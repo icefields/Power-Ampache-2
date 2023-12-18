@@ -1,4 +1,4 @@
-package luci.sixsixsix.powerampache2.data.entities
+package luci.sixsixsix.powerampache2.domain.models
 
 data class Song(
     val mediaId: String = "",

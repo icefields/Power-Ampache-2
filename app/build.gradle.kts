@@ -120,6 +120,8 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.15.1")
     ksp("com.github.bumptech.glide:compiler:4.15.1")
 
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-android-compiler:2.48")

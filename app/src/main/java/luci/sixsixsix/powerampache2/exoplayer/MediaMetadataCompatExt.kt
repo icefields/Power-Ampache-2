@@ -1,7 +1,7 @@
 package luci.sixsixsix.powerampache2.exoplayer
 
 import android.media.MediaMetadata
-import luci.sixsixsix.powerampache2.data.entities.Song
+import luci.sixsixsix.powerampache2.domain.models.Song
 
 fun MediaMetadata.toSong(): Song? = description?.let {
     Song(

@@ -15,19 +15,19 @@ import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import luci.sixsixsix.powerampache2.common.Constants.mockSongs
-import luci.sixsixsix.powerampache2.data.entities.Song
-import luci.sixsixsix.powerampache2.data.remote.MusicDatabase
+import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.MusicRepository
 
 @Module
 @InstallIn(ServiceComponent::class)
 @OptIn(UnstableApi::class)
 object ServiceModule {
 
-    @ServiceScoped
-    @Provides
-    fun provideMusicDatabase():MusicDatabase = object : MusicDatabase {
-        override suspend fun getAllSongs(): List<Song> = mockSongs
-    }
+//    @ServiceScoped
+//    @Provides
+//    fun provideMusicDatabase():MusicRepository = object : MusicDatabase {
+//        override suspend fun getAllSongs(): List<Song> = mockSongs
+//    }
 
     @Provides
     fun provideAudioAttributes() = AudioAttributes.Builder()

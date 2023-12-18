@@ -60,22 +60,22 @@ class MusicServiceConnection(context: Context) {
             mediaController = MediaController(context, mediaBrowser.sessionToken).apply {
                 registerCallback(MediaControllerCallback())
             }
-            _isConnected.postValue(Event(Resource.success(true)))
+            _isConnected.postValue(Event(Resource.Success(true)))
         }
 
         override fun onConnectionSuspended() {
             Log.d("MusicServiceConnection", "SUSPENDED")
 
-            _isConnected.postValue(Event(Resource.error(
-                "The connection was suspended", false
+            _isConnected.postValue(Event(Resource.Error(
+                message = "The connection was suspended", exception = Exception("The connection was suspended")
             )))
         }
 
         override fun onConnectionFailed() {
             Log.d("MusicServiceConnection", "FAILED")
 
-            _isConnected.postValue(Event(Resource.error(
-                "Couldn't connect to media browser", false
+            _isConnected.postValue(Event(Resource.Error(
+                message = "Couldn't connect to media browser", exception = Exception("Couldn't connect to media browser")
             )))
         }
     }
@@ -94,9 +94,9 @@ class MusicServiceConnection(context: Context) {
             when(event) {
                 NETWORK_ERROR -> _networkError.postValue(
                     Event(
-                        Resource.error(
-                            "Couldn't connect to the server. Please check your internet connection.",
-                            null
+                        Resource.Error(
+                            message = "Couldn't connect to the server. Please check your internet connection.",
+                            exception = Exception("Couldn't connect to the server. Please check your internet connection.")
                         )
                     )
                 )
