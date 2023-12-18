@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.os.ResultReceiver
 import androidx.media3.common.ControlDispatcher
 import androidx.media3.common.Player
-import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+import luci.sixsixsix.powerampache2.exoplayer.FirebaseMusicSource
 
 class MusicPlaybackPreparer(
     private val firebaseMusicSource: FirebaseMusicSource,

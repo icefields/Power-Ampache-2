@@ -7,14 +7,14 @@ import android.media.MediaMetadata
 import android.media.browse.MediaBrowser
 import android.os.Bundle
 import android.service.media.MediaBrowserService
-import android.support.v4.media.MediaDescriptionCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSourceFactory
 import androidx.media3.exoplayer.ExoPlayer
-import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
-import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
+import androidx.media3.session.MediaLibraryService
+import androidx.media3.session.MediaSession
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import luci.sixsixsix.powerampache2.common.Constants.MEDIA_ROOT_ID
@@ -26,8 +26,9 @@ import javax.inject.Inject
 
 private const val SERVICE_TAG = "MusicService"
 
+@OptIn(UnstableApi::class)
 @AndroidEntryPoint
-class MusicService : MediaBrowserService() {
+class MusicService : MediaLibraryService() {
 
     @Inject
     lateinit var dataSourceFactory: DefaultDataSourceFactory
@@ -43,7 +44,7 @@ class MusicService : MediaBrowserService() {
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
-    private lateinit var mediaSession: MediaSessionCompat
+    private var mediaSession: MediaSession? = null
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
     var isForegroundService = false
@@ -69,16 +70,32 @@ class MusicService : MediaBrowserService() {
             PendingIntent.getActivity(this, 0, it, 0)
         }
 
-        mediaSession = MediaSessionCompat(this, SERVICE_TAG).apply {
-            setSessionActivity(activityIntent)
-            isActive = true
+//        mediaSession = MediaSession(this, SERVICE_TAG).apply {
+//            setSessionActivity(activityIntent)
+//            isActive = true
+//        }
+
+        mediaSession = activityIntent?.let {
+            MediaSession.Builder(this, exoPlayer)
+                .setSessionActivity(activityIntent)
+                .build().apply {
+    //            setSessionActivity(activityIntent)
+    //            isActive = true
+                }
         }
 
-        sessionToken = mediaSession.sessionToken
+
+
+
+
+
+
+
+        sessionToken = mediaSession?.token
 
         musicNotificationManager = MusicNotificationManager(
             this,
-            mediaSession.sessionToken,
+            mediaSession.token,
             MusicPlayerNotificationListener(this)
         ) {
             curSongDuration = exoPlayer.duration
@@ -108,7 +125,7 @@ class MusicService : MediaBrowserService() {
         override fun getMediaDescription(
             player: Player?,
             windowIndex: Int
-        ): MediaDescriptionCompat = firebaseMusicSource.songs[windowIndex].description
+        ): MediaDescription = firebaseMusicSource.songs[windowIndex].description
     }
 
     private fun preparePlayer(
@@ -127,9 +144,20 @@ class MusicService : MediaBrowserService() {
         exoPlayer.stop()
     }
 
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? {
+        TODO("Not yet implemented")
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()
+
+        mediaSession?.run {
+            player.release()
+            release()
+            mediaSession = null
+        }
+
 
         exoPlayer.removeListener(musicPlayerEventListener)
         exoPlayer.release()
@@ -168,26 +196,3 @@ class MusicService : MediaBrowserService() {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

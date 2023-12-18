@@ -13,6 +13,7 @@ val composeVersion = rootProject.extra.get("compose_version") as String
 val retrofit2Version = rootProject.extra.get("retrofit2_version") as String
 val coroutinesVersion = rootProject.extra.get("coroutines_version") as String
 val exoplayerVersion = rootProject.extra.get("exoplayer_version") as String
+val media3Version = "1.2.0"
 
 val localProperties = Properties()
 localProperties.load(project.rootProject.file("local.properties").inputStream())
@@ -102,19 +103,18 @@ dependencies {
 //    api("com.google.android.exoplayer:exoplayer-core:$exoplayerVersion")
 //    api("com.google.android.exoplayer:exoplayer-ui:$exoplayerVersion")
 //    api("com.google.android.exoplayer:extension-mediasession:$exoplayerVersion")
-    val media3_version = "1.2.0"
 
     // For media playback using ExoPlayer
-    implementation("androidx.media3:media3-exoplayer:$media3_version")
+    implementation("androidx.media3:media3-exoplayer:$media3Version")
     // Common functionality for media database components
-    implementation("androidx.media3:media3-database:$media3_version")
+    implementation("androidx.media3:media3-database:$media3Version")
     // Common functionality for media decoders
-    implementation("androidx.media3:media3-decoder:$media3_version")
+    implementation("androidx.media3:media3-decoder:$media3Version")
     // Common functionality for loading data
-    implementation("androidx.media3:media3-datasource:$media3_version")
+    implementation("androidx.media3:media3-datasource:$media3Version")
     // Common functionality used across multiple media libraries
-    implementation("androidx.media3:media3-common:1.2.0")
-    implementation("com.google.android.exoplayer:extension-mediasession:2.19.1")
+    implementation("androidx.media3:media3-common:$media3Version")
+    implementation("androidx.media3:media3-session:$media3Version")
 
     // Glide
     implementation("com.github.bumptech.glide:glide:4.15.1")

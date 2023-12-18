@@ -9,6 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.exoplayer.MusicServiceConnection
 import javax.inject.Singleton
 
@@ -22,18 +23,18 @@ object AppModule {
         @ApplicationContext context: Context
     ) = MusicServiceConnection(context)
 
-    @Singleton
-    @Provides
-    fun provideSwipeSongAdapter() = SwipeSongAdapter()
+//    @Singleton
+//    @Provides
+//    fun provideSwipeSongAdapter() = SwipeSongAdapter()
 
     @Singleton
     @Provides
-    fun provideGlideInstance(
-        @ApplicationContext context: Context
-    ) = Glide.with(context).setDefaultRequestOptions(
-        RequestOptions()
-            .placeholder(R.drawable.ic_image)
-            .error(R.drawable.ic_image)
-            .diskCacheStrategy(DiskCacheStrategy.DATA)
-    )
+    fun provideGlideInstance(@ApplicationContext context: Context) =
+        Glide.with(context)
+            .setDefaultRequestOptions(
+                RequestOptions()
+                    .placeholder(R.drawable.ic_image)
+                    .error(R.drawable.ic_image)
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+            )
 }
