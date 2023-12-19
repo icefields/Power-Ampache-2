@@ -12,13 +12,16 @@ interface MainNetwork {
     @GET("json.server.php?action=handshake")
     suspend fun authorize(@Query("auth") apiKey: String = API_KEY): AuthDto
 
+    @GET("json.server.php?action=ping")
+    suspend fun ping(@Query("auth") authKey: String = ""): AuthDto
+
     @GET("json.server.php?action=songs")
     suspend fun getAllSongs(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 22,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String = "sorrow",
         @Query("exact") exact: Int = 0,
-        @Query("offset") offset: Int = 4000,
+        @Query("offset") offset: Int = 0,
     ): SongsResponse // TODO remove default values
 
     companion object {

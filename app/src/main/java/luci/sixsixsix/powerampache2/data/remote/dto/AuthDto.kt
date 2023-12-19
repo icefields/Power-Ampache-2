@@ -2,6 +2,7 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
+import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
 
 data class AuthDto(
@@ -49,7 +50,20 @@ data class AuthDto(
     val users: Int,
     @SerializedName("videos")
     val videos: Int,
+    @SerializedName("server")
+    var server: String? = null,
+    @SerializedName("version")
+    var version: String? = null,
+    @SerializedName("compatible")
+    var compatible: String? = null,
 ): AmpacheBaseResponse()
+
+fun AuthDto.toServerInfo(): ServerInfo = ServerInfo(
+    server = server,
+    version = version,
+    compatible = compatible
+)
+
 
 fun AuthDto.toSession(dateMapper: DateMapper): Session = Session(
     add = add,

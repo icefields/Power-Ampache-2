@@ -162,7 +162,7 @@ class MusicService : MediaLibraryService() {
         }
 
 
-        exoPlayer.removeListener(musicPlayerEventListener)
+// TODO        exoPlayer.removeListener(musicPlayerEventListener)
         exoPlayer.release()
     }
 

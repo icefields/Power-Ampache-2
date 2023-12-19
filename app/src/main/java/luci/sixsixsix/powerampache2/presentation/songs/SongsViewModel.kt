@@ -62,12 +62,12 @@ class SongsViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                Log.d("aaaa", "${songs[0].title}")
+                                Log.d("aaaa", "${songs.size}")
                                 state = state.copy(songs = songs)
                             }
                         }
                         is Resource.Error -> {
-                            Log.d("aaaa", "${result.exception}")
+                            Log.d("aaaa", "ERROR SongsViewModel ${result.exception}")
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)
