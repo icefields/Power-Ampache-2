@@ -115,6 +115,9 @@ dependencies {
     // Common functionality used across multiple media libraries
     implementation("androidx.media3:media3-common:$media3Version")
     implementation("androidx.media3:media3-session:$media3Version")
+    implementation("androidx.media3:media3-exoplayer-dash:$media3Version")
+    implementation("androidx.media3:media3-ui:$media3Version")
+
 
     // Glide
     implementation("com.github.bumptech.glide:glide:4.15.1")

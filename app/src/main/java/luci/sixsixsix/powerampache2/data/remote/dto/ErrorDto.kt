@@ -5,16 +5,16 @@ import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.domain.errors.MusicError
 
 data class ErrorDto(
-    @SerializedName("errorAction")
+    @SerializedName("errorAction") // "errorAction":"handshake"
     val errorAction: String,
 
-    @SerializedName("errorCode")
+    @SerializedName("errorCode") // "errorCode":"4701",
     val errorCode: String,
 
     @SerializedName("errorMessage")
     val errorMessage: String,
 
-    @SerializedName("errorType")
+    @SerializedName("errorType") // "errorType":"account"
     val errorType: String
 )
 

@@ -67,7 +67,7 @@ class SongsViewModel @Inject constructor(
                             }
                         }
                         is Resource.Error -> {
-
+                            Log.d("aaaa", "${result.exception}")
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)

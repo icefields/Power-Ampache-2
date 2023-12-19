@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
-import luci.sixsixsix.powerampache2.data.remote.dto.AuthDto
+import luci.sixsixsix.powerampache2.data.remote.dto.AmpacheBaseResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
@@ -19,6 +19,7 @@ import java.io.IOException
 import java.lang.NullPointerException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.jvm.Throws
 
 @Singleton
 class MusicRepositoryImpl @Inject constructor(
@@ -29,26 +30,7 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun authorize(force: Boolean): Resource<Session> =
         try {
-            if (session == null || session!!.isTokenExpired() || force) {
-                val auth = api.authorize()
-                auth.error?.let {
-                    throw(MusicException(it.toError()))
-                }
-
-                auth.auth?.let {
-                    session = auth.toSession(dateMapper)
-                }
-            }
-
-            session?.let {
-                Log.d("aaaa", it.sessionExpire.toString())
-                Resource.Success(it)
-            } ?: run {
-                Resource.Error(
-                    message = "cannot load data",
-                    exception = NullPointerException("Session still null after init")
-                )
-            }
+            Resource.Success(authorize2(force))
         } catch (e: IOException) {
             Resource.Error(message = "cannot load data", exception = e)
         } catch (e: HttpException) {
@@ -59,39 +41,37 @@ class MusicRepositoryImpl @Inject constructor(
             Resource.Error(message = "cannot load data", exception = e)
         }
 
+    @Throws(Exception::class)
+    private suspend fun authorize2(force: Boolean): Session {
+        if (session == null || session!!.isTokenExpired() || force) {
+            val auth = api.authorize()
+            auth.error?.let {
+                throw (MusicException(it.toError()))
+            }
+            auth.auth?.let {
+                session = auth.toSession(dateMapper)
+                Log.d("aaaa", "token null or expired ${session?.sessionExpire} ${session?.isTokenExpired()}")
+            }
+        }
+        return session!! // will throw exception if session null
+    }
+
+
     override suspend fun getSongs(fetchRemote: Boolean, query: String): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-
-        authorize(false)
-
-        val remoteSongs = try {
-            val resp1 = api.getAllSongs(session!!.auth, filter = query)
-            resp1.error?.let {
-                Log.d("aaaa", "ERROR "+it.toString())
-                throw(MusicException(it.toError()))
-            }
-
-            val response = resp1.songs?.map { it.toSong() }
-            Log.d("aaaa", "SONGS "+response?.size)
-            response
+        try {
+            val auth = authorize2(false)
+            val resp1 = api.getAllSongs(auth.auth, filter = query)
+            resp1.error?.let { throw(MusicException(it.toError())) }
+            emit(Resource.Success(resp1.songs!!.map { it.toSong() })) // will throw exception if songs null
         } catch (e: IOException) {
-            Log.d("aaaa", e.toString())
-            emit(Resource.Error(message = "cannot load data", exception = e))
-            null
+            emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
         } catch (e: HttpException) {
-            Log.d("aaaa", e.toString())
-            emit(Resource.Error(message = "cannot load data", exception = e))
-            null
+            emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
+        } catch (e: MusicException) {
+            emit(Resource.Error(message = e.musicError.toString(), exception = e))
         } catch (e: Exception) {
-            Log.d("aaaa", "exc " + e.toString())
-            emit(Resource.Error(message = "cannot load data", exception = e))
-            null
-        }
-
-        remoteSongs?.let { songs ->
-            emit(Resource.Success(songs))
-        } ?: run {
-            emit(Resource.Error(message = "song list is null", exception = NullPointerException("song list is null")))
+            emit(Resource.Error(message = "generic exception ${e.toString()}", exception = e))
         }
         emit(Resource.Loading(false))
     }

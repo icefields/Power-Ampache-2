@@ -14,41 +14,5 @@ object Constants {
     const val TIMEOUT_READ_S = 120L
     const val TIMEOUT_WRITE_S = 120L
 
-    val mockSongs: List<Song> = listOf(
-        Song(mediaId = "",
-            title = "",
-            subtitle = "",
-            songUrl = "",
-            imageUrl = ""),
-        Song(mediaId = "",
-            title = "",
-            subtitle = "",
-            songUrl = "",
-            imageUrl = ""),
-        Song(mediaId = "",
-            title = "",
-            subtitle = "",
-            songUrl = "",
-            imageUrl = ""),
-        Song(mediaId = "",
-            title = "",
-            subtitle = "",
-            songUrl = "",
-            imageUrl = ""),
-        Song(mediaId = "",
-            title = "",
-            subtitle = "",
-            songUrl = "",
-            imageUrl = ""),
-        Song(mediaId = "",
-            title = "",
-            subtitle = "",
-            songUrl = "",
-            imageUrl = ""),
-        Song(mediaId = "",
-            title = "",
-            subtitle = "",
-            songUrl = "",
-            imageUrl = "")
-    )
+    const val ERROR_INT = -1
 }

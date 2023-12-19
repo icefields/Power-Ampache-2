@@ -1,26 +1,28 @@
 package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 data class SongDto(
     @SerializedName("album")
-    val album: MusicAttributeDto,
+    val album: MusicAttributeDto?,
 
     @SerializedName("album_mbid")
     val albumMbid: Any,
 
     @SerializedName("albumartist")
-    val albumartist: MusicAttributeDto,
+    val albumartist: MusicAttributeDto?,
 
     @SerializedName("albumartist_mbid")
     val albumartistMbid: Any,
 
     @SerializedName("art")
-    val art: String,
+    val art: String?,
 
     @SerializedName("artist")
-    val artist: MusicAttributeDto,
+    val artist: MusicAttributeDto?,
 
     @SerializedName("artist_mbid")
     val artistMbid: Any,
@@ -29,31 +31,31 @@ data class SongDto(
     val averagerating: Any,
 
     @SerializedName("bitrate")
-    val bitrate: Int,
+    val bitrate: Int?,
 
     @SerializedName("catalog")
-    val catalog: Int,
+    val catalog: Int?,
 
     @SerializedName("channels")
-    val channels: Int,
+    val channels: Int?,
 
     @SerializedName("comment")
     val comment: Any,
 
     @SerializedName("composer")
-    val composer: String,
+    val composer: String?,
 
     @SerializedName("disk")
     val disk: Int,
 
     @SerializedName("filename")
-    val filename: String,
+    val filename: String?,
 
     @SerializedName("flag")
     val flag: Int,
 
     @SerializedName("genre")
-    val genre: List<MusicAttributeDto>,
+    val genre: List<MusicAttributeDto>?,
 
     @SerializedName("id")
     val id: String,
@@ -71,19 +73,19 @@ data class SongDto(
     val mbid: Any,
 
     @SerializedName("mime")
-    val mime: String,
+    val mime: String?,
 
     @SerializedName("mode")
-    val mode: String,
+    val mode: String?,
 
     @SerializedName("name")
-    val name: String,
+    val name: String?,
 
     @SerializedName("playcount")
-    val playcount: Int,
+    val playcount: Int?,
 
     @SerializedName("playlisttrack")
-    val playlisttrack: Int,
+    val playlisttrack: Int?,
 
     @SerializedName("preciserating")
     val preciserating: Any,
@@ -98,7 +100,7 @@ data class SongDto(
     val r128TrackGain: Any,
 
     @SerializedName("rate")
-    val rate: Int,
+    val rate: Int?,
 
     @SerializedName("rating")
     val rating: Any,
@@ -122,27 +124,43 @@ data class SongDto(
     val time: Int?,
 
     @SerializedName("title")
-    val title: String,
+    val title: String?,
 
     @SerializedName("track")
-    val track: Int,
+    val track: Int?,
 
     @SerializedName("url")
-    val url: String,
+    val url: String?,
 
     @SerializedName("year")
-    val year: Int
+    val year: Int?
 )
 
 data class SongsResponse(
     @SerializedName("song") val songs: List<SongDto>?,
-    @SerializedName("error") val error: ErrorDto?
-)
+) : AmpacheBaseResponse()
 
 fun SongDto.toSong() = Song(
     mediaId = id,
-    title = title,
-    subtitle = artist.name,
-    songUrl = url,
-    imageUrl = art
+    title = title ?: "",
+    artist = artist?.toMusicAttribute() ?: MusicAttribute.emptyInstance(),
+    album = album?.toMusicAttribute() ?: MusicAttribute.emptyInstance(),
+    albumArtist = albumartist?.toMusicAttribute() ?: MusicAttribute.emptyInstance(),
+    songUrl = url ?: "",
+    imageUrl = art ?: "",
+    bitrate = bitrate ?: ERROR_INT,
+    catalog = catalog ?: ERROR_INT,
+    channels = channels ?: ERROR_INT,
+    composer = composer ?: "",
+    filename = filename ?: "",
+    genre = genre?.map { it.toMusicAttribute() } ?: listOf<MusicAttribute>(),
+    mime = mime ?: "",
+    name = name ?: "",
+    playCount = playcount ?: ERROR_INT,
+    playlistTrackNumber = playlisttrack ?: ERROR_INT,
+    rate = rate ?: ERROR_INT,
+    size = size ?: ERROR_INT,
+    time = time ?: ERROR_INT,
+    trackNumber = track ?: ERROR_INT,
+    year = year ?: ERROR_INT
 )

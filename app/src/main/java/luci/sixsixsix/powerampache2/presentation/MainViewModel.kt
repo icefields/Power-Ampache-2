@@ -11,8 +11,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Constants.MEDIA_ROOT_ID
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.data.remote.dto.SongDto
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.toSong
 import luci.sixsixsix.powerampache2.exoplayer.MusicServiceConnection
 import luci.sixsixsix.powerampache2.exoplayer.State
 import luci.sixsixsix.powerampache2.exoplayer.isPlayEnabled
@@ -23,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val musicServiceConnection: MusicServiceConnection,
-    private val musicDatabase: MusicRepository
+    private val musicRepository: MusicRepository
 ) : ViewModel() {
     private val _mediaItems = MutableLiveData<Resource<List<Song>>>()
     val mediaItems: LiveData<Resource<List<Song>>> = _mediaItems
@@ -34,29 +37,19 @@ class MainViewModel @Inject constructor(
     val playbackState = musicServiceConnection.playbackState
 
     init {
-        viewModelScope.launch {
-            musicDatabase.authorize()
-        }
-
-//        _mediaItems.postValue(Resource.Loading(true))
-//        musicServiceConnection.subscribe(MEDIA_ROOT_ID, object : MediaBrowser.SubscriptionCallback() {
-//            override fun onChildrenLoaded(
-//                parentId: String,
-//                children: MutableList<MediaBrowser.MediaItem>
-//            ) {
-//                super.onChildrenLoaded(parentId, children)
-//                val items = children.map {
-//                    Song(
-//                        it.mediaId!!,
-//                        it.description.title.toString(),
-//                        it.description.subtitle.toString(),
-//                        it.description.mediaUri.toString(),
-//                        it.description.iconUri.toString()
-//                    )
-//                }
-//                _mediaItems.postValue(Resource.Success(items))
-//            }
-//        })
+        _mediaItems.postValue(Resource.Loading(true))
+        musicServiceConnection.subscribe(MEDIA_ROOT_ID, object : MediaBrowser.SubscriptionCallback() {
+            override fun onChildrenLoaded(
+                parentId: String,
+                children: MutableList<MediaBrowser.MediaItem>
+            ) {
+                super.onChildrenLoaded(parentId, children)
+                val items = children.map {
+                    it.toSong()
+                }
+                _mediaItems.postValue(Resource.Success(items))
+            }
+        })
     }
 
     fun skipToNextSong() {

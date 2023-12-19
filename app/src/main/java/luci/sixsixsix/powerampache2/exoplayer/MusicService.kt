@@ -11,7 +11,7 @@ import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultDataSourceFactory
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
@@ -30,13 +30,13 @@ private const val SERVICE_TAG = "MusicService"
 class MusicService : MediaLibraryService() {
 
     @Inject
-    lateinit var dataSourceFactory: DefaultDataSourceFactory
+    lateinit var dataSourceFactory: DefaultDataSource.Factory
 
     @Inject
     lateinit var exoPlayer: ExoPlayer
 
     @Inject
-    lateinit var firebaseMusicSource: FirebaseMusicSource
+    lateinit var firebaseMusicSource: MusicSource
 
     private lateinit var musicNotificationManager: MusicNotificationManager
 
@@ -135,7 +135,8 @@ class MusicService : MediaLibraryService() {
         playNow: Boolean
     ) {
         val curSongIndex = if(curPlayingSong == null) 0 else songs.indexOf(itemToPlay)
-        exoPlayer.prepare(firebaseMusicSource.asMediaSource(dataSourceFactory))
+        exoPlayer.setMediaSource(firebaseMusicSource.asMediaSource(dataSourceFactory))
+        exoPlayer.prepare()
         exoPlayer.seekTo(curSongIndex, 0L)
         exoPlayer.playWhenReady = playNow
     }

@@ -49,8 +49,7 @@ data class AuthDto(
     val users: Int,
     @SerializedName("videos")
     val videos: Int,
-    @SerializedName("error") val error: ErrorDto?
-)
+): AmpacheBaseResponse()
 
 fun AuthDto.toSession(dateMapper: DateMapper): Session = Session(
     add = add,

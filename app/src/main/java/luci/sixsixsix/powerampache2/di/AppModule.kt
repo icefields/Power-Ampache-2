@@ -28,30 +28,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-    @Singleton
-    @Provides
-    fun provideMusicServiceConnection(@ApplicationContext context: Context) = MusicServiceConnection(context)
-
-//    @Singleton
-//    @Provides
-//    fun provideSwipeSongAdapter() = SwipeSongAdapter()
-
-    @Singleton
-    @Provides
-    fun provideGlideInstance(@ApplicationContext context: Context) =
-        Glide.with(context)
-            .setDefaultRequestOptions(
-                RequestOptions()
-                    .placeholder(R.drawable.ic_image)
-                    .error(R.drawable.ic_image)
-                    .diskCacheStrategy(DiskCacheStrategy.DATA)
-            )
-
-//    @Provides
-//    fun provideInterceptor(@ApplicationContext appContext: Context): Interceptor =
-//        AssetsNetworkInterceptor(appContext)
-
     @Provides
     @Singleton
     fun provideRetrofit(/*interceptor: Interceptor*/): Retrofit {
@@ -69,11 +45,22 @@ object AppModule {
             .build()
     }
 
+    @Provides
+    fun provideDateMapper(): DateMapper = AmpacheDateMapper()
 
     @Provides
     @Singleton
     fun provideAmpacheApi(retrofit: Retrofit): MainNetwork = retrofit.create(MainNetwork::class.java)
 
+    @Singleton
     @Provides
-    fun provideDateMapper(): DateMapper = AmpacheDateMapper()
+    fun provideMusicServiceConnection(@ApplicationContext context: Context) = MusicServiceConnection(context)
+
+//    @Singleton
+//    @Provides
+//    fun provideSwipeSongAdapter() = SwipeSongAdapter()
+
+//    @Provides
+//    fun provideInterceptor(@ApplicationContext appContext: Context): Interceptor =
+//        AssetsNetworkInterceptor(appContext)
 }

@@ -56,7 +56,7 @@ fun SongItem(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = song.subtitle,
+                    text = song.artist.name,
                     fontWeight = FontWeight.Light,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
@@ -66,10 +66,10 @@ fun SongItem(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "(${song.mediaId})",
+                text = ("album: ${song.album.name} \nalbum-Artist: ${song.albumArtist.name}"),
                 fontStyle = FontStyle.Italic,
                 color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1,
+                maxLines = 2,
             )
         }
     }
