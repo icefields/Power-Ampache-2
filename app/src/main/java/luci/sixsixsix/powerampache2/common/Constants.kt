@@ -15,4 +15,6 @@ object Constants {
     const val TIMEOUT_WRITE_S = 120L
 
     const val ERROR_INT = -1
+    const val NETWORK_REQUEST_LIMIT_DEBUG = 222 // TODO remove or set to zero for production
+
 }

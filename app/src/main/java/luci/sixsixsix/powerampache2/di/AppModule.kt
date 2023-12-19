@@ -1,6 +1,8 @@
 package luci.sixsixsix.powerampache2.di
 
+import android.app.Application
 import android.content.Context
+import androidx.room.Room
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
@@ -13,6 +15,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_READ_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_WRITE_S
+import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.mapping.AmpacheDateMapper
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork.Companion.BASE_URL
@@ -55,6 +58,16 @@ object AppModule {
     @Singleton
     @Provides
     fun provideMusicServiceConnection(@ApplicationContext context: Context) = MusicServiceConnection(context)
+
+    @Provides
+    @Singleton
+    fun provideMusicDatabase(application: Application): MusicDatabase =
+        Room.databaseBuilder(
+            application,
+            MusicDatabase::class.java,
+            "musicdb.db"
+        ).fallbackToDestructiveMigration()
+            .build()
 
 //    @Singleton
 //    @Provides

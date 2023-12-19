@@ -1,4 +1,4 @@
-package luci.sixsixsix.powerampache2.presentation.songs
+package luci.sixsixsix.powerampache2.presentation.playlists
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -16,13 +16,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.presentation.artists.ArtistItem
+import luci.sixsixsix.powerampache2.presentation.artists.ArtistsViewModel
+import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
+
 
 @Composable
 @Destination(start = false)
-fun SongsListScreen(
+fun PlaylistsScreen(
 //    navigator: DestinationsNavigator,
-    viewModel: SongsViewModel = hiltViewModel(),
+    viewModel: PlaylistsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
@@ -51,21 +54,21 @@ fun SongsListScreen(
             onRefresh = { viewModel.onEvent(SongsEvent.Refresh) }
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(state.songs.size) { i ->
-                    val company = state.songs[i]
-                    SongItem(
-                        song = company,
+                items(state.playlists.size) { i ->
+                    val playlist = state.playlists[i]
+                    PlaylistItem(
+                        playlist = playlist,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                            // TODO navigate
-                            //navigator.navigate(CompanyInfoScreenDestination(company.symbol))
+                                // TODO navigate
+                                //navigator.navigate(CompanyInfoScreenDestination(company.symbol))
                             }
                             .padding(16.dp)
                     )
 
                     // if not last item add a divider
-                    if(i < state.songs.size) {
+                    if(i < state.playlists.size) {
                         Divider(modifier = Modifier.padding(horizontal = 16.dp))
                     }
                 }

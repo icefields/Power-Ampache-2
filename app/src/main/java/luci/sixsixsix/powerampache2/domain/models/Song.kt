@@ -9,23 +9,23 @@ data class Song(
     val album: MusicAttribute = MusicAttribute.emptyInstance(),
     val artist: MusicAttribute = MusicAttribute.emptyInstance(),
     val albumArtist: MusicAttribute = MusicAttribute.emptyInstance(),
-    val songUrl: String,
-    val imageUrl: String ,
-    val bitrate: Int,
-    val catalog: Int,
-    val channels: Int,
-    val composer: String,
-    val filename: String,
+    val songUrl: String = "",
+    val imageUrl: String = "" ,
+    val bitrate: Int = Constants.ERROR_INT,
+    val catalog: Int = Constants.ERROR_INT,
+    val channels: Int = Constants.ERROR_INT,
+    val composer: String = "",
+    val filename: String = "",
     val genre: List<MusicAttribute> = listOf(),
-    val mime: String,
-    val playCount: Int,
-    val playlistTrackNumber: Int,
-    val rate: Int,
-    val size: Int,
-    val time: Int?,
-    val trackNumber: Int,
-    val year: Int,
-    val name: String
+    val mime: String = "",
+    val playCount: Int = Constants.ERROR_INT,
+    val playlistTrackNumber: Int = Constants.ERROR_INT,
+    val rate: Int = Constants.ERROR_INT,
+    val size: Int = Constants.ERROR_INT,
+    val time: Int = Constants.ERROR_INT,
+    val trackNumber: Int = Constants.ERROR_INT,
+    val year: Int = Constants.ERROR_INT,
+    val name: String = ""
 )
 
 fun MediaBrowser.MediaItem.toSong() = Song(
@@ -52,5 +52,3 @@ fun MediaBrowser.MediaItem.toSong() = Song(
             trackNumber = Constants.ERROR_INT,
             year = Constants.ERROR_INT
         )
-
-

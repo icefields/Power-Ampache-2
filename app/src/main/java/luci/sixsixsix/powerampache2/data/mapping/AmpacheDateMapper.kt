@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.data.mapping
 
 
+import androidx.room.TypeConverter
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -21,6 +22,22 @@ class AmpacheDateMapper: DateMapper {
     override fun isoStringToLocalDateTime(timestamp: String): LocalDateTime =
         LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_ZONED_DATE_TIME)
 
+
+    // ----- DATABASE CONVERTERS
+
+    @TypeConverter
+    fun toDate(dateString: String?): LocalDateTime? {
+        return if (dateString == null) {
+            null
+        } else {
+            LocalDateTime.parse(dateString)
+        }
+    }
+
+    @TypeConverter
+    fun toDateString(date: LocalDateTime?): String? {
+        return date?.toString()
+    }
 
 //    fun Duration.toDaysPartCompat(): Long = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 //        toDaysPart()
