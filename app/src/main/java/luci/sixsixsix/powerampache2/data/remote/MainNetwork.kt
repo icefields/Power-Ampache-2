@@ -48,7 +48,7 @@ interface MainNetwork {
     @GET("json.server.php?action=artists")
     suspend fun getArtists(
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        @Query("limit") limit: Int = 0,
         @Query("filter") filter: String = "",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
@@ -68,9 +68,9 @@ interface MainNetwork {
 
     companion object {
         const val API_KEY = "0db9dcbb4a945e443547e3c082110abf"
-        const val BASE_URL = "https://demo.ampache.dev/server/" // "http://192.168.1.100/ampache/public/server/"
-        const val DEMO_USER = "demo"
-        const val DEMO_PASSWORD = "demodemo"
+        const val BASE_URL = "http://192.168.1.100/ampache/public/server/" //"https://demo.ampache.dev/server/" //
+        const val DEMO_USER = "test-user"
+        const val DEMO_PASSWORD = "testtest"
     }
 }
 
