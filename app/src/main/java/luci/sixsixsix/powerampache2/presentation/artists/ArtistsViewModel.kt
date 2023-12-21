@@ -58,7 +58,7 @@ class ArtistsViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { albums ->
-                                Log.d("aaaa", "viewmodel.getArtists size ${albums.size}")
+                                Log.d("aaaa", "viewmodel.getAlbumsFromArtist size ${albums.size}")
                             }
                         }
                         is Resource.Error -> { }
@@ -87,7 +87,7 @@ class ArtistsViewModel @Inject constructor(
                             Log.d("aaaa", "viewmodel.getArtists is bottom reached? $isEndOfDataReached size of new array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
-                            state = state.copy(isFetchingMore = false)
+                            state = state.copy(isFetchingMore = false, isLoading = false)
                             Log.d("aaaa", "ERROR AlbumsViewModel ${result.exception}")
                         }
                         is Resource.Loading -> {

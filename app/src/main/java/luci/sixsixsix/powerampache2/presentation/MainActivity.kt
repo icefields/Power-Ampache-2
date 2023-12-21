@@ -12,6 +12,7 @@ import com.google.gson.Gson
 import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
 import luci.sixsixsix.powerampache2.data.local.MusicAttributesContainer
+import luci.sixsixsix.powerampache2.presentation.main.MainScreen
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
 
 @AndroidEntryPoint
@@ -25,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    DestinationsNavHost(navGraph = NavGraphs.root)
+                    MainScreen(modifier = Modifier.fillMaxSize())
                 }
             }
         }

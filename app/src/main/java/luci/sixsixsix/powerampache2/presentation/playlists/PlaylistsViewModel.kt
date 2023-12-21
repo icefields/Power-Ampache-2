@@ -70,7 +70,7 @@ class PlaylistsViewModel @Inject constructor(
                             Log.d("aaaa", "viewmodel.getPlaylists is bottom reached? $isEndOfDataReached  offset $offset size of new array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
-                            state = state.copy(isFetchingMore = false)
+                            state = state.copy(isFetchingMore = false, isLoading = false)
                             Log.d("aaaa", "ERROR PlaylistsViewModel ${result.exception}")
                         }
                         is Resource.Loading -> {

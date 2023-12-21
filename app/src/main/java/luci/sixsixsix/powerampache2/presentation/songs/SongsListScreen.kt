@@ -19,8 +19,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistEvent
 
 @Composable
 @Destination(start = false)

@@ -32,7 +32,8 @@ data class SongEntity(
     val time: Int?,
     val trackNumber: Int,
     val year: Int,
-    val name: String
+    val name: String,
+    val mode: String? = null
 )
 
 fun SongEntity.toSong() = Song(
@@ -57,7 +58,8 @@ fun SongEntity.toSong() = Song(
     size = size ?: Constants.ERROR_INT,
     time = time ?: Constants.ERROR_INT,
     trackNumber = trackNumber ?: Constants.ERROR_INT,
-    year = year ?: Constants.ERROR_INT
+    year = year ?: Constants.ERROR_INT,
+    mode = mode
 )
 
 fun Song.toSongEntity() = SongEntity(
@@ -82,5 +84,6 @@ fun Song.toSongEntity() = SongEntity(
     size = size ?: Constants.ERROR_INT,
     time = time ?: Constants.ERROR_INT,
     trackNumber = trackNumber ?: Constants.ERROR_INT,
-    year = year ?: Constants.ERROR_INT
+    year = year ?: Constants.ERROR_INT,
+    mode = mode
 )

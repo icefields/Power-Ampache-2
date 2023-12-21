@@ -495,10 +495,70 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    private suspend fun getSongsFromAlbumDb(albumId: String): List<Song> {
+        val localSongs = dao.searchSong("").map { it.toSong() }
+        val list = LinkedHashSet<Song>()
+        for (song in localSongs) {
+            if(song.album.id == albumId) {
+                list.add(song)
+            }
+        }
+
+        return ArrayList(list).sortedWith(comparator = object : Comparator<Song> {
+            override fun compare(o1: Song?, o2: Song?): Int {
+                return o2?.let {
+                    o1?.trackNumber?.compareTo(it.trackNumber)
+                } ?: run {
+                    //tracks with no track number go last
+                    Int.MAX_VALUE
+                }
+            }
+        })
+    }
+
+    /**
+     * USE Network response for this, database not reliable for unknown reason
+     * use the cache to just preload some data
+     */
     override suspend fun getSongsFromAlbum(
         albumId: String,
         fetchRemote: Boolean
-    ): Flow<Resource<List<Song>>> {
-        TODO("Not yet implemented")
+    ): Flow<Resource<List<Song>>> = flow {
+        emit(Resource.Loading(true))
+        Log.d("aaaa", "repo getSongsFromAlbum $albumId")
+
+        val localSongs = getSongsFromAlbumDb(albumId)
+        val isDbEmpty = localSongs.isEmpty()
+        if (!isDbEmpty) {
+            emit(Resource.Success(data = localSongs))
+        }
+        val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+        if(shouldLoadCacheOnly) {
+            emit(Resource.Loading(false))
+            return@flow
+        }
+
+        val auth = getSession()!!//authorize2(false)
+        val response = api.getSongsFromAlbum(auth.auth, albumId = albumId)
+        response.error?.let { throw(MusicException(it.toError())) }
+        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
+
+        Log.d("aaa", "songs from web ${songs.size}")
+
+        dao.insertSongs(songs.map { it.toSongEntity() })
+        // stick to the single source of truth pattern despite performance deterioration
+        emit(Resource.Success(data = getSongsFromAlbumDb(albumId), networkData = songs))
+        emit(Resource.Loading(false))
+    }.catch { e ->
+        when(e) {
+            is IOException ->
+                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
+            is HttpException ->
+                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
+            is MusicException ->
+                emit(Resource.Error(message = e.musicError.toString(), exception = e))
+            else ->
+                emit(Resource.Error(message = "generic exception $e", exception = e))
+        }
     }
 }

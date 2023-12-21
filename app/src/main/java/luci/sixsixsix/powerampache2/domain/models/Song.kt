@@ -25,7 +25,8 @@ data class Song(
     val time: Int = Constants.ERROR_INT,
     val trackNumber: Int = Constants.ERROR_INT,
     val year: Int = Constants.ERROR_INT,
-    val name: String = ""
+    val name: String = "",
+    val mode: String? = null
 )
 
 fun MediaBrowser.MediaItem.toSong() = Song(

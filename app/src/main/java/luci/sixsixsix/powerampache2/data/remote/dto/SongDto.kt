@@ -162,5 +162,6 @@ fun SongDto.toSong() = Song(
     size = size ?: ERROR_INT,
     time = time ?: ERROR_INT,
     trackNumber = track ?: ERROR_INT,
-    year = year ?: ERROR_INT
+    year = year ?: ERROR_INT,
+    mode = mode
 )

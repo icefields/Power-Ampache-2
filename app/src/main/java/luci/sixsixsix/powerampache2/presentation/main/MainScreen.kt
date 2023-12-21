@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Piano
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -33,12 +35,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.presentation.NavGraphs
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsScreen
+import luci.sixsixsix.powerampache2.presentation.artists.ArtistsViewModel
 import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 
 private val tabItems = listOf<TabItem>(
@@ -50,9 +57,7 @@ private val tabItems = listOf<TabItem>(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-@Destination(start = true)
 fun MainScreen(
-    navigator: DestinationsNavigator,
     viewModel: AuthViewModel = hiltViewModel(),
     modifier: Modifier = Modifier) {
 
@@ -62,7 +67,7 @@ fun MainScreen(
         }
     } else {
         if (viewModel.state.session != null) {
-            LoggedInScreen()
+            DestinationsNavHost(navGraph = NavGraphs.root)
         } else {
             LoginScreen()
         }
@@ -71,9 +76,14 @@ fun MainScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LoggedInScreen() {
+@Destination(start = true)
+fun LoggedInScreen(
+    navigator: DestinationsNavigator,
+    viewModel: MainViewModel = hiltViewModel()
+) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
+
     LaunchedEffect(selectedTabIndex) {
         pagerState.animateScrollToPage(selectedTabIndex)
     }
@@ -84,6 +94,7 @@ fun LoggedInScreen() {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
+
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -93,7 +104,7 @@ fun LoggedInScreen() {
         ) { index ->
             when(index) {
                 0 -> SongsListScreen(modifier = Modifier.fillMaxSize())
-                1 -> AlbumsScreen(modifier = Modifier.fillMaxSize())
+                1 -> AlbumsScreen(navigator, modifier = Modifier.fillMaxSize())
                 2 -> ArtistsScreen(modifier = Modifier.fillMaxSize())
                 3 -> PlaylistsScreen(modifier = Modifier.fillMaxSize())
             }

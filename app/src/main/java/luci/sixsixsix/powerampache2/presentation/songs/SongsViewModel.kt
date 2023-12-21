@@ -82,7 +82,7 @@ class SongsViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
-                            state = state.copy(isFetchingMore = false)
+                            state = state.copy(isFetchingMore = false, isLoading = false)
                             Log.d("aaaa", "ERROR SongsViewModel.getSongs ${result.exception}")
                         }
                         is Resource.Loading -> {
