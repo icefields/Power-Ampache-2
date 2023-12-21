@@ -14,10 +14,10 @@ data class ArtistEntity(
     val genre: List<MusicAttribute> = listOf(),
     val artUrl: String = "",
     val flag: Int = 0,
-    val summary: Any? = null,
+    val summary: String? = null,
     val time: Int = 0,
     val yearFormed: Int = 0,
-    val placeFormed: Any? = null
+    val placeFormed: String? = null
 )
 
 fun ArtistEntity.toArtist() = Artist(
@@ -42,8 +42,8 @@ fun Artist.toArtistEntity() = ArtistEntity(
     genre = genre,
     artUrl = artUrl ?: "",
     flag = flag ?: 0,
-    summary = summary ?: 0,
+    summary = summary.toString(),
     time = time ?: 0,
     yearFormed = yearFormed,
-    placeFormed = placeFormed
+    placeFormed = placeFormed.toString()
 )
