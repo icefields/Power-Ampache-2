@@ -1,7 +1,5 @@
 package luci.sixsixsix.powerampache2.common
 
-import luci.sixsixsix.powerampache2.domain.models.Song
-
 object Constants {
     const val SONG_COLLECTION = "songs"
     const val MEDIA_ROOT_ID = "root_id"
@@ -17,8 +15,10 @@ object Constants {
 
     const val ERROR_INT = -1
 
+    const val CLEAR_TABLE_AFTER_FETCH = false
+
     // DEBUG
-    const val NETWORK_REQUEST_LIMIT_DEBUG = 222 // TODO remove or set to zero for production
+    const val NETWORK_REQUEST_LIMIT_DEBUG = 20 // TODO remove or set to zero for production
     const val DEBUG_USER = "test-user"
     const val DEBUG_PASSWORD = "testtest"
     const val DEBUG_URL = "http://192.168.1.100/ampache/public/server/"

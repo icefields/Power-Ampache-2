@@ -6,5 +6,6 @@ data class ArtistsState (
     val artists: List<Artist> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val isFetchingMore: Boolean = false
 )

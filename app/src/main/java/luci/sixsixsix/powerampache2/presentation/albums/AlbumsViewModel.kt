@@ -4,30 +4,24 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.common.Constants.UPDATE_PLAYER_POSITION_INTERVAL
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.exoplayer.MusicService
-import luci.sixsixsix.powerampache2.exoplayer.MusicServiceConnection
-import luci.sixsixsix.powerampache2.exoplayer.currentPlaybackPosition
-import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
-import luci.sixsixsix.powerampache2.presentation.songs.SongsState
 import javax.inject.Inject
 
 @HiltViewModel
 class AlbumsViewModel @Inject constructor(
     private val repository: MusicRepository
 ) : ViewModel() {
+
     var state by mutableStateOf(AlbumsState())
     private var searchJob: Job? = null
+    private var isEndOfDataList: Boolean = false
 
     init {
         getAlbums()
@@ -46,29 +40,43 @@ class AlbumsViewModel @Inject constructor(
                     getAlbums()
                 }
             }
+            is AlbumsEvent.OnBottomListReached -> {
+                if (!state.isFetchingMore && !isEndOfDataList) {
+                    Log.d("aaaa", "AlbumsEvent.OnBottomListReached")
+                    state = state.copy(isFetchingMore = true)
+                    getAlbums(fetchRemote = true, offset = state.albums.size)
+                }
+            }
         }
     }
 
     private fun getAlbums(
         query: String = state.searchQuery.lowercase(),
-        fetchRemote: Boolean = true
+        fetchRemote: Boolean = true,
+        offset: Int = 0
     ) {
         viewModelScope.launch {
             repository
-                .getAlbums(fetchRemote, query)
+                .getAlbums(fetchRemote, query, offset)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { albums ->
-                                Log.d("aaaa", "${albums.size}")
                                 state = state.copy(albums = albums)
+                                Log.d("aaaa", "viewmodel.getAlbums size ${state.albums.size}")
                             }
+                            isEndOfDataList = ( result.networkData?.isEmpty() == true && offset > 0 )
+                            Log.d("aaaa", "viewmodel.getAlbums is bottom reached? $isEndOfDataList offset $offset, size of new array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
+                            state = state.copy(isFetchingMore = false)
                             Log.d("aaaa", "ERROR AlbumsViewModel ${result.exception}")
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)
+                            if(!result.isLoading) {
+                                state = state.copy(isFetchingMore = false)
+                            }
                         }
                     }
                 }

@@ -8,6 +8,7 @@ import luci.sixsixsix.powerampache2.domain.models.Session
 data class AuthState(
     val session: Session? = null,
     val isLoading: Boolean = false,
+    val error: String = "",
     val username: String = DEBUG_USER,
     val password: String = DEBUG_PASSWORD,
     val url: String = DEBUG_URL

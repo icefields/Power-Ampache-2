@@ -41,7 +41,7 @@ class MusicSource @Inject constructor(private val musicDatabase: MusicRepository
 
     suspend fun fetchMediaData() = withContext(Dispatchers.IO) {
         state = State.STATE_INITIALIZING
-        musicDatabase.getSongs().collect { result ->
+        /*musicDatabase.getSongs().collect { result ->
                 when(result) {
                     is Resource.Success -> {
                         result.data?.let { allSongs ->
@@ -70,7 +70,7 @@ class MusicSource @Inject constructor(private val musicDatabase: MusicRepository
                 }
             }
 
-
+*/
     }
 
     fun asMediaSource(dataSourceFactory: DefaultDataSource.Factory): ConcatenatingMediaSource {

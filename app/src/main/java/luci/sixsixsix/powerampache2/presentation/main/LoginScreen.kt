@@ -73,5 +73,7 @@ fun LoginScreen(
         }) {
             Text(text = "Login")
         }
+
+        Text(text = state.error)
     }
 }

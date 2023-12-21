@@ -42,6 +42,7 @@ object AppModule {
     @Singleton
     fun provideRetrofit(interceptor: Interceptor): Retrofit {
         val okHttpClient = OkHttpClient.Builder()
+            .retryOnConnectionFailure(true)
             .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
             .readTimeout(TIMEOUT_READ_S, TimeUnit.SECONDS)
             .writeTimeout(TIMEOUT_WRITE_S, TimeUnit.SECONDS)

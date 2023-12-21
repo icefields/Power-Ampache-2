@@ -20,8 +20,10 @@ import javax.inject.Inject
 class PlaylistsViewModel @Inject constructor(
     private val repository: MusicRepository
 ) : ViewModel() {
+
     var state by mutableStateOf(PlaylistsState())
     private var searchJob: Job? = null
+    private var isBottomReached: Boolean = false
 
     init {
         getPlaylists()
@@ -40,29 +42,43 @@ class PlaylistsViewModel @Inject constructor(
                     getPlaylists()
                 }
             }
+            is PlaylistEvent.OnBottomListReached -> {
+                if (!state.isFetchingMore && !isBottomReached) {
+                    Log.d("aaaa", "PlaylistEvent.OnBottomListReached")
+                    state = state.copy(isFetchingMore = true)
+                    getPlaylists(fetchRemote = true, offset = state.playlists.size)
+                }
+            }
         }
     }
 
     private fun getPlaylists(
         query: String = state.searchQuery.lowercase(),
-        fetchRemote: Boolean = true
+        fetchRemote: Boolean = true,
+        offset: Int = 0
     ) {
         viewModelScope.launch {
             repository
-                .getPlaylists(fetchRemote, query)
+                .getPlaylists(fetchRemote, query, offset)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { playlists ->
-                                Log.d("aaaa", "${playlists.size}")
                                 state = state.copy(playlists = playlists)
+                                Log.d("aaaa", "viewmodel.getPlaylists size ${state.playlists.size}")
                             }
+                            isBottomReached = ( result.networkData?.isEmpty() == true && offset > 0 ) ?: run { false }
+                            Log.d("aaaa", "viewmodel.getPlaylists is bottom reached? $isBottomReached  offset $offset size of new array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
+                            state = state.copy(isFetchingMore = false)
                             Log.d("aaaa", "ERROR PlaylistsViewModel ${result.exception}")
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)
+                            if(!result.isLoading) {
+                                state = state.copy(isFetchingMore = false)
+                            }
                         }
                     }
                 }

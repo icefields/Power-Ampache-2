@@ -6,5 +6,6 @@ data class AlbumsState (
     val albums: List<Album> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val isFetchingMore: Boolean = false
 )

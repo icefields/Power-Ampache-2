@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import javax.inject.Inject
 
@@ -20,43 +21,41 @@ class AuthViewModel @Inject constructor(private val repository: MusicRepository)
         viewModelScope.launch {
             // try to login with saved auth token
             state = state.copy(isLoading = true)
-            when(val ping = repository.ping()) {
+            when( val ping = repository.ping() ) {
                 is Resource.Success -> {
-                    // if the session returned by ping is null, user is not authorized
-                    // if the session is not null we are authorized and the session is refreshed
+                    //   If the session returned by ping is null, the token is probably expired and
+                    // the user is no longer authorized
+                    //   If the session is not null we are authorized and the auth token in the
+                    // session object is refreshed
                     ping.data?.second?.let {
-                        state = state.copy(session = it)
-                        state = state.copy(isLoading = false)
+                        state = state.copy(session = it, isLoading = false)
                     } ?: run {
-                        // try autologin
-                        repository
-                            .autoLogin()
-                            .collect { result ->
-                                when(result) {
-                                    is Resource.Success -> {
-                                        result.data?.let { auth ->
-                                            Log.d("aaaa", "AuthViewModel ${auth}")
-                                            state = state.copy(session = auth)
-                                        }
-                                    }
-                                    is Resource.Error -> {
-                                        state = state.copy(isLoading = false)
-                                        Log.d("aaaa", "ERROR AuthViewModel ${result.exception}")
-                                    }
-                                    is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
-                                }
-                            }
+                        autologin()
                     }
                 }
                 is Resource.Error -> {
-                    // TODO handle error
-                    Log.d("aaaa", "ERROR AuthViewModel.INIT ${ping.data?.second} ${ping.exception}")
-                    state = state.copy(isLoading = false)
+                    state = state.copy(error = "{${ping.exception}", isLoading = false)
                 }
                 else -> {}
             }
-
         }
+    }
+
+    private suspend fun autologin() {
+        repository
+            .autoLogin()
+            .collect { result ->
+                when(result) {
+                    is Resource.Success -> {
+                        result.data?.let { auth ->
+                            Log.d("aaaa", "AuthViewModel ${auth}")
+                            state = state.copy(session = auth)
+                        }
+                    }
+                    is Resource.Error -> state = state.copy(error = "{$result.exception}", isLoading = false)
+                    is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                }
+            }
     }
 
     fun onEvent(event: AuthEvent) {
@@ -76,7 +75,7 @@ class AuthViewModel @Inject constructor(private val repository: MusicRepository)
     ) {
         viewModelScope.launch {
             repository
-                .authorize(username, password, serverUrl)
+                .authorize(username, password.sha256(), serverUrl)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
@@ -87,7 +86,7 @@ class AuthViewModel @Inject constructor(private val repository: MusicRepository)
                         }
                         is Resource.Error -> {
                             Log.d("aaaa", "ERROR AuthViewModel login ${result.exception?.localizedMessage}")
-                            state = state.copy(isLoading = false)
+                            state = state.copy(error = result.exception?.toString() ?: "authorization error", isLoading = false)
                         }
                         is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                     }

@@ -6,5 +6,6 @@ data class SongsState(
     val songs: List<Song> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val isFetchingMore: Boolean = false
 )

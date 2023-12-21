@@ -12,7 +12,7 @@ import androidx.room.TypeConverters
         PlaylistEntity::class,
         SessionEntity::class,
         CredentialsEntity::class],
-    version = 13
+    version = 18
 )
 @TypeConverters(Converters::class)
 abstract class MusicDatabase: RoomDatabase() {

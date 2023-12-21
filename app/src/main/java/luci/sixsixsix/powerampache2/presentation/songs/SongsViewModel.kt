@@ -18,6 +18,7 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.exoplayer.MusicService
 import luci.sixsixsix.powerampache2.exoplayer.MusicServiceConnection
 import luci.sixsixsix.powerampache2.exoplayer.currentPlaybackPosition
+import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,8 +26,10 @@ class SongsViewModel @Inject constructor(
     musicServiceConnection: MusicServiceConnection,
     private val repository: MusicRepository
 ) : ViewModel() {
+
     var state by mutableStateOf(SongsState())
     private var searchJob: Job? = null
+    private var isBottomReached: Boolean = false
 
     init {
         getSongs()
@@ -49,41 +52,50 @@ class SongsViewModel @Inject constructor(
                     getSongs()
                 }
             }
-
-            else -> {}
+            is SongsEvent.OnBottomListReached -> {
+                if (!state.isFetchingMore && !isBottomReached) {
+                    Log.d("aaaa", "SongsEvent.OnBottomListReached")
+                    state = state.copy(isFetchingMore = true)
+                    getSongs(fetchRemote = true, offset = state.songs.size)
+                }
+            }
         }
     }
 
     private fun getSongs(
         query: String = state.searchQuery.lowercase(),
-        fetchRemote: Boolean = true
+        fetchRemote: Boolean = true,
+        offset: Int = 0
     ) {
-        Log.d("aaaa", "getSongs")
+        Log.d("aaaa", "viewmodel.getSongs")
         viewModelScope.launch {
             repository
-                .getSongs(fetchRemote, query)
+                .getSongs(fetchRemote, query, offset)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                Log.d("aaaa", "${songs.size}")
                                 state = state.copy(songs = songs)
+                                Log.d("aaaa", "viewmodel.getSongs SONGS size${state.songs.size}")
                             }
+                            isBottomReached = ( result.networkData?.isEmpty() == true && offset > 0 ) ?: run { false }
+                            Log.d("aaaa", "viewmodel.getSongs is bottom reached? $isBottomReached ")
                         }
+
                         is Resource.Error -> {
-                            Log.d("aaaa", "ERROR SongsViewModel ${result.exception}")
+                            state = state.copy(isFetchingMore = false)
+                            Log.d("aaaa", "ERROR SongsViewModel.getSongs ${result.exception}")
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)
+                            if(!result.isLoading) {
+                                state = state.copy(isFetchingMore = false)
+                            }
                         }
-
-                        else -> {}
                     }
                 }
         }
     }
-
-
 
     // TODO original code
 
