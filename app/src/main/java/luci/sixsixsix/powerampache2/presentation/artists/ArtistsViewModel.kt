@@ -23,26 +23,26 @@ class ArtistsViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     init {
-        getArtist()
+        getArtists()
     }
 
-    fun onEvent(event: SongsEvent) {
+    fun onEvent(event: ArtistEvent) {
         when(event) {
-            is SongsEvent.Refresh -> {
-                getArtist(fetchRemote = true)
+            is ArtistEvent.Refresh -> {
+                getArtists(fetchRemote = true)
             }
-            is SongsEvent.OnSearchQueryChange -> {
+            is ArtistEvent.OnSearchQueryChange -> {
                 state = state.copy(searchQuery = event.query)
                 searchJob?.cancel()
                 searchJob = viewModelScope.launch {
                     delay(1500L)
-                    getArtist()
+                    getArtists()
                 }
             }
         }
     }
 
-    private fun getArtist(
+    private fun getArtists(
         query: String = state.searchQuery.lowercase(),
         fetchRemote: Boolean = true
     ) {
@@ -53,7 +53,7 @@ class ArtistsViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { artists ->
-                                Log.d("aaaa", "${artists.size}")
+                                Log.d("aaaa", "ARTISTS SIZE ${artists.size}")
                                 state = state.copy(artists = artists)
                             }
                         }

@@ -66,13 +66,13 @@ fun AuthDto.toServerInfo(): ServerInfo = ServerInfo(
 
 
 fun AuthDto.toSession(dateMapper: DateMapper): Session = Session(
-    add = add,
+    add = dateMapper(add),
     albums = albums ?: 0,
     api = api ?: "",
     artists = artists ?: 0,
     auth = auth ?: "",
     catalogs = catalogs,
-    clean = clean,
+    clean = dateMapper(clean),
     genres = genres,
     labels = labels,
     licenses = licenses,
@@ -85,7 +85,7 @@ fun AuthDto.toSession(dateMapper: DateMapper): Session = Session(
     sessionExpire = dateMapper(sessionExpire),
     shares = shares,
     songs = songs,
-    update = update,
+    update = dateMapper(update),
     users = users,
-    videos = videos
+    videos = videos,
 )

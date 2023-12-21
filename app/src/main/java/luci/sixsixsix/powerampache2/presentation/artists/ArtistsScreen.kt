@@ -34,7 +34,7 @@ fun ArtistsScreen(
         OutlinedTextField(
             value = state.searchQuery,
             onValueChange = {
-                viewModel.onEvent(SongsEvent.OnSearchQueryChange(it))
+                viewModel.onEvent(ArtistEvent.OnSearchQueryChange(it))
             },
             modifier = Modifier
                 .padding(16.dp)
@@ -48,7 +48,7 @@ fun ArtistsScreen(
 
         SwipeRefresh(
             state = swipeRefreshState,
-            onRefresh = { viewModel.onEvent(SongsEvent.Refresh) }
+            onRefresh = { viewModel.onEvent(ArtistEvent.Refresh) }
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.artists.size) { i ->

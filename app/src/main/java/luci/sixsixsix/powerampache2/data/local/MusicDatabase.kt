@@ -5,8 +5,14 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [AlbumEntity::class, SongEntity::class],
-    version = 3
+    entities = [
+        AlbumEntity::class,
+        SongEntity::class,
+        ArtistEntity::class,
+        PlaylistEntity::class,
+        SessionEntity::class,
+        CredentialsEntity::class],
+    version = 12
 )
 @TypeConverters(Converters::class)
 abstract class MusicDatabase: RoomDatabase() {

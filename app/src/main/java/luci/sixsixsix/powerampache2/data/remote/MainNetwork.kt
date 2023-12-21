@@ -4,6 +4,7 @@ import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.AuthDto
+import luci.sixsixsix.powerampache2.data.remote.dto.GoodbyeDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import retrofit2.http.GET
@@ -26,17 +27,20 @@ interface MainNetwork {
     @GET("json.server.php?action=ping")
     suspend fun ping(@Query("auth") authKey: String = ""): AuthDto
 
+    @GET("json.server.php?action=goodbye")
+    suspend fun goodbye(@Query("auth") authKey: String = ""): GoodbyeDto
+
     @GET("json.server.php?action=songs")
-    suspend fun getAllSongs(
+    suspend fun getSongs(
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 0,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
         @Query("filter") filter: String = "",
         @Query("exact") exact: Int = 0,
-        @Query("offset") offset: Int = 0,
+        @Query("offset") offset: Int = 2000,
     ): SongsResponse // TODO remove default values
 
     @GET("json.server.php?action=albums")
-    suspend fun getAllAlbums(
+    suspend fun getAlbums(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
         @Query("filter") filter: String = "",
@@ -68,9 +72,7 @@ interface MainNetwork {
 
     companion object {
         const val API_KEY = "0db9dcbb4a945e443547e3c082110abf"
-        const val BASE_URL = "http://192.168.1.100/ampache/public/server/" //"https://demo.ampache.dev/server/" //
-        const val DEMO_USER = "test-user"
-        const val DEMO_PASSWORD = "testtest"
+        const val BASE_URL = "http://localhost/"//""http://192.168.1.100/ampache/public/server/" //"https://demo.ampache.dev/server/" //
     }
 }
 

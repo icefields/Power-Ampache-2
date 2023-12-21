@@ -10,11 +10,16 @@ object Constants {
     const val NOTIFICATION_CHANNEL_ID = "music"
     const val NOTIFICATION_ID = 1
 
+    // NETWORK
     const val TIMEOUT_CONNECTION_S = 120L
     const val TIMEOUT_READ_S = 120L
     const val TIMEOUT_WRITE_S = 120L
 
     const val ERROR_INT = -1
-    const val NETWORK_REQUEST_LIMIT_DEBUG = 222 // TODO remove or set to zero for production
 
+    // DEBUG
+    const val NETWORK_REQUEST_LIMIT_DEBUG = 222 // TODO remove or set to zero for production
+    const val DEBUG_USER = "test-user"
+    const val DEBUG_PASSWORD = "testtest"
+    const val DEBUG_URL = "http://192.168.1.100/ampache/public/server/"
 }

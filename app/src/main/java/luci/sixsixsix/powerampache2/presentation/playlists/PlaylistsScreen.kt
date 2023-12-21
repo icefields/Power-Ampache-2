@@ -37,7 +37,7 @@ fun PlaylistsScreen(
         OutlinedTextField(
             value = state.searchQuery,
             onValueChange = {
-                viewModel.onEvent(SongsEvent.OnSearchQueryChange(it))
+                viewModel.onEvent(PlaylistEvent.OnSearchQueryChange(it))
             },
             modifier = Modifier
                 .padding(16.dp)
@@ -51,7 +51,7 @@ fun PlaylistsScreen(
 
         SwipeRefresh(
             state = swipeRefreshState,
-            onRefresh = { viewModel.onEvent(SongsEvent.Refresh) }
+            onRefresh = { viewModel.onEvent(PlaylistEvent.Refresh) }
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.playlists.size) { i ->

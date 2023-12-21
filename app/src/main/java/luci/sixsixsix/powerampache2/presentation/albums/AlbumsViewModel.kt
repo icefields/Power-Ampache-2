@@ -33,12 +33,12 @@ class AlbumsViewModel @Inject constructor(
         getAlbums()
     }
 
-    fun onEvent(event: SongsEvent) {
+    fun onEvent(event: AlbumsEvent) {
         when(event) {
-            is SongsEvent.Refresh -> {
+            is AlbumsEvent.Refresh -> {
                 getAlbums(fetchRemote = true)
             }
-            is SongsEvent.OnSearchQueryChange -> {
+            is AlbumsEvent.OnSearchQueryChange -> {
                 state = state.copy(searchQuery = event.query)
                 searchJob?.cancel()
                 searchJob = viewModelScope.launch {

@@ -16,9 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
-import luci.sixsixsix.powerampache2.presentation.songs.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
-import luci.sixsixsix.powerampache2.presentation.songs.SongsViewModel
 
 @Composable
 @Destination(start = false)
@@ -36,7 +34,7 @@ fun AlbumsScreen(
         OutlinedTextField(
             value = state.searchQuery,
             onValueChange = {
-                viewModel.onEvent(SongsEvent.OnSearchQueryChange(it))
+                viewModel.onEvent(AlbumsEvent.OnSearchQueryChange(it))
             },
             modifier = Modifier
                 .padding(16.dp)
@@ -50,7 +48,7 @@ fun AlbumsScreen(
 
         SwipeRefresh(
             state = swipeRefreshState,
-            onRefresh = { viewModel.onEvent(SongsEvent.Refresh) }
+            onRefresh = { viewModel.onEvent(AlbumsEvent.Refresh) }
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.albums.size) { i ->

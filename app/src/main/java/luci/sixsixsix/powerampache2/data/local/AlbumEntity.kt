@@ -4,10 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
-import java.time.LocalDateTime
-
-
-
 
 @Entity
 data class AlbumEntity(

@@ -11,7 +11,9 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface MusicRepository {
     suspend fun ping(): Resource<Pair<ServerInfo, Session?>>
-    suspend fun authorize(force: Boolean = true): Resource<Session>
+    suspend fun autoLogin(): Flow<Resource<Session>>
+    suspend fun logout(): Flow<Resource<Boolean>>
+    suspend fun authorize(username:String, password:String, serverUrl: String, force: Boolean = true): Flow<Resource<Session>>
     suspend fun getSongs(fetchRemote: Boolean = true, query: String = ""): Flow<Resource<List<Song>>>
     suspend fun getAlbums(fetchRemote: Boolean = true, query: String = ""): Flow<Resource<List<Album>>>
     suspend fun getArtists(fetchRemote: Boolean = true, query: String = ""): Flow<Resource<List<Artist>>>

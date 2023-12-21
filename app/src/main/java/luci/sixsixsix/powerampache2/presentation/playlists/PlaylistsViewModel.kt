@@ -24,26 +24,26 @@ class PlaylistsViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     init {
-        getArtist()
+        getPlaylists()
     }
 
-    fun onEvent(event: SongsEvent) {
+    fun onEvent(event: PlaylistEvent) {
         when(event) {
-            is SongsEvent.Refresh -> {
-                getArtist(fetchRemote = true)
+            is PlaylistEvent.Refresh -> {
+                getPlaylists(fetchRemote = true)
             }
-            is SongsEvent.OnSearchQueryChange -> {
+            is PlaylistEvent.OnSearchQueryChange -> {
                 state = state.copy(searchQuery = event.query)
                 searchJob?.cancel()
                 searchJob = viewModelScope.launch {
                     delay(1500L)
-                    getArtist()
+                    getPlaylists()
                 }
             }
         }
     }
 
-    private fun getArtist(
+    private fun getPlaylists(
         query: String = state.searchQuery.lowercase(),
         fetchRemote: Boolean = true
     ) {

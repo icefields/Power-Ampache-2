@@ -41,6 +41,7 @@ class SongsViewModel @Inject constructor(
                 getSongs(fetchRemote = true)
             }
             is SongsEvent.OnSearchQueryChange -> {
+                Log.d("aaaa", "SongsEvent.OnSearchQueryChange")
                 state = state.copy(searchQuery = event.query)
                 searchJob?.cancel()
                 searchJob = viewModelScope.launch {
@@ -48,6 +49,8 @@ class SongsViewModel @Inject constructor(
                     getSongs()
                 }
             }
+
+            else -> {}
         }
     }
 
@@ -55,6 +58,7 @@ class SongsViewModel @Inject constructor(
         query: String = state.searchQuery.lowercase(),
         fetchRemote: Boolean = true
     ) {
+        Log.d("aaaa", "getSongs")
         viewModelScope.launch {
             repository
                 .getSongs(fetchRemote, query)
@@ -72,12 +76,12 @@ class SongsViewModel @Inject constructor(
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)
                         }
+
+                        else -> {}
                     }
                 }
         }
     }
-
-
 
 
 

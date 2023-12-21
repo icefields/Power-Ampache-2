@@ -37,6 +37,12 @@ object Converters {
         } catch (e: Exception) {
             "{}"
         }
+
+    @TypeConverter
+    fun stringToLocalDateTime(value: String?): LocalDateTime? = value?.let { LocalDateTime.parse(it) }
+
+    @TypeConverter
+    fun localDateTimeToString(date: LocalDateTime?): String? = date?.toString()
 }
 
 data class MusicAttributesContainer(

@@ -3,27 +3,22 @@ package luci.sixsixsix.powerampache2.presentation.main
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.FeaturedPlayList
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Piano
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.outlined.AddCircle
+
 import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.FeaturedPlayList
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Piano
-import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -38,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
@@ -57,7 +53,25 @@ private val tabItems = listOf<TabItem>(
 @Destination(start = true)
 fun MainScreen(
     navigator: DestinationsNavigator,
+    viewModel: AuthViewModel = hiltViewModel(),
     modifier: Modifier = Modifier) {
+
+    if(viewModel.state.isLoading) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
+    } else {
+        if (viewModel.state.session != null) {
+            LoggedInScreen()
+        } else {
+            LoginScreen()
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun LoggedInScreen() {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
     LaunchedEffect(selectedTabIndex) {
