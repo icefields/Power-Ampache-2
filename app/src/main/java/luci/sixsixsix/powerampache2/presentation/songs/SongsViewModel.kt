@@ -18,7 +18,6 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.exoplayer.MusicService
 import luci.sixsixsix.powerampache2.exoplayer.MusicServiceConnection
 import luci.sixsixsix.powerampache2.exoplayer.currentPlaybackPosition
-import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,7 +28,7 @@ class SongsViewModel @Inject constructor(
 
     var state by mutableStateOf(SongsState())
     private var searchJob: Job? = null
-    private var isBottomReached: Boolean = false
+    private var isEndOfDataReached: Boolean = false
 
     init {
         getSongs()
@@ -53,7 +52,7 @@ class SongsViewModel @Inject constructor(
                 }
             }
             is SongsEvent.OnBottomListReached -> {
-                if (!state.isFetchingMore && !isBottomReached) {
+                if (!state.isFetchingMore && !isEndOfDataReached) {
                     Log.d("aaaa", "SongsEvent.OnBottomListReached")
                     state = state.copy(isFetchingMore = true)
                     getSongs(fetchRemote = true, offset = state.songs.size)
@@ -78,8 +77,8 @@ class SongsViewModel @Inject constructor(
                                 state = state.copy(songs = songs)
                                 Log.d("aaaa", "viewmodel.getSongs SONGS size${state.songs.size}")
                             }
-                            isBottomReached = ( result.networkData?.isEmpty() == true && offset > 0 ) ?: run { false }
-                            Log.d("aaaa", "viewmodel.getSongs is bottom reached? $isBottomReached ")
+                            isEndOfDataReached = ( result.networkData?.isEmpty() == true && offset > 0 ) ?: run { false }
+                            Log.d("aaaa", "viewmodel.getSongs is bottom reached? $isEndOfDataReached ")
                         }
 
                         is Resource.Error -> {

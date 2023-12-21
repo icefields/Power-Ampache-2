@@ -11,7 +11,7 @@ data class AlbumEntity(
     val name: String = "",
     val basename: String = "",
     val artist: MusicAttribute,
-    val artists: List<MusicAttribute>,
+    val artists: List<MusicAttribute> = listOf(),
     val time: Int = 0,
     val year: Int = 0,
     val songCount: Int = 0,
@@ -27,15 +27,15 @@ fun AlbumEntity.toAlbum() = Album(
     id = id,
     name = name ?: "",
     basename = basename ?: "",
-    artists = artists,// Gson().fromJson(artists, MusicAttributesContainer::class.java).attr,
-    artist = artist, //Gson().fromJson(artist, MusicAttribute::class.java),
+    artists = artists,
+    artist = artist,
     artUrl = artUrl ?: "",
     songCount = songCount ?: 0,
     flag = flag ?: 0,
     time = time ?: 0,
     year = year ?: 0,
-    genre = genre //Gson().fromJson(genre, MusicAttributesContainer::class.java).attr,
-    )
+    genre = genre
+)
 
 fun Album.toAlbumEntity() = AlbumEntity(
     id = id,

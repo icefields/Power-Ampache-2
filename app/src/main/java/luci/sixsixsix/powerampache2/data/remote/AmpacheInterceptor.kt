@@ -11,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AmpacheInterceptor @Inject constructor(val musicDatabase: MusicDatabase): Interceptor {
+class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDatabase): Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         return runBlocking {
             var request = chain.request()

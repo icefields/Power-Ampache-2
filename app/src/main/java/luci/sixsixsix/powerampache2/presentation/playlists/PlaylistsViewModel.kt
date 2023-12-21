@@ -12,7 +12,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 import javax.inject.Inject
 
 
@@ -23,7 +22,7 @@ class PlaylistsViewModel @Inject constructor(
 
     var state by mutableStateOf(PlaylistsState())
     private var searchJob: Job? = null
-    private var isBottomReached: Boolean = false
+    private var isEndOfDataReached: Boolean = false
 
     init {
         getPlaylists()
@@ -43,7 +42,7 @@ class PlaylistsViewModel @Inject constructor(
                 }
             }
             is PlaylistEvent.OnBottomListReached -> {
-                if (!state.isFetchingMore && !isBottomReached) {
+                if (!state.isFetchingMore && !isEndOfDataReached) {
                     Log.d("aaaa", "PlaylistEvent.OnBottomListReached")
                     state = state.copy(isFetchingMore = true)
                     getPlaylists(fetchRemote = true, offset = state.playlists.size)
@@ -67,8 +66,8 @@ class PlaylistsViewModel @Inject constructor(
                                 state = state.copy(playlists = playlists)
                                 Log.d("aaaa", "viewmodel.getPlaylists size ${state.playlists.size}")
                             }
-                            isBottomReached = ( result.networkData?.isEmpty() == true && offset > 0 ) ?: run { false }
-                            Log.d("aaaa", "viewmodel.getPlaylists is bottom reached? $isBottomReached  offset $offset size of new array ${result.networkData?.size}")
+                            isEndOfDataReached = ( result.networkData?.isEmpty() == true && offset > 0 ) ?: run { false }
+                            Log.d("aaaa", "viewmodel.getPlaylists is bottom reached? $isEndOfDataReached  offset $offset size of new array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
                             state = state.copy(isFetchingMore = false)

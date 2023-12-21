@@ -12,8 +12,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistEvent
-import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,7 +21,7 @@ class ArtistsViewModel @Inject constructor(
 
     var state by mutableStateOf(ArtistsState())
     private var searchJob: Job? = null
-    private var isBottomReached: Boolean = false
+    private var isEndOfDataReached: Boolean = false
 
     init {
         getArtists()
@@ -43,12 +41,30 @@ class ArtistsViewModel @Inject constructor(
                 }
             }
             is ArtistEvent.OnBottomListReached -> {
-                if (!state.isFetchingMore && !isBottomReached) {
+                if (!state.isFetchingMore && !isEndOfDataReached) {
                     Log.d("aaaa", "ArtistEvent.OnBottomListReached")
                     state = state.copy(isFetchingMore = true)
                     getArtists(fetchRemote = true, offset = state.artists.size)
                 }
             }
+        }
+    }
+
+    fun getAlbumsFromArtist(artistId: String) {
+        viewModelScope.launch {
+            repository
+                .getAlbumsFromArtist(artistId)
+                .collect { result ->
+                    when(result) {
+                        is Resource.Success -> {
+                            result.data?.let { albums ->
+                                Log.d("aaaa", "viewmodel.getArtists size ${albums.size}")
+                            }
+                        }
+                        is Resource.Error -> { }
+                        is Resource.Loading -> { }
+                    }
+                }
         }
     }
 
@@ -67,8 +83,8 @@ class ArtistsViewModel @Inject constructor(
                                 state = state.copy(artists = artists)
                                 Log.d("aaaa", "viewmodel.getArtists size ${state.artists.size}")
                             }
-                            isBottomReached = ( result.networkData?.isEmpty() == true && offset > 0 )
-                            Log.d("aaaa", "viewmodel.getArtists is bottom reached? $isBottomReached size of new array ${result.networkData?.size}")
+                            isEndOfDataReached = ( result.networkData?.isEmpty() == true && offset > 0 )
+                            Log.d("aaaa", "viewmodel.getArtists is bottom reached? $isEndOfDataReached size of new array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
                             state = state.copy(isFetchingMore = false)

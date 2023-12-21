@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.powerampache2.common.Constants.CLEAR_TABLE_AFTER_FETCH
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
+import luci.sixsixsix.powerampache2.data.local.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.toAlbum
@@ -26,6 +27,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toBoolean
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
+import luci.sixsixsix.powerampache2.data.remote.dto.toMusicAttribute
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 import luci.sixsixsix.powerampache2.data.remote.dto.toServerInfo
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
@@ -35,6 +37,7 @@ import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Artist
+import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
@@ -409,5 +412,93 @@ class MusicRepositoryImpl @Inject constructor(
             else ->
                 emit(Resource.Error(message = "generic exception $e", exception = e))
         }
+    }
+
+    private suspend fun getAlbumsFromArtistsDb(artistId: String): List<Album> {
+        val localAlbums = dao.searchAlbum("").map { it.toAlbum() }
+        val list = LinkedHashSet<Album>()
+        for (album in localAlbums) {
+            if(album.artist.id == artistId) {
+                list.add(album)
+            }
+            for (artist in album.artists) {
+                if(artist.id == artistId) {
+                    list.add(album)
+                }
+            }
+        }
+
+        return ArrayList(list).sortedWith(comparator = object : Comparator<Album> {
+            override fun compare(o1: Album?, o2: Album?): Int {
+                return o1?.let {
+                    o2?.year?.compareTo(it.year)
+                } ?: run {
+                    0
+                }
+            }
+        })
+    }
+
+    override suspend fun getAlbumsFromArtist(
+        artistId: String,
+        fetchRemote: Boolean
+    ): Flow<Resource<List<Album>>> = flow {
+        emit(Resource.Loading(true))
+        Log.d("aaaa", "repo getAlbumsFromArtist $artistId")
+
+        val localAlbums = getAlbumsFromArtistsDb(artistId)
+        val isDbEmpty = localAlbums.isEmpty()
+        if (!isDbEmpty) {
+            emit(Resource.Success(data = localAlbums))
+        }
+        val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+        if(shouldLoadCacheOnly) {
+            emit(Resource.Loading(false))
+            return@flow
+        }
+
+        val auth = getSession()!!//authorize2(false)
+        val response = api.getAlbumsFromArtist(auth.auth, artistId = artistId)
+        response.error?.let { throw(MusicException(it.toError())) }
+
+        // some albums come from web with no artists id, or with artist id zero, add the id manually
+        // so the database can find it (db is single source of truth)
+        val albums = response.albums!!
+            .map { albumDto ->
+                albumDto.toAlbum().copy(
+                    artists = ArrayList(
+                        albumDto.artists?.let { artists ->
+                            artists.map { attribute -> attribute.toMusicAttribute() }
+                        } ?: run { listOf() }
+                    ).apply {
+                        add(MusicAttribute(id = artistId, name = ""))
+                    }
+                )
+            } // will throw exception if songs null
+
+        Log.d("aaa", "albums from web ${albums.size}")
+
+        dao.insertAlbums(albums.map { it.toAlbumEntity() })
+        // stick to the single source of truth pattern despite performance deterioration
+        emit(Resource.Success(data = getAlbumsFromArtistsDb(artistId), networkData = albums))
+        emit(Resource.Loading(false))
+    }.catch { e ->
+        when(e) {
+            is IOException ->
+                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
+            is HttpException ->
+                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
+            is MusicException ->
+                emit(Resource.Error(message = e.musicError.toString(), exception = e))
+            else ->
+                emit(Resource.Error(message = "generic exception $e", exception = e))
+        }
+    }
+
+    override suspend fun getSongsFromAlbum(
+        albumId: String,
+        fetchRemote: Boolean
+    ): Flow<Resource<List<Song>>> {
+        TODO("Not yet implemented")
     }
 }

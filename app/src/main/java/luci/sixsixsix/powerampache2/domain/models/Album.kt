@@ -17,4 +17,6 @@ data class Album(
     val flag: Int = 0,
     val rating: Int = 0,
     val averageRating: Int = 0,
-)
+): Comparable<Album> {
+    override fun compareTo(other: Album): Int = id.compareTo(other.id)
+}

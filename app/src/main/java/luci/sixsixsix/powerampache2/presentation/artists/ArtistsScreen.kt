@@ -64,6 +64,8 @@ fun ArtistsScreen(
                             .clickable {
                                 // TODO navigate
                                 //navigator.navigate(CompanyInfoScreenDestination(company.symbol))
+                                // TODO TEST REMOVE
+                                viewModel.getAlbumsFromArtist(artist.id)
                             }
                             .padding(16.dp)
                     )
