@@ -27,7 +27,6 @@ import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScre
 import luci.sixsixsix.powerampache2.presentation.playlist_detail.PlaylistDetailScreen
 import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 
-
 @Composable
 @Destination(start = false)
 fun PlaylistsScreen(

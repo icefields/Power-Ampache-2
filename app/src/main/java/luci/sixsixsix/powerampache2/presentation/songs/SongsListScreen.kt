@@ -19,11 +19,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.presentation.destinations.SongDetailScreenDestination
 
 @Composable
 @Destination(start = false)
 fun SongsListScreen(
-//    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator,
     viewModel: SongsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -54,14 +56,13 @@ fun SongsListScreen(
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.songs.size) { i ->
-                    val company = state.songs[i]
+                    val song = state.songs[i]
                     SongItem(
-                        song = company,
+                        song = song,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                            // TODO navigate
-                            //navigator.navigate(CompanyInfoScreenDestination(company.symbol))
+                                navigator.navigate(SongDetailScreenDestination(song))
                             }
                             .padding(16.dp)
                     )

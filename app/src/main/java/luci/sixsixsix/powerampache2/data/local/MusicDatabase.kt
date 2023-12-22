@@ -18,7 +18,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
         PlaylistEntity::class,
         SessionEntity::class,
         CredentialsEntity::class],
-    version = 22
+    version = 23
 )
 @TypeConverters(Converters::class)
 abstract class MusicDatabase: RoomDatabase() {

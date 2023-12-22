@@ -103,7 +103,7 @@ fun LoggedInScreen(
                 .background(Color.LightGray)
         ) { index ->
             when(index) {
-                0 -> SongsListScreen(modifier = Modifier.fillMaxSize())
+                0 -> SongsListScreen(navigator, modifier = Modifier.fillMaxSize())
                 1 -> AlbumsScreen(navigator, modifier = Modifier.fillMaxSize())
                 2 -> ArtistsScreen(navigator, modifier = Modifier.fillMaxSize())
                 3 -> PlaylistsScreen(navigator, modifier = Modifier.fillMaxSize())

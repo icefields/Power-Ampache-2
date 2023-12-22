@@ -1,8 +1,11 @@
 package luci.sixsixsix.powerampache2.domain.models
 
 import android.media.browse.MediaBrowser
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.common.Constants
 
+@Parcelize
 data class Song(
     val mediaId: String,
     val title: String,
@@ -17,7 +20,7 @@ data class Song(
     val composer: String = "",
     val filename: String = "",
     val genre: List<MusicAttribute> = listOf(),
-    val mime: String = "",
+    val mime: String? = null,
     val playCount: Int = Constants.ERROR_INT,
     val playlistTrackNumber: Int = Constants.ERROR_INT,
     val rate: Int = Constants.ERROR_INT,
@@ -34,7 +37,7 @@ data class Song(
     val publisher: String? = null,
     val replayGainTrackGain: Float? = null ,
     val replayGainTrackPeak: Float? = null
-): Comparable<Song> {
+): Comparable<Song>, Parcelable {
     override fun compareTo(other: Song): Int = mediaId.compareTo(other.mediaId)
 }
 
@@ -53,7 +56,7 @@ fun MediaBrowser.MediaItem.toSong() = Song(
             composer = "",
             filename = "",
             genre = listOf<MusicAttribute>(),
-            mime = "",
+            mime = null,
             name = "",
             playCount = Constants.ERROR_INT,
             playlistTrackNumber = Constants.ERROR_INT,

@@ -34,6 +34,5 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        Toast.makeText(this,"${Gson().fromJson("{}", MusicAttributesContainer::class.java).attr}", Toast.LENGTH_LONG).show()
     }
 }
