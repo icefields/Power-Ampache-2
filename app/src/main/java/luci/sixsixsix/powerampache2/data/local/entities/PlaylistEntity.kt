@@ -1,9 +1,7 @@
-package luci.sixsixsix.powerampache2.data.local
+package luci.sixsixsix.powerampache2.data.local.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 
 @Entity

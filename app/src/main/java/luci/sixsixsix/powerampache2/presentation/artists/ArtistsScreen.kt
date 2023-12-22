@@ -19,13 +19,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
-import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistEvent
-import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 
 @Composable
 @Destination(start = false)
 fun ArtistsScreen(
-//    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator,
     viewModel: ArtistsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -62,10 +62,7 @@ fun ArtistsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                // TODO navigate
-                                //navigator.navigate(CompanyInfoScreenDestination(company.symbol))
-                                // TODO TEST REMOVE
-                                viewModel.getAlbumsFromArtist(artist.id)
+                                navigator.navigate(ArtistDetailScreenDestination(artist.id))
                             }
                             .padding(16.dp)
                     )

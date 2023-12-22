@@ -105,8 +105,8 @@ fun LoggedInScreen(
             when(index) {
                 0 -> SongsListScreen(modifier = Modifier.fillMaxSize())
                 1 -> AlbumsScreen(navigator, modifier = Modifier.fillMaxSize())
-                2 -> ArtistsScreen(modifier = Modifier.fillMaxSize())
-                3 -> PlaylistsScreen(modifier = Modifier.fillMaxSize())
+                2 -> ArtistsScreen(navigator, modifier = Modifier.fillMaxSize())
+                3 -> PlaylistsScreen(navigator, modifier = Modifier.fillMaxSize())
             }
         }
 

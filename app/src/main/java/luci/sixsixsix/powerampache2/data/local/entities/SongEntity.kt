@@ -1,11 +1,9 @@
-package luci.sixsixsix.powerampache2.data.local
+package luci.sixsixsix.powerampache2.data.local.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.data.remote.dto.SongDto
-import luci.sixsixsix.powerampache2.data.remote.dto.toMusicAttribute
-import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.data.remote.dto.MusicAttributeDto
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 
@@ -33,7 +31,14 @@ data class SongEntity(
     val trackNumber: Int,
     val year: Int,
     val name: String,
-    val mode: String? = null
+    val mode: String? = null,
+    val artists: List<MusicAttribute> = listOf(),
+    val flag: Int = Constants.ERROR_INT,
+    val streamFormat: String? = null,
+    val streamMime: String? = null,
+    val publisher: String? = null,
+    val replayGainTrackGain: Float? = null ,
+    val replayGainTrackPeak: Float? = null
 )
 
 fun SongEntity.toSong() = Song(
@@ -59,7 +64,14 @@ fun SongEntity.toSong() = Song(
     time = time ?: Constants.ERROR_INT,
     trackNumber = trackNumber ?: Constants.ERROR_INT,
     year = year ?: Constants.ERROR_INT,
-    mode = mode
+    mode = mode,
+    artists = artists,
+    flag = flag,
+    streamFormat = streamFormat,
+    streamMime = streamMime,
+    publisher = publisher,
+    replayGainTrackGain = replayGainTrackGain,
+    replayGainTrackPeak = replayGainTrackGain,
 )
 
 fun Song.toSongEntity() = SongEntity(
@@ -85,5 +97,12 @@ fun Song.toSongEntity() = SongEntity(
     time = time ?: Constants.ERROR_INT,
     trackNumber = trackNumber ?: Constants.ERROR_INT,
     year = year ?: Constants.ERROR_INT,
-    mode = mode
+    mode = mode,
+    artists = artists,
+    flag = flag,
+    streamFormat = streamFormat,
+    streamMime = streamMime,
+    publisher = publisher,
+    replayGainTrackGain = replayGainTrackGain,
+    replayGainTrackPeak = replayGainTrackGain,
 )

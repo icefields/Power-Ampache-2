@@ -88,6 +88,14 @@ interface MainNetwork {
         @Query("filter") albumId: String = "",
         @Query("offset") offset: Int = 0, ): SongsResponse
 
+    @GET("json.server.php?action=playlist_songs")
+    suspend fun getSongsFromPlaylist(
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 0,
+        @Query("random") random: Int = 0, // integer 0, 1 (if true get random songs using limit)
+        @Query("filter") albumId: String = "",
+        @Query("offset") offset: Int = 0, ): SongsResponse
+
     companion object {
         const val API_KEY = "0db9dcbb4a945e443547e3c082110abf"
         const val BASE_URL = "http://localhost/"

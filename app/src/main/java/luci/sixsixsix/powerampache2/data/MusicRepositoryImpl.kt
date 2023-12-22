@@ -1,27 +1,24 @@
 package luci.sixsixsix.powerampache2.data
 
 import android.util.Log
-import androidx.room.getQueryDispatcher
-import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.powerampache2.common.Constants.CLEAR_TABLE_AFTER_FETCH
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
-import luci.sixsixsix.powerampache2.data.local.AlbumEntity
-import luci.sixsixsix.powerampache2.data.local.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
-import luci.sixsixsix.powerampache2.data.local.toAlbum
-import luci.sixsixsix.powerampache2.data.local.toAlbumEntity
-import luci.sixsixsix.powerampache2.data.local.toArtist
-import luci.sixsixsix.powerampache2.data.local.toArtistEntity
-import luci.sixsixsix.powerampache2.data.local.toPlaylist
-import luci.sixsixsix.powerampache2.data.local.toPlaylistEntity
-import luci.sixsixsix.powerampache2.data.local.toSession
-import luci.sixsixsix.powerampache2.data.local.toSessionEntity
-import luci.sixsixsix.powerampache2.data.local.toSong
-import luci.sixsixsix.powerampache2.data.local.toSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
+import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toArtist
+import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toSession
+import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toSong
+import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
@@ -52,7 +49,8 @@ import kotlin.jvm.Throws
 /**
  * the source of truth is the database, stick to the single source of truth pattern, only return
  * data from database, when making a network call first insert data into db then read from db and
- * return/emit data
+ * return/emit data.
+ * When breaking a rule please add a comment with a TODO: BREAKING_RULE
  */
 @Singleton
 class MusicRepositoryImpl @Inject constructor(
@@ -517,6 +515,8 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     /**
+     * TODO BREAKING_RULE: inconsistent data in the response, must use network response
+     *
      * USE Network response for this, database not reliable for unknown reason
      * use the cache to just preload some data
      */
@@ -548,6 +548,39 @@ class MusicRepositoryImpl @Inject constructor(
         dao.insertSongs(songs.map { it.toSongEntity() })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = getSongsFromAlbumDb(albumId), networkData = songs))
+        emit(Resource.Loading(false))
+    }.catch { e ->
+        when(e) {
+            is IOException ->
+                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
+            is HttpException ->
+                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
+            is MusicException ->
+                emit(Resource.Error(message = e.musicError.toString(), exception = e))
+            else ->
+                emit(Resource.Error(message = "generic exception $e", exception = e))
+        }
+    }
+
+
+    /**
+     * TODO BREAKING_RULE: Implement cache for playlist songs
+     * This method only fetches from the network, breaking one of the rules defined in the
+     * documentation of this class.
+     */
+    override suspend fun getSongsFromPlaylist(
+        playlistId: String,
+        fetchRemote: Boolean
+    ): Flow<Resource<List<Song>>> = flow {
+        emit(Resource.Loading(true))
+        Log.d("aaaa", "repo getSongsFromPlaylist $playlistId")
+
+        val auth = getSession()!!//authorize2(false)
+        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId)
+        response.error?.let { throw(MusicException(it.toError())) }
+        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
+
+        emit(Resource.Success(data = songs, networkData = songs))
         emit(Resource.Loading(false))
     }.catch { e ->
         when(e) {

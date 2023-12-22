@@ -1,4 +1,4 @@
-package luci.sixsixsix.powerampache2.data.local
+package luci.sixsixsix.powerampache2.data.local.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

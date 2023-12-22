@@ -84,7 +84,7 @@ class ArtistsViewModel @Inject constructor(
                                 Log.d("aaaa", "viewmodel.getArtists size ${state.artists.size}")
                             }
                             isEndOfDataReached = ( result.networkData?.isEmpty() == true && offset > 0 )
-                            Log.d("aaaa", "viewmodel.getArtists is bottom reached? $isEndOfDataReached size of new array ${result.networkData?.size}")
+                            Log.d("aaaa", "viewmodel.getArtists is bottom reached? $isEndOfDataReached size of new network array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
                             state = state.copy(isFetchingMore = false, isLoading = false)

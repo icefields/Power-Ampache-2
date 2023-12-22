@@ -26,8 +26,18 @@ data class Song(
     val trackNumber: Int = Constants.ERROR_INT,
     val year: Int = Constants.ERROR_INT,
     val name: String = "",
-    val mode: String? = null
-)
+    val mode: String? = null,
+    val artists: List<MusicAttribute> = listOf(),
+    val flag: Int = Constants.ERROR_INT,
+    val streamFormat: String? = null,
+    val streamMime: String? = null,
+    val publisher: String? = null,
+    val replayGainTrackGain: Float? = null ,
+    val replayGainTrackPeak: Float? = null
+): Comparable<Song> {
+    override fun compareTo(other: Song): Int = mediaId.compareTo(other.mediaId)
+}
+
 
 fun MediaBrowser.MediaItem.toSong() = Song(
             mediaId = mediaId!!,

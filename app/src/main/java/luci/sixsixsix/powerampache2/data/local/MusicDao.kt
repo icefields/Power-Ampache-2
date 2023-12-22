@@ -4,6 +4,14 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
+import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.CREDENTIALS_PRIMARY_KEY
+import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.SESSION_PRIMARY_KEY
+import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
+import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
 
 @Dao
 interface MusicDao {
@@ -37,7 +45,7 @@ interface MusicDao {
     @Query("DELETE FROM albumentity")
     suspend fun clearAlbums()
 
-    @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR UPPER(:query) == basename""")
+    @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR UPPER(:query) == basename ORDER BY name ASC""")
     suspend fun searchAlbum(query: String): List<AlbumEntity>
 
 
@@ -48,7 +56,7 @@ interface MusicDao {
     @Query("DELETE FROM songentity")
     suspend fun clearSongs()
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name ORDER BY title ASC, year DESC;""")
     suspend fun searchSong(query: String): List<SongEntity>
 
 // --- ARTISTS ---
@@ -58,7 +66,7 @@ interface MusicDao {
     @Query("DELETE FROM artistentity")
     suspend fun clearArtists()
 
-    @Query("""SELECT * FROM artistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
+    @Query("""SELECT * FROM artistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name ORDER BY name ASC""")
     suspend fun searchArtist(query: String): List<ArtistEntity>
 
 // --- PLAYLISTS ---
@@ -68,6 +76,6 @@ interface MusicDao {
     @Query("DELETE FROM playlistentity")
     suspend fun clearPlaylists()
 
-    @Query("""SELECT * FROM playlistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
+    @Query("""SELECT * FROM playlistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name ORDER BY name ASC""")
     suspend fun searchPlaylists(query: String): List<PlaylistEntity>
 }

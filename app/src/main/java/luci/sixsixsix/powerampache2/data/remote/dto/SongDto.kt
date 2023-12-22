@@ -91,7 +91,7 @@ data class SongDto(
     val preciserating: Any,
 
     @SerializedName("publisher")
-    val publisher: Any,
+    val publisher: String? = null,
 
     @SerializedName("r128_album_gain")
     val r128AlbumGain: Any,
@@ -112,10 +112,10 @@ data class SongDto(
     val replaygainAlbumPeak: Any,
 
     @SerializedName("replaygain_track_gain")
-    val replaygainTrackGain: Any,
+    val replaygainTrackGain: Float? = null,
 
     @SerializedName("replaygain_track_peak")
-    val replaygainTrackPeak: Any,
+    val replaygainTrackPeak: Float? = null,
 
     @SerializedName("size")
     val size: Int?,
@@ -133,10 +133,20 @@ data class SongDto(
     val url: String?,
 
     @SerializedName("year")
-    val year: Int?
+    val year: Int?,
+
+    @SerializedName("stream_format")
+    val streamFormat: String? = null,
+
+    @SerializedName("stream_mime")
+    val streamMime: String? = null,
+
+    @SerializedName("artists")
+    val artists: List<MusicAttributeDto> = listOf()
 )
 
 data class SongsResponse(
+    @SerializedName("total_count") val totalCount: Int? = ERROR_INT,
     @SerializedName("song") val songs: List<SongDto>?,
 ) : AmpacheBaseResponse()
 
@@ -163,5 +173,12 @@ fun SongDto.toSong() = Song(
     time = time ?: ERROR_INT,
     trackNumber = track ?: ERROR_INT,
     year = year ?: ERROR_INT,
-    mode = mode
+    mode = mode,
+    artists = artists?.map { it.toMusicAttribute() } ?: listOf<MusicAttribute>(),
+    flag = flag,
+    streamFormat = streamFormat,
+    streamMime = streamMime,
+    publisher = publisher,
+    replayGainTrackGain = replaygainTrackGain,
+    replayGainTrackPeak = replaygainTrackPeak,
 )

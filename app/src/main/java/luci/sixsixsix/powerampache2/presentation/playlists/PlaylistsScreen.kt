@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.playlists
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,15 +20,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistItem
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsViewModel
+import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.playlist_detail.PlaylistDetailScreen
 import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 
 
 @Composable
 @Destination(start = false)
 fun PlaylistsScreen(
-//    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator,
     viewModel: PlaylistsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -64,8 +68,8 @@ fun PlaylistsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                // TODO navigate
-                                //navigator.navigate(CompanyInfoScreenDestination(company.symbol))
+                                Log.d("aaaa", "navigator.navigate(PlaylistDetailScreenDestination(playlist.id))")
+                                navigator.navigate(PlaylistDetailScreenDestination(playlist.id))
                             }
                             .padding(16.dp)
                     )
