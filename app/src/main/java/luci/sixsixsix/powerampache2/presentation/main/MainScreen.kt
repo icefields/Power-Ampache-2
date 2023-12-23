@@ -164,31 +164,41 @@ fun LoggedInScreen(
                 }
             },
             sheetDragHandle = {
-                // show miniplayer
                 Box(modifier = Modifier
-                    .height(
-                        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                            0.dp
-                        } else {
-                            70.0.dp
-                        }
-                    )
+                    .height(70.0.dp)
                     .fillMaxWidth()
                     .background(Color.DarkGray)
-                    .clickable {
-                        scope.launch {
+                ) {
+                    Text(text = state.currentSong?.title ?: "ERROR")
+                    // show miniplayer
+                    Box(modifier = Modifier
+                        .height(
                             if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                                scaffoldState.bottomSheetState.partialExpand()
+                                0.dp
                             } else {
-                                scaffoldState.bottomSheetState.expand()
+                                70.0.dp
+                            }
+                        )
+                        .fillMaxWidth()
+                        .background(Color.Blue)
+                        .clickable {
+                            scope.launch {
+                                if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                                    scaffoldState.bottomSheetState.partialExpand() //only peek
+                                } else {
+                                    scaffoldState.bottomSheetState.expand()
+                                }
                             }
                         }
-                    }
-                ) {}
+                    ) {}
+                }
+
             },
             sheetShape = RectangleShape,
             sheetSwipeEnabled = true,
-            sheetPeekHeight = if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded || viewModel.playlistManager.getCurrentSong() == null) {
+            sheetPeekHeight = if (
+//                scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded ||
+                viewModel.playlistManager.getCurrentSong() == null) {
                 0.dp
             } else { 70.0.dp },
 
@@ -203,11 +213,9 @@ fun LoggedInScreen(
             ) { index ->
                 when(index) {
                     0 -> SongsListScreen(navigator, modifier = Modifier.fillMaxSize())
-                    1 -> DestinationsNavHost(
-                        navGraph = Ampache2NavGraphs.albums,
-                    ) //AlbumsScreen(navigator, modifier = Modifier.fillMaxSize())
+                    1 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.albums,) //AlbumsScreen(navigator, modifier = Modifier.fillMaxSize())
                     2 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.artists)//ArtistsScreen(navigator, modifier = Modifier.fillMaxSize())
-                    3 -> PlaylistsScreen(navigator, modifier = Modifier.fillMaxSize())
+                    3 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.playlists)//PlaylistsScreen(navigator, modifier = Modifier.fillMaxSize())
                 }
             }
         }

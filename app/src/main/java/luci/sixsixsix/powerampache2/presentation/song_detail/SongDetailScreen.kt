@@ -40,9 +40,6 @@ import luci.sixsixsix.powerampache2.presentation.navigation.AlbumsNavGraph
 import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
 
 @Composable
-@Destination(start = false)
-@ArtistsNavGraph
-@AlbumsNavGraph
 fun SongDetailScreen(
     navigator: DestinationsNavigator,
     viewModel: SongDetailViewModel = hiltViewModel(),

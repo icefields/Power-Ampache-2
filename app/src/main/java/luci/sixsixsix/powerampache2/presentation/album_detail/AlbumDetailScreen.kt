@@ -17,7 +17,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumsEvent
-import luci.sixsixsix.powerampache2.presentation.destinations.SongDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.navigation.AlbumsNavGraph
 import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
 import luci.sixsixsix.powerampache2.presentation.songs.SongItem

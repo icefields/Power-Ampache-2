@@ -24,10 +24,13 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistItem
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsViewModel
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
+import luci.sixsixsix.powerampache2.presentation.navigation.PlaylistsNavGraph
 import luci.sixsixsix.powerampache2.presentation.playlist_detail.PlaylistDetailScreen
 import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 
 @Composable
+@PlaylistsNavGraph(start = true)
 @Destination(start = false)
 fun PlaylistsScreen(
     navigator: DestinationsNavigator,

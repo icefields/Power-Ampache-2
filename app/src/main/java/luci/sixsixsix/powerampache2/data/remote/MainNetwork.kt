@@ -66,12 +66,12 @@ interface MainNetwork {
     @GET("json.server.php?action=playlists")
     suspend fun getPlaylists(
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        @Query("limit") limit: Int = 100,
         @Query("filter") filter: String = "",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
-        @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
-        @Query("show_dupes") showDupes: Int = 0, // 0, 1 (if true if true ignore 'api_hide_dupe_searches' setting)
+        @Query("hide_search") hideSearch: Int = 1, // 0, 1 (if true do not include searches/smartlists in the result)
+        @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true if true ignore 'api_hide_dupe_searches' setting)
     ): PlaylistsResponse // TODO remove default values
 
     @GET("json.server.php?action=artist_albums")
