@@ -22,19 +22,8 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.presentation.album_detail.AlbumDetailEvent
-import luci.sixsixsix.powerampache2.presentation.album_detail.AlbumDetailState
-import luci.sixsixsix.powerampache2.presentation.albums.AlbumItem
-import luci.sixsixsix.powerampache2.presentation.artist_detail.ArtistDetailEvent
-import luci.sixsixsix.powerampache2.presentation.artist_detail.ArtistDetailViewModel
-import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+
 import luci.sixsixsix.powerampache2.presentation.songs.SongItem
-import javax.inject.Inject
 
 @Composable
 @Destination
@@ -56,14 +45,14 @@ fun PlaylistDetailScreen(
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.songs.size) { i ->
-                    val company = state.songs[i]
+                    val song = state.songs[i]
                     SongItem(
-                        song = company,
+                        song = song,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                // TODO navigate
-                                //navigator.navigate(CompanyInfoScreenDestination(company.symbol))
+                                viewModel.onEvent(PlaylistDetailEvent.OnSongSelected(song))
+                                //mainViewModel.state = mainViewModel.state.copy(currentSong = song)
                             }
                             .padding(16.dp)
                     )

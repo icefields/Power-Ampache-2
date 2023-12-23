@@ -17,9 +17,11 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
 
-@Composable
 @Destination
+@Composable
+@ArtistsNavGraph
 fun ArtistDetailScreen(
     navigator: DestinationsNavigator,
     artistId: String,

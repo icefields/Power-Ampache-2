@@ -4,6 +4,7 @@ import android.media.browse.MediaBrowser
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.data.remote.dto.toMusicAttribute
 
 @Parcelize
 data class Song(
@@ -39,8 +40,57 @@ data class Song(
     val replayGainTrackPeak: Float? = null
 ): Comparable<Song>, Parcelable {
     override fun compareTo(other: Song): Int = mediaId.compareTo(other.mediaId)
-}
 
+    companion object {
+        val mockSong = Song(
+            mediaId = "21863",
+            title = "Beauty In The Sorrow",
+            artist = MusicAttribute("468", "Trivium"),
+            album = MusicAttribute("1986", "The Sin And The Sentence"),
+            albumArtist = MusicAttribute.emptyInstance(),
+            songUrl = "http://192.168.1.100/ampache/public/play/index.php?ssid=bd15d8f22785f5176aa2f783f88616f3&type=song&oid=21863&uid=2&player=api&name=Trivium%20-%20Beauty%20In%20The%20Sorrow.mp3",
+            imageUrl = "http://192.168.1.100/ampache/public/image.php?object_id=1986&object_type=album&auth=bd15d8f22785f5176aa2f783f88616f3&name=art.jpg",
+
+        )
+        /*
+        * {
+
+            "playlisttrack": 1,
+            "time": 271,
+            "year": 2017,
+            "bitrate": 320000,
+            "rate": 44100,
+            "mode": "cbr",
+            "mime": "audio\/mpeg",
+            "url": "http:\/\/192.168.1.100\/ampache\/public\/play\/index.php?ssid=bd15d8f22785f5176aa2f783f88616f3&type=song&oid=21863&uid=2&player=api&name=Trivium%20-%20Beauty%20In%20The%20Sorrow.mp3",
+            "size": 10872204,
+            "mbid": null,
+            "album_mbid": null,
+            "artist_mbid": null,
+            "albumartist_mbid": null,
+            "art": "http:\/\/192.168.1.100\/ampache\/public\/image.php?object_id=1986&object_type=album&auth=bd15d8f22785f5176aa2f783f88616f3&name=art.jpg",
+            "flag": 0,
+            "preciserating": null,
+            "rating": null,
+            "averagerating": null,
+            "playcount": 0,
+            "catalog": 1,
+            "composer": null,
+            "channels": 2,
+            "comment": "http:\/\/megazonemusic.blogspot.com\/",
+            "license": null,
+            "publisher": "Roadrunner",
+            "language": null,
+            "lyrics": null,
+            "replaygain_album_gain": null,
+            "replaygain_album_peak": null,
+            "replaygain_track_gain": null,
+            "replaygain_track_peak": null,
+            "r128_album_gain": null,
+            "r128_track_gain": null
+        }*/
+    }
+}
 
 fun MediaBrowser.MediaItem.toSong() = Song(
             mediaId = mediaId!!,

@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.albums
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,9 +22,11 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.navigation.AlbumsNavGraph
 
-@Composable
 @Destination
+@AlbumsNavGraph(start = true)
+@Composable
 fun AlbumsScreen(
     navigator: DestinationsNavigator,
     viewModel: AlbumsViewModel = hiltViewModel(),
@@ -31,6 +34,8 @@ fun AlbumsScreen(
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
+
+   // Log.d("aaaa", "AlbumsScreen ${mainViewModel.state.currentSong}")
 
     Column(
         modifier = Modifier.fillMaxSize()

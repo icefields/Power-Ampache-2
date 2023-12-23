@@ -13,6 +13,8 @@ val composeVersion = rootProject.extra.get("compose_version") as String
 val retrofit2Version = rootProject.extra.get("retrofit2_version") as String
 val coroutinesVersion = rootProject.extra.get("coroutines_version") as String
 val exoplayerVersion = rootProject.extra.get("exoplayer_version") as String
+val composeNavVersion = rootProject.extra.get("composeNav_version") as String
+
 val media3Version = "1.2.0"
 
 val localProperties = Properties()
@@ -90,9 +92,10 @@ dependencies {
     // DO NOT INCLUDE implementation("androidx.compose.material:material:$composeVersion")
 
     // Compose Nav Destinations
-    implementation("io.github.raamcosta.compose-destinations:core:1.1.2-beta")
-    implementation("androidx.media3:media3-ui:1.2.0")
-    ksp("io.github.raamcosta.compose-destinations:ksp:1.1.2-beta")
+    // implementation("io.github.raamcosta.compose-destinations:core:$composeNavVersion")
+    // Version with animations
+    implementation("io.github.raamcosta.compose-destinations:animations-core:$composeNavVersion")
+    ksp("io.github.raamcosta.compose-destinations:ksp:$composeNavVersion")
 
     // coroutines in Android
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")

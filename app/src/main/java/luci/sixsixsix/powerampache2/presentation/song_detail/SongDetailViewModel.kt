@@ -11,28 +11,43 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class SongDetailViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val repository: MusicRepository,
-    private val application: Application
+    private val application: Application,
+    val playlistManager: MusicPlaylistManager
 ) : AndroidViewModel(application) {
-    var state by mutableStateOf(SongDetailState(song = savedStateHandle.get<Song>("song")!!))
+
+    var state by mutableStateOf(SongDetailState())
 
     init {
+        viewModelScope.launch {
+            playlistManager.state.collect { songState ->
+                Log.d("aaaa", "SongDetailViewModel collect ${songState.song}")
+
+                songState.song?.let {
+                    state = state.copy(song = it)
+                    launchVLC(it)
+                }
+            }
+        }
     }
 
     fun onEvent(event: SongDetailEvent) {
         when(event) {
             is SongDetailEvent.Play -> {
-                launchVLC()
+                playlistManager.getCurrentSong()?.let { song ->
+                    launchVLC(song)
+                }
             }
-
         }
     }
 
@@ -44,16 +59,17 @@ class SongDetailViewModel @Inject constructor(
      * - vlcIntent.putExtra("position", 90000L)
      * - vlcIntent.putExtra("subtitles_location", "/sdcard/Movies/Fifty-Fifty.srt")
      */
-    private fun launchVLC() {
-        Toast.makeText(application, "${state.song.mime} ${state.song.songUrl}", Toast.LENGTH_LONG).show()
-        Log.d("aaaa","${state.song.mime} ${state.song.songUrl}")
-        val uri: Uri = Uri.parse(state.song.songUrl)
+    private fun launchVLC(song: Song) {
+        Toast.makeText(application, "${song.mime} ${song.songUrl}", Toast.LENGTH_LONG).show()
+        Log.d("aaaa","${song.mime} ${song.songUrl}")
+        val uri: Uri = Uri.parse(song.songUrl)
         val vlcIntent = Intent(Intent.ACTION_VIEW)
         vlcIntent
             .setPackage("org.videolan.vlc")
-            .setDataAndTypeAndNormalize(uri, state.song.mime ?:"audio/*")
-            .putExtra("title", state.song.title)
+            .setDataAndTypeAndNormalize(uri, song.mime ?:"audio/*")
+            .putExtra("title", song?.title)
             .flags = FLAG_ACTIVITY_NEW_TASK
         application.startActivity(vlcIntent)
+
     }
 }

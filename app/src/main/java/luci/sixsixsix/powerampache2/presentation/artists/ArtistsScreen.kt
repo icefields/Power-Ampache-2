@@ -21,9 +21,11 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
 
+@Destination
+@ArtistsNavGraph(start = true)
 @Composable
-@Destination(start = false)
 fun ArtistsScreen(
     navigator: DestinationsNavigator,
     viewModel: ArtistsViewModel = hiltViewModel(),

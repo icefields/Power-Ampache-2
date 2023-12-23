@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.album_detail
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,11 +15,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.presentation.albums.AlbumsEvent
+import luci.sixsixsix.powerampache2.presentation.destinations.SongDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.navigation.AlbumsNavGraph
+import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
 import luci.sixsixsix.powerampache2.presentation.songs.SongItem
+import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 
 @Composable
 @Destination
+@AlbumsNavGraph(start = false)
 fun AlbumDetailScreen(
+    navigator: DestinationsNavigator,
     albumId: String,
     viewModel: AlbumDetailViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
@@ -35,14 +44,15 @@ fun AlbumDetailScreen(
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.songs.size) { i ->
-                    val company = state.songs[i]
+                    val song = state.songs[i]
                     SongItem(
-                        song = company,
+                        song = song,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                // TODO navigate
-                                //navigator.navigate(CompanyInfoScreenDestination(company.symbol))
+                                Log.d("aaaa", "AlbumDetailScreen click $song")
+                                viewModel.onEvent(
+                                    AlbumDetailEvent.OnSongSelected(song))
                             }
                             .padding(16.dp)
                     )

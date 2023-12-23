@@ -18,12 +18,14 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.exoplayer.MusicService
 import luci.sixsixsix.powerampache2.exoplayer.MusicServiceConnection
 import luci.sixsixsix.powerampache2.exoplayer.currentPlaybackPosition
+import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class SongsViewModel @Inject constructor(
     musicServiceConnection: MusicServiceConnection,
-    private val repository: MusicRepository
+    private val repository: MusicRepository,
+    private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
 
     var state by mutableStateOf(SongsState())
@@ -58,6 +60,8 @@ class SongsViewModel @Inject constructor(
                     getSongs(fetchRemote = true, offset = state.songs.size)
                 }
             }
+
+            is SongsEvent.OnSongSelected -> playlistManager.updateCurrentSong(event.song)
         }
     }
 
