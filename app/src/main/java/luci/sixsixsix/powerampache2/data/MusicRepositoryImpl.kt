@@ -115,15 +115,16 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun ping(): Resource<Pair<ServerInfo, Session?>> =
         try {
-            val session = getSession()
-            val resp = api.ping(session?.auth ?: "")
+            val dbSession = getSession()
+            val pingResponse = api.ping(dbSession?.auth ?: "")
 
             // Updated session only valid of previous session exists, authorize otherwise
-            session?.let {
+            dbSession?.let {
                 try {
                     // add credentials to the new session
-                    resp.toSession(dateMapper)
+                    pingResponse.toSession(dateMapper)
                 } catch (e: Exception) {
+                    dao.clearSession()
                     null
                 }?.let { se ->
                     se.auth?.let {
@@ -134,7 +135,7 @@ class MusicRepositoryImpl @Inject constructor(
             }
 
             // server info always available
-            serverInfo = resp.toServerInfo()
+            serverInfo = pingResponse.toServerInfo()
             Resource.Success(Pair(serverInfo!!, getSession()))
         } catch (e: IOException) {
             Resource.Error(message = "cannot load data", exception = e)
