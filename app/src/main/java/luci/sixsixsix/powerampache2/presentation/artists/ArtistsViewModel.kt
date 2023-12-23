@@ -10,21 +10,30 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistEvent
 import javax.inject.Inject
 
 @HiltViewModel
 class ArtistsViewModel @Inject constructor(
-    private val repository: MusicRepository
+    private val repository: MusicRepository,
+    private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
 
     var state by mutableStateOf(ArtistsState())
-    private var searchJob: Job? = null
     private var isEndOfDataReached: Boolean = false
 
     init {
         getArtists()
+        viewModelScope.launch {
+            playlistManager.currentSearchQuery.collect { query ->
+                L("ArtistsViewModel collect ${query}")
+                onEvent(ArtistEvent.OnSearchQueryChange(query))
+            }
+        }
     }
 
     fun onEvent(event: ArtistEvent) {
@@ -34,37 +43,15 @@ class ArtistsViewModel @Inject constructor(
             }
             is ArtistEvent.OnSearchQueryChange -> {
                 state = state.copy(searchQuery = event.query)
-                searchJob?.cancel()
-                searchJob = viewModelScope.launch {
-                    delay(1500L)
-                    getArtists()
-                }
+                getArtists()
             }
             is ArtistEvent.OnBottomListReached -> {
                 if (!state.isFetchingMore && !isEndOfDataReached) {
-                    Log.d("aaaa", "ArtistEvent.OnBottomListReached")
+                    L( "ArtistEvent.OnBottomListReached")
                     state = state.copy(isFetchingMore = true)
                     getArtists(fetchRemote = true, offset = state.artists.size)
                 }
             }
-        }
-    }
-
-    fun getAlbumsFromArtist(artistId: String) {
-        viewModelScope.launch {
-            repository
-                .getAlbumsFromArtist(artistId)
-                .collect { result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            result.data?.let { albums ->
-                                Log.d("aaaa", "viewmodel.getAlbumsFromArtist size ${albums.size}")
-                            }
-                        }
-                        is Resource.Error -> { }
-                        is Resource.Loading -> { }
-                    }
-                }
         }
     }
 
@@ -81,14 +68,16 @@ class ArtistsViewModel @Inject constructor(
                         is Resource.Success -> {
                             result.data?.let { artists ->
                                 state = state.copy(artists = artists)
-                                Log.d("aaaa", "viewmodel.getArtists size ${state.artists.size}")
+                                L( "viewmodel.getArtists size ${state.artists.size}")
                             }
                             isEndOfDataReached = ( result.networkData?.isEmpty() == true && offset > 0 )
-                            Log.d("aaaa", "viewmodel.getArtists is bottom reached? $isEndOfDataReached size of new network array ${result.networkData?.size}")
+                            L("viewmodel.getArtists is bottom reached? $isEndOfDataReached size of new network array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
+                            // TODO set end of data list otherwise keeps fetching? do for other screens too
+                            isEndOfDataReached = true
                             state = state.copy(isFetchingMore = false, isLoading = false)
-                            Log.d("aaaa", "ERROR AlbumsViewModel ${result.exception}")
+                            L( "ERROR AlbumsViewModel ${result.exception}")
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)

@@ -1,7 +1,7 @@
 package luci.sixsixsix.powerampache2.data.remote
 
-import android.util.Log
 import kotlinx.coroutines.runBlocking
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
@@ -33,7 +33,7 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
                         .build()
                 }
             }
-            Log.d("aaaa", "INTERCEPTOR request.url ${request.url}")
+            L("INTERCEPTOR request.url ${request.url}")
             chain.proceed(request)
         }
     }

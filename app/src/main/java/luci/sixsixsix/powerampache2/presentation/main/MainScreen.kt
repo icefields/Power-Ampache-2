@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -30,7 +31,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -53,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -61,11 +67,16 @@ import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.powerampache2.common.Logger
+import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.MainActivity
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumsScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.LoggedInScreenDestination
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsScreen
 import luci.sixsixsix.powerampache2.presentation.song_detail.SongDetailScreen
+import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 
 private val tabItems = listOf<TabItem>(
@@ -79,21 +90,23 @@ private val tabItems = listOf<TabItem>(
 @Composable
 fun MainScreen(
     activity: ComponentActivity,
-    viewModel: AuthViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel,
     modifier: Modifier = Modifier) {
 
-    if(viewModel.state.isLoading) {
+    if(authViewModel.state.isLoading) {
         Column(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
     } else {
-        if (viewModel.state.session != null) {
+        if (authViewModel.state.session != null) {
             DestinationsNavHost(navGraph = Ampache2NavGraphs.root)
         } else {
             LoginScreen()
         }
     }
 }
+
+val miniPlayerHeight = 70.0.dp
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
@@ -106,6 +119,7 @@ fun LoggedInScreen(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
     val state = viewModel.state
+//    (LocalContext.current as MainActivity).mainViewModel = viewModel
 
     LaunchedEffect(selectedTabIndex) {
         pagerState.animateScrollToPage(selectedTabIndex)
@@ -124,23 +138,85 @@ fun LoggedInScreen(
         }
         val scaffoldState = rememberBottomSheetScaffoldState()
 
-//        scope.launch {
-//            sheetState.partialExpand()
-//        }
-
-        state.currentSong?.let{ song ->
-            Log.d("aaaa", "MAIN ${song}")
-//            scope.launch {
-//                scaffoldState.bottomSheetState.hide()
-//            }
+        // TODO DEBUG snackbar errors
+        if (state.errorMessage != "") {
+            LaunchedEffect(scaffoldState.snackbarHostState, state.errorMessage) {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = state.errorMessage,
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Indefinite
+                ).apply {
+                    when (this) {
+                        SnackbarResult.Dismissed -> viewModel.onEvent(MainEvent.OnDismissErrorMessage)
+                        SnackbarResult.ActionPerformed -> viewModel.onEvent(MainEvent.OnDismissErrorMessage)
+                    }
+                }
+            }
         }
-        
+
+        L("MAIN ScREEN Current song ${state.song}")
+
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
             sheetContent = {
                 SongDetailScreen(navigator = navigator)
             },
             topBar = {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = state.searchQuery,
+                        onValueChange = {
+                            viewModel.onEvent(MainEvent.OnSearchQueryChange(it))
+                        },
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        placeholder = {
+                            Text(text = "Search ...")
+                        },
+                        maxLines = 1,
+                        singleLine = true
+                    )
+                }
+            },
+            sheetDragHandle = {
+                Box(modifier = Modifier
+                    .height(miniPlayerHeight)
+                    .fillMaxWidth()
+                    .background(Color.DarkGray)
+                ) {
+                    Text(text = state.song?.title ?: "ERROR")
+                    // show mini-player
+                    Box(modifier = Modifier
+                        .height(
+                            // if it's expanded do not show the player
+                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                                0.dp
+                            } else {
+                                miniPlayerHeight
+                            }
+                        )
+                        .fillMaxWidth()
+                        .background(Color.Blue)
+                        .clickable {
+                            scope.launch {
+                                if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                                    scaffoldState.bottomSheetState.partialExpand() //only peek
+                                } else {
+                                    scaffoldState.bottomSheetState.expand()
+                                }
+                            }
+                        }
+                    ) {}
+                }
+
+            },
+            sheetShape = RectangleShape,
+            sheetSwipeEnabled = true,
+            sheetPeekHeight = getPeakHeight(viewModel.state.song),
+
+        ) {
+            Column {
                 TabRow(selectedTabIndex = selectedTabIndex) {
                     tabItems.forEachIndexed { index, item ->
                         Tab(
@@ -162,65 +238,30 @@ fun LoggedInScreen(
                         )
                     }
                 }
-            },
-            sheetDragHandle = {
-                Box(modifier = Modifier
-                    .height(70.0.dp)
-                    .fillMaxWidth()
-                    .background(Color.DarkGray)
-                ) {
-                    Text(text = state.currentSong?.title ?: "ERROR")
-                    // show miniplayer
-                    Box(modifier = Modifier
-                        .height(
-                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                                0.dp
-                            } else {
-                                70.0.dp
-                            }
-                        )
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Blue)
-                        .clickable {
-                            scope.launch {
-                                if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                                    scaffoldState.bottomSheetState.partialExpand() //only peek
-                                } else {
-                                    scaffoldState.bottomSheetState.expand()
-                                }
-                            }
-                        }
-                    ) {}
-                }
-
-            },
-            sheetShape = RectangleShape,
-            sheetSwipeEnabled = true,
-            sheetPeekHeight = if (
-//                scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded ||
-                viewModel.playlistManager.getCurrentSong() == null) {
-                0.dp
-            } else { 70.0.dp },
-
-        ) {
-
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                        .weight(1f),
                     //.background(Color.LightGray),
-            ) { index ->
-                when(index) {
-                    0 -> SongsListScreen(navigator, modifier = Modifier.fillMaxSize())
-                    1 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.albums,) //AlbumsScreen(navigator, modifier = Modifier.fillMaxSize())
-                    2 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.artists)//ArtistsScreen(navigator, modifier = Modifier.fillMaxSize())
-                    3 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.playlists)//PlaylistsScreen(navigator, modifier = Modifier.fillMaxSize())
+                ) { index ->
+                    when(index) {
+                        0 -> SongsListScreen(navigator, modifier = Modifier.fillMaxSize())
+                        1 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.albums)    //AlbumsScreen(navigator, modifier = Modifier.fillMaxSize())
+                        2 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.artists)   //ArtistsScreen(navigator, modifier = Modifier.fillMaxSize())
+                        3 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.playlists) //PlaylistsScreen(navigator, modifier = Modifier.fillMaxSize())
+                    }
                 }
+
+                // add spacing at the bottom when the mini player is visible
+                Box(modifier = Modifier.height(getPeakHeight(viewModel.state.song)))
             }
+
         }
     }
 }
+
+fun getPeakHeight(song: Song?): Dp = if (song == null) { 0.dp } else { miniPlayerHeight }
 
 data class TabItem(
     val title: String,

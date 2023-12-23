@@ -34,7 +34,7 @@ interface MainNetwork {
     @GET("json.server.php?action=goodbye")
     suspend fun goodbye(@Query("auth") authKey: String = ""): GoodbyeDto
 
-    @GET("json.server.php?action=songs")
+    @GET("json.server.php?action=search_songs")
     suspend fun getSongs(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
@@ -94,6 +94,66 @@ interface MainNetwork {
         @Query("limit") limit: Int = 0,
         @Query("random") random: Int = 0, // integer 0, 1 (if true get random songs using limit)
         @Query("filter") albumId: String = "",
+        @Query("offset") offset: Int = 0, ): SongsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getSongsFlagged( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "flagged", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): SongsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getSongsNewest( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 11,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "newest", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): SongsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getSongsHighest( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 11,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "highest", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): SongsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getSongsFrequent( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 11,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "frequent", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): SongsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getSongsRecent( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 11,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "recent", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): SongsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getSongsRandom( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "random", // newest, highest, frequent, recent, forgotten, flagged, random
         @Query("offset") offset: Int = 0, ): SongsResponse
 
     companion object {

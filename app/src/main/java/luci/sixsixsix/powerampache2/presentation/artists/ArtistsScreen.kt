@@ -37,20 +37,20 @@ fun ArtistsScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        OutlinedTextField(
-            value = state.searchQuery,
-            onValueChange = {
-                viewModel.onEvent(ArtistEvent.OnSearchQueryChange(it))
-            },
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            placeholder = {
-                Text(text = "Search ...")
-            },
-            maxLines = 1,
-            singleLine = true
-        )
+//        OutlinedTextField(
+//            value = state.searchQuery,
+//            onValueChange = {
+//               // viewModel.onEvent(ArtistEvent.OnSearchQueryChange(it))
+//            },
+//            modifier = Modifier
+//                .padding(16.dp)
+//                .fillMaxWidth(),
+//            placeholder = {
+//                Text(text = "Search ...")
+//            },
+//            maxLines = 1,
+//            singleLine = true
+//        )
 
         SwipeRefresh(
             state = swipeRefreshState,

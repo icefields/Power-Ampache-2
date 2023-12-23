@@ -35,26 +35,9 @@ fun AlbumsScreen(
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
 
-   // Log.d("aaaa", "AlbumsScreen ${mainViewModel.state.currentSong}")
-
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        OutlinedTextField(
-            value = state.searchQuery,
-            onValueChange = {
-                viewModel.onEvent(AlbumsEvent.OnSearchQueryChange(it))
-            },
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            placeholder = {
-                Text(text = "Search ...")
-            },
-            maxLines = 1,
-            singleLine = true
-        )
-
         SwipeRefresh(
             state = swipeRefreshState,
             onRefresh = { viewModel.onEvent(AlbumsEvent.Refresh) }

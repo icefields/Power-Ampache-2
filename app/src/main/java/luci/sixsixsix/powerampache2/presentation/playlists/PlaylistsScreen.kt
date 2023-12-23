@@ -21,6 +21,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistItem
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsViewModel
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
@@ -43,20 +44,20 @@ fun PlaylistsScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        OutlinedTextField(
-            value = state.searchQuery,
-            onValueChange = {
-                viewModel.onEvent(PlaylistEvent.OnSearchQueryChange(it))
-            },
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            placeholder = {
-                Text(text = "Search ...")
-            },
-            maxLines = 1,
-            singleLine = true
-        )
+//        OutlinedTextField(
+//            value = state.searchQuery,
+//            onValueChange = {
+//                // viewModel.onEvent(PlaylistEvent.OnSearchQueryChange(it))
+//            },
+//            modifier = Modifier
+//                .padding(16.dp)
+//                .fillMaxWidth(),
+//            placeholder = {
+//                Text(text = "Search ...")
+//            },
+//            maxLines = 1,
+//            singleLine = true
+//        )
 
         SwipeRefresh(
             state = swipeRefreshState,
@@ -70,7 +71,7 @@ fun PlaylistsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                Log.d("aaaa", "navigator.navigate(PlaylistDetailScreenDestination(playlist.id))")
+                                L("navigator.navigate(PlaylistDetailScreenDestination(playlist.id))")
                                 navigator.navigate(PlaylistDetailScreenDestination(playlist.id))
                             }
                             .padding(16.dp)

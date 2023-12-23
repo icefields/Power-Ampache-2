@@ -10,21 +10,29 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class AlbumsViewModel @Inject constructor(
-    private val repository: MusicRepository
+    private val repository: MusicRepository,
+    private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
 
     var state by mutableStateOf(AlbumsState())
-    private var searchJob: Job? = null
     private var isEndOfDataList: Boolean = false
 
     init {
         getAlbums()
+        viewModelScope.launch {
+            playlistManager.currentSearchQuery.collect { query ->
+                L("AlbumsViewModel collect ${query}")
+                onEvent(AlbumsEvent.OnSearchQueryChange(query))
+            }
+        }
     }
 
     fun onEvent(event: AlbumsEvent) {
@@ -34,15 +42,11 @@ class AlbumsViewModel @Inject constructor(
             }
             is AlbumsEvent.OnSearchQueryChange -> {
                 state = state.copy(searchQuery = event.query)
-                searchJob?.cancel()
-                searchJob = viewModelScope.launch {
-                    delay(1500L)
-                    getAlbums()
-                }
+                getAlbums()
             }
             is AlbumsEvent.OnBottomListReached -> {
                 if (!state.isFetchingMore && !isEndOfDataList) {
-                    Log.d("aaaa", "AlbumsEvent.OnBottomListReached")
+                    L( "AlbumsEvent.OnBottomListReached")
                     state = state.copy(isFetchingMore = true)
                     getAlbums(fetchRemote = true, offset = state.albums.size)
                 }
@@ -63,14 +67,16 @@ class AlbumsViewModel @Inject constructor(
                         is Resource.Success -> {
                             result.data?.let { albums ->
                                 state = state.copy(albums = albums)
-                                Log.d("aaaa", "viewmodel.getAlbums size ${state.albums.size}")
+                                L( "viewmodel.getAlbums size ${state.albums.size}")
                             }
                             isEndOfDataList = ( result.networkData?.isEmpty() == true && offset > 0 )
-                            Log.d("aaaa", "viewmodel.getAlbums is bottom reached? $isEndOfDataList offset $offset, size of new array ${result.networkData?.size}")
+                            L( "viewmodel.getAlbums is bottom reached? $isEndOfDataList offset $offset, size of new array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
+                            // TODO set end of data list otherwise keeps fetching? do for other screens too
+                            isEndOfDataList = true
                             state = state.copy(isFetchingMore = false, isLoading = false)
-                            Log.d("aaaa", "ERROR AlbumsViewModel ${result.exception}")
+                            L( "ERROR AlbumsViewModel ${result.exception}")
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)

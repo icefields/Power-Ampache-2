@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
@@ -39,7 +40,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 getSongsFromPlaylist(playlistId = event.playlistId ,fetchRemote = true)
             }
 
-            is PlaylistDetailEvent.OnSongSelected -> playlistManager.updateCurrentSong(event.song)
+            is PlaylistDetailEvent.OnSongSelected -> { playlistManager.updateCurrentSong(event.song) }
         }
     }
 
@@ -53,7 +54,7 @@ class PlaylistDetailViewModel @Inject constructor(
                             // USE NETWORK DATA FOR THIS CALL
                             result.networkData?.let { songs ->
                                 state = state.copy(songs = songs)
-                                Log.d("aaaa", "viewmodel.getSongsFromPlaylist size ${result.data?.size} network: ${result.networkData?.size}")
+                                L("viewmodel.getSongsFromPlaylist size ${result.data?.size} network: ${result.networkData?.size}")
                             }
                         }
                         is Resource.Error -> state = state.copy(isLoading = false)

@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.domain.MusicRepository
@@ -18,6 +19,10 @@ class AuthViewModel @Inject constructor(private val repository: MusicRepository)
     var state by mutableStateOf(AuthState())
 
     init {
+        verifyAndAutologin()
+    }
+
+    fun verifyAndAutologin() {
         viewModelScope.launch {
             // try to login with saved auth token
             state = state.copy(isLoading = true)
@@ -48,7 +53,7 @@ class AuthViewModel @Inject constructor(private val repository: MusicRepository)
                 when(result) {
                     is Resource.Success -> {
                         result.data?.let { auth ->
-                            Log.d("aaaa", "AuthViewModel ${auth}")
+                            L( "AuthViewModel ${auth}")
                             state = state.copy(session = auth)
                         }
                     }
@@ -80,12 +85,12 @@ class AuthViewModel @Inject constructor(private val repository: MusicRepository)
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { auth ->
-                                Log.d("aaaa", "AuthViewModel ${auth}")
+                                L( "AuthViewModel ${auth}")
                                 state = state.copy(session = auth)
                             }
                         }
                         is Resource.Error -> {
-                            Log.d("aaaa", "ERROR AuthViewModel login ${result.exception?.localizedMessage}")
+                            L( "ERROR AuthViewModel login ${result.exception?.localizedMessage}")
                             state = state.copy(error = result.exception?.toString() ?: "authorization error", isLoading = false)
                         }
                         is Resource.Loading -> state = state.copy(isLoading = result.isLoading)

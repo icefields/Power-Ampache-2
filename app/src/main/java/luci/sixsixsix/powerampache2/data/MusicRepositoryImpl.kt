@@ -2,9 +2,12 @@ package luci.sixsixsix.powerampache2.data
 
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.powerampache2.common.Constants.CLEAR_TABLE_AFTER_FETCH
+import luci.sixsixsix.powerampache2.common.Constants.HOME_MAX_SONGS
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
@@ -39,8 +42,10 @@ import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import retrofit2.HttpException
 import java.io.IOException
+import java.lang.StringBuilder
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -56,13 +61,40 @@ import kotlin.jvm.Throws
 class MusicRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val dateMapper: DateMapper,
-    private val db: MusicDatabase
+    private val db: MusicDatabase,
+    private val playlistManager: MusicPlaylistManager
 ): MusicRepository {
     private var serverInfo: ServerInfo? = null
     private val dao = db.dao
 
+    private suspend fun <T> handleError(label:String = "", e: Throwable, fc: FlowCollector<Resource<T>>) {
+        //val sb = StringBuilder(label)
+        StringBuilder(label)
+            .append(if (label.isBlank())"" else " - ")
+            .append( when(e) {
+                    is IOException -> "cannot load data IOException $e"
+                    //fc.emit(Resource.Error<T>(message = "cannot load data IOException $e", exception = e))
+                    is HttpException -> "cannot load data HttpException $e"
+                    //fc.emit(Resource.Error<T>(message = "cannot load data HttpException $e", exception = e))
+                    is MusicException -> e.musicError.toString()
+                    //fc.emit(Resource.Error<T>(message = e.musicError.toString(), exception = e))
+                    else -> "generic exception $e"
+                    //fc.emit(Resource.Error<T>(message = "generic exception $e", exception = e))
+                }
+            ).toString().apply {
+                fc.emit(
+                    Resource.Error<T>(
+                        message = this,
+                        exception = e
+                    )
+                )
+                // TODO DEBUG this is just for debugging
+                playlistManager.updateErrorMessage(this)
+            }
+    }
+
     private suspend fun getSession(): Session? {
-        Log.d("aaaa", "GET_SESSION ${dao.getSession()?.toSession()}")
+        L("GET_SESSION ${dao.getSession()?.toSession()}")
         return dao.getSession()?.toSession()
     }
 
@@ -75,7 +107,7 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     private suspend fun setCredentials(se: CredentialsEntity) {
-        Log.d("aaaa", "setCredentials $se")
+        L("setCredentials $se")
         dao.updateCredentials(se)
     }
 
@@ -91,7 +123,7 @@ class MusicRepositoryImpl @Inject constructor(
         dao.clearSongs()
         dao.clearArtists()
         dao.clearPlaylists()
-        Log.d("aaaa", "LOGOUT $resp")
+        L( "LOGOUT $resp")
 
         if (resp?.toBoolean() == true) {
             emit(Resource.Success(true))
@@ -100,18 +132,7 @@ class MusicRepositoryImpl @Inject constructor(
         }
 
         emit(Resource.Loading(false))
-    }.catch { e ->
-        when(e) {
-            is IOException ->
-                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
-            is HttpException ->
-                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
-            is MusicException ->
-                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-            else ->
-                emit(Resource.Error(message = "generic exception $e", exception = e))
-        }
-    }
+    }.catch { e -> handleError("logout()", e, this) }
 
     override suspend fun ping(): Resource<Pair<ServerInfo, Session?>> =
         try {
@@ -168,22 +189,11 @@ class MusicRepositoryImpl @Inject constructor(
         //   Save current credentials, so they can be picked up by the interceptor,
         // and for future autologin, this has to be first line of code before any network call
         setCredentials(CredentialsEntity(username = username, password = sha256password, serverUrl = serverUrl))
-        Log.d("aaaa","authorize CREDENTIALS ${getCredentials()}")
+        L("authorize CREDENTIALS ${getCredentials()}")
         val auth = authorize2(username, sha256password, serverUrl, force)
         emit(Resource.Success(auth))
         emit(Resource.Loading(false))
-    }.catch { e ->
-        when(e) {
-            is IOException ->
-                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
-            is HttpException ->
-                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
-            is MusicException ->
-                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-            else ->
-                emit(Resource.Error(message = "generic exception $e", exception = e))
-        }
-    }
+    }.catch { e -> handleError("authorize()", e, this) }
 
     @Throws(Exception::class)
     private suspend fun authorize2(
@@ -197,55 +207,135 @@ class MusicRepositoryImpl @Inject constructor(
             val timestamp = Instant.now().epochSecond
             val authHash = "$timestamp$sha256password".sha256()
 
-            Log.d("aaaa", "hashed password:${serverUrl} $sha256password \ntimestamp: ${timestamp}\ntimestamp+hashedPass: $timestamp${sha256password} \nauthHash: $authHash")
+            L("hashed password:${serverUrl} $sha256password \ntimestamp: ${timestamp}\ntimestamp+hashedPass: $timestamp${sha256password} \nauthHash: $authHash")
 
             val auth = api.authorize(authHash = authHash, user = username, timestamp = timestamp)
             auth.error?.let {
                 throw (MusicException(it.toError()))
             }
             auth.auth?.let {
-                Log.d("aaaa", "NEW auth $auth")
+                L("NEW auth $auth")
                 setSession(auth.toSession(dateMapper))
                 session = getSession()
-                Log.d("aaaa", "auth token was null or expired ${session?.sessionExpire}, \nisTokenExpired? ${session?.isTokenExpired()}, \nnew auth ${session?.auth}")
+                L("auth token was null or expired ${session?.sessionExpire}, \nisTokenExpired? ${session?.isTokenExpired()}, \nnew auth ${session?.auth}")
             }
         }
         return getSession()!! // will throw exception if session null
     }
 
+    @Throws(Exception::class)
+    private suspend fun getHomeScreenSongs(auth: Session): List<Song> {
+        val flagged = api.getSongsFlagged(authKey = auth.auth).songs!!.map { it.toSong() }
+        val recent = api.getSongsRecent(authKey = auth.auth).songs!!.map { it.toSong() }
+        val highest = api.getSongsHighest(authKey = auth.auth).songs!!.map { it.toSong() }
+        val frequent = api.getSongsFrequent(authKey = auth.auth).songs!!.map { it.toSong() }
+        val newest = api.getSongsNewest(authKey = auth.auth).songs!!.map { it.toSong() }
+        val random = api.getSongsRandom(authKey = auth.auth).songs!!.map { it.toSong() }
 
+        return LinkedHashSet<Song>().apply {
+            addAll(recent)
+            addAll(newest)
+            addAll(highest)
+            addAll(flagged)
+            addAll(frequent)
+            addAll(random)
+        }.toList()
+    }
+
+
+    /**
+     *
+     * TODO BREAKING_RULE single source of truth
+     *
+     */
     override suspend fun getSongs(
         fetchRemote: Boolean,
         query: String,
         offset: Int
-    ): Flow<Resource<List<Song>>> = flow {
+    ): Flow<Resource<List<Song>>> = flow<Resource<List<Song>>> {
         emit(Resource.Loading(true))
-        Log.d("aaaa", "getSongs - repo getSongs")
+        L( "getSongs - repo getSongs")
 
+        // TODO home page is not loading cached data at the beginning
+        //      to avoid invalid or outdated data
         // db
         // the offset is meant to be use to fetch more data from the web,
         // return cache only if the offset is zero
-        if (offset == 0) {
-            val localSongs = dao.searchSong(query)
-            Log.d("aaaa", "getSongs - songs from cache ${localSongs.size}")
-            val isDbEmpty = localSongs.isEmpty() && query.isEmpty()
-            if (!isDbEmpty) {
-                emit(Resource.Success(data = localSongs.map { it.toSong() }))
-            }
-            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
-            if (shouldLoadCacheOnly) {
-                emit(Resource.Loading(false))
-                return@flow
-            }
-        }
+//        if (offset == 0) {
+//            val localSongs = dao.searchSong(query)
+//            L("getSongs - songs from cache ${localSongs.size}")
+//            val isDbEmpty = localSongs.isEmpty() && query.isEmpty()
+//            if (!isDbEmpty) {
+//                emit(Resource.Success(data = localSongs.map { it.toSong() }))
+//            }
+//            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+//            if (shouldLoadCacheOnly) {
+//                emit(Resource.Loading(false))
+//                return@flow
+//            }
+//        }
 
         // network
         val auth = getSession()!!//authorize2(false)
-        val response = api.getSongs(auth.auth, filter = query, offset = offset)
-        response.error?.let { throw(MusicException(it.toError())) }
-        val songs = response.songs!!.map { it.toSong() } // will throw exception if songs null
-        //emit(Resource.Success(songs)) // will throw exception if songs null
-        Log.d("aaa", "songs from web ${songs.size}")
+        val hashSet = LinkedHashSet<Song>()
+        val songs = if (query.isNullOrBlank()) {
+            api.getSongsNewest(authKey = auth.auth).songs?.let { dto ->
+                val newest = dto.map { it.toSong() }
+                hashSet.addAll(newest)
+                if (newest.isNotEmpty()) {
+                    emit(Resource.Success(data = hashSet.toList()))
+                }
+            }
+
+            api.getSongsRecent(authKey = auth.auth).songs?.let { dto ->
+                val recent = dto.map { it.toSong() }
+                hashSet.addAll(recent)
+                if (recent.isNotEmpty()) {
+                    emit(Resource.Success(data = hashSet.toList()))
+                }
+            }
+
+            api.getSongsHighest(authKey = auth.auth).songs?.let { dto ->
+                val highest = dto.map { it.toSong() }
+                hashSet.addAll(highest)
+                if (highest.isNotEmpty()) {
+                    emit(Resource.Success(data = hashSet.toList()))
+                }
+            }
+
+            api.getSongsFrequent(authKey = auth.auth).songs?.let { dto ->
+                val frequent = dto.map { it.toSong() }
+                hashSet.addAll(frequent)
+                if (frequent.isNotEmpty()) {
+                    emit(Resource.Success(data = hashSet.toList()))
+                }
+            }
+
+            api.getSongsFlagged(authKey = auth.auth).songs?.let { flaggedDto ->
+                val flagged = flaggedDto.map { it.toSong() }
+                hashSet.addAll(flagged)
+                if (flagged.isNotEmpty()) {
+                    emit(Resource.Success(data = hashSet.toList()))
+                }
+            }
+
+            val randomL = api.getSongsRandom(
+                authKey = auth.auth,
+                limit = HOME_MAX_SONGS - hashSet.size
+            ).songs!!.map { it.toSong() }
+            hashSet.addAll(randomL)
+            if (randomL.isNotEmpty()) {
+                emit(Resource.Success(data = hashSet.toList()))
+            }
+            hashSet.toList()
+        } else {
+            val response = api.getSongs(auth.auth, filter = query, offset = offset)
+            response.error?.let { throw(MusicException(it.toError())) }
+            /*val songs = */response.songs!!.map { it.toSong() } // will throw exception if songs null
+            //emit(Resource.Success(songs)) // will throw exception if songs null
+        }
+
+        L("getsongs - songs from web ${songs.size}")
 
         // db
         if (query.isNullOrBlank() && offset == 0 && CLEAR_TABLE_AFTER_FETCH) {
@@ -255,21 +345,26 @@ class MusicRepositoryImpl @Inject constructor(
         dao.insertSongs(songs.map { it.toSongEntity() })
         // stick to the single source of truth pattern despite performance deterioration
         val songsDb = dao.searchSong(query).map { it.toSong() }
-        Log.d("aaaa", "getSongs songs from db after web ${songsDb.size}")
-        emit(Resource.Success(data = songsDb, networkData = songs))
+        L( "getSongs songs from db after web ${songsDb.size}")
+        val hashset = LinkedHashSet<Song>()
+        hashset.addAll(songs)
+        hashset.addAll(songsDb) // add all the cached history at the end of the list
+        emit(Resource.Success(data = hashset.toList(), networkData = songs))
         emit(Resource.Loading(false))
-    }.catch { e ->
-        when(e) {
-            is IOException ->
-                emit(Resource.Error(message = "getSongs cannot load data IOException $e", exception = e))
-            is HttpException ->
-                emit(Resource.Error(message = "getSongs cannot load data HttpException $e", exception = e))
-            is MusicException ->
-                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-            else ->
-                emit(Resource.Error(message = "getSongs generic exception $e", exception = e))
-        }
-    }
+    }.catch { e -> handleError("getSongs()", e, this) }
+
+//        .catch { e ->
+//        when(e) {
+//            is IOException ->
+//                emit(Resource.Error(message = "getSongs cannot load data IOException $e", exception = e))
+//            is HttpException ->
+//                emit(Resource.Error(message = "getSongs cannot load data HttpException $e", exception = e))
+//            is MusicException ->
+//                emit(Resource.Error(message = e.musicError.toString(), exception = e))
+//            else ->
+//                emit(Resource.Error(message = "getSongs generic exception $e", exception = e))
+//        }
+ //   }
 
     override suspend fun getAlbums(
         fetchRemote: Boolean,
@@ -277,7 +372,7 @@ class MusicRepositoryImpl @Inject constructor(
         offset: Int
     ): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
-        Log.d("aaaa", "getAlbums - repo getSongs offset $offset")
+        L("getAlbums - repo getSongs offset $offset")
 
         if (offset == 0) {
             val localAlbums = dao.searchAlbum(query)
@@ -296,7 +391,7 @@ class MusicRepositoryImpl @Inject constructor(
         val response = api.getAlbums(auth.auth, filter = query, offset = offset)
         response.error?.let { throw(MusicException(it.toError())) }
         val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
-        Log.d("aaa", "albums from web ${albums.size}")
+        L("albums from web ${albums.size}")
 
         if (query.isNullOrBlank() && offset == 0 && CLEAR_TABLE_AFTER_FETCH) {
             // if it's just a search do not clear cache
@@ -306,18 +401,7 @@ class MusicRepositoryImpl @Inject constructor(
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchAlbum(query).map { it.toAlbum() }, networkData = albums))
         emit(Resource.Loading(false))
-    }.catch { e ->
-        when(e) {
-            is IOException ->
-                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
-            is HttpException ->
-                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
-            is MusicException ->
-                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-            else ->
-                emit(Resource.Error(message = "generic exception $e", exception = e))
-        }
-    }
+    }.catch { e -> handleError("getAlbums()", e, this) }
 
     override suspend fun getArtists(
         fetchRemote: Boolean,
@@ -354,18 +438,7 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Success(data = dao.searchArtist(query).map { it.toArtist() }, networkData = artists))
 
         emit(Resource.Loading(false))
-    }.catch { e ->
-        when(e) {
-            is IOException ->
-                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
-            is HttpException ->
-                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
-            is MusicException ->
-                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-            else ->
-                emit(Resource.Error(message = "generic exception $e", exception = e))
-        }
-    }
+    }.catch { e -> handleError("getArtists()", e, this) }
 
     override suspend fun getPlaylists(
         fetchRemote: Boolean,
@@ -400,18 +473,7 @@ class MusicRepositoryImpl @Inject constructor(
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchPlaylists(query).map { it.toPlaylist() }, networkData = playlists))
         emit(Resource.Loading(false))
-    }.catch { e ->
-        when(e) {
-            is IOException ->
-                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
-            is HttpException ->
-                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
-            is MusicException ->
-                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-            else ->
-                emit(Resource.Error(message = "generic exception $e", exception = e))
-        }
-    }
+    }.catch { e -> handleError("getPlaylists()", e, this) }
 
     private suspend fun getAlbumsFromArtistsDb(artistId: String): List<Album> {
         val localAlbums = dao.searchAlbum("").map { it.toAlbum() }
@@ -443,7 +505,7 @@ class MusicRepositoryImpl @Inject constructor(
         fetchRemote: Boolean
     ): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
-        Log.d("aaaa", "repo getAlbumsFromArtist $artistId")
+        L("repo getAlbumsFromArtist $artistId")
 
         val localAlbums = getAlbumsFromArtistsDb(artistId)
         val isDbEmpty = localAlbums.isEmpty()
@@ -475,24 +537,13 @@ class MusicRepositoryImpl @Inject constructor(
                 )
             } // will throw exception if songs null
 
-        Log.d("aaa", "albums from web ${albums.size}")
+        L("albums from web ${albums.size}")
 
         dao.insertAlbums(albums.map { it.toAlbumEntity() })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = getAlbumsFromArtistsDb(artistId), networkData = albums))
         emit(Resource.Loading(false))
-    }.catch { e ->
-        when(e) {
-            is IOException ->
-                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
-            is HttpException ->
-                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
-            is MusicException ->
-                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-            else ->
-                emit(Resource.Error(message = "generic exception $e", exception = e))
-        }
-    }
+    }.catch { e -> handleError("getAlbumsFromArtist()", e, this) }
 
     private suspend fun getSongsFromAlbumDb(albumId: String): List<Song> {
         val localSongs = dao.searchSong("").map { it.toSong() }
@@ -526,7 +577,7 @@ class MusicRepositoryImpl @Inject constructor(
         fetchRemote: Boolean
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-        Log.d("aaaa", "repo getSongsFromAlbum $albumId")
+        L("repo getSongsFromAlbum $albumId")
 
         val localSongs = getSongsFromAlbumDb(albumId)
         val isDbEmpty = localSongs.isEmpty()
@@ -544,24 +595,13 @@ class MusicRepositoryImpl @Inject constructor(
         response.error?.let { throw(MusicException(it.toError())) }
         val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
 
-        Log.d("aaa", "songs from web ${songs.size}")
+        L("songs from web ${songs.size}")
 
         dao.insertSongs(songs.map { it.toSongEntity() })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = getSongsFromAlbumDb(albumId), networkData = songs))
         emit(Resource.Loading(false))
-    }.catch { e ->
-        when(e) {
-            is IOException ->
-                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
-            is HttpException ->
-                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
-            is MusicException ->
-                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-            else ->
-                emit(Resource.Error(message = "generic exception $e", exception = e))
-        }
-    }
+    }.catch { e -> handleError("getSongsFromAlbum()", e, this) }
 
 
     /**
@@ -574,7 +614,7 @@ class MusicRepositoryImpl @Inject constructor(
         fetchRemote: Boolean
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-        Log.d("aaaa", "repo getSongsFromPlaylist $playlistId")
+        L("repo getSongsFromPlaylist $playlistId")
 
         val auth = getSession()!!//authorize2(false)
         val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId)
@@ -583,16 +623,5 @@ class MusicRepositoryImpl @Inject constructor(
 
         emit(Resource.Success(data = songs, networkData = songs))
         emit(Resource.Loading(false))
-    }.catch { e ->
-        when(e) {
-            is IOException ->
-                emit(Resource.Error(message = "cannot load data IOException $e", exception = e))
-            is HttpException ->
-                emit(Resource.Error(message = "cannot load data HttpException $e", exception = e))
-            is MusicException ->
-                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-            else ->
-                emit(Resource.Error(message = "generic exception $e", exception = e))
-        }
-    }
+    }.catch { e -> handleError("getSongsFromPlaylist()", e, this) }
 }

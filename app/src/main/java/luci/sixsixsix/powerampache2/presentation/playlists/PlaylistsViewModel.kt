@@ -10,22 +10,31 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.presentation.albums.AlbumsEvent
+import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
 
 @HiltViewModel
 class PlaylistsViewModel @Inject constructor(
-    private val repository: MusicRepository
+    private val repository: MusicRepository,
+    private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
 
     var state by mutableStateOf(PlaylistsState())
-    private var searchJob: Job? = null
     private var isEndOfDataReached: Boolean = false
 
     init {
         getPlaylists()
+        viewModelScope.launch {
+            playlistManager.currentSearchQuery.collect { query ->
+                L( "PlaylistsViewModel collect ${query}")
+                onEvent(PlaylistEvent.OnSearchQueryChange(query))
+            }
+        }
     }
 
     fun onEvent(event: PlaylistEvent) {
@@ -35,15 +44,11 @@ class PlaylistsViewModel @Inject constructor(
             }
             is PlaylistEvent.OnSearchQueryChange -> {
                 state = state.copy(searchQuery = event.query)
-                searchJob?.cancel()
-                searchJob = viewModelScope.launch {
-                    delay(1500L)
-                    getPlaylists()
-                }
+                getPlaylists()
             }
             is PlaylistEvent.OnBottomListReached -> {
                 if (!state.isFetchingMore && !isEndOfDataReached) {
-                    Log.d("aaaa", "PlaylistEvent.OnBottomListReached")
+                    L("PlaylistEvent.OnBottomListReached")
                     state = state.copy(isFetchingMore = true)
                     getPlaylists(fetchRemote = true, offset = state.playlists.size)
                 }
@@ -64,14 +69,14 @@ class PlaylistsViewModel @Inject constructor(
                         is Resource.Success -> {
                             result.data?.let { playlists ->
                                 state = state.copy(playlists = playlists)
-                                Log.d("aaaa", "viewmodel.getPlaylists size ${state.playlists.size}")
+                                L("viewmodel.getPlaylists size ${state.playlists.size}")
                             }
                             isEndOfDataReached = ( result.networkData?.isEmpty() == true && offset > 0 ) ?: run { false }
-                            Log.d("aaaa", "viewmodel.getPlaylists is bottom reached? $isEndOfDataReached  offset $offset size of new array ${result.networkData?.size}")
+                            L( "viewmodel.getPlaylists is bottom reached? $isEndOfDataReached  offset $offset size of new array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
                             state = state.copy(isFetchingMore = false, isLoading = false)
-                            Log.d("aaaa", "ERROR PlaylistsViewModel ${result.exception}")
+                            L( "ERROR PlaylistsViewModel ${result.exception}")
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)

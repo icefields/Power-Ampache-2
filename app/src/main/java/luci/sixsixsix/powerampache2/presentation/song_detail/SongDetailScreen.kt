@@ -33,16 +33,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.main.MainEvent
+import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.navigation.AlbumsNavGraph
 import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
 
 @Composable
 fun SongDetailScreen(
     navigator: DestinationsNavigator,
-    viewModel: SongDetailViewModel = hiltViewModel(),
+    viewModel: MainViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val state = viewModel.state
@@ -80,7 +83,9 @@ fun SongDetailScreen(
             Box(modifier = Modifier.weight(2.0f))
             IconButton(
                 onClick = {
-                    viewModel.onEvent(SongDetailEvent.Play)
+                    state.song?.let {
+                        viewModel.onEvent(MainEvent.Play(it))
+                    }
                 }
             ) {
                 Icon(

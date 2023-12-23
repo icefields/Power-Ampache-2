@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import javax.inject.Inject
@@ -48,7 +49,7 @@ class ArtistDetailViewModel @Inject constructor(
                         is Resource.Success -> {
                             result.networkData?.let { albums ->
                                 state = state.copy(albums = albums)
-                                Log.d("aaaa", "viewmodel.getAlbumsFromArtist size ${result.data?.size} network: ${result.networkData?.size}")
+                                L("viewmodel.getAlbumsFromArtist size ${result.data?.size} network: ${result.networkData?.size}")
                             }
                         }
                         is Resource.Error -> state = state.copy(isLoading = false)

@@ -13,11 +13,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Constants.UPDATE_PLAYER_POSITION_INTERVAL
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.exoplayer.MusicService
 import luci.sixsixsix.powerampache2.exoplayer.MusicServiceConnection
 import luci.sixsixsix.powerampache2.exoplayer.currentPlaybackPosition
+import luci.sixsixsix.powerampache2.presentation.albums.AlbumsEvent
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
@@ -29,12 +32,16 @@ class SongsViewModel @Inject constructor(
 ) : ViewModel() {
 
     var state by mutableStateOf(SongsState())
-    private var searchJob: Job? = null
     private var isEndOfDataReached: Boolean = false
 
     init {
         getSongs()
-
+        viewModelScope.launch {
+            playlistManager.currentSearchQuery.collect { query ->
+                L("AlbumsViewModel collect ${query}")
+                onEvent(SongsEvent.OnSearchQueryChange(query))
+            }
+        }
         // TODO original code
         // updateCurrentPlayerPosition()
     }
@@ -45,23 +52,19 @@ class SongsViewModel @Inject constructor(
                 getSongs(fetchRemote = true)
             }
             is SongsEvent.OnSearchQueryChange -> {
-                Log.d("aaaa", "SongsEvent.OnSearchQueryChange")
+                L("SongsEvent.OnSearchQueryChange")
                 state = state.copy(searchQuery = event.query)
-                searchJob?.cancel()
-                searchJob = viewModelScope.launch {
-                    delay(1500L)
-                    getSongs()
-                }
+                getSongs()
             }
             is SongsEvent.OnBottomListReached -> {
                 if (!state.isFetchingMore && !isEndOfDataReached) {
-                    Log.d("aaaa", "SongsEvent.OnBottomListReached")
+                    L("SongsEvent.OnBottomListReached")
                     state = state.copy(isFetchingMore = true)
                     getSongs(fetchRemote = true, offset = state.songs.size)
                 }
             }
 
-            is SongsEvent.OnSongSelected -> playlistManager.updateCurrentSong(event.song)
+            is SongsEvent.OnSongSelected -> { playlistManager.updateCurrentSong(event.song) }
         }
     }
 
@@ -70,7 +73,7 @@ class SongsViewModel @Inject constructor(
         fetchRemote: Boolean = true,
         offset: Int = 0
     ) {
-        Log.d("aaaa", "viewmodel.getSongs")
+        L("viewmodel.getSongs")
         viewModelScope.launch {
             repository
                 .getSongs(fetchRemote, query, offset)
@@ -78,16 +81,22 @@ class SongsViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                state = state.copy(songs = songs)
-                                Log.d("aaaa", "viewmodel.getSongs SONGS size${state.songs.size}")
+                                val hashSet = LinkedHashSet<Song>(state.songs).apply {
+                                    addAll(songs)
+                                }
+                                state = state.copy(songs = hashSet.toList())
+                                L("viewmodel.getSongs SONGS size${state.songs.size}")
                             }
-                            isEndOfDataReached = ( result.networkData?.isEmpty() == true && offset > 0 ) ?: run { false }
-                            Log.d("aaaa", "viewmodel.getSongs is bottom reached? $isEndOfDataReached ")
+
+                            // this is the home page, there is extra data, unless it's a search
+                            isEndOfDataReached = state.searchQuery.isNullOrBlank() ||
+                                    ( result.networkData?.isEmpty() == true && offset > 0 )
+                            L( "viewmodel.getSongs is bottom reached? $isEndOfDataReached ")
                         }
 
                         is Resource.Error -> {
                             state = state.copy(isFetchingMore = false, isLoading = false)
-                            Log.d("aaaa", "ERROR SongsViewModel.getSongs ${result.exception}")
+                            L("ERROR SongsViewModel.getSongs ${result.exception}")
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)

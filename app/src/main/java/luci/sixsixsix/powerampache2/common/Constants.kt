@@ -17,9 +17,12 @@ object Constants {
 
     const val CLEAR_TABLE_AFTER_FETCH = false
 
+    const val HOME_MAX_SONGS = 66
+
     // DEBUG
-    const val NETWORK_REQUEST_LIMIT_DEBUG = 20 // TODO remove or set to zero for production
+    const val NETWORK_REQUEST_LIMIT_DEBUG = 20
     const val DEBUG_USER = "test-user"
+    const val TAG_LOG = "lucie"
     const val DEBUG_PASSWORD = "testtest"
     const val DEBUG_URL = "http://192.168.1.100/ampache/public/server/"
 }

@@ -21,12 +21,15 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.presentation.main.MainEvent
+import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
 @Composable
 @Destination(start = false)
 fun SongsListScreen(
     navigator: DestinationsNavigator,
     viewModel: SongsViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
@@ -35,21 +38,6 @@ fun SongsListScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        OutlinedTextField(
-            value = state.searchQuery,
-            onValueChange = {
-                viewModel.onEvent(SongsEvent.OnSearchQueryChange(it))
-            },
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            placeholder = {
-                Text(text = "Search ...")
-            },
-            maxLines = 1,
-            singleLine = true
-        )
-
         SwipeRefresh(
             state = swipeRefreshState,
             onRefresh = { viewModel.onEvent(SongsEvent.Refresh) }
@@ -63,6 +51,7 @@ fun SongsListScreen(
                             .fillMaxWidth()
                             .clickable {
                                 viewModel.onEvent(SongsEvent.OnSongSelected(song))
+                                mainViewModel.onEvent(MainEvent.Play(song))
                             }
                             .padding(16.dp)
                     )
@@ -75,7 +64,13 @@ fun SongsListScreen(
                             CircularProgressIndicator(
                                 modifier = Modifier
                                     .align(Alignment.CenterHorizontally)
-                                    .alpha( if (state.isFetchingMore) { 1.0f } else { 0.0f } )
+                                    .alpha(
+                                        if (state.isFetchingMore) {
+                                            1.0f
+                                        } else {
+                                            0.0f
+                                        }
+                                    )
                             )
                         }
                     }

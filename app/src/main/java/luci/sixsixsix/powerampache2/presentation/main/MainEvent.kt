@@ -1,8 +1,9 @@
 package luci.sixsixsix.powerampache2.presentation.main
 
-import luci.sixsixsix.powerampache2.presentation.albums.AlbumsEvent
+import luci.sixsixsix.powerampache2.domain.models.Song
 
 sealed class MainEvent {
     data class OnSearchQueryChange(val query: String): MainEvent()
-
+    data object OnDismissErrorMessage: MainEvent()
+    data class Play(val song: Song): MainEvent()
 }

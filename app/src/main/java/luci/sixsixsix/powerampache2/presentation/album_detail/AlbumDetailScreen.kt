@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.presentation.album_detail
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,13 +11,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.powerampache2.presentation.MainActivity
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumsEvent
+import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
+import luci.sixsixsix.powerampache2.presentation.main.MainEvent
+import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.navigation.AlbumsNavGraph
 import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
 import luci.sixsixsix.powerampache2.presentation.songs.SongItem
@@ -33,6 +40,9 @@ fun AlbumDetailScreen(
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
+//    val mainViewModel: MainViewModel = (LocalContext.current as MainActivity).mainViewModel
+
+//    Toast.makeText(LocalContext.current, "AlbumDetailScreen ${mainViewModel.state.song?.title}", Toast.LENGTH_LONG).show()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -49,9 +59,9 @@ fun AlbumDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                Log.d("aaaa", "AlbumDetailScreen click $song")
-                                viewModel.onEvent(
-                                    AlbumDetailEvent.OnSongSelected(song))
+                                L("AlbumDetailScreen click $song")
+                                viewModel.onEvent(AlbumDetailEvent.OnSongSelected(song))
+                                // mainViewModel.onEvent(MainEvent.Play(song))
                             }
                             .padding(16.dp)
                     )
