@@ -96,6 +96,8 @@ interface MainNetwork {
         @Query("filter") albumId: String = "",
         @Query("offset") offset: Int = 0, ): SongsResponse
 
+// ------------------------- STATS CALLS -----------------------------------
+
     @GET("json.server.php?action=stats")
     suspend fun getSongsFlagged( // flagged = favourites
         @Query("auth") authKey: String,
@@ -156,6 +158,65 @@ interface MainNetwork {
         @Query("filter") _filter: String = "random", // newest, highest, frequent, recent, forgotten, flagged, random
         @Query("offset") offset: Int = 0, ): SongsResponse
 
+    @GET("json.server.php?action=stats")
+    suspend fun getAlbumsFlagged( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "flagged", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): AlbumsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getAlbumsNewest( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 11,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "newest", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): AlbumsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getAlbumsHighest( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 11,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "highest", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): AlbumsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getAlbumsFrequent( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 11,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "frequent", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): AlbumsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getAlbumsRecent( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 11,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "recent", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): AlbumsResponse
+
+    @GET("json.server.php?action=stats")
+    suspend fun getAlbumsRandom( // flagged = favourites
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        //@Query("user_id") userId: Int,
+        //@Query("username") username: String,
+        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
+        @Query("filter") _filter: String = "random", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("offset") offset: Int = 0, ): AlbumsResponse
     companion object {
         const val API_KEY = "0db9dcbb4a945e443547e3c082110abf"
         const val BASE_URL = "http://localhost/"

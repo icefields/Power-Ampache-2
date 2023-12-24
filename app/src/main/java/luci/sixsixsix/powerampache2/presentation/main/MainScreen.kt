@@ -18,11 +18,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.FeaturedPlayList
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Piano
 
 import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.FeaturedPlayList
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Piano
 import androidx.compose.material3.BottomSheetScaffold
@@ -73,6 +75,7 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.MainActivity
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumsScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.LoggedInScreenDestination
+import luci.sixsixsix.powerampache2.presentation.home.HomeScreen
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsScreen
 import luci.sixsixsix.powerampache2.presentation.song_detail.SongDetailScreen
@@ -80,6 +83,7 @@ import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 
 private val tabItems = listOf<TabItem>(
+    TabItem("Home", unselectedIcon = Icons.Outlined.Home, selectedIcon = Icons.Filled.Home),
     TabItem("Songs", unselectedIcon = Icons.Outlined.LibraryMusic, selectedIcon = Icons.Filled.LibraryMusic),
     TabItem("Albums", unselectedIcon = Icons.Outlined.Album, selectedIcon = Icons.Filled.Album),
     TabItem("Artists", unselectedIcon = Icons.Outlined.Piano, selectedIcon = Icons.Filled.Piano),
@@ -246,10 +250,11 @@ fun LoggedInScreen(
                     //.background(Color.LightGray),
                 ) { index ->
                     when(index) {
-                        0 -> SongsListScreen(navigator, modifier = Modifier.fillMaxSize())
-                        1 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.albums)    //AlbumsScreen(navigator, modifier = Modifier.fillMaxSize())
-                        2 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.artists)   //ArtistsScreen(navigator, modifier = Modifier.fillMaxSize())
-                        3 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.playlists) //PlaylistsScreen(navigator, modifier = Modifier.fillMaxSize())
+                        0 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.home)
+                        1 -> SongsListScreen(navigator, modifier = Modifier.fillMaxSize())
+                        2 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.albums)    //AlbumsScreen(navigator, modifier = Modifier.fillMaxSize())
+                        3 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.artists)   //ArtistsScreen(navigator, modifier = Modifier.fillMaxSize())
+                        4 -> DestinationsNavHost(navGraph = Ampache2NavGraphs.playlists) //PlaylistsScreen(navigator, modifier = Modifier.fillMaxSize())
                     }
                 }
 

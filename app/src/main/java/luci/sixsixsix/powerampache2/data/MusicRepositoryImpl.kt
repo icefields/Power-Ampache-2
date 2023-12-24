@@ -624,4 +624,70 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Success(data = songs, networkData = songs))
         emit(Resource.Loading(false))
     }.catch { e -> handleError("getSongsFromPlaylist()", e, this) }
+
+    override suspend fun getRecentAlbums(): Flow<Resource<List<Album>>> = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.getAlbumsRecent(auth.auth).albums?.map { it.toAlbum() }?.let {
+            emit(Resource.Success(data = it, networkData = it))
+        }?:run {
+            throw Exception("error connecting or getting data")
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> handleError("getRecentAlbums()", e, this) }
+
+    override suspend fun getNewestAlbums(): Flow<Resource<List<Album>>> = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.getAlbumsNewest(auth.auth).albums?.map { it.toAlbum() }?.let {
+            emit(Resource.Success(data = it, networkData = it))
+        }?:run {
+            throw Exception("error connecting or getting data")
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> handleError("getNewestAlbums()", e, this) }
+
+    override suspend fun getHighestAlbums(): Flow<Resource<List<Album>>> = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.getAlbumsHighest(auth.auth).albums?.map { it.toAlbum() }?.let {
+            emit(Resource.Success(data = it, networkData = it))
+        }?:run {
+            throw Exception("error connecting or getting data")
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> handleError("getHighestAlbums()", e, this) }
+
+    override suspend fun getFrequentAlbums(): Flow<Resource<List<Album>>> = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.getAlbumsFrequent(auth.auth).albums?.map { it.toAlbum() }?.let {
+            emit(Resource.Success(data = it, networkData = it))
+        }?:run {
+            throw Exception("error connecting or getting data")
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> handleError("getFrequentAlbums()", e, this) }
+
+    override suspend fun getFlaggedAlbums(): Flow<Resource<List<Album>>> = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.getAlbumsFlagged(auth.auth).albums?.map { it.toAlbum() }?.let {
+            emit(Resource.Success(data = it, networkData = it))
+        }?:run {
+            throw Exception("error connecting or getting data")
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> handleError("getFlaggedAlbums()", e, this) }
+
+    override suspend fun getRandomAlbums(): Flow<Resource<List<Album>>> = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.getAlbumsRandom(auth.auth).albums?.map { it.toAlbum() }?.let {
+            emit(Resource.Success(data = it, networkData = it))
+        }?:run {
+            throw Exception("error connecting or getting data")
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> handleError("getRandomAlbums()", e, this) }
 }

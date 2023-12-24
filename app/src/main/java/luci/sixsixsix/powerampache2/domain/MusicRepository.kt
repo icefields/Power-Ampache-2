@@ -21,4 +21,11 @@ interface MusicRepository {
     suspend fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Album>>>
     suspend fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
     suspend fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
+
+    suspend fun getRecentAlbums(): Flow<Resource<List<Album>>>
+    suspend fun getNewestAlbums(): Flow<Resource<List<Album>>>
+    suspend fun getHighestAlbums(): Flow<Resource<List<Album>>>
+    suspend fun getFrequentAlbums(): Flow<Resource<List<Album>>>
+    suspend fun getFlaggedAlbums(): Flow<Resource<List<Album>>>
+    suspend fun getRandomAlbums(): Flow<Resource<List<Album>>>
 }

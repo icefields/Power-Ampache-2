@@ -5,6 +5,7 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumsScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistsScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.HomeScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.LoggedInScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.LoginScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
@@ -32,13 +33,22 @@ object Ampache2NavGraphs {
             AlbumDetailScreenDestination,)
     )
 
-
     val playlists: NavGraph = NavGraph(
         route = "playlists",
         startRoute = PlaylistsScreenDestination,
         destinations = listOf(
             ArtistDetailScreenDestination,
             PlaylistsScreenDestination,
+            PlaylistDetailScreenDestination,
+            AlbumDetailScreenDestination,)
+    )
+
+    val home: NavGraph = NavGraph(
+        route = "home",
+        startRoute = HomeScreenDestination,
+        destinations = listOf(
+            ArtistDetailScreenDestination,
+            HomeScreenDestination,
             PlaylistDetailScreenDestination,
             AlbumDetailScreenDestination,)
     )

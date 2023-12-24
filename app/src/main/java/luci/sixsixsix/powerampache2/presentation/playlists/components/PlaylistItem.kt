@@ -1,4 +1,4 @@
-package luci.sixsixsix.powerampache2.presentation.playlists
+package luci.sixsixsix.powerampache2.presentation.playlists.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
