@@ -40,7 +40,9 @@ class AlbumDetailViewModel @Inject constructor(
             is AlbumDetailEvent.Fetch -> {
                 getSongsFromAlbum(albumId = event.albumId ,fetchRemote = true)
             }
-            is AlbumDetailEvent.OnSongSelected -> { playlistManager.updateCurrentSong(event.song) }
+            is AlbumDetailEvent.OnSongSelected -> {
+                playlistManager.updateCurrentSong(event.song)
+            }
         }
     }
 
@@ -51,8 +53,8 @@ class AlbumDetailViewModel @Inject constructor(
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            // USE NETWORK DATA FOR THIS CALL
-                            result.networkData?.let { songs ->
+                            // USE NETWORK DATA FOR THIS CALL (why???? )
+                            result.data?.let { songs ->
                                 state = state.copy(songs = songs)
                                 L("viewmodel.getSongsFromAlbum size ${result.data?.size} network: ${result.networkData?.size}")
                             }

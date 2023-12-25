@@ -15,7 +15,10 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(private val repository: MusicRepository) : ViewModel() {
+class AuthViewModel @Inject constructor(
+    private val repository: MusicRepository,
+    private val playlistManager: MusicPlaylistManager
+) : ViewModel() {
     var state by mutableStateOf(AuthState())
 
     init {
@@ -35,6 +38,7 @@ class AuthViewModel @Inject constructor(private val repository: MusicRepository)
                     ping.data?.second?.let {
                         state = state.copy(session = it, isLoading = false)
                     } ?: run {
+                        playlistManager.reset()
                         autologin()
                     }
                 }

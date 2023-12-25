@@ -1,4 +1,4 @@
-package luci.sixsixsix.powerampache2.presentation.main
+package luci.sixsixsix.powerampache2.presentation.main.subscreens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
-import luci.sixsixsix.powerampache2.data.remote.MainNetwork.Companion.BASE_URL
+import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
+import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 
 @Composable
 @Destination(start = false)

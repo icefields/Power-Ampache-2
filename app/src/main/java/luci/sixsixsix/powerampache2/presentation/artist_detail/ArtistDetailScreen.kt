@@ -17,11 +17,9 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
 
 @Destination
 @Composable
-@ArtistsNavGraph
 fun ArtistDetailScreen(
     navigator: DestinationsNavigator,
     artistId: String,
@@ -46,7 +44,7 @@ fun ArtistDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                navigator.navigate(AlbumDetailScreenDestination(album.id))
+                                navigator.navigate(AlbumDetailScreenDestination(album.id, album))
                             }
                             .padding(16.dp)
                     )

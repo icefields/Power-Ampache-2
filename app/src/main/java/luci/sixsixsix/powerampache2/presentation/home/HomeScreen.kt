@@ -31,13 +31,8 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.navigation.HomeNavGraph
-import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistEvent
-import luci.sixsixsix.powerampache2.presentation.playlists.components.PlaylistItem
-import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsViewModel
 
 @Composable
-@HomeNavGraph(start = true)
 @Destination(start = false)
 fun HomeScreen(
     navigator: DestinationsNavigator,
@@ -47,7 +42,7 @@ fun HomeScreen(
     val state = viewModel.state
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
     ) {
         items(7) { i ->
             when(i) {
@@ -138,7 +133,7 @@ fun AlbumItemSquare(navigator: DestinationsNavigator, album: Album) {
                 .width(120.dp)
                 .clickable {
                     L("AlbumItemSquare navigator.navigate(AlbumDetailScreenDestination(album.id))")
-                    navigator.navigate(AlbumDetailScreenDestination(album.id))
+                    navigator.navigate(AlbumDetailScreenDestination(album.id, album))
                 },
             model = album.artUrl,
             placeholder = painterResource(id = R.drawable.ic_home),

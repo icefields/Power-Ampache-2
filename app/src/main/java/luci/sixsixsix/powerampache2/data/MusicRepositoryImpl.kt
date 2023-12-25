@@ -489,6 +489,7 @@ class MusicRepositoryImpl @Inject constructor(
             }
         }
 
+        // Sort by year
         return ArrayList(list).sortedWith(comparator = object : Comparator<Album> {
             override fun compare(o1: Album?, o2: Album?): Int {
                 return o1?.let {
@@ -577,30 +578,38 @@ class MusicRepositoryImpl @Inject constructor(
         fetchRemote: Boolean
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-        L("repo getSongsFromAlbum $albumId")
+        L("getSongsFromAlbum before db ${System.currentTimeMillis()}")
 
-        val localSongs = getSongsFromAlbumDb(albumId)
-        val isDbEmpty = localSongs.isEmpty()
-        if (!isDbEmpty) {
-            emit(Resource.Success(data = localSongs))
-        }
-        val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
-        if(shouldLoadCacheOnly) {
-            emit(Resource.Loading(false))
-            return@flow
-        }
+        // TODO OPTIMIZE. this operation currently takes about 7s on pixel 6a
+//        val localSongs = getSongsFromAlbumDb(albumId)
+//        val isDbEmpty = localSongs.isEmpty()
+//        if (!isDbEmpty) {
+//            L("repo getSongsFromAlbum local songs ${localSongs.size}")
+//            emit(Resource.Success(data = localSongs))
+//        }
+//        val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+//        if(shouldLoadCacheOnly) {
+//            emit(Resource.Loading(false))
+//            return@flow
+//        }
+//        L("getSongsFromAlbum after db ${System.currentTimeMillis()}")
+
 
         val auth = getSession()!!//authorize2(false)
         val response = api.getSongsFromAlbum(auth.auth, albumId = albumId)
         response.error?.let { throw(MusicException(it.toError())) }
         val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
 
-        L("songs from web ${songs.size}")
+        L("getSongsFromAlbum songs from web ${songs.size} ${System.currentTimeMillis()}")
 
         dao.insertSongs(songs.map { it.toSongEntity() })
+        // TODO BREAKING_RULE single source of truth. Performance issues, investigate
         // stick to the single source of truth pattern despite performance deterioration
-        emit(Resource.Success(data = getSongsFromAlbumDb(albumId), networkData = songs))
+        // emit(Resource.Success(data = getSongsFromAlbumDb(albumId), networkData = songs))
+        emit(Resource.Success(data = songs, networkData = songs))
         emit(Resource.Loading(false))
+        L("getSongsFromAlbum loading done ${System.currentTimeMillis()}")
+
     }.catch { e -> handleError("getSongsFromAlbum()", e, this) }
 
 

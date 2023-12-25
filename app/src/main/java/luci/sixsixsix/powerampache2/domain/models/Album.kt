@@ -1,6 +1,10 @@
 package luci.sixsixsix.powerampache2.domain.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
+
+@Parcelize
 data class Album(
     val id: String = "",
     val name: String = "",
@@ -9,7 +13,7 @@ data class Album(
     val artists: List<MusicAttribute> = listOf(),
     val time: Int = 0,
     val year: Int = 0,
-    val tracks: List<Any> = listOf(),
+    val tracks: List<Song> = listOf(),
     val songCount: Int = 0,
     val diskCount: Int = 0,
     val genre: List<MusicAttribute> = listOf(),
@@ -17,6 +21,6 @@ data class Album(
     val flag: Int = 0,
     val rating: Int = 0,
     val averageRating: Int = 0,
-): Comparable<Album> {
+): Comparable<Album>, Parcelable {
     override fun compareTo(other: Album): Int = id.compareTo(other.id)
 }

@@ -36,7 +36,7 @@ fun SongsListScreen(
     val state = viewModel.state
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
     ) {
         SwipeRefresh(
             state = swipeRefreshState,

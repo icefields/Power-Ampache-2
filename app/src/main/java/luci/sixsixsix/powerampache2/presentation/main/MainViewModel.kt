@@ -89,7 +89,7 @@ class MainViewModel @Inject constructor(
      * - vlcIntent.putExtra("subtitles_location", "/sdcard/Movies/Fifty-Fifty.srt")
      */
     private fun launchVLC(song: Song) {
-        Toast.makeText(application, "${song.mime} ${song.songUrl}", Toast.LENGTH_LONG).show()
+        Toast.makeText(application, "launchVLC ${song.mime}\n${song.songUrl}", Toast.LENGTH_LONG).show()
         L("launchVLC ${song.mime} ${song.songUrl}")
         val uri: Uri = Uri.parse(song.songUrl)
         val vlcIntent = Intent(Intent.ACTION_VIEW)

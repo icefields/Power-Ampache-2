@@ -21,10 +21,8 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.navigation.ArtistsNavGraph
 
 @Destination
-@ArtistsNavGraph(start = true)
 @Composable
 fun ArtistsScreen(
     navigator: DestinationsNavigator,
@@ -35,23 +33,8 @@ fun ArtistsScreen(
     val state = viewModel.state
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
     ) {
-//        OutlinedTextField(
-//            value = state.searchQuery,
-//            onValueChange = {
-//               // viewModel.onEvent(ArtistEvent.OnSearchQueryChange(it))
-//            },
-//            modifier = Modifier
-//                .padding(16.dp)
-//                .fillMaxWidth(),
-//            placeholder = {
-//                Text(text = "Search ...")
-//            },
-//            maxLines = 1,
-//            singleLine = true
-//        )
-
         SwipeRefresh(
             state = swipeRefreshState,
             onRefresh = { viewModel.onEvent(ArtistEvent.Refresh) }

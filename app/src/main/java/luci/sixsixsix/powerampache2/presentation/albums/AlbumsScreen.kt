@@ -25,7 +25,7 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.navigation.AlbumsNavGraph
 
 @Destination
-@AlbumsNavGraph(start = true)
+//@AlbumsNavGraph(start = true)
 @Composable
 fun AlbumsScreen(
     navigator: DestinationsNavigator,
@@ -36,7 +36,7 @@ fun AlbumsScreen(
     val state = viewModel.state
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
     ) {
         SwipeRefresh(
             state = swipeRefreshState,
@@ -50,7 +50,7 @@ fun AlbumsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                navigator.navigate(AlbumDetailScreenDestination(album.id))
+                                navigator.navigate(AlbumDetailScreenDestination(album.id, album))
                             }
                             .padding(16.dp)
                     )

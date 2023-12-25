@@ -29,7 +29,7 @@ class MusicPlaylistManager @Inject constructor() {
         _currentSongState.value = CurrentSongState(song = newSong)
     }
 
-    fun updateErrorMessage(errorMessage: String) {
+    fun updateErrorMessage(errorMessage: String?) {
         L("MusicPlaylistManager updateErrorMessage $errorMessage")
         _errorMessageState.value = ErrorMessageState(errorMessage = errorMessage)
     }
@@ -42,4 +42,11 @@ class MusicPlaylistManager @Inject constructor() {
     fun getCurrentSong(): Song? = currentSongState.value.song
 
     fun getErrorMessage(): String? = errorMessageState.value.errorMessage
+
+    fun reset() {
+        updateCurrentSong(newSong= null)
+        updateSearchQuery(searchQuery= "")
+        // TODO keep error message for now
+        // updateErrorMessage(errorMessage= null)
+    }
 }

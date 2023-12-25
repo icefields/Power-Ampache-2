@@ -35,23 +35,8 @@ fun PlaylistsScreen(
     val state = viewModel.state
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
     ) {
-//        OutlinedTextField(
-//            value = state.searchQuery,
-//            onValueChange = {
-//                // viewModel.onEvent(PlaylistEvent.OnSearchQueryChange(it))
-//            },
-//            modifier = Modifier
-//                .padding(16.dp)
-//                .fillMaxWidth(),
-//            placeholder = {
-//                Text(text = "Search ...")
-//            },
-//            maxLines = 1,
-//            singleLine = true
-//        )
-
         SwipeRefresh(
             state = swipeRefreshState,
             onRefresh = { viewModel.onEvent(PlaylistEvent.Refresh) }
