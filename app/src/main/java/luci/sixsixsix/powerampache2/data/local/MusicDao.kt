@@ -59,6 +59,9 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by flag, playCount""")
     suspend fun searchSong(query: String): List<SongEntity>
 
+    @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by trackNumber, playCount""")
+    suspend fun getSongFromAlbum(albumId: String): List<SongEntity>
+
 // --- ARTISTS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArtists(companyListingEntities: List<ArtistEntity>)

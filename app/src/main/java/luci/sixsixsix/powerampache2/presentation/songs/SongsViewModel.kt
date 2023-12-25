@@ -81,11 +81,25 @@ class SongsViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                val hashSet = LinkedHashSet<Song>(state.songs).apply {
-                                    addAll(songs)
+                                if (query.isNullOrEmpty()) {
+                                    val hashSet = LinkedHashSet<Song>(state.songs).apply {
+                                        addAll(songs)
+                                    }
+                                    state = state.copy(songs = hashSet.toList())
+                                } else {
+                                    val currentSongs = state.songs
+                                    // if there's a search query put the results on top
+                                    val hashSet = LinkedHashSet<Song>(currentSongs).apply {
+                                        // remove results from the current array
+                                        removeAll(songs.toSet())
+                                    }
+                                    state = state.copy(songs = ArrayList(songs).apply {
+                                        // add the old songs at the end of the list
+                                        addAll(currentSongs)
+                                    })
                                 }
-                                state = state.copy(songs = hashSet.toList())
-                                L("viewmodel.getSongs SONGS size${state.songs.size}")
+
+                                L("viewmodel.getSongs SONGS size at the end ${state.songs.size}")
                             }
 
                             // this is the home page, there is extra data, unless it's a search

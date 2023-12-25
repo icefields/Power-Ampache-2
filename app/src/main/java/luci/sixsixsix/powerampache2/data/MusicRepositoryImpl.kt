@@ -546,26 +546,26 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> handleError("getAlbumsFromArtist()", e, this) }
 
-    private suspend fun getSongsFromAlbumDb(albumId: String): List<Song> {
-        val localSongs = dao.searchSong("").map { it.toSong() }
-        val list = LinkedHashSet<Song>()
-        for (song in localSongs) {
-            if(song.album.id == albumId) {
-                list.add(song)
-            }
-        }
-
-        return ArrayList(list).sortedWith(comparator = object : Comparator<Song> {
-            override fun compare(o1: Song?, o2: Song?): Int {
-                return o2?.let {
-                    o1?.trackNumber?.compareTo(it.trackNumber)
-                } ?: run {
-                    //tracks with no track number go last
-                    Int.MAX_VALUE
-                }
-            }
-        })
-    }
+//    private suspend fun getSongsFromAlbumDb(albumId: String): List<Song> {
+//        val localSongs = dao.searchSong("").map { it.toSong() }
+//        val list = LinkedHashSet<Song>()
+//        for (song in localSongs) {
+//            if(song.album.id == albumId) {
+//                list.add(song)
+//            }
+//        }
+//
+//        return ArrayList(list).sortedWith(comparator = object : Comparator<Song> {
+//            override fun compare(o1: Song?, o2: Song?): Int {
+//                return o2?.let {
+//                    o1?.trackNumber?.compareTo(it.trackNumber)
+//                } ?: run {
+//                    //tracks with no track number go last
+//                    Int.MAX_VALUE
+//                }
+//            }
+//        })
+//    }
 
     /**
      * TODO BREAKING_RULE: inconsistent data in the response, must use network response
@@ -581,18 +581,18 @@ class MusicRepositoryImpl @Inject constructor(
         L("getSongsFromAlbum before db ${System.currentTimeMillis()}")
 
         // TODO OPTIMIZE. this operation currently takes about 7s on pixel 6a
-//        val localSongs = getSongsFromAlbumDb(albumId)
-//        val isDbEmpty = localSongs.isEmpty()
-//        if (!isDbEmpty) {
-//            L("repo getSongsFromAlbum local songs ${localSongs.size}")
-//            emit(Resource.Success(data = localSongs))
-//        }
-//        val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
-//        if(shouldLoadCacheOnly) {
-//            emit(Resource.Loading(false))
-//            return@flow
-//        }
-//        L("getSongsFromAlbum after db ${System.currentTimeMillis()}")
+        val localSongs = dao.getSongFromAlbum(albumId).map { it.toSong() }
+        val isDbEmpty = localSongs.isEmpty()
+        if (!isDbEmpty) {
+            L("repo getSongsFromAlbum local songs ${localSongs.size}")
+            emit(Resource.Success(data = localSongs))
+        }
+        val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+        if(shouldLoadCacheOnly) {
+            emit(Resource.Loading(false))
+            return@flow
+        }
+        L("getSongsFromAlbum after db ${System.currentTimeMillis()}")
 
 
         val auth = getSession()!!//authorize2(false)
@@ -605,8 +605,8 @@ class MusicRepositoryImpl @Inject constructor(
         dao.insertSongs(songs.map { it.toSongEntity() })
         // TODO BREAKING_RULE single source of truth. Performance issues, investigate
         // stick to the single source of truth pattern despite performance deterioration
-        // emit(Resource.Success(data = getSongsFromAlbumDb(albumId), networkData = songs))
-        emit(Resource.Success(data = songs, networkData = songs))
+        emit(Resource.Success(data = dao.getSongFromAlbum(albumId).map { it.toSong() }, networkData = songs))
+        // emit(Resource.Success(data = songs, networkData = songs))
         emit(Resource.Loading(false))
         L("getSongsFromAlbum loading done ${System.currentTimeMillis()}")
 
@@ -637,7 +637,7 @@ class MusicRepositoryImpl @Inject constructor(
     override suspend fun getRecentAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
-        api.getAlbumsRecent(auth.auth).albums?.map { it.toAlbum() }?.let {
+        api.getAlbumsRecent(auth.auth, username = getCredentials()?.username).albums?.map { it.toAlbum() }?.let {
             emit(Resource.Success(data = it, networkData = it))
         }?:run {
             throw Exception("error connecting or getting data")
