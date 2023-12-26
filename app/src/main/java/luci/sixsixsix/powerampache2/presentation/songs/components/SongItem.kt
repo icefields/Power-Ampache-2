@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Segment
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,7 +45,7 @@ fun SongItem(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 7.dp, vertical = 6.dp)
     ) {
@@ -102,14 +99,6 @@ fun SongItem(
                 maxLines = 1,
                 textAlign = TextAlign.Start
             )
-
-
-//                    Text(
-//                        text = ("album: ${song.album.name} \nalbum-Artist: ${song.albumArtist.name}"),
-//                        fontStyle = FontStyle.Italic,
-//                        color = MaterialTheme.colorScheme.onBackground,
-//                        maxLines = 2,
-//                    )
         }
         Button(onClick = {},
             modifier = Modifier.weight(0.5f)

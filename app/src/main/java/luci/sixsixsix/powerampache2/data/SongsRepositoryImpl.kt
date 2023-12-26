@@ -177,16 +177,6 @@ class SongsRepositoryImpl @Inject constructor(
             } catch (e: Exception) {
             }
 
-
-//            val randomL = api.getSongsRandom(
-//                authKey = auth.auth,
-//                limit = Constants.HOME_MAX_SONGS - hashSet.size,
-//                username = getCredentials()?.username
-//            ).songs!!.map { it.toSong() }
-//            hashSet.addAll(randomL)
-//            if (randomL.isNotEmpty()) {
-//                emit(Resource.Success(data = hashSet.toList()))
-//            }
             hashSet.toList()
         } else {
             val response = api.getSongs(auth.auth, filter = query, offset = offset)

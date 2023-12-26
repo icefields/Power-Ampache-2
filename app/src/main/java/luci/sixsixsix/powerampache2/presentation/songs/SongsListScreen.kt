@@ -56,7 +56,6 @@ fun SongsListScreen(
                                         viewModel.onEvent(SongsEvent.OnSongSelected(song))
                                         mainViewModel.onEvent(MainEvent.Play(song))
                                     }
-                                    .padding(16.dp)
                             )
                             // search queries are limited, do not fetch more in case of a search string
                             if (i == (state.songs.size - 1) && state.searchQuery.isNullOrBlank()) {

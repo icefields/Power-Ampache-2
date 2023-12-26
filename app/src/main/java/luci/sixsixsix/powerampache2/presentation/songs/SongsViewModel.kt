@@ -67,7 +67,9 @@ class SongsViewModel @Inject constructor(
                 }
             }
 
-            is SongsEvent.OnSongSelected -> { playlistManager.updateCurrentSong(event.song) }
+            is SongsEvent.OnSongSelected -> {
+                L("SongsEvent.OnSongSelected", event.song)
+                playlistManager.updateCurrentSong(event.song) }
         }
     }
 
