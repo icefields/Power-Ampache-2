@@ -48,6 +48,8 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR UPPER(:query) == basename""")
     suspend fun searchAlbum(query: String): List<AlbumEntity>
 
+    @Query("""SELECT * FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId) order by year ASC""")
+    suspend fun getAlbumsFromArtist(artistId: String): List<AlbumEntity>
 
 // --- SONGS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -71,6 +73,7 @@ interface MusicDao {
 
     @Query("""SELECT * FROM artistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
     suspend fun searchArtist(query: String): List<ArtistEntity>
+
 
 // --- PLAYLISTS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)

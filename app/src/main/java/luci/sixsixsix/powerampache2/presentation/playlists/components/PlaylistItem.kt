@@ -40,7 +40,7 @@ fun PlaylistItem(
                 AsyncImage(
                     modifier = Modifier.weight(1f),
                     model = playlist.artUrl,
-                    placeholder = painterResource(id = R.drawable.ic_home),
+                    placeholder = painterResource(id = R.drawable.placeholder_album),
                     error = painterResource(id = R.drawable.ic_playlist),
                     contentDescription = playlist.name,
                 )

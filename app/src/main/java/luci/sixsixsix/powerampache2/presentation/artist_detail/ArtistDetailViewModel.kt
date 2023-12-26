@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import javax.inject.Inject
 
@@ -19,7 +20,7 @@ class ArtistDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
-    private val repository: MusicRepository
+    private val repository: AlbumsRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(ArtistDetailState())

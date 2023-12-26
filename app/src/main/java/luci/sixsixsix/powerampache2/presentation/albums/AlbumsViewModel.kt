@@ -12,13 +12,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class AlbumsViewModel @Inject constructor(
-    private val repository: MusicRepository,
+    private val repository: AlbumsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
 

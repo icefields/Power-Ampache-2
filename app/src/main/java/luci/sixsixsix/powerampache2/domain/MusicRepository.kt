@@ -14,18 +14,6 @@ interface MusicRepository {
     suspend fun autoLogin(): Flow<Resource<Session>>
     suspend fun logout(): Flow<Resource<Boolean>>
     suspend fun authorize(username:String, password:String, serverUrl: String, force: Boolean = true): Flow<Resource<Session>>
-    suspend fun getSongs(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Song>>>
-    suspend fun getAlbums(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Album>>>
     suspend fun getArtists(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Artist>>>
     suspend fun getPlaylists(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Playlist>>>
-    suspend fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Album>>>
-    suspend fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
-    suspend fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
-
-    suspend fun getRecentAlbums(): Flow<Resource<List<Album>>>
-    suspend fun getNewestAlbums(): Flow<Resource<List<Album>>>
-    suspend fun getHighestAlbums(): Flow<Resource<List<Album>>>
-    suspend fun getFrequentAlbums(): Flow<Resource<List<Album>>>
-    suspend fun getFlaggedAlbums(): Flow<Resource<List<Album>>>
-    suspend fun getRandomAlbums(): Flow<Resource<List<Album>>>
 }

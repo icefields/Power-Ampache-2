@@ -1,4 +1,4 @@
-package luci.sixsixsix.powerampache2.presentation.albums
+package luci.sixsixsix.powerampache2.presentation.artists.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,11 +21,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.Artist
 
 @Composable
-fun AlbumItem(
-    album: Album,
+fun ArtistItem(
+    artist: Artist,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -40,14 +40,14 @@ fun AlbumItem(
             ) {
                 AsyncImage(
                     modifier = Modifier.weight(1f),
-                    model = album.artUrl,
-                    placeholder = painterResource(id = R.drawable.ic_home),
+                    model = artist.artUrl,
+                    placeholder = painterResource(id = R.drawable.placeholder_album),
                     error = painterResource(id = R.drawable.ic_playlist),
-                    contentDescription = album.name,
+                    contentDescription = artist.name,
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = album.name,
+                    text = artist.name,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onBackground,
@@ -57,7 +57,7 @@ fun AlbumItem(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = album.artist.name,
+                    text = "${artist.genre}",
                     fontWeight = FontWeight.Light,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
@@ -67,7 +67,7 @@ fun AlbumItem(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = ("genre: ${ if (album.genre.isNotEmpty()) {album.genre[0]?.name} else {""}} \nalbum-Artist size: ${album.artists.size}"),
+                text = ("Albums: ${artist.albumCount} \nSongs: ${artist.songCount}"),
                 fontStyle = FontStyle.Italic,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,

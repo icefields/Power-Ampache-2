@@ -2,6 +2,7 @@ package luci.sixsixsix.powerampache2.domain.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import luci.sixsixsix.powerampache2.common.md5
 
 
 @Parcelize
@@ -24,3 +25,6 @@ data class Album(
 ): Comparable<Album>, Parcelable {
     override fun compareTo(other: Album): Int = id.compareTo(other.id)
 }
+
+// LISTS PERFORMANCE . urls contain the token, do not rely only on id
+fun Album.key(): String = "${id}${artUrl}"//.md5()

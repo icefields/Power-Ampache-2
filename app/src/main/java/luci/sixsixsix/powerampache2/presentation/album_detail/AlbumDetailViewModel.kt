@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.playlist_detail.PlaylistDetailEvent
 import javax.inject.Inject
@@ -21,7 +22,7 @@ class AlbumDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
-    private val repository: MusicRepository,
+    private val repository: SongsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
 

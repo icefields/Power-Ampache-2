@@ -8,17 +8,19 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 
 import javax.inject.Inject
 import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.powerampache2.domain.AlbumsRepository
+import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
-    private val repository: MusicRepository,
+    private val albumsRepository: AlbumsRepository,
+    private val mainRepository: MusicRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(HomeScreenState())
@@ -45,7 +47,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getPlaylists(fetchRemote: Boolean = true) {
         viewModelScope.launch {
-            repository
+            mainRepository
                 .getPlaylists(fetchRemote)
                 .collect { result ->
                     when(result) {
@@ -70,7 +72,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getRecent(fetchRemote: Boolean = true, ) {
         viewModelScope.launch {
-            repository
+            albumsRepository
                 .getRecentAlbums()
                 .collect { result ->
                     when(result) {
@@ -95,7 +97,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getFlagged(fetchRemote: Boolean = true, ) {
         viewModelScope.launch {
-            repository
+            albumsRepository
                 .getFlaggedAlbums()
                 .collect { result ->
                     when(result) {
@@ -120,7 +122,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getNewest(fetchRemote: Boolean = true, ) {
         viewModelScope.launch {
-            repository
+            albumsRepository
                 .getNewestAlbums()
                 .collect { result ->
                     when(result) {
@@ -145,7 +147,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getHighest(fetchRemote: Boolean = true, ) {
         viewModelScope.launch {
-            repository
+            albumsRepository
                 .getHighestAlbums()
                 .collect { result ->
                     when(result) {
@@ -170,7 +172,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getFrequent(fetchRemote: Boolean = true, ) {
         viewModelScope.launch {
-            repository
+            albumsRepository
                 .getFrequentAlbums()
                 .collect { result ->
                     when(result) {
@@ -195,7 +197,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getRandom(fetchRemote: Boolean = true, ) {
         viewModelScope.launch {
-            repository
+            albumsRepository
                 .getRandomAlbums()
                 .collect { result ->
                     when(result) {

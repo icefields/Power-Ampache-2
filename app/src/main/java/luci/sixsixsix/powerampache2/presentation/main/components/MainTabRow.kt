@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.sp
 
 object MainTabRow {
     @OptIn(ExperimentalFoundationApi::class)
@@ -47,7 +48,7 @@ object MainTabRow {
                         selectedTabIndex = index
                     },
                     text = {
-                        Text(text = item.title)
+                        Text(text = item.title, fontSize = 12.sp, maxLines = 1)
                     },
                     icon = {
                         Icon(

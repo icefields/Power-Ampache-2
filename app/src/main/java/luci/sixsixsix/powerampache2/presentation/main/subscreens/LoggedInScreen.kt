@@ -167,7 +167,12 @@ fun MainContent(
             TopAppBar(
                 title = {
                     if (searchVisibility == 1.0f) {
-                        TopBar(modifier = Modifier.alpha(searchVisibility), viewModel = viewModel, currentPage = pagerState.currentPage, interactionSource = interactionSource)
+                        TopBar(
+                            modifier = Modifier.alpha(searchVisibility),
+                            viewModel = viewModel,
+                            currentPage = pagerState.currentPage,
+                            interactionSource = interactionSource
+                        )
                     } else {
                         AnimatedVisibility(visibleState = transitionState) {
                             Text(
