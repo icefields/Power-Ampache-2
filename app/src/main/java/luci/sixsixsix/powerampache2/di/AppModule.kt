@@ -56,10 +56,6 @@ object AppModule {
             .build()
     }
 
-//    @Provides
-//    @Singleton
-//    fun provideInterceptor(musicDatabase: MusicDatabase): Interceptor = AmpacheInterceptor(musicDatabase)
-
     @Provides
     fun provideDateMapper(): DateMapper = AmpacheDateMapper()
 
@@ -80,12 +76,4 @@ object AppModule {
             "musicdb.db"
         ).fallbackToDestructiveMigration()
             .build()
-
-//    @Singleton
-//    @Provides
-//    fun provideSwipeSongAdapter() = SwipeSongAdapter()
-
-//    @Provides
-//    fun provideInterceptor(@ApplicationContext appContext: Context): Interceptor =
-//        AssetsNetworkInterceptor(appContext)
 }

@@ -7,15 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
-
-import javax.inject.Inject
 import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
+import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
@@ -220,20 +217,3 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 }
-
-
-sealed class HomeScreenEvent {
-    data object Refresh: HomeScreenEvent()
-    data class OnSearchQueryChange(val query: String): HomeScreenEvent()
-}
-
-data class HomeScreenState (///, , , recent, forgotten, ,
-    val playlists: List<Playlist> = emptyList(),
-    val recentAlbums: List<Album> = emptyList(),
-    val newestAlbums: List<Album> = emptyList(),
-    val highestAlbums: List<Album> = emptyList(),
-    val frequentAlbums: List<Album> = emptyList(),
-    val flaggedAlbums: List<Album> = emptyList(),
-    val randomAlbums: List<Album> = emptyList(),
-    val isLoading: Boolean = false,
-)

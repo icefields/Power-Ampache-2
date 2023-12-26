@@ -1,19 +1,15 @@
 package luci.sixsixsix.powerampache2.presentation.playlists
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.presentation.albums.AlbumsEvent
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
@@ -23,7 +19,6 @@ class PlaylistsViewModel @Inject constructor(
     private val repository: MusicRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
-
     var state by mutableStateOf(PlaylistsState())
     private var isEndOfDataReached: Boolean = false
 
@@ -31,21 +26,23 @@ class PlaylistsViewModel @Inject constructor(
         getPlaylists()
         viewModelScope.launch {
             playlistManager.currentSearchQuery.collect { query ->
-                L( "PlaylistsViewModel collect ${query}")
+                L("PlaylistsViewModel collect" , query)
                 onEvent(PlaylistEvent.OnSearchQueryChange(query))
             }
         }
     }
 
     fun onEvent(event: PlaylistEvent) {
-        when(event) {
+        when (event) {
             is PlaylistEvent.Refresh -> {
                 getPlaylists(fetchRemote = true)
             }
+
             is PlaylistEvent.OnSearchQueryChange -> {
                 state = state.copy(searchQuery = event.query)
                 getPlaylists()
             }
+
             is PlaylistEvent.OnBottomListReached -> {
                 if (!state.isFetchingMore && !isEndOfDataReached) {
                     L("PlaylistEvent.OnBottomListReached")
@@ -65,22 +62,23 @@ class PlaylistsViewModel @Inject constructor(
             repository
                 .getPlaylists(fetchRemote, query, offset)
                 .collect { result ->
-                    when(result) {
+                    when (result) {
                         is Resource.Success -> {
                             result.data?.let { playlists ->
                                 state = state.copy(playlists = playlists)
-                                L("viewmodel.getPlaylists size ${state.playlists.size}")
+                                L("viewmodel.getPlaylists size", state.playlists.size)
                             }
-                            isEndOfDataReached = ( result.networkData?.isEmpty() == true && offset > 0 ) ?: run { false }
-                            L( "viewmodel.getPlaylists is bottom reached? $isEndOfDataReached  offset $offset size of new array ${result.networkData?.size}")
+                            isEndOfDataReached =
+                                (result.networkData?.isEmpty() == true && offset > 0)
+                            L("viewmodel.getPlaylists is bottom reached?", isEndOfDataReached, "offset", offset, "size of new array", result.networkData?.size)
                         }
                         is Resource.Error -> {
                             state = state.copy(isFetchingMore = false, isLoading = false)
-                            L( "ERROR PlaylistsViewModel ${result.exception}")
+                            L("ERROR PlaylistsViewModel", result.exception)
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)
-                            if(!result.isLoading) {
+                            if (!result.isLoading) {
                                 state = state.copy(isFetchingMore = false)
                             }
                         }

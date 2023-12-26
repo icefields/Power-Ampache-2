@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="divider_padding">16dp</dimen>
+    <dimen name="albumDetailScreen_top_padding">5dp</dimen>
+    <dimen name="albumDetailScreen_infoSection_padding">10dp</dimen>
+    <dimen name="albumDetailScreen_infoSection_attribute_paddingHorizontal">6dp</dimen>
+    <dimen name="songItem_row_paddingHorizontal">7dp</dimen>
+    <dimen name="songItem_row_paddingVertical">6dp</dimen>
+    <dimen name="albumItem_paddingHorizontal">3dp</dimen>
+    <dimen name="albumItem_paddingVertical">5dp</dimen>
+    <dimen name="albumItem_infoText_paddingVertical">5dp</dimen>
+    <dimen name="albumItem_infoText_paddingHorizontal">8dp</dimen>
+    <dimen name="albumItem_infoTextSection_textSize_title">15sp</dimen>
+    <dimen name="albumItem_infoTextSection_lineHeight_title">16sp</dimen>
+    <dimen name="albumItem_infoTextSection_textSize_artist">14sp</dimen>
+    <dimen name="songItem_card_borderStroke">0.5dp</dimen>
+    <dimen name="albumItem_card_border">0.5dp</dimen>
+    <dimen name="albumItem_card_cornerRadius">5dp</dimen>
+    <dimen name="songItem_card_cornerRadius">1dp</dimen>
+    <dimen name="songItem_infoTextSection_paddingHorizontal">6dp</dimen>
+    <dimen name="songItem_infoTextSection_paddingVertical">0dp</dimen>
+    <dimen name="songItem_infoTextSection_textSize_title">17sp</dimen>
+    <dimen name="songItem_infoTextSection_textSize_artist">14sp</dimen>
+    <dimen name="songItem_infoTextSection_textSize_album">14sp</dimen>
+    <dimen name="main_tab_textSize">12sp</dimen>
+    <dimen name="songItem_infoTextSection_spacer">4dp</dimen>
+    <dimen name="miniPlayer_height">70dp</dimen>
+</resources>

@@ -2,4 +2,35 @@
     <string name="app_name">Power Ampache 2</string>
     <string name="notification_channel_name">Music Channel</string>
     <string name="notification_channel_description">Shows the currently playing music</string>
+
+    <string name="albumDetailScreen_infoSection_year">Year</string>
+    <string name="albumDetailScreen_infoSection_songs">Songs</string>
+    <string name="albumDetailScreen_infoSection_time">Total Time</string>
+    <string name="playlistItem_songCount">%s Songs</string>
+    <string name="topBar_search_hint">Search …</string>
+    <string name="main_tab_title_albums">Albums</string>
+    <string name="main_tab_title_home">Home</string>
+    <string name="main_tab_title_songs">Songs</string>
+    <string name="main_tab_title_artists">Artists</string>
+    <string name="main_tab_title_playlists">Playlists</string>
+    <string name="loginScreen_username">Username</string>
+    <string name="loginScreen_password">Password</string>
+    <string name="loginScreen_server_url">Server Url</string>
+    <string name="loginScreen_login">Login</string>
+    <string name="home_section_title_recent">Recent</string>
+    <string name="home_section_title_flagged">Flagged</string>
+    <string name="home_section_title_frequent">Frequent</string>
+    <string name="home_section_title_highest">Highest</string>
+    <string name="home_section_title_newest">Newest</string>
+    <string name="home_section_title_playlists">Playlists</string>
+    <string name="home_section_title_moreAlbums">More Albums</string>
+
+    <!-- content description strings-->
+    <string name="back_content_description">Back</string>
+    <string name="search_content_description">Search</string>
+    <string name="menu_content_description">Search</string>
+
 </resources>
+
+
+

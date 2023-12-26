@@ -1,7 +1,5 @@
 package luci.sixsixsix.powerampache2.presentation.songs
 
-import android.util.Log
-import androidx.compose.animation.expandVertically
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,19 +8,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Constants.UPDATE_PLAYER_POSITION_INTERVAL
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.exoplayer.MusicService
 import luci.sixsixsix.powerampache2.exoplayer.MusicServiceConnection
 import luci.sixsixsix.powerampache2.exoplayer.currentPlaybackPosition
-import luci.sixsixsix.powerampache2.presentation.albums.AlbumsEvent
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
@@ -32,9 +27,7 @@ class SongsViewModel @Inject constructor(
     private val repository: SongsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
-
     var state by mutableStateOf(SongsState())
-    private var isEndOfDataReached: Boolean = false
 
     init {
         getSongs()
@@ -59,13 +52,6 @@ class SongsViewModel @Inject constructor(
                 state = state.copy(searchQuery = event.query)
                 getSongs(refresh = event.query.isNullOrEmpty())
             }
-            is SongsEvent.OnBottomListReached -> {
-                if (!state.isFetchingMore && !isEndOfDataReached) {
-                    L("SongsEvent.OnBottomListReached")
-                    state = state.copy(isFetchingMore = true)
-                    getSongs(fetchRemote = true, offset = state.songs.size)
-                }
-            }
 
             is SongsEvent.OnSongSelected -> {
                 L("SongsEvent.OnSongSelected", event.song)
@@ -79,7 +65,6 @@ class SongsViewModel @Inject constructor(
         refresh: Boolean = false,
         offset: Int = 0
     ) {
-        L("viewmodel.getSongs")
         viewModelScope.launch {
             repository
                 .getSongs(fetchRemote, query, offset)
@@ -94,31 +79,16 @@ class SongsViewModel @Inject constructor(
                                     listOf()
                                 }
 
-                                if (query.isNullOrEmpty()) {
+                                if (query.isBlank()) {
                                     val hashSet = LinkedHashSet<Song>(oldSongs).apply {
                                         addAll(songs)
                                     }
                                     state = state.copy(songs = hashSet.toList())
                                 } else {
-
-                                    // if there's a search query put the results on top
-//                                    val hashSet = LinkedHashSet<Song>(oldSongs).apply {
-//                                        // remove results from the current array
-//                                        removeAll(songs.toSet())
-//                                    }
-                                    state = state.copy(songs = ArrayList(songs).apply {
-                                        // add the old songs at the end of the list
-//                                        addAll(hashSet)
-                                    })
+                                    state = state.copy(songs = ArrayList(songs))
                                 }
-
-                                L("viewmodel.getSongs SONGS size at the end ${state.songs.size}")
+                                L("viewmodel.getSongs SONGS size at the end", state.songs.size)
                             }
-
-                            // this is the home page, there is extra data, unless it's a search
-                            isEndOfDataReached = state.searchQuery.isNullOrBlank() ||
-                                    ( result.networkData?.isEmpty() == true && offset > 0 )
-                            L( "viewmodel.getSongs is bottom reached? $isEndOfDataReached ")
                         }
 
                         is Resource.Error -> {

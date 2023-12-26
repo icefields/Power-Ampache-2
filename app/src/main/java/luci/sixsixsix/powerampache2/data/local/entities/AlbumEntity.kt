@@ -42,7 +42,7 @@ fun Album.toAlbumEntity() = AlbumEntity(
     id = id,
     name = name ?: "",
     basename = basename ?: "",
-    artists = artists, //Gson().toJson(MusicAttributesContainer(artists)) ?: "{}",
+    artists = artists,
     artistId = artist.id,
     artistName = artist.name,
     artUrl = artUrl ?: "",
@@ -50,5 +50,5 @@ fun Album.toAlbumEntity() = AlbumEntity(
     flag = flag ?: 0,
     time = time ?: 0,
     year = year ?: 0,
-    genre = genre //Gson().toJson(MusicAttributesContainer(genre)) ?: "{}",
+    genre = genre
 )

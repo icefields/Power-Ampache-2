@@ -1,7 +1,10 @@
 package luci.sixsixsix.powerampache2.common
 
-import android.util.Log
-import luci.sixsixsix.powerampache2.common.Constants.TAG_LOG
+import androidx.annotation.DimenRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import java.lang.StringBuilder
 import java.security.MessageDigest
@@ -81,3 +84,7 @@ fun Any.toDebugString(): String {
     // remove variables that are auto generate by the parcelable
     return sb.toString().split("CREATOR")[0]
 }
+
+@Composable
+@ReadOnlyComposable
+fun fontDimensionResource(@DimenRes id: Int) = dimensionResource(id = id).value.sp

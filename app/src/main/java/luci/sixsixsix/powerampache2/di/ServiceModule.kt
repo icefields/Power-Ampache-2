@@ -2,11 +2,9 @@ package luci.sixsixsix.powerampache2.di
 
 import android.content.Context
 import androidx.annotation.OptIn
-import androidx.media3.common.C
 import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.common.util.Util
-import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.Module
@@ -15,7 +13,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
-
 
 @Module
 @InstallIn(ServiceComponent::class)
@@ -44,7 +41,7 @@ object ServiceModule {
         @ApplicationContext context: Context
     ) = DefaultDataSource.Factory(context, DefaultDataSource.Factory(context))
 
-    //    @ServiceScoped
+//    @ServiceScoped
 //    @Provides
 //    fun provideMusicDatabase():MusicRepository = object : MusicDatabase {
 //        override suspend fun getAllSongs(): List<Song> = mockSongs

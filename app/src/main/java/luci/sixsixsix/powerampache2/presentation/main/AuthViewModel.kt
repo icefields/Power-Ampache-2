@@ -1,6 +1,5 @@
 package luci.sixsixsix.powerampache2.presentation.main
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -29,7 +28,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             // try to login with saved auth token
             state = state.copy(isLoading = true)
-            when( val ping = repository.ping() ) {
+            when (val ping = repository.ping()) {
                 is Resource.Success -> {
                     //   If the session returned by ping is null, the token is probably expired and
                     // the user is no longer authorized
@@ -42,9 +41,11 @@ class AuthViewModel @Inject constructor(
                         autologin()
                     }
                 }
+
                 is Resource.Error -> {
                     state = state.copy(error = "{${ping.exception}", isLoading = false)
                 }
+
                 else -> {}
             }
         }
@@ -54,21 +55,24 @@ class AuthViewModel @Inject constructor(
         repository
             .autoLogin()
             .collect { result ->
-                when(result) {
+                when (result) {
                     is Resource.Success -> {
                         result.data?.let { auth ->
-                            L( "AuthViewModel ${auth}")
+                            L("AuthViewModel", auth)
                             state = state.copy(session = auth)
                         }
                     }
-                    is Resource.Error -> state = state.copy(error = "{$result.exception}", isLoading = false)
+
+                    is Resource.Error -> state =
+                        state.copy(error = "${result.exception}", isLoading = false)
+
                     is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                 }
             }
     }
 
     fun onEvent(event: AuthEvent) {
-        when(event) {
+        when (event) {
             is AuthEvent.Login -> login()
             is AuthEvent.TryAutoLogin -> {}
             is AuthEvent.OnChangePassword -> state = state.copy(password = event.password)
@@ -83,20 +87,24 @@ class AuthViewModel @Inject constructor(
         serverUrl: String = state.url
     ) {
         viewModelScope.launch {
-            repository
-                .authorize(username, password.sha256(), serverUrl)
+            repository.authorize(username, password.sha256(), serverUrl)
                 .collect { result ->
-                    when(result) {
+                    when (result) {
                         is Resource.Success -> {
                             result.data?.let { auth ->
-                                L( "AuthViewModel ${auth}")
+                                L("AuthViewModel.login", auth)
                                 state = state.copy(session = auth)
                             }
                         }
+
                         is Resource.Error -> {
-                            L( "ERROR AuthViewModel login ${result.exception?.localizedMessage}")
-                            state = state.copy(error = result.exception?.toString() ?: "authorization error", isLoading = false)
+                            L("ERROR AuthViewModel login ${result.exception?.localizedMessage}")
+                            state = state.copy(
+                                error = result.exception?.toString() ?: "authorization error",
+                                isLoading = false
+                            )
                         }
+
                         is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                     }
                 }

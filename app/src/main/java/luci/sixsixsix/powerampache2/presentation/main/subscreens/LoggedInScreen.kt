@@ -1,47 +1,29 @@
 package luci.sixsixsix.powerampache2.presentation.main.subscreens
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Album
-import androidx.compose.material.icons.filled.FeaturedPlayList
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Piano
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Album
-import androidx.compose.material.icons.outlined.FeaturedPlayList
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.LibraryMusic
-import androidx.compose.material.icons.outlined.Piano
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -51,40 +33,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.presentation.main.MainEvent
-import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.main.components.SheetDragHandle
-import luci.sixsixsix.powerampache2.presentation.main.components.TopBar
-import luci.sixsixsix.powerampache2.presentation.song_detail.SongDetailScreen
-import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsScreen
 import luci.sixsixsix.powerampache2.presentation.home.HomeScreen
+import luci.sixsixsix.powerampache2.presentation.main.MainEvent
+import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.main.components.MainTabRow
+import luci.sixsixsix.powerampache2.presentation.main.components.SheetDragHandle
+import luci.sixsixsix.powerampache2.presentation.main.components.TopBar
 import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.song_detail.SongDetailScreen
+import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 import kotlin.math.abs
-
-val miniPlayerHeight = 70.0.dp
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -94,7 +73,6 @@ fun LoggedInScreen(
 ) {
     val state = viewModel.state
     val scaffoldState = rememberBottomSheetScaffoldState()
-    L("MAIN ScREEN Current song ${state.song}")
 
     // TODO DEBUG snackbar errors
     if (state.errorMessage != "") {
@@ -144,7 +122,8 @@ fun MainContent(
     navigator: DestinationsNavigator,
     viewModel: MainViewModel = hiltViewModel()
 ) {
-    val pagerState = rememberPagerState { MainTabRow.tabItems.size }
+    val tabsCount = MainTabRow.tabItems.size
+    val pagerState = rememberPagerState { tabsCount }
     L("MainContent Current song ${viewModel.state.song}")
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scroll = rememberScrollState(0)
@@ -159,7 +138,7 @@ fun MainContent(
 
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    Toast.makeText(LocalContext.current, "focused : $isFocused", Toast.LENGTH_LONG).show()
+    //Toast.makeText(LocalContext.current, "focused : $isFocused", Toast.LENGTH_LONG).show()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -176,9 +155,11 @@ fun MainContent(
                     } else {
                         AnimatedVisibility(visibleState = transitionState) {
                             Text(
-                                modifier = Modifier.basicMarquee().alpha(
-                                    abs(searchVisibility - 1.0f)
-                                ),
+                                modifier = Modifier
+                                    .basicMarquee()
+                                    .alpha(
+                                        abs(searchVisibility - 1.0f)
+                                    ),
                                 text = generateBarTitle(viewModel.state.song),
                                 maxLines = 1
                             )
@@ -194,7 +175,6 @@ fun MainContent(
                 actions = {
                     if (searchVisibility == 0.0f) {
                         IconButton(
-
                             modifier = Modifier.alpha(
                                 abs(searchVisibility - 1.0f)
                             ),
@@ -230,11 +210,14 @@ fun MainContent(
     }
 }
 
+@Composable
 private fun generateBarTitle(song: Song?): String =
-    "Power Ampache 2 " + (song?.title?.let {
-        "(${song?.artist?.name ?: ""} - ${song?.title ?: ""})"
+    stringResource(id = R.string.app_name) + (song?.title?.let {
+        "(${song.artist.name} - ${song.title})"
     } ?: "" )
 
 
 
-fun getPeakHeight(song: Song?): Dp = if (song == null) { 0.dp } else { miniPlayerHeight }
+@Composable
+fun getPeakHeight(song: Song?): Dp =
+    if (song == null) { 0.dp } else { dimensionResource(id = R.dimen.miniPlayer_height) }

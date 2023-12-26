@@ -14,10 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.main.MainState
-import luci.sixsixsix.powerampache2.presentation.main.subscreens.miniPlayerHeight
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -25,7 +26,7 @@ fun SheetDragHandle(state: MainState, scaffoldState: BottomSheetScaffoldState) {
     val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier
-        .height(miniPlayerHeight)
+        .height(dimensionResource(id = R.dimen.miniPlayer_height))
         .fillMaxWidth()
         .background(Color.DarkGray)
     ) {
@@ -37,7 +38,7 @@ fun SheetDragHandle(state: MainState, scaffoldState: BottomSheetScaffoldState) {
                 if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
                     0.dp
                 } else {
-                    miniPlayerHeight
+                    dimensionResource(id = R.dimen.miniPlayer_height)
                 }
             )
             .fillMaxWidth()

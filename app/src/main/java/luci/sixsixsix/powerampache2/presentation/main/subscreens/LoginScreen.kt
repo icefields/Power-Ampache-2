@@ -9,18 +9,19 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 
 @Composable
 @Destination(start = false)
 fun LoginScreen(
-//    navigator: DestinationsNavigator,
-    viewModel: AuthViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
 
@@ -36,7 +37,7 @@ fun LoginScreen(
                 .padding(16.dp)
                 .fillMaxWidth(),
             placeholder = {
-                Text(text = "Username")
+                Text(text = stringResource(id = R.string.loginScreen_username))
             },
             maxLines = 1,
             singleLine = true
@@ -50,7 +51,7 @@ fun LoginScreen(
                 .padding(16.dp)
                 .fillMaxWidth(),
             placeholder = {
-                Text(text = "Password")
+                Text(text = stringResource(id = R.string.loginScreen_password))
             },
             maxLines = 1,
             singleLine = true
@@ -64,7 +65,7 @@ fun LoginScreen(
                 .padding(16.dp)
                 .fillMaxWidth(),
             placeholder = {
-                Text(text = "You Server Url")
+                Text(text = stringResource(id = R.string.loginScreen_server_url))
             },
             maxLines = 1,
             singleLine = true
@@ -72,9 +73,8 @@ fun LoginScreen(
         Button(onClick = {
             viewModel.onEvent(AuthEvent.Login)
         }) {
-            Text(text = "Login")
+            Text(text = stringResource(id = R.string.loginScreen_login))
         }
-
         Text(text = state.error)
     }
 }

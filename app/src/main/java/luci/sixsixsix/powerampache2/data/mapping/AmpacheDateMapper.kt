@@ -38,28 +38,4 @@ class AmpacheDateMapper: DateMapper {
     fun toDateString(date: LocalDateTime?): String? {
         return date?.toString()
     }
-
-//    fun Duration.toDaysPartCompat(): Long = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//        toDaysPart()
-//    } else {
-//        seconds / 86400
-//    }
-//
-//    fun Duration.toHoursPartCompat(): Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//        toHoursPart()
-//    } else {
-//        (toHours() % 24).toInt()
-//    }
-//
-//    fun Duration.toMinutesPartCompat(): Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//        toMinutesPart()
-//    } else {
-//        (toMinutes() % 60).toInt()
-//    }
-//
-//    fun Duration.toSecondsPartCompat(): Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//        toSecondsPart()
-//    } else {
-//        (seconds % 60).toInt()
-//    }
 }

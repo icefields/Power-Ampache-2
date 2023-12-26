@@ -24,18 +24,52 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.fontDimensionResource
+
 
 object MainTabRow {
+    val tabItems: List<TabItem>
+        @Composable
+        get() = listOf<TabItem>(
+                TabItem(
+                    stringResource(id = R.string.main_tab_title_home),
+                    unselectedIcon = Icons.Outlined.Home,
+                    selectedIcon = Icons.Filled.Home
+                ),
+                TabItem(
+                    stringResource(id = R.string.main_tab_title_songs),
+                    unselectedIcon = Icons.Outlined.LibraryMusic,
+                    selectedIcon = Icons.Filled.LibraryMusic
+                ),
+                TabItem(
+                    stringResource(id = R.string.main_tab_title_albums),
+                    unselectedIcon = Icons.Outlined.Album,
+                    selectedIcon = Icons.Filled.Album
+                ),
+                TabItem(
+                    stringResource(id = R.string.main_tab_title_artists),
+                    unselectedIcon = Icons.Outlined.Piano,
+                    selectedIcon = Icons.Filled.Piano
+                ),
+                TabItem(
+                    stringResource(id = R.string.main_tab_title_playlists),
+                    unselectedIcon = Icons.Outlined.FeaturedPlayList,
+                    selectedIcon = Icons.Filled.FeaturedPlayList
+                )
+            )
+
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun MainTabRow(pagerState: PagerState) {
         var selectedTabIndex by remember { mutableIntStateOf(0) }
+
         LaunchedEffect(selectedTabIndex) {
             pagerState.animateScrollToPage(selectedTabIndex)
         }
         LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
-            if(!pagerState.isScrollInProgress) {
+            if (!pagerState.isScrollInProgress) {
                 selectedTabIndex = pagerState.currentPage
             }
         }
@@ -48,7 +82,11 @@ object MainTabRow {
                         selectedTabIndex = index
                     },
                     text = {
-                        Text(text = item.title, fontSize = 12.sp, maxLines = 1)
+                        Text(
+                            text = item.title,
+                            fontSize = fontDimensionResource(id = R.dimen.main_tab_textSize),
+                            maxLines = 1
+                        )
                     },
                     icon = {
                         Icon(
@@ -62,18 +100,10 @@ object MainTabRow {
             }
         }
     }
-
-    data class TabItem(
-        val title: String,
-        val unselectedIcon: ImageVector,
-        val selectedIcon: ImageVector
-    )
-
-    val tabItems = listOf<TabItem>(
-        TabItem("Home", unselectedIcon = Icons.Outlined.Home, selectedIcon = Icons.Filled.Home),
-        TabItem("Songs", unselectedIcon = Icons.Outlined.LibraryMusic, selectedIcon = Icons.Filled.LibraryMusic),
-        TabItem("Albums", unselectedIcon = Icons.Outlined.Album, selectedIcon = Icons.Filled.Album),
-        TabItem("Artists", unselectedIcon = Icons.Outlined.Piano, selectedIcon = Icons.Filled.Piano),
-        TabItem("Playlists", unselectedIcon = Icons.Outlined.FeaturedPlayList, selectedIcon = Icons.Filled.FeaturedPlayList),
-    )
 }
+
+data class TabItem(
+    val title: String,
+    val unselectedIcon: ImageVector,
+    val selectedIcon: ImageVector
+)

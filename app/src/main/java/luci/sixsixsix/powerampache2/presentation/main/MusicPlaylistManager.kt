@@ -1,10 +1,7 @@
 package luci.sixsixsix.powerampache2.presentation.main
 
-import android.util.Log
-import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
@@ -25,12 +22,12 @@ class MusicPlaylistManager @Inject constructor() {
     val currentSearchQuery: StateFlow<String> = _currentSearchQuery
 
     fun updateCurrentSong(newSong: Song?) {
-        L( "MusicPlaylistManager updateCurrentSong $newSong")
+        L( "MusicPlaylistManager updateCurrentSong", newSong)
         _currentSongState.value = CurrentSongState(song = newSong)
     }
 
     fun updateErrorMessage(errorMessage: String?) {
-        L("MusicPlaylistManager updateErrorMessage $errorMessage")
+        L("MusicPlaylistManager updateErrorMessage", errorMessage)
         _errorMessageState.value = ErrorMessageState(errorMessage = errorMessage)
     }
 

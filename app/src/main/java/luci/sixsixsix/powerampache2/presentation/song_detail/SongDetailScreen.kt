@@ -11,16 +11,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayCircle
-
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -31,14 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
 @Composable
 fun SongDetailScreen(
-    //navigator: DestinationsNavigator,
     viewModel: MainViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -92,21 +86,18 @@ fun SongDetailScreen(
             }
             Box(modifier = Modifier.weight(2.0f))
         }
-        
+
         LazyColumn(modifier = Modifier.weight(3.0f)) {
             items(1) {
                 Text(
-                    text = "${state.song?.copy(imageUrl = "", songUrl = "", filename = "")}"
-                        .replace(", ","\n"),
+                    text = "${state.song?.toDebugString()}",
                     fontWeight = FontWeight.Light,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 30,
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.End
                 )
             }
-
         }
     }
 }
