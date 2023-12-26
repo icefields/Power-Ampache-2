@@ -2,21 +2,31 @@ package luci.sixsixsix.powerampache2.presentation.album_detail
 
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -56,13 +66,14 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
+import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
-import java.lang.StringBuilder
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -103,7 +114,10 @@ fun AlbumDetailScreen(
             error = painterResource(id = R.drawable.ic_playlist),
             contentDescription = album.name,
         )
-        Box(modifier = Modifier.fillMaxSize().alpha(0.5f).background(Color.Black))
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .alpha(0.5f)
+            .background(Color.Black))
 
         if (state.isLoading)
             LoadingScreen()
@@ -149,27 +163,27 @@ fun AlbumDetailScreen(
                         )
                 }
             ) {
-                Surface(modifier = Modifier.padding(it).padding(top = 5.dp).background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color(red = 0, blue = 0, green = 0, alpha = 220),
-                            Color(red = 0, blue = 0, green = 0, alpha = 240),
-                            Color.Black,
-                            Color.Black,
-                        )
-                    )
-                ),
-                    color = Color.Transparent//Color(red = 0, blue = 0, green = 0, alpha = 190)
+                Surface(
+                    modifier = Modifier
+                        .padding(it)
+                        .padding(top = 5.dp)
+                        .background(brush = albumBackgroundGradientDark),
+                    color = Color.Transparent
                 ) {
                     Column {
-                        Box (modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = if (infoVisibility) { 470.dp } else { 0.dp })
-                            .padding(10.dp)
-                        ) {
-                            Text(text = albumToString(album), fontWeight = FontWeight.Normal, fontSize = 19.sp)
-                        }
+                        AlbumInfoSection(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(
+                                    max = if (infoVisibility) {
+                                        470.dp
+                                    } else {
+                                        0.dp
+                                    }
+                                )
+                                .padding(10.dp), 
+                            album = album
+                        )
 
                         SwipeRefresh(
                             state = swipeRefreshState,
@@ -178,8 +192,6 @@ fun AlbumDetailScreen(
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
-
-                                    //.background(Color(red = 0, blue = 0, green = 0, alpha = 120))
                             ) {
                                 items(state.songs.size) { i ->
                                     val song = state.songs[i]
@@ -188,7 +200,6 @@ fun AlbumDetailScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                L("AlbumDetailScreen click $song")
                                                 viewModel.onEvent(AlbumDetailEvent.OnSongSelected(song))
                                                 mainViewModel.onEvent(MainEvent.Play(song))
                                             }
@@ -199,60 +210,98 @@ fun AlbumDetailScreen(
                     }
                 }
             }
-
     }
 }
 
-fun albumToString(album: Album): String {
-    val sb = StringBuilder()
-        for (field in album.javaClass.declaredFields) {
-            field.isAccessible = true
+@Composable
+fun AlbumInfoSection(modifier: Modifier, album: Album) {
+    Column (modifier = modifier) {
+        GenreChips(album.genre)
+        // TODO remove? is this necessary?
+        GenreChips(album.artists)
 
-            field.get(album)?.let {
-                if(
-                    !field.name.lowercase().contains("url") &&
-                    !field.name.lowercase().contains("artist") &&
-                    !field.name.lowercase().contains("CREATOR") &&
-                    !field.name.lowercase().contains("\$stable") &&
-                    "$it".isNotBlank() &&
-                    "$it" != "0" &&
-                    !"$it".contains("CREATOR") &&
-                    !"$it".contains("\$stable") &&
-                    "$it" != "[]"
+        Spacer(modifier = Modifier.height(6.dp))
+        if (album.year > 0) {
+            InfoText(
+                modifier = Modifier.padding(horizontal = 6.dp),
+                title = "Year",
+                name = "${album.year}"
+            )
+        }
+        Spacer(modifier = Modifier.height(2.dp))
+        if (album.songCount > 0) {
+            InfoText(
+                modifier = Modifier.padding(horizontal = 6.dp),
+                title = "Songs",
+                name = "${album.songCount}"
+            )
+        }
+        Spacer(modifier = Modifier.height(2.dp))
+        if (album.time > 0) {
+            InfoText(
+                modifier = Modifier.padding(horizontal = 6.dp),
+                title = "Total time",
+                name = album.totalTime()
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoText(modifier: Modifier = Modifier, title: String, name: String) {
+    Row(modifier = modifier) {
+        Text(
+            modifier = Modifier.align(Alignment.CenterVertically),
+            text = title,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            modifier = Modifier.align(Alignment.CenterVertically),
+            text = name,
+            fontWeight = FontWeight.Bold,
+            fontSize = 17.sp
+        )
+    }
+}
+
+@Composable
+fun GenreChips(attributes: List<MusicAttribute>) {
+    LazyRow {
+        items(attributes) {
+            Row {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(red = 0, blue = 0, green = 0, alpha = 180)
+                    ),
+                    shape = RoundedCornerShape(20.dp)
                 ) {
-                    if (it is List<*>) {
-                        if (field.name != "genre") {
-                            sb.append(field.name)
-                                .append(": ")
-                        } else {
-                            sb.append(" | ")
-                        }
-
-                        it.forEach { listElem ->
-                            listElem?.let {
-                                if (listElem is MusicAttribute) {
-                                    sb.append(listElem.name)
-                                    sb.append(" | ")
-                                }
-                            }
-                        }
-                        sb.append("\n")
-
-
-                    }
-                    else if (it is MusicAttribute) {
-                        sb.append(field.name)
-                            .append(": ")
-                            .append("${it.name}")
-                            .append("\n")
-                    } else {
-                        sb.append(field.name)
-                            .append(": ")
-                            .append("${field.get(album)}")
-                            .append("\n")
-                    }
+                    Text(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .align(Alignment.CenterHorizontally),
+                        text = it.name,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
+                Spacer(modifier = Modifier.width(12.dp))
             }
         }
-    return sb.toString().split("CREATOR")[0]
+    }
 }
+
+val albumBackgroundGradientDark = Brush.verticalGradient(
+    colors = listOf(
+        Color.Transparent,
+        Color(red = 0, blue = 0, green = 0, alpha = 150),
+        Color.Black,
+        Color(red = 0, blue = 0, green = 0, alpha = 240),
+        Color(red = 0, blue = 0, green = 0, alpha = 220),
+        Color(red = 0, blue = 0, green = 0, alpha = 200),
+        Color(red = 0, blue = 0, green = 0, alpha = 170),
+        Color(red = 0, blue = 0, green = 0, alpha = 150),
+        Color(red = 0, blue = 0, green = 0, alpha = 130),
+    )
+)

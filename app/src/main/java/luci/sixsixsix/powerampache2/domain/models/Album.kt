@@ -26,5 +26,11 @@ data class Album(
     override fun compareTo(other: Album): Int = id.compareTo(other.id)
 }
 
+fun Album.totalTime(): String {
+    val minutes = time / 60
+    val seconds = time % 60
+    return "${minutes}m ${seconds}s"
+}
+
 // LISTS PERFORMANCE . urls contain the token, do not rely only on id
 fun Album.key(): String = "${id}${artUrl}"//.md5()

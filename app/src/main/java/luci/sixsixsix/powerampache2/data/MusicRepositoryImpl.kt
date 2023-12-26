@@ -72,6 +72,13 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     private suspend fun setSession(se: Session) {
+        if (se.auth != getSession()?.auth) {
+            // albums, songs, playlists and artist have links that contain the auth token
+            dao.clearAlbums()
+            dao.clearSongs()
+            dao.clearArtists()
+            dao.clearPlaylists()
+        }
         dao.updateSession(se.toSessionEntity())
     }
 
@@ -117,6 +124,7 @@ class MusicRepositoryImpl @Inject constructor(
                 try {
                     // add credentials to the new session
                     pingResponse.toSession(dateMapper)
+                    // TODO Check connection error before making this call crash into the try-catch
                 } catch (e: Exception) {
                     dao.clearSession()
                     null

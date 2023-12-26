@@ -41,6 +41,7 @@ data class Song(
     val replayGainTrackPeak: Float? = null
 ): Comparable<Song>, Parcelable {
     override fun compareTo(other: Song): Int = mediaId.compareTo(other.mediaId)
+    override fun hashCode(): Int = key().hashCode()
 
     companion object {
         val mockSong = Song(

@@ -1,5 +1,7 @@
 package luci.sixsixsix.powerampache2.presentation
 
+import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast

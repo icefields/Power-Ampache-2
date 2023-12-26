@@ -45,7 +45,7 @@ fun SongsListScreen(
                         modifier = Modifier.fillMaxSize(),) {
                         items(
                             state.songs.size,
-                            key = { i -> state.songs[i].key() }
+                            // TODO conflicts, why? key = { i -> state.songs[i].key() }
                         ) { i ->
                             val song = state.songs[i]
                             SongItem(
