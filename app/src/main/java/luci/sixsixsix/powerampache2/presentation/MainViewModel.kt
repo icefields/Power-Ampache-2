@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.common.Constants.MEDIA_ROOT_ID
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.remote.dto.SongDto
 import luci.sixsixsix.powerampache2.domain.MusicRepository

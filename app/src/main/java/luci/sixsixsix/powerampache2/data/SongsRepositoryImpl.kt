@@ -221,7 +221,7 @@ class SongsRepositoryImpl @Inject constructor(
         val response = api.getSongsFromAlbum(auth.auth, albumId = albumId)
         response.error?.let { throw(MusicException(it.toError())) }
         val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
-        L("getSongsFromAlbum songs from web ${songs.size}")
+        L("getSongsFromAlbum songs from web", songs.size)
 
         // TODO BREAKING_RULE single source of truth. (see function doc)
         emit(Resource.Success(data = songs, networkData = songs))

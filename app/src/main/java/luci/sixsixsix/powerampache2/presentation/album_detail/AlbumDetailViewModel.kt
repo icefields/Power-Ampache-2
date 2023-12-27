@@ -53,7 +53,6 @@ class AlbumDetailViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            // USE NETWORK DATA FOR THIS CALL (why???? )
                             result.data?.let { songs ->
                                 state = state.copy(songs = songs)
                                 L("viewmodel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)

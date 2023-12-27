@@ -17,7 +17,6 @@ import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import luci.sixsixsix.powerampache2.common.Constants.MEDIA_ROOT_ID
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_ERROR
 import luci.sixsixsix.powerampache2.exoplayer.callbacks.MusicPlayerEventListener
 import luci.sixsixsix.powerampache2.exoplayer.callbacks.MusicPlayerNotificationListener
