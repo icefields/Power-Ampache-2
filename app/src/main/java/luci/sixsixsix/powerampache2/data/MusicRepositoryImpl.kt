@@ -8,8 +8,8 @@ import luci.sixsixsix.powerampache2.common.Constants.CLEAR_TABLE_AFTER_FETCH
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
-import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toArtist
 import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
@@ -23,7 +23,6 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 import luci.sixsixsix.powerampache2.data.remote.dto.toServerInfo
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
-import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
@@ -31,15 +30,12 @@ import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import retrofit2.HttpException
 import java.io.IOException
-import java.lang.StringBuilder
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.jvm.Throws
 
 /**
  * the source of truth is the database, stick to the single source of truth pattern, only return
@@ -103,6 +99,7 @@ class MusicRepositoryImpl @Inject constructor(
         dao.clearSongs()
         dao.clearArtists()
         dao.clearPlaylists()
+
         L( "LOGOUT $resp")
 
         if (resp?.toBoolean() == true) {
@@ -283,18 +280,13 @@ class MusicRepositoryImpl @Inject constructor(
             fc: FlowCollector<Resource<T>>,
             onError: (message: String) -> Unit = {}
         ) {
-            //val sb = StringBuilder(label)
             StringBuilder(label)
                 .append(if (label.isBlank())"" else " - ")
                 .append( when(e) {
                     is IOException -> "cannot load data IOException $e"
-                    //fc.emit(Resource.Error<T>(message = "cannot load data IOException $e", exception = e))
                     is HttpException -> "cannot load data HttpException $e"
-                    //fc.emit(Resource.Error<T>(message = "cannot load data HttpException $e", exception = e))
                     is MusicException -> e.musicError.toString()
-                    //fc.emit(Resource.Error<T>(message = e.musicError.toString(), exception = e))
                     else -> "generic exception $e"
-                    //fc.emit(Resource.Error<T>(message = "generic exception $e", exception = e))
                 }).toString().apply {
                     fc.emit(Resource.Error<T>(message = this, exception = e))
                     onError(this)

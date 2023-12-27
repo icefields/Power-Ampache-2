@@ -39,12 +39,9 @@ import javax.inject.Singleton
 @Singleton
 class AlbumsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
-    private val dateMapper: DateMapper,
     private val db: MusicDatabase,
-    private val musicRepository: MusicRepository,
     private val playlistManager: MusicPlaylistManager
 ): AlbumsRepository {
-    private var serverInfo: ServerInfo? = null
     private val dao = db.dao
 
     private suspend fun <T> handleError(

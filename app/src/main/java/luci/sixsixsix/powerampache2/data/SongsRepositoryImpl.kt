@@ -38,12 +38,9 @@ import kotlin.jvm.Throws
 @Singleton
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
-    private val dateMapper: DateMapper,
     private val db: MusicDatabase,
-    private val musicRepository: MusicRepository,
     private val playlistManager: MusicPlaylistManager
 ): SongsRepository {
-    private var serverInfo: ServerInfo? = null
     private val dao = db.dao
 
     private suspend fun <T> handleError(
