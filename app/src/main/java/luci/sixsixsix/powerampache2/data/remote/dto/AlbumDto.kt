@@ -47,7 +47,7 @@ data class AlbumDto(
     @SerializedName("art")
     val art: String? = "",
     @SerializedName("flag")
-    val flag: Any = false, // TODO this can be boolean or integer from the server, find a solution!
+    val flag: Any? = null, // TODO this can be boolean or integer from the server, find a solution!
     @SerializedName("rating")
     val rating: Int? = 0,
     @SerializedName("averagerating")

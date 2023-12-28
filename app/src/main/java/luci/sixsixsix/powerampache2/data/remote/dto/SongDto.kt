@@ -52,7 +52,7 @@ data class SongDto(
     val filename: String?,
 
     @SerializedName("flag")
-    val flag: Any = false, // TODO this can be boolean or integer from the server, find a solution!
+    val flag: Any? = null, // TODO this can be boolean or integer from the server, find a solution!
 
     @SerializedName("genre")
     val genre: List<MusicAttributeDto>?,
