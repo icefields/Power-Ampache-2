@@ -18,7 +18,7 @@ data class PlaylistDto(
     @SerializedName("art")
     val art: String? = null,
     @SerializedName("flag")
-    val flag: Int? = null,
+    val flag: Any = false, // TODO this can be boolean or integer from the server, find a solution!
     @SerializedName("preciserating")
     val preciserating: Int? = null,
     @SerializedName("rating")

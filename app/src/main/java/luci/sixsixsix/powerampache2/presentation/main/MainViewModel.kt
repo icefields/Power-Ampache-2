@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
@@ -69,6 +70,28 @@ class MainViewModel @Inject constructor(
                 // this will update the state in MainViewModel because
                 // we're listening to changes to variable
                 playlistManager.updateErrorMessage("")
+            }
+
+            // TODO the logout on the hamburger menu is just for debugging, remove and move the
+            //  event in AuthViewModel
+            MainEvent.OnLogout -> {
+                L( "MainViewModel Logout")
+
+                viewModelScope.launch {
+                    musicRepository.logout().collect { result ->
+                        when (result) {
+                            is Resource.Success -> {
+                                result.data?.let { auth ->
+                                    L("MainViewModel", auth)
+                                }
+                            }
+
+                            is Resource.Error ->  L("MainViewModel", result.exception)
+
+                            is Resource.Loading -> {}
+                        }
+                    }
+                }
             }
         }
     }

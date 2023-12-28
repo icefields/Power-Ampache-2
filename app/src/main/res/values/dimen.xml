@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="divider_padding">16dp</dimen>
+    <dimen name="login_inputText_padding">16dp</dimen>
     <dimen name="albumDetailScreen_top_padding">5dp</dimen>
     <dimen name="albumDetailScreen_infoSection_padding">10dp</dimen>
     <dimen name="albumDetailScreen_infoSection_attribute_paddingHorizontal">6dp</dimen>

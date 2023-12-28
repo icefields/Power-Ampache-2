@@ -11,5 +11,6 @@ data class AuthState(
     val error: String = "",
     val username: String = DEBUG_USER,
     val password: String = DEBUG_PASSWORD,
+    val authToken: String = "",
     val url: String = DEBUG_URL
 )

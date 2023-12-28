@@ -47,7 +47,7 @@ data class AlbumDto(
     @SerializedName("art")
     val art: String? = "",
     @SerializedName("flag")
-    val flag: Int? = 0,
+    val flag: Any = false, // TODO this can be boolean or integer from the server, find a solution!
     @SerializedName("rating")
     val rating: Int? = 0,
     @SerializedName("averagerating")
@@ -71,7 +71,7 @@ fun AlbumDto.toAlbum() = Album(
     genre = genre?.map { it.toMusicAttribute() } ?: listOf(),
     artUrl = art ?: "",
     songCount = songcount ?: 0,
-    flag = flag ?: 0,
+//    flag = flag ?: false,
     time = time ?: 0,
     year = year ?: 0,
 )

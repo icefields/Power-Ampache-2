@@ -167,7 +167,9 @@ fun MainContent(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        viewModel.onEvent(MainEvent.OnLogout)
+                    }) {
                         Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
                     }
                 },

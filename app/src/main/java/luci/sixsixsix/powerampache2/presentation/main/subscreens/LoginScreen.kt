@@ -9,11 +9,17 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.DEBUG_DEMO_URL
+import luci.sixsixsix.powerampache2.common.Constants.DEBUG_PASSWORD
+import luci.sixsixsix.powerampache2.common.Constants.DEBUG_URL
+import luci.sixsixsix.powerampache2.common.Constants.DEBUG_USER
+import luci.sixsixsix.powerampache2.common.Constants.DEMO_AUTH_TOKEN
 import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 
@@ -34,7 +40,7 @@ fun LoginScreen(
                 viewModel.onEvent(AuthEvent.OnChangeUsername(it))
             },
             modifier = Modifier
-                .padding(16.dp)
+                .padding(dimensionResource(id = R.dimen.login_inputText_padding))
                 .fillMaxWidth(),
             placeholder = {
                 Text(text = stringResource(id = R.string.loginScreen_username))
@@ -48,7 +54,7 @@ fun LoginScreen(
                 viewModel.onEvent(AuthEvent.OnChangePassword(it))
             },
             modifier = Modifier
-                .padding(16.dp)
+                .padding(dimensionResource(id = R.dimen.login_inputText_padding))
                 .fillMaxWidth(),
             placeholder = {
                 Text(text = stringResource(id = R.string.loginScreen_password))
@@ -62,10 +68,24 @@ fun LoginScreen(
                 viewModel.onEvent(AuthEvent.OnChangeServerUrl(it))
             },
             modifier = Modifier
-                .padding(16.dp)
+                .padding(dimensionResource(id = R.dimen.login_inputText_padding))
                 .fillMaxWidth(),
             placeholder = {
                 Text(text = stringResource(id = R.string.loginScreen_server_url))
+            },
+            maxLines = 1,
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = state.authToken,
+            onValueChange = {
+                viewModel.onEvent(AuthEvent.OnChangeAuthToken(it))
+            },
+            modifier = Modifier
+                .padding(dimensionResource(id = R.dimen.login_inputText_padding))
+                .fillMaxWidth(),
+            placeholder = {
+                Text(text = stringResource(id = R.string.loginScreen_auth_token))
             },
             maxLines = 1,
             singleLine = true
@@ -76,5 +96,26 @@ fun LoginScreen(
             Text(text = stringResource(id = R.string.loginScreen_login))
         }
         Text(text = state.error)
+
+        // TODO DEBUG, REMOVE
+        Button(onClick = {
+            viewModel.onEvent(AuthEvent.OnChangeServerUrl(DEBUG_DEMO_URL))
+            viewModel.onEvent(AuthEvent.OnChangePassword(""))
+            viewModel.onEvent(AuthEvent.OnChangeUsername(""))
+            viewModel.onEvent(AuthEvent.OnChangeAuthToken(DEMO_AUTH_TOKEN))
+            viewModel.onEvent(AuthEvent.Login)
+        }) {
+            Text(text = stringResource(id = R.string.loginScreen_demo_server))
+        }
+
+        Button(onClick = {
+            viewModel.onEvent(AuthEvent.OnChangeServerUrl(DEBUG_URL))
+            viewModel.onEvent(AuthEvent.OnChangePassword(DEBUG_PASSWORD))
+            viewModel.onEvent(AuthEvent.OnChangeUsername(DEBUG_USER))
+            viewModel.onEvent(AuthEvent.OnChangeAuthToken(""))
+            viewModel.onEvent(AuthEvent.Login)
+        }) {
+            Text(text = "My Server")
+        }
     }
 }

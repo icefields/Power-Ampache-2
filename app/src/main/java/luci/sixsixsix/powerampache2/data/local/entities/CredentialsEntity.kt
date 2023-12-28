@@ -9,5 +9,6 @@ data class CredentialsEntity(
     @PrimaryKey val primaryKey: String = CREDENTIALS_PRIMARY_KEY,
     val username: String,
     val password: String,
+    val authToken: String,
     val serverUrl: String
 )

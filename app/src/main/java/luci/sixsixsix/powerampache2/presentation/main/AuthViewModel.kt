@@ -1,8 +1,12 @@
 package luci.sixsixsix.powerampache2.presentation.main
 
+import android.app.Application
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,18 +14,35 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
+import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: MusicRepository,
-    private val playlistManager: MusicPlaylistManager
-) : ViewModel() {
+    private val playlistManager: MusicPlaylistManager,
+    private val db: MusicDatabase, application: Application,
+    ) : AndroidViewModel(application) {
     var state by mutableStateOf(AuthState())
 
     init {
         verifyAndAutologin()
+
+        // TODO anti-pattern, viewmodel should not know about the database
+        // Listen to changes of the session table from the database
+        db.dao.getSessionLiveData().observeForever {
+            if (it == null) {
+                playlistManager.reset()
+                // setting the session to null will show the login screen, but the autologin call
+                // will immediately set isLoading to true which will show the loading screen instead
+                state = state.copy(session = null, isLoading = false)
+                // autologin will log back in if credentials are correct
+                viewModelScope.launch {
+                    autologin()
+                }
+            }
+        }
     }
 
     fun verifyAndAutologin() {
@@ -78,16 +99,18 @@ class AuthViewModel @Inject constructor(
             is AuthEvent.OnChangePassword -> state = state.copy(password = event.password)
             is AuthEvent.OnChangeServerUrl -> state = state.copy(url = event.url)
             is AuthEvent.OnChangeUsername -> state = state.copy(username = event.username)
+            is AuthEvent.OnChangeAuthToken -> state = state.copy(authToken = event.token)
         }
     }
 
     private fun login(
         username: String = state.username,
         password: String = state.password,
-        serverUrl: String = state.url
+        serverUrl: String = state.url,
+        authToken: String = state.authToken
     ) {
         viewModelScope.launch {
-            repository.authorize(username, password.sha256(), serverUrl)
+            repository.authorize(username, password.sha256(), serverUrl, authToken)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {

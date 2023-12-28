@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.data.local
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -26,6 +27,8 @@ interface MusicDao {
     @Query("""SELECT * FROM sessionentity WHERE primaryKey == '$SESSION_PRIMARY_KEY'""")
     suspend fun getSession(): SessionEntity?
 
+    @Query("""SELECT * FROM sessionentity WHERE primaryKey == '$SESSION_PRIMARY_KEY'""")
+    fun getSessionLiveData(): LiveData<SessionEntity?>
 
 // --- CREDENTIALS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -58,7 +61,7 @@ interface MusicDao {
     @Query("DELETE FROM songentity")
     suspend fun clearSongs()
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by flag, playCount""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by playCount""")
     suspend fun searchSong(query: String): List<SongEntity>
 
     @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by trackNumber, playCount""")
