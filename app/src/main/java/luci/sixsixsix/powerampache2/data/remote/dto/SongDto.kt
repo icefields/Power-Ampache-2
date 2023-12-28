@@ -52,7 +52,7 @@ data class SongDto(
     val filename: String?,
 
     @SerializedName("flag")
-    val flag: Int,
+    val flag: Any? = null, // TODO this can be boolean or integer from the server, find a solution!
 
     @SerializedName("genre")
     val genre: List<MusicAttributeDto>?,
@@ -175,7 +175,7 @@ fun SongDto.toSong() = Song(
     year = year ?: ERROR_INT,
     mode = mode,
     artists = artists?.map { it.toMusicAttribute() } ?: listOf<MusicAttribute>(),
-    flag = flag,
+//    flag = flag,
     streamFormat = streamFormat,
     streamMime = streamMime,
     publisher = publisher,

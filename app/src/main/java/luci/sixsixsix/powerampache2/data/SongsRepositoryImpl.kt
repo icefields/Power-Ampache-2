@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
@@ -47,9 +48,15 @@ class SongsRepositoryImpl @Inject constructor(
         label: String = "",
         e: Throwable,
         fc: FlowCollector<Resource<T>>,
-    ) = MusicRepositoryImpl.handleError(label, e, fc) {
+    ) = MusicRepositoryImpl.handleError(label, e, fc) { message, error ->
         // TODO DEBUG this is just for debugging
-        playlistManager.updateErrorMessage(it)
+        playlistManager.updateErrorMessage(message)
+
+        if (error is MusicException && error.musicError.isSessionExpiredError()) {
+            runBlocking {
+                dao.clearSession()
+            }
+        }
     }
 
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()

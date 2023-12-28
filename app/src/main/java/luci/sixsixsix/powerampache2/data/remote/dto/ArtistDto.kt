@@ -22,7 +22,7 @@ data class ArtistDto(
     @SerializedName("art")
     val art: String? = null,
     @SerializedName("flag")
-    val flag: Int? = null,
+    val flag: Any? = null, // TODO this can be boolean or integer from the server, find a solution!
     @SerializedName("preciserating")
     val preciserating: Any? = null,
     @SerializedName("rating")
@@ -52,7 +52,7 @@ fun ArtistDto.toArtist() = Artist(
     songCount = songcount ?: 0,
     genre = genre?.map { it.toMusicAttribute() } ?: listOf(),
     artUrl = art ?: "ERROR no name",
-    flag = flag ?: 0,
+//    flag = flag ?: false,
     summary = summary,
     time = time ?: 0,
     yearFormed = yearformed ?: 0,

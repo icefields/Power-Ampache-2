@@ -23,4 +23,6 @@ object Constants {
     const val TAG_LOG = "lucie"
     const val DEBUG_PASSWORD = "testtest"
     const val DEBUG_URL = "http://192.168.1.100/ampache/public/server/"
+    const val DEMO_AUTH_TOKEN = "demodemo"
+    const val DEBUG_DEMO_URL = "https://demo.ampache.dev/server/"
 }

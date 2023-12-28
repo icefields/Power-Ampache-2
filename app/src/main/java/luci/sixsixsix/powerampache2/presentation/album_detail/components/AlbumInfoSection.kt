@@ -2,16 +2,21 @@ package luci.sixsixsix.powerampache2.presentation.album_detail.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.totalTime
+import luci.sixsixsix.powerampache2.presentation.album_detail.AlbumDetailScreen
+import java.util.UUID
 
 @Composable
 fun AlbumInfoSection(modifier: Modifier, album: Album) {
@@ -48,4 +53,18 @@ fun AlbumInfoSection(modifier: Modifier, album: Album) {
             )
         }
     }
+}
+
+@Preview//(widthDp = 50, heightDp = 50)
+@Composable
+fun AlbumDetailScreenPreview() {
+    AlbumInfoSection(
+        Modifier,
+        Album(
+            name = "Album title",
+            time = 129,
+            id = UUID.randomUUID().toString(),
+            songCount = 11,
+            year = 1986)
+    )
 }

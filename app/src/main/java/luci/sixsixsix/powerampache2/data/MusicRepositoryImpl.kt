@@ -1,9 +1,12 @@
 package luci.sixsixsix.powerampache2.data
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.powerampache2.common.Constants.CLEAR_TABLE_AFTER_FETCH
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
@@ -30,6 +33,7 @@ import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
+import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import retrofit2.HttpException
 import java.io.IOException
@@ -57,9 +61,16 @@ class MusicRepositoryImpl @Inject constructor(
         label:String = "",
         e: Throwable,
         fc: FlowCollector<Resource<T>>,
-    ) = Companion.handleError(label, e, fc) {
+    ) = Companion.handleError(label, e, fc) { message, error ->
         // TODO DEBUG this is just for debugging
-        playlistManager.updateErrorMessage(it)
+        playlistManager.updateErrorMessage(message)
+
+        if (error is MusicException && error.musicError.isSessionExpiredError()) {
+            runBlocking {
+                clearCachedData()
+                dao.clearSession()
+            }
+        }
     }
 
     private suspend fun getSession(): Session? {
@@ -70,12 +81,17 @@ class MusicRepositoryImpl @Inject constructor(
     private suspend fun setSession(se: Session) {
         if (se.auth != getSession()?.auth) {
             // albums, songs, playlists and artist have links that contain the auth token
-            dao.clearAlbums()
-            dao.clearSongs()
-            dao.clearArtists()
-            dao.clearPlaylists()
+            clearCachedData()
+            L("setSession CLEARING DATABASE")
         }
         dao.updateSession(se.toSessionEntity())
+    }
+
+    private suspend fun clearCachedData() {
+        dao.clearAlbums()
+        dao.clearSongs()
+        dao.clearArtists()
+        dao.clearPlaylists()
     }
 
     private suspend fun getCredentials(): CredentialsEntity? {
@@ -95,10 +111,7 @@ class MusicRepositoryImpl @Inject constructor(
 
         dao.clearCredentials()
         dao.clearSession()
-        dao.clearAlbums()
-        dao.clearSongs()
-        dao.clearArtists()
-        dao.clearPlaylists()
+        clearCachedData()
 
         L( "LOGOUT $resp")
 
@@ -153,6 +166,7 @@ class MusicRepositoryImpl @Inject constructor(
             credentials?.username ?: "",
             credentials?.password ?: "",
             credentials?.serverUrl ?: "",
+            credentials?.authToken ?: "",
             true
         )
     }
@@ -161,14 +175,15 @@ class MusicRepositoryImpl @Inject constructor(
         username: String,
         sha256password: String,
         serverUrl: String,
+        authToken: String,
         force: Boolean
     ): Flow<Resource<Session>> = flow {
         emit(Resource.Loading(true))
         //   Save current credentials, so they can be picked up by the interceptor,
         // and for future autologin, this has to be first line of code before any network call
-        setCredentials(CredentialsEntity(username = username, password = sha256password, serverUrl = serverUrl))
+        setCredentials(CredentialsEntity(username = username, password = sha256password, serverUrl = serverUrl, authToken = authToken))
         L("authorize CREDENTIALS ${getCredentials()}")
-        val auth = tryAuthorize(username, sha256password, serverUrl, force)
+        val auth = tryAuthorize(username, sha256password, serverUrl, authToken, force)
         emit(Resource.Success(auth))
         emit(Resource.Loading(false))
     }.catch { e -> handleError("authorize()", e, this) }
@@ -178,7 +193,8 @@ class MusicRepositoryImpl @Inject constructor(
         username:String,
         sha256password:String,
         serverUrl:String,
-        force: Boolean
+        authToken: String,
+        force: Boolean,
     ): Session {
         var session = getSession()
         if (session == null || session.isTokenExpired() || force) {
@@ -187,7 +203,12 @@ class MusicRepositoryImpl @Inject constructor(
 
             L("hashed password:${serverUrl} $sha256password \ntimestamp: ${timestamp}\ntimestamp+hashedPass: $timestamp${sha256password} \nauthHash: $authHash")
 
-            val auth = api.authorize(authHash = authHash, user = username, timestamp = timestamp)
+            val auth =
+                if (authToken.isBlank()) {
+                    api.authorize(authHash = authHash, user = username, timestamp = timestamp)
+                } else {
+                    api.authorize(apiKey = authToken)
+                }
             auth.error?.let {
                 throw (MusicException(it.toError()))
             }
@@ -278,18 +299,25 @@ class MusicRepositoryImpl @Inject constructor(
             label:String = "",
             e: Throwable,
             fc: FlowCollector<Resource<T>>,
-            onError: (message: String) -> Unit = {}
+            onError: (message: String, e: Throwable) -> Unit
         ) {
             StringBuilder(label)
                 .append(if (label.isBlank())"" else " - ")
                 .append( when(e) {
                     is IOException -> "cannot load data IOException $e"
                     is HttpException -> "cannot load data HttpException $e"
-                    is MusicException -> e.musicError.toString()
+                    is MusicException -> {
+                        if (e.musicError.isSessionExpiredError()) {
+                            // TODO clear session and try to autologin using the saved credentials
+                        } else if (e.musicError.isEmptyResult()) {
+                            // TODO handle empty result
+                        }
+                        e.musicError.toString()
+                    }
                     else -> "generic exception $e"
                 }).toString().apply {
                     fc.emit(Resource.Error<T>(message = this, exception = e))
-                    onError(this)
+                    onError(this, e)
                 }
         }
     }

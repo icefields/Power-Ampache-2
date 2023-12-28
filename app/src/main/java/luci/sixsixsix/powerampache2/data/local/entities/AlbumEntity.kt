@@ -19,7 +19,7 @@ data class AlbumEntity(
     val diskCount: Int = 0,
     val genre: List<MusicAttribute>,
     val artUrl: String = "",
-    val flag: Int = 0,
+//    val flag: Boolean = false,
     val rating: Int = 0,
     val averageRating: Int = 0,
 )
@@ -32,7 +32,7 @@ fun AlbumEntity.toAlbum() = Album(
     artist = MusicAttribute(id = artistId, name = artistName),
     artUrl = artUrl ?: "",
     songCount = songCount ?: 0,
-    flag = flag ?: 0,
+//    flag = flag ?: false,
     time = time ?: 0,
     year = year ?: 0,
     genre = genre
@@ -47,7 +47,7 @@ fun Album.toAlbumEntity() = AlbumEntity(
     artistName = artist.name,
     artUrl = artUrl ?: "",
     songCount = songCount ?: 0,
-    flag = flag ?: 0,
+//    flag = flag ?: false,
     time = time ?: 0,
     year = year ?: 0,
     genre = genre
