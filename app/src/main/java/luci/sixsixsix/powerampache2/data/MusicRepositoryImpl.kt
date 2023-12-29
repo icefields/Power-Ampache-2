@@ -27,6 +27,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 import luci.sixsixsix.powerampache2.data.remote.dto.toServerInfo
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.models.Artist
@@ -52,26 +53,27 @@ class MusicRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val dateMapper: DateMapper,
     private val db: MusicDatabase,
-    private val playlistManager: MusicPlaylistManager
+    private val playlistManager: MusicPlaylistManager,
+    private val errorHandler: ErrorHandler
 ): MusicRepository {
     private var serverInfo: ServerInfo? = null
     private val dao = db.dao
 
-    private suspend fun <T> handleError(
-        label:String = "",
-        e: Throwable,
-        fc: FlowCollector<Resource<T>>,
-    ) = Companion.handleError(label, e, fc) { message, error ->
-        // TODO DEBUG this is just for debugging
-        playlistManager.updateErrorMessage(message)
-
-        if (error is MusicException && error.musicError.isSessionExpiredError()) {
-            runBlocking {
-                clearCachedData()
-                dao.clearSession()
-            }
-        }
-    }
+//    private suspend fun <T> handleError(
+//        label:String = "",
+//        e: Throwable,
+//        fc: FlowCollector<Resource<T>>,
+//    ) = Companion.handleError(label, e, fc) { message, error ->
+//        // TODO DEBUG this is just for debugging
+//        playlistManager.updateErrorMessage(message)
+//
+//        if (error is MusicException && error.musicError.isSessionExpiredError()) {
+//            runBlocking {
+//                clearCachedData()
+//                dao.clearSession()
+//            }
+//        }
+//    }
 
     private suspend fun getSession(): Session? {
         L("GET_SESSION ${dao.getSession()?.toSession()}")
@@ -81,17 +83,10 @@ class MusicRepositoryImpl @Inject constructor(
     private suspend fun setSession(se: Session) {
         if (se.auth != getSession()?.auth) {
             // albums, songs, playlists and artist have links that contain the auth token
-            clearCachedData()
+            dao.clearCachedData()
             L("setSession CLEARING DATABASE")
         }
         dao.updateSession(se.toSessionEntity())
-    }
-
-    private suspend fun clearCachedData() {
-        dao.clearAlbums()
-        dao.clearSongs()
-        dao.clearArtists()
-        dao.clearPlaylists()
     }
 
     private suspend fun getCredentials(): CredentialsEntity? {
@@ -111,7 +106,7 @@ class MusicRepositoryImpl @Inject constructor(
 
         dao.clearCredentials()
         dao.clearSession()
-        clearCachedData()
+        dao.clearCachedData()
 
         L( "LOGOUT $resp")
 
@@ -122,7 +117,7 @@ class MusicRepositoryImpl @Inject constructor(
         }
 
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("logout()", e, this) }
+    }.catch { e -> errorHandler("logout()", e, this) }
 
     override suspend fun ping(): Resource<Pair<ServerInfo, Session?>> =
         try {
@@ -186,7 +181,7 @@ class MusicRepositoryImpl @Inject constructor(
         val auth = tryAuthorize(username, sha256password, serverUrl, authToken, force)
         emit(Resource.Success(auth))
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("authorize()", e, this) }
+    }.catch { e -> errorHandler("authorize()", e, this) }
 
     @Throws(Exception::class)
     private suspend fun tryAuthorize(
@@ -259,7 +254,7 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Success(data = dao.searchArtist(query).map { it.toArtist() }, networkData = artists))
 
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getArtists()", e, this) }
+    }.catch { e -> errorHandler("getArtists()", e, this) }
 
     override suspend fun getPlaylists(
         fetchRemote: Boolean,
@@ -294,34 +289,34 @@ class MusicRepositoryImpl @Inject constructor(
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchPlaylists(query).map { it.toPlaylist() }, networkData = playlists))
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getPlaylists()", e, this) }
+    }.catch { e -> errorHandler("getPlaylists()", e, this) }
 
 
-    companion object {
-        suspend fun <T> handleError(
-            label:String = "",
-            e: Throwable,
-            fc: FlowCollector<Resource<T>>,
-            onError: (message: String, e: Throwable) -> Unit
-        ) {
-            StringBuilder(label)
-                .append(if (label.isBlank())"" else " - ")
-                .append( when(e) {
-                    is IOException -> "cannot load data IOException $e"
-                    is HttpException -> "cannot load data HttpException $e"
-                    is MusicException -> {
-                        if (e.musicError.isSessionExpiredError()) {
-                            // TODO clear session and try to autologin using the saved credentials
-                        } else if (e.musicError.isEmptyResult()) {
-                            // TODO handle empty result
-                        }
-                        e.musicError.toString()
-                    }
-                    else -> "generic exception $e"
-                }).toString().apply {
-                    fc.emit(Resource.Error<T>(message = this, exception = e))
-                    onError(this, e)
-                }
-        }
-    }
+//    companion object {
+//        suspend fun <T> handleError(
+//            label:String = "",
+//            e: Throwable,
+//            fc: FlowCollector<Resource<T>>,
+//            onError: (message: String, e: Throwable) -> Unit
+//        ) {
+//            StringBuilder(label)
+//                .append(if (label.isBlank())"" else " - ")
+//                .append( when(e) {
+//                    is IOException -> "cannot load data IOException $e"
+//                    is HttpException -> "cannot load data HttpException $e"
+//                    is MusicException -> {
+//                        if (e.musicError.isSessionExpiredError()) {
+//                            // TODO clear session and try to autologin using the saved credentials
+//                        } else if (e.musicError.isEmptyResult()) {
+//                            // TODO handle empty result
+//                        }
+//                        e.musicError.toString()
+//                    }
+//                    else -> "generic exception $e"
+//                }).toString().apply {
+//                    fc.emit(Resource.Error<T>(message = this, exception = e))
+//                    onError(this, e)
+//                }
+//        }
+//    }
 }

@@ -19,6 +19,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.models.Album
@@ -40,24 +41,25 @@ import kotlin.jvm.Throws
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
-    private val playlistManager: MusicPlaylistManager
+    private val playlistManager: MusicPlaylistManager,
+    private val errorHandler: ErrorHandler
 ): SongsRepository {
     private val dao = db.dao
 
-    private suspend fun <T> handleError(
-        label: String = "",
-        e: Throwable,
-        fc: FlowCollector<Resource<T>>,
-    ) = MusicRepositoryImpl.handleError(label, e, fc) { message, error ->
-        // TODO DEBUG this is just for debugging
-        playlistManager.updateErrorMessage(message)
-
-        if (error is MusicException && error.musicError.isSessionExpiredError()) {
-            runBlocking {
-                dao.clearSession()
-            }
-        }
-    }
+//    private suspend fun <T> handleError(
+//        label: String = "",
+//        e: Throwable,
+//        fc: FlowCollector<Resource<T>>,
+//    ) = MusicRepositoryImpl.handleError(label, e, fc) { message, error ->
+//        // TODO DEBUG this is just for debugging
+//        playlistManager.updateErrorMessage(message)
+//
+//        if (error is MusicException && error.musicError.isSessionExpiredError()) {
+//            runBlocking {
+//                dao.clearSession()
+//            }
+//        }
+//    }
 
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
     private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
@@ -205,7 +207,7 @@ class SongsRepositoryImpl @Inject constructor(
         hashset.addAll(songsDb) // add all the cached history at the end of the list
         emit(Resource.Success(data = hashset.toList(), networkData = songs))
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getSongs()", e, this) }
+    }.catch { e -> errorHandler("getSongs()", e, this) }
 
     /**
      * TODO BREAKING_RULE: inconsistent data in the response, must use network response.
@@ -236,7 +238,7 @@ class SongsRepositoryImpl @Inject constructor(
 
         // cache songs after emitting success because the result of this is not used right now
         dao.insertSongs(songs.map { it.toSongEntity() })
-    }.catch { e -> handleError("getSongsFromAlbum()", e, this) }
+    }.catch { e -> errorHandler("getSongsFromAlbum()", e, this) }
 
     /**
      * TODO BREAKING_RULE: Implement cache for playlist songs
@@ -263,7 +265,7 @@ class SongsRepositoryImpl @Inject constructor(
         // Songs are cached regardless for quick access from SongsScreen and Albums
         // cache songs after emitting success
         dao.insertSongs(songs.map { it.toSongEntity() })
-    }.catch { e -> handleError("getSongsFromPlaylist()", e, this) }
+    }.catch { e -> errorHandler("getSongsFromPlaylist()", e, this) }
 
     override suspend fun getRecentSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
@@ -274,7 +276,7 @@ class SongsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getRecentSongs()", e, this) }
+    }.catch { e -> errorHandler("getRecentSongs()", e, this) }
 
     override suspend fun getNewestSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
@@ -285,7 +287,7 @@ class SongsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getNewestSongs()", e, this) }
+    }.catch { e -> errorHandler("getNewestSongs()", e, this) }
 
     override suspend fun getHighestSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
@@ -296,7 +298,7 @@ class SongsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getHighestSongs()", e, this) }
+    }.catch { e -> errorHandler("getHighestSongs()", e, this) }
 
     override suspend fun getFrequentSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
@@ -307,7 +309,7 @@ class SongsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getFrequentSongs()", e, this) }
+    }.catch { e -> errorHandler("getFrequentSongs()", e, this) }
 
     override suspend fun getFlaggedSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
@@ -318,7 +320,7 @@ class SongsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getFlaggedSongs()", e, this) }
+    }.catch { e -> errorHandler("getFlaggedSongs()", e, this) }
 
     override suspend fun getRandomSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
@@ -329,7 +331,7 @@ class SongsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getRandomSongs()", e, this) }
+    }.catch { e -> errorHandler("getRandomSongs()", e, this) }
 
 
     /**
