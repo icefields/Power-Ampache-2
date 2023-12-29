@@ -8,7 +8,6 @@ import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.data.MusicRepositoryImpl.Companion.handleError
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
@@ -21,6 +20,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toMusicAttribute
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.models.Album
@@ -41,24 +41,25 @@ import javax.inject.Singleton
 class AlbumsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
-    private val playlistManager: MusicPlaylistManager
+    private val playlistManager: MusicPlaylistManager,
+    private val errorHandler: ErrorHandler
 ): AlbumsRepository {
     private val dao = db.dao
 
-    private suspend fun <T> handleError(
-        label:String = "",
-        e: Throwable,
-        fc: FlowCollector<Resource<T>>,
-    ) = MusicRepositoryImpl.handleError(label, e, fc) { message, error ->
-        // TODO DEBUG this is just for debugging
-        playlistManager.updateErrorMessage(message)
-
-        if (error is MusicException && error.musicError.isSessionExpiredError()) {
-            runBlocking {
-                dao.clearSession()
-            }
-        }
-    }
+//    private suspend fun <T> handleError(
+//        label:String = "",
+//        e: Throwable,
+//        fc: FlowCollector<Resource<T>>,
+//    ) = MusicRepositoryImpl.handleError(label, e, fc) { message, error ->
+//        // TODO DEBUG this is just for debugging
+//        playlistManager.updateErrorMessage(message)
+//
+//        if (error is MusicException && error.musicError.isSessionExpiredError()) {
+//            runBlocking {
+//                dao.clearSession()
+//            }
+//        }
+//    }
 
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
     private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
@@ -99,7 +100,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchAlbum(query).map { it.toAlbum() }, networkData = albums))
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getAlbums()", e, this) }
+    }.catch { e -> errorHandler.handleError("getAlbums()", e, this) }
 
     override suspend fun getAlbumsFromArtist(
         artistId: String,
@@ -145,7 +146,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         val dbUpdatedAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
         emit(Resource.Success(data = dbUpdatedAlbums, networkData = albums))
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getAlbumsFromArtist()", e, this) }
+    }.catch { e -> errorHandler.handleError("getAlbumsFromArtist()", e, this) }
 
     override suspend fun getRecentAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -156,7 +157,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getRecentAlbums()", e, this) }
+    }.catch { e -> errorHandler.handleError("getRecentAlbums()", e, this) }
 
     override suspend fun getNewestAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -167,7 +168,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getNewestAlbums()", e, this) }
+    }.catch { e -> errorHandler.handleError("getNewestAlbums()", e, this) }
 
     override suspend fun getHighestAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -178,7 +179,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getHighestAlbums()", e, this) }
+    }.catch { e -> errorHandler.handleError("getHighestAlbums()", e, this) }
 
     override suspend fun getFrequentAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -189,7 +190,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getFrequentAlbums()", e, this) }
+    }.catch { e -> errorHandler.handleError("getFrequentAlbums()", e, this) }
 
     override suspend fun getFlaggedAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -200,7 +201,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getFlaggedAlbums()", e, this) }
+    }.catch { e -> errorHandler.handleError("getFlaggedAlbums()", e, this) }
 
     override suspend fun getRandomAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -211,5 +212,5 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> handleError("getRandomAlbums()", e, this) }
+    }.catch { e -> errorHandler.handleError("getRandomAlbums()", e, this) }
 }
