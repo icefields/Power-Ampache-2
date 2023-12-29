@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.Icon
@@ -33,8 +34,8 @@ import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
 @Composable
 fun SongDetailScreen(
+    modifier: Modifier = Modifier,
     viewModel: MainViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
 ) {
     val state = viewModel.state
 
@@ -87,7 +88,7 @@ fun SongDetailScreen(
             Box(modifier = Modifier.weight(2.0f))
         }
 
-        LazyColumn(modifier = Modifier.weight(3.0f)) {
+        LazyColumn(modifier = Modifier.weight(1.0f)) {
             items(1) {
                 Text(
                     text = "${state.song?.toDebugString()}",
@@ -97,6 +98,17 @@ fun SongDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.End
                 )
+            }
+        }
+
+        LazyColumn(modifier = Modifier.weight(3.0f)) {
+            items(viewModel.state.queue.toList()) { song ->
+                Text(
+                    text = "${song.title} - ${song.artist.name}",
+                    fontWeight = FontWeight.Light,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    modifier = Modifier.fillMaxWidth())
             }
         }
     }

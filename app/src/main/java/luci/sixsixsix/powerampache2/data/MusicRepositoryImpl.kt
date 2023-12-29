@@ -198,25 +198,28 @@ class MusicRepositoryImpl @Inject constructor(
     ): Session {
         var session = getSession()
         if (session == null || session.isTokenExpired() || force) {
-            val timestamp = Instant.now().epochSecond
-            val authHash = "$timestamp$sha256password".sha256()
-
-            L("hashed password:${serverUrl} $sha256password \ntimestamp: ${timestamp}\ntimestamp+hashedPass: $timestamp${sha256password} \nauthHash: $authHash")
-
-            val auth =
-                if (authToken.isBlank()) {
+            val auth = if (authToken.isBlank()) {
+                    val timestamp = Instant.now().epochSecond
+                    val authHash = "$timestamp$sha256password".sha256()
+                    L("hashed password:${serverUrl} $sha256password \ntimestamp: ${timestamp}\ntimestamp+hashedPass: $timestamp${sha256password} \nauthHash: $authHash")
                     api.authorize(authHash = authHash, user = username, timestamp = timestamp)
                 } else {
                     api.authorize(apiKey = authToken)
                 }
+
             auth.error?.let {
                 throw (MusicException(it.toError()))
             }
+
             auth.auth?.let {
                 L("NEW auth $auth")
                 setSession(auth.toSession(dateMapper))
+
+                // TODO remove logs
                 session = getSession()
-                L("auth token was null or expired ${session?.sessionExpire}, \nisTokenExpired? ${session?.isTokenExpired()}, \nnew auth ${session?.auth}")
+                L("auth token was null or expired", session?.sessionExpire,
+                    "\nisTokenExpired?", session?.isTokenExpired(),
+                    "new auth", session?.auth)
             }
         }
         return getSession()!! // will throw exception if session null
@@ -278,7 +281,7 @@ class MusicRepositoryImpl @Inject constructor(
             }
         }
 
-        val auth = getSession()!!//authorize2(false)
+        val auth = getSession()!!
         val response = api.getPlaylists(auth.auth, filter = query, offset = offset)
         response.error?.let { throw(MusicException(it.toError())) }
         val playlists = response.playlist!!.map { it.toPlaylist() } // will throw exception if playlist null

@@ -47,9 +47,9 @@ fun PowerAmpache2Theme(
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             // TODO fix light theme
-        //  if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             // TODO forcing DARK until light colours are fixed
-            dynamicDarkColorScheme(context)
+            //dynamicDarkColorScheme(context)
         }
 
         darkTheme -> DarkColorScheme

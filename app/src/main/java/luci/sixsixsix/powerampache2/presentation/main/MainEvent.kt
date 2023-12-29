@@ -7,4 +7,5 @@ sealed class MainEvent {
     data object OnDismissErrorMessage: MainEvent()
     data object OnLogout: MainEvent() // TODO move this to AuthViewModel
     data class Play(val song: Song): MainEvent()
+    data object PlayCurrent: MainEvent()
 }

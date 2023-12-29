@@ -16,6 +16,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.navigation.PlaylistsNavGraph
+import luci.sixsixsix.powerampache2.presentation.songs.components.SongInfoThirdRow
 
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 
@@ -43,13 +44,17 @@ fun PlaylistDetailScreen(
                     val song = state.songs[i]
                     SongItem(
                         song = song,
+                        songItemEventListener = {
+
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 viewModel.onEvent(PlaylistDetailEvent.OnSongSelected(song))
                                 //mainViewModel.state = mainViewModel.state.copy(currentSong = song)
                             }
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        songInfoThirdRow = SongInfoThirdRow.Time
                     )
 
                     if (i < state.songs.size - 1) {

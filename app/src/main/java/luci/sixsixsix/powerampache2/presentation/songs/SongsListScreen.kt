@@ -49,6 +49,9 @@ fun SongsListScreen(
                         val song = state.songs[i]
                         SongItem(
                             song = song,
+                            songItemEventListener = {
+
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {

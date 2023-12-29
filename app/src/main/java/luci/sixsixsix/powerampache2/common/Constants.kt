@@ -21,6 +21,7 @@ object Constants {
     const val NETWORK_REQUEST_LIMIT_DEBUG = 20
     const val DEBUG_USER = "test-user"
     const val TAG_LOG = "lucie"
+    const val ERROR_TITLE = "ERROR"
     const val DEBUG_PASSWORD = "testtest"
     const val DEBUG_URL = "http://192.168.1.100/ampache/public/server/"
     const val DEMO_AUTH_TOKEN = "demodemo"

@@ -97,7 +97,7 @@ fun LoggedInScreen(
             SongDetailScreen()
         },
         sheetDragHandle = {
-            SheetDragHandle(state = state, scaffoldState = scaffoldState)
+            SheetDragHandle(scaffoldState = scaffoldState)
         },
         sheetShape = RectangleShape,
         sheetSwipeEnabled = true,

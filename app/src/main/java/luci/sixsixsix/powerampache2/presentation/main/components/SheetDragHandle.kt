@@ -16,21 +16,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.main.MainState
+import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.song_detail.components.MiniPlayer
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
-fun SheetDragHandle(state: MainState, scaffoldState: BottomSheetScaffoldState) {
+fun SheetDragHandle(
+    scaffoldState: BottomSheetScaffoldState,
+    mainViewModel: MainViewModel = hiltViewModel()
+) {
     val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier
         .height(dimensionResource(id = R.dimen.miniPlayer_height))
         .fillMaxWidth()
-        .background(Color.DarkGray)
     ) {
-        Text(text = state.song?.title ?: "ERROR")
         // show mini-player
         Box(modifier = Modifier
             .height(
@@ -42,7 +47,6 @@ fun SheetDragHandle(state: MainState, scaffoldState: BottomSheetScaffoldState) {
                 }
             )
             .fillMaxWidth()
-            .background(Color.Blue)
             .clickable {
                 scope.launch {
                     if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
@@ -52,6 +56,8 @@ fun SheetDragHandle(state: MainState, scaffoldState: BottomSheetScaffoldState) {
                     }
                 }
             }
-        ) {}
+        ) {
+            MiniPlayer()
+        }
     }
 }

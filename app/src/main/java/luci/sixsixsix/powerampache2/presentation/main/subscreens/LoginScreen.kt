@@ -115,7 +115,7 @@ fun LoginScreen(
             viewModel.onEvent(AuthEvent.OnChangeAuthToken(""))
             viewModel.onEvent(AuthEvent.Login)
         }) {
-            Text(text = "My Server")
+            Text(text = "Local Debug-Server")
         }
     }
 }

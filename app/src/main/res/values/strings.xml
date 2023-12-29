@@ -18,7 +18,7 @@
     <string name="loginScreen_server_url">Server Url</string>
     <string name="loginScreen_auth_token">Auth Token</string>
     <string name="loginScreen_login">Login</string>
-    <string name="loginScreen_demo_server">Demo Server</string>
+    <string name="loginScreen_demo_server">Remote Debug-Server</string>
     <string name="home_section_title_recent">Recent</string>
     <string name="home_section_title_flagged">Flagged</string>
     <string name="home_section_title_frequent">Frequent</string>
@@ -30,7 +30,7 @@
     <!-- content description strings-->
     <string name="back_content_description">Back</string>
     <string name="search_content_description">Search</string>
-    <string name="menu_content_description">Search</string>
+    <string name="menu_content_description">Dropdown Menu</string>
 
 </resources>
 

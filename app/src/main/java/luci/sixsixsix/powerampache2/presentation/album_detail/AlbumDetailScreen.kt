@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBarDefaults
@@ -28,6 +29,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -35,14 +37,22 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.presentation.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoSection
+import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoViewEvents
+import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.songs.components.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
+import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,8 +96,8 @@ fun AlbumDetailScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .alpha(0.5f)
-                .background(Color.Black)
+                .alpha(0.4f)
+                .background(brush = screenBackgroundGradient)
         )
 
         if (state.isLoading) {
@@ -109,7 +119,7 @@ fun AlbumDetailScreen(
                 modifier = Modifier
                     .padding(it)
                     .padding(top = dimensionResource(id = R.dimen.albumDetailScreen_top_padding))
-                    .background(brush = albumBackgroundGradientDark),
+                    .background(brush = albumBackgroundGradient),
                 color = Color.Transparent
             ) {
                 Column {
@@ -126,7 +136,16 @@ fun AlbumDetailScreen(
                             .padding(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
-                        album = album
+                        album = album,
+                        eventListener = { event ->
+                            when(event) {
+                                AlbumInfoViewEvents.PLAY_ALBUM -> viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
+                                AlbumInfoViewEvents.SHARE_ALBUM -> viewModel.onEvent(AlbumDetailEvent.OnShareAlbum)
+                                AlbumInfoViewEvents.DOWNLOAD_ALBUM -> viewModel.onEvent(AlbumDetailEvent.OnDownloadAlbum)
+                                AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM -> viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
+                                AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST -> viewModel.onEvent(AlbumDetailEvent.OnAddAlbumToQueue)
+                            }
+                        }
                     )
 
                     SwipeRefresh(
@@ -141,12 +160,25 @@ fun AlbumDetailScreen(
                                 val song = state.songs[i]
                                 SongItem(
                                     song = song,
+                                    songItemEventListener = { event ->
+                                        when(event) {
+                                            SongItemEvent.PLAY_NEXT -> viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
+                                            SongItemEvent.SHARE_SONG -> viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
+                                            SongItemEvent.DOWNLOAD_SONG -> viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
+                                            SongItemEvent.GO_TO_ALBUM -> navigator.navigate(AlbumDetailScreenDestination(album.id, album))
+                                            SongItemEvent.GO_TO_ARTIST -> navigator.navigate(ArtistDetailScreenDestination(album.artist.id))
+                                            SongItemEvent.ADD_SONG_TO_QUEUE -> viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
+                                            SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
+                                        }
+                                    },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
                                             viewModel.onEvent(AlbumDetailEvent.OnSongSelected(song))
                                             mainViewModel.onEvent(MainEvent.Play(song))
-                                        }
+                                        },
+                                    songInfoThirdRow = SongInfoThirdRow.Time,
+
                                 )
                             }
                         }
@@ -157,16 +189,59 @@ fun AlbumDetailScreen(
     }
 }
 
-private val albumBackgroundGradientDark = Brush.verticalGradient(
-    colors = listOf(
-        Color.Transparent,
-        Color(red = 0, blue = 0, green = 0, alpha = 150),
-        Color.Black,
-        Color(red = 0, blue = 0, green = 0, alpha = 240),
-        Color(red = 0, blue = 0, green = 0, alpha = 220),
-        Color(red = 0, blue = 0, green = 0, alpha = 200),
-        Color(red = 0, blue = 0, green = 0, alpha = 170),
-        Color(red = 0, blue = 0, green = 0, alpha = 150),
-        Color(red = 0, blue = 0, green = 0, alpha = 130),
-    )
+private val albumBackgroundGradient
+    @Composable
+    get() =
+        Brush.verticalGradient(
+            colors = listOf(
+                Color.Transparent,
+                MaterialTheme.colorScheme.background.copy(alpha = 0.6f),
+                MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                MaterialTheme.colorScheme.background,
+                MaterialTheme.colorScheme.background,
+                MaterialTheme.colorScheme.background,
+                MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                MaterialTheme.colorScheme.background.copy(alpha = 0.75f),
+                MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                MaterialTheme.colorScheme.background.copy(alpha = 0.65f),
+                MaterialTheme.colorScheme.background.copy(alpha = 0.62f),
+            )
+
 )
+
+private val screenBackgroundGradient
+    @Composable
+    get() =
+        Brush.verticalGradient(
+            colors = listOf(
+                Color.Transparent,
+                MaterialTheme.colorScheme.background,
+                MaterialTheme.colorScheme.background
+            )
+
+        )
+
+@Preview(widthDp = 300) //(widthDp = 50, heightDp = 50)
+@Composable
+fun AlbumPreview() {
+    AlbumDetailScreen(
+        navigator = EmptyDestinationsNavigator,
+        albumId = "1050",
+        album = Album(
+            name = "Album title",
+            time = 129,
+            id = UUID.randomUUID().toString(),
+            songCount = 11,
+            genre = listOf(
+                MusicAttribute(id = UUID.randomUUID().toString(), name = "Thrash Metal"),
+                MusicAttribute(id = UUID.randomUUID().toString(), name = "Progressive Metal"),
+                MusicAttribute(id = UUID.randomUUID().toString(), name = "Jazz"),
+            ),
+            artists = listOf(
+                MusicAttribute(id = UUID.randomUUID().toString(), name = "Megadeth"),
+                MusicAttribute(id = UUID.randomUUID().toString(), name = "Marty Friedman"),
+                MusicAttribute(id = UUID.randomUUID().toString(), name = "Other people"),
+            ),
+            year = 1986)
+    )
+}

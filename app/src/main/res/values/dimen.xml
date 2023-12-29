@@ -2,9 +2,6 @@
 <resources>
     <dimen name="divider_padding">16dp</dimen>
     <dimen name="login_inputText_padding">16dp</dimen>
-    <dimen name="albumDetailScreen_top_padding">5dp</dimen>
-    <dimen name="albumDetailScreen_infoSection_padding">10dp</dimen>
-    <dimen name="albumDetailScreen_infoSection_attribute_paddingHorizontal">6dp</dimen>
     <dimen name="songItem_row_paddingHorizontal">7dp</dimen>
     <dimen name="songItem_row_paddingVertical">6dp</dimen>
     <dimen name="albumItem_paddingHorizontal">3dp</dimen>
@@ -26,4 +23,12 @@
     <dimen name="main_tab_textSize">12sp</dimen>
     <dimen name="songItem_infoTextSection_spacer">4dp</dimen>
     <dimen name="miniPlayer_height">70dp</dimen>
+
+    <dimen name="albumDetail_chip_radius">20dp</dimen>
+    <dimen name="albumDetail_chip_elevation">2dp</dimen>
+    <dimen name="albumDetail_title_fontSize">24sp</dimen>
+    <dimen name="albumDetailScreen_top_padding">5dp</dimen>
+    <dimen name="albumDetailScreen_infoSection_padding">10dp</dimen>
+    <dimen name="albumDetailScreen_infoSection_attribute_paddingHorizontal">6dp</dimen>
+    <dimen name="albumDetailScreen_infoSection_chipsRow_padding">2dp</dimen>
 </resources>

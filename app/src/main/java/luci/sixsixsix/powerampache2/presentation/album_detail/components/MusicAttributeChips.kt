@@ -9,26 +9,37 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 
 @Composable
-fun MusicAttributeChips(attributes: List<MusicAttribute>) {
-    LazyRow {
+fun MusicAttributeChips(
+    modifier: Modifier = Modifier,
+    attributes: List<MusicAttribute>,
+    containerColor: Color = Color(red = 0, blue = 0, green = 0, alpha = 180)
+) {
+    LazyRow(modifier = modifier
+        .padding(
+            horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding)
+        )) {
         items(attributes) {
             Row {
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(red = 0, blue = 0, green = 0, alpha = 180)
+                        containerColor = containerColor
                     ),
-                    shape = RoundedCornerShape(20.dp)
+                    shape = RoundedCornerShape(dimensionResource(R.dimen.albumDetail_chip_radius)),
+                    elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.albumDetail_chip_elevation))
                 ) {
                     Text(
                         modifier = Modifier

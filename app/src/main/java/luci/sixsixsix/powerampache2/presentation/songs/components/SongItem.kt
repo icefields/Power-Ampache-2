@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,33 +13,70 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.totalTime
+
+enum class SongInfoThirdRow {
+    AlbumTitle,
+    Time
+}
+
+enum class SongItemEvent {
+    PLAY_NEXT,
+    SHARE_SONG,
+    DOWNLOAD_SONG,
+    GO_TO_ALBUM,
+    GO_TO_ARTIST,
+    ADD_SONG_TO_QUEUE,
+    ADD_SONG_TO_PLAYLIST,
+}
 
 @Composable
 fun SongItem(
     song: Song,
-    modifier: Modifier = Modifier
+    songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
 ) {
+    var isContextMenuVisible by rememberSaveable { // put in viewModel?
+         mutableStateOf(false)
+    }
+    var pressOffset by remember {
+        mutableStateOf(DpOffset.Zero)
+    }
+    var itemHeight by remember {
+        mutableStateOf(0.dp)
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -82,29 +120,51 @@ fun SongItem(
                     vertical = dimensionResource(R.dimen.songItem_infoTextSection_paddingVertical)
                 )
                 .align(Alignment.CenterVertically),
-            song = song
+            song = song,
+            songInfoThirdRow = songInfoThirdRow
         )
 
-        Button(
-            onClick = {},
-            modifier = Modifier.weight(0.5f)
-        ) {
-            Image(
-                painterResource(id = android.R.drawable.ic_menu_preferences),
+        Image(Icons.Outlined.MoreVert,
                 stringResource(id = R.string.menu_content_description),
-                modifier = Modifier.background(Color.Transparent),
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .weight(0.5f)
+                    .pointerInput(true) {
+                        detectTapGestures(
+                            onPress = { offset ->
+                                pressOffset = DpOffset(offset.x.toDp(), offset.y.toDp())
+                                L("SongItem.Image", offset.y, offset.x)
+                                isContextMenuVisible = true
+                            })
+                    },
                 contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(Color.Black)
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary)
             )
-        }
     }
+
     Spacer(modifier = Modifier
             .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer) * 2))
+
+    SongDropDownMenu(
+        isContextMenuVisible = isContextMenuVisible,
+        pressOffset = pressOffset,
+        songItemEventListener = songItemEventListener) {
+        isContextMenuVisible = false
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun InfoTextSection(modifier: Modifier, song: Song) {
+private fun InfoTextSection(
+    modifier: Modifier,
+    song: Song,
+    songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
+) {
+    val songInfoThirdRowText = when(songInfoThirdRow) {
+        SongInfoThirdRow.AlbumTitle -> song.album.name
+        SongInfoThirdRow.Time -> song.totalTime()
+    }
+
     Column(
         modifier = modifier
     ) {
@@ -129,7 +189,7 @@ private fun InfoTextSection(modifier: Modifier, song: Song) {
                 .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
         Text(
             modifier = Modifier.basicMarquee(),
-            text = song.album.name,
+            text = songInfoThirdRowText,
             fontWeight = FontWeight.Light,
             fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_album),
             maxLines = 1,

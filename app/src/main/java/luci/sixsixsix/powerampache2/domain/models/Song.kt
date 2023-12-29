@@ -57,6 +57,12 @@ data class Song(
     }
 }
 
+fun Song.totalTime(): String {
+    val minutes = time / 60
+    val seconds = time % 60
+    return "$minutes:${if (seconds < 10) { "0" } else { "" } }${seconds}"
+}
+
 // LISTS PERFORMANCE . urls contain the token, do not rely only on id
 fun Song.key(): String = "${mediaId}${songUrl}"//.md5()
 

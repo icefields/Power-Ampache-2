@@ -49,6 +49,14 @@ class MainViewModel @Inject constructor(
                 L("MainViewModel collect errorState", errorState.errorMessage)
             }
         }
+
+        viewModelScope.launch {
+            playlistManager.currentQueueState.collect { queue ->
+                L("MainViewModel collect queue", queue)
+                // this is used to update the UI
+                state = state.copy(queue = queue)
+            }
+        }
     }
 
 
@@ -92,6 +100,10 @@ class MainViewModel @Inject constructor(
                         }
                     }
                 }
+            }
+
+            MainEvent.PlayCurrent -> {
+                state.song?.let { launchVLC(song = it) }
             }
         }
     }
