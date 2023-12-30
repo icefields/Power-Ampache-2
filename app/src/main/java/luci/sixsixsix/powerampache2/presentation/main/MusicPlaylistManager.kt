@@ -1,6 +1,5 @@
 package luci.sixsixsix.powerampache2.presentation.main
 
-import android.system.Os.remove
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.powerampache2.common.L
@@ -25,7 +24,7 @@ class MusicPlaylistManager @Inject constructor() {
     private val _currentQueueState = MutableStateFlow(listOf<Song>())
     val currentQueueState: StateFlow<List<Song>> = _currentQueueState
 
-    fun updateCurrentSong(newSong: Song?) {
+    fun updateTopSong(newSong: Song?) {
         L( "MusicPlaylistManager updateCurrentSong", newSong)
         _currentSongState.value = CurrentSongState(song = newSong)
         // add the current song on top of the queue
@@ -33,6 +32,11 @@ class MusicPlaylistManager @Inject constructor() {
             remove(newSong)
             add(0, newSong)
         }
+    }
+
+    fun moveToSongInQueue(newSong: Song?) {
+        L( "MusicPlaylistManager moveToSongInQueue", newSong)
+        _currentSongState.value = CurrentSongState(song = newSong)
     }
 
     fun updateErrorMessage(errorMessage: String?) {
@@ -48,11 +52,13 @@ class MusicPlaylistManager @Inject constructor() {
     fun replaceCurrentQueue(newPlaylist: List<Song>) {
         L( "MusicPlaylistManager replaceCurrentQueue", newPlaylist)
         _currentQueueState.value = newPlaylist
+        checkCurrentSong()
     }
 
     fun addToCurrentQueue(newQueue: List<Song>) {
         L( "MusicPlaylistManager addToCurrentQueue", newQueue.size)
         _currentQueueState.value += newQueue
+        checkCurrentSong()
     }
 
     fun addToCurrentQueue(newSong: Song) {
@@ -63,16 +69,16 @@ class MusicPlaylistManager @Inject constructor() {
     fun addToCurrentQueueNext(list: List<Song>) {
         L( "MusicPlaylistManager addToCurrentQueueNext", list.size)
         val queue = ArrayList<Song>(currentQueueState.value).apply {
-            // remove duplicates
-            removeAll(list.toSet())
-            addAll(0, list)
-//            // remove the current song and add it back on top, in case it has been removed
-//            currentSongState.value.song?.let {
-//                remove(it)
-//                add(0, it)
-//            }
+            removeAll(list.toSet()) // remove duplicates
+            addAll( if (size > 0) { 1 } else { 0 } , list)
         }
         replaceCurrentQueue(queue)
+    }
+
+    private fun checkCurrentSong() {
+        if (currentQueueState.value.isNotEmpty() && getCurrentSong() == null) {
+            updateTopSong(currentQueueState.value[0])
+        }
     }
 
     fun addToCurrentQueueNext(song: Song) {
@@ -80,12 +86,16 @@ class MusicPlaylistManager @Inject constructor() {
         addToCurrentQueueNext(listOf(song))
     }
 
+    fun startRestartQueue() {
+        _currentSongState.value = CurrentSongState(song = currentQueueState.value[0])
+    }
+
     fun getCurrentSong(): Song? = currentSongState.value.song
 
     fun getErrorMessage(): String? = errorMessageState.value.errorMessage
 
     fun reset() {
-        updateCurrentSong(newSong= null)
+        updateTopSong(newSong= null)
         updateSearchQuery(searchQuery= "")
         replaceCurrentQueue(listOf())
         // TODO keep error message for now

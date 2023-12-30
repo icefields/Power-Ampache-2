@@ -100,7 +100,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchAlbum(query).map { it.toAlbum() }, networkData = albums))
         emit(Resource.Loading(false))
-    }.catch { e -> errorHandler.handleError("getAlbums()", e, this) }
+    }.catch { e -> errorHandler("getAlbums()", e, this) }
 
     override suspend fun getAlbumsFromArtist(
         artistId: String,
@@ -146,7 +146,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         val dbUpdatedAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
         emit(Resource.Success(data = dbUpdatedAlbums, networkData = albums))
         emit(Resource.Loading(false))
-    }.catch { e -> errorHandler.handleError("getAlbumsFromArtist()", e, this) }
+    }.catch { e -> errorHandler("getAlbumsFromArtist()", e, this) }
 
     override suspend fun getRecentAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -157,7 +157,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> errorHandler.handleError("getRecentAlbums()", e, this) }
+    }.catch { e -> errorHandler("getRecentAlbums()", e, this) }
 
     override suspend fun getNewestAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -168,7 +168,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> errorHandler.handleError("getNewestAlbums()", e, this) }
+    }.catch { e -> errorHandler("getNewestAlbums()", e, this) }
 
     override suspend fun getHighestAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -179,7 +179,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> errorHandler.handleError("getHighestAlbums()", e, this) }
+    }.catch { e -> errorHandler("getHighestAlbums()", e, this) }
 
     override suspend fun getFrequentAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -190,7 +190,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> errorHandler.handleError("getFrequentAlbums()", e, this) }
+    }.catch { e -> errorHandler("getFrequentAlbums()", e, this) }
 
     override suspend fun getFlaggedAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -201,7 +201,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> errorHandler.handleError("getFlaggedAlbums()", e, this) }
+    }.catch { e -> errorHandler("getFlaggedAlbums()", e, this) }
 
     override suspend fun getRandomAlbums(): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
@@ -212,5 +212,5 @@ class AlbumsRepositoryImpl @Inject constructor(
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
-    }.catch { e -> errorHandler.handleError("getRandomAlbums()", e, this) }
+    }.catch { e -> errorHandler("getRandomAlbums()", e, this) }
 }

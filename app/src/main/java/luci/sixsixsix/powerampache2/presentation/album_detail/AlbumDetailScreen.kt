@@ -65,8 +65,8 @@ fun AlbumDetailScreen(
     viewModel: AlbumDetailViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel(),
 ) {
-    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
 
@@ -150,7 +150,7 @@ fun AlbumDetailScreen(
 
                     SwipeRefresh(
                         state = swipeRefreshState,
-                        onRefresh = { viewModel.onEvent(AlbumDetailEvent.Refresh) }
+                        onRefresh = { viewModel.onEvent(AlbumDetailEvent.Fetch(album.id)) }
                     ) {
                         LazyColumn(
                             modifier = Modifier
@@ -181,6 +181,9 @@ fun AlbumDetailScreen(
 
                                 )
                             }
+                        }
+                        if (state.isLoading && state.songs.isEmpty()) {
+                            LoadingScreen()
                         }
                     }
                 }

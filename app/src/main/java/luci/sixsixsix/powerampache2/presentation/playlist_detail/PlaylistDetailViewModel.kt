@@ -1,6 +1,5 @@
 package luci.sixsixsix.powerampache2.presentation.playlist_detail
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +10,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
@@ -41,7 +39,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 getSongsFromPlaylist(playlistId = event.playlistId ,fetchRemote = true)
             }
 
-            is PlaylistDetailEvent.OnSongSelected -> { playlistManager.updateCurrentSong(event.song) }
+            is PlaylistDetailEvent.OnSongSelected -> { playlistManager.updateTopSong(event.song) }
         }
     }
 

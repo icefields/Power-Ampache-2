@@ -11,10 +11,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PlaylistPlay
+import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,8 +55,10 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
+import luci.sixsixsix.powerampache2.presentation.TestScreen
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsScreen
+import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
 import luci.sixsixsix.powerampache2.presentation.home.HomeScreen
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
@@ -61,6 +66,7 @@ import luci.sixsixsix.powerampache2.presentation.main.components.MainTabRow
 import luci.sixsixsix.powerampache2.presentation.main.components.SheetDragHandle
 import luci.sixsixsix.powerampache2.presentation.main.components.TopBar
 import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.queue.QueueScreen
 import luci.sixsixsix.powerampache2.presentation.song_detail.SongDetailScreen
 import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 import kotlin.math.abs
@@ -186,26 +192,51 @@ fun MainContent(
                             Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
                         }
                     }
+                    if (viewModel.state.queue.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                navigator.navigate(QueueScreenDestination)
+                            }) {
+                            Icon(
+                                imageVector = Icons.Default.QueueMusic,
+                                contentDescription = "Queue"
+                            )
+                        }
+                    }
                 }
             )
         }
     ) {
-        Surface(modifier = Modifier.padding(top = it.calculateTopPadding(), bottom = it.calculateBottomPadding())) {
-            Column {
-                MainTabRow.MainTabRow(pagerState)
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1.0f)
-                ) { index ->
-                    when (index) {
-                        0 -> HomeScreen(navigator = navigator)
-                        1 -> SongsListScreen(navigator)
-                        2 -> AlbumsScreen(navigator = navigator)
-                        3 -> ArtistsScreen(navigator = navigator)
-                        4 -> PlaylistsScreen(navigator = navigator)
-                    }
+        tabbedLibraryView(
+            navigator = navigator,
+            pagerState = pagerState,
+            modifier = Modifier.padding(top = it.calculateTopPadding(), bottom = it.calculateBottomPadding())
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun tabbedLibraryView(
+    navigator: DestinationsNavigator,
+    pagerState: PagerState,
+    modifier: Modifier
+) {
+    Surface(modifier = modifier) {
+        Column {
+            MainTabRow.MainTabRow(pagerState)
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1.0f)
+            ) { index ->
+                when (index) {
+                    0 -> HomeScreen(navigator = navigator)
+                    1 -> SongsListScreen(navigator)
+                    2 -> AlbumsScreen(navigator = navigator)
+                    3 -> ArtistsScreen(navigator = navigator)
+                    4 -> PlaylistsScreen(navigator = navigator)
                 }
             }
         }

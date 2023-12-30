@@ -1,6 +1,5 @@
 package luci.sixsixsix.powerampache2.presentation.album_detail
 
-import android.system.Os.remove
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,7 +11,6 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.SongsRepository
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
@@ -35,16 +33,13 @@ class AlbumDetailViewModel @Inject constructor(
 
     fun onEvent(event: AlbumDetailEvent) {
         when (event) {
-            is AlbumDetailEvent.Refresh -> {
-            }
-
             is AlbumDetailEvent.Fetch -> {
                 getSongsFromAlbum(albumId = event.albumId, fetchRemote = true)
             }
 
             is AlbumDetailEvent.OnSongSelected -> {
                 // play the selected song and add the rest of the album to the queue
-                playlistManager.updateCurrentSong(event.song)
+                playlistManager.updateTopSong(event.song)
             }
 
             is AlbumDetailEvent.OnAddSongToQueueNext -> playlistManager.addToCurrentQueueNext(event.song)
@@ -54,14 +49,14 @@ class AlbumDetailViewModel @Inject constructor(
             is AlbumDetailEvent.OnPlayAlbum -> {
                 L("AlbumDetailEvent.OnPlayAlbum")
                 playlistManager.addToCurrentQueueNext(state.songs)
-                playlistManager.updateCurrentSong(state.songs[0])
+                playlistManager.updateTopSong(state.songs[0])
             }
             AlbumDetailEvent.OnDownloadAlbum -> {}
             AlbumDetailEvent.OnShareAlbum -> {}
             AlbumDetailEvent.OnShuffleAlbum -> {
                 val shuffled = state.songs.shuffled()
                 playlistManager.addToCurrentQueueNext(shuffled)
-                playlistManager.updateCurrentSong(shuffled[0])
+                playlistManager.updateTopSong(shuffled[0])
             }
 
             is AlbumDetailEvent.OnAddSongToPlaylist -> {}

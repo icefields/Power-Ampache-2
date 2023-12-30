@@ -40,7 +40,7 @@ fun SongDetailScreen(
     val state = viewModel.state
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
 
         AsyncImage(

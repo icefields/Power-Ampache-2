@@ -36,7 +36,8 @@ fun AlbumsScreen(
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
-    val albumCardSize = (LocalConfiguration.current.screenWidthDp / GRID_ITEMS_ROW).dp
+    val cardsPerRow = if (state.albums.size < 5) { 1 } else { GRID_ITEMS_ROW }
+    val albumCardSize = (LocalConfiguration.current.screenWidthDp / cardsPerRow).dp
 
     Column(modifier = modifier) {
         SwipeRefresh(
@@ -44,7 +45,7 @@ fun AlbumsScreen(
             onRefresh = { viewModel.onEvent(AlbumsEvent.Refresh) }
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(GRID_ITEMS_ROW)
+                columns = GridCells.Fixed(cardsPerRow)
             ) {
                 items(
                     count = state.albums.size,

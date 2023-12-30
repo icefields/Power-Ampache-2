@@ -6,9 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.media.session.MediaController
 import androidx.annotation.OptIn
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
+
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
@@ -77,18 +75,18 @@ class MusicNotificationManager(
             player: Player,
             callback: PlayerNotificationManager.BitmapCallback
         ): Bitmap? {
-            Glide.with(context).asBitmap()
-                .load(mediaController.metadata?.description?.iconUri)
-                .into(object : CustomTarget<Bitmap>() {
-                    override fun onResourceReady(
-                        resource: Bitmap,
-                        transition: Transition<in Bitmap>?
-                    ) {
-                        callback.onBitmap(resource)
-                    }
-
-                    override fun onLoadCleared(placeholder: Drawable?) = Unit
-                })
+//            Glide.with(context).asBitmap()
+//                .load(mediaController.metadata?.description?.iconUri)
+//                .into(object : CustomTarget<Bitmap>() {
+//                    override fun onResourceReady(
+//                        resource: Bitmap,
+//                        transition: Transition<in Bitmap>?
+//                    ) {
+//                        callback.onBitmap(resource)
+//                    }
+//
+//                    override fun onLoadCleared(placeholder: Drawable?) = Unit
+//                })
             return null
         }
     }

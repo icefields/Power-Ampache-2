@@ -148,9 +148,13 @@ fun SongItem(
     SongDropDownMenu(
         isContextMenuVisible = isContextMenuVisible,
         pressOffset = pressOffset,
-        songItemEventListener = songItemEventListener) {
-        isContextMenuVisible = false
-    }
+        songItemEventListener = {
+            isContextMenuVisible = false
+            songItemEventListener(it)
+        },
+        onDismissRequest = {
+            isContextMenuVisible = false
+        })
 }
 
 @OptIn(ExperimentalFoundationApi::class)

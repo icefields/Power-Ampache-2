@@ -23,11 +23,9 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.navigation.PlaylistsNavGraph
 import luci.sixsixsix.powerampache2.presentation.playlists.components.PlaylistItem
 
 @Composable
-@PlaylistsNavGraph(start = true)
 @Destination(start = false)
 fun PlaylistsScreen(
     navigator: DestinationsNavigator,

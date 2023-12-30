@@ -66,7 +66,7 @@ interface MainNetwork {
     @GET("json.server.php?action=playlists")
     suspend fun getPlaylists(
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 100,
+        @Query("limit") limit: Int = 0,
         @Query("filter") filter: String = "",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
