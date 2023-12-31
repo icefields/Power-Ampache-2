@@ -1,5 +1,6 @@
-package luci.sixsixsix.powerampache2.presentation.main.components
+package luci.sixsixsix.powerampache2.presentation.main.screens.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
@@ -28,37 +29,13 @@ import androidx.compose.ui.res.stringResource
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 
-
 object MainTabRow {
-    val tabItems: List<TabItem>
-        @Composable
-        get() = listOf<TabItem>(
-                TabItem(
-                    stringResource(id = R.string.main_tab_title_home),
-                    unselectedIcon = Icons.Outlined.Home,
-                    selectedIcon = Icons.Filled.Home
-                ),
-                TabItem(
-                    stringResource(id = R.string.main_tab_title_songs),
-                    unselectedIcon = Icons.Outlined.LibraryMusic,
-                    selectedIcon = Icons.Filled.LibraryMusic
-                ),
-                TabItem(
-                    stringResource(id = R.string.main_tab_title_albums),
-                    unselectedIcon = Icons.Outlined.Album,
-                    selectedIcon = Icons.Filled.Album
-                ),
-                TabItem(
-                    stringResource(id = R.string.main_tab_title_artists),
-                    unselectedIcon = Icons.Outlined.Piano,
-                    selectedIcon = Icons.Filled.Piano
-                ),
-                TabItem(
-                    stringResource(id = R.string.main_tab_title_playlists),
-                    unselectedIcon = Icons.Outlined.FeaturedPlayList,
-                    selectedIcon = Icons.Filled.FeaturedPlayList
-                )
-            )
+    val tabItems: List<TabItem> = listOf(
+        TabItem.Albums,
+        TabItem.Playlists,
+        TabItem.Songs,
+        TabItem.Artists
+    )
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
@@ -83,7 +60,7 @@ object MainTabRow {
                     },
                     text = {
                         Text(
-                            text = item.title,
+                            text = stringResource(id = item.titleRes),
                             fontSize = fontDimensionResource(id = R.dimen.main_tab_textSize),
                             maxLines = 1
                         )
@@ -93,17 +70,42 @@ object MainTabRow {
                             imageVector = if (index == selectedTabIndex) {
                                 item.selectedIcon
                             } else item.unselectedIcon,
-                            contentDescription = item.title
+                            contentDescription = stringResource(id = item.titleRes)
                         )
                     }
                 )
             }
         }
     }
+
 }
 
-data class TabItem(
-    val title: String,
+sealed class TabItem(
+    @StringRes val titleRes: Int,
     val unselectedIcon: ImageVector,
     val selectedIcon: ImageVector
-)
+) {
+    data object Songs: TabItem(
+        titleRes = R.string.main_tab_title_songs,
+        unselectedIcon = Icons.Outlined.LibraryMusic,
+        selectedIcon = Icons.Filled.LibraryMusic
+    )
+
+    data object Albums: TabItem(
+        R.string.main_tab_title_albums,
+        unselectedIcon = Icons.Outlined.Album,
+        selectedIcon = Icons.Filled.Album
+    )
+
+    data object Playlists: TabItem(
+         R.string.main_tab_title_playlists,
+        unselectedIcon = Icons.Outlined.FeaturedPlayList,
+        selectedIcon = Icons.Filled.FeaturedPlayList
+    )
+
+    data object Artists: TabItem(
+        R.string.main_tab_title_artists,
+        unselectedIcon = Icons.Outlined.Piano,
+        selectedIcon = Icons.Filled.Piano
+    )
+}
