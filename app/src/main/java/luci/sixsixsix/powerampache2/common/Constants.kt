@@ -12,6 +12,8 @@ object Constants {
     const val TIMEOUT_WRITE_S = 120L
 
     const val ERROR_INT = -1
+    const val ERROR_STRING = "ERROR"
+    const val LOADING_STRING = "LOADING"
 
     const val CLEAR_TABLE_AFTER_FETCH = false
 
@@ -21,7 +23,7 @@ object Constants {
     const val NETWORK_REQUEST_LIMIT_DEBUG = 20
     const val DEBUG_USER = "test-user"
     const val TAG_LOG = "lucie"
-    const val ERROR_TITLE = "ERROR"
+    const val ERROR_TITLE = ERROR_STRING
     const val DEBUG_PASSWORD = "testtest"
     const val DEBUG_URL = "http://192.168.1.100/ampache/public/server/"
     const val DEMO_AUTH_TOKEN = "demodemo"

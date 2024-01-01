@@ -81,19 +81,19 @@ class SongsRepositoryImpl @Inject constructor(
         // db
         // the offset is meant to be use to fetch more data from the web,
         // return cache only if the offset is zero
-//        if (offset == 0) {
-//            val localSongs = dao.searchSong(query)
-//            L("getSongs - songs from cache ${localSongs.size}")
-//            val isDbEmpty = localSongs.isEmpty() && query.isEmpty()
-//            if (!isDbEmpty) {
-//                emit(Resource.Success(data = localSongs.map { it.toSong() }))
-//            }
-//            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
-//            if (shouldLoadCacheOnly) {
-//                emit(Resource.Loading(false))
-//                return@flow
-//            }
-//        }
+        if (offset == 0) {
+            val localSongs = dao.searchSong(query)
+            L("getSongs - songs from cache ${localSongs.size}")
+            val isDbEmpty = localSongs.isEmpty() && query.isEmpty()
+            if (!isDbEmpty) {
+                emit(Resource.Success(data = localSongs.map { it.toSong() }))
+            }
+            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+            if (shouldLoadCacheOnly) {
+                emit(Resource.Loading(false))
+                return@flow
+            }
+        }
 
         // network TODO WHAT IS THIS!!?? FIX !!!
         val auth = getSession()!!//authorize2(false)
@@ -113,75 +113,75 @@ class SongsRepositoryImpl @Inject constructor(
             } catch (e: Exception) {
             }
 
-            try {
-                api.getSongsNewest(
-                    authKey = auth.auth,
-                    username = getCredentials()?.username
-                ).songs?.let { dto ->
-                    val newest = dto.map { it.toSong() }
-                    hashSet.addAll(newest)
-                    if (newest.isNotEmpty()) {
-                        emit(Resource.Success(data = hashSet.toList()))
-                    }
-                }
-            } catch (e: Exception) {
-            }
-
-            try {
-                api.getSongsRecent(
-                    authKey = auth.auth,
-                    username = getCredentials()?.username
-                ).songs?.let { dto ->
-                    val recent = dto.map { it.toSong() }
-                    hashSet.addAll(recent)
-                    if (recent.isNotEmpty()) {
-                        emit(Resource.Success(data = hashSet.toList()))
-                    }
-                }
-            } catch (e: Exception) {
-            }
-
-            try {
-                api.getSongsHighest(
-                    authKey = auth.auth,
-                    username = getCredentials()?.username
-                ).songs?.let { dto ->
-                    val highest = dto.map { it.toSong() }
-                    hashSet.addAll(highest)
-                    if (highest.isNotEmpty()) {
-                        emit(Resource.Success(data = hashSet.toList()))
-                    }
-                }
-            } catch (e: Exception) {
-            }
-
-            try {
-                api.getSongsFrequent(
-                    authKey = auth.auth,
-                    username = getCredentials()?.username
-                ).songs?.let { dto ->
-                    val frequent = dto.map { it.toSong() }
-                    hashSet.addAll(frequent)
-                    if (frequent.isNotEmpty()) {
-                        emit(Resource.Success(data = hashSet.toList()))
-                    }
-                }
-            } catch (e: Exception) {
-            }
-
-            try {
-                api.getSongsFlagged(
-                    authKey = auth.auth,
-                    username = getCredentials()?.username
-                ).songs?.let { flaggedDto ->
-                    val flagged = flaggedDto.map { it.toSong() }
-                    hashSet.addAll(flagged)
-                    if (flagged.isNotEmpty()) {
-                        emit(Resource.Success(data = hashSet.toList()))
-                    }
-                }
-            } catch (e: Exception) {
-            }
+//            try {
+//                api.getSongsNewest(
+//                    authKey = auth.auth,
+//                    username = getCredentials()?.username
+//                ).songs?.let { dto ->
+//                    val newest = dto.map { it.toSong() }
+//                    hashSet.addAll(newest)
+//                    if (newest.isNotEmpty()) {
+//                        emit(Resource.Success(data = hashSet.toList()))
+//                    }
+//                }
+//            } catch (e: Exception) {
+//            }
+//
+//            try {
+//                api.getSongsRecent(
+//                    authKey = auth.auth,
+//                    username = getCredentials()?.username
+//                ).songs?.let { dto ->
+//                    val recent = dto.map { it.toSong() }
+//                    hashSet.addAll(recent)
+//                    if (recent.isNotEmpty()) {
+//                        emit(Resource.Success(data = hashSet.toList()))
+//                    }
+//                }
+//            } catch (e: Exception) {
+//            }
+//
+//            try {
+//                api.getSongsHighest(
+//                    authKey = auth.auth,
+//                    username = getCredentials()?.username
+//                ).songs?.let { dto ->
+//                    val highest = dto.map { it.toSong() }
+//                    hashSet.addAll(highest)
+//                    if (highest.isNotEmpty()) {
+//                        emit(Resource.Success(data = hashSet.toList()))
+//                    }
+//                }
+//            } catch (e: Exception) {
+//            }
+//
+//            try {
+//                api.getSongsFrequent(
+//                    authKey = auth.auth,
+//                    username = getCredentials()?.username
+//                ).songs?.let { dto ->
+//                    val frequent = dto.map { it.toSong() }
+//                    hashSet.addAll(frequent)
+//                    if (frequent.isNotEmpty()) {
+//                        emit(Resource.Success(data = hashSet.toList()))
+//                    }
+//                }
+//            } catch (e: Exception) {
+//            }
+//
+//            try {
+//                api.getSongsFlagged(
+//                    authKey = auth.auth,
+//                    username = getCredentials()?.username
+//                ).songs?.let { flaggedDto ->
+//                    val flagged = flaggedDto.map { it.toSong() }
+//                    hashSet.addAll(flagged)
+//                    if (flagged.isNotEmpty()) {
+//                        emit(Resource.Success(data = hashSet.toList()))
+//                    }
+//                }
+//            } catch (e: Exception) {
+//            }
 
             hashSet.toList()
         } else {

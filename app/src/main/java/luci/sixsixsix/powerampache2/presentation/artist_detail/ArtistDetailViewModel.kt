@@ -1,6 +1,5 @@
 package luci.sixsixsix.powerampache2.presentation.artist_detail
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,6 +12,7 @@ import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,23 +20,31 @@ class ArtistDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
-    private val repository: AlbumsRepository
+    private val repository: AlbumsRepository,
+    private val musicRepository: MusicRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(ArtistDetailState())
 
     init {
-        savedStateHandle.get<String>("artistId")?.let {
-            getAlbumsFromArtist(it)
+        savedStateHandle.get<String>("artistId")?.let {id ->
+            getAlbumsFromArtist(id)
+
+            savedStateHandle.get<Artist>("artist")?.let { artist ->
+                state = state.copy(artist = artist)
+            } ?: getArtist(id)
         }
     }
 
     fun onEvent(event: ArtistDetailEvent) {
         when(event) {
             is ArtistDetailEvent.Refresh -> {
+                state.artist?.let {
+                    getAlbumsFromArtist(artistId = it.id, fetchRemote = true)
+                }
             }
             is ArtistDetailEvent.Fetch -> {
-                getAlbumsFromArtist(artistId = event.albumId ,fetchRemote = true)
+                getAlbumsFromArtist(artistId = event.albumId, fetchRemote = true)
             }
         }
     }
@@ -48,11 +56,34 @@ class ArtistDetailViewModel @Inject constructor(
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
+                            // TODO why am I using network data here? please comment
                             result.networkData?.let { albums ->
                                 state = state.copy(albums = albums)
                                 L("viewmodel.getAlbumsFromArtist size ${result.data?.size} network: ${result.networkData?.size}")
                             }
                         }
+
+                        is Resource.Error -> state = state.copy(isLoading = false)
+                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                    }
+                }
+        }
+    }
+
+    private fun getArtist(artistId: String, fetchRemote: Boolean = true) {
+        viewModelScope.launch {
+            musicRepository
+                .getArtist(artistId)
+                .collect { result ->
+                    when(result) {
+                        is Resource.Success -> {
+                            // TODO why am I using network data here? please comment
+                            result.networkData?.let { artist ->
+                                state = state.copy(artist = artist)
+                                L("viewmodel.getArtist size ${result.data} network: ${result.networkData}")
+                            }
+                        }
+
                         is Resource.Error -> state = state.copy(isLoading = false)
                         is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                     }

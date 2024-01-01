@@ -69,7 +69,7 @@ interface MusicDao {
 
 // --- ARTISTS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertArtists(companyListingEntities: List<ArtistEntity>)
+    suspend fun insertArtists(artists: List<ArtistEntity>)
 
     @Query("DELETE FROM artistentity")
     suspend fun clearArtists()
@@ -77,6 +77,8 @@ interface MusicDao {
     @Query("""SELECT * FROM artistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
     suspend fun searchArtist(query: String): List<ArtistEntity>
 
+    @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time""")
+    suspend fun getArtist(artistId: String): ArtistEntity?
 
 // --- PLAYLISTS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)

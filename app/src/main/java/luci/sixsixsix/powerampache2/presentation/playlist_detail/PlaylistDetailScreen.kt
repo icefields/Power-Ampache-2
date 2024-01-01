@@ -16,9 +16,13 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.presentation.album_detail.AlbumDetailEvent
+import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongInfoThirdRow
 
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
+import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
 
 @Composable
 @Destination
@@ -43,8 +47,18 @@ fun PlaylistDetailScreen(
                     val song = state.songs[i]
                     SongItem(
                         song = song,
-                        songItemEventListener = {
-
+                        songItemEventListener = { event ->
+                            when(event) {
+                                SongItemEvent.PLAY_NEXT -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
+                                SongItemEvent.SHARE_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
+                                SongItemEvent.DOWNLOAD_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
+                                SongItemEvent.GO_TO_ALBUM -> {} //  navigator.navigate(AlbumDetailScreenDestination(albumId = song.album.id))
+                                SongItemEvent.GO_TO_ARTIST -> navigator.navigate(
+                                    ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
+                                )
+                                SongItemEvent.ADD_SONG_TO_QUEUE -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
+                                SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
+                            }
                         },
                         modifier = Modifier
                             .fillMaxWidth()

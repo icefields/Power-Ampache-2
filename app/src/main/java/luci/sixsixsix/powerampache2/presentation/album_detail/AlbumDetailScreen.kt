@@ -111,6 +111,7 @@ fun AlbumDetailScreen(
                 AlbumDetailTopBar(
                     navigator = navigator,
                     album = album,
+                    isLoading = state.isLoading,
                     scrollBehavior = scrollBehavior
                 ) { infoVisibility = !infoVisibility }
             }
@@ -166,7 +167,7 @@ fun AlbumDetailScreen(
                                             SongItemEvent.SHARE_SONG -> viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
                                             SongItemEvent.DOWNLOAD_SONG -> viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
                                             SongItemEvent.GO_TO_ALBUM -> navigator.navigate(AlbumDetailScreenDestination(album.id, album))
-                                            SongItemEvent.GO_TO_ARTIST -> navigator.navigate(ArtistDetailScreenDestination(album.artist.id))
+                                            SongItemEvent.GO_TO_ARTIST -> navigator.navigate(ArtistDetailScreenDestination(artistId = album.artist.id, artist = null))
                                             SongItemEvent.ADD_SONG_TO_QUEUE -> viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
                                             SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
                                         }

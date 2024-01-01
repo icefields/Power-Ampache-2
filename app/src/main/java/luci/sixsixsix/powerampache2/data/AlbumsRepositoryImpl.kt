@@ -128,15 +128,16 @@ class AlbumsRepositoryImpl @Inject constructor(
         // so the database can find it (db is single source of truth)
         val albums = response.albums!!
             .map { albumDto ->
-                albumDto.toAlbum().copy(
-                    artists = ArrayList(
-                        albumDto.artists?.let { artists ->
-                            artists.map { attribute -> attribute.toMusicAttribute() }
-                        } ?: run { listOf() }
-                    ).apply {
-                        add(MusicAttribute(id = artistId, name = ""))
-                    }
-                )
+                albumDto.toAlbum()
+//                    .copy(
+//                    artists = ArrayList(
+//                        albumDto.artists?.let { artists ->
+//                            artists.map { attribute -> attribute.toMusicAttribute() }
+//                        } ?: run { listOf() }
+//                    ).apply {
+//                        add(MusicAttribute(id = artistId, name = ""))
+//                    }
+//                )
             } // will throw exception if songs null
 
         L("albums from web ${albums.size}")

@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -66,8 +67,8 @@ fun MainContent(
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    var currentScreen: MainContentMenuItem by remember {
-        mutableStateOf(MainContentMenuItem.Home)
+    var currentScreen: String by rememberSaveable {
+        mutableStateOf(MainContentMenuItem.Home.id)
     }
 
     ModalNavigationDrawer(
@@ -78,12 +79,7 @@ fun MainContent(
                 Divider()
                 DrawerBody(items = drawerItems,
                     onItemClick = {
-                        currentScreen = when (it) {
-                            MainContentMenuItem.Home -> MainContentMenuItem.Home
-                            MainContentMenuItem.Library -> MainContentMenuItem.Library
-                            MainContentMenuItem.Logout -> MainContentMenuItem.Logout
-                            MainContentMenuItem.Settings -> MainContentMenuItem.Settings
-                        }
+                        currentScreen = it.id
                         scope.launch {
                             drawerState.close()
                         }
@@ -114,7 +110,9 @@ fun MainContent(
                 top = it.calculateTopPadding(),
                 bottom = it.calculateBottomPadding()
             )) {
-                when (currentScreen) {
+                L("MainContent currentScreen ${currentScreen}")
+
+                when (MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
                     is MainContentMenuItem.Home -> HomeScreen(navigator = navigator)
                     is MainContentMenuItem.Library -> TabbedLibraryView(
                         navigator = navigator,

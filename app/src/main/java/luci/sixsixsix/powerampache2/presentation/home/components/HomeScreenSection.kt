@@ -81,7 +81,8 @@ fun SectionRow(navigator: DestinationsNavigator, albumsRow: List<Any>) {
                     when(album) {
                         is Album -> AlbumItemSquare(
                             modifier = Modifier.heightIn(max = 260.dp).clickable {
-                                navigator.navigate(AlbumDetailScreenDestination(album.id, album))},
+                                navigator.navigate(AlbumDetailScreenDestination(album.id, album))
+                            },
                             album = album
                         )
                     }

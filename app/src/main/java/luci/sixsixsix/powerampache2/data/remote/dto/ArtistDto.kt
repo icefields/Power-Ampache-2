@@ -32,7 +32,7 @@ data class ArtistDto(
     @SerializedName("mbid")
     val mbid: Any? = null,
     @SerializedName("summary")
-    val summary: Any? = null,
+    val summary: String? = null,
     @SerializedName("time")
     val time: Int? = null,
     @SerializedName("yearformed")
@@ -56,5 +56,5 @@ fun ArtistDto.toArtist() = Artist(
     summary = summary,
     time = time ?: 0,
     yearFormed = yearformed ?: 0,
-    placeFormed = placeformed
+    placeFormed = placeformed.toString()
 )

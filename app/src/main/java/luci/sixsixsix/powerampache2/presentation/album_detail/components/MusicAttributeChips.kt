@@ -33,24 +33,26 @@ fun MusicAttributeChips(
             horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding)
         )) {
         items(attributes) {
-            Row {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = containerColor
-                    ),
-                    shape = RoundedCornerShape(dimensionResource(R.dimen.albumDetail_chip_radius)),
-                    elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.albumDetail_chip_elevation))
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .align(Alignment.CenterHorizontally),
-                        text = it.name,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+            if (it.name.isNotBlank()) {
+                Row {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = containerColor
+                        ),
+                        shape = RoundedCornerShape(dimensionResource(R.dimen.albumDetail_chip_radius)),
+                        elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.albumDetail_chip_elevation))
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.CenterHorizontally),
+                            text = it.name,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
                 }
-                Spacer(modifier = Modifier.width(12.dp))
             }
         }
     }

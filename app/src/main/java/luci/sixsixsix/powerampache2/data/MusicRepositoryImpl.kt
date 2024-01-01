@@ -59,22 +59,6 @@ class MusicRepositoryImpl @Inject constructor(
     private var serverInfo: ServerInfo? = null
     private val dao = db.dao
 
-//    private suspend fun <T> handleError(
-//        label:String = "",
-//        e: Throwable,
-//        fc: FlowCollector<Resource<T>>,
-//    ) = Companion.handleError(label, e, fc) { message, error ->
-//        // TODO DEBUG this is just for debugging
-//        playlistManager.updateErrorMessage(message)
-//
-//        if (error is MusicException && error.musicError.isSessionExpiredError()) {
-//            runBlocking {
-//                clearCachedData()
-//                dao.clearSession()
-//            }
-//        }
-//    }
-
     private suspend fun getSession(): Session? {
         L("GET_SESSION ${dao.getSession()?.toSession()}")
         return dao.getSession()?.toSession()
@@ -100,13 +84,15 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun logout(): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading(true))
-        val resp = getSession()?.auth?.let {
-            api.goodbye(it)
-        }
 
+        // clear database first so even with lack of connection the user will be logged out
         dao.clearCredentials()
         dao.clearSession()
         dao.clearCachedData()
+
+        val resp = getSession()?.auth?.let {
+            api.goodbye(it)
+        }
 
         L( "LOGOUT $resp")
 
@@ -219,6 +205,35 @@ class MusicRepositoryImpl @Inject constructor(
         }
         return getSession()!! // will throw exception if session null
     }
+
+    override suspend fun getArtist(
+        artistId: String,
+        fetchRemote: Boolean,
+    ): Flow<Resource<Artist>> = flow {
+        emit(Resource.Loading(true))
+
+        dao.getArtist(artistId)?.let { artistEntity ->
+            emit(Resource.Success(data = artistEntity.toArtist() ))
+            if(!fetchRemote) {  // load cache only?
+                emit(Resource.Loading(false))
+                return@flow
+            }
+        }
+
+        val auth = getSession()!!
+        val response = api.getArtistInfo(authKey = auth.auth, artistId = artistId)
+        val artist = response.toArtist()  //will throw exception if artist null
+
+//        if (CLEAR_TABLE_AFTER_FETCH) { dao.clearArtists() }
+
+        dao.insertArtists(listOf(artist.toArtistEntity()))
+        // stick to the single source of truth pattern despite performance deterioration
+        dao.getArtist(artistId)?.let { artistEntity ->
+            emit(Resource.Success(data = artistEntity.toArtist(), networkData = artist ))
+        }
+
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getArtists()", e, this) }
 
     override suspend fun getArtists(
         fetchRemote: Boolean,

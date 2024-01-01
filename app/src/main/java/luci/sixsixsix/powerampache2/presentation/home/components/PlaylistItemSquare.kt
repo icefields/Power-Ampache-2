@@ -110,5 +110,6 @@ val playlistBgColours
             MaterialTheme.colorScheme.errorContainer,
             MaterialTheme.colorScheme.background,
             MaterialTheme.colorScheme.surface,
-            MaterialTheme.colorScheme.surfaceVariant
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.inverseSurface
         )

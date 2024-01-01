@@ -59,14 +59,14 @@ fun TestScreen(
         ColouredRow(name = "surfaceVariant", colour = MaterialTheme.colorScheme.surfaceVariant)
         ColouredRow(name = "onSurfaceVariant", colour = MaterialTheme.colorScheme.onSurfaceVariant)
 
-        ColouredRow(name = "inverseOnSurface", colour = MaterialTheme.colorScheme.inverseOnSurface)
-        ColouredRow(name = "inversePrimary", colour = MaterialTheme.colorScheme.inversePrimary)
         ColouredRow(name = "inverseSurface", colour = MaterialTheme.colorScheme.inverseSurface)
+        ColouredRow(name = "inverseOnSurface", colour = MaterialTheme.colorScheme.inverseOnSurface)
+
+        ColouredRow(name = "inversePrimary", colour = MaterialTheme.colorScheme.inversePrimary)
         ColouredRow(name = "surfaceTint", colour = MaterialTheme.colorScheme.surfaceTint)
         ColouredRow(name = "outline", colour = MaterialTheme.colorScheme.outline)
         ColouredRow(name = "outlineVariant", colour = MaterialTheme.colorScheme.outlineVariant)
         ColouredRow(name = "scrim", colour = MaterialTheme.colorScheme.scrim)
-        ColouredRow(name = "inverseSurface", colour = MaterialTheme.colorScheme.inverseSurface)
     }
 }
 

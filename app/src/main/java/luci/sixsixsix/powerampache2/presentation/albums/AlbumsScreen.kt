@@ -22,6 +22,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.key
+import luci.sixsixsix.powerampache2.presentation.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.albums.components.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 
@@ -38,6 +39,10 @@ fun AlbumsScreen(
     val state = viewModel.state
     val cardsPerRow = if (state.albums.size < 5) { 1 } else { GRID_ITEMS_ROW }
     val albumCardSize = (LocalConfiguration.current.screenWidthDp / cardsPerRow).dp
+
+    if (state.isLoading && state.albums.isEmpty()) {
+        LoadingScreen()
+    }
 
     Column(modifier = modifier) {
         SwipeRefresh(

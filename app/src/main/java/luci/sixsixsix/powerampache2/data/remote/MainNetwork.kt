@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
+import luci.sixsixsix.powerampache2.data.remote.dto.ArtistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.AuthDto
 import luci.sixsixsix.powerampache2.data.remote.dto.GoodbyeDto
@@ -73,6 +74,13 @@ interface MainNetwork {
         @Query("hide_search") hideSearch: Int = 1, // 0, 1 (if true do not include searches/smartlists in the result)
         @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true if true ignore 'api_hide_dupe_searches' setting)
     ): PlaylistsResponse // TODO remove default values
+
+    @GET("json.server.php?action=artist")
+    suspend fun getArtistInfo(
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 0,
+        @Query("filter") artistId: String = "",
+        @Query("offset") offset: Int = 0, ): ArtistDto
 
     @GET("json.server.php?action=artist_albums")
     suspend fun getAlbumsFromArtist(

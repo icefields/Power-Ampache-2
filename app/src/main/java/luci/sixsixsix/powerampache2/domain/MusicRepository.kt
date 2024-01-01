@@ -13,6 +13,7 @@ interface MusicRepository {
     suspend fun autoLogin(): Flow<Resource<Session>>
     suspend fun logout(): Flow<Resource<Boolean>>
     suspend fun authorize(username:String, password:String, serverUrl: String, authToken: String, force: Boolean = true): Flow<Resource<Session>>
+    suspend fun getArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<Artist>>
     suspend fun getArtists(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Artist>>>
     suspend fun getPlaylists(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Playlist>>>
 }

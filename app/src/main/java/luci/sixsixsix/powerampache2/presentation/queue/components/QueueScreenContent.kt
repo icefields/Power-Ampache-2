@@ -9,11 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.QueueEvent
 import luci.sixsixsix.powerampache2.presentation.queue.QueueViewModel
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
+import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
 
 @Composable
 fun QueueScreenContent(
@@ -27,8 +29,18 @@ fun QueueScreenContent(
         items(state.queue) { song ->
             SongItem(
                 song = song,
-                songItemEventListener = {
-
+                songItemEventListener = { event ->
+                    when(event) {
+                        SongItemEvent.PLAY_NEXT -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
+                        SongItemEvent.SHARE_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
+                        SongItemEvent.DOWNLOAD_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
+                        SongItemEvent.GO_TO_ALBUM -> {} //  navigator.navigate(AlbumDetailScreenDestination(albumId = song.album.id))
+                        SongItemEvent.GO_TO_ARTIST -> navigator.navigate(
+                            ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
+                        )
+                        SongItemEvent.ADD_SONG_TO_QUEUE -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
+                        SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

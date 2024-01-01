@@ -80,6 +80,7 @@ class ArtistsViewModel @Inject constructor(
                             L( "ERROR AlbumsViewModel ${result.exception}")
                         }
                         is Resource.Loading -> {
+
                             state = state.copy(isLoading = result.isLoading)
                             if(!result.isLoading) {
                                 state = state.copy(isFetchingMore = false)
