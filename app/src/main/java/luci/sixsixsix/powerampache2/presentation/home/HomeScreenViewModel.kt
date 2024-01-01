@@ -11,14 +11,13 @@ import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val albumsRepository: AlbumsRepository,
     private val mainRepository: MusicRepository,
-    private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(HomeScreenState())
 
@@ -50,7 +49,15 @@ class HomeScreenViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { playlists ->
-                                state = state.copy(playlists = playlists)
+                                // inject generated playlists
+                                val playlistList = mutableListOf<Playlist>(
+                                    Playlist.HighestPlaylist(),
+                                    Playlist.RecentPlaylist(),
+                                    Playlist.FrequentPlaylist(),
+                                    Playlist.FlaggedPlaylist()
+                                )
+                                playlistList.addAll(playlists)
+                                state = state.copy(playlists = playlistList)
                                 L("HomeScreenViewModel.getPlaylists size ${state.playlists.size}")
                             }
                             L( "HomeScreenViewModel.getPlaylists size of network array ${result.networkData?.size}")

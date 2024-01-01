@@ -15,6 +15,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongInfoThirdRow
 
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
@@ -23,7 +24,7 @@ import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 @Destination
 fun PlaylistDetailScreen(
     navigator: DestinationsNavigator,
-    playlistId: String,
+    playlist: Playlist,
     viewModel: PlaylistDetailViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {

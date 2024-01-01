@@ -23,12 +23,13 @@ fun HomeScreen(
     // to add sections to the home screen just add Title and Array of Albums, Playlists or Songs
     val homeScreenItems = mapOf(
         Pair(stringResource(id = R.string.home_section_title_recent), state.recentAlbums),
+        Pair(stringResource(id = R.string.home_section_title_playlists), state.playlists),
         Pair(stringResource(id = R.string.home_section_title_flagged), state.flaggedAlbums),
         Pair(stringResource(id = R.string.home_section_title_frequent), state.frequentAlbums),
         Pair(stringResource(id = R.string.home_section_title_highest), state.highestAlbums),
         Pair(stringResource(id = R.string.home_section_title_newest), state.newestAlbums),
         Pair(stringResource(id = R.string.home_section_title_moreAlbums), state.randomAlbums),
-        Pair(stringResource(id = R.string.home_section_title_playlists), state.playlists)
+
     )
 
     LazyColumn(modifier = modifier) {

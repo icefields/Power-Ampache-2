@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -23,7 +24,7 @@ import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScre
 @Composable
 fun HomeScreenSection(navigator: DestinationsNavigator, albumsRow: List<Any>?, text: String) {
     if (!albumsRow.isNullOrEmpty()) {
-        Column(modifier = Modifier.height(280.dp)) {
+        Column {
             SectionTitle(text = text)
             SectionRow(navigator = navigator, albumsRow = albumsRow)
             Spacer(modifier = Modifier.height(24.dp))
@@ -42,21 +43,49 @@ fun SectionTitle(text: String) {
     )
 }
 
+typealias PlaylistColumn = ArrayList<Playlist>
+
 @Composable
 fun SectionRow(navigator: DestinationsNavigator, albumsRow: List<Any>) {
-    LazyRow(modifier = Modifier.fillMaxWidth()) {
-        items(albumsRow) { album: Any ->
-            when(album) {
-                is Album -> AlbumItemSquare(
-                    modifier = Modifier.clickable {
-                        navigator.navigate(AlbumDetailScreenDestination(album.id, album))},
-                    album = album
-                )
-                is Playlist -> PlaylistItemSquare(
-                    modifier = Modifier.clickable {
-                        navigator.navigate(PlaylistDetailScreenDestination(album.id,))},
-                    playlist = album
-                )
+    if(albumsRow.isNotEmpty()) {
+        if (albumsRow[0] is Playlist) {
+            LazyRow(modifier = Modifier.fillMaxWidth()) {
+                val elementsPerColumn = 2
+                val lists = ArrayList<PlaylistColumn>()
+                var currentColumn = PlaylistColumn()
+                for (el in albumsRow) {
+                    if (currentColumn.size == elementsPerColumn) {
+                        lists.add(currentColumn)
+                        currentColumn = PlaylistColumn() // reset
+                    }
+                    currentColumn.add(el as Playlist)
+                }
+                // add the last one
+                if (currentColumn.size <= elementsPerColumn) {
+                    lists.add(currentColumn)
+                }
+
+                items(lists) { column ->
+                    PlaylistItemSquare(
+                        modifier = Modifier.heightIn(max = 120.dp),
+                        playlistColumn = column
+                    ) {
+                        navigator.navigate(PlaylistDetailScreenDestination(playlist = it))
+                    }
+                }
+            }
+        } else {
+            // Mixed mode (playlist + album items)
+            LazyRow(modifier = Modifier.fillMaxWidth()) {
+                items(albumsRow) { album: Any ->
+                    when(album) {
+                        is Album -> AlbumItemSquare(
+                            modifier = Modifier.heightIn(max = 260.dp).clickable {
+                                navigator.navigate(AlbumDetailScreenDestination(album.id, album))},
+                            album = album
+                        )
+                    }
+                }
             }
         }
     }

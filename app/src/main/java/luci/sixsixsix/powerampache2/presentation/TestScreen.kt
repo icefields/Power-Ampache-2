@@ -29,24 +29,33 @@ fun TestScreen(
     ) {
         ColouredRow(name = "primary", colour = MaterialTheme.colorScheme.primary)
         ColouredRow(name = "onPrimary", colour = MaterialTheme.colorScheme.onPrimary)
+
         ColouredRow(name = "primaryContainer", colour = MaterialTheme.colorScheme.primaryContainer)
         ColouredRow(name = "onPrimaryContainer", colour = MaterialTheme.colorScheme.onPrimaryContainer)
+
         ColouredRow(name = "secondary", colour = MaterialTheme.colorScheme.secondary)
         ColouredRow(name = "onSecondary", colour = MaterialTheme.colorScheme.onSecondary)
+
         ColouredRow(name = "secondaryContainer", colour = MaterialTheme.colorScheme.secondaryContainer)
         ColouredRow(name = "onSecondaryContainer", colour = MaterialTheme.colorScheme.onSecondaryContainer)
+
         ColouredRow(name = "tertiary", colour = MaterialTheme.colorScheme.tertiary)
         ColouredRow(name = "onTertiary", colour = MaterialTheme.colorScheme.onTertiary)
+
         ColouredRow(name = "tertiaryContainer", colour = MaterialTheme.colorScheme.tertiaryContainer)
         ColouredRow(name = "onTertiaryContainer", colour = MaterialTheme.colorScheme.onTertiaryContainer)
+
         ColouredRow(name = "error", colour = MaterialTheme.colorScheme.error)
         ColouredRow(name = "errorContainer", colour = MaterialTheme.colorScheme.errorContainer)
         ColouredRow(name = "onError", colour = MaterialTheme.colorScheme.onError)
         ColouredRow(name = "onErrorContainer", colour = MaterialTheme.colorScheme.onErrorContainer)
+
         ColouredRow(name = "background", colour = MaterialTheme.colorScheme.background)
         ColouredRow(name = "onBackground", colour = MaterialTheme.colorScheme.onBackground)
+
         ColouredRow(name = "surface", colour = MaterialTheme.colorScheme.surface)
         ColouredRow(name = "onSurface", colour = MaterialTheme.colorScheme.onSurface)
+
         ColouredRow(name = "surfaceVariant", colour = MaterialTheme.colorScheme.surfaceVariant)
         ColouredRow(name = "onSurfaceVariant", colour = MaterialTheme.colorScheme.onSurfaceVariant)
 
@@ -58,8 +67,6 @@ fun TestScreen(
         ColouredRow(name = "outlineVariant", colour = MaterialTheme.colorScheme.outlineVariant)
         ColouredRow(name = "scrim", colour = MaterialTheme.colorScheme.scrim)
         ColouredRow(name = "inverseSurface", colour = MaterialTheme.colorScheme.inverseSurface)
-        ColouredRow(name = "onErrorContainer", colour = MaterialTheme.colorScheme.onErrorContainer)
-        ColouredRow(name = "onErrorContainer", colour = MaterialTheme.colorScheme.onErrorContainer)
     }
 }
 

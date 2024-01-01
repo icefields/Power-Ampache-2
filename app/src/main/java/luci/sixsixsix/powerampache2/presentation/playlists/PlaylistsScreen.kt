@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -52,7 +51,8 @@ fun PlaylistsScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        navigator.navigate(PlaylistDetailScreenDestination(playlist.id))
+                                        navigator.navigate(
+                                            PlaylistDetailScreenDestination(playlist = playlist))
                                     }
                             )
 
