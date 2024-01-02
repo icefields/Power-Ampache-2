@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
+import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 
@@ -46,17 +47,20 @@ data class AlbumDto(
 
     @SerializedName("art")
     val art: String? = "",
+
     @SerializedName("flag")
     val flag: Any? = null, // TODO this can be boolean or integer from the server, find a solution!
+
     @SerializedName("rating")
     val rating: Int? = 0,
+
     @SerializedName("averagerating")
-    val averagerating: Int? = 0,
+
+    val averagerating: Float = 0.0f,
+
     @SerializedName("mbid")
     val mbid: Any? = Any()
 )
-
-
 
 data class AlbumsResponse(
     @SerializedName("album") val albums: List<AlbumDto>?,
@@ -71,7 +75,7 @@ fun AlbumDto.toAlbum() = Album(
     genre = genre?.map { it.toMusicAttribute() } ?: listOf(),
     artUrl = art ?: "",
     songCount = songcount ?: 0,
-//    flag = flag ?: false,
+    flag = processFlag(flag),
     time = time ?: 0,
     year = year ?: 0,
 )

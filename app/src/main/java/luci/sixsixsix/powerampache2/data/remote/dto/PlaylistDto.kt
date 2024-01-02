@@ -2,6 +2,7 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 
 
 import com.google.gson.annotations.SerializedName
+import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 
 data class PlaylistDto(
@@ -20,11 +21,11 @@ data class PlaylistDto(
     @SerializedName("flag")
     val flag: Any? = null, // TODO this can be boolean or integer from the server, find a solution!
     @SerializedName("preciserating")
-    val preciserating: Int? = null,
+    val preciserating: Float = 0.0f,
     @SerializedName("rating")
-    val rating: Int? = null,
+    val rating: Int = 0,
     @SerializedName("averagerating")
-    val averagerating: Int? = null
+    val averagerating: Float = 0.0f,
 )
 
 data class PlaylistsResponse(
@@ -38,4 +39,8 @@ fun PlaylistDto.toPlaylist() = Playlist(
     artUrl = art ?: "",
     items = items ?: 0,
     type = type ?: "ERROR no type",
+    flag = processFlag(flag),
+    preciseRating = preciserating,
+    rating = rating,
+    averageRating = averagerating
 )

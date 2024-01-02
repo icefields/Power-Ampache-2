@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,11 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.DEBUG_DEMO_URL
-import luci.sixsixsix.powerampache2.common.Constants.DEBUG_PASSWORD
-import luci.sixsixsix.powerampache2.common.Constants.DEBUG_URL
-import luci.sixsixsix.powerampache2.common.Constants.DEBUG_USER
-import luci.sixsixsix.powerampache2.common.Constants.DEMO_AUTH_TOKEN
+import luci.sixsixsix.powerampache2.data.Servers
 import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 
@@ -96,25 +93,21 @@ fun LoginScreen(
         }
         Text(text = state.error)
 
-        // TODO DEBUG, REMOVE
-        Button(onClick = {
-            viewModel.onEvent(AuthEvent.OnChangeServerUrl(DEBUG_DEMO_URL))
-            viewModel.onEvent(AuthEvent.OnChangePassword(""))
-            viewModel.onEvent(AuthEvent.OnChangeUsername(""))
-            viewModel.onEvent(AuthEvent.OnChangeAuthToken(DEMO_AUTH_TOKEN))
-            viewModel.onEvent(AuthEvent.Login)
-        }) {
-            Text(text = stringResource(id = R.string.loginScreen_demo_server))
-        }
+        LoginButton(server = Servers.LocalDebug, buttonText = R.string.loginScreen_local_server)
+        LoginButton(server = Servers.Dogmazic, buttonText = R.string.loginScreen_dogmazic_server)
+        LoginButton(server = Servers.AmpacheDemo, buttonText = R.string.loginScreen_demo_server)
+    }
+}
 
-        Button(onClick = {
-            viewModel.onEvent(AuthEvent.OnChangeServerUrl(DEBUG_URL))
-            viewModel.onEvent(AuthEvent.OnChangePassword(DEBUG_PASSWORD))
-            viewModel.onEvent(AuthEvent.OnChangeUsername(DEBUG_USER))
-            viewModel.onEvent(AuthEvent.OnChangeAuthToken(""))
-            viewModel.onEvent(AuthEvent.Login)
-        }) {
-            Text(text = "Local Debug-Server")
-        }
+@Composable
+fun LoginButton(server: Servers, viewModel: AuthViewModel = hiltViewModel(), @StringRes buttonText: Int){
+    Button(onClick = {
+        viewModel.onEvent(AuthEvent.OnChangeServerUrl(server.url))
+        viewModel.onEvent(AuthEvent.OnChangePassword(server.password))
+        viewModel.onEvent(AuthEvent.OnChangeUsername(server.user))
+        viewModel.onEvent(AuthEvent.OnChangeAuthToken(server.apiKey))
+        viewModel.onEvent(AuthEvent.Login)
+    }) {
+        Text(text = stringResource(id = buttonText))
     }
 }

@@ -2,6 +2,7 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 
 
 import com.google.gson.annotations.SerializedName
+import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.Artist
 
 data class ArtistDto(
@@ -28,7 +29,7 @@ data class ArtistDto(
     @SerializedName("rating")
     val rating: Any? = null,
     @SerializedName("averagerating")
-    val averagerating: Any? = null,
+    val averagerating: Float = 0.0f,
     @SerializedName("mbid")
     val mbid: Any? = null,
     @SerializedName("summary")
@@ -52,7 +53,7 @@ fun ArtistDto.toArtist() = Artist(
     songCount = songcount ?: 0,
     genre = genre?.map { it.toMusicAttribute() } ?: listOf(),
     artUrl = art ?: "ERROR no name",
-//    flag = flag ?: false,
+    flag = processFlag(flag),
     summary = summary,
     time = time ?: 0,
     yearFormed = yearformed ?: 0,

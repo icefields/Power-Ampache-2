@@ -17,9 +17,9 @@ data class Album(
     val diskCount: Int = 0,
     val genre: List<MusicAttribute> = listOf(),
     val artUrl: String = "",
-//    val flag: Boolean = false,
+    val flag: Int = 0,
     val rating: Int = 0,
-    val averageRating: Int = 0,
+    val averageRating: Float = 0.0f
 ): Comparable<Album>, Parcelable {
     override fun compareTo(other: Album): Int = id.compareTo(other.id)
 }

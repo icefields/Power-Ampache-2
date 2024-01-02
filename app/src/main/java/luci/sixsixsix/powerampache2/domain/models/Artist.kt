@@ -14,7 +14,7 @@ data class Artist(
     val songCount: Int = 0,
     val genre: List<MusicAttribute> = listOf(),
     val artUrl: String = "",
-//    val flag: Boolean = false,
+    val flag: Int = 0,
     val summary: String? = null,
     val time: Int = 0,
     val yearFormed: Int = 0,

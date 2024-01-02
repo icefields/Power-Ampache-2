@@ -18,7 +18,9 @@
     <string name="loginScreen_server_url">Server Url</string>
     <string name="loginScreen_auth_token">Auth Token</string>
     <string name="loginScreen_login">Login</string>
-    <string name="loginScreen_demo_server">Remote Debug-Server</string>
+    <string name="loginScreen_demo_server">Remote Demo-Server</string>
+    <string name="loginScreen_local_server">Local Server</string>
+    <string name="loginScreen_dogmazic_server">Dogmazic</string>
     <string name="home_section_title_recent">Recent</string>
     <string name="home_section_title_flagged">Flagged</string>
     <string name="home_section_title_frequent">Frequent</string>

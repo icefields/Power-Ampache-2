@@ -78,8 +78,8 @@ fun ArtistDetailScreen(
                 .align(Alignment.TopCenter),
             model = state.artist.artUrl,
             contentScale = ContentScale.Crop,
-            placeholder = painterResource(id = R.drawable.placeholder_album),
-            error = painterResource(id = R.drawable.ic_image),
+//            placeholder = painterResource(id = R.drawable.placeholder_album),
+//            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name
         )
         AsyncImage(
@@ -88,8 +88,8 @@ fun ArtistDetailScreen(
                 .align(Alignment.TopCenter),
             model = state.artist.artUrl,
             contentScale = ContentScale.FillWidth,
-            placeholder = painterResource(id = R.drawable.placeholder_album),
-            error = painterResource(id = R.drawable.ic_playlist),
+//            placeholder = painterResource(id = R.drawable.placeholder_album),
+//            error = painterResource(id = R.drawable.ic_playlist),
             contentDescription = state.artist.name,
         )
         // full screen view to add a transparent black layer on top

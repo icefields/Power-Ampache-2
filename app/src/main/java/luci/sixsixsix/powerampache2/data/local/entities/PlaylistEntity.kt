@@ -12,6 +12,10 @@ data class PlaylistEntity(
     val items: Int? = 0,
     val type: String? = null,
     val artUrl: String? = null,
+    val flag: Int = 0,
+    val preciseRating: Float = 0.0f,
+    val rating: Int = 0,
+    val averageRating: Float = 0.0f,
 )
 
 fun PlaylistEntity.toPlaylist() = Playlist(
@@ -20,7 +24,11 @@ fun PlaylistEntity.toPlaylist() = Playlist(
     owner = owner ?: "",
     items = items ?: 0,
     type = type ?: "",
-    artUrl = artUrl ?: ""
+    artUrl = artUrl ?: "",
+    flag = flag,
+    preciseRating = preciseRating,
+    rating = rating,
+    averageRating = averageRating
 )
 
 fun Playlist.toPlaylistEntity() = PlaylistEntity(
@@ -29,5 +37,9 @@ fun Playlist.toPlaylistEntity() = PlaylistEntity(
     owner = owner ?: "",
     items = items ?: 0,
     type = type ?: "",
-    artUrl = artUrl ?: ""
+    artUrl = artUrl ?: "",
+    flag = flag,
+    preciseRating = preciseRating,
+    rating = rating,
+    averageRating = averageRating
 )

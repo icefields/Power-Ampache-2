@@ -33,7 +33,7 @@ data class Song(
     val name: String = "",
     val mode: String? = null,
     val artists: List<MusicAttribute> = listOf(),
-//    val flag: Boolean = false,
+    val flag: Int = 0,
     val streamFormat: String? = null,
     val streamMime: String? = null,
     val publisher: String? = null,
