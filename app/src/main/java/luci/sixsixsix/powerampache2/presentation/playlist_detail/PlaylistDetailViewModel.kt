@@ -11,8 +11,12 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
+import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
+import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Playlist.*
+import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
@@ -29,23 +33,7 @@ class PlaylistDetailViewModel @Inject constructor(
 
     init {
         savedStateHandle.get<Playlist>("playlist")?.let { playlist ->
-            when(playlist) {
-                is HighestPlaylist -> getHighestSongs()
-                is RecentPlaylist -> getRecentSongs()
-                is FlaggedPlaylist -> getFlaggedSongs()
-                is FrequentPlaylist -> getFrequentSongs()
-                else -> getSongsFromPlaylist(playlist.id)
-
-
-
-//                PlaylistType.Default -> savedStateHandle.get<String>("playlistId")?.let { id ->
-//                    getSongsFromPlaylist(id)
-//                }
-//                PlaylistType.HighestSongs -> getHighestSongs()
-//                PlaylistType.RecentSongs -> getRecentSongs()
-//                PlaylistType.FrequentSongs -> getFrequentSongs()
-//                PlaylistType.FlaggedSongs -> getFlaggedSongs()
-            }
+            onEvent(PlaylistDetailEvent.Fetch(playlist))
         }
     }
 
@@ -54,12 +42,32 @@ class PlaylistDetailViewModel @Inject constructor(
             is PlaylistDetailEvent.Refresh -> {
             }
             is PlaylistDetailEvent.Fetch -> {
-                getSongsFromPlaylist(playlistId = event.playlistId ,fetchRemote = true)
+                when (event.playlist) {
+                    is HighestPlaylist -> getHighestSongs(fetchRemote = true)
+                    is RecentPlaylist -> getRecentSongs(fetchRemote = true)
+                    is FlaggedPlaylist -> getFlaggedSongs(fetchRemote = true)
+                    is FrequentPlaylist -> getFrequentSongs(fetchRemote = true)
+                    else -> getSongsFromPlaylist(playlistId = event.playlist.id, fetchRemote = true)
+                }
             }
 
             is PlaylistDetailEvent.OnSongSelected -> { playlistManager.updateTopSong(event.song) }
+            PlaylistDetailEvent.OnDownloadPlaylist -> TODO()
+            PlaylistDetailEvent.OnPlayPlaylist -> TODO()
+            PlaylistDetailEvent.OnSharePlaylist -> TODO()
+            PlaylistDetailEvent.OnShufflePlaylist -> TODO()
         }
     }
+
+    fun generateBackgrounds(): Pair<String, String> =
+        if (state.songs.isNotEmpty()) {
+            val urls = state.songs.map { it.imageUrl }.toSet().shuffled()
+            // try to have different images, get first and last
+            val randomBackgroundTop = urls[0]
+            val randomBackgroundBottom = urls[urls.size - 1]
+            Pair(randomBackgroundTop, randomBackgroundBottom)
+        } else Pair("", "")
+
 
     private fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {

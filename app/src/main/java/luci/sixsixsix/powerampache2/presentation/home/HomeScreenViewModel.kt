@@ -11,7 +11,11 @@ import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
+import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
+import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,10 +55,10 @@ class HomeScreenViewModel @Inject constructor(
                             result.data?.let { playlists ->
                                 // inject generated playlists
                                 val playlistList = mutableListOf<Playlist>(
-                                    Playlist.HighestPlaylist(),
-                                    Playlist.RecentPlaylist(),
-                                    Playlist.FrequentPlaylist(),
-                                    Playlist.FlaggedPlaylist()
+                                    HighestPlaylist(),
+                                    RecentPlaylist(),
+                                    FrequentPlaylist(),
+                                    FlaggedPlaylist()
                                 )
                                 playlistList.addAll(playlists)
                                 state = state.copy(playlists = playlistList)

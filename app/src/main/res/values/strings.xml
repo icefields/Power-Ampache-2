@@ -6,6 +6,7 @@
     <string name="albumDetailScreen_infoSection_year">Year</string>
     <string name="albumDetailScreen_infoSection_songs">Songs</string>
     <string name="albumDetailScreen_infoSection_time">Total Time</string>
+    <string name="playlistDetailScreen_infoSection_avgRating">Average Rating</string>
     <string name="playlistItem_songCount">%s Songs</string>
     <string name="topBar_search_hint">Search …</string>
     <string name="main_tab_title_albums">Albums</string>
