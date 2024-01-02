@@ -20,10 +20,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,50 +43,90 @@ import java.util.UUID
 @Composable
 fun AlbumItem(album: Album, modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier,
+        modifier = modifier.aspectRatio(1f),
         elevation = CardDefaults.cardElevation(1.dp),
         shape = RoundedCornerShape(dimensionResource(R.dimen.albumItem_card_cornerRadius))
     ) {
-        Box {
+        Box(modifier = Modifier.background(brush = albumBackgroundGradient)) {
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize()
-                    .aspectRatio(1f/1f)
-                    .border(dimensionResource(R.dimen.albumItem_card_border), MaterialTheme.colorScheme.background),
+                    .aspectRatio(1f / 1f)
+                    .border(
+                        dimensionResource(R.dimen.albumItem_card_border),
+                        MaterialTheme.colorScheme.background
+                    ),
                 model = album.artUrl,
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(id = R.drawable.placeholder_album),
                 error = painterResource(id = R.drawable.ic_playlist),
                 contentDescription = album.name,
             )
+//            Box(modifier = Modifier
+//                .fillMaxSize()
+//                .background(brush = albumBackgroundGradient))
+
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
+                    .background(brush = albumBackgroundGradient)
+                    //.background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
                     .padding(
-                        horizontal = dimensionResource(R.dimen.albumItem_infoText_paddingHorizontal),
-                        vertical = dimensionResource(R.dimen.albumItem_infoText_paddingVertical)
+                        start = dimensionResource(R.dimen.albumItem_infoText_paddingHorizontal),
+                        end = dimensionResource(R.dimen.albumItem_infoText_paddingHorizontal),
+                        top = 10.dp,
+                        bottom = dimensionResource(R.dimen.albumItem_infoText_paddingVertical)
                     )
             ) {
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = album.name,
-                    fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_title),
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    lineHeight = fontDimensionResource(R.dimen.albumItem_infoTextSection_lineHeight_title)
-                )
-                Text(
-                    modifier = Modifier.basicMarquee(),
-                    text = album.artist.name,
-                    fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_artist),
-                    fontWeight = FontWeight.Light
-                )
+                    Text(
+                        text = album.name,
+                        fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_title),
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        lineHeight = fontDimensionResource(R.dimen.albumItem_infoTextSection_lineHeight_title),
+                        style = TextStyle(
+                            fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_title),
+                            shadow = Shadow(
+                                color = MaterialTheme.colorScheme.background,
+                                offset = Offset(0.0f, 0.0f),
+                                blurRadius = 18f
+                            )
+                        )
+                    )
+
+
+                    Text(
+                        modifier = Modifier.basicMarquee(),
+                        text = album.artist.name,
+                        fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_artist),
+                        fontWeight = FontWeight.Light,
+                        style = TextStyle(
+                            fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_title),
+                            shadow = Shadow(
+                                color = MaterialTheme.colorScheme.background,
+                                offset = Offset(0.0f, 0.0f),
+                                blurRadius = 18f
+                            )
+                        )
+                    )
             }
         }
     }
 }
+
+private val albumBackgroundGradient
+    @Composable
+    get() =
+        Brush.verticalGradient(
+            colors = listOf(
+                Color.Transparent,
+                MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+            )
+        )
 
 @Preview(widthDp = 300) //(widthDp = 50, heightDp = 50)
 @Composable

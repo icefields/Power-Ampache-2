@@ -50,7 +50,7 @@ fun PlaylistDetailTopBar(
     onRightIconClick: () -> Unit
 ) {
     TopAppBar(
-        modifier = Modifier.background(Color.Transparent),
+        //modifier = Modifier.background(Color.Transparent),
         colors = TopAppBarDefaults.largeTopAppBarColors(
             containerColor = Color.Transparent,
             scrolledContainerColor = MaterialTheme.colorScheme.surface,
