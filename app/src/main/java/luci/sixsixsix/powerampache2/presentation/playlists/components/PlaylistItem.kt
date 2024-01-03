@@ -84,19 +84,6 @@ fun PlaylistItem(
                 .align(Alignment.CenterVertically),
             playlistInfo = playlistInfo
         )
-
-        Button(
-            onClick = {},
-            modifier = Modifier.weight(0.5f)
-        ) {
-            Image(
-                painterResource(id = android.R.drawable.ic_menu_preferences),
-                stringResource(id = R.string.menu_content_description),
-                modifier = Modifier.background(Color.Transparent),
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(Color.Black)
-            )
-        }
     }
     Spacer(modifier = Modifier
         .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer) * 2))

@@ -11,30 +11,37 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDatabase): Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        return runBlocking {
-            var request = chain.request()
-            val host = musicDatabase.dao.getCredentials()?.serverUrl?.toHttpUrlOrNull()
-            host?.let { newHost ->
-                try {
-                    request.url.newBuilder()
-                        .scheme(newHost.scheme)
-                        .host(newHost.host)
-                        .encodedPath("${newHost.encodedPath}${request.url.encodedPath}")
-                        .encodedQuery(request.url.encodedQuery)
-                        .build()
-                } catch (e: URISyntaxException) {
-                    e.printStackTrace()
-                    null
-                }?.let { newUrl ->
-                    request = request.newBuilder()
-                        .url(newUrl)
-                        .build()
-                }
-            }
-            L("INTERCEPTOR request.url ${request.url}")
-            chain.proceed(request)
+class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDatabase) :
+    Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
+        var request = chain.request()
+        var hostStr = musicDatabase.dao.getCredentials()?.serverUrl
+        if (hostStr?.contains("/server") == false) {
+            hostStr += "/server"
         }
+        if (hostStr?.contains("http://") == false &&
+            hostStr?.contains("https://") == false) {
+            hostStr = "https://$hostStr"
+        }
+        val host = hostStr?.toHttpUrlOrNull()
+        host?.let { newHost ->
+            try {
+                request.url.newBuilder()
+                    .scheme(newHost.scheme)
+                    .host(newHost.host)
+                    .encodedPath("${newHost.encodedPath}${request.url.encodedPath}")
+                    .encodedQuery(request.url.encodedQuery)
+                    .build()
+            } catch (e: URISyntaxException) {
+                e.printStackTrace()
+                null
+            }?.let { newUrl ->
+                request = request.newBuilder()
+                    .url(newUrl)
+                    .build()
+            }
+        }
+        L("INTERCEPTOR request.url ${request.url}")
+        chain.proceed(request)
     }
 }
