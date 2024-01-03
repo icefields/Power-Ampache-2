@@ -12,11 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.song_detail.components.SongDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.song_detail.components.MiniPlayer
 
 @Composable
@@ -26,6 +26,7 @@ fun SheetDragHandle(
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
+    val barHeight = dimensionResource(id = R.dimen.miniPlayer_height)
 
     Box(modifier = Modifier
         .height(dimensionResource(id = R.dimen.miniPlayer_height))
@@ -35,11 +36,11 @@ fun SheetDragHandle(
         Box(modifier = Modifier
             .height(
                 // if it's expanded do not show the player
-                if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                    0.dp
-                } else {
-                    dimensionResource(id = R.dimen.miniPlayer_height)
-                }
+                //if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                //    0.dp
+                //} else {
+                barHeight
+                //}
             )
             .fillMaxWidth()
             .clickable {
@@ -52,7 +53,11 @@ fun SheetDragHandle(
                 }
             }
         ) {
-            MiniPlayer()
+            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                SongDetailTopBar()
+            } else {
+                MiniPlayer()
+            }
         }
     }
 }
