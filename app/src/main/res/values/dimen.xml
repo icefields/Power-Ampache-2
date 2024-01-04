@@ -23,6 +23,7 @@
     <dimen name="main_tab_textSize">12sp</dimen>
     <dimen name="songItem_infoTextSection_spacer">4dp</dimen>
     <dimen name="miniPlayer_height">70dp</dimen>
+    <dimen name="queue_dragHandle_height">42dp</dimen>
     <dimen name="close_handle_icon_padding">10dp</dimen>
 
     <dimen name="albumDetail_chip_radius">20dp</dimen>

@@ -27,7 +27,7 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory {
                 .build()
 
         }
-        .logger(DebugLogger()) // TODO change in production
+        //.logger(DebugLogger()) // TODO change in production
         .build()
 
 }

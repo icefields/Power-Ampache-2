@@ -43,10 +43,10 @@ fun SongDetailQueueDragHandle(
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
-    val barHeight = dimensionResource(id = R.dimen.miniPlayer_height)
+    val barHeight = dimensionResource(id = R.dimen.queue_dragHandle_height)
 
     Box(modifier = Modifier
-        .height(dimensionResource(id = R.dimen.miniPlayer_height))
+        .height(dimensionResource(id = R.dimen.queue_dragHandle_height))
         .fillMaxWidth()
     ) {
         // show mini-player
@@ -74,9 +74,6 @@ fun SongDetailQueueDragHandle(
 
 
 
-
-
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongDetailQueueTopBar(
@@ -86,7 +83,7 @@ fun SongDetailQueueTopBar(
     Box(
         contentAlignment = Alignment.CenterStart,
         modifier = modifier
-            .background(MaterialTheme.colorScheme.primary)
+            .background(MaterialTheme.colorScheme.primaryContainer)
             .padding(
                 vertical = 5.dp,
                 horizontal = 8.dp
@@ -96,7 +93,7 @@ fun SongDetailQueueTopBar(
             Image(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(dimensionResource(id = R.dimen.close_handle_icon_padding)),
+                    .padding(2.dp),
                 contentScale = ContentScale.FillHeight,
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "close song detail screen"
@@ -110,6 +107,7 @@ fun SongDetailQueueTopBar(
             Text(
                 modifier = Modifier.basicMarquee(),
                 text = "UP NEXT",
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 maxLines = 1,

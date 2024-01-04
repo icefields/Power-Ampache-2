@@ -44,6 +44,8 @@ import luci.sixsixsix.powerampache2.presentation.song_detail.components.SongDeta
 import luci.sixsixsix.powerampache2.presentation.queue.QueueEvent
 import luci.sixsixsix.powerampache2.presentation.queue.QueueViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.components.QueueScreenContent
+import luci.sixsixsix.powerampache2.presentation.song_detail.components.SongDetailContent
+import luci.sixsixsix.powerampache2.presentation.song_detail.components.SongDetailQueueScreenContent
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
 
@@ -56,7 +58,7 @@ fun SongDetailScreen(
 ) {
     val state = viewModel.state
     val scaffoldState = rememberBottomSheetScaffoldState()
-    val barHeight = dimensionResource(id = R.dimen.miniPlayer_height)
+    val barHeight = dimensionResource(id = R.dimen.queue_dragHandle_height)
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
@@ -72,123 +74,5 @@ fun SongDetailScreen(
         SongDetailContent(
             //navigator = navigator,
             Modifier.padding(paddingValues = it))
-    }
-}
-
-@Composable
-fun SongDetailContent(
-    // navigator: DestinationsNavigator,
-    modifier: Modifier = Modifier,
-    viewModel: MainViewModel = hiltViewModel()
-) {
-    val state = viewModel.state
-
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-
-        AsyncImage(
-            modifier = Modifier
-                .weight(7f)
-                .fillMaxWidth(),
-            model = state.song?.imageUrl,
-            placeholder = painterResource(id = R.drawable.placeholder_album),
-            error = painterResource(id = R.drawable.ic_playlist),
-            contentDescription = state.song?.title,
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = state.song?.title ?: "",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onBackground,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Box(modifier = Modifier.weight(2.0f))
-            IconButton(
-                onClick = {
-                    state.song?.let {
-                        viewModel.onEvent(MainEvent.Play(it))
-                    }
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.PlayCircle,
-                    contentDescription = state.song?.title ?: "",
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .fillMaxSize()
-                )
-            }
-            Box(modifier = Modifier.weight(2.0f))
-        }
-
-        LazyColumn(modifier = Modifier.weight(1.0f)) {
-            items(1) {
-                Text(
-                    text = "${state.song?.toDebugString()}",
-                    fontWeight = FontWeight.Light,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 30,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.End
-                )
-            }
-        }
-
-        LazyColumn(modifier = Modifier.weight(3.0f)) {
-            items(viewModel.state.queue.toList()) { song ->
-                Text(
-                    text = "${song.title} - ${song.artist.name}",
-                    fontWeight = FontWeight.Light,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth())
-            }
-        }
-    }
-}
-
-@Composable
-fun SongDetailQueueScreenContent(
-    modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel = hiltViewModel(),
-    viewModel: QueueViewModel = hiltViewModel()
-) {
-    val state = mainViewModel.state
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        items(state.queue) { song ->
-            SongItem(
-                song = song,
-                songItemEventListener = { event ->
-                    when(event) {
-                        SongItemEvent.PLAY_NEXT -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
-                        SongItemEvent.SHARE_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
-                        SongItemEvent.DOWNLOAD_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
-                        SongItemEvent.GO_TO_ALBUM -> {} //  navigator.navigate(AlbumDetailScreenDestination(albumId = song.album.id))
-                        SongItemEvent.GO_TO_ARTIST -> {}
-                        SongItemEvent.ADD_SONG_TO_QUEUE -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
-                        SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        // TODO BUG when tapping on a song, in the context of a playlist, do not
-                        //  move the new song on top, just start playing from the selected song
-                        mainViewModel.onEvent(MainEvent.Play(song))
-                        viewModel.onEvent(QueueEvent.OnSongSelected(song))
-                    }
-            )
-        }
     }
 }
