@@ -10,7 +10,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
@@ -19,15 +21,23 @@ class AlbumDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
-    private val repository: SongsRepository,
+    private val songsRepository: SongsRepository,
+    private val albumsRepository: AlbumsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
 
     var state by mutableStateOf(AlbumDetailState())
 
     init {
+        val album = savedStateHandle.get<Album>("album")?.also {
+            state = state.copy(album = it)
+        }
+
         savedStateHandle.get<String>("albumId")?.let {
             getSongsFromAlbum(it)
+            if (album == null) {
+                getAlbumInfo(it)
+            }
         }
     }
 
@@ -42,12 +52,10 @@ class AlbumDetailViewModel @Inject constructor(
                 playlistManager.updateTopSong(event.song)
             }
 
-            is AlbumDetailEvent.OnAddSongToQueueNext -> playlistManager.addToCurrentQueueNext(event.song)
-            is AlbumDetailEvent.OnAddSongToQueue -> playlistManager.addToCurrentQueue(event.song)
-
             is AlbumDetailEvent.OnAddAlbumToQueue -> playlistManager.addToCurrentQueue(state.songs)
+
             is AlbumDetailEvent.OnPlayAlbum -> {
-                L("AlbumDetailEvent.OnPlayAlbum")
+                L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
                 playlistManager.addToCurrentQueueNext(state.songs)
                 playlistManager.updateTopSong(state.songs[0])
             }
@@ -59,22 +67,40 @@ class AlbumDetailViewModel @Inject constructor(
                 playlistManager.updateTopSong(shuffled[0])
             }
 
-            is AlbumDetailEvent.OnAddSongToPlaylist -> {}
-            is AlbumDetailEvent.OnDownloadSong -> {}
-            is AlbumDetailEvent.OnShareSong -> {}
+
+        }
+    }
+
+    private fun getAlbumInfo(albumId: String, fetchRemote: Boolean = true) {
+        viewModelScope.launch {
+            albumsRepository
+                .getAlbum(albumId, fetchRemote)
+                .collect { result ->
+                    when(result) {
+                        is Resource.Success -> {
+                            // TODO why am I using network data here? please comment
+                            result.networkData?.let { album ->
+                                state = state.copy(album = album)
+                                L("AlbumDetailViewModel.getAlbumInfo size ${result.data} network: ${result.networkData}")
+                            }
+                        }
+                        is Resource.Error -> state = state.copy(isLoading = false)
+                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                    }
+                }
         }
     }
 
     private fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
-            repository
+            songsRepository
                 .getSongsFromAlbum(albumId)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
                                 state = state.copy(songs = songs)
-                                L("viewmodel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)
+                                L("AlbumDetailViewModel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)
                             }
                         }
 

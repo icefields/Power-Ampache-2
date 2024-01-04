@@ -13,4 +13,5 @@ interface AlbumsRepository {
     suspend fun getFrequentAlbums(): Flow<Resource<List<Album>>>
     suspend fun getFlaggedAlbums(): Flow<Resource<List<Album>>>
     suspend fun getRandomAlbums(): Flow<Resource<List<Album>>>
+    suspend fun getAlbum(albumId: String, fetchRemote: Boolean, ): Flow<Resource<Album>>
 }

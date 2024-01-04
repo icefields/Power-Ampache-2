@@ -17,6 +17,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.LoadingScreen
+import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
@@ -56,11 +57,13 @@ fun SongsListScreen(
                                     SongItemEvent.PLAY_NEXT -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
                                     SongItemEvent.SHARE_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
                                     SongItemEvent.DOWNLOAD_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
-                                    SongItemEvent.GO_TO_ALBUM -> {} //  navigator.navigate(AlbumDetailScreenDestination(albumId = song.album.id))
+                                    SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
+                                        AlbumDetailScreenDestination(albumId = song.album.id, album = null)
+                                    )
                                     SongItemEvent.GO_TO_ARTIST -> navigator.navigate(
                                         ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
                                     )
-                                    SongItemEvent.ADD_SONG_TO_QUEUE -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
+                                    SongItemEvent.ADD_SONG_TO_QUEUE -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                                     SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
                                 }
                             },

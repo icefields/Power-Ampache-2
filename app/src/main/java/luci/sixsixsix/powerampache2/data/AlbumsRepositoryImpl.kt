@@ -12,10 +12,13 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toArtist
+import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
+import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toMusicAttribute
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
@@ -24,6 +27,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
@@ -63,7 +67,6 @@ class AlbumsRepositoryImpl @Inject constructor(
 
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
     private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
-
 
     override suspend fun getAlbums(
         fetchRemote: Boolean,
@@ -214,4 +217,33 @@ class AlbumsRepositoryImpl @Inject constructor(
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getRandomAlbums()", e, this) }
+
+    override suspend fun getAlbum(
+        albumId: String,
+        fetchRemote: Boolean,
+    ): Flow<Resource<Album>> = flow {
+        emit(Resource.Loading(true))
+
+        dao.getAlbum(albumId)?.let { albumEntity ->
+            emit(Resource.Success(data = albumEntity.toAlbum() ))
+            if(!fetchRemote) {  // load cache only?
+                emit(Resource.Loading(false))
+                return@flow
+            }
+        }
+
+        val auth = getSession()!!
+        val response = api.getAlbumInfo(authKey = auth.auth, albumId = albumId)
+        val album = response.toAlbum()  //will throw exception if artist null
+
+//        if (CLEAR_TABLE_AFTER_FETCH) { dao.clearArtists() }
+
+        dao.insertAlbums(listOf(album.toAlbumEntity()))
+        // stick to the single source of truth pattern despite performance deterioration
+        dao.getAlbum(albumId)?.let { albumEntity ->
+            emit(Resource.Success(data = albumEntity.toAlbum(), networkData = album ))
+        }
+
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getAlbum()", e, this) }
 }

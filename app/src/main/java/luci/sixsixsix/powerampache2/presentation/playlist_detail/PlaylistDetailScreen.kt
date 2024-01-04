@@ -40,8 +40,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.LoadingScreen
+import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.home.components.remainingPlaylistBgColours
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.playlist_detail.components.PlaylistDetailTopBar
@@ -162,14 +162,16 @@ fun PlaylistDetailScreen(
                                     song = song,
                                     songItemEventListener = { event ->
                                         when(event) {
-                                            SongItemEvent.PLAY_NEXT -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
-                                            SongItemEvent.SHARE_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
-                                            SongItemEvent.DOWNLOAD_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
-                                            SongItemEvent.GO_TO_ALBUM -> {} //  navigator.navigate(AlbumDetailScreenDestination(albumId = song.album.id))
+                                            SongItemEvent.PLAY_NEXT -> mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                                            SongItemEvent.SHARE_SONG -> mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                                            SongItemEvent.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                                            SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
+                                                AlbumDetailScreenDestination(albumId = song.album.id, album = null)
+                                            )
                                             SongItemEvent.GO_TO_ARTIST -> navigator.navigate(
                                                 ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
                                             )
-                                            SongItemEvent.ADD_SONG_TO_QUEUE -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
+                                            SongItemEvent.ADD_SONG_TO_QUEUE -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                                             SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
                                         }
                                     },

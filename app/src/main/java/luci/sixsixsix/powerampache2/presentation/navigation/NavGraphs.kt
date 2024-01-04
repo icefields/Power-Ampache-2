@@ -1,5 +1,7 @@
 package luci.sixsixsix.powerampache2.presentation.navigation
 
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
 //import luci.sixsixsix.powerampache2.presentation.NavGraph
 //import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 //import luci.sixsixsix.powerampache2.presentation.destinations.AlbumsScreenDestination
@@ -13,6 +15,12 @@ package luci.sixsixsix.powerampache2.presentation.navigation
 //import luci.sixsixsix.powerampache2.presentation.destinations.SongsListScreenDestination
 
 object Ampache2NavGraphs {
+
+    // TODO this is not taking into consideration lifecycle, it's set the first time the NavGraph
+    //  is declared inside LoggedInScreen and MainContent
+    var navigator: DestinationsNavigator? = null
+
+
 //
 //    val albums: NavGraph = NavGraph(
 //        route = "albums",

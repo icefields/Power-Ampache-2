@@ -23,8 +23,10 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 
 @Composable
-fun AlbumInfoButtonsRow(modifier: Modifier = Modifier, album: Album,
-                        eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit) {
+fun AlbumInfoButtonsRow(
+    modifier: Modifier = Modifier, album: Album,
+    eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit
+) {
     Row(modifier = modifier
         .padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding)),
         verticalAlignment = Alignment.CenterVertically,

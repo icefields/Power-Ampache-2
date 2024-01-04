@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.presentation.album_detail
 
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 
 
 sealed class AlbumDetailEvent {
@@ -10,10 +11,6 @@ sealed class AlbumDetailEvent {
     data object OnShareAlbum: AlbumDetailEvent()
     data object OnDownloadAlbum: AlbumDetailEvent()
     data object OnShuffleAlbum: AlbumDetailEvent()
-    data class OnAddSongToQueue(val song: Song): AlbumDetailEvent()
-    data class OnAddSongToPlaylist(val song: Song): AlbumDetailEvent()
-    data class OnAddSongToQueueNext(val song: Song): AlbumDetailEvent()
     data object OnAddAlbumToQueue: AlbumDetailEvent()
-    data class OnShareSong(val song: Song): AlbumDetailEvent()
-    data class OnDownloadSong(val song: Song): AlbumDetailEvent()
+
 }

@@ -17,6 +17,7 @@ import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.album_detail.AlbumDetailEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -84,6 +85,7 @@ class MainViewModel @Inject constructor(
             //  event in AuthViewModel
             MainEvent.OnLogout -> {
                 L( "MainViewModel Logout")
+                playlistManager.reset()
 
                 viewModelScope.launch {
                     musicRepository.logout().collect { result ->
@@ -105,6 +107,15 @@ class MainViewModel @Inject constructor(
             MainEvent.PlayCurrent -> {
                 state.song?.let { launchVLC(song = it) }
             }
+
+
+
+            is MainEvent.OnAddSongToQueueNext -> playlistManager.addToCurrentQueueNext(event.song)
+            is MainEvent.OnAddSongToQueue -> playlistManager.addToCurrentQueue(event.song)
+
+            is MainEvent.OnAddSongToPlaylist -> {}
+            is MainEvent.OnDownloadSong -> {}
+            is MainEvent.OnShareSong -> {}
         }
     }
 

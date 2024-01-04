@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
@@ -90,13 +91,23 @@ fun SongDetailQueueTopBar(
             )
     ) {
         if (showCloseIcon) {
-            Image(
+//            Image(
+//                modifier = Modifier
+//                    .fillMaxHeight()
+//                    .padding(2.dp),
+//                contentScale = ContentScale.FillHeight,
+//                imageVector = Icons.Default.KeyboardArrowDown,
+//                contentDescription = "close song detail screen"
+//            )
+
+            Icon(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(2.dp),
-                contentScale = ContentScale.FillHeight,
+                    .padding(dimensionResource(id = R.dimen.close_handle_icon_padding)),
+                //contentScale = ContentScale.FillHeight,
                 imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "close song detail screen"
+                contentDescription = "close song detail screen",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 

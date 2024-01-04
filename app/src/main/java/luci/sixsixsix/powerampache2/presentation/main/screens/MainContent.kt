@@ -48,6 +48,7 @@ import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTab
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTabRow.tabItems
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.TabItem
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.drawerItems
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsScreen
 import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 
@@ -59,6 +60,8 @@ fun MainContent(
     navigator: DestinationsNavigator,
     viewModel: MainViewModel = hiltViewModel()
 ) {
+    Ampache2NavGraphs.navigator = navigator
+
     val tabsCount = MainTabRow.tabItems.size
     val pagerState = rememberPagerState { tabsCount }
     L("MainContent Current song ${viewModel.state.song}")

@@ -32,3 +32,5 @@ fun Album.totalTime(): String {
 
 // LISTS PERFORMANCE . urls contain the token, do not rely only on id
 fun Album.key(): String = "${id}${artUrl}"//.md5()
+
+fun Album.empty(): Album = Album()

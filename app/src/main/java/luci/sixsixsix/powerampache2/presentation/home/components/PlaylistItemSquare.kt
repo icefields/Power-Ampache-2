@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import kotlin.random.Random
 
@@ -36,7 +37,7 @@ fun PlaylistItemSquare(
 ) {
     Column {
         for(playlist in playlistColumn) {
-            ColourPlaylistHomeItem(playlist, modifier, getRandomColour(), onPlaylistClick)
+            ColourPlaylistHomeItem(playlist, modifier, RandomThemeBackgroundColour(), onPlaylistClick)
             Spacer(modifier = Modifier.height(10.dp))
         }
     }
@@ -50,7 +51,7 @@ fun ColourPlaylistHomeItem(
     onPlaylistClick: (playlist: Playlist) -> Unit
 ) {
     Card(
-        border = BorderStroke((0.5).dp, Color.Black),
+        border = BorderStroke((0.5).dp, MaterialTheme.colorScheme.background),
         modifier = modifier
             .width(width)
             .height(height)
@@ -83,33 +84,33 @@ fun ColourPlaylistHomeItem(
     }
 }
 
-@Composable
-fun getRandomColour(): Color {
-    if (remainingPlaylistBgColours.isEmpty()) {
-        remainingPlaylistBgColours = ArrayList(playlistBgColours)
-    }
-    val randomIndex = Random.nextInt(remainingPlaylistBgColours.size)
-    val randomColour = remainingPlaylistBgColours[randomIndex]
-    remainingPlaylistBgColours.removeAt(randomIndex)
-    return randomColour
-}
-
-var remainingPlaylistBgColours = mutableListOf<Color>()
-
-val playlistBgColours
-    @Composable
-    get() =
-        listOf(
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.secondary,
-            MaterialTheme.colorScheme.secondaryContainer,
-            MaterialTheme.colorScheme.tertiary,
-            MaterialTheme.colorScheme.tertiaryContainer,
-            MaterialTheme.colorScheme.error,
-            MaterialTheme.colorScheme.errorContainer,
-            MaterialTheme.colorScheme.background,
-            MaterialTheme.colorScheme.surface,
-            MaterialTheme.colorScheme.surfaceVariant,
-            MaterialTheme.colorScheme.inverseSurface
-        )
+//@Composable
+//fun getRandomColour(): Color {
+//    if (remainingPlaylistBgColours.isEmpty()) {
+//        remainingPlaylistBgColours = ArrayList(playlistBgColours)
+//    }
+//    val randomIndex = Random.nextInt(remainingPlaylistBgColours.size)
+//    val randomColour = remainingPlaylistBgColours[randomIndex]
+//    remainingPlaylistBgColours.removeAt(randomIndex)
+//    return randomColour
+//}
+//
+//var remainingPlaylistBgColours = mutableListOf<Color>()
+//
+//val playlistBgColours
+//    @Composable
+//    get() =
+//        listOf(
+//            MaterialTheme.colorScheme.primary,
+//            MaterialTheme.colorScheme.primaryContainer,
+//            MaterialTheme.colorScheme.secondary,
+//            MaterialTheme.colorScheme.secondaryContainer,
+//            MaterialTheme.colorScheme.tertiary,
+//            MaterialTheme.colorScheme.tertiaryContainer,
+//            MaterialTheme.colorScheme.error,
+//            MaterialTheme.colorScheme.errorContainer,
+//            MaterialTheme.colorScheme.background,
+//            MaterialTheme.colorScheme.surface,
+//            MaterialTheme.colorScheme.surfaceVariant,
+//            MaterialTheme.colorScheme.inverseSurface
+//        )

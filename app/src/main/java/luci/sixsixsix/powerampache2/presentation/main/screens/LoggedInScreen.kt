@@ -56,7 +56,7 @@ fun LoggedInScreen(
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
-            SongDetailScreen()
+            SongDetailScreen(mainScaffoldState = scaffoldState)
         },
         sheetDragHandle = {
             SheetDragHandle(scaffoldState = scaffoldState)

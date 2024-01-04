@@ -5,43 +5,62 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.queue.QueueEvent
 import luci.sixsixsix.powerampache2.presentation.queue.QueueViewModel
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDetailQueueScreenContent(
+    mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel = hiltViewModel(),
     viewModel: QueueViewModel = hiltViewModel()
 ) {
     val state = mainViewModel.state
+    val scope = rememberCoroutineScope()
+
     LazyColumn(modifier = modifier.fillMaxSize()) {
         items(state.queue) { song ->
             SongItem(
                 song = song,
                 songItemEventListener = { event ->
                     when(event) {
-                        SongItemEvent.PLAY_NEXT -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
-                        SongItemEvent.SHARE_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
-                        SongItemEvent.DOWNLOAD_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
-                        SongItemEvent.GO_TO_ALBUM -> {} //  navigator.navigate(AlbumDetailScreenDestination(albumId = song.album.id))
-                        SongItemEvent.GO_TO_ARTIST -> {}
-                        SongItemEvent.ADD_SONG_TO_QUEUE -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
+                        SongItemEvent.PLAY_NEXT -> mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                        SongItemEvent.SHARE_SONG -> mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                        SongItemEvent.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                        SongItemEvent.GO_TO_ALBUM -> {
+                            Ampache2NavGraphs.navigator?.navigate(AlbumDetailScreenDestination(albumId = song.album.id))
+                            scope.launch {
+                                mainScaffoldState.bottomSheetState.partialExpand()
+                            }
+                        }
+                        SongItemEvent.GO_TO_ARTIST -> {
+                            Ampache2NavGraphs.navigator?.navigate(ArtistDetailScreenDestination(artistId = song.artist.id))
+                            scope.launch {
+                                mainScaffoldState.bottomSheetState.partialExpand()
+                            }
+                        }
+                        SongItemEvent.ADD_SONG_TO_QUEUE -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                         SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        // TODO BUG when tapping on a song, in the context of a playlist, do not
-                        //  move the new song on top, just start playing from the selected song
                         mainViewModel.onEvent(MainEvent.Play(song))
                         viewModel.onEvent(QueueEvent.OnSongSelected(song))
                     }

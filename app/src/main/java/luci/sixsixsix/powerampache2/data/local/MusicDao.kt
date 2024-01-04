@@ -54,6 +54,9 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId) order by year ASC""")
     suspend fun getAlbumsFromArtist(artistId: String): List<AlbumEntity>
 
+    @Query("""SELECT * FROM albumentity WHERE LOWER(id) == LOWER(:albumId) order by time""")
+    suspend fun getAlbum(albumId: String): AlbumEntity?
+
 // --- SONGS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSongs(companyListingEntities: List<SongEntity>)

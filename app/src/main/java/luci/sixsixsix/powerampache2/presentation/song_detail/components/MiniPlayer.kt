@@ -53,8 +53,9 @@ import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MiniPlayer(modifier: Modifier = Modifier,
-               mainViewModel: MainViewModel = hiltViewModel()
+fun MiniPlayer(
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel = hiltViewModel()
 ) {
     Row(modifier = modifier.padding(vertical = 5.dp, horizontal = 5.dp)) {
         Card(

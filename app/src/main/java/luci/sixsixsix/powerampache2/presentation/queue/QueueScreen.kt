@@ -71,6 +71,7 @@ fun QueueScreen(
                         navigator.navigateUp()
                     }) {
                         Icon(
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = stringResource(id = R.string.back_content_description)
                         )

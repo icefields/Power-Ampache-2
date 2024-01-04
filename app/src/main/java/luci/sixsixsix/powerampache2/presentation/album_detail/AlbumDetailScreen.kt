@@ -45,8 +45,9 @@ import luci.sixsixsix.powerampache2.presentation.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoSection
 import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoViewEvents
-import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongInfoThirdRow
@@ -60,7 +61,7 @@ import java.util.UUID
 fun AlbumDetailScreen(
     navigator: DestinationsNavigator,
     albumId: String,
-    album: Album,
+    album: Album? = null,
     modifier: Modifier = Modifier,
     viewModel: AlbumDetailViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel(),
@@ -69,27 +70,38 @@ fun AlbumDetailScreen(
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
+    var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
+
+    if (playlistsDialogOpen.isOpen) {
+        playlistsDialogOpen.song?.let {
+            AddToPlaylistOrQueueDialog(it,
+                onDismissRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                }
+            )
+        }
+    }
 
     Box(modifier = modifier) {
         AsyncImage(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
-            model = album.artUrl,
+            model = viewModel.state.album.artUrl,
             contentScale = ContentScale.Crop,
             placeholder = painterResource(id = R.drawable.placeholder_album),
             error = painterResource(id = R.drawable.ic_image),
-            contentDescription = album.name
+            contentDescription = viewModel.state.album.name
         )
         AsyncImage(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
-            model = album.artUrl,
+            model = viewModel.state.album.artUrl,
             contentScale = ContentScale.FillWidth,
             placeholder = painterResource(id = R.drawable.placeholder_album),
             error = painterResource(id = R.drawable.ic_playlist),
-            contentDescription = album.name,
+            contentDescription = viewModel.state.album.name,
         )
         // full screen view to add a transparent black layer on top
         // of the images for readability
@@ -110,7 +122,7 @@ fun AlbumDetailScreen(
             topBar = {
                 AlbumDetailTopBar(
                     navigator = navigator,
-                    album = album,
+                    album = viewModel.state.album,
                     isLoading = state.isLoading,
                     scrollBehavior = scrollBehavior
                 ) { infoVisibility = !infoVisibility }
@@ -137,7 +149,7 @@ fun AlbumDetailScreen(
                             .padding(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
-                        album = album,
+                        album = viewModel.state.album,
                         eventListener = { event ->
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
@@ -151,7 +163,7 @@ fun AlbumDetailScreen(
 
                     SwipeRefresh(
                         state = swipeRefreshState,
-                        onRefresh = { viewModel.onEvent(AlbumDetailEvent.Fetch(album.id)) }
+                        onRefresh = { viewModel.onEvent(AlbumDetailEvent.Fetch(viewModel.state.album.id)) }
                     ) {
                         LazyColumn(
                             modifier = Modifier
@@ -163,13 +175,19 @@ fun AlbumDetailScreen(
                                     song = song,
                                     songItemEventListener = { event ->
                                         when(event) {
-                                            SongItemEvent.PLAY_NEXT -> viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
-                                            SongItemEvent.SHARE_SONG -> viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
-                                            SongItemEvent.DOWNLOAD_SONG -> viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
-                                            SongItemEvent.GO_TO_ALBUM -> navigator.navigate(AlbumDetailScreenDestination(album.id, album))
-                                            SongItemEvent.GO_TO_ARTIST -> navigator.navigate(ArtistDetailScreenDestination(artistId = album.artist.id, artist = null))
-                                            SongItemEvent.ADD_SONG_TO_QUEUE -> viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
-                                            SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
+                                            SongItemEvent.PLAY_NEXT -> mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                                            SongItemEvent.SHARE_SONG -> mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                                            SongItemEvent.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                                            SongItemEvent.GO_TO_ALBUM -> { } // No ACTION, we're already in this album //navigator.navigate(AlbumDetailScreenDestination(viewModel.state.album.id, viewModel.state.album))
+                                            SongItemEvent.GO_TO_ARTIST ->
+                                                navigator.navigate(
+                                                    ArtistDetailScreenDestination(
+                                                        artistId = viewModel.state.album.artist.id,
+                                                        artist = null
+                                                    )
+                                                )
+                                            SongItemEvent.ADD_SONG_TO_QUEUE -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
+                                            SongItemEvent.ADD_SONG_TO_PLAYLIST -> playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, song)
                                         }
                                     },
                                     modifier = Modifier

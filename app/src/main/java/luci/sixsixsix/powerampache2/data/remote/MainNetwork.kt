@@ -3,6 +3,7 @@ package luci.sixsixsix.powerampache2.data.remote
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.data.remote.dto.AlbumDto
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistsResponse
@@ -81,6 +82,13 @@ interface MainNetwork {
         @Query("limit") limit: Int = 0,
         @Query("filter") artistId: String = "",
         @Query("offset") offset: Int = 0, ): ArtistDto
+
+    @GET("json.server.php?action=album")
+    suspend fun getAlbumInfo(
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 0,
+        @Query("filter") albumId: String = "",
+        @Query("offset") offset: Int = 0, ): AlbumDto
 
     @GET("json.server.php?action=artist_albums")
     suspend fun getAlbumsFromArtist(

@@ -26,11 +26,20 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoViewEvents
 
+enum class SongDetailButtonEvents {
+    SHARE_SONG,
+    DOWNLOAD_SONG,
+    ADD_SONG_TO_PLAYLIST_OR_QUEUE,
+    GO_TO_ALBUM,
+    GO_TO_ARTIST,
+    SHOW_INFO
+}
+
 @Composable
 fun SongDetailButtonRow(
     modifier: Modifier = Modifier,
     song : Song,
-    eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit
+    eventListener: (albumInfoViewEvents: SongDetailButtonEvents) -> Unit
 ) {
     val fontSize = 11.sp
     val tint = MaterialTheme.colorScheme.tertiary
@@ -46,7 +55,7 @@ fun SongDetailButtonRow(
         ) {
             IconButton(
                 onClick = {
-                    eventListener(AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST)
+                    eventListener(SongDetailButtonEvents.ADD_SONG_TO_PLAYLIST_OR_QUEUE)
                 }) {
                 Icon(
                     tint = tint,
@@ -63,7 +72,7 @@ fun SongDetailButtonRow(
         ) {
             IconButton(
                 onClick = {
-                    eventListener(AlbumInfoViewEvents.DOWNLOAD_ALBUM)
+                    eventListener(SongDetailButtonEvents.DOWNLOAD_SONG)
                 }) {
                 Icon(
                     tint = tint,
@@ -80,7 +89,7 @@ fun SongDetailButtonRow(
 
             IconButton(
                 onClick = {
-                    eventListener(AlbumInfoViewEvents.SHARE_ALBUM)
+                    eventListener(SongDetailButtonEvents.SHARE_SONG)
                 }) {
                 Icon(
                     tint = tint,
@@ -97,7 +106,7 @@ fun SongDetailButtonRow(
 
             IconButton(
                 onClick = {
-                    //eventListener(AlbumInfoViewEvents.SHARE_ALBUM)
+                    eventListener(SongDetailButtonEvents.SHOW_INFO)
                 }) {
                 Icon(
                     tint = tint,
@@ -114,7 +123,7 @@ fun SongDetailButtonRow(
 
             IconButton(
                 onClick = {
-                    //eventListener(AlbumInfoViewEvents.SHARE_ALBUM)
+                    eventListener(SongDetailButtonEvents.GO_TO_ALBUM)
                 }) {
                 Icon(
                     tint = tint,
@@ -130,7 +139,7 @@ fun SongDetailButtonRow(
         ) {
             IconButton(
                 onClick = {
-                    //eventListener(AlbumInfoViewEvents.SHARE_ALBUM)
+                    eventListener(SongDetailButtonEvents.GO_TO_ARTIST)
                 }) {
                 Icon(
                     tint = tint,

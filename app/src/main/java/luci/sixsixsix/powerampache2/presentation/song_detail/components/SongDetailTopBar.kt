@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,13 +44,14 @@ fun SongDetailTopBar(
                 horizontal = 8.dp
             )
     ) {
-        Image(
+        Icon(
             modifier = Modifier
                 .fillMaxHeight()
                 .padding(dimensionResource(id = R.dimen.close_handle_icon_padding)),
-            contentScale = ContentScale.FillHeight,
+            //contentScale = ContentScale.FillHeight,
             imageVector = Icons.Default.KeyboardArrowDown,
-            contentDescription = "close song detail screen"
+            contentDescription = "close song detail screen",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
 
