@@ -41,7 +41,7 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
                     .build()
             }
         }
-        L("INTERCEPTOR request.url ${request.url}")
+        L(request.url)
         chain.proceed(request)
     }
 }

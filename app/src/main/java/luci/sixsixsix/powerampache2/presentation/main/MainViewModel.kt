@@ -17,7 +17,6 @@ import luci.sixsixsix.powerampache2.common.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.presentation.album_detail.AlbumDetailEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,7 +32,7 @@ class MainViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             playlistManager.currentSongState.collect { songState ->
-                L("MainViewModel collect", songState.song)
+                L(songState.song)
                 // this is used to update the UI
                 songState.song?.let {
                     state = state.copy(song = it)
@@ -47,17 +46,18 @@ class MainViewModel @Inject constructor(
                     state = state.copy(errorMessage = it)
                 }
 
-                L("MainViewModel collect errorState", errorState.errorMessage)
+                L(errorState.errorMessage)
             }
         }
 
         viewModelScope.launch {
             playlistManager.currentQueueState.collect { queue ->
-                L("MainViewModel collect queue", queue)
+                L("queue", queue)
                 // this is used to update the UI
                 state = state.copy(queue = queue)
             }
         }
+        L()
     }
 
 
@@ -72,7 +72,7 @@ class MainViewModel @Inject constructor(
                 }
             }
             is MainEvent.Play -> {
-                L( "MainViewModel Play", event.song)
+                L( "Play", event.song)
                 launchVLC(song = event.song)
             }
             MainEvent.OnDismissErrorMessage -> {
@@ -84,7 +84,7 @@ class MainViewModel @Inject constructor(
             // TODO the logout on the hamburger menu is just for debugging, remove and move the
             //  event in AuthViewModel
             MainEvent.OnLogout -> {
-                L( "MainViewModel Logout")
+                L( " Logout")
                 playlistManager.reset()
 
                 viewModelScope.launch {
@@ -92,7 +92,7 @@ class MainViewModel @Inject constructor(
                         when (result) {
                             is Resource.Success -> {
                                 result.data?.let { auth ->
-                                    L("MainViewModel", auth)
+                                    L(auth)
                                 }
                             }
 
