@@ -1,35 +1,23 @@
 package luci.sixsixsix.powerampache2.data
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toArtist
-import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
-import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
-import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
-import luci.sixsixsix.powerampache2.data.remote.dto.toMusicAttribute
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
-import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
-import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
@@ -49,21 +37,6 @@ class AlbumsRepositoryImpl @Inject constructor(
     private val errorHandler: ErrorHandler
 ): AlbumsRepository {
     private val dao = db.dao
-
-//    private suspend fun <T> handleError(
-//        label:String = "",
-//        e: Throwable,
-//        fc: FlowCollector<Resource<T>>,
-//    ) = MusicRepositoryImpl.handleError(label, e, fc) { message, error ->
-//        // TODO DEBUG this is just for debugging
-//        playlistManager.updateErrorMessage(message)
-//
-//        if (error is MusicException && error.musicError.isSessionExpiredError()) {
-//            runBlocking {
-//                dao.clearSession()
-//            }
-//        }
-//    }
 
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
     private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()

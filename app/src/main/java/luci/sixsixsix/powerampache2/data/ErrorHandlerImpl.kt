@@ -1,12 +1,9 @@
 package luci.sixsixsix.powerampache2.data
 
-import androidx.compose.runtime.referentialEqualityPolicy
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.runBlocking
-import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
@@ -47,6 +44,7 @@ class ErrorHandlerImpl @Inject constructor(
                 playlistManager.updateErrorMessage(this)
                 onError(this, e)
                 L.e(e)
+                L()
             }
     }
 }

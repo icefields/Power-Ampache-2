@@ -1,7 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -10,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainScreen
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme

@@ -21,6 +21,5 @@ object Constants {
 
     // DEBUG
     const val NETWORK_REQUEST_LIMIT_DEBUG = 20
-    const val TAG_LOG = "lucie"
     const val ERROR_TITLE = ERROR_STRING
 }

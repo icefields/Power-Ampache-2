@@ -1,7 +1,7 @@
 package luci.sixsixsix.powerampache2.data.remote
 
 import kotlinx.coroutines.runBlocking
-import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor

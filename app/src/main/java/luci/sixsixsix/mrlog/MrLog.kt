@@ -1,8 +1,9 @@
-package luci.sixsixsix.powerampache2.common
+package luci.sixsixsix.mrlog
 
 import android.util.Log
 import com.google.gson.Gson
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.common.Constants
 import org.json.JSONException
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -27,29 +28,23 @@ import java.io.StringWriter
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http:></http:>//www.gnu.org/licenses/>.
  */
-typealias L = MrLog
 
-private const val TRACE_START = 5
-private const val NULL_MESSAGE = "__NULL__"
-private const val EMPTY_MESSAGE = "__EMPTY__"
-private const val SEPARATOR_DEFAULT = " **** "
-private const val TAG = Constants.TAG_LOG
-private const val LOGS_ON: Boolean = BuildConfig.MRLOG_ON
+typealias L = MrLog
 
 enum class LogType { DEBUG, WARNING, ERROR }
 
-object MrLog {
+object MrLog: MrLogI {
     private val stringStackBuilder = StringStackBuilder()
     private val callingMethod: String
         get() = stringStackBuilder.getCallingMethod(TRACE_START)
 
-    operator fun invoke(vararg messages: Any?) =
+    override operator fun invoke(vararg messages: Any?) =
         tag(tag = TAG, logType = LogType.DEBUG, messages = messages.toList())
 
-    fun d(vararg strings: Any?) = tag(TAG, LogType.DEBUG, strings.toList())
-    fun w(vararg strings: Any?) = tag(TAG, LogType.WARNING, strings.toList())
-    fun e(vararg strings: Any?) = tag(TAG, LogType.ERROR, strings.toList())
-    fun json(obj: Any?) = tag(TAG, LogType.DEBUG, listOf(Gson().toJson(obj)))
+    override fun d(vararg strings: Any?) = tag(TAG, LogType.DEBUG, strings.toList())
+    override fun w(vararg strings: Any?) = tag(TAG, LogType.WARNING, strings.toList())
+    override fun e(vararg strings: Any?) = tag(TAG, LogType.ERROR, strings.toList())
+    override fun json(obj: Any?) = tag(TAG, LogType.DEBUG, listOf(Gson().toJson(obj)))
 
     private fun tag(tag: String, logType: LogType, messages: List<Any?>) {
         if (!LOGS_ON) return

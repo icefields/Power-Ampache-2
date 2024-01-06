@@ -1,14 +1,10 @@
 package luci.sixsixsix.powerampache2.data
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import luci.sixsixsix.powerampache2.common.Constants.CLEAR_TABLE_AFTER_FETCH
-import luci.sixsixsix.powerampache2.common.L
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -34,7 +30,6 @@ import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
-import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import retrofit2.HttpException
 import java.io.IOException
