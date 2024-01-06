@@ -6,7 +6,6 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.MusicRepositoryImpl
 
 interface ErrorHandler {
-
     suspend operator fun <T> invoke(
         label:String = "",
         e: Throwable,

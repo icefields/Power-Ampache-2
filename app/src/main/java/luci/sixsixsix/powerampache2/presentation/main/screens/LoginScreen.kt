@@ -94,6 +94,7 @@ fun LoginScreen(
         Text(text = state.error)
 
         LoginButton(server = Servers.LocalDebug, buttonText = R.string.loginScreen_local_server)
+        LoginButton(server = Servers.RemoteDebug, buttonText = R.string.loginScreen_remote_server)
         LoginButton(server = Servers.Dogmazic, buttonText = R.string.loginScreen_dogmazic_server)
         LoginButton(server = Servers.AmpacheDemo, buttonText = R.string.loginScreen_demo_server)
     }

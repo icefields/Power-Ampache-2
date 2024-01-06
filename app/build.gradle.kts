@@ -40,6 +40,7 @@ android {
     buildTypes {
         debug {
             buildConfigField("boolean", "MRLOG_ON", "true")
+            //buildConfigField("String", "AMPACHE_USER", AMPACHE_USER)
         }
         release {
             buildConfigField("boolean", "MRLOG_ON", "false")

@@ -52,12 +52,11 @@ class MainViewModel @Inject constructor(
 
         viewModelScope.launch {
             playlistManager.currentQueueState.collect { queue ->
-                L("queue", queue)
+                L("queue:", queue)
                 // this is used to update the UI
                 state = state.copy(queue = queue)
             }
         }
-        L()
     }
 
 
