@@ -33,6 +33,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.components.QueueScreenContent
@@ -48,6 +50,19 @@ fun QueueScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
+    var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
+
+    if (playlistsDialogOpen.isOpen) {
+        playlistsDialogOpen.song?.let {
+            AddToPlaylistOrQueueDialog(
+                song = it,
+                onDismissRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                },
+                mainViewModel = mainViewModel
+            )
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -81,7 +96,7 @@ fun QueueScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            // show menu to add to an existing playlist or create a new one
+                            playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, mainViewModel.state.queue[0])
                         }
                     ) {
                         Icon(
@@ -91,8 +106,8 @@ fun QueueScreen(
                     }
                     IconButton(
                         onClick = {
+                            //viewModel.onEvent(QueueEvent.OnPlayQueue)
                             mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-                            viewModel.onEvent(QueueEvent.OnPlayQueue)
                         }
                     ) {
                         Icon(

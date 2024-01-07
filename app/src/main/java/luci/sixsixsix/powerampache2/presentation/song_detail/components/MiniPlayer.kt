@@ -77,7 +77,7 @@ fun MiniPlayerContent(
     Card(
         border = BorderStroke(
             width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
         modifier = Modifier
             .background(Color.Transparent),

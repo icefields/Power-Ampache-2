@@ -16,6 +16,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
@@ -101,6 +102,14 @@ class HomeScreenViewModel @Inject constructor(
                 }
         }
 
+    private suspend fun replaceWithRandomIfEmpty(albums: List<Album>, callback: (albums: List<Album>) -> Unit) {
+        if (albums.isNullOrEmpty()) {
+            getRandom(fetchRemote = true) { albums ->
+                callback(albums)
+            }
+        }
+    }
+
     private suspend fun getRecent(fetchRemote: Boolean = true) {
             albumsRepository
                 .getRecentAlbums()
@@ -109,12 +118,13 @@ class HomeScreenViewModel @Inject constructor(
                         is Resource.Success -> {
                             result.data?.let { albums ->
                                 state = state.copy(recentAlbums = albums)
-                                L("HomeScreenViewModel.getRecent size ${state.playlists.size}")
+                                L("size", state.playlists.size)
                             }
-                            L( "HomeScreenViewModel.getRecent size of network array ${result.networkData?.size}")
+                            replaceWithRandomIfEmpty(state.recentAlbums) { state = state.copy(recentAlbums = it) }
                         }
                         is Resource.Error -> {
                             state = state.copy(isLoading = false)
+                            replaceWithRandomIfEmpty(state.recentAlbums) { state = state.copy(recentAlbums = it) }
                             L( "ERROR HomeScreenViewModel.getRecent ${result.exception}")
                         }
                         is Resource.Loading -> {
@@ -159,10 +169,12 @@ class HomeScreenViewModel @Inject constructor(
                                 state = state.copy(newestAlbums = albums)
                                 L("HomeScreenViewModel.getNewest size ${state.playlists.size}")
                             }
+                            replaceWithRandomIfEmpty(state.newestAlbums) { state = state.copy(newestAlbums = it) }
                             L( "HomeScreenViewModel.getNewest size of network array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
                             state = state.copy(isLoading = false)
+                            replaceWithRandomIfEmpty(state.newestAlbums) { state = state.copy(newestAlbums = it) }
                             L( "ERROR HomeScreenViewModel.getNewest ${result.exception}")
                         }
                         is Resource.Loading -> {
@@ -207,9 +219,11 @@ class HomeScreenViewModel @Inject constructor(
                                 L("HomeScreenViewModel.getFrequent size ${state.playlists.size}")
                             }
                             L( "HomeScreenViewModel.getFrequent size of network array ${result.networkData?.size}")
+                            replaceWithRandomIfEmpty(state.frequentAlbums) { state = state.copy(frequentAlbums = it) }
                         }
                         is Resource.Error -> {
                             state = state.copy(isLoading = false)
+                            replaceWithRandomIfEmpty(state.frequentAlbums) { state = state.copy(frequentAlbums = it) }
                             L( "ERROR HomeScreenViewModel.getFrequent ${result.exception}")
                         }
                         is Resource.Loading -> {
@@ -219,27 +233,32 @@ class HomeScreenViewModel @Inject constructor(
                 }
         }
 
+    private suspend fun getRandom(fetchRemote: Boolean = true) {
+        getRandom(fetchRemote = fetchRemote) { albums ->
+            state = state.copy(randomAlbums = albums)
+            L("HomeScreenViewModel.getRandom size ${state.playlists.size}")
+        }
+    }
 
-    private suspend fun getRandom(fetchRemote: Boolean = true, ) {
-            albumsRepository
-                .getRandomAlbums()
-                .collect { result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            result.data?.let { albums ->
-                                state = state.copy(randomAlbums = albums)
-                                L("HomeScreenViewModel.getRandom size ${state.playlists.size}")
-                            }
-                            L( "HomeScreenViewModel.getRandom size of network array ${result.networkData?.size}")
+    private suspend fun getRandom(fetchRemote: Boolean = true, callback: (albums: List<Album>) -> Unit) {
+        albumsRepository
+            .getRandomAlbums()
+            .collect { result ->
+                when(result) {
+                    is Resource.Success -> {
+                        result.data?.let { albums ->
+                            callback(albums)
                         }
-                        is Resource.Error -> {
-                            state = state.copy(isLoading = false)
-                            L( "ERROR HomeScreenViewModel.getRandom ${result.exception}")
-                        }
-                        is Resource.Loading -> {
-                            state = state.copy(isLoading = result.isLoading)
-                        }
+                        L( "HomeScreenViewModel.getRandom size of network array ${result.networkData?.size}")
+                    }
+                    is Resource.Error -> {
+                        state = state.copy(isLoading = false)
+                        L( "ERROR HomeScreenViewModel.getRandom ${result.exception}")
+                    }
+                    is Resource.Loading -> {
+                        state = state.copy(isLoading = result.isLoading)
                     }
                 }
-        }
+            }
+    }
 }

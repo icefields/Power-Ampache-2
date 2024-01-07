@@ -89,8 +89,8 @@ fun AlbumDetailScreen(
                 .align(Alignment.TopCenter),
             model = viewModel.state.album.artUrl,
             contentScale = ContentScale.Crop,
-            placeholder = painterResource(id = R.drawable.placeholder_album),
-            error = painterResource(id = R.drawable.ic_image),
+            //placeholder = painterResource(id = R.drawable.placeholder_album),
+            //error = painterResource(id = R.drawable.ic_image),
             contentDescription = viewModel.state.album.name
         )
         AsyncImage(
@@ -99,8 +99,8 @@ fun AlbumDetailScreen(
                 .align(Alignment.TopCenter),
             model = viewModel.state.album.artUrl,
             contentScale = ContentScale.FillWidth,
-            placeholder = painterResource(id = R.drawable.placeholder_album),
-            error = painterResource(id = R.drawable.ic_playlist),
+            //placeholder = painterResource(id = R.drawable.placeholder_album),
+            //error = painterResource(id = R.drawable.ic_playlist),
             contentDescription = viewModel.state.album.name,
         )
         // full screen view to add a transparent black layer on top
