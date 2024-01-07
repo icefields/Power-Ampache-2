@@ -11,6 +11,9 @@ object Constants {
     const val TIMEOUT_READ_S = 120L
     const val TIMEOUT_WRITE_S = 120L
 
+    const val NETWORK_REQUEST_LIMIT_HOME = 40
+
+
     const val ERROR_INT = -1
     const val ERROR_STRING = "ERROR"
     const val LOADING_STRING = "LOADING"

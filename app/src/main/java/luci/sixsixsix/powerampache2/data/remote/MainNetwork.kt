@@ -2,6 +2,7 @@ package luci.sixsixsix.powerampache2.data.remote
 
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
+import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumDto
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
@@ -117,7 +118,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getSongsFlagged( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -127,7 +128,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getSongsNewest( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 11,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -137,7 +138,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getSongsHighest( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 11,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -147,7 +148,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getSongsFrequent( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 11,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -157,7 +158,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getSongsRecent( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 11,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -167,7 +168,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getSongsRandom( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -177,7 +178,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getAlbumsFlagged( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -187,7 +188,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getAlbumsNewest( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 11,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -197,7 +198,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getAlbumsHighest( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 11,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -207,7 +208,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getAlbumsFrequent( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 11,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -217,7 +218,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getAlbumsRecent( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = 11,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
@@ -227,7 +228,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getAlbumsRandom( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode

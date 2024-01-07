@@ -1,6 +1,9 @@
 package luci.sixsixsix.powerampache2.presentation.main
 
 import android.app.Application
+import android.content.Intent
+import android.os.Build
+import androidx.annotation.OptIn
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -9,6 +12,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.common.util.Util.startForegroundService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,8 +21,10 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
 import luci.sixsixsix.powerampache2.player.PlayerEvent
+import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
 import java.util.concurrent.TimeUnit
@@ -33,17 +40,24 @@ class MainViewModel @Inject constructor(
 
     var state by mutableStateOf(MainState())
     private var searchJob: Job? = null
+    private var isServiceRunning = false
 
     var duration by mutableLongStateOf(0L)
     var progress by mutableFloatStateOf(0f)
     var progressStr by mutableStateOf("00:00")
     var isPlaying by mutableStateOf(false)
+    var isBuffering by mutableStateOf(false)
 
     init {
         L()
         viewModelScope.launch {
             playlistManager.currentSongState.collect { songState ->
+                songState.song?.let {
+                    startMusicServiceIfNecessary()
+                } ?: stopMusicService()
+
                 L(songState.song)
+
                 // this is used to update the UI
                 songState.song?.let {
                     state = state.copy(song = it)
@@ -62,7 +76,14 @@ class MainViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            playlistManager.currentQueueState.collect { queue ->
+            playlistManager.currentQueueState.collect { q ->
+                val queue = q.filterNotNull()
+                if (!queue.isNullOrEmpty()) {
+                    startMusicServiceIfNecessary()
+                } else if (queue.isNullOrEmpty() && state.song == null) {
+                    stopMusicService()
+                }
+
                 L("queue:", queue)
                 // this is used to update the UI
                 state = state.copy(queue = queue)
@@ -73,11 +94,19 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             simpleMediaServiceHandler.simpleMediaState.collect { mediaState ->
                 when (mediaState) {
-                    is SimpleMediaState.Buffering -> calculateProgressValue(mediaState.progress)
-                    SimpleMediaState.Initial -> {} // UI STATE Initial
-                    is SimpleMediaState.Playing -> isPlaying = mediaState.isPlaying
-                    is SimpleMediaState.Progress -> calculateProgressValue(mediaState.progress)
+                    is SimpleMediaState.Buffering -> {
+                        isBuffering = true
+                        calculateProgressValue(mediaState.progress)
+                    }
+                    SimpleMediaState.Initial -> {
+                    } // UI STATE Initial
+                    is SimpleMediaState.Playing -> {
+                        isPlaying = mediaState.isPlaying
+                    }
+                    is SimpleMediaState.Progress ->
+                        calculateProgressValue(mediaState.progress)
                     is SimpleMediaState.Ready -> {
+                        isBuffering = false
                         duration = mediaState.duration
                         // UI STATE READY
                     }
@@ -166,16 +195,41 @@ class MainViewModel @Inject constructor(
 
     private fun loadSongData() {
         val mediaItemList = mutableListOf<MediaItem>()
-        for (song in state.queue) {
-            mediaItemList.add(song.toMediaItem())
+        for (song: Song? in state.queue) {
+            song?.let {
+                mediaItemList.add(it.toMediaItem())
+            }
         }
         simpleMediaServiceHandler.addMediaItemList(mediaItemList)
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun startMusicServiceIfNecessary() {
+        L("startMusicServiceIfNecessary", isServiceRunning)
+        if (!isServiceRunning) {
+            Intent(application, SimpleMediaService::class.java).apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(application, this)
+                    isServiceRunning = true
+                }
+            }
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun stopMusicService() {
+        L("stopMusicService", isServiceRunning)
+        if (isServiceRunning) {
+            application.stopService(Intent(application, SimpleMediaService::class.java))
+                .also { isServiceRunning = false }
+        }
     }
 
     override fun onCleared() {
         viewModelScope.launch {
             simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
         }
+        stopMusicService()
         L("onCleared")
         super.onCleared()
     }

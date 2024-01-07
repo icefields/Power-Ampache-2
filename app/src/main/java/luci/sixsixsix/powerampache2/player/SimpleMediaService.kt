@@ -22,6 +22,8 @@ class SimpleMediaService: MediaSessionService() {
             mediaSessionService = this,
             mediaSession = mediaSession
         )
+        L("SERVICE onStartCommand")
+
         return super.onStartCommand(intent, flags, startId)
     }
 

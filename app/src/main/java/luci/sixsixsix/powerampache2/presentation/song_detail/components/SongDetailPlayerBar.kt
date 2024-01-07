@@ -3,6 +3,7 @@ package luci.sixsixsix.powerampache2.presentation.song_detail.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
@@ -18,6 +20,9 @@ import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,15 +36,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 
 @Composable
 fun SongDetailPlayerBar(
     isPlaying:Boolean,
+    isBuffering:Boolean,
     progress: Float,
     durationStr: String,
     progressStr: String,
@@ -52,8 +60,18 @@ fun SongDetailPlayerBar(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
-        PlayerControls(isPlaying = isPlaying, modifier = Modifier.fillMaxWidth(), onEvent = onEvent)
-        PlayerTimeSlider(progress = progress, durationStr = durationStr, progressStr = progressStr, onEvent = onEvent)
+        PlayerControls(
+            isPlaying = isPlaying,
+            isBuffering = isBuffering,
+            modifier = Modifier.fillMaxWidth(),
+            onEvent = onEvent
+        )
+        PlayerTimeSlider(
+            progress = progress,
+            durationStr = durationStr,
+            progressStr = progressStr,
+            onEvent = onEvent
+        )
     }
 }
 
@@ -61,6 +79,7 @@ fun SongDetailPlayerBar(
 @Composable
 fun PlayerControls(
     isPlaying: Boolean,
+    isBuffering: Boolean,
     modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit
 ) {
@@ -96,19 +115,40 @@ fun PlayerControls(
                 contentDescription = "SkipPrevious"
             )
         }
-        IconButton(modifier = Modifier
+
+        IconButton(
+            modifier = Modifier
             .height(80.dp)
             .widthIn(min = 100.dp, max = 100.dp),
             onClick = {
                 onEvent(MainEvent.PlayPauseCurrent)
             }) {
-            Icon(
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.aspectRatio(1f / 1f),
-                imageVector = if (!isPlaying) { Icons.Default.PlayCircle } else { Icons.Default.PauseCircle }, // Pause
-                contentDescription = "Play"
-            )
+            if (!isBuffering) {
+                Icon(
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.aspectRatio(1f / 1f),
+                    imageVector = if (!isPlaying) {
+                        Icons.Default.PlayCircle
+                    } else {
+                        Icons.Default.PauseCircle
+                    }, // Pause
+                    contentDescription = "Play"
+                )
+            } else {
+                Card(modifier = Modifier
+                    .height(80.dp)
+                    .widthIn(min = 100.dp, max = 100.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.secondary
+                    )) {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                }
+            }
         }
+
         IconButton(modifier = Modifier.weight(1f),
             onClick = {
                 onEvent(MainEvent.SkipNext)
@@ -172,5 +212,11 @@ fun PlayerTimeSlider(
 @Composable
 @Preview
 fun PreviewSongDetailPlayerBar() {
-    SongDetailPlayerBar(false, 12f, "3:40", "5:32") {}
+    SongDetailPlayerBar(
+        isPlaying = false,
+        isBuffering = true,
+        progress = 12f,
+        durationStr = "3:40",
+        progressStr = "5:32"
+    ) {}
 }

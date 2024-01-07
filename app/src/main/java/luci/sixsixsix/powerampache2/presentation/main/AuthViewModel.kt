@@ -12,6 +12,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import javax.inject.Inject
 
@@ -24,16 +25,17 @@ class AuthViewModel @Inject constructor(
     var state by mutableStateOf(AuthState())
 
     init {
+        state = state.copy(isLoading = true)
         verifyAndAutologin()
-
         // TODO anti-pattern, viewmodel should not know about the database
         // Listen to changes of the session table from the database
         db.dao.getSessionLiveData().observeForever {
+            state = state.copy(session = it?.toSession())
             if (it == null) {
                 playlistManager.reset()
                 // setting the session to null will show the login screen, but the autologin call
                 // will immediately set isLoading to true which will show the loading screen instead
-                state = state.copy(session = null, isLoading = false)
+                state = state.copy(session = null, isLoading = true)
                 // autologin will log back in if credentials are correct
                 viewModelScope.launch {
                     autologin()
@@ -45,7 +47,6 @@ class AuthViewModel @Inject constructor(
     fun verifyAndAutologin() {
         viewModelScope.launch {
             // try to login with saved auth token
-            state = state.copy(isLoading = true)
             when (val ping = repository.ping()) {
                 is Resource.Success -> {
                     //   If the session returned by ping is null, the token is probably expired and
@@ -56,6 +57,8 @@ class AuthViewModel @Inject constructor(
                         state = state.copy(session = it, isLoading = false)
                     } ?: run {
                         playlistManager.reset()
+                        // do not show loading screen during ping, only during autologin
+                        state = state.copy(isLoading = true)
                         autologin()
                     }
                 }
@@ -64,7 +67,8 @@ class AuthViewModel @Inject constructor(
                     state = state.copy(error = "{${ping.exception}", isLoading = false)
                 }
 
-                else -> {}
+                is Resource.Loading ->
+                    if (!ping.isLoading) { state = state.copy(isLoading = false) }
             }
         }
     }

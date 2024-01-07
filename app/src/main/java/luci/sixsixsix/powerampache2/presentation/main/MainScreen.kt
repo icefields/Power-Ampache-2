@@ -3,6 +3,7 @@ package luci.sixsixsix.powerampache2.presentation.main
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import luci.sixsixsix.powerampache2.presentation.LoadingScreen
+import luci.sixsixsix.powerampache2.presentation.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.LoggedInScreen
 import luci.sixsixsix.powerampache2.presentation.main.screens.LoginScreen
 
@@ -10,7 +11,7 @@ import luci.sixsixsix.powerampache2.presentation.main.screens.LoginScreen
 fun MainScreen(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
 ) {
     if(authViewModel.state.isLoading) {
         LoadingScreen()

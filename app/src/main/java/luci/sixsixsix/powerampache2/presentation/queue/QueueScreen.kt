@@ -46,7 +46,6 @@ fun QueueScreen(
     mainViewModel: MainViewModel,
     viewModel: QueueViewModel = hiltViewModel()
 ) {
-    val state = mainViewModel.state
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
 
@@ -97,7 +96,8 @@ fun QueueScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = if (!mainViewModel.isPlaying) Icons.Default.PlayArrow else Icons.Default.Pause,
+                            imageVector = if (!mainViewModel.isPlaying)
+                                Icons.Default.PlayArrow else Icons.Default.Pause,
                             contentDescription = stringResource(id = R.string.search_content_description)
                         )
                     }
@@ -110,7 +110,11 @@ fun QueueScreen(
                 .padding(it)
                 .padding(top = dimensionResource(id = R.dimen.albumDetailScreen_top_padding)),
         ) {
-            QueueScreenContent(navigator = navigator, mainViewModel = mainViewModel)
+            QueueScreenContent(
+                navigator = navigator,
+                mainViewModel = mainViewModel,
+                viewModel = viewModel
+            )
         }
     }
 }

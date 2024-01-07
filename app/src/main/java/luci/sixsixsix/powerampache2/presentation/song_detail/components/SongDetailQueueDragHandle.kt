@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.song_detail.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,9 +14,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
@@ -80,49 +86,50 @@ fun SongDetailQueueTopBar(
     modifier: Modifier = Modifier,
     showCloseIcon: Boolean = true
 ) {
-    Box(
-        contentAlignment = Alignment.CenterStart,
+    Card(
+        elevation = CardDefaults.cardElevation(0.dp),
+        shape = RoundedCornerShape(0.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
         modifier = modifier
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(
-                vertical = 5.dp,
-                horizontal = 8.dp
-            )
+            .fillMaxWidth()
     ) {
-        if (showCloseIcon) {
-//            Image(
-//                modifier = Modifier
-//                    .fillMaxHeight()
-//                    .padding(2.dp),
-//                contentScale = ContentScale.FillHeight,
-//                imageVector = Icons.Default.KeyboardArrowDown,
-//                contentDescription = "close song detail screen"
-//            )
-
-            Icon(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(dimensionResource(id = R.dimen.close_handle_icon_padding)),
-                //contentScale = ContentScale.FillHeight,
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "close song detail screen",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Column(modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .padding(
+                    vertical = 5.dp,
+                    horizontal = 8.dp
+                )
         ) {
-            Text(
-                modifier = Modifier.basicMarquee(),
-                text = "UP NEXT",
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp,
-                maxLines = 1,
-                textAlign = TextAlign.Center
-            )
+            if (showCloseIcon) {
+                Icon(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(dimensionResource(id = R.dimen.close_handle_icon_padding)),
+                    //contentScale = ContentScale.FillHeight,
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = "close song detail screen",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier.basicMarquee(),
+                    text = "UP NEXT",
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 17.sp,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

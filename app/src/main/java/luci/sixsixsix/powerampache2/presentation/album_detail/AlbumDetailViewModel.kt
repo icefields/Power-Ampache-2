@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -13,6 +14,7 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.presentation.home.HomeScreenState
 import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
@@ -23,10 +25,12 @@ class AlbumDetailViewModel @Inject constructor(
     // need this because we're passing the symbol around
     private val songsRepository: SongsRepository,
     private val albumsRepository: AlbumsRepository,
-    private val playlistManager: MusicPlaylistManager
+    private val playlistManager: MusicPlaylistManager,
 ) : ViewModel() {
-
-    var state by mutableStateOf(AlbumDetailState())
+    //var state by mutableStateOf(AlbumDetailState())
+    var state by savedStateHandle.saveable {
+        mutableStateOf(AlbumDetailState())
+    }
 
     init {
         val album = savedStateHandle.get<Album>("album")?.also {

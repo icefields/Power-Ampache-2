@@ -26,6 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -35,6 +36,7 @@ import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
 import luci.sixsixsix.powerampache2.presentation.home.HomeScreen
+import luci.sixsixsix.powerampache2.presentation.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.DrawerBody
@@ -56,7 +58,8 @@ import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 fun MainContent(
     navigator: DestinationsNavigator,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     Ampache2NavGraphs.navigator = navigator
 
@@ -112,16 +115,21 @@ fun MainContent(
                 top = it.calculateTopPadding(),
                 bottom = it.calculateBottomPadding()
             )) {
-                L("MainContent currentScreen ${currentScreen}")
-
+                L("MainContent currentScreen $currentScreen")
                 when (MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
-                    is MainContentMenuItem.Home -> HomeScreen(navigator = navigator)
+                    is MainContentMenuItem.Home -> HomeScreen(
+                        navigator = navigator,
+                        viewModel = homeScreenViewModel
+                    )
                     is MainContentMenuItem.Library -> TabbedLibraryView(
                         navigator = navigator,
                         pagerState = pagerState,
                         mainViewModel = mainViewModel
                     )
-                    is MainContentMenuItem.Settings -> HomeScreen(navigator = navigator)
+                    is MainContentMenuItem.Settings -> HomeScreen(
+                        navigator = navigator,
+                        viewModel = homeScreenViewModel
+                    )
                     MainContentMenuItem.Logout -> mainViewModel.onEvent(MainEvent.OnLogout)
                 }
             }

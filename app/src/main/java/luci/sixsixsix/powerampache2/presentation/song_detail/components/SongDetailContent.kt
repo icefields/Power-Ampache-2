@@ -139,6 +139,7 @@ fun SongDetailContent(
             durationStr = mainViewModel.state.song?.totalTime() ?: "",
             progressStr = mainViewModel.progressStr,
             isPlaying = mainViewModel.isPlaying,
+            isBuffering = mainViewModel.isBuffering,
             modifier = Modifier.fillMaxWidth().wrapContentHeight()
         ) { event ->
             mainViewModel.onEvent(event)

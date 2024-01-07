@@ -10,7 +10,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
@@ -18,15 +17,16 @@ import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.QueueEvent
 import luci.sixsixsix.powerampache2.presentation.queue.QueueViewModel
+import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
 
 @Composable
 fun QueueScreenContent(
     navigator: DestinationsNavigator,
-    modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
-    viewModel: QueueViewModel = hiltViewModel()
+    viewModel: QueueViewModel,
+    modifier: Modifier = Modifier
 ) {
     val state = mainViewModel.state
     LazyColumn(modifier = modifier.fillMaxSize()) {
@@ -54,8 +54,8 @@ fun QueueScreenContent(
                     .clickable {
                         // TODO BUG when tapping on a song, in the context of a playlist, do not
                         //  move the new song on top, just start playing from the selected song
-                        mainViewModel.onEvent(MainEvent.Play(song))
                         viewModel.onEvent(QueueEvent.OnSongSelected(song))
+                        mainViewModel.onEvent(MainEvent.Play(song))
                     }
             )
         }

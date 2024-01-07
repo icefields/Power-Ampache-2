@@ -10,13 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
-import androidx.hilt.navigation.compose.hiltViewModel
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.song_detail.components.SongDetailContent
 import luci.sixsixsix.powerampache2.presentation.song_detail.components.SongDetailQueueDragHandle
 import luci.sixsixsix.powerampache2.presentation.song_detail.components.SongDetailQueueScreenContent
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,15 +22,17 @@ fun SongDetailScreen(
     // navigator: DestinationsNavigator,
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = hiltViewModel(),
+    viewModel: MainViewModel
 ) {
-    val state = viewModel.state
     val scaffoldState = rememberBottomSheetScaffoldState()
     val barHeight = dimensionResource(id = R.dimen.queue_dragHandle_height)
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
-            SongDetailQueueScreenContent(mainScaffoldState = mainScaffoldState, mainViewModel = viewModel)
+            SongDetailQueueScreenContent(
+                mainScaffoldState = mainScaffoldState,
+                mainViewModel = viewModel
+            )
         },
         sheetDragHandle = {
             SongDetailQueueDragHandle(scaffoldState = scaffoldState)

@@ -1,7 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,9 +11,9 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -23,7 +22,9 @@ import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.MainActivity
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
+import luci.sixsixsix.powerampache2.presentation.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
@@ -31,11 +32,12 @@ import luci.sixsixsix.powerampache2.presentation.main.screens.components.SheetDr
 import luci.sixsixsix.powerampache2.presentation.song_detail.SongDetailScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoggedInScreen(
     mainViewModel: MainViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    //homeScreenViewModel: HomeScreenViewModel
 ) {
     val state = mainViewModel.state
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -60,7 +62,7 @@ fun LoggedInScreen(
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
-            SongDetailScreen(mainScaffoldState = scaffoldState)
+            SongDetailScreen(mainScaffoldState = scaffoldState, viewModel = mainViewModel)
         },
         sheetDragHandle = {
             SheetDragHandle(scaffoldState = scaffoldState, mainViewModel = mainViewModel)
@@ -76,6 +78,20 @@ fun LoggedInScreen(
                     // those are declared in the activity
                     dependency(mainViewModel)
                     dependency(authViewModel)
+                    //dependency(homeScreenViewModel)
+
+//                    dependency(hiltViewModel<QueueViewModel>(LocalContext.current as MainActivity))
+//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
+//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
+//                    dependency(NavGraphs.root) {
+//                        val parentEntry = remember(navBackStackEntry) {
+//                            navController.getBackStackEntry(NavGraphs.root.route)
+//                        }
+//                        hiltViewModel<HomeScreenViewModel>(parentEntry)
+//                    }
+
+
+
 
                     // To tie SettingsViewModel to "settings" nested navigation graph,
                     // making it available to all screens that belong to it

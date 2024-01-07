@@ -102,19 +102,7 @@ class AlbumsRepositoryImpl @Inject constructor(
 
         // some albums come from web with no artists id, or with artist id zero, add the id manually
         // so the database can find it (db is single source of truth)
-        val albums = response.albums!!
-            .map { albumDto ->
-                albumDto.toAlbum()
-//                    .copy(
-//                    artists = ArrayList(
-//                        albumDto.artists?.let { artists ->
-//                            artists.map { attribute -> attribute.toMusicAttribute() }
-//                        } ?: run { listOf() }
-//                    ).apply {
-//                        add(MusicAttribute(id = artistId, name = ""))
-//                    }
-//                )
-            } // will throw exception if songs null
+        val albums = response.albums!!.map { albumDto -> albumDto.toAlbum() } // will throw exception if songs null
 
         L("albums from web ${albums.size}")
 

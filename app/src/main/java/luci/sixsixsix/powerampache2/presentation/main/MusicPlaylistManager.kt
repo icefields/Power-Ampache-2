@@ -24,7 +24,7 @@ class MusicPlaylistManager @Inject constructor() {
     private val _currentQueueState = MutableStateFlow(listOf<Song>())
     val currentQueueState: StateFlow<List<Song>> = _currentQueueState
 
-    fun updateTopSong(newSong: Song?) {
+    fun updateTopSong(newSong: Song?) = newSong?.let {
         L( "MusicPlaylistManager updateTopSong", newSong)
         _currentSongState.value = CurrentSongState(song = newSong)
         // add the current song on top of the queue
@@ -37,12 +37,12 @@ class MusicPlaylistManager @Inject constructor() {
     /**
      * used in the callback when music player goes to the next song in the playlist
      */
-    fun updateCurrentSong(newSong: Song?) {
+    fun updateCurrentSong(newSong: Song?) = newSong?.let {
         L( "MusicPlaylistManager updateCurrentSong", newSong)
         _currentSongState.value = CurrentSongState(song = newSong)
     }
 
-    fun moveToSongInQueue(newSong: Song?) {
+    fun moveToSongInQueue(newSong: Song?) = newSong?.let {
         L( "MusicPlaylistManager moveToSongInQueue", newSong)
         _currentSongState.value = CurrentSongState(song = newSong)
     }
@@ -59,7 +59,7 @@ class MusicPlaylistManager @Inject constructor() {
 
     fun replaceCurrentQueue(newPlaylist: List<Song>) {
         L( "MusicPlaylistManager replaceCurrentQueue", newPlaylist)
-        _currentQueueState.value = newPlaylist
+        _currentQueueState.value = newPlaylist.filterNotNull()
         checkCurrentSong()
     }
 
@@ -69,7 +69,7 @@ class MusicPlaylistManager @Inject constructor() {
         checkCurrentSong()
     }
 
-    fun addToCurrentQueue(newSong: Song) {
+    fun addToCurrentQueue(newSong: Song?) = newSong?.let {
         L( "MusicPlaylistManager addToCurrentQueue", newSong)
         addToCurrentQueue(listOf(newSong))
     }
@@ -97,7 +97,7 @@ class MusicPlaylistManager @Inject constructor() {
         }
     }
 
-    fun addToCurrentQueueNext(song: Song) {
+    fun addToCurrentQueueNext(song: Song?) = song?.let {
         L( "MusicPlaylistManager addToCurrentQueueNext", song)
         addToCurrentQueueNext(listOf(song))
     }

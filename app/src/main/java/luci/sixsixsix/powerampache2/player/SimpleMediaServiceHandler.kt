@@ -9,7 +9,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
@@ -23,6 +22,7 @@ class SimpleMediaServiceHandler @Inject constructor(
     private val _simpleMediaState = MutableStateFlow<SimpleMediaState>(SimpleMediaState.Initial)
     val simpleMediaState = _simpleMediaState.asStateFlow()
     private var job: Job? = null
+    private val currentMediaItems = mutableListOf<MediaItem>()
 
     init {
         player.addListener(this)
@@ -41,8 +41,6 @@ class SimpleMediaServiceHandler @Inject constructor(
         if (
             player.mediaItemCount > 0 && playlistManager.getCurrentSong()?.toMediaItem()?.mediaId == player.currentMediaItem?.mediaId
         ) {
-            L("NOT player.setMediaItems")
-
             player.removeMediaItems(0, player.currentMediaItemIndex)
             player.removeMediaItems(player.currentMediaItemIndex + 1, player.mediaItemCount)
 
@@ -54,9 +52,10 @@ class SimpleMediaServiceHandler @Inject constructor(
                 mediaItems.subList(indexInQueue + 1, mediaItems.size)
             )
         } else {
-            L("player.setMediaItems")
             player.setMediaItems(mediaItems)
         }
+        currentMediaItems.clear()
+        currentMediaItems.addAll(mediaItems)
         player.prepare()
     }
 
@@ -80,8 +79,9 @@ class SimpleMediaServiceHandler @Inject constructor(
             PlayerEvent.SkipBack -> player.seekToPreviousMediaItem()
             PlayerEvent.SkipForward -> player.seekToNextMediaItem()
             is PlayerEvent.ForcePlay -> {
-                player.pause()
-                stopProgressUpdate()
+                player.seekTo(currentMediaItems.indexOf(playerEvent.mediaItem), 0)
+//                player.pause()
+//                stopProgressUpdate()
                 player.play()
                 _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
                 startProgressUpdate()
@@ -92,15 +92,26 @@ class SimpleMediaServiceHandler @Inject constructor(
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         super.onMediaItemTransition(mediaItem, reason)
         // if the media player is handling a playlist, when changing song update UI accordingly
-        playlistManager.updateCurrentSong(
-            newSong = playlistManager.currentQueueState.value.filter { it.mediaId == mediaItem?.mediaId } [0]
-        )
+        try {
+            playlistManager.updateCurrentSong(
+                newSong = playlistManager.currentQueueState.value.filter { it.mediaId == mediaItem?.mediaId }[0]
+            )
+        } catch (e: Exception) {
+            L.e(e)
+        }
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
         when (playbackState) {
-            ExoPlayer.STATE_BUFFERING -> _simpleMediaState.value = SimpleMediaState.Buffering(player.currentPosition)
-            ExoPlayer.STATE_READY -> _simpleMediaState.value = SimpleMediaState.Ready(player.duration)
+            ExoPlayer.STATE_IDLE -> { L("STATE_IDLE")}
+            ExoPlayer.STATE_BUFFERING -> {
+                L("STATE_BUFFERING")
+                _simpleMediaState.value = SimpleMediaState.Buffering(player.currentPosition)
+            }
+            ExoPlayer.STATE_READY -> {
+                _simpleMediaState.value = SimpleMediaState.Ready(player.duration)
+                L("STATE_READY")
+            }
         }
     }
 

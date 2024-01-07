@@ -3,10 +3,15 @@ package luci.sixsixsix.powerampache2.presentation.home
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
@@ -22,31 +27,50 @@ import javax.inject.Inject
 class HomeScreenViewModel @Inject constructor(
     private val albumsRepository: AlbumsRepository,
     private val mainRepository: MusicRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    var state by mutableStateOf(HomeScreenState())
+    //var state2 by mutableStateOf(HomeScreenState())
+    //private val state = savedStateHandle.getLiveData<HomeScreenState>("itemsKey").value
+    var state by savedStateHandle.saveable {
+        mutableStateOf(HomeScreenState())
+    }
 
     init {
+        L()
+        fetchAllAsync()
+    }
+
+    private fun fetchAllAsync() = viewModelScope.launch {
+        async { getPlaylists() }
+        async { getFlagged() }
+        async { getFrequent() }
+        async { getHighest() }
+        async { getNewest() }
+        async { getRecent() }
+        async { getRandom() }
+    }
+
+    private suspend fun fetchAll() = viewModelScope.launch {
         getPlaylists()
         getFlagged()
         getFrequent()
         getHighest()
         getNewest()
         getRecent()
-        getNewest()
         getRandom()
     }
 
     fun onEvent(event: HomeScreenEvent) {
         when(event) {
             is HomeScreenEvent.Refresh -> {
-                getPlaylists(fetchRemote = true)
+                fetchAllAsync()
             }
-            else -> {}
+
+            is HomeScreenEvent.OnSearchQueryChange -> { }
         }
     }
 
-    private fun getPlaylists(fetchRemote: Boolean = true) {
-        viewModelScope.launch {
+    private suspend fun getPlaylists(fetchRemote: Boolean = true) {
             mainRepository
                 .getPlaylists(fetchRemote)
                 .collect { result ->
@@ -68,7 +92,7 @@ class HomeScreenViewModel @Inject constructor(
                         }
                         is Resource.Error -> {
                             state = state.copy(isLoading = false)
-                            L( "ERROR HomeScreenViewModel.getPlaylists ${result.exception}")
+                            L( "ERROR HomeScreenViewModel.getPlaylists", result.exception)
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)
@@ -76,10 +100,8 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
-    }
 
-    private fun getRecent(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+    private suspend fun getRecent(fetchRemote: Boolean = true) {
             albumsRepository
                 .getRecentAlbums()
                 .collect { result ->
@@ -101,10 +123,9 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
-    }
 
-    private fun getFlagged(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+
+    private suspend fun getFlagged(fetchRemote: Boolean = true, ) {
             albumsRepository
                 .getFlaggedAlbums()
                 .collect { result ->
@@ -125,11 +146,10 @@ class HomeScreenViewModel @Inject constructor(
                         }
                     }
                 }
-        }
+
     }
 
-    private fun getNewest(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+    private suspend fun getNewest(fetchRemote: Boolean = true, ) {
             albumsRepository
                 .getNewestAlbums()
                 .collect { result ->
@@ -151,10 +171,8 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
-    }
 
-    private fun getHighest(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+    private suspend fun getHighest(fetchRemote: Boolean = true, ) {
             albumsRepository
                 .getHighestAlbums()
                 .collect { result ->
@@ -176,10 +194,9 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
-    }
 
-    private fun getFrequent(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+
+    private suspend fun getFrequent(fetchRemote: Boolean = true, ) {
             albumsRepository
                 .getFrequentAlbums()
                 .collect { result ->
@@ -201,10 +218,9 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
-    }
 
-    private fun getRandom(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+
+    private suspend fun getRandom(fetchRemote: Boolean = true, ) {
             albumsRepository
                 .getRandomAlbums()
                 .collect { result ->
@@ -226,5 +242,4 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
-    }
 }

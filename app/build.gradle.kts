@@ -112,7 +112,13 @@ dependencies {
 
     // ExoPlayer
     implementation("androidx.media3:media3-exoplayer:$media3Version")
+    // DASH playback support with ExoPlayer
     implementation("androidx.media3:media3-exoplayer-dash:$media3Version")
+    // HLS playback support with ExoPlayer
+    implementation("androidx.media3:media3-exoplayer-hls:$media3Version")
+    // RTSP playback support with ExoPlayer
+    implementation("androidx.media3:media3-exoplayer-rtsp:$media3Version")
+
     // Common functionality for media database components
     implementation("androidx.media3:media3-database:$media3Version")
     // Common functionality for media decoders
