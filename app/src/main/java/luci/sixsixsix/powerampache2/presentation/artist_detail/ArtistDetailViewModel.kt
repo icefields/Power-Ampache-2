@@ -56,8 +56,7 @@ class ArtistDetailViewModel @Inject constructor(
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            // TODO why am I using network data here? please comment
-                            result.networkData?.let { albums ->
+                            result.data?.let { albums ->
                                 state = state.copy(albums = albums)
                                 L("viewmodel.getAlbumsFromArtist size ${result.data?.size} network: ${result.networkData?.size}")
                             }

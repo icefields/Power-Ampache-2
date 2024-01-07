@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Download
@@ -24,7 +25,9 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 
 @Composable
 fun AlbumInfoButtonsRow(
-    modifier: Modifier = Modifier, album: Album,
+    album: Album,
+    isPlayingAlbum: Boolean,
+    modifier: Modifier = Modifier,
     eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit
 ) {
     Row(modifier = modifier
@@ -59,7 +62,7 @@ fun AlbumInfoButtonsRow(
             }) {
             Icon(
                 modifier = Modifier.aspectRatio(1f/1f),
-                imageVector = Icons.Default.PlayCircle, // Pause
+                imageVector = if (!isPlayingAlbum) Icons.Default.PlayCircle else Icons.Default.PauseCircle, // Pause
                 contentDescription = "Play"
             )
         }

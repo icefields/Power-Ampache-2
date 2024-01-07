@@ -60,7 +60,6 @@ fun ArtistDetailScreen(
     artistId: String,
     artist: Artist? = null,
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel = hiltViewModel(),
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
     val state = viewModel.state

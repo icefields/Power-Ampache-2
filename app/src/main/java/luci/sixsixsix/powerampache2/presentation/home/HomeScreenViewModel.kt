@@ -3,14 +3,20 @@ package luci.sixsixsix.powerampache2.presentation.home
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
@@ -22,31 +28,50 @@ import javax.inject.Inject
 class HomeScreenViewModel @Inject constructor(
     private val albumsRepository: AlbumsRepository,
     private val mainRepository: MusicRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    var state by mutableStateOf(HomeScreenState())
+    //var state2 by mutableStateOf(HomeScreenState())
+    //private val state = savedStateHandle.getLiveData<HomeScreenState>("itemsKey").value
+    var state by savedStateHandle.saveable {
+        mutableStateOf(HomeScreenState())
+    }
 
     init {
+        L()
+        fetchAllAsync()
+    }
+
+    private fun fetchAllAsync() = viewModelScope.launch {
+        async { getPlaylists() }
+        async { getFlagged() }
+        async { getFrequent() }
+        async { getHighest() }
+        async { getNewest() }
+        async { getRecent() }
+        async { getRandom() }
+    }
+
+    private suspend fun fetchAll() = viewModelScope.launch {
         getPlaylists()
         getFlagged()
         getFrequent()
         getHighest()
         getNewest()
         getRecent()
-        getNewest()
         getRandom()
     }
 
     fun onEvent(event: HomeScreenEvent) {
         when(event) {
             is HomeScreenEvent.Refresh -> {
-                getPlaylists(fetchRemote = true)
+                fetchAllAsync()
             }
-            else -> {}
+
+            is HomeScreenEvent.OnSearchQueryChange -> { }
         }
     }
 
-    private fun getPlaylists(fetchRemote: Boolean = true) {
-        viewModelScope.launch {
+    private suspend fun getPlaylists(fetchRemote: Boolean = true) {
             mainRepository
                 .getPlaylists(fetchRemote)
                 .collect { result ->
@@ -68,7 +93,7 @@ class HomeScreenViewModel @Inject constructor(
                         }
                         is Resource.Error -> {
                             state = state.copy(isLoading = false)
-                            L( "ERROR HomeScreenViewModel.getPlaylists ${result.exception}")
+                            L( "ERROR HomeScreenViewModel.getPlaylists", result.exception)
                         }
                         is Resource.Loading -> {
                             state = state.copy(isLoading = result.isLoading)
@@ -76,10 +101,16 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
+
+    private suspend fun replaceWithRandomIfEmpty(albums: List<Album>, callback: (albums: List<Album>) -> Unit) {
+        if (albums.isNullOrEmpty()) {
+            getRandom(fetchRemote = true) { albums ->
+                callback(albums)
+            }
+        }
     }
 
-    private fun getRecent(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+    private suspend fun getRecent(fetchRemote: Boolean = true) {
             albumsRepository
                 .getRecentAlbums()
                 .collect { result ->
@@ -87,12 +118,13 @@ class HomeScreenViewModel @Inject constructor(
                         is Resource.Success -> {
                             result.data?.let { albums ->
                                 state = state.copy(recentAlbums = albums)
-                                L("HomeScreenViewModel.getRecent size ${state.playlists.size}")
+                                L("size", state.playlists.size)
                             }
-                            L( "HomeScreenViewModel.getRecent size of network array ${result.networkData?.size}")
+                            replaceWithRandomIfEmpty(state.recentAlbums) { state = state.copy(recentAlbums = it) }
                         }
                         is Resource.Error -> {
                             state = state.copy(isLoading = false)
+                            replaceWithRandomIfEmpty(state.recentAlbums) { state = state.copy(recentAlbums = it) }
                             L( "ERROR HomeScreenViewModel.getRecent ${result.exception}")
                         }
                         is Resource.Loading -> {
@@ -101,10 +133,9 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
-    }
 
-    private fun getFlagged(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+
+    private suspend fun getFlagged(fetchRemote: Boolean = true, ) {
             albumsRepository
                 .getFlaggedAlbums()
                 .collect { result ->
@@ -125,11 +156,10 @@ class HomeScreenViewModel @Inject constructor(
                         }
                     }
                 }
-        }
+
     }
 
-    private fun getNewest(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+    private suspend fun getNewest(fetchRemote: Boolean = true, ) {
             albumsRepository
                 .getNewestAlbums()
                 .collect { result ->
@@ -139,10 +169,12 @@ class HomeScreenViewModel @Inject constructor(
                                 state = state.copy(newestAlbums = albums)
                                 L("HomeScreenViewModel.getNewest size ${state.playlists.size}")
                             }
+                            replaceWithRandomIfEmpty(state.newestAlbums) { state = state.copy(newestAlbums = it) }
                             L( "HomeScreenViewModel.getNewest size of network array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
                             state = state.copy(isLoading = false)
+                            replaceWithRandomIfEmpty(state.newestAlbums) { state = state.copy(newestAlbums = it) }
                             L( "ERROR HomeScreenViewModel.getNewest ${result.exception}")
                         }
                         is Resource.Loading -> {
@@ -151,10 +183,8 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
-    }
 
-    private fun getHighest(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+    private suspend fun getHighest(fetchRemote: Boolean = true, ) {
             albumsRepository
                 .getHighestAlbums()
                 .collect { result ->
@@ -176,10 +206,9 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
-    }
 
-    private fun getFrequent(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
+
+    private suspend fun getFrequent(fetchRemote: Boolean = true, ) {
             albumsRepository
                 .getFrequentAlbums()
                 .collect { result ->
@@ -190,9 +219,11 @@ class HomeScreenViewModel @Inject constructor(
                                 L("HomeScreenViewModel.getFrequent size ${state.playlists.size}")
                             }
                             L( "HomeScreenViewModel.getFrequent size of network array ${result.networkData?.size}")
+                            replaceWithRandomIfEmpty(state.frequentAlbums) { state = state.copy(frequentAlbums = it) }
                         }
                         is Resource.Error -> {
                             state = state.copy(isLoading = false)
+                            replaceWithRandomIfEmpty(state.frequentAlbums) { state = state.copy(frequentAlbums = it) }
                             L( "ERROR HomeScreenViewModel.getFrequent ${result.exception}")
                         }
                         is Resource.Loading -> {
@@ -201,30 +232,33 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
         }
+
+    private suspend fun getRandom(fetchRemote: Boolean = true) {
+        getRandom(fetchRemote = fetchRemote) { albums ->
+            state = state.copy(randomAlbums = albums)
+            L("HomeScreenViewModel.getRandom size ${state.playlists.size}")
+        }
     }
 
-    private fun getRandom(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
-            albumsRepository
-                .getRandomAlbums()
-                .collect { result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            result.data?.let { albums ->
-                                state = state.copy(randomAlbums = albums)
-                                L("HomeScreenViewModel.getRandom size ${state.playlists.size}")
-                            }
-                            L( "HomeScreenViewModel.getRandom size of network array ${result.networkData?.size}")
+    private suspend fun getRandom(fetchRemote: Boolean = true, callback: (albums: List<Album>) -> Unit) {
+        albumsRepository
+            .getRandomAlbums()
+            .collect { result ->
+                when(result) {
+                    is Resource.Success -> {
+                        result.data?.let { albums ->
+                            callback(albums)
                         }
-                        is Resource.Error -> {
-                            state = state.copy(isLoading = false)
-                            L( "ERROR HomeScreenViewModel.getRandom ${result.exception}")
-                        }
-                        is Resource.Loading -> {
-                            state = state.copy(isLoading = result.isLoading)
-                        }
+                        L( "HomeScreenViewModel.getRandom size of network array ${result.networkData?.size}")
+                    }
+                    is Resource.Error -> {
+                        state = state.copy(isLoading = false)
+                        L( "ERROR HomeScreenViewModel.getRandom ${result.exception}")
+                    }
+                    is Resource.Loading -> {
+                        state = state.copy(isLoading = result.isLoading)
                     }
                 }
-        }
+            }
     }
 }

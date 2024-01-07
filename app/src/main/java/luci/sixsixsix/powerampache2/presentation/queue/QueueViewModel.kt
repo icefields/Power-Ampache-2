@@ -14,7 +14,8 @@ class QueueViewModel  @Inject constructor(
         when(event) {
             is QueueEvent.OnSongSelected -> {
                 L("QueueEvent.OnSongSelected", event.song)
-                playlistManager.moveToSongInQueue(event.song) }
+                playlistManager.moveToSongInQueue(event.song)
+            }
 
             QueueEvent.OnPlayQueue -> {
                 L("QueueEvent.OnPlayQueue")

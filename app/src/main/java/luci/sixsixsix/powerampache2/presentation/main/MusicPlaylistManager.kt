@@ -24,8 +24,8 @@ class MusicPlaylistManager @Inject constructor() {
     private val _currentQueueState = MutableStateFlow(listOf<Song>())
     val currentQueueState: StateFlow<List<Song>> = _currentQueueState
 
-    fun updateTopSong(newSong: Song?) {
-        L( "MusicPlaylistManager updateCurrentSong", newSong)
+    fun updateTopSong(newSong: Song?) = newSong?.let {
+        L( "MusicPlaylistManager updateTopSong", newSong)
         _currentSongState.value = CurrentSongState(song = newSong)
         // add the current song on top of the queue
         _currentQueueState.value = ArrayList(_currentQueueState.value).apply {
@@ -34,7 +34,15 @@ class MusicPlaylistManager @Inject constructor() {
         }
     }
 
-    fun moveToSongInQueue(newSong: Song?) {
+    /**
+     * used in the callback when music player goes to the next song in the playlist
+     */
+    fun updateCurrentSong(newSong: Song?) = newSong?.let {
+        L( "MusicPlaylistManager updateCurrentSong", newSong)
+        _currentSongState.value = CurrentSongState(song = newSong)
+    }
+
+    fun moveToSongInQueue(newSong: Song?) = newSong?.let {
         L( "MusicPlaylistManager moveToSongInQueue", newSong)
         _currentSongState.value = CurrentSongState(song = newSong)
     }
@@ -51,7 +59,7 @@ class MusicPlaylistManager @Inject constructor() {
 
     fun replaceCurrentQueue(newPlaylist: List<Song>) {
         L( "MusicPlaylistManager replaceCurrentQueue", newPlaylist)
-        _currentQueueState.value = newPlaylist
+        _currentQueueState.value = newPlaylist.filterNotNull()
         checkCurrentSong()
     }
 
@@ -61,7 +69,7 @@ class MusicPlaylistManager @Inject constructor() {
         checkCurrentSong()
     }
 
-    fun addToCurrentQueue(newSong: Song) {
+    fun addToCurrentQueue(newSong: Song?) = newSong?.let {
         L( "MusicPlaylistManager addToCurrentQueue", newSong)
         addToCurrentQueue(listOf(newSong))
     }
@@ -69,8 +77,16 @@ class MusicPlaylistManager @Inject constructor() {
     fun addToCurrentQueueNext(list: List<Song>) {
         L( "MusicPlaylistManager addToCurrentQueueNext", list.size)
         val queue = ArrayList<Song>(currentQueueState.value).apply {
-            removeAll(list.toSet()) // remove duplicates
-            addAll( if (size > 0) { 1 } else { 0 } , list)
+            val currentSongIndex = indexOf(currentSongState.value.song)
+            addAll( if (size > currentSongIndex+1) { currentSongIndex+1 } else { size } , list)
+        }
+        replaceCurrentQueue(queue)
+    }
+
+    fun addToCurrentQueueTop(list: List<Song>) {
+        L( "MusicPlaylistManager addToCurrentQueueTop", list.size)
+        val queue = ArrayList<Song>(currentQueueState.value).apply {
+            addAll(0, list)
         }
         replaceCurrentQueue(queue)
     }
@@ -81,7 +97,7 @@ class MusicPlaylistManager @Inject constructor() {
         }
     }
 
-    fun addToCurrentQueueNext(song: Song) {
+    fun addToCurrentQueueNext(song: Song?) = song?.let {
         L( "MusicPlaylistManager addToCurrentQueueNext", song)
         addToCurrentQueueNext(listOf(song))
     }

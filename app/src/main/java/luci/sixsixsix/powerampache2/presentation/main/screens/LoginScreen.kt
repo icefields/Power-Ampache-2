@@ -22,8 +22,8 @@ import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 @Composable
 @Destination(start = false)
 fun LoginScreen(
-    modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel,
+    modifier: Modifier = Modifier
 ) {
     val state = viewModel.state
 
@@ -93,15 +93,15 @@ fun LoginScreen(
         }
         Text(text = state.error)
 
-        LoginButton(server = Servers.LocalDebug, buttonText = R.string.loginScreen_local_server)
-        LoginButton(server = Servers.RemoteDebug, buttonText = R.string.loginScreen_remote_server)
-        LoginButton(server = Servers.Dogmazic, buttonText = R.string.loginScreen_dogmazic_server)
-        LoginButton(server = Servers.AmpacheDemo, buttonText = R.string.loginScreen_demo_server)
+        LoginButton(server = Servers.LocalDebug, buttonText = R.string.loginScreen_local_server, viewModel = viewModel)
+        LoginButton(server = Servers.RemoteDebug, buttonText = R.string.loginScreen_remote_server, viewModel = viewModel)
+        LoginButton(server = Servers.Dogmazic, buttonText = R.string.loginScreen_dogmazic_server, viewModel = viewModel)
+        LoginButton(server = Servers.AmpacheDemo, buttonText = R.string.loginScreen_demo_server, viewModel = viewModel)
     }
 }
 
 @Composable
-fun LoginButton(server: Servers, viewModel: AuthViewModel = hiltViewModel(), @StringRes buttonText: Int){
+fun LoginButton(server: Servers, viewModel: AuthViewModel, @StringRes buttonText: Int){
     Button(onClick = {
         viewModel.onEvent(AuthEvent.OnChangeServerUrl(server.url))
         viewModel.onEvent(AuthEvent.OnChangePassword(server.password))

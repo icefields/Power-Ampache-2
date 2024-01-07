@@ -2,6 +2,7 @@ package luci.sixsixsix.powerampache2.presentation.playlist_detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -38,7 +41,11 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
+import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
+import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.presentation.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
@@ -61,7 +68,7 @@ fun PlaylistDetailScreen(
     playlist: Playlist,
     modifier: Modifier = Modifier,
     viewModel: PlaylistDetailViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel
 ) {
     val state = viewModel.state
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
@@ -71,7 +78,6 @@ fun PlaylistDetailScreen(
     val backgrounds = viewModel.generateBackgrounds()
     val randomBackgroundTop = backgrounds.first
     val randomBackgroundBottom = backgrounds.second
-
 
     Box(modifier = modifier) {
         AsyncImage(
@@ -148,6 +154,8 @@ fun PlaylistDetailScreen(
                         }
                     )
 
+                    showHideEmptyPlaylistView(playlist = playlist, state = state)
+
                     SwipeRefresh(
                         state = swipeRefreshState,
                         onRefresh = { viewModel.onEvent(PlaylistDetailEvent.Fetch(playlist)) }
@@ -195,6 +203,34 @@ fun PlaylistDetailScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun showHideEmptyPlaylistView(playlist: Playlist, state: PlaylistDetailState) {
+    if (
+        (playlist is RecentPlaylist ||
+                playlist is FrequentPlaylist ||
+                playlist is HighestPlaylist ||
+                playlist is FlaggedPlaylist) &&
+        !state.isLoading && !state.isRefreshing && state.songs.isNullOrEmpty()
+    ){
+        Card(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "This playlist is empty")
+                Text(text = when(playlist) {
+                    is FrequentPlaylist -> "Your most frequently played songs will appear here"
+                    is HighestPlaylist -> "Your highest rated songs will appear here"
+                    is RecentPlaylist -> "Your most recent songs will appear here"
+                    is FlaggedPlaylist -> "Your liked songs will appear here"
+                    else -> ""
+                })
             }
         }
     }

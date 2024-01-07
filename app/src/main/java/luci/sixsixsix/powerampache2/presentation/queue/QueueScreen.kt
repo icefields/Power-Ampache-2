@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +33,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.components.QueueScreenContent
@@ -42,12 +45,24 @@ import luci.sixsixsix.powerampache2.presentation.queue.components.QueueScreenCon
 fun QueueScreen(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel,
     viewModel: QueueViewModel = hiltViewModel()
 ) {
-    val state = mainViewModel.state
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
+    var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
+
+    if (playlistsDialogOpen.isOpen) {
+        playlistsDialogOpen.song?.let {
+            AddToPlaylistOrQueueDialog(
+                song = it,
+                onDismissRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                },
+                mainViewModel = mainViewModel
+            )
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -81,22 +96,23 @@ fun QueueScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            // show menu to add to an existing playlist or create a new one
+                            playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, mainViewModel.state.queue[0])
                         }
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlaylistAdd,
-                            contentDescription = stringResource(id = R.string.search_content_description)
+                            contentDescription = "add all songs in queue to playlist"
                         )
                     }
                     IconButton(
                         onClick = {
-                            mainViewModel.onEvent(MainEvent.Play(mainViewModel.state.queue[0]))
-                            viewModel.onEvent(QueueEvent.OnPlayQueue)
+                            //viewModel.onEvent(QueueEvent.OnPlayQueue)
+                            mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.PlayArrow,
+                            imageVector = if (!mainViewModel.isPlaying)
+                                Icons.Default.PlayArrow else Icons.Default.Pause,
                             contentDescription = stringResource(id = R.string.search_content_description)
                         )
                     }
@@ -109,7 +125,11 @@ fun QueueScreen(
                 .padding(it)
                 .padding(top = dimensionResource(id = R.dimen.albumDetailScreen_top_padding)),
         ) {
-            QueueScreenContent(navigator)
+            QueueScreenContent(
+                navigator = navigator,
+                mainViewModel = mainViewModel,
+                viewModel = viewModel
+            )
         }
     }
 }

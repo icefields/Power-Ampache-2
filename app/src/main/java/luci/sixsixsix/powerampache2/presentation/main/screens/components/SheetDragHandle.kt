@@ -20,10 +20,10 @@ import luci.sixsixsix.powerampache2.presentation.song_detail.components.SongDeta
 import luci.sixsixsix.powerampache2.presentation.song_detail.components.MiniPlayer
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 fun SheetDragHandle(
     scaffoldState: BottomSheetScaffoldState,
-    mainViewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel
 ) {
     val scope = rememberCoroutineScope()
     val barHeight = dimensionResource(id = R.dimen.miniPlayer_height)
@@ -54,9 +54,9 @@ fun SheetDragHandle(
             }
         ) {
             if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                SongDetailTopBar()
+                SongDetailTopBar(mainViewModel = mainViewModel)
             } else {
-                MiniPlayer()
+                MiniPlayer(mainViewModel = mainViewModel)
             }
         }
     }

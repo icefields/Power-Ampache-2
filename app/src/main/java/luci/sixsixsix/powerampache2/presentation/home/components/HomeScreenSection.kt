@@ -20,15 +20,26 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.home.LoadingView
 
 @Composable
-fun HomeScreenSection(navigator: DestinationsNavigator, albumsRow: List<Any>?, text: String) {
+fun HomeScreenSection(
+    navigator: DestinationsNavigator,
+    albumsRow: List<Any>?,
+    text: String
+) {
     if (!albumsRow.isNullOrEmpty()) {
         Column {
             SectionTitle(text = text)
             SectionRow(navigator = navigator, albumsRow = albumsRow)
             Spacer(modifier = Modifier.height(24.dp))
         }
+    } else if (text == "loading" && albumsRow == null) {
+        // TODO this is a hack, passing "loading" as identifier to visualize a loading progress
+        //  at the bottom while data is loading. A null list in this case means isLoading = true,
+        //  and empty list means isLoading = false.
+        //  Do this properly!
+        LoadingView()
     }
 }
 

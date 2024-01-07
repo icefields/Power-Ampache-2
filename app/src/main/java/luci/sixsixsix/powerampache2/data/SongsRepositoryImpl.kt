@@ -39,21 +39,6 @@ class SongsRepositoryImpl @Inject constructor(
 ): SongsRepository {
     private val dao = db.dao
 
-//    private suspend fun <T> handleError(
-//        label: String = "",
-//        e: Throwable,
-//        fc: FlowCollector<Resource<T>>,
-//    ) = MusicRepositoryImpl.handleError(label, e, fc) { message, error ->
-//        // TODO DEBUG this is just for debugging
-//        playlistManager.updateErrorMessage(message)
-//
-//        if (error is MusicException && error.musicError.isSessionExpiredError()) {
-//            runBlocking {
-//                dao.clearSession()
-//            }
-//        }
-//    }
-
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
     private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
 
@@ -202,6 +187,10 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongs()", e, this) }
 
+    private suspend fun cacheSongs(songs: List<Song>) =
+        dao.insertSongs(songs.map { it.toSongEntity() })
+
+
     /**
      * TODO BREAKING_RULE: inconsistent data in the response, must use network response.
      *   INVESTIGATE !
@@ -230,7 +219,7 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
 
         // cache songs after emitting success because the result of this is not used right now
-        dao.insertSongs(songs.map { it.toSongEntity() })
+        cacheSongs(songs)
     }.catch { e -> errorHandler("getSongsFromAlbum()", e, this) }
 
     /**
@@ -255,27 +244,43 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Success(data = songs, networkData = songs))
         emit(Resource.Loading(false))
 
-        // Songs are cached regardless for quick access from SongsScreen and Albums
         // cache songs after emitting success
-        dao.insertSongs(songs.map { it.toSongEntity() })
+        // Songs are cached regardless for quick access from SongsScreen and Albums
+        cacheSongs(songs)
     }.catch { e -> errorHandler("getSongsFromPlaylist()", e, this) }
 
     override suspend fun getRecentSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
-        api.getSongsRecent(auth.auth, username = getCredentials()?.username).songs?.map { it.toSong() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
+        api.getSongsRecent(
+            auth.auth,
+            username = getCredentials()?.username
+        ).songs?.map { it.toSong() }?.let { songs ->
+            emit(Resource.Success(data = songs, networkData = songs))
+
+            // cache songs after emitting success
+            // Songs are cached regardless for quick access from SongsScreen and Albums
+            cacheSongs(songs)
         }?:run {
             throw Exception("error connecting or getting data")
         }
         emit(Resource.Loading(false))
+
+
     }.catch { e -> errorHandler("getRecentSongs()", e, this) }
 
     override suspend fun getNewestSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
-        api.getSongsNewest(auth.auth, username = getCredentials()?.username).songs?.map { it.toSong() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
+        api.getSongsNewest(
+            auth.auth,
+            username = getCredentials()?.username
+        ).songs?.map { it.toSong() }?.let { songs ->
+            emit(Resource.Success(data = songs, networkData = songs))
+
+            // cache songs after emitting success
+            // Songs are cached regardless for quick access from SongsScreen and Albums
+            cacheSongs(songs)
         }?:run {
             throw Exception("error connecting or getting data")
         }
@@ -285,8 +290,13 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun getHighestSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
-        api.getSongsHighest(auth.auth, username = getCredentials()?.username).songs?.map { it.toSong() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
+        api.getSongsHighest(auth.auth, username = getCredentials()?.username
+        ).songs?.map { it.toSong() }?.let {songs ->
+            emit(Resource.Success(data = songs, networkData = songs))
+
+            // cache songs after emitting success
+            // Songs are cached regardless for quick access from SongsScreen and Albums
+            cacheSongs(songs)
         }?:run {
             throw Exception("error connecting or getting data")
         }
@@ -296,8 +306,13 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun getFrequentSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
-        api.getSongsFrequent(auth.auth, username = getCredentials()?.username).songs?.map { it.toSong() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
+        api.getSongsFrequent(auth.auth, username = getCredentials()?.username
+        ).songs?.map { it.toSong() }?.let {songs ->
+            emit(Resource.Success(data = songs, networkData = songs))
+
+            // cache songs after emitting success
+            // Songs are cached regardless for quick access from SongsScreen and Albums
+            cacheSongs(songs)
         }?:run {
             throw Exception("error connecting or getting data")
         }
@@ -307,8 +322,12 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun getFlaggedSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
-        api.getSongsFlagged(auth.auth).songs?.map { it.toSong() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
+        api.getSongsFlagged(auth.auth).songs?.map { it.toSong() }?.let { songs ->
+            emit(Resource.Success(data = songs, networkData = songs))
+
+            // cache songs after emitting success
+            // Songs are cached regardless for quick access from SongsScreen and Albums
+            cacheSongs(songs)
         }?:run {
             throw Exception("error connecting or getting data")
         }
@@ -318,8 +337,13 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun getRandomSongs(): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
-        api.getSongsRandom(auth.auth, username = getCredentials()?.username).songs?.map { it.toSong() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
+        api.getSongsRandom(auth.auth, username = getCredentials()?.username
+        ).songs?.map { it.toSong() }?.let {songs ->
+            emit(Resource.Success(data = songs, networkData = songs))
+
+            // cache songs after emitting success
+            // Songs are cached regardless for quick access from SongsScreen and Albums
+            cacheSongs(songs)
         }?:run {
             throw Exception("error connecting or getting data")
         }

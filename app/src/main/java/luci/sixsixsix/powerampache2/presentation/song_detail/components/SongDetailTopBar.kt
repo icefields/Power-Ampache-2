@@ -34,7 +34,7 @@ import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 @Composable
 fun SongDetailTopBar(
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel
 ) {
     Box(
         contentAlignment = Alignment.CenterStart,

@@ -133,7 +133,6 @@ fun SongItem(
                         detectTapGestures(
                             onPress = { offset ->
                                 pressOffset = DpOffset(offset.x.toDp(), offset.y.toDp())
-                                L("SongItem.Image", offset.y, offset.x)
                                 isContextMenuVisible = true
                             })
                     },

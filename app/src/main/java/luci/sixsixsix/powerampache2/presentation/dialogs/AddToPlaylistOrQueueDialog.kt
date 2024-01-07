@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.dialogs
 
+import android.provider.CalendarContract
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +30,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,9 +62,13 @@ data class AddToPlaylistOrQueueDialogOpen(
 fun AddToPlaylistOrQueueDialog(
     song: Song,
     onDismissRequest: () -> Unit,
-    viewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel,
+    viewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
+    var headerBgColour by remember { mutableStateOf(Color.Transparent) }
+    if (headerBgColour == Color.Transparent)
+        headerBgColour = RandomThemeBackgroundColour()
+
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -70,7 +80,7 @@ fun AddToPlaylistOrQueueDialog(
                 verticalArrangement = Arrangement.Center,
             ) {
                 // use same colour for the header
-                val headerBgColour = RandomThemeBackgroundColour()
+
                 Text(
                     text = "PLAYLISTS",
                     modifier = Modifier
@@ -138,11 +148,15 @@ fun PlaylistDialogItem(
     iconContentDescription: String = title,
     backgroundColour: Color = RandomThemeBackgroundColour()
 ) {
+    var backgroundColourState by remember { mutableStateOf(Color.Transparent) }
+    if (backgroundColourState == Color.Transparent)
+        backgroundColourState = backgroundColour
+
     Card(
         // border = BorderStroke((0.0).dp, MaterialTheme.colorScheme.background),
         modifier = modifier,
         colors = CardDefaults.cardColors(
-            containerColor = backgroundColour
+            containerColor = backgroundColourState
         ),
         elevation = CardDefaults.cardElevation(0.dp),
         shape = RoundedCornerShape(0.dp)

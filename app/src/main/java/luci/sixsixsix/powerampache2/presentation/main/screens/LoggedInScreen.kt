@@ -1,7 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,26 +13,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.navigation.dependency
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.MainActivity
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
+import luci.sixsixsix.powerampache2.presentation.home.HomeScreenViewModel
+import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.SheetDragHandle
 import luci.sixsixsix.powerampache2.presentation.song_detail.SongDetailScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoggedInScreen(
-    viewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel,
+    authViewModel: AuthViewModel,
+    //homeScreenViewModel: HomeScreenViewModel
 ) {
-    val state = viewModel.state
+    val state = mainViewModel.state
     val scaffoldState = rememberBottomSheetScaffoldState()
 
     // TODO DEBUG snackbar errors
@@ -45,8 +51,8 @@ fun LoggedInScreen(
                 duration = SnackbarDuration.Indefinite
             ).apply {
                 when (this) {
-                    SnackbarResult.Dismissed -> viewModel.onEvent(MainEvent.OnDismissErrorMessage)
-                    SnackbarResult.ActionPerformed -> viewModel.onEvent(MainEvent.OnDismissErrorMessage)
+                    SnackbarResult.Dismissed -> mainViewModel.onEvent(MainEvent.OnDismissErrorMessage)
+                    SnackbarResult.ActionPerformed -> mainViewModel.onEvent(MainEvent.OnDismissErrorMessage)
                 }
             }
         }
@@ -56,18 +62,46 @@ fun LoggedInScreen(
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
-            SongDetailScreen(mainScaffoldState = scaffoldState)
+            SongDetailScreen(mainScaffoldState = scaffoldState, viewModel = mainViewModel)
         },
         sheetDragHandle = {
-            SheetDragHandle(scaffoldState = scaffoldState)
+            SheetDragHandle(scaffoldState = scaffoldState, mainViewModel = mainViewModel)
         },
         sheetShape = RectangleShape,
         sheetSwipeEnabled = true,
-        sheetPeekHeight = getPeakHeight(viewModel.state.song) // peek only when a song is pulled up
+        sheetPeekHeight = getPeakHeight(mainViewModel.state.song) // peek only when a song is pulled up
     ) {
         Column {
             DestinationsNavHost(
                 navGraph = NavGraphs.root,
+                dependenciesContainerBuilder = {
+                    // those are declared in the activity
+                    dependency(mainViewModel)
+                    dependency(authViewModel)
+                    //dependency(homeScreenViewModel)
+
+//                    dependency(hiltViewModel<QueueViewModel>(LocalContext.current as MainActivity))
+//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
+//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
+//                    dependency(NavGraphs.root) {
+//                        val parentEntry = remember(navBackStackEntry) {
+//                            navController.getBackStackEntry(NavGraphs.root.route)
+//                        }
+//                        hiltViewModel<HomeScreenViewModel>(parentEntry)
+//                    }
+
+
+
+
+                    // To tie SettingsViewModel to "settings" nested navigation graph,
+                    // making it available to all screens that belong to it
+//                    dependency(NavGraphs.root) {
+//                        val parentEntry = remember(navBackStackEntry) {
+//                            navController.getBackStackEntry(NavGraphs.root.route)
+//                        }
+//                        hiltViewModel<MainViewModel>(parentEntry)
+//                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(

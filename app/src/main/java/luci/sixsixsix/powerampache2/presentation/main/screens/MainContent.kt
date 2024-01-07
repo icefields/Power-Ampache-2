@@ -36,6 +36,7 @@ import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
 import luci.sixsixsix.powerampache2.presentation.home.HomeScreen
+import luci.sixsixsix.powerampache2.presentation.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.DrawerBody
@@ -57,13 +58,14 @@ import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 fun MainContent(
     navigator: DestinationsNavigator,
-    viewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel,
+    homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     Ampache2NavGraphs.navigator = navigator
 
     val tabsCount = MainTabRow.tabItems.size
     val pagerState = rememberPagerState { tabsCount }
-    L("MainContent Current song ${viewModel.state.song}")
+    L("MainContent Current song ${mainViewModel.state.song}")
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -94,7 +96,8 @@ fun MainContent(
             topBar = {
                 MainContentTopAppBar(
                     pagerState = pagerState,
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
+                    viewModel = mainViewModel
                 ) { event ->
                     when(event) {
                         MainContentTopAppBarEvent.OnLeftDrawerIconClick -> scope.launch {
@@ -112,16 +115,22 @@ fun MainContent(
                 top = it.calculateTopPadding(),
                 bottom = it.calculateBottomPadding()
             )) {
-                L("MainContent currentScreen ${currentScreen}")
-
+                L("MainContent currentScreen $currentScreen")
                 when (MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
-                    is MainContentMenuItem.Home -> HomeScreen(navigator = navigator)
+                    is MainContentMenuItem.Home -> HomeScreen(
+                        navigator = navigator,
+                        viewModel = homeScreenViewModel
+                    )
                     is MainContentMenuItem.Library -> TabbedLibraryView(
                         navigator = navigator,
-                        pagerState = pagerState
+                        pagerState = pagerState,
+                        mainViewModel = mainViewModel
                     )
-                    is MainContentMenuItem.Settings -> HomeScreen(navigator = navigator)
-                    MainContentMenuItem.Logout -> viewModel.onEvent(MainEvent.OnLogout)
+                    is MainContentMenuItem.Settings -> HomeScreen(
+                        navigator = navigator,
+                        viewModel = homeScreenViewModel
+                    )
+                    MainContentMenuItem.Logout -> mainViewModel.onEvent(MainEvent.OnLogout)
                 }
             }
         }
@@ -133,7 +142,8 @@ fun MainContent(
 fun TabbedLibraryView(
     navigator: DestinationsNavigator,
     pagerState: PagerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel
 ) {
         Column {
             MainTabRow.MainTabRow(pagerState)
@@ -149,7 +159,7 @@ fun TabbedLibraryView(
                     TabItem.Albums -> AlbumsScreen(navigator = navigator)
                     TabItem.Artists -> ArtistsScreen(navigator = navigator)
                     TabItem.Playlists -> PlaylistsScreen(navigator = navigator)
-                    TabItem.Songs -> SongsListScreen(navigator)
+                    TabItem.Songs -> SongsListScreen(navigator = navigator, mainViewModel = mainViewModel)
                 }
             }
         }

@@ -29,8 +29,9 @@ enum class AlbumInfoViewEvents {
 
 @Composable
 fun AlbumInfoSection(
-    modifier: Modifier,
     album: Album,
+    isPlayingAlbum: Boolean,
+    modifier: Modifier,
     eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit
 ) {
     Column(modifier = modifier) {
@@ -70,7 +71,12 @@ fun AlbumInfoSection(
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
-        AlbumInfoButtonsRow(modifier = Modifier.fillMaxWidth(), album = album, eventListener)
+        AlbumInfoButtonsRow(
+            modifier = Modifier.fillMaxWidth(),
+            album = album,
+            isPlayingAlbum = isPlayingAlbum,
+            eventListener = eventListener
+        )
         Spacer(modifier = Modifier.width(20.dp))
     }
 }
@@ -79,24 +85,9 @@ fun AlbumInfoSection(
 @Composable
 fun AlbumInfoSectionPreview() {
     AlbumInfoSection(
-        Modifier,
-        Album(
-            name = "Album title",
-            time = 129,
-            id = UUID.randomUUID().toString(),
-            songCount = 11,
-            genre = listOf(
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Thrash Metal"),
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Progressive Metal"),
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Jazz"),
-            ),
-            artists = listOf(
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Megadeth"),
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Marty Friedman"),
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Other people"),
-            ),
-            year = 1986
-        ),
-        eventListener = {}
+        modifier = Modifier,
+        album = Album.mock(),
+        isPlayingAlbum = false,
+        eventListener = {},
     )
 }
