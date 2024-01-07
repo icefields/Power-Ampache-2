@@ -1,12 +1,15 @@
 package luci.sixsixsix.powerampache2.presentation.queue.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
@@ -22,7 +25,7 @@ import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
 fun QueueScreenContent(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel,
     viewModel: QueueViewModel = hiltViewModel()
 ) {
     val state = mainViewModel.state
@@ -47,6 +50,7 @@ fun QueueScreenContent(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(if (song == mainViewModel.state.song) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
                     .clickable {
                         // TODO BUG when tapping on a song, in the context of a playlist, do not
                         //  move the new song on top, just start playing from the selected song

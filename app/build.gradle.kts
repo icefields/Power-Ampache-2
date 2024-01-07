@@ -83,6 +83,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.2")
 
+    implementation("androidx.media:media:1.7.0")
+
     // Compose dependencies
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
@@ -94,6 +96,7 @@ dependencies {
     implementation("androidx.paging:paging-compose:3.3.0-alpha02")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
     // DO NOT INCLUDE implementation("androidx.compose.material:material:$composeVersion")
 
     // Compose Nav Destinations
@@ -108,12 +111,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
 
     // ExoPlayer
-//    api("com.google.android.exoplayer:exoplayer-core:$exoplayerVersion")
-//    api("com.google.android.exoplayer:exoplayer-ui:$exoplayerVersion")
-//    api("com.google.android.exoplayer:extension-mediasession:$exoplayerVersion")
-
-    // For media playback using ExoPlayer
     implementation("androidx.media3:media3-exoplayer:$media3Version")
+    implementation("androidx.media3:media3-exoplayer-dash:$media3Version")
     // Common functionality for media database components
     implementation("androidx.media3:media3-database:$media3Version")
     // Common functionality for media decoders
@@ -123,9 +122,9 @@ dependencies {
     // Common functionality used across multiple media libraries
     implementation("androidx.media3:media3-common:$media3Version")
     implementation("androidx.media3:media3-session:$media3Version")
-    implementation("androidx.media3:media3-exoplayer-dash:$media3Version")
     implementation("androidx.media3:media3-ui:$media3Version")
 
+    // Coil
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     //Dagger - Hilt

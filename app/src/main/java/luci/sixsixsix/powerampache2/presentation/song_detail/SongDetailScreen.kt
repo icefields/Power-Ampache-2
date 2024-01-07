@@ -32,7 +32,7 @@ fun SongDetailScreen(
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
-            SongDetailQueueScreenContent(mainScaffoldState = mainScaffoldState)
+            SongDetailQueueScreenContent(mainScaffoldState = mainScaffoldState, mainViewModel = viewModel)
         },
         sheetDragHandle = {
             SongDetailQueueDragHandle(scaffoldState = scaffoldState)
@@ -43,6 +43,7 @@ fun SongDetailScreen(
     ) {
         SongDetailContent(
             mainScaffoldState = mainScaffoldState,
-            modifier = Modifier.padding(paddingValues = it))
+            modifier = Modifier.padding(paddingValues = it),
+            mainViewModel = viewModel)
     }
 }

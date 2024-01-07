@@ -23,7 +23,7 @@ import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 @Destination(start = false)
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel
 ) {
     val state = viewModel.state
 

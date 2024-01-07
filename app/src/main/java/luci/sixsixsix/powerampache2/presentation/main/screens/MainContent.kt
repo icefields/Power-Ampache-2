@@ -26,7 +26,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -57,13 +56,13 @@ import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 fun MainContent(
     navigator: DestinationsNavigator,
-    viewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel
 ) {
     Ampache2NavGraphs.navigator = navigator
 
     val tabsCount = MainTabRow.tabItems.size
     val pagerState = rememberPagerState { tabsCount }
-    L("MainContent Current song ${viewModel.state.song}")
+    L("MainContent Current song ${mainViewModel.state.song}")
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -94,7 +93,8 @@ fun MainContent(
             topBar = {
                 MainContentTopAppBar(
                     pagerState = pagerState,
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
+                    viewModel = mainViewModel
                 ) { event ->
                     when(event) {
                         MainContentTopAppBarEvent.OnLeftDrawerIconClick -> scope.launch {
@@ -118,10 +118,11 @@ fun MainContent(
                     is MainContentMenuItem.Home -> HomeScreen(navigator = navigator)
                     is MainContentMenuItem.Library -> TabbedLibraryView(
                         navigator = navigator,
-                        pagerState = pagerState
+                        pagerState = pagerState,
+                        mainViewModel = mainViewModel
                     )
                     is MainContentMenuItem.Settings -> HomeScreen(navigator = navigator)
-                    MainContentMenuItem.Logout -> viewModel.onEvent(MainEvent.OnLogout)
+                    MainContentMenuItem.Logout -> mainViewModel.onEvent(MainEvent.OnLogout)
                 }
             }
         }
@@ -133,7 +134,8 @@ fun MainContent(
 fun TabbedLibraryView(
     navigator: DestinationsNavigator,
     pagerState: PagerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel
 ) {
         Column {
             MainTabRow.MainTabRow(pagerState)
@@ -149,7 +151,7 @@ fun TabbedLibraryView(
                     TabItem.Albums -> AlbumsScreen(navigator = navigator)
                     TabItem.Artists -> ArtistsScreen(navigator = navigator)
                     TabItem.Playlists -> PlaylistsScreen(navigator = navigator)
-                    TabItem.Songs -> SongsListScreen(navigator)
+                    TabItem.Songs -> SongsListScreen(navigator = navigator, mainViewModel = mainViewModel)
                 }
             }
         }

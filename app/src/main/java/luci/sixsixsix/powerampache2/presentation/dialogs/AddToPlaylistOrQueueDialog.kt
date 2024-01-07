@@ -56,8 +56,8 @@ data class AddToPlaylistOrQueueDialogOpen(
 fun AddToPlaylistOrQueueDialog(
     song: Song,
     onDismissRequest: () -> Unit,
-    viewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel,
+    viewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(

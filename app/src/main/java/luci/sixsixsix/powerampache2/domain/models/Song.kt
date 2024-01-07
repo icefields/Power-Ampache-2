@@ -1,7 +1,11 @@
 package luci.sixsixsix.powerampache2.domain.models
 
 import android.media.browse.MediaBrowser
+import android.net.Uri
 import android.os.Parcelable
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.StarRating
 import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.md5
@@ -65,6 +69,31 @@ fun Song.totalTime(): String {
 
 // LISTS PERFORMANCE . urls contain the token, do not rely only on id
 fun Song.key(): String = "${mediaId}${songUrl}"//.md5()
+
+fun Song.toMediaItem() = MediaItem.Builder()
+    .setMediaId(mediaId)
+    .setUri(songUrl)
+    .setMimeType(mime)
+    .setMediaMetadata(
+        MediaMetadata.Builder().setFolderType(MediaMetadata.FOLDER_TYPE_ALBUMS)
+            .setArtworkUri(Uri.parse(imageUrl))
+            .setAlbumTitle(album.name)
+            .setArtist(artist.name)
+            .setDisplayTitle(title)
+            .setTitle(title)
+            .setTrackNumber(trackNumber)
+            .setGenre(if (genre.isNotEmpty()) {
+                genre[0].name
+            } else "")
+            .setComposer(composer)
+            .setAlbumArtist(artist.name)
+            .setOverallRating(StarRating(5, if (rate in 0..5) rate.toFloat() else 0f))
+            .setReleaseYear(year)
+            .setUserRating(StarRating(5, if (rate in 0..5) rate.toFloat() else 0f))
+            .build()
+    ).build()
+
+
 
 fun MediaBrowser.MediaItem.toSong() = Song(
             mediaId = mediaId!!,

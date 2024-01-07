@@ -81,11 +81,12 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
 
         // clear database first so even with lack of connection the user will be logged out
+        val currentAuth = getSession()?.auth // need this to make the logout call
         dao.clearCredentials()
         dao.clearSession()
         dao.clearCachedData()
 
-        val resp = getSession()?.auth?.let {
+        val resp = currentAuth?.let {
             api.goodbye(it)
         }
 

@@ -37,10 +37,9 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.presentation.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoSection
@@ -53,7 +52,6 @@ import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +62,7 @@ fun AlbumDetailScreen(
     album: Album? = null,
     modifier: Modifier = Modifier,
     viewModel: AlbumDetailViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel,
 ) {
     val state = viewModel.state
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
@@ -74,10 +72,12 @@ fun AlbumDetailScreen(
 
     if (playlistsDialogOpen.isOpen) {
         playlistsDialogOpen.song?.let {
-            AddToPlaylistOrQueueDialog(it,
+            AddToPlaylistOrQueueDialog(
+                song = it,
                 onDismissRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
-                }
+                },
+                mainViewModel = mainViewModel
             )
         }
     }
@@ -128,6 +128,7 @@ fun AlbumDetailScreen(
                 ) { infoVisibility = !infoVisibility }
             }
         ) {
+            L(mainViewModel.isPlaying, mainViewModel.state.song, state.songs.contains(mainViewModel.state.song))
             Surface(
                 modifier = Modifier
                     .padding(it)
@@ -135,6 +136,7 @@ fun AlbumDetailScreen(
                     .background(brush = albumBackgroundGradient),
                 color = Color.Transparent
             ) {
+                val isPlayingAlbum = mainViewModel.isPlaying && state.songs.contains(mainViewModel.state.song)
                 Column {
                     AlbumInfoSection(
                         modifier = Modifier
@@ -150,13 +152,27 @@ fun AlbumDetailScreen(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
                         album = viewModel.state.album,
+                        isPlayingAlbum = isPlayingAlbum,
                         eventListener = { event ->
                             when(event) {
-                                AlbumInfoViewEvents.PLAY_ALBUM -> viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
-                                AlbumInfoViewEvents.SHARE_ALBUM -> viewModel.onEvent(AlbumDetailEvent.OnShareAlbum)
-                                AlbumInfoViewEvents.DOWNLOAD_ALBUM -> viewModel.onEvent(AlbumDetailEvent.OnDownloadAlbum)
-                                AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM -> viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
-                                AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST -> viewModel.onEvent(AlbumDetailEvent.OnAddAlbumToQueue)
+                                AlbumInfoViewEvents.PLAY_ALBUM -> {
+                                    if (!isPlayingAlbum) {
+                                        // add next to the list and skip to the top of the album (which is next)
+                                        viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
+                                        mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0]))
+                                    } else {
+                                        // will pause if playing
+                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                    }
+                                }
+                                AlbumInfoViewEvents.SHARE_ALBUM ->
+                                    viewModel.onEvent(AlbumDetailEvent.OnShareAlbum)
+                                AlbumInfoViewEvents.DOWNLOAD_ALBUM ->
+                                    viewModel.onEvent(AlbumDetailEvent.OnDownloadAlbum)
+                                AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM ->
+                                    viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
+                                AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST ->
+                                    viewModel.onEvent(AlbumDetailEvent.OnAddAlbumToQueue)
                             }
                         }
                     )
@@ -175,9 +191,12 @@ fun AlbumDetailScreen(
                                     song = song,
                                     songItemEventListener = { event ->
                                         when(event) {
-                                            SongItemEvent.PLAY_NEXT -> mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                                            SongItemEvent.SHARE_SONG -> mainViewModel.onEvent(MainEvent.OnShareSong(song))
-                                            SongItemEvent.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                                            SongItemEvent.PLAY_NEXT ->
+                                                mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                                            SongItemEvent.SHARE_SONG ->
+                                                mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                                            SongItemEvent.DOWNLOAD_SONG ->
+                                                mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                                             SongItemEvent.GO_TO_ALBUM -> { } // No ACTION, we're already in this album //navigator.navigate(AlbumDetailScreenDestination(viewModel.state.album.id, viewModel.state.album))
                                             SongItemEvent.GO_TO_ARTIST ->
                                                 navigator.navigate(
@@ -246,24 +265,24 @@ private val screenBackgroundGradient
 @Preview(widthDp = 300) //(widthDp = 50, heightDp = 50)
 @Composable
 fun AlbumPreview() {
-    AlbumDetailScreen(
-        navigator = EmptyDestinationsNavigator,
-        albumId = "1050",
-        album = Album(
-            name = "Album title",
-            time = 129,
-            id = UUID.randomUUID().toString(),
-            songCount = 11,
-            genre = listOf(
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Thrash Metal"),
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Progressive Metal"),
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Jazz"),
-            ),
-            artists = listOf(
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Megadeth"),
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Marty Friedman"),
-                MusicAttribute(id = UUID.randomUUID().toString(), name = "Other people"),
-            ),
-            year = 1986)
-    )
+//    AlbumDetailScreen(
+//        navigator = EmptyDestinationsNavigator,
+//        albumId = "1050",
+//        album = Album(
+//            name = "Album title",
+//            time = 129,
+//            id = UUID.randomUUID().toString(),
+//            songCount = 11,
+//            genre = listOf(
+//                MusicAttribute(id = UUID.randomUUID().toString(), name = "Thrash Metal"),
+//                MusicAttribute(id = UUID.randomUUID().toString(), name = "Progressive Metal"),
+//                MusicAttribute(id = UUID.randomUUID().toString(), name = "Jazz"),
+//            ),
+//            artists = listOf(
+//                MusicAttribute(id = UUID.randomUUID().toString(), name = "Megadeth"),
+//                MusicAttribute(id = UUID.randomUUID().toString(), name = "Marty Friedman"),
+//                MusicAttribute(id = UUID.randomUUID().toString(), name = "Other people"),
+//            ),
+//            year = 1986)
+//    )
 }

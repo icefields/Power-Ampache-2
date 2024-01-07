@@ -10,18 +10,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.outlined.AddBox
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
@@ -40,22 +36,38 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.fontDimensionResource
-import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoViewEvents
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MiniPlayer(
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel
+) {
+    mainViewModel.state.song?.let {song ->
+        MiniPlayerContent(
+            song = song,
+            modifier = modifier,
+            isPlaying = mainViewModel.isPlaying
+        ) { event ->
+            mainViewModel.onEvent(event)
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun MiniPlayerContent(
+    song: Song,
+    isPlaying: Boolean,
+    modifier: Modifier = Modifier,
+    onEvent: (MainEvent) -> Unit
 ) {
     Row(modifier = modifier.padding(vertical = 5.dp, horizontal = 5.dp)) {
         Card(
@@ -72,24 +84,26 @@ fun MiniPlayer(
             shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
         ) {
             AsyncImage(
-                model = mainViewModel.state.song?.imageUrl,
+                model = song.imageUrl,
                 contentScale = ContentScale.FillHeight,
                 placeholder = painterResource(id = R.drawable.placeholder_album),
                 error = painterResource(id = R.drawable.ic_playlist),
-                contentDescription = mainViewModel.state.song?.title,
+                contentDescription = song.title,
             )
         }
 
         Spacer(modifier = Modifier
             .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
 
-        Column(modifier = Modifier.weight(1.0f).fillMaxHeight(),
+        Column(modifier = Modifier
+            .weight(1.0f)
+            .fillMaxHeight(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 modifier = Modifier.basicMarquee(),
-                text = mainViewModel.state.song?.title ?: Constants.ERROR_TITLE,
+                text = song.title ,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 maxLines = 1,
@@ -99,7 +113,7 @@ fun MiniPlayer(
                 .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
             Text(
                 modifier = Modifier.basicMarquee(),
-                text = mainViewModel.state.song?.artist?.name ?: Constants.ERROR_TITLE,
+                text = song.artist.name,
                 fontWeight = FontWeight.Light,
                 fontSize = 14.sp,
                 maxLines = 1,
@@ -112,6 +126,7 @@ fun MiniPlayer(
             verticalAlignment = Alignment.CenterVertically) {
             IconButton(modifier = Modifier.widthIn(min = 20.dp, max = 40.dp),
                 onClick = {
+                    onEvent(MainEvent.SkipPrevious)
                 }) {
                 Icon(
                     imageVector = Icons.Outlined.SkipPrevious,
@@ -120,16 +135,17 @@ fun MiniPlayer(
             }
             IconButton(modifier = Modifier.widthIn(min = 60.dp, max = 100.dp),
                 onClick = {
-                    mainViewModel.onEvent(MainEvent.PlayCurrent)
+                    onEvent(MainEvent.PlayPauseCurrent)
                 }) {
                 Icon(
                     modifier = Modifier.aspectRatio(1f / 1f),
-                    imageVector = Icons.Outlined.PlayCircle, // Pause
+                    imageVector = if (!isPlaying) { Icons.Default.PlayCircle } else { Icons.Default.PauseCircle },
                     contentDescription = "Play"
                 )
             }
             IconButton(modifier = Modifier.widthIn(min = 20.dp, max = 40.dp),
                 onClick = {
+                    onEvent(MainEvent.SkipNext)
                 }) {
                 Icon(
                     imageVector = Icons.Outlined.SkipNext,
@@ -138,6 +154,7 @@ fun MiniPlayer(
             }
             IconButton(modifier = Modifier.widthIn(min = 20.dp, max = 40.dp),
                 onClick = {
+                    onEvent(MainEvent.Shuffle)
                 }) {
                 Icon(
                     imageVector = Icons.Outlined.Shuffle, //ShuffleOn
@@ -146,4 +163,15 @@ fun MiniPlayer(
             }
         }
     }
+}
+
+
+@Composable
+@Preview
+fun previewMiniPlayer() {
+    MiniPlayerContent(
+        song = Song.mockSong,
+        modifier = Modifier.width(400.dp).height(50.dp),
+        isPlaying = true
+    ) {}
 }

@@ -29,8 +29,8 @@ import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
 fun SongsListScreen(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
-    viewModel: SongsViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel,
+    viewModel: SongsViewModel = hiltViewModel()
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state

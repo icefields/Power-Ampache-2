@@ -28,8 +28,8 @@ private const val SERVICE_TAG = "MusicService"
 @AndroidEntryPoint
 class MusicService : MediaLibraryService() {
 
-    @Inject
-    lateinit var dataSourceFactory: DefaultDataSource.Factory
+//    @Inject
+//    lateinit var dataSourceFactory: DefaultDataSource.Factory
 
     @Inject
     lateinit var exoPlayer: ExoPlayer
@@ -134,7 +134,7 @@ class MusicService : MediaLibraryService() {
         playNow: Boolean
     ) {
         val curSongIndex = if(curPlayingSong == null) 0 else songs.indexOf(itemToPlay)
-        exoPlayer.setMediaSource(firebaseMusicSource.asMediaSource(dataSourceFactory))
+        //exoPlayer.setMediaSource(firebaseMusicSource.asMediaSource(dataSourceFactory))
         exoPlayer.prepare()
         exoPlayer.seekTo(curSongIndex, 0L)
         exoPlayer.playWhenReady = playNow

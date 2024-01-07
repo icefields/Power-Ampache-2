@@ -56,8 +56,8 @@ class AlbumDetailViewModel @Inject constructor(
 
             is AlbumDetailEvent.OnPlayAlbum -> {
                 L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
-                playlistManager.addToCurrentQueueNext(state.songs)
-                playlistManager.updateTopSong(state.songs[0])
+                playlistManager.updateCurrentSong(state.songs[0])
+                playlistManager.addToCurrentQueueTop(state.songs)
             }
             AlbumDetailEvent.OnDownloadAlbum -> {}
             AlbumDetailEvent.OnShareAlbum -> {}

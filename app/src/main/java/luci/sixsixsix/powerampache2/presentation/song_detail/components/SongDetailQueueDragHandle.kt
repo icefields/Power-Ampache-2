@@ -40,8 +40,7 @@ import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 @Composable
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 fun SongDetailQueueDragHandle(
-    scaffoldState: BottomSheetScaffoldState,
-    mainViewModel: MainViewModel = hiltViewModel()
+    scaffoldState: BottomSheetScaffoldState
 ) {
     val scope = rememberCoroutineScope()
     val barHeight = dimensionResource(id = R.dimen.queue_dragHandle_height)

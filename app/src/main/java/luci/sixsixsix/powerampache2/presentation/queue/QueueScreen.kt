@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,7 +43,7 @@ import luci.sixsixsix.powerampache2.presentation.queue.components.QueueScreenCon
 fun QueueScreen(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel,
     viewModel: QueueViewModel = hiltViewModel()
 ) {
     val state = mainViewModel.state
@@ -86,17 +87,17 @@ fun QueueScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlaylistAdd,
-                            contentDescription = stringResource(id = R.string.search_content_description)
+                            contentDescription = "add all songs in queue to playlist"
                         )
                     }
                     IconButton(
                         onClick = {
-                            mainViewModel.onEvent(MainEvent.Play(mainViewModel.state.queue[0]))
+                            mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
                             viewModel.onEvent(QueueEvent.OnPlayQueue)
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.PlayArrow,
+                            imageVector = if (!mainViewModel.isPlaying) Icons.Default.PlayArrow else Icons.Default.Pause,
                             contentDescription = stringResource(id = R.string.search_content_description)
                         )
                     }
@@ -109,7 +110,7 @@ fun QueueScreen(
                 .padding(it)
                 .padding(top = dimensionResource(id = R.dimen.albumDetailScreen_top_padding)),
         ) {
-            QueueScreenContent(navigator)
+            QueueScreenContent(navigator = navigator, mainViewModel = mainViewModel)
         }
     }
 }

@@ -1,24 +1,16 @@
 package luci.sixsixsix.powerampache2.presentation.song_detail.components
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,23 +19,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.toDebugString
-import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoViewEvents
+import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
@@ -51,7 +37,6 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
-import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,9 +44,9 @@ fun SongDetailContent(
     // navigator: DestinationsNavigator,
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel
 ) {
-    val state = viewModel.state
+    val state = mainViewModel.state
     val scope = rememberCoroutineScope()
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
 
@@ -70,7 +55,8 @@ fun SongDetailContent(
             AddToPlaylistOrQueueDialog(it,
                 onDismissRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
-                }
+                },
+                mainViewModel = mainViewModel
             )
         }
     }
@@ -82,15 +68,15 @@ fun SongDetailContent(
     ) {
         AsyncImage(
             modifier = Modifier
-                .aspectRatio(1f)
+                .weight(1f)
                 .fillMaxWidth(),
             model = state.song?.imageUrl,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Fit,
             placeholder = painterResource(id = R.drawable.placeholder_album),
             error = painterResource(id = R.drawable.placeholder_album),
             contentDescription = state.song?.title,
         )
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = state.song?.title ?: "",
@@ -113,19 +99,19 @@ fun SongDetailContent(
             maxLines = 1,
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Divider(Modifier.padding(vertical = 2.dp))
-        viewModel.state.song?.let { song ->
+        Divider(Modifier.padding(vertical = 0.dp))
+        mainViewModel.state.song?.let { song ->
             SongDetailButtonRow(modifier = Modifier.fillMaxWidth(), song = song) { event ->
                 when(event) {
-                    SongDetailButtonEvents.SHARE_SONG -> viewModel.onEvent(MainEvent.OnShareSong(song))
-                    SongDetailButtonEvents.DOWNLOAD_SONG -> viewModel.onEvent(MainEvent.OnDownloadSong(song))
+                    SongDetailButtonEvents.SHARE_SONG -> mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                    SongDetailButtonEvents.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                     SongDetailButtonEvents.ADD_SONG_TO_PLAYLIST_OR_QUEUE -> {
                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, song)
                     }
                     SongDetailButtonEvents.GO_TO_ALBUM -> {
-                        viewModel.state.song?.album?.id?.let { albumId ->
+                        mainViewModel.state.song?.album?.id?.let { albumId ->
                             Ampache2NavGraphs.navigator?.navigate(AlbumDetailScreenDestination(albumId = albumId))
                             scope.launch {
                                 mainScaffoldState.bottomSheetState.partialExpand()
@@ -133,7 +119,7 @@ fun SongDetailContent(
                         }
                     }
                     SongDetailButtonEvents.GO_TO_ARTIST -> {
-                        viewModel.state.song?.artist?.id?.let { artistId ->
+                        mainViewModel.state.song?.artist?.id?.let { artistId ->
                             Ampache2NavGraphs.navigator?.navigate(ArtistDetailScreenDestination(artistId = artistId))
                             scope.launch {
                                 mainScaffoldState.bottomSheetState.partialExpand()
@@ -144,13 +130,28 @@ fun SongDetailContent(
                 }
             }
         }
-        Divider(Modifier.padding(vertical = 2.dp))
+        Divider(Modifier.padding(vertical = 0.dp))
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        SongDetailPlayerBar(modifier = Modifier.fillMaxWidth())
+        SongDetailPlayerBar(
+            progress = mainViewModel.progress,
+            durationStr = mainViewModel.state.song?.totalTime() ?: "",
+            progressStr = mainViewModel.progressStr,
+            isPlaying = mainViewModel.isPlaying,
+            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+        ) { event ->
+            mainViewModel.onEvent(event)
+        }
 
-        LazyColumn(modifier = Modifier.weight(1.0f)) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+    }
+}
+
+@Composable
+fun otherStuff() {
+    LazyColumn() {
 //            items(1) {
 //                Text(
 //                    text = "${state.song?.toDebugString()}",
@@ -161,7 +162,7 @@ fun SongDetailContent(
 //                    textAlign = TextAlign.End
 //                )
 //            }
-        }
+    }
 
 //        Row(
 //            modifier = Modifier
@@ -191,5 +192,4 @@ fun SongDetailContent(
 //                    modifier = Modifier.fillMaxWidth())
 //            }
 //        }
-    }
 }

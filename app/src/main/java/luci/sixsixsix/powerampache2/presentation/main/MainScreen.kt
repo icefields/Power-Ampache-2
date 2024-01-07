@@ -9,15 +9,16 @@ import luci.sixsixsix.powerampache2.presentation.main.screens.LoginScreen
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    mainViewModel: MainViewModel
 ) {
     if(authViewModel.state.isLoading) {
         LoadingScreen()
     } else {
         if (authViewModel.state.session != null) {
-            LoggedInScreen()
+            LoggedInScreen(mainViewModel, authViewModel)
         } else {
-            LoginScreen()
+            LoginScreen(viewModel = authViewModel)
         }
     }
 }

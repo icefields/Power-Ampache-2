@@ -46,7 +46,7 @@ fun MainContentTopAppBar(
     pagerState: PagerState,
     scrollBehavior: TopAppBarScrollBehavior,
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = hiltViewModel(),
+    viewModel: MainViewModel,
     onNavigationIconClick: (MainContentTopAppBarEvent) -> Unit
 ) {
     var searchVisibility by remember { mutableFloatStateOf(0.0f) }
