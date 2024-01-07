@@ -22,7 +22,6 @@ class SimpleMediaServiceHandler @Inject constructor(
     private val _simpleMediaState = MutableStateFlow<SimpleMediaState>(SimpleMediaState.Initial)
     val simpleMediaState = _simpleMediaState.asStateFlow()
     private var job: Job? = null
-    private val currentMediaItems = mutableListOf<MediaItem>()
 
     init {
         player.addListener(this)
@@ -54,8 +53,6 @@ class SimpleMediaServiceHandler @Inject constructor(
         } else {
             player.setMediaItems(mediaItems)
         }
-        currentMediaItems.clear()
-        currentMediaItems.addAll(mediaItems)
         player.prepare()
     }
 
@@ -79,7 +76,16 @@ class SimpleMediaServiceHandler @Inject constructor(
             PlayerEvent.SkipBack -> player.seekToPreviousMediaItem()
             PlayerEvent.SkipForward -> player.seekToNextMediaItem()
             is PlayerEvent.ForcePlay -> {
-                player.seekTo(currentMediaItems.indexOf(playerEvent.mediaItem), 0)
+                var indexToSeekTo = -1
+                var i = 0
+                while(indexToSeekTo == -1 && i < player.mediaItemCount) {
+                    if (player.getMediaItemAt(i) == playerEvent.mediaItem) {
+                        indexToSeekTo = i
+                    }
+                    ++i
+                }
+
+                player.seekTo(indexToSeekTo, 0)
 //                player.pause()
 //                stopProgressUpdate()
                 player.play()
