@@ -31,6 +31,7 @@ enum class PlaylistInfoViewEvents {
 fun PlaylistInfoSection(
     modifier: Modifier,
     playlist: Playlist,
+    shuffleOn: Boolean,
     songs: List<Song>,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit
 ) {
@@ -90,7 +91,12 @@ fun PlaylistInfoSection(
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
-        PlaylistInfoButtonsRow(modifier = Modifier.fillMaxWidth(), playlist = playlist, eventListener)
+        PlaylistInfoButtonsRow(
+            modifier = Modifier.fillMaxWidth(),
+            shuffleOn = shuffleOn,
+            playlist = playlist,
+            eventListener = eventListener
+        )
         Spacer(modifier = Modifier.width(20.dp))
     }
 }
@@ -101,6 +107,7 @@ fun PlaylistInfoSectionPreview() {
     PlaylistInfoSection(
         Modifier,
         Playlist.mock(),
+        shuffleOn = true,
         listOf(Song.mockSong),
         eventListener = {}
     )

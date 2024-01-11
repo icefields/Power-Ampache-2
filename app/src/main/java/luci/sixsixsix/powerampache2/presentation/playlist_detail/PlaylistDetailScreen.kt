@@ -145,6 +145,7 @@ fun PlaylistDetailScreen(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
                         playlist = playlist,
+                        shuffleOn = mainViewModel.shuffleOn,
                         songs = viewModel.state.songs,
                         eventListener = { event ->
                             when(event) {
@@ -152,9 +153,34 @@ fun PlaylistDetailScreen(
                                     viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
                                     mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0]))
                                 }
-                                PlaylistInfoViewEvents.SHARE_PLAYLIST -> viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)
-                                PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST -> viewModel.onEvent(PlaylistDetailEvent.OnDownloadPlaylist)
-                                PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST -> viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
+                                PlaylistInfoViewEvents.SHARE_PLAYLIST ->
+                                    viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)
+                                PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST ->
+                                    viewModel.onEvent(PlaylistDetailEvent.OnDownloadPlaylist)
+                                PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST -> {
+                                    // this will add the shuffled playlist next and update the current song
+                                    // in main view model (which is listening to playlist manager)
+                                    val oldCurrentSong = mainViewModel.state.song
+                                    viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
+                                    // after updating queue and current song, play
+                                    if (!mainViewModel.isPlaying) {
+                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                    }
+                                    // no need to skip if the queue was empty previously
+                                    if (oldCurrentSong != null) {
+                                        mainViewModel.onEvent(MainEvent.SkipNext)
+                                    }
+                                }
+
+
+//
+//                                    {
+//                                    mainViewModel.onEvent(MainEvent.Shuffle(!mainViewModel.shuffleOn))
+//                                    viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
+//                                    if (!mainViewModel.isPlaying && mainViewModel.shuffleOn) {
+//                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+//                                    }
+//                                }
                             }
                         }
                     )

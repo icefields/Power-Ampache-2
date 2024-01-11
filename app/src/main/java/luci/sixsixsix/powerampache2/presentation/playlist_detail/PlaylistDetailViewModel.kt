@@ -73,7 +73,11 @@ class PlaylistDetailViewModel @Inject constructor(
                 playlistManager.addToCurrentQueueTop(state.songs)
             }
             PlaylistDetailEvent.OnSharePlaylist -> TODO()
-            PlaylistDetailEvent.OnShufflePlaylist -> TODO()
+            PlaylistDetailEvent.OnShufflePlaylist -> {
+                val shuffled = state.songs.shuffled()
+                playlistManager.addToCurrentQueueNext(shuffled)
+                playlistManager.moveToSongInQueue(shuffled[0])
+            }
         }
     }
 

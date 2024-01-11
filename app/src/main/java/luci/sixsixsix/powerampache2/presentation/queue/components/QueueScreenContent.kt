@@ -35,15 +35,20 @@ fun QueueScreenContent(
                 song = song,
                 songItemEventListener = { event ->
                     when(event) {
-                        SongItemEvent.PLAY_NEXT -> mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                        SongItemEvent.SHARE_SONG -> mainViewModel.onEvent(MainEvent.OnShareSong(song))
-                        SongItemEvent.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
-                        SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
-                            AlbumDetailScreenDestination(albumId = song.album.id, album = null)
-                        )
-                        SongItemEvent.GO_TO_ARTIST -> navigator.navigate(
-                            ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
-                        )
+                        SongItemEvent.PLAY_NEXT ->
+                            mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                        SongItemEvent.SHARE_SONG ->
+                            mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                        SongItemEvent.DOWNLOAD_SONG ->
+                            mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                        SongItemEvent.GO_TO_ALBUM ->
+                            navigator.navigate(
+                                AlbumDetailScreenDestination(albumId = song.album.id, album = null)
+                            )
+                        SongItemEvent.GO_TO_ARTIST ->
+                            navigator.navigate(
+                                ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
+                            )
                         SongItemEvent.ADD_SONG_TO_QUEUE -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueue(song))
                         SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
                     }

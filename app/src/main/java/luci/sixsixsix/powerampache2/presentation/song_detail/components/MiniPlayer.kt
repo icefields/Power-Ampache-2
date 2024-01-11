@@ -216,7 +216,7 @@ fun MiniPlayerContent(
                             Icons.Outlined.Shuffle
                         else
                             Icons.Outlined.ShuffleOn,
-                        contentDescription = "Share"
+                        contentDescription = "shuffle toggle"
                     )
                 }
             }

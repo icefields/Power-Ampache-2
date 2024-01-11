@@ -127,6 +127,12 @@ class MusicPlaylistManager @Inject constructor() {
 
     fun getErrorMessage(): String? = errorMessageState.value.errorMessage
 
+    /**
+     * remove all songs except the currently playing one if any
+     */
+    fun clearQueue() =
+        replaceCurrentQueue(listOfNotNull(currentSongState.value.song))
+
     fun reset() {
         _currentSongState.value = CurrentSongState(song = null)
         updateSearchQuery(searchQuery= "")

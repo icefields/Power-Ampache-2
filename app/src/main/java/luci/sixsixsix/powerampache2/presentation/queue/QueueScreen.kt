@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.PlaylistRemove
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -100,7 +101,16 @@ fun QueueScreen(
                     }
                     IconButton(
                         onClick = {
-                            //viewModel.onEvent(QueueEvent.OnPlayQueue)
+                            viewModel.onEvent(QueueEvent.OnClearQueue)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlaylistRemove,
+                            contentDescription = "clear playlist"
+                        )
+                    }
+                    IconButton(
+                        onClick = {
                             mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
                         }
                     ) {

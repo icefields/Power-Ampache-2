@@ -49,6 +49,7 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.playlist_detail.PlaylistDetailEvent
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
@@ -169,8 +170,21 @@ fun AlbumDetailScreen(
                                     viewModel.onEvent(AlbumDetailEvent.OnShareAlbum)
                                 AlbumInfoViewEvents.DOWNLOAD_ALBUM ->
                                     viewModel.onEvent(AlbumDetailEvent.OnDownloadAlbum)
-                                AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM ->
+                                AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM -> {
+                                    // this will add the shuffled playlist next and update the current song
+                                    // in main view model (which is listening to playlist manager)
+                                    val oldCurrentSong = mainViewModel.state.song
                                     viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
+                                    // after updating queue and current song, play
+                                    if (!mainViewModel.isPlaying) {
+                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                    }
+                                    // no need to skip if the queue was empty previously
+                                    if (oldCurrentSong != null) {
+                                        mainViewModel.onEvent(MainEvent.SkipNext)
+                                    }
+                                }
+
                                 AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST ->
                                     viewModel.onEvent(AlbumDetailEvent.OnAddAlbumToQueue)
                                 AlbumInfoViewEvents.FAVOURITE_ALBUM ->

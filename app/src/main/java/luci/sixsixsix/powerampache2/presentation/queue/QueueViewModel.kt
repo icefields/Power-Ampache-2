@@ -21,6 +21,10 @@ class QueueViewModel  @Inject constructor(
                 L("QueueEvent.OnPlayQueue")
                 playlistManager.startRestartQueue()
             }
+
+            QueueEvent.OnClearQueue -> {
+                playlistManager.clearQueue()
+            }
         }
     }
 }

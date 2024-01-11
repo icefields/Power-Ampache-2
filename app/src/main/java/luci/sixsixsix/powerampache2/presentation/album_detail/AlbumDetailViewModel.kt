@@ -47,17 +47,13 @@ class AlbumDetailViewModel @Inject constructor(
 
     fun onEvent(event: AlbumDetailEvent) {
         when (event) {
-            is AlbumDetailEvent.Fetch -> {
+            is AlbumDetailEvent.Fetch ->
                 getSongsFromAlbum(albumId = event.albumId, fetchRemote = true)
-            }
-
-            is AlbumDetailEvent.OnSongSelected -> {
+            is AlbumDetailEvent.OnSongSelected ->
                 // play the selected song and add the rest of the album to the queue
                 playlistManager.updateTopSong(event.song)
-            }
-
-            is AlbumDetailEvent.OnAddAlbumToQueue -> playlistManager.addToCurrentQueue(state.songs)
-
+            is AlbumDetailEvent.OnAddAlbumToQueue ->
+                playlistManager.addToCurrentQueue(state.songs)
             is AlbumDetailEvent.OnPlayAlbum -> {
                 L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
                 playlistManager.updateCurrentSong(state.songs[0])
@@ -68,10 +64,10 @@ class AlbumDetailViewModel @Inject constructor(
             AlbumDetailEvent.OnShuffleAlbum -> {
                 val shuffled = state.songs.shuffled()
                 playlistManager.addToCurrentQueueNext(shuffled)
-                playlistManager.updateTopSong(shuffled[0])
+                playlistManager.moveToSongInQueue(shuffled[0])
             }
-
-            AlbumDetailEvent.OnFavouriteAlbum -> favouriteAlbum()
+            AlbumDetailEvent.OnFavouriteAlbum ->
+                favouriteAlbum()
         }
     }
 

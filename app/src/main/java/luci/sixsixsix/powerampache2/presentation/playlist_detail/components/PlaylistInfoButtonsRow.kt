@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.ShuffleOn
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shuffle
+import androidx.compose.material.icons.outlined.ShuffleOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -22,8 +25,11 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 
 @Composable
-fun PlaylistInfoButtonsRow(modifier: Modifier = Modifier, playlist: Playlist,
-                        eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit) {
+fun PlaylistInfoButtonsRow(
+    modifier: Modifier = Modifier,
+    playlist: Playlist,
+    shuffleOn: Boolean,
+    eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit) {
     Row(modifier = modifier
         .padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding)),
         verticalAlignment = Alignment.CenterVertically,
@@ -64,9 +70,10 @@ fun PlaylistInfoButtonsRow(modifier: Modifier = Modifier, playlist: Playlist,
             onClick = {
                 eventListener(PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST)
             }) {
+
             Icon(
-                imageVector = Icons.Outlined.Shuffle, //ShuffleOn
-                contentDescription = "Shuffle"
+                imageVector = Icons.Filled.Shuffle,
+                contentDescription = "Shuffle Play"
             )
         }
     }
