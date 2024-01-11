@@ -10,8 +10,10 @@ import luci.sixsixsix.powerampache2.data.remote.dto.ArtistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.AuthDto
 import luci.sixsixsix.powerampache2.data.remote.dto.GoodbyeDto
+import luci.sixsixsix.powerampache2.data.remote.dto.LikeResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
+import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Song
 import retrofit2.http.GET
@@ -37,6 +39,11 @@ interface MainNetwork {
     @GET("json.server.php?action=goodbye")
     suspend fun goodbye(@Query("auth") authKey: String = ""): GoodbyeDto
 
+    @GET("json.server.php?action=user")
+    suspend fun getUser(
+        @Query("auth") authKey: String,
+        @Query("username") username: String): UserDto
+
     @GET("json.server.php?action=search_songs")
     suspend fun getSongs(
         @Query("auth") authKey: String,
@@ -49,7 +56,7 @@ interface MainNetwork {
     @GET("json.server.php?action=albums")
     suspend fun getAlbums(
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        @Query("limit") limit: Int,
         @Query("filter") filter: String = "",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
@@ -176,68 +183,41 @@ interface MainNetwork {
         @Query("offset") offset: Int = 0, ): SongsResponse
 
     @GET("json.server.php?action=stats")
-    suspend fun getAlbumsFlagged( // flagged = favourites
+    suspend fun getAlbumsStats(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
-        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "flagged", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("type") type: Type = Type.album,
+        @Query("filter") filter: StatFilter,
         @Query("offset") offset: Int = 0, ): AlbumsResponse
 
-    @GET("json.server.php?action=stats")
-    suspend fun getAlbumsNewest( // flagged = favourites
+    @GET("json.server.php?action=flag")
+    suspend fun flag( // flagged = favourites
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "newest", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): AlbumsResponse
+        @Query("id") id: String,
+        @Query("flag") flag: Int,
+        @Query("type") type: Type): LikeResponse
 
-    @GET("json.server.php?action=stats")
-    suspend fun getAlbumsHighest( // flagged = favourites
-        @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "highest", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): AlbumsResponse
-
-    @GET("json.server.php?action=stats")
-    suspend fun getAlbumsFrequent( // flagged = favourites
-        @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "frequent", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): AlbumsResponse
-
-    @GET("json.server.php?action=stats")
-    suspend fun getAlbumsRecent( // flagged = favourites
-        @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "recent", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): AlbumsResponse
-
-    @GET("json.server.php?action=stats")
-    suspend fun getAlbumsRandom( // flagged = favourites
-        @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "album", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "random", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): AlbumsResponse
     companion object {
         const val API_KEY = "0db9dcbb4a945e443547e3c082110abf"
         const val BASE_URL = "http://localhost/"
     }
+
+    enum class Type(value: String) {
+        song("song"),
+        album("album"),
+        artist("artist"),
+        playlist("playlist")
+    }
+
+    enum class StatFilter(value: String) {
+        random("random"),
+        recent("recent"),
+        newest("newest"),
+        frequent("frequent"),
+        flagged("flagged"),
+        forgotten("forgotten"),
+        highest("highest")
+    }
 }
-//""http://192.168.1.100/ampache/public/server/" //"https://demo.ampache.dev/server/" //
-// http://192.168.1.100/ampache/public/server/json.server.php?action=songs&auth=5bbec52145f2761fbb1f9bb3db529d06&limit=4

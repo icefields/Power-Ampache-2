@@ -9,11 +9,11 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val composeVersion = rootProject.extra.get("compose_version") as String
-val retrofit2Version = rootProject.extra.get("retrofit2_version") as String
-val coroutinesVersion = rootProject.extra.get("coroutines_version") as String
-val exoplayerVersion = rootProject.extra.get("exoplayer_version") as String
-val composeNavVersion = rootProject.extra.get("composeNav_version") as String
+val composeVersion = "1.5.4" // rootProject.extra.get("compose_version") as String
+val retrofit2Version = "2.9.0" //rootProject.extra.get("retrofit2_version") as String
+val coroutinesVersion = "1.7.3" //rootProject.extra.get("coroutines_version") as String
+val exoplayerVersion = "2.19.1" // rootProject.extra.get("exoplayer_version") as String
+val composeNavVersion = "1.8.42-beta" // rootProject.extra.get("composeNav_version") as String
 
 val media3Version = "1.2.0"
 
@@ -113,11 +113,11 @@ dependencies {
     // ExoPlayer
     implementation("androidx.media3:media3-exoplayer:$media3Version")
     // DASH playback support with ExoPlayer
-    implementation("androidx.media3:media3-exoplayer-dash:$media3Version")
+    // implementation("androidx.media3:media3-exoplayer-dash:$media3Version")
     // HLS playback support with ExoPlayer
     implementation("androidx.media3:media3-exoplayer-hls:$media3Version")
     // RTSP playback support with ExoPlayer
-    implementation("androidx.media3:media3-exoplayer-rtsp:$media3Version")
+    // implementation("androidx.media3:media3-exoplayer-rtsp:$media3Version")
 
     // Common functionality for media database components
     implementation("androidx.media3:media3-database:$media3Version")

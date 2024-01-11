@@ -5,7 +5,7 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Album
 
 interface AlbumsRepository {
-    suspend fun getAlbums(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Album>>>
+    suspend fun getAlbums(fetchRemote: Boolean = true, query: String = "", offset: Int = 0, limit: Int = 0): Flow<Resource<List<Album>>>
     suspend fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Album>>>
     suspend fun getRecentAlbums(): Flow<Resource<List<Album>>>
     suspend fun getNewestAlbums(): Flow<Resource<List<Album>>>

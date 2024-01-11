@@ -10,13 +10,14 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 
 @HiltViewModel
 class PlaylistsViewModel @Inject constructor(
-    private val repository: MusicRepository,
+    private val repository: PlaylistsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(PlaylistsState())

@@ -47,6 +47,8 @@ import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.presentation.LoadingScreen
+import luci.sixsixsix.powerampache2.presentation.album_detail.AlbumDetailEvent
+import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoViewEvents
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
@@ -146,7 +148,10 @@ fun PlaylistDetailScreen(
                         songs = viewModel.state.songs,
                         eventListener = { event ->
                             when(event) {
-                                PlaylistInfoViewEvents.PLAY_PLAYLIST -> viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
+                                PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
+                                    viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
+                                    mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0]))
+                                }
                                 PlaylistInfoViewEvents.SHARE_PLAYLIST -> viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)
                                 PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST -> viewModel.onEvent(PlaylistDetailEvent.OnDownloadPlaylist)
                                 PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST -> viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)

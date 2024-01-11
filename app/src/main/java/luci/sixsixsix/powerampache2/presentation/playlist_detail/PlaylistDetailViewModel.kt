@@ -16,7 +16,7 @@ import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
-import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,6 +36,21 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
+    /*
+     is AlbumDetailEvent.OnSongSelected -> {
+                // play the selected song and add the rest of the album to the queue
+                playlistManager.updateTopSong(event.song)
+            }
+
+            is AlbumDetailEvent.OnAddAlbumToQueue -> playlistManager.addToCurrentQueue(state.songs)
+
+            is AlbumDetailEvent.OnPlayAlbum -> {
+                L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
+                playlistManager.updateCurrentSong(state.songs[0])
+                playlistManager.addToCurrentQueueTop(state.songs)
+            }
+     */
+
     fun onEvent(event: PlaylistDetailEvent) {
         when(event) {
             is PlaylistDetailEvent.Refresh -> {
@@ -50,9 +65,13 @@ class PlaylistDetailViewModel @Inject constructor(
                 }
             }
 
-            is PlaylistDetailEvent.OnSongSelected -> { playlistManager.updateTopSong(event.song) }
+            is PlaylistDetailEvent.OnSongSelected -> playlistManager.updateTopSong(event.song)
             PlaylistDetailEvent.OnDownloadPlaylist -> TODO()
-            PlaylistDetailEvent.OnPlayPlaylist -> TODO()
+            PlaylistDetailEvent.OnPlayPlaylist -> {
+                L("OnPlayPlaylist")
+                playlistManager.updateCurrentSong(state.songs[0])
+                playlistManager.addToCurrentQueueTop(state.songs)
+            }
             PlaylistDetailEvent.OnSharePlaylist -> TODO()
             PlaylistDetailEvent.OnShufflePlaylist -> TODO()
         }

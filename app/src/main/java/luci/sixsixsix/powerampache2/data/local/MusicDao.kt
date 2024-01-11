@@ -13,6 +13,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SESSION_PRIMARY_KEY
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
 
 @Dao
 interface MusicDao {
@@ -40,6 +41,15 @@ interface MusicDao {
     @Query("""SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'""")
     suspend fun getCredentials(): CredentialsEntity?
 
+// --- USER ---
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateUser(userEntity: UserEntity)
+
+    @Query("DELETE FROM userentity")
+    suspend fun clearUser()
+
+    @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
+    fun getUserLiveData(): LiveData<UserEntity?>
 
 // --- ALBUMS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)

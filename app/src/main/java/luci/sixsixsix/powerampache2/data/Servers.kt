@@ -6,7 +6,7 @@ const val DEBUG_LOCAL_DEMO_URL = "http://192.168.1.100/ampache/public/"
 
 const val DEBUG_REMOTE_USER = "test-user"
 const val DEBUG_REMOTE_PASSWORD = "testtest"
-const val DEBUG_REMOTE_DEMO_URL = "http://tari.ddns.net/"
+const val DEBUG_REMOTE_DEMO_URL = "tari.ddns.net/"
 
 const val AMPACHE_DEMO_APIKEY = "demodemo"
 const val AMPACHE_DEMO_URL = "demo.ampache.dev"

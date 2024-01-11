@@ -12,5 +12,5 @@ sealed class AlbumDetailEvent {
     data object OnDownloadAlbum: AlbumDetailEvent()
     data object OnShuffleAlbum: AlbumDetailEvent()
     data object OnAddAlbumToQueue: AlbumDetailEvent()
-
+    data object OnFavouriteAlbum: AlbumDetailEvent()
 }

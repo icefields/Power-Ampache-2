@@ -14,6 +14,8 @@ sealed class MainEvent {
     data object Backwards: MainEvent()
     data object Repeat: MainEvent()
     data object Shuffle: MainEvent()
+    data object FavouriteSong: MainEvent()
+
     data class UpdateProgress(val newProgress: Float): MainEvent()
 
 

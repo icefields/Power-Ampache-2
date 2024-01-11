@@ -11,6 +11,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -18,9 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
-    private val songsRepository: SongsRepository,
-    private val albumsRepository: AlbumsRepository,
-    private val repository: MusicRepository
+    private val playlistsRepository: PlaylistsRepository
 ) : ViewModel() {
     var state by mutableStateOf(AddToPlaylistOrQueueDialogState())
     private var isEndOfDataReached: Boolean = false
@@ -40,7 +39,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
         offset: Int = 0
     ) {
         viewModelScope.launch {
-            repository
+            playlistsRepository
                 .getPlaylists(fetchRemote, "", offset)
                 .collect { result ->
                     when (result) {

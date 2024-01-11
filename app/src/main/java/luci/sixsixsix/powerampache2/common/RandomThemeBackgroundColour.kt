@@ -17,6 +17,22 @@ object RandomThemeBackgroundColour {
         return randomColour
     }
 
+    @Composable
+    operator fun invoke(hash: Int): Color {
+        // not using remainingPlaylistBgColours here, but cycle through colours anyway
+        if (remainingPlaylistBgColours.isEmpty()) {
+            remainingPlaylistBgColours = ArrayList(playlistBgColours)
+        }
+
+        val randomIndex = hash % playlistBgColours.size
+        val randomColour = playlistBgColours[randomIndex]
+
+        // not using remainingPlaylistBgColours here, but cycle through colours anyway
+        remainingPlaylistBgColours.remove(randomColour)
+
+        return randomColour
+    }
+
     private var remainingPlaylistBgColours = mutableListOf<Color>()
 
     private val playlistBgColours

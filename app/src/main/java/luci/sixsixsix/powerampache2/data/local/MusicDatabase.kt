@@ -9,6 +9,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
 
 @Database(
     entities = [
@@ -17,8 +18,9 @@ import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
         ArtistEntity::class,
         PlaylistEntity::class,
         SessionEntity::class,
-        CredentialsEntity::class],
-    version = 48
+        CredentialsEntity::class,
+        UserEntity::class
+    ], version = 57
 )
 @TypeConverters(Converters::class)
 abstract class MusicDatabase: RoomDatabase() {

@@ -44,6 +44,7 @@ fun SongDetailScreen(
         SongDetailContent(
             mainScaffoldState = mainScaffoldState,
             modifier = Modifier.padding(paddingValues = it),
-            mainViewModel = viewModel)
+            mainViewModel = viewModel
+        )
     }
 }

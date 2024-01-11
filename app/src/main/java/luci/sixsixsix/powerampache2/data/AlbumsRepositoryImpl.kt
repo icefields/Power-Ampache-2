@@ -19,7 +19,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Session
-import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,7 +44,8 @@ class AlbumsRepositoryImpl @Inject constructor(
     override suspend fun getAlbums(
         fetchRemote: Boolean,
         query: String,
-        offset: Int
+        offset: Int,
+        limit: Int
     ): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
         L("getAlbums - repo getSongs offset $offset")
@@ -63,7 +64,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!//authorize2(false)
-        val response = api.getAlbums(auth.auth, filter = query, offset = offset)
+        val response = api.getAlbums(auth.auth, filter = query, offset = offset, limit = limit)
         response.error?.let { throw(MusicException(it.toError())) }
         val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
         L("albums from web ${albums.size}")
@@ -113,72 +114,6 @@ class AlbumsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getAlbumsFromArtist()", e, this) }
 
-    override suspend fun getRecentAlbums(): Flow<Resource<List<Album>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getAlbumsRecent(auth.auth, username = getCredentials()?.username).albums?.map { it.toAlbum() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getRecentAlbums()", e, this) }
-
-    override suspend fun getNewestAlbums(): Flow<Resource<List<Album>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getAlbumsNewest(auth.auth, username = getCredentials()?.username).albums?.map { it.toAlbum() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getNewestAlbums()", e, this) }
-
-    override suspend fun getHighestAlbums(): Flow<Resource<List<Album>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getAlbumsHighest(auth.auth, username = getCredentials()?.username).albums?.map { it.toAlbum() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getHighestAlbums()", e, this) }
-
-    override suspend fun getFrequentAlbums(): Flow<Resource<List<Album>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getAlbumsFrequent(auth.auth, username = getCredentials()?.username).albums?.map { it.toAlbum() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getFrequentAlbums()", e, this) }
-
-    override suspend fun getFlaggedAlbums(): Flow<Resource<List<Album>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getAlbumsFlagged(auth.auth).albums?.map { it.toAlbum() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getFlaggedAlbums()", e, this) }
-
-    override suspend fun getRandomAlbums(): Flow<Resource<List<Album>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getAlbumsRandom(auth.auth, username = getCredentials()?.username).albums?.map { it.toAlbum() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getRandomAlbums()", e, this) }
-
     override suspend fun getAlbum(
         albumId: String,
         fetchRemote: Boolean,
@@ -207,4 +142,28 @@ class AlbumsRepositoryImpl @Inject constructor(
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getAlbum()", e, this) }
+
+    // --- HOME PAGE data ---
+
+    private suspend fun getAlbumsStats(statFilter: MainNetwork.StatFilter): Flow<Resource<List<Album>>> = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.getAlbumsStats(
+            auth.auth,
+            username = getCredentials()?.username,
+            filter = statFilter
+        ).albums?.map { it.toAlbum() }?.let {
+            emit(Resource.Success(data = it, networkData = it))
+        }?:run {
+            throw Exception("error connecting or getting data")
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getAlbumsStats()", e, this) }
+
+    override suspend fun getRecentAlbums() = getAlbumsStats(MainNetwork.StatFilter.recent)
+    override suspend fun getNewestAlbums() = getAlbumsStats(MainNetwork.StatFilter.newest)
+    override suspend fun getHighestAlbums() = getAlbumsStats(MainNetwork.StatFilter.highest)
+    override suspend fun getFrequentAlbums() = getAlbumsStats(MainNetwork.StatFilter.frequent)
+    override suspend fun getFlaggedAlbums() = getAlbumsStats(MainNetwork.StatFilter.flagged)
+    override suspend fun getRandomAlbums() = getAlbumsStats(MainNetwork.StatFilter.random)
 }

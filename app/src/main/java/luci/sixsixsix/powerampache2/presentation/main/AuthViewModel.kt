@@ -14,23 +14,24 @@ import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: MusicRepository,
     private val playlistManager: MusicPlaylistManager,
-    private val db: MusicDatabase, application: Application,
-    ) : AndroidViewModel(application) {
+    application: Application
+) : AndroidViewModel(application) {
     var state by mutableStateOf(AuthState())
 
     init {
         state = state.copy(isLoading = true)
         verifyAndAutologin()
-        // TODO anti-pattern, viewmodel should not know about the database
         // Listen to changes of the session table from the database
-        db.dao.getSessionLiveData().observeForever {
-            state = state.copy(session = it?.toSession())
+        repository.sessionLiveData.observeForever {
+            state = state.copy(session = it)//?.toSession())
+            L(it)
             if (it == null) {
                 playlistManager.reset()
                 // setting the session to null will show the login screen, but the autologin call
@@ -39,6 +40,15 @@ class AuthViewModel @Inject constructor(
                 // autologin will log back in if credentials are correct
                 viewModelScope.launch {
                     autologin()
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            repository.userLiveData().observeForever {
+                L(it)
+                it?.let { user ->
+                    state = state.copy(user = user)
                 }
             }
         }
@@ -116,13 +126,11 @@ class AuthViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { auth ->
-                                L("AuthViewModel.login", auth)
                                 state = state.copy(session = auth)
                             }
                         }
 
                         is Resource.Error -> {
-                            L("ERROR AuthViewModel login ${result.exception?.localizedMessage}")
                             state = state.copy(
                                 error = result.exception?.toString() ?: "authorization error",
                                 isLoading = false

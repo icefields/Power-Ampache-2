@@ -1,8 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.album_detail
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,11 +10,12 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
+import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.presentation.home.HomeScreenState
-import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
+import kotlin.math.abs
 
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
@@ -25,6 +24,7 @@ class AlbumDetailViewModel @Inject constructor(
     // need this because we're passing the symbol around
     private val songsRepository: SongsRepository,
     private val albumsRepository: AlbumsRepository,
+    private val playlistsRepository: PlaylistsRepository,
     private val playlistManager: MusicPlaylistManager,
 ) : ViewModel() {
     //var state by mutableStateOf(AlbumDetailState())
@@ -71,9 +71,28 @@ class AlbumDetailViewModel @Inject constructor(
                 playlistManager.updateTopSong(shuffled[0])
             }
 
-
+            AlbumDetailEvent.OnFavouriteAlbum -> favouriteAlbum()
         }
     }
+
+    private fun favouriteAlbum(albumId: String = state.album.id) = viewModelScope.launch {
+        playlistsRepository.likeAlbum(albumId, (state.album.flag != 1))
+            .collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            // refresh album
+                            state = state.copy(
+                                album = state.album.copy(flag = abs(state.album.flag - 1))
+                            )
+                        }
+                    }
+                    is Resource.Error -> state = state.copy(isLikeLoading = false)
+                    is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+                }
+            }
+    }
+
 
     private fun getAlbumInfo(albumId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {

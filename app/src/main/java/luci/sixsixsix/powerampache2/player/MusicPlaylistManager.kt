@@ -1,4 +1,4 @@
-package luci.sixsixsix.powerampache2.presentation.main
+package luci.sixsixsix.powerampache2.player
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,14 +58,16 @@ class MusicPlaylistManager @Inject constructor() {
     }
 
     fun replaceCurrentQueue(newPlaylist: List<Song>) {
-        L( "MusicPlaylistManager replaceCurrentQueue", newPlaylist)
+        L( "MusicPlaylistManager replaceCurrentQueue", newPlaylist.size)
         _currentQueueState.value = newPlaylist.filterNotNull()
         checkCurrentSong()
     }
 
     fun addToCurrentQueue(newQueue: List<Song>) {
         L( "MusicPlaylistManager addToCurrentQueue", newQueue.size)
-        _currentQueueState.value += newQueue
+        _currentQueueState.value = LinkedHashSet(_currentQueueState.value)
+            .apply { addAll(newQueue) }
+            .toList()
         checkCurrentSong()
     }
 
@@ -74,12 +76,27 @@ class MusicPlaylistManager @Inject constructor() {
         addToCurrentQueue(listOf(newSong))
     }
 
+    /**
+     * add items to the current queue as next in queue
+     */
     fun addToCurrentQueueNext(list: List<Song>) {
         L( "MusicPlaylistManager addToCurrentQueueNext", list.size)
-        val queue = ArrayList<Song>(currentQueueState.value).apply {
-            val currentSongIndex = indexOf(currentSongState.value.song)
-            addAll( if (size > currentSongIndex+1) { currentSongIndex+1 } else { size } , list)
-        }
+        val queue = ArrayList(_currentQueueState.value)
+            .apply {
+                // remove all songs except the current
+                val listWithoutCurrentSong = ArrayList(list)
+                    .apply { remove(currentSongState.value.song) }
+                removeAll(listWithoutCurrentSong.toSet())
+                // find current index, new songs will be added after that
+                val currentSongIndex = indexOf(currentSongState.value.song)
+                addAll( if (size > currentSongIndex+1) { currentSongIndex+1 } else { size } , listWithoutCurrentSong)
+            }
+
+//        val queue = ArrayList<Song>(currentQueueState.value)
+//            .apply {
+//                val currentSongIndex = indexOf(currentSongState.value.song)
+//                addAll( if (size > currentSongIndex+1) { currentSongIndex+1 } else { size } , list)
+//            }
         replaceCurrentQueue(queue)
     }
 

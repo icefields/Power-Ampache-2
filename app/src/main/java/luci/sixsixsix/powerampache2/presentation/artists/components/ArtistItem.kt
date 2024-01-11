@@ -1,5 +1,7 @@
 package luci.sixsixsix.powerampache2.presentation.artists.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +33,7 @@ import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Artist
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArtistItem(
     artist: Artist,
@@ -70,12 +73,16 @@ fun ArtistItem(
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(1.dp))
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
             if (artist.songCount > 0) {
                 Text(
+                    modifier = Modifier.basicMarquee(),
                     text = ("Songs ${artist.songCount} | Albums ${artist.albumCount}"),
                     fontStyle = FontStyle.Italic,
-                    fontSize = 11.sp,
+                    fontSize = 9.sp,
                     maxLines = 1,
                 )
             }

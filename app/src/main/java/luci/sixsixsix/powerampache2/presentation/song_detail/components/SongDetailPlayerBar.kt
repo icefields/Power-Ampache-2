@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.Repeat
@@ -57,7 +61,7 @@ fun SongDetailPlayerBar(
     Column(
         modifier = modifier
             .padding(vertical = 9.dp, horizontal = 9.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
         PlayerControls(
@@ -83,17 +87,19 @@ fun PlayerControls(
     modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit
 ) {
+    val tint = MaterialTheme.colorScheme.primary
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+
     ) {
         IconButton(modifier = Modifier.weight(1f),
             onClick = {
                 onEvent(MainEvent.Repeat) // TODO repeat one or all
             }) {
             Icon(
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = tint,
                 imageVector = Icons.Outlined.Repeat,
                 contentDescription = "Repeat"
             )
@@ -103,58 +109,37 @@ fun PlayerControls(
             onClick = {
             }) {
             Icon(
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.fillMaxSize().pointerInput(Unit) {
-                    detectTapGestures(
-                        onLongPress = { onEvent(MainEvent.Backwards) },
-                        onDoubleTap = { onEvent(MainEvent.Backwards) },
-                        onPress = { onEvent(MainEvent.SkipPrevious) }
-                    )
-                },
+                tint = tint,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onLongPress = { onEvent(MainEvent.Backwards) },
+                            onDoubleTap = { onEvent(MainEvent.Backwards) },
+                            onPress = { onEvent(MainEvent.SkipPrevious) }
+                        )
+                    },
                 imageVector = Icons.Outlined.SkipPrevious,
                 contentDescription = "SkipPrevious"
             )
         }
 
-        IconButton(
+        PlayButton(
             modifier = Modifier
-            .height(80.dp)
-            .widthIn(min = 100.dp, max = 100.dp),
-            onClick = {
-                onEvent(MainEvent.PlayPauseCurrent)
-            }) {
-            if (!isBuffering) {
-                Icon(
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.aspectRatio(1f / 1f),
-                    imageVector = if (!isPlaying) {
-                        Icons.Default.PlayCircle
-                    } else {
-                        Icons.Default.PauseCircle
-                    }, // Pause
-                    contentDescription = "Play"
-                )
-            } else {
-                Card(modifier = Modifier
-                    .height(80.dp)
-                    .widthIn(min = 100.dp, max = 100.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.secondary
-                    )) {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                        }
-                }
-            }
-        }
+                .height(80.dp)
+                .width(100.dp),
+            iconTint = tint,
+            background = Color.Transparent,
+            isBuffering = isBuffering,
+            isPlaying = isPlaying
+        ) { onEvent(MainEvent.PlayPauseCurrent) }
 
         IconButton(modifier = Modifier.weight(1f),
             onClick = {
                 onEvent(MainEvent.SkipNext)
             }) {
             Icon(
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = tint,
                 modifier = Modifier.fillMaxSize(),
                 imageVector = Icons.Outlined.SkipNext,
                 contentDescription = "SkipNext"
@@ -166,10 +151,45 @@ fun PlayerControls(
                 onEvent(MainEvent.Shuffle)
             }) {
             Icon(
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = tint,
                 imageVector = Icons.Outlined.Shuffle, //ShuffleOn
                 contentDescription = "Shuffle"
             )
+        }
+    }
+}
+
+@Composable
+fun PlayButton(
+    modifier: Modifier = Modifier,
+    isBuffering: Boolean,
+    isPlaying: Boolean,
+    background: Color = MaterialTheme.colorScheme.background,
+    iconTint: Color = MaterialTheme.colorScheme.onBackground,
+    onEvent: () -> Unit
+) {
+    IconButton(
+        modifier = modifier,
+        onClick = { onEvent() }
+    ) {
+        Card(colors = CardDefaults.cardColors(containerColor = background)) {
+            Box(modifier = Modifier.wrapContentSize(),
+                contentAlignment = Alignment.Center) {
+                if (!isBuffering) {
+                    Icon(
+                        tint = iconTint,
+                        modifier = Modifier.aspectRatio(1f / 1f),
+                        imageVector = if (!isPlaying) {
+                            Icons.Default.PlayCircle
+                        } else {
+                            Icons.Default.PauseCircle
+                        },
+                        contentDescription = "Play"
+                    )
+                } else {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 }

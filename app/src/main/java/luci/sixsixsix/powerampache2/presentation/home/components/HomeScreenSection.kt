@@ -12,10 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
@@ -35,7 +37,7 @@ fun HomeScreenSection(
             Spacer(modifier = Modifier.height(24.dp))
         }
     } else if (text == "loading" && albumsRow == null) {
-        // TODO this is a hack, passing "loading" as identifier to visualize a loading progress
+        // TODO this is a hac: passing "loading" as identifier to visualize a loading progress
         //  at the bottom while data is loading. A null list in this case means isLoading = true,
         //  and empty list means isLoading = false.
         //  Do this properly!

@@ -73,12 +73,7 @@ fun HomeScreen(
                 }
             }
         }
-
-//        if (isLoadingData(state)) {
-//            LoadingView()
-//        }
     }
-
 }
 
 fun isLoadingData(state: HomeScreenState) = (state.isLoading ||

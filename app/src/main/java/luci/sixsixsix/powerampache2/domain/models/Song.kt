@@ -75,16 +75,15 @@ fun Song.toMediaItem() = MediaItem.Builder()
     .setUri(songUrl)
     .setMimeType(mime)
     .setMediaMetadata(
-        MediaMetadata.Builder().setFolderType(MediaMetadata.FOLDER_TYPE_ALBUMS)
+        MediaMetadata.Builder()
+            .setFolderType(MediaMetadata.FOLDER_TYPE_ALBUMS)
             .setArtworkUri(Uri.parse(imageUrl))
             .setAlbumTitle(album.name)
             .setArtist(artist.name)
             .setDisplayTitle(title)
             .setTitle(title)
-            .setTrackNumber(trackNumber)
-            .setGenre(if (genre.isNotEmpty()) {
-                genre[0].name
-            } else "")
+            .setTrackNumber(if (trackNumber > 0) { trackNumber } else null)
+            .setGenre(if (genre.isNotEmpty()) { genre[0].name } else null)
             .setComposer(composer)
             .setAlbumArtist(artist.name)
             .setOverallRating(StarRating(5, if (rate in 0..5) rate.toFloat() else 0f))
@@ -92,8 +91,6 @@ fun Song.toMediaItem() = MediaItem.Builder()
             .setUserRating(StarRating(5, if (rate in 0..5) rate.toFloat() else 0f))
             .build()
     ).build()
-
-
 
 fun MediaBrowser.MediaItem.toSong() = Song(
             mediaId = mediaId!!,

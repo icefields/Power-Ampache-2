@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
-import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
 import javax.inject.Inject
 
 class SimpleMediaServiceHandler @Inject constructor(
@@ -45,11 +44,15 @@ class SimpleMediaServiceHandler @Inject constructor(
 
             val indexInQueue = mediaItems.indexOf(player.currentMediaItem)
 
-            player.addMediaItems(0, mediaItems.subList(0, indexInQueue))
-            player.addMediaItems(
-                player.currentMediaItemIndex + 1,
-                mediaItems.subList(indexInQueue + 1, mediaItems.size)
-            )
+            if (indexInQueue >= 0 && indexInQueue < mediaItems.size) {
+                player.addMediaItems(0, mediaItems.subList(0, indexInQueue))
+                player.addMediaItems(
+                    player.currentMediaItemIndex + 1,
+                    mediaItems.subList(indexInQueue + 1, mediaItems.size)
+                )
+            } else {
+                player.setMediaItems(mediaItems)
+            }
         } else {
             player.setMediaItems(mediaItems)
         }

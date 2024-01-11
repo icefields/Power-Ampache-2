@@ -8,9 +8,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
@@ -56,11 +57,17 @@ class AlbumsViewModel @Inject constructor(
     private fun getAlbums(
         query: String = state.searchQuery.lowercase(),
         fetchRemote: Boolean = true,
-        offset: Int = 0
+        offset: Int = 0,
+        limit: Int = NETWORK_REQUEST_LIMIT_DEBUG
     ) {
         viewModelScope.launch {
             repository
-                .getAlbums(fetchRemote, query, offset)
+                .getAlbums(
+                    fetchRemote = fetchRemote,
+                    query = query,
+                    offset = offset,
+                    limit = limit
+                )
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
@@ -68,7 +75,7 @@ class AlbumsViewModel @Inject constructor(
                                 state = state.copy(albums = albums)
                                 L("viewmodel.getAlbums size ${state.albums.size}")
                             }
-                            isEndOfDataList = (result.networkData?.isEmpty() == true && offset > 0)
+                            isEndOfDataList = ( ((result.networkData?.size ?: 0) < limit) && offset > 0)
                         }
 
                         is Resource.Error -> {

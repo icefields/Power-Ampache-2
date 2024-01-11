@@ -90,7 +90,7 @@ fun SongDetailQueueTopBar(
         elevation = CardDefaults.cardElevation(0.dp),
         shape = RoundedCornerShape(0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = MaterialTheme.colorScheme.secondary
         ),
         modifier = modifier
             .fillMaxWidth()
@@ -111,7 +111,7 @@ fun SongDetailQueueTopBar(
                     //contentScale = ContentScale.FillHeight,
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = "close song detail screen",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.onSecondary
                 )
             }
 
@@ -123,9 +123,9 @@ fun SongDetailQueueTopBar(
                 Text(
                     modifier = Modifier.basicMarquee(),
                     text = "UP NEXT",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    //fontWeight = FontWeight.SemiBold,
-                    fontSize = 17.sp,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
                     maxLines = 1,
                     textAlign = TextAlign.Center
                 )

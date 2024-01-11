@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import luci.sixsixsix.powerampache2.domain.models.User
 
 val drawerItems = listOf(
     MainContentMenuItem.Home,
@@ -29,14 +30,14 @@ val drawerItems = listOf(
 )
 
 @Composable
-fun DrawerHeader() {
+fun DrawerHeader(user: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = "Header", fontSize = 30.sp)
+        Text(text = user, fontSize = 30.sp)
     }
 }
 

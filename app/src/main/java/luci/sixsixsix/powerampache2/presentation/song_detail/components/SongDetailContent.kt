@@ -103,30 +103,35 @@ fun SongDetailContent(
 
         Divider(Modifier.padding(vertical = 0.dp))
         mainViewModel.state.song?.let { song ->
-            SongDetailButtonRow(modifier = Modifier.fillMaxWidth(), song = song) { event ->
+            SongDetailButtonRow(
+                modifier = Modifier.fillMaxWidth(),
+                song = song,
+                mainViewModel.state.isLikeLoading
+            ) { event ->
                 when(event) {
-                    SongDetailButtonEvents.SHARE_SONG -> mainViewModel.onEvent(MainEvent.OnShareSong(song))
-                    SongDetailButtonEvents.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
-                    SongDetailButtonEvents.ADD_SONG_TO_PLAYLIST_OR_QUEUE -> {
+                    SongDetailButtonEvents.SHARE_SONG ->
+                        mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                    SongDetailButtonEvents.DOWNLOAD_SONG ->
+                        mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                    SongDetailButtonEvents.ADD_SONG_TO_PLAYLIST_OR_QUEUE ->
                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, song)
-                    }
-                    SongDetailButtonEvents.GO_TO_ALBUM -> {
+                    SongDetailButtonEvents.GO_TO_ALBUM ->
                         mainViewModel.state.song?.album?.id?.let { albumId ->
                             Ampache2NavGraphs.navigator?.navigate(AlbumDetailScreenDestination(albumId = albumId))
                             scope.launch {
                                 mainScaffoldState.bottomSheetState.partialExpand()
                             }
                         }
-                    }
-                    SongDetailButtonEvents.GO_TO_ARTIST -> {
+                    SongDetailButtonEvents.GO_TO_ARTIST ->
                         mainViewModel.state.song?.artist?.id?.let { artistId ->
                             Ampache2NavGraphs.navigator?.navigate(ArtistDetailScreenDestination(artistId = artistId))
                             scope.launch {
                                 mainScaffoldState.bottomSheetState.partialExpand()
                             }
                         }
-                    }
                     SongDetailButtonEvents.SHOW_INFO -> TODO()
+                    SongDetailButtonEvents.FAVOURITE_SONG ->
+                        mainViewModel.onEvent(MainEvent.FavouriteSong)
                 }
             }
         }

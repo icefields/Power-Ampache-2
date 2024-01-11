@@ -21,24 +21,29 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.math.abs
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val application: Application,
     private val playlistManager: MusicPlaylistManager,
+    private val playlistsRepository: PlaylistsRepository,
     private val musicRepository: MusicRepository,
     private val simpleMediaServiceHandler: SimpleMediaServiceHandler
 ) : AndroidViewModel(application) {
 
     var state by mutableStateOf(MainState())
+        private set
     private var searchJob: Job? = null
     private var isServiceRunning = false
 
@@ -55,9 +60,6 @@ class MainViewModel @Inject constructor(
                 songState.song?.let {
                     startMusicServiceIfNecessary()
                 } ?: stopMusicService()
-
-                L(songState.song)
-
                 // this is used to update the UI
                 songState.song?.let {
                     state = state.copy(song = it)
@@ -91,6 +93,10 @@ class MainViewModel @Inject constructor(
             }
         }
 
+        observePlayerEvents()
+    }
+
+    private fun observePlayerEvents() {
         viewModelScope.launch {
             simpleMediaServiceHandler.simpleMediaState.collect { mediaState ->
                 when (mediaState) {
@@ -115,6 +121,9 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /**
+     * UI ACTIONS AND EVENTS (play, stop, skip, like, download, etc ...)
+     */
     fun onEvent(event: MainEvent) {
         when(event) {
             is MainEvent.OnSearchQueryChange -> {
@@ -142,8 +151,8 @@ class MainViewModel @Inject constructor(
             is MainEvent.OnAddSongToPlaylist -> {}
             is MainEvent.OnDownloadSong -> {}
             is MainEvent.OnShareSong -> {}
-            is MainEvent.Repeat -> TODO()
-            is MainEvent.Shuffle -> TODO()
+            is MainEvent.Repeat -> TODO("enable shuffle on player, also listen to when repeat is turned off")
+            is MainEvent.Shuffle -> TODO("enable shuffle on player, also listen to when shuffle is turned off")
             is MainEvent.SkipNext -> viewModelScope.launch {
                 simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.SkipForward)
             }
@@ -160,7 +169,25 @@ class MainViewModel @Inject constructor(
             MainEvent.Forward -> viewModelScope.launch {
                 simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Forward)
             }
+            MainEvent.FavouriteSong -> state.song?.let {
+                favouriteSong(it)
+            }
         }
+    }
+
+    private fun favouriteSong(song: Song) = viewModelScope.launch {
+        playlistsRepository.likeSong(song.mediaId, (song.flag != 1)).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            // refresh song
+                            state = state.copy(song = song.copy(flag = abs(song.flag - 1)))
+                        }
+                    }
+                    is Resource.Error -> state = state.copy(isLikeLoading = false)
+                    is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+                }
+            }
     }
 
     private fun logout() {
@@ -217,7 +244,7 @@ class MainViewModel @Inject constructor(
     }
 
     @OptIn(UnstableApi::class)
-    private fun stopMusicService() {
+    fun stopMusicService() {
         L("stopMusicService", isServiceRunning)
         if (isServiceRunning) {
             application.stopService(Intent(application, SimpleMediaService::class.java))
@@ -230,6 +257,7 @@ class MainViewModel @Inject constructor(
             simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
         }
         stopMusicService()
+        playlistManager.reset()
         L("onCleared")
         super.onCleared()
     }

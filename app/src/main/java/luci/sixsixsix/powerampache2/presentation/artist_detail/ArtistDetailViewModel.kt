@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
+import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import javax.inject.Inject
@@ -21,7 +22,7 @@ class ArtistDetailViewModel @Inject constructor(
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
     private val repository: AlbumsRepository,
-    private val musicRepository: MusicRepository
+    private val artistsRepository: ArtistsRepository,
 ) : ViewModel() {
 
     var state by mutableStateOf(ArtistDetailState())
@@ -71,7 +72,7 @@ class ArtistDetailViewModel @Inject constructor(
 
     private fun getArtist(artistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
-            musicRepository
+            artistsRepository
                 .getArtist(artistId)
                 .collect { result ->
                     when(result) {

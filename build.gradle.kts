@@ -4,7 +4,7 @@ buildscript {
         set("composeNav_version", "1.8.42-beta")
         set("retrofit2_version", "2.9.0")
         set("coroutines_version", "1.7.3")
-        set("lifecycle_version", "2.6.2")
+        //set("lifecycle_version", "2.6.2")
         set("exoplayer_version", "2.19.1")
     }
 

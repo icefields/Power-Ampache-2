@@ -10,6 +10,7 @@ data class AlbumDetailState (
     val album: Album = Album(),
     val songs: List<Song> = emptyList(),
     val isLoading: Boolean = false,
+    val isLikeLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false

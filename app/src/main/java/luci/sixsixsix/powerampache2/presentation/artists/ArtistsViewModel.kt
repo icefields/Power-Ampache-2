@@ -9,13 +9,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.presentation.main.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class ArtistsViewModel @Inject constructor(
-    private val repository: MusicRepository,
+    private val artistsRepository: ArtistsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
 
@@ -57,7 +58,7 @@ class ArtistsViewModel @Inject constructor(
         offset: Int = 0
     ) {
         viewModelScope.launch {
-            repository
+            artistsRepository
                 .getArtists(fetchRemote, query, offset)
                 .collect { result ->
                     when(result) {

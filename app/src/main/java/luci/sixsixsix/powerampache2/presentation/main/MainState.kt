@@ -6,5 +6,6 @@ data class MainState (
     val searchQuery: String = "",
     val errorMessage: String = "",
     val song: Song? = null,
-    val queue: List<Song> = listOf()
+    val queue: List<Song> = listOf(),
+    val isLikeLoading:Boolean = false
 )

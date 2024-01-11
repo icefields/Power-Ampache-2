@@ -90,7 +90,7 @@ fun AlbumDetailScreen(
             model = viewModel.state.album.artUrl,
             contentScale = ContentScale.Crop,
             //placeholder = painterResource(id = R.drawable.placeholder_album),
-            //error = painterResource(id = R.drawable.ic_image),
+            error = painterResource(id = R.drawable.placeholder_album),
             contentDescription = viewModel.state.album.name
         )
         AsyncImage(
@@ -100,7 +100,7 @@ fun AlbumDetailScreen(
             model = viewModel.state.album.artUrl,
             contentScale = ContentScale.FillWidth,
             //placeholder = painterResource(id = R.drawable.placeholder_album),
-            //error = painterResource(id = R.drawable.ic_playlist),
+            error = painterResource(id = R.drawable.placeholder_album),
             contentDescription = viewModel.state.album.name,
         )
         // full screen view to add a transparent black layer on top
@@ -128,7 +128,6 @@ fun AlbumDetailScreen(
                 ) { infoVisibility = !infoVisibility }
             }
         ) {
-            L(mainViewModel.isPlaying, mainViewModel.state.song, state.songs.contains(mainViewModel.state.song))
             Surface(
                 modifier = Modifier
                     .padding(it)
@@ -153,6 +152,7 @@ fun AlbumDetailScreen(
                             ),
                         album = viewModel.state.album,
                         isPlayingAlbum = isPlayingAlbum,
+                        isLikeLoading = state.isLikeLoading,
                         eventListener = { event ->
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {
@@ -173,6 +173,8 @@ fun AlbumDetailScreen(
                                     viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
                                 AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST ->
                                     viewModel.onEvent(AlbumDetailEvent.OnAddAlbumToQueue)
+                                AlbumInfoViewEvents.FAVOURITE_ALBUM ->
+                                    viewModel.onEvent(AlbumDetailEvent.OnFavouriteAlbum)
                             }
                         }
                     )

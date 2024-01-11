@@ -20,6 +20,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,11 +33,13 @@ import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
 import luci.sixsixsix.powerampache2.presentation.home.HomeScreen
 import luci.sixsixsix.powerampache2.presentation.home.HomeScreenViewModel
+import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.DrawerBody
@@ -59,27 +62,24 @@ import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 fun MainContent(
     navigator: DestinationsNavigator,
     mainViewModel: MainViewModel,
+    authViewModel: AuthViewModel,
     homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
+    // IMPORTANT : set the main navigator right away here in MainScreen
     Ampache2NavGraphs.navigator = navigator
 
-    val tabsCount = MainTabRow.tabItems.size
+    val tabsCount = tabItems.size
     val pagerState = rememberPagerState { tabsCount }
-    L("MainContent Current song ${mainViewModel.state.song}")
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
-    var currentScreen: String by rememberSaveable {
-        mutableStateOf(MainContentMenuItem.Home.id)
-    }
+    var currentScreen: String by rememberSaveable { mutableStateOf(MainContentMenuItem.Home.id) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                DrawerHeader()
+                DrawerHeader(authViewModel.state.user?.username ?: ERROR_STRING)
                 Divider()
                 DrawerBody(items = drawerItems,
                     onItemClick = {
@@ -115,7 +115,6 @@ fun MainContent(
                 top = it.calculateTopPadding(),
                 bottom = it.calculateBottomPadding()
             )) {
-                L("MainContent currentScreen $currentScreen")
                 when (MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
                     is MainContentMenuItem.Home -> HomeScreen(
                         navigator = navigator,
@@ -145,24 +144,24 @@ fun TabbedLibraryView(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel
 ) {
-        Column {
-            MainTabRow.MainTabRow(pagerState)
-            HorizontalPager(
-                state = pagerState,
-                modifier = modifier
-                    .fillMaxWidth()
-                    .weight(1.0f)
-            ) { index ->
-                // The order of the items on screen is the same of the tabItems list order
-                // to change the order, change the order in tabItems
-                when(tabItems[index]) {
-                    TabItem.Albums -> AlbumsScreen(navigator = navigator)
-                    TabItem.Artists -> ArtistsScreen(navigator = navigator)
-                    TabItem.Playlists -> PlaylistsScreen(navigator = navigator)
-                    TabItem.Songs -> SongsListScreen(navigator = navigator, mainViewModel = mainViewModel)
-                }
+    Column {
+        MainTabRow.MainTabRow(pagerState)
+        HorizontalPager(
+            state = pagerState,
+            modifier = modifier
+                .fillMaxWidth()
+                .weight(1.0f)
+        ) { index ->
+            // The order of the items on screen is the same of the tabItems list order
+            // to change the order, change the order in tabItems
+            when(tabItems[index]) {
+                TabItem.Albums -> AlbumsScreen(navigator = navigator)
+                TabItem.Artists -> ArtistsScreen(navigator = navigator)
+                TabItem.Playlists -> PlaylistsScreen(navigator = navigator)
+                TabItem.Songs -> SongsListScreen(navigator = navigator, mainViewModel = mainViewModel)
             }
         }
+    }
 }
 
 
