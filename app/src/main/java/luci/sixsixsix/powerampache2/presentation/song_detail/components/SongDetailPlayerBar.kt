@@ -21,7 +21,11 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.Repeat
+import androidx.compose.material.icons.outlined.RepeatOn
+import androidx.compose.material.icons.outlined.RepeatOne
+import androidx.compose.material.icons.outlined.RepeatOneOn
 import androidx.compose.material.icons.outlined.Shuffle
+import androidx.compose.material.icons.outlined.ShuffleOn
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
 import androidx.compose.material3.Card
@@ -46,12 +50,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 
 @Composable
 fun SongDetailPlayerBar(
     isPlaying:Boolean,
     isBuffering:Boolean,
+    shuffleOn: Boolean,
+    repeatMode: RepeatMode,
     progress: Float,
     durationStr: String,
     progressStr: String,
@@ -67,6 +74,8 @@ fun SongDetailPlayerBar(
         PlayerControls(
             isPlaying = isPlaying,
             isBuffering = isBuffering,
+            shuffleOn = shuffleOn,
+            repeatMode = repeatMode,
             modifier = Modifier.fillMaxWidth(),
             onEvent = onEvent
         )
@@ -84,6 +93,8 @@ fun SongDetailPlayerBar(
 fun PlayerControls(
     isPlaying: Boolean,
     isBuffering: Boolean,
+    shuffleOn: Boolean,
+    repeatMode: RepeatMode,
     modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit
 ) {
@@ -100,7 +111,11 @@ fun PlayerControls(
             }) {
             Icon(
                 tint = tint,
-                imageVector = Icons.Outlined.Repeat,
+                imageVector = when(repeatMode) {
+                    RepeatMode.OFF -> Icons.Outlined.Repeat
+                    RepeatMode.ONE -> Icons.Outlined.RepeatOneOn
+                    RepeatMode.ALL -> Icons.Outlined.RepeatOn
+                },
                 contentDescription = "Repeat"
             )
         }
@@ -148,11 +163,14 @@ fun PlayerControls(
 
         IconButton(modifier = Modifier.weight(1f),
             onClick = {
-                onEvent(MainEvent.Shuffle)
+                onEvent(MainEvent.Shuffle(!shuffleOn))
             }) {
             Icon(
                 tint = tint,
-                imageVector = Icons.Outlined.Shuffle, //ShuffleOn
+                imageVector = if(!shuffleOn)
+                    Icons.Outlined.Shuffle
+                else
+                    Icons.Outlined.ShuffleOn,
                 contentDescription = "Shuffle"
             )
         }
@@ -237,6 +255,8 @@ fun PreviewSongDetailPlayerBar() {
         isBuffering = true,
         progress = 12f,
         durationStr = "3:40",
-        progressStr = "5:32"
+        progressStr = "5:32",
+        repeatMode = RepeatMode.ONE,
+        shuffleOn = true
     ) {}
 }

@@ -37,6 +37,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.CircleBackButton
+import luci.sixsixsix.powerampache2.presentation.TopBarCircularProgress
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -79,11 +80,7 @@ fun ArtistDetailTopBar(
         },
         scrollBehavior = scrollBehavior,
         actions = {
-            if (isLoading) {
-                Box(modifier = Modifier.fillMaxHeight().padding(12.dp)) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-            }
+            TopBarCircularProgress(isLoading)
             IconButton(onClick = {
                 onRightIconClick()
             }) {

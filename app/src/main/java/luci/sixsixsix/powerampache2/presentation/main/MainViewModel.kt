@@ -26,6 +26,7 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.PlayerEvent
+import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
@@ -52,18 +53,37 @@ class MainViewModel @Inject constructor(
     var progressStr by mutableStateOf("00:00")
     var isPlaying by mutableStateOf(false)
     var isBuffering by mutableStateOf(false)
+    var isLoading by mutableStateOf(false)
+    var shuffleOn by mutableStateOf(false)
+    var repeatMode by mutableStateOf(RepeatMode.OFF)
 
     init {
         L()
+        observePlaylistManager()
+        observePlayerEvents()
+        observeSession()
+    }
+
+    private fun observeSession() {
+        musicRepository.sessionLiveData.observeForever {
+            // if sessions is null, stop service and invalidate queue and current song
+            if (it == null) {
+                if (!isPlaying) stopMusicService()
+                playlistManager.reset() // this will trigger the observables in observePlaylistManager() and reset mainviewmodel as well
+            }
+        }
+    }
+
+    private fun observePlaylistManager() {
         viewModelScope.launch {
             playlistManager.currentSongState.collect { songState ->
                 songState.song?.let {
                     startMusicServiceIfNecessary()
                 } ?: stopMusicService()
                 // this is used to update the UI
-                songState.song?.let {
-                    state = state.copy(song = it)
-                }
+                //songState.song?.let {
+                    state = state.copy(song = songState.song)
+                //}
             }
         }
 
@@ -92,8 +112,6 @@ class MainViewModel @Inject constructor(
                 loadSongData()
             }
         }
-
-        observePlayerEvents()
     }
 
     private fun observePlayerEvents() {
@@ -116,6 +134,8 @@ class MainViewModel @Inject constructor(
                         duration = mediaState.duration
                         // UI STATE READY
                     }
+
+                    is SimpleMediaState.Loading -> isLoading = mediaState.isLoading
                 }
             }
         }
@@ -151,8 +171,15 @@ class MainViewModel @Inject constructor(
             is MainEvent.OnAddSongToPlaylist -> {}
             is MainEvent.OnDownloadSong -> {}
             is MainEvent.OnShareSong -> {}
-            is MainEvent.Repeat -> TODO("enable shuffle on player, also listen to when repeat is turned off")
-            is MainEvent.Shuffle -> TODO("enable shuffle on player, also listen to when shuffle is turned off")
+            is MainEvent.Repeat -> viewModelScope.launch {
+                val nextRepeatMode = nextRepeatMode()
+                simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.RepeatToggle(nextRepeatMode))
+                repeatMode = nextRepeatMode
+            }
+            is MainEvent.Shuffle -> viewModelScope.launch {
+                simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.ShuffleToggle(event.shuffleOn))
+                shuffleOn = event.shuffleOn
+            }
             is MainEvent.SkipNext -> viewModelScope.launch {
                 simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.SkipForward)
             }
@@ -261,4 +288,11 @@ class MainViewModel @Inject constructor(
         L("onCleared")
         super.onCleared()
     }
+
+    fun nextRepeatMode(): RepeatMode =
+        when(repeatMode) {
+            RepeatMode.OFF -> RepeatMode.ONE
+            RepeatMode.ONE -> RepeatMode.ALL
+            RepeatMode.ALL -> RepeatMode.OFF
+        }
 }

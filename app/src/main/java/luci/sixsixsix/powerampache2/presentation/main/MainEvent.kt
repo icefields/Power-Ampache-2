@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.presentation.main
 
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.player.RepeatMode
 
 sealed class MainEvent {
     data class OnSearchQueryChange(val query: String): MainEvent()
@@ -13,7 +14,7 @@ sealed class MainEvent {
     data object Forward: MainEvent()
     data object Backwards: MainEvent()
     data object Repeat: MainEvent()
-    data object Shuffle: MainEvent()
+    data class Shuffle(val shuffleOn: Boolean): MainEvent()
     data object FavouriteSong: MainEvent()
 
     data class UpdateProgress(val newProgress: Float): MainEvent()

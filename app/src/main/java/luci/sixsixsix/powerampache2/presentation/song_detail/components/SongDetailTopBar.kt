@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.presentation.TopBarCircularProgress
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -78,5 +79,10 @@ fun SongDetailTopBar(
                 textAlign = TextAlign.Center
             )
         }
+
+        TopBarCircularProgress(
+            isLoading = mainViewModel.isLoading,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        )
     }
 }

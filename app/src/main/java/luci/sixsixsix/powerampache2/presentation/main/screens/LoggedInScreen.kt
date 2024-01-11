@@ -78,29 +78,6 @@ fun LoggedInScreen(
                     // those are declared in the activity
                     dependency(mainViewModel)
                     dependency(authViewModel)
-                    //dependency(homeScreenViewModel)
-
-//                    dependency(hiltViewModel<QueueViewModel>(LocalContext.current as MainActivity))
-//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
-//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
-//                    dependency(NavGraphs.root) {
-//                        val parentEntry = remember(navBackStackEntry) {
-//                            navController.getBackStackEntry(NavGraphs.root.route)
-//                        }
-//                        hiltViewModel<HomeScreenViewModel>(parentEntry)
-//                    }
-
-
-
-
-                    // To tie SettingsViewModel to "settings" nested navigation graph,
-                    // making it available to all screens that belong to it
-//                    dependency(NavGraphs.root) {
-//                        val parentEntry = remember(navBackStackEntry) {
-//                            navController.getBackStackEntry(NavGraphs.root.route)
-//                        }
-//                        hiltViewModel<MainViewModel>(parentEntry)
-//                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,3 +93,44 @@ fun LoggedInScreen(
 @Composable
 fun getPeakHeight(song: Song?): Dp =
     if (song == null) { 0.dp } else { dimensionResource(id = R.dimen.miniPlayer_height) }
+
+
+
+
+//DestinationsNavHost(
+//navGraph = NavGraphs.root,
+//dependenciesContainerBuilder = {
+//    // those are declared in the activity
+//    dependency(mainViewModel)
+//    dependency(authViewModel)
+    //dependency(homeScreenViewModel)
+
+//                    dependency(hiltViewModel<QueueViewModel>(LocalContext.current as MainActivity))
+//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
+//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
+//                    dependency(NavGraphs.root) {
+//                        val parentEntry = remember(navBackStackEntry) {
+//                            navController.getBackStackEntry(NavGraphs.root.route)
+//                        }
+//                        hiltViewModel<HomeScreenViewModel>(parentEntry)
+//                    }
+
+
+
+
+    // To tie SettingsViewModel to "settings" nested navigation graph,
+    // making it available to all screens that belong to it
+//                    dependency(NavGraphs.root) {
+//                        val parentEntry = remember(navBackStackEntry) {
+//                            navController.getBackStackEntry(NavGraphs.root.route)
+//                        }
+//                        hiltViewModel<MainViewModel>(parentEntry)
+//                    }
+//},
+//modifier = Modifier
+//.fillMaxWidth()
+//.padding(
+//top = it.calculateTopPadding(),
+//bottom = it.calculateBottomPadding()
+//)
+//)

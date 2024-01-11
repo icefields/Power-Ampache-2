@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.Shuffle
+import androidx.compose.material.icons.outlined.ShuffleOn
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
 import androidx.compose.material3.Card
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
@@ -57,6 +59,8 @@ fun MiniPlayer(
         MiniPlayerContent(
             song = song,
             modifier = modifier,
+            shuffleOn = mainViewModel.shuffleOn,
+            repeatMode = mainViewModel.repeatMode,
             isPlaying = mainViewModel.isPlaying,
             isBuffering = mainViewModel.isBuffering
         ) { event ->
@@ -71,6 +75,8 @@ fun MiniPlayerContent(
     song: Song,
     isPlaying: Boolean,
     isBuffering: Boolean,
+    shuffleOn: Boolean,
+    repeatMode: RepeatMode,
     modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit
 ) {
@@ -203,10 +209,13 @@ fun MiniPlayerContent(
                 }
                 IconButton(modifier = Modifier.widthIn(min = 20.dp, max = 40.dp),
                     onClick = {
-                        onEvent(MainEvent.Shuffle)
+                        onEvent(MainEvent.Shuffle(!shuffleOn))
                     }) {
                     Icon(
-                        imageVector = Icons.Outlined.Shuffle, //ShuffleOn
+                        imageVector = if(!shuffleOn)
+                            Icons.Outlined.Shuffle
+                        else
+                            Icons.Outlined.ShuffleOn,
                         contentDescription = "Share"
                     )
                 }
@@ -223,6 +232,8 @@ fun previewMiniPlayer() {
         song = Song.mockSong,
         modifier = Modifier.width(400.dp).height(50.dp),
         isPlaying = true,
-        isBuffering = true
+        isBuffering = true,
+        shuffleOn = true,
+        repeatMode = RepeatMode.OFF
     ) {}
 }

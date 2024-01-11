@@ -180,6 +180,8 @@ fun SongDetailContent(
             progressStr = mainViewModel.progressStr,
             isPlaying = mainViewModel.isPlaying,
             isBuffering = mainViewModel.isBuffering,
+            shuffleOn = mainViewModel.shuffleOn,
+            repeatMode = mainViewModel.repeatMode,
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()

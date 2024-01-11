@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,6 +38,7 @@ import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.presentation.CircleBackButton
+import luci.sixsixsix.powerampache2.presentation.TopBarCircularProgress
 import java.util.UUID
 
 
@@ -82,19 +84,13 @@ fun AlbumDetailTopBar(
         },
         scrollBehavior = scrollBehavior,
         actions = {
-            if (isLoading) {
-                Box(modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(12.dp)) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-            }
+            TopBarCircularProgress(isLoading)
 
             IconButton(onClick = {
                 onRightIconClick()
             }) {
                 Icon(
-                    imageVector = Icons.Default.Info,
+                    imageVector = Icons.Outlined.Info,
                     contentDescription = "show hide album info"
                 )
             }

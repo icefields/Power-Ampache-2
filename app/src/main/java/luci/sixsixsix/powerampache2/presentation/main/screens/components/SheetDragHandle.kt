@@ -34,14 +34,7 @@ fun SheetDragHandle(
     ) {
         // show mini-player
         Box(modifier = Modifier
-            .height(
-                // if it's expanded do not show the player
-                //if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                //    0.dp
-                //} else {
-                barHeight
-                //}
-            )
+            .height(barHeight)
             .fillMaxWidth()
             .clickable {
                 scope.launch {

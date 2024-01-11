@@ -128,7 +128,7 @@ class MusicPlaylistManager @Inject constructor() {
     fun getErrorMessage(): String? = errorMessageState.value.errorMessage
 
     fun reset() {
-        updateTopSong(newSong= null)
+        _currentSongState.value = CurrentSongState(song = null)
         updateSearchQuery(searchQuery= "")
         replaceCurrentQueue(listOf())
         // TODO keep error message for now

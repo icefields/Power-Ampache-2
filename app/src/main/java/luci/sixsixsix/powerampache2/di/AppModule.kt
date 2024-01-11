@@ -44,11 +44,13 @@ object AppModule {
     }
 
     @Provides
-    fun provideDateMapper(): DateMapper = AmpacheDateMapper()
+    fun provideDateMapper(): DateMapper =
+        AmpacheDateMapper()
 
     @Provides
     @Singleton
-    fun provideAmpacheApi(retrofit: Retrofit): MainNetwork = retrofit.create(MainNetwork::class.java)
+    fun provideAmpacheApi(retrofit: Retrofit): MainNetwork =
+        retrofit.create(MainNetwork::class.java)
 
     @Provides
     @Singleton

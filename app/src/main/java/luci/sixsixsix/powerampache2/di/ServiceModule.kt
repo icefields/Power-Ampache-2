@@ -13,9 +13,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaNotificationManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Singleton
 
 @Module
@@ -23,9 +23,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @OptIn(UnstableApi::class)
 object ServiceModule {
-
-    @Provides
+    //@ServiceScoped
     @Singleton
+    @Provides
     fun provideAudioAttributes() = AudioAttributes.Builder()
         .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
         .setUsage(C.USAGE_MEDIA)
@@ -54,20 +54,17 @@ object ServiceModule {
         player = player
     )
 
-    @Provides
+    //@ServiceScoped
     @Singleton
+    @Provides
     fun provideMediaSession(
         @ApplicationContext context: Context,
         player: ExoPlayer
     ) = MediaSession.Builder(context, player).build()
 
-    @Provides
+    //@ServiceScoped
     @Singleton
-    fun provideServiceHandler(player: ExoPlayer, playlistManager: MusicPlaylistManager) = SimpleMediaServiceHandler(playlistManager = playlistManager, player = player)
-
-//    @ServiceScoped
-//    @Provides
-//    fun provideDataSourceFactory(
-//        @ApplicationContext context: Context
-//    ) = DefaultDataSource.Factory(context, DefaultDataSource.Factory(context))
+    @Provides
+    fun provideServiceHandler(player: ExoPlayer, playlistManager: MusicPlaylistManager) =
+        SimpleMediaServiceHandler(playlistManager = playlistManager, player = player)
 }

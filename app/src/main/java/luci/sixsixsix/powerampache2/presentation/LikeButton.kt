@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.presentation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
@@ -28,16 +29,18 @@ fun LikeButton(
     onClick: () -> Unit
 ) {
     IconButton(
-        modifier = modifier,
+        modifier = modifier.size(24.dp),
         onClick = { onClick() }
     ) {
         Card(
             colors = CardDefaults.cardColors(containerColor = background),
-            modifier = modifier
-                .size(24.dp)
+            modifier = Modifier.fillMaxSize()
+
         ) {
-            Box(modifier = Modifier.wrapContentSize(),
-                contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 if (isLikeLoading) {
                     CircularProgressIndicator()
                 } else {

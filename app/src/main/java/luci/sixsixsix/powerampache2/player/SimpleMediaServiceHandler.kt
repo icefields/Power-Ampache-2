@@ -3,6 +3,7 @@ package luci.sixsixsix.powerampache2.player
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -87,14 +88,18 @@ class SimpleMediaServiceHandler @Inject constructor(
                     }
                     ++i
                 }
-
                 player.seekTo(indexToSeekTo, 0)
-//                player.pause()
-//                stopProgressUpdate()
                 player.play()
                 _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
                 startProgressUpdate()
             }
+            is PlayerEvent.RepeatToggle -> player.repeatMode =
+                when(playerEvent.repeatMode) {
+                    RepeatMode.OFF -> Player.REPEAT_MODE_OFF
+                    RepeatMode.ONE -> Player.REPEAT_MODE_ONE
+                    RepeatMode.ALL -> Player.REPEAT_MODE_ALL
+                }
+            is PlayerEvent.ShuffleToggle -> player.shuffleModeEnabled = playerEvent.shuffleOn
         }
     }
 
@@ -124,6 +129,12 @@ class SimpleMediaServiceHandler @Inject constructor(
         }
     }
 
+    override fun onIsLoadingChanged(isLoading: Boolean) {
+        L("STATE_isLoading", isLoading)
+        _simpleMediaState.value = SimpleMediaState.Loading(isLoading)
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = isPlaying)
         if (isPlaying) {
@@ -154,6 +165,7 @@ sealed class SimpleMediaState {
     data class Buffering(val progress: Long): SimpleMediaState()
     data class Progress(val progress: Long): SimpleMediaState()
     data class Playing(val isPlaying: Boolean): SimpleMediaState()
+    data class Loading(val isLoading: Boolean): SimpleMediaState()
 
 }
 
@@ -166,5 +178,8 @@ sealed class PlayerEvent {
     data class ForcePlay(val mediaItem: MediaItem): PlayerEvent()
     data object Stop: PlayerEvent()
     data class Progress(val newProgress: Float): PlayerEvent()
-
+    data class ShuffleToggle(val shuffleOn: Boolean): PlayerEvent()
+    data class RepeatToggle(val repeatMode: RepeatMode): PlayerEvent()
 }
+
+enum class RepeatMode { OFF, ONE, ALL }
