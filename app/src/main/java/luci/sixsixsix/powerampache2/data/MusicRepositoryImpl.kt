@@ -212,7 +212,6 @@ class MusicRepositoryImpl @Inject constructor(
                 }
             }
         }
-
         return getSession()!! // will throw exception if session null
     }
 }

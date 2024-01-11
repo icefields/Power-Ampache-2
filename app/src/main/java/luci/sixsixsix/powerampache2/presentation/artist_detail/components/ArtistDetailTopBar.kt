@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +34,7 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Artist
+import luci.sixsixsix.powerampache2.presentation.CircleBackButton
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -71,14 +71,8 @@ fun ArtistDetailTopBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = {
+            CircleBackButton {
                 navigator.navigateUp()
-            }) {
-                Icon(
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(id = R.string.back_content_description)
-                )
             }
         },
         scrollBehavior = scrollBehavior,

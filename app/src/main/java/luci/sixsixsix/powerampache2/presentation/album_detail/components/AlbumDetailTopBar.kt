@@ -5,17 +5,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -26,23 +23,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
+import luci.sixsixsix.powerampache2.presentation.CircleBackButton
 import java.util.UUID
 
 
@@ -63,7 +56,9 @@ fun AlbumDetailTopBar(
         ),
         title = {
             Text(
-                modifier = Modifier.basicMarquee().padding(15.dp),
+                modifier = Modifier
+                    .basicMarquee()
+                    .padding(15.dp),
                 text = "${album.name} - ${album.artist.name}",
                 maxLines = 1,
                 fontWeight = FontWeight.Normal,
@@ -80,20 +75,16 @@ fun AlbumDetailTopBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = {
+            CircleBackButton {
                 navigator.navigateUp()
-            }) {
-                Icon(
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(id = R.string.back_content_description)
-                )
             }
         },
         scrollBehavior = scrollBehavior,
         actions = {
             if (isLoading) {
-                Box(modifier = Modifier.fillMaxHeight().padding(12.dp)) {
+                Box(modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(12.dp)) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }

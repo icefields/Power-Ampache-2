@@ -79,13 +79,10 @@ class PlaylistsRepositoryImpl @Inject constructor(
             id = id,
             flag = if (like) { 1 } else { 0 },
             type = type).apply {
-
-            if (error != null) {
-                // TODO rewrite using MusicException
-                throw Exception(error.toString())
-            } else if (success != null) {
+            error?.let { throw(MusicException(it.toError())) }
+            if (success != null) {
                 emit(Resource.Success(data = Any(), networkData = Any()))
-            }else {
+            } else {
                 throw Exception("error getting a response from FLAG/LIKE call")
             }
         }
