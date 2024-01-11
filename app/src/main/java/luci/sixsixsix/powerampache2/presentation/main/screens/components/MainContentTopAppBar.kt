@@ -9,6 +9,8 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -19,20 +21,27 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
@@ -43,15 +52,13 @@ import kotlin.math.abs
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainContentTopAppBar(
-    pagerState: PagerState,
     scrollBehavior: TopAppBarScrollBehavior,
+    searchVisibility: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     onNavigationIconClick: (MainContentTopAppBarEvent) -> Unit
 ) {
-    var searchVisibility by remember { mutableFloatStateOf(0.0f) }
     val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
     val transitionState = remember {
         MutableTransitionState(false).apply {
             // Start the animation immediately.
@@ -62,25 +69,13 @@ fun MainContentTopAppBar(
     TopAppBar(
         modifier = modifier,
         title = {
-            if (searchVisibility == 1.0f) {
-                TopBar(
-                    modifier = Modifier.alpha(searchVisibility),
-                    viewModel = viewModel,
-                    currentPage = pagerState.currentPage,
-                    interactionSource = interactionSource
+            AnimatedVisibility(visibleState = transitionState) {
+                Text(
+                    modifier = Modifier
+                        .basicMarquee(),
+                    text = generateBarTitle(viewModel.state.song),
+                    maxLines = 1
                 )
-            } else {
-                AnimatedVisibility(visibleState = transitionState) {
-                    Text(
-                        modifier = Modifier
-                            .basicMarquee()
-                            .alpha(
-                                abs(searchVisibility - 1.0f)
-                            ),
-                        text = generateBarTitle(viewModel.state.song),
-                        maxLines = 1
-                    )
-                }
             }
         },
         navigationIcon = {
@@ -95,20 +90,16 @@ fun MainContentTopAppBar(
         },
         scrollBehavior = scrollBehavior,
         actions = {
-            if (searchVisibility == 0.0f) {
                 IconButton(
-                    modifier = Modifier.alpha(
-                        abs(searchVisibility - 1.0f)
-                    ),
                     onClick = {
-                        searchVisibility = abs(searchVisibility - 1.0f)
+                        searchVisibility.value = !searchVisibility.value
                     }) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search"
                     )
                 }
-            }
+
             if (viewModel.state.queue.isNotEmpty()) {
                 IconButton(
                     onClick = {
@@ -125,7 +116,7 @@ fun MainContentTopAppBar(
 }
 
 @Composable
-fun TopBar(
+fun TopBarOLD(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     currentPage: Int,
@@ -153,13 +144,15 @@ fun TopBar(
     }
 }
 
-sealed class MainContentTopAppBarEvent {
-    data object OnLeftDrawerIconClick: MainContentTopAppBarEvent()
-    data object OnPlaylistIconClick: MainContentTopAppBarEvent()
-}
-
 @Composable
 private fun generateBarTitle(song: Song?): String =
     stringResource(id = R.string.app_name) + (song?.title?.let {
         "(${song.artist.name} - ${song.title})"
     } ?: "" )
+
+sealed class MainContentTopAppBarEvent {
+    data object OnLeftDrawerIconClick: MainContentTopAppBarEvent()
+    data object OnPlaylistIconClick: MainContentTopAppBarEvent()
+}
+
+

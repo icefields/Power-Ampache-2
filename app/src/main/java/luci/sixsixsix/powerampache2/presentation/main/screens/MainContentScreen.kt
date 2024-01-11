@@ -1,38 +1,50 @@
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
-import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.artists.ArtistsScreen
@@ -59,7 +71,7 @@ import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
 @Destination(start = true)
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
-fun MainContent(
+fun MainContentScreen(
     navigator: DestinationsNavigator,
     mainViewModel: MainViewModel,
     authViewModel: AuthViewModel,
@@ -74,6 +86,16 @@ fun MainContent(
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var currentScreen: String by rememberSaveable { mutableStateOf(MainContentMenuItem.Home.id) }
+    val isSearchActive = remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    if (isSearchActive.value) {
+        MainSearchBar(
+            modifier = Modifier.focusRequester(focusRequester),
+            viewModel = mainViewModel,
+            isActive = isSearchActive
+        )
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -95,11 +117,12 @@ fun MainContent(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 MainContentTopAppBar(
-                    pagerState = pagerState,
+                    searchVisibility = isSearchActive,
                     scrollBehavior = scrollBehavior,
                     viewModel = mainViewModel
                 ) { event ->
                     when(event) {
+                        // OPEN-CLOSE drawer
                         MainContentTopAppBarEvent.OnLeftDrawerIconClick -> scope.launch {
                             drawerState.apply {
                                 if (isClosed) open() else close()
@@ -107,30 +130,70 @@ fun MainContent(
                         }
                         MainContentTopAppBarEvent.OnPlaylistIconClick ->
                             navigator.navigate(QueueScreenDestination)
+                        else -> {}
                     }
                 }
             }
         ) {
-            Surface(modifier = Modifier.padding(
-                top = it.calculateTopPadding(),
-                bottom = it.calculateBottomPadding()
-            )) {
-                when (MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
-                    is MainContentMenuItem.Home -> HomeScreen(
-                        navigator = navigator,
-                        viewModel = homeScreenViewModel
-                    )
-                    is MainContentMenuItem.Library -> TabbedLibraryView(
-                        navigator = navigator,
-                        pagerState = pagerState,
-                        mainViewModel = mainViewModel
-                    )
-                    is MainContentMenuItem.Settings -> HomeScreen(
-                        navigator = navigator,
-                        viewModel = homeScreenViewModel
-                    )
-                    MainContentMenuItem.Logout -> mainViewModel.onEvent(MainEvent.OnLogout)
-                }
+               Surface(
+                   modifier = Modifier.padding(
+                       top = it.calculateTopPadding(),
+                       bottom = it.calculateBottomPadding()
+                   )
+               ) {
+                   when (MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
+                       is MainContentMenuItem.Home -> HomeScreen(
+                           navigator = navigator,
+                           viewModel = homeScreenViewModel
+                       )
+                       is MainContentMenuItem.Library -> TabbedLibraryView(
+                           navigator = navigator,
+                           pagerState = pagerState,
+                           mainViewModel = mainViewModel
+                       )
+                       is MainContentMenuItem.Settings -> HomeScreen(
+                           navigator = navigator,
+                           viewModel = homeScreenViewModel
+                       )
+                       MainContentMenuItem.Logout -> mainViewModel.onEvent(MainEvent.OnLogout)
+                       else -> {}
+                   }
+               }
+           }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainSearchBar(
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel,
+    isActive: MutableState<Boolean>
+) {
+    val state = viewModel.state
+    SearchBar(
+        leadingIcon = {
+            Icon(imageVector = Icons.Default.Search, contentDescription = "search")
+        },
+        query = state.searchQuery,
+        onQueryChange = {
+            viewModel.onEvent(MainEvent.OnSearchQueryChange(it))
+        },
+        placeholder = {
+            Text(text = stringResource(id = R.string.topBar_search_hint))
+        },
+        enabled = true,
+        onSearch = {
+            isActive.value = false
+            viewModel.onEvent(MainEvent.OnSearchQueryChange(it))
+        }, //the callback to be invoked when the input service triggers the ImeAction.Search action
+        active = isActive.value, //whether the user is searching or not
+        onActiveChange = { isActive.value = it }, //the callback to be invoked when this search bar's active state is changed
+    )
+    {
+        LazyColumn {
+            items(viewModel.state.queue) {
+                Text(text = it.title)
             }
         }
     }
@@ -159,6 +222,7 @@ fun TabbedLibraryView(
                 TabItem.Artists -> ArtistsScreen(navigator = navigator)
                 TabItem.Playlists -> PlaylistsScreen(navigator = navigator)
                 TabItem.Songs -> SongsListScreen(navigator = navigator, mainViewModel = mainViewModel)
+                else -> {}
             }
         }
     }
