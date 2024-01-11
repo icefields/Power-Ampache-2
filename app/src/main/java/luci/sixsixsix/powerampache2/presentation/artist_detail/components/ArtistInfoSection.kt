@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,12 +45,9 @@ enum class ArtistInfoViewEvents {
 fun ArtistInfoSection(
     modifier: Modifier,
     artist: Artist,
+    summaryOpen: MutableState<Boolean>,
     eventListener: (albumInfoViewEvents: ArtistInfoViewEvents) -> Unit
 ) {
-    var summaryOpen by remember {
-        mutableStateOf(false)
-    }
-
     Column(modifier = modifier) {
         MusicAttributeChips(
             attributes = artist.genre,
@@ -77,13 +75,14 @@ fun ArtistInfoSection(
             Text( // name
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .clickable {
-                          summaryOpen = !summaryOpen
-                },
+                        summaryOpen.value = !summaryOpen.value
+                    },
                 text = artist.summary,
                 fontWeight = FontWeight.Normal,
                 fontSize = 15.sp,
-                maxLines = if (summaryOpen) { 50 } else { 5 },
+                maxLines = if (summaryOpen.value) { 150 } else { 5 },
                 lineHeight = 17.sp
             )
         }
@@ -99,6 +98,7 @@ fun ArtistInfoSectionPreview() {
     ArtistInfoSection(
         Modifier,
         Artist.mockArtist(),
-        eventListener = {}
+        eventListener = {},
+        summaryOpen = remember { mutableStateOf(true) }
     )
 }

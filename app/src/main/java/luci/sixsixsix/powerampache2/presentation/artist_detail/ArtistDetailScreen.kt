@@ -65,8 +65,7 @@ fun ArtistDetailScreen(
     val state = viewModel.state
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    var infoVisibility by remember { mutableStateOf(true) }
-
+    val summaryOpen = remember { mutableStateOf(false) }
     val cardsPerRow = if (state.albums.size < 2) { 1 } else { GRID_ITEMS_ROW }
     val albumCardSize = (LocalConfiguration.current.screenWidthDp / cardsPerRow).dp
 
@@ -78,7 +77,7 @@ fun ArtistDetailScreen(
             model = state.artist.artUrl,
             contentScale = ContentScale.Crop,
 //            placeholder = painterResource(id = R.drawable.placeholder_album),
-//            error = painterResource(id = R.drawable.ic_image),
+            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name
         )
         AsyncImage(
@@ -88,17 +87,15 @@ fun ArtistDetailScreen(
             model = state.artist.artUrl,
             contentScale = ContentScale.FillWidth,
 //            placeholder = painterResource(id = R.drawable.placeholder_album),
-//            error = painterResource(id = R.drawable.ic_playlist),
+            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name,
         )
         // full screen view to add a transparent black layer on top
         // of the images for readability
-        Box(
-            modifier = Modifier
+        Box(modifier = Modifier
                 .fillMaxSize()
                 .alpha(0.4f)
-                .background(brush = screenBackgroundGradient)
-        )
+                .background(brush = screenBackgroundGradient))
 
         if (state.isLoading) {
             LoadingScreen()
@@ -113,7 +110,7 @@ fun ArtistDetailScreen(
                     artist = state.artist,
                     isLoading = state.isLoading,
                     scrollBehavior = scrollBehavior
-                ) { infoVisibility = !infoVisibility }
+                ) { summaryOpen.value = !summaryOpen.value }
             }
         ) {
             Surface(
@@ -127,17 +124,10 @@ fun ArtistDetailScreen(
                     ArtistInfoSection(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(
-                                max = if (infoVisibility) {
-                                    666.dp // any big number
-                                } else {
-                                    0.dp
-                                }
-                            )
-                            .padding(
-                                dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
-                            ),
+                            .heightIn(max = 666.dp) // any big number
+                            .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         artist = state.artist,
+                        summaryOpen = summaryOpen,
                         eventListener = { event ->
                             when(event) {
                                 ArtistInfoViewEvents.SHARE_ARTIST -> TODO()

@@ -1,5 +1,9 @@
 package luci.sixsixsix.powerampache2.presentation.song_detail.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +23,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,16 +35,20 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.models.totalTime
+import luci.sixsixsix.powerampache2.presentation.LikeButton
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.InfoDialog
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SongDetailContent(
     // navigator: DestinationsNavigator,
@@ -48,8 +58,9 @@ fun SongDetailContent(
 ) {
     val state = mainViewModel.state
     val scope = rememberCoroutineScope()
-    var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
+    val buttonsTint = MaterialTheme.colorScheme.secondary
 
+    var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
     if (playlistsDialogOpen.isOpen) {
         playlistsDialogOpen.song?.let {
             AddToPlaylistOrQueueDialog(it,
@@ -59,6 +70,16 @@ fun SongDetailContent(
                 mainViewModel = mainViewModel
             )
         }
+    }
+
+    var infoDialogOpen by remember { mutableStateOf(false) }
+    if (infoDialogOpen) {
+            InfoDialog(
+                info = mainViewModel.state.song?.toDebugString() ?: ERROR_STRING,
+                onDismissRequest = {
+                    infoDialogOpen = false
+                }
+            )
     }
 
     Column(
@@ -78,27 +99,43 @@ fun SongDetailContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = state.song?.title ?: "",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 24.sp,
-            //color = MaterialTheme.colorScheme.primary,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(2.dp))
+        Box() {
+            Column {
+                Text(
+                    text = state.song?.title ?: "",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 22.sp,
+                    //color = MaterialTheme.colorScheme.primary,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .basicMarquee()
+                )
+                Spacer(modifier = Modifier.height(2.dp))
 
-        Text(
-            text = state.song?.artist?.name ?: "",
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.secondary,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-            modifier = Modifier.fillMaxWidth()
-        )
+                Text(
+                    text = state.song?.artist?.name ?: "",
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            LikeButton(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                isLikeLoading = mainViewModel.state.isLikeLoading,
+                isFavourite = mainViewModel.state.song?.flag == 1,
+                iconTint = buttonsTint,
+                background = Color.Transparent
+            ) {
+                mainViewModel.onEvent(MainEvent.FavouriteSong)
+            }
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Divider(Modifier.padding(vertical = 0.dp))
@@ -106,7 +143,7 @@ fun SongDetailContent(
             SongDetailButtonRow(
                 modifier = Modifier.fillMaxWidth(),
                 song = song,
-                mainViewModel.state.isLikeLoading
+                tint = buttonsTint
             ) { event ->
                 when(event) {
                     SongDetailButtonEvents.SHARE_SONG ->
@@ -129,9 +166,7 @@ fun SongDetailContent(
                                 mainScaffoldState.bottomSheetState.partialExpand()
                             }
                         }
-                    SongDetailButtonEvents.SHOW_INFO -> TODO()
-                    SongDetailButtonEvents.FAVOURITE_SONG ->
-                        mainViewModel.onEvent(MainEvent.FavouriteSong)
+                    SongDetailButtonEvents.SHOW_INFO -> infoDialogOpen = true
                 }
             }
         }
@@ -145,7 +180,9 @@ fun SongDetailContent(
             progressStr = mainViewModel.progressStr,
             isPlaying = mainViewModel.isPlaying,
             isBuffering = mainViewModel.isBuffering,
-            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
         ) { event ->
             mainViewModel.onEvent(event)
         }

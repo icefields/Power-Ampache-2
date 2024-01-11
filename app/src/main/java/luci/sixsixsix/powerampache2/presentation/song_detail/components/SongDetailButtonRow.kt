@@ -3,6 +3,8 @@ package luci.sixsixsix.powerampache2.presentation.song_detail.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -36,43 +38,28 @@ enum class SongDetailButtonEvents {
     ADD_SONG_TO_PLAYLIST_OR_QUEUE,
     GO_TO_ALBUM,
     GO_TO_ARTIST,
-    SHOW_INFO,
-    FAVOURITE_SONG
+    SHOW_INFO
 }
 
 @Composable
 fun SongDetailButtonRow(
     modifier: Modifier = Modifier,
-    song : Song,
-    isLikeLoading: Boolean,
+    tint: Color = MaterialTheme.colorScheme.secondary,
+    song: Song,
     eventListener: (albumInfoViewEvents: SongDetailButtonEvents) -> Unit
 ) {
     val fontSize = 11.sp
-    val tint = MaterialTheme.colorScheme.secondary
     LazyRow(
         modifier = modifier
-        .padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding)).padding(bottom = 8.dp),
+            .padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding))
+            .padding(bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         items(7) {
             when(it) {
                 // TODO do not hardcode array of ui elements
-                0 -> Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    LikeButton(
-                        isLikeLoading = isLikeLoading,
-                        isFavourite = song.flag == 1,
-                        iconTint = tint,
-                        background = Color.Transparent
-                    ) {
-                        eventListener(SongDetailButtonEvents.FAVOURITE_SONG)
-                    }
-
-                    Text(text = "Favourite", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
-                }
+                0 -> Spacer(modifier = Modifier.height(1.dp))
 
                 1 -> Column(
                     verticalArrangement = Arrangement.Center,
