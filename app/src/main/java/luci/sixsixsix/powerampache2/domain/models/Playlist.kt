@@ -35,4 +35,4 @@ class FrequentPlaylist: Playlist(id = "", name = "Frequently Played Songs")
 class HighestPlaylist: Playlist(id = "", name = "Highest Rated Songs")
 
 @Parcelize
-class FlaggedPlaylist: Playlist(id = "", name = "Flagged Songs")
+class FlaggedPlaylist: Playlist(id = "", name = "Favourite Songs")

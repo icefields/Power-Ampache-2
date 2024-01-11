@@ -24,7 +24,7 @@
     <string name="loginScreen_remote_server">Remote Debug Server</string>
     <string name="loginScreen_dogmazic_server">Dogmazic</string>
     <string name="home_section_title_recent">Recent</string>
-    <string name="home_section_title_flagged">Flagged</string>
+    <string name="home_section_title_flagged">Favourite</string>
     <string name="home_section_title_frequent">Frequent</string>
     <string name="home_section_title_highest">Highest</string>
     <string name="home_section_title_newest">Newest</string>

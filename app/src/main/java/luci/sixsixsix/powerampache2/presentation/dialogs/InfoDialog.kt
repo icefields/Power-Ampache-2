@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.dialogs
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
@@ -21,7 +22,9 @@ fun InfoDialog(
     info: String,
     onDismissRequest: () -> Unit
 ) {
-    Dialog(onDismissRequest = { onDismissRequest() }) {
+    Dialog(
+        onDismissRequest = { onDismissRequest() }
+    ) {
         Card(
             modifier = Modifier
                 .padding(16.dp),
@@ -30,12 +33,15 @@ fun InfoDialog(
             Text(
                 text = info,
                 modifier = Modifier
-                    .wrapContentSize(Alignment.Center)
-                    .padding(vertical = textPaddingVertical)
-                    .verticalScroll(rememberScrollState()),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp
+                    .wrapContentSize(Alignment.CenterStart)
+                    .padding(textPaddingVertical)
+                    .verticalScroll(rememberScrollState())
+                    .clickable {
+                        onDismissRequest()
+                    },
+                textAlign = TextAlign.Start,
+                fontWeight = FontWeight.Normal,
+                fontSize = 15.sp
             )
         }
     }
