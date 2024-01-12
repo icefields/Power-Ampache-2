@@ -13,11 +13,13 @@ import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
+import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
+import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -34,7 +36,6 @@ import javax.inject.Singleton
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
-    private val playlistManager: MusicPlaylistManager,
     private val errorHandler: ErrorHandler
 ): SongsRepository {
     private val dao = db.dao
@@ -50,35 +51,38 @@ class SongsRepositoryImpl @Inject constructor(
         fetchRemote: Boolean,
         query: String,
         offset: Int
-    ): Flow<Resource<List<Song>>> = flow<Resource<List<Song>>> {
+    ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
         L( "getSongs - repo getSongs")
 
-        // TODO home page is not loading cached data at the beginning
-        //      to avoid invalid or outdated data
+        // TODO songs view is not loading cached data at the beginning
+        //      to avoid weird behaviour due to the mix of random songs from api
+        //      and the overall .shuffled() called when emitting at the end
         // db
         // the offset is meant to be use to fetch more data from the web,
         // return cache only if the offset is zero
-        if (offset == 0) {
-            val localSongs = dao.searchSong(query)
-            L("getSongs - songs from cache ${localSongs.size}")
-            val isDbEmpty = localSongs.isEmpty() && query.isEmpty()
-            if (!isDbEmpty) {
-                emit(Resource.Success(data = localSongs.map { it.toSong() }))
-            }
-            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
-            if (shouldLoadCacheOnly) {
-                emit(Resource.Loading(false))
-                return@flow
-            }
-        }
+//        if (offset == 0) {
+//            val localSongs = dao.searchSong(query)
+//            L("getSongs - songs from cache ${localSongs.size}")
+//            val isDbEmpty = localSongs.isEmpty() && query.isEmpty()
+//            if (!isDbEmpty) {
+//                emit(Resource.Success(data = localSongs.map { it.toSong() }))
+//            }
+//            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+//            if (shouldLoadCacheOnly) {
+//                emit(Resource.Loading(false))
+//                return@flow
+//            }
+//        }
 
         // network TODO WHAT IS THIS!!?? FIX !!!
         val auth = getSession()!!//authorize2(false)
         val hashSet = LinkedHashSet<Song>()
         val songs = if (query.isNullOrBlank()) {
+            // not a search
             try {
-                api.getSongsRandom(
+                api.getSongsStats(
+                    filter = MainNetwork.StatFilter.random,
                     authKey = auth.auth,
                     username = getCredentials()?.username
                 ).songs?.let { dto ->
@@ -90,83 +94,12 @@ class SongsRepositoryImpl @Inject constructor(
                 }
             } catch (e: Exception) {
             }
-
-//            try {
-//                api.getSongsNewest(
-//                    authKey = auth.auth,
-//                    username = getCredentials()?.username
-//                ).songs?.let { dto ->
-//                    val newest = dto.map { it.toSong() }
-//                    hashSet.addAll(newest)
-//                    if (newest.isNotEmpty()) {
-//                        emit(Resource.Success(data = hashSet.toList()))
-//                    }
-//                }
-//            } catch (e: Exception) {
-//            }
-//
-//            try {
-//                api.getSongsRecent(
-//                    authKey = auth.auth,
-//                    username = getCredentials()?.username
-//                ).songs?.let { dto ->
-//                    val recent = dto.map { it.toSong() }
-//                    hashSet.addAll(recent)
-//                    if (recent.isNotEmpty()) {
-//                        emit(Resource.Success(data = hashSet.toList()))
-//                    }
-//                }
-//            } catch (e: Exception) {
-//            }
-//
-//            try {
-//                api.getSongsHighest(
-//                    authKey = auth.auth,
-//                    username = getCredentials()?.username
-//                ).songs?.let { dto ->
-//                    val highest = dto.map { it.toSong() }
-//                    hashSet.addAll(highest)
-//                    if (highest.isNotEmpty()) {
-//                        emit(Resource.Success(data = hashSet.toList()))
-//                    }
-//                }
-//            } catch (e: Exception) {
-//            }
-//
-//            try {
-//                api.getSongsFrequent(
-//                    authKey = auth.auth,
-//                    username = getCredentials()?.username
-//                ).songs?.let { dto ->
-//                    val frequent = dto.map { it.toSong() }
-//                    hashSet.addAll(frequent)
-//                    if (frequent.isNotEmpty()) {
-//                        emit(Resource.Success(data = hashSet.toList()))
-//                    }
-//                }
-//            } catch (e: Exception) {
-//            }
-//
-//            try {
-//                api.getSongsFlagged(
-//                    authKey = auth.auth,
-//                    username = getCredentials()?.username
-//                ).songs?.let { flaggedDto ->
-//                    val flagged = flaggedDto.map { it.toSong() }
-//                    hashSet.addAll(flagged)
-//                    if (flagged.isNotEmpty()) {
-//                        emit(Resource.Success(data = hashSet.toList()))
-//                    }
-//                }
-//            } catch (e: Exception) {
-//            }
-
             hashSet.toList()
         } else {
+            // if this is a search
             val response = api.getSongs(auth.auth, filter = query, offset = offset)
             response.error?.let { throw(MusicException(it.toError())) }
-            /*val songs = */response.songs!!.map { it.toSong() } // will throw exception if songs null
-            //emit(Resource.Success(songs)) // will throw exception if songs null
+            response.songs!!.map { it.toSong() } // will throw exception if songs null
         }
 
         L("getsongs - songs from web ${songs.size}")
@@ -177,13 +110,23 @@ class SongsRepositoryImpl @Inject constructor(
             dao.clearSongs()
         }
         dao.insertSongs(songs.map { it.toSongEntity() })
+
         // stick to the single source of truth pattern despite performance deterioration
         val songsDb = dao.searchSong(query).map { it.toSong() }
         L( "getSongs songs from db after web ${songsDb.size}")
-        val hashset = LinkedHashSet<Song>()
-        hashset.addAll(songs)
-        hashset.addAll(songsDb) // add all the cached history at the end of the list
-        emit(Resource.Success(data = hashset.toList(), networkData = songs))
+
+        val returnSongList =  if (query.isNullOrBlank()) {
+            // if not a search append the songsDb to the network result
+            ArrayList(songsDb).removeAll(songs.toSet())
+            ArrayList(songs).apply {
+                addAll(songsDb.shuffled())
+            }
+        } else {
+            // if it's a search return what the db found
+            songsDb
+        }
+
+        emit(Resource.Success(data = returnSongList, networkData = songs))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongs()", e, this) }
 
@@ -249,106 +192,30 @@ class SongsRepositoryImpl @Inject constructor(
         cacheSongs(songs)
     }.catch { e -> errorHandler("getSongsFromPlaylist()", e, this) }
 
-    override suspend fun getRecentSongs(): Flow<Resource<List<Song>>> = flow {
+    private suspend fun getSongsStats(statFilter: MainNetwork.StatFilter): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
-        api.getSongsRecent(
+        api.getSongsStats(
             auth.auth,
-            username = getCredentials()?.username
+            username = getCredentials()?.username,
+            filter = statFilter
         ).songs?.map { it.toSong() }?.let { songs ->
             emit(Resource.Success(data = songs, networkData = songs))
 
-            // cache songs after emitting success
-            // Songs are cached regardless for quick access from SongsScreen and Albums
+            // cache songs after emitting success because the result of this is not used right now
             cacheSongs(songs)
         }?:run {
-            throw Exception("error connecting or getting data")
+            throw Exception("error connecting or getting data in getSongsStats")
         }
         emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getSongsStats()", e, this) }
 
-
-    }.catch { e -> errorHandler("getRecentSongs()", e, this) }
-
-    override suspend fun getNewestSongs(): Flow<Resource<List<Song>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getSongsNewest(
-            auth.auth,
-            username = getCredentials()?.username
-        ).songs?.map { it.toSong() }?.let { songs ->
-            emit(Resource.Success(data = songs, networkData = songs))
-
-            // cache songs after emitting success
-            // Songs are cached regardless for quick access from SongsScreen and Albums
-            cacheSongs(songs)
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getNewestSongs()", e, this) }
-
-    override suspend fun getHighestSongs(): Flow<Resource<List<Song>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getSongsHighest(auth.auth, username = getCredentials()?.username
-        ).songs?.map { it.toSong() }?.let {songs ->
-            emit(Resource.Success(data = songs, networkData = songs))
-
-            // cache songs after emitting success
-            // Songs are cached regardless for quick access from SongsScreen and Albums
-            cacheSongs(songs)
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getHighestSongs()", e, this) }
-
-    override suspend fun getFrequentSongs(): Flow<Resource<List<Song>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getSongsFrequent(auth.auth, username = getCredentials()?.username
-        ).songs?.map { it.toSong() }?.let {songs ->
-            emit(Resource.Success(data = songs, networkData = songs))
-
-            // cache songs after emitting success
-            // Songs are cached regardless for quick access from SongsScreen and Albums
-            cacheSongs(songs)
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getFrequentSongs()", e, this) }
-
-    override suspend fun getFlaggedSongs(): Flow<Resource<List<Song>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getSongsFlagged(auth.auth).songs?.map { it.toSong() }?.let { songs ->
-            emit(Resource.Success(data = songs, networkData = songs))
-
-            // cache songs after emitting success
-            // Songs are cached regardless for quick access from SongsScreen and Albums
-            cacheSongs(songs)
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getFlaggedSongs()", e, this) }
-
-    override suspend fun getRandomSongs(): Flow<Resource<List<Song>>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getSongsRandom(auth.auth, username = getCredentials()?.username
-        ).songs?.map { it.toSong() }?.let {songs ->
-            emit(Resource.Success(data = songs, networkData = songs))
-
-            // cache songs after emitting success
-            // Songs are cached regardless for quick access from SongsScreen and Albums
-            cacheSongs(songs)
-        }?:run {
-            throw Exception("error connecting or getting data")
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getRandomSongs()", e, this) }
+    override suspend fun getRecentSongs() = getSongsStats(MainNetwork.StatFilter.recent)
+    override suspend fun getNewestSongs() = getSongsStats(MainNetwork.StatFilter.newest)
+    override suspend fun getHighestSongs() = getSongsStats(MainNetwork.StatFilter.highest)
+    override suspend fun getFrequentSongs() = getSongsStats(MainNetwork.StatFilter.frequent)
+    override suspend fun getFlaggedSongs() = getSongsStats(MainNetwork.StatFilter.flagged)
+    override suspend fun getRandomSongs() = getSongsStats(MainNetwork.StatFilter.random)
 
 
     /**

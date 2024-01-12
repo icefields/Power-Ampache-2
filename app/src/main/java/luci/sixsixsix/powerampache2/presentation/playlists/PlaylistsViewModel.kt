@@ -40,8 +40,12 @@ class PlaylistsViewModel @Inject constructor(
             }
 
             is PlaylistEvent.OnSearchQueryChange -> {
-                state = state.copy(searchQuery = event.query)
-                getPlaylists()
+                if (event.query.isBlank() && state.searchQuery.isBlank()) {
+
+                } else {
+                    state = state.copy(searchQuery = event.query)
+                    getPlaylists()
+                }
             }
 
             is PlaylistEvent.OnBottomListReached -> {

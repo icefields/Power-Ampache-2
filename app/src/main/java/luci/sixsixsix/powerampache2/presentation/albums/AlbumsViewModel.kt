@@ -40,8 +40,12 @@ class AlbumsViewModel @Inject constructor(
             }
 
             is AlbumsEvent.OnSearchQueryChange -> {
-                state = state.copy(searchQuery = event.query)
-                getAlbums()
+                if (event.query.isBlank() && state.searchQuery.isBlank()) {
+
+                } else {
+                    state = state.copy(searchQuery = event.query)
+                    getAlbums()
+                }
             }
 
             is AlbumsEvent.OnBottomListReached -> {

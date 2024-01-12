@@ -29,6 +29,7 @@ const val GRID_ITEMS_ROW = 3
 @Composable
 fun ArtistsScreen(
     navigator: DestinationsNavigator,
+    gridItemsRow: Int = GRID_ITEMS_ROW,
     viewModel: ArtistsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -47,7 +48,7 @@ fun ArtistsScreen(
             onRefresh = { viewModel.onEvent(ArtistEvent.Refresh) }
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(GRID_ITEMS_ROW),
+                columns = GridCells.Fixed(gridItemsRow),
                 modifier = Modifier.fillMaxSize()) {
                 items(state.artists.size) { i ->
                     val artist = state.artists[i]

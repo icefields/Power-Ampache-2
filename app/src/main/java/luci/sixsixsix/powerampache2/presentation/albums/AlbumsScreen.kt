@@ -33,17 +33,20 @@ import luci.sixsixsix.powerampache2.presentation.albums.components.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 
 const val GRID_ITEMS_ROW = 2
+const val GRID_ITEMS_ROW_MIN = 2
 
 @Destination
 @Composable
 fun AlbumsScreen(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
+    gridItemsRow: Int = GRID_ITEMS_ROW,
+    minGridItemsRow: Int = GRID_ITEMS_ROW_MIN,
     viewModel: AlbumsViewModel = hiltViewModel()
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
-    val cardsPerRow = if (state.albums.size < 5) { 1 } else { GRID_ITEMS_ROW }
+    val cardsPerRow = if (state.albums.size < 5) { minGridItemsRow } else { gridItemsRow }
     val albumCardSize = (LocalConfiguration.current.screenWidthDp / cardsPerRow).dp
 
     if (state.isLoading && state.albums.isEmpty()) {

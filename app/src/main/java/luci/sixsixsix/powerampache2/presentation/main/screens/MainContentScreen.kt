@@ -34,10 +34,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -64,7 +66,9 @@ import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTab
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.TabItem
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.drawerItems
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigator
 import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
 
 @Composable
@@ -92,8 +96,9 @@ fun MainContentScreen(
     if (isSearchActive.value) {
         MainSearchBar(
             modifier = Modifier.focusRequester(focusRequester),
-            viewModel = mainViewModel,
-            isActive = isSearchActive
+            mainViewModel = mainViewModel,
+            isActive = isSearchActive,
+            navigator = navigator
         )
     }
 
@@ -163,39 +168,40 @@ fun MainContentScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MainSearchBar(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel,
-    isActive: MutableState<Boolean>
+    mainViewModel: MainViewModel,
+    isActive: MutableState<Boolean>,
+    navigator: DestinationsNavigator
 ) {
-    val state = viewModel.state
+    val state = mainViewModel.state
+    val controller = LocalSoftwareKeyboardController.current
+
     SearchBar(
         leadingIcon = {
             Icon(imageVector = Icons.Default.Search, contentDescription = "search")
         },
         query = state.searchQuery,
         onQueryChange = {
-            viewModel.onEvent(MainEvent.OnSearchQueryChange(it))
+            mainViewModel.onEvent(MainEvent.OnSearchQueryChange(it))
         },
         placeholder = {
             Text(text = stringResource(id = R.string.topBar_search_hint))
         },
         enabled = true,
         onSearch = {
-            isActive.value = false
-            viewModel.onEvent(MainEvent.OnSearchQueryChange(it))
+            isActive.value = true
+            controller?.hide()
         }, //the callback to be invoked when the input service triggers the ImeAction.Search action
         active = isActive.value, //whether the user is searching or not
-        onActiveChange = { isActive.value = it }, //the callback to be invoked when this search bar's active state is changed
-    )
-    {
-        LazyColumn {
-            items(viewModel.state.queue) {
-                Text(text = it.title)
-            }
-        }
+        onActiveChange = {
+            isActive.value = it
+            if (!it) { mainViewModel.onEvent(MainEvent.OnSearchQueryChange("")) }
+        }, //the callback to be invoked when this search bar's active state is changed
+    ) {
+        SearchResultsScreen(navigator = navigator, mainViewModel = mainViewModel)
     }
 }
 

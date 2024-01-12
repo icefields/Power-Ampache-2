@@ -24,6 +24,15 @@ android {
     namespace = "luci.sixsixsix.powerampache2"
     compileSdk = 34
 
+    val properties = Properties()
+    properties.load(project.rootProject.file("secrets.properties").inputStream())
+    val apikey = properties.getProperty("API_KEY")
+    val ampacheUser = properties.getProperty("AMPACHE_USER")
+    val ampachePass = properties.getProperty("AMPACHE_PASSWORD")
+    val ampacheUrl = properties.getProperty("AMPACHE_URL")
+    val dogmazicPass = properties.getProperty("DOGMAZIC_PASSWORD")
+    val dogmazicUser = properties.getProperty("DOGMAZIC_USER")
+
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
@@ -40,7 +49,12 @@ android {
     buildTypes {
         debug {
             buildConfigField("boolean", "MRLOG_ON", "true")
-            //buildConfigField("String", "AMPACHE_USER", AMPACHE_USER)
+            buildConfigField("String", "AMPACHE_USER", ampacheUser)
+            buildConfigField("String", "AMPACHE_PASSWORD", ampachePass)
+            buildConfigField("String", "AMPACHE_URL", ampacheUrl)
+            buildConfigField("String", "API_KEY", apikey)
+            buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
+            buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
         }
         release {
             buildConfigField("boolean", "MRLOG_ON", "false")

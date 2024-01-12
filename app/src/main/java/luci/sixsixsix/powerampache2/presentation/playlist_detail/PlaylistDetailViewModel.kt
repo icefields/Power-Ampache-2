@@ -27,7 +27,6 @@ class PlaylistDetailViewModel @Inject constructor(
     private val songsRepository: SongsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
-
     var state by mutableStateOf(PlaylistDetailState())
 
     init {
@@ -35,21 +34,6 @@ class PlaylistDetailViewModel @Inject constructor(
             onEvent(PlaylistDetailEvent.Fetch(playlist))
         }
     }
-
-    /*
-     is AlbumDetailEvent.OnSongSelected -> {
-                // play the selected song and add the rest of the album to the queue
-                playlistManager.updateTopSong(event.song)
-            }
-
-            is AlbumDetailEvent.OnAddAlbumToQueue -> playlistManager.addToCurrentQueue(state.songs)
-
-            is AlbumDetailEvent.OnPlayAlbum -> {
-                L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
-                playlistManager.updateCurrentSong(state.songs[0])
-                playlistManager.addToCurrentQueueTop(state.songs)
-            }
-     */
 
     fun onEvent(event: PlaylistDetailEvent) {
         when(event) {

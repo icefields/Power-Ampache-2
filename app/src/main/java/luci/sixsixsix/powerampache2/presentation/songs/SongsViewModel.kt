@@ -22,6 +22,7 @@ class SongsViewModel @Inject constructor(
     var state by mutableStateOf(SongsState())
 
     init {
+        L("SongsListScreen")
         getSongs()
         viewModelScope.launch {
             playlistManager.currentSearchQuery.collect { query ->
@@ -36,13 +37,19 @@ class SongsViewModel @Inject constructor(
     fun onEvent(event: SongsEvent) {
         when(event) {
             is SongsEvent.Refresh -> {
+                L("Refresh")
                 getSongs(fetchRemote = true, refresh = true)
             }
             is SongsEvent.OnSearchQueryChange -> {
                 L("SongsEvent.OnSearchQueryChange")
                 // force refresh when deleting the search query
-                state = state.copy(searchQuery = event.query)
-                getSongs(refresh = event.query.isNullOrEmpty())
+                // start a search only if the new query is different from the previous
+                if (event.query.isBlank() && state.searchQuery.isBlank()) {
+
+                } else {
+                    state = state.copy(searchQuery = event.query)
+                    getSongs(refresh = event.query.isNullOrEmpty())
+                }
             }
 
             is SongsEvent.OnSongSelected -> {
@@ -64,21 +71,7 @@ class SongsViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                val oldSongs = if(!refresh) {
-                                    state.songs
-                                } else {
-                                    L("viewmodel.getSongs REFRESH")
-                                    listOf()
-                                }
-
-                                if (query.isBlank()) {
-                                    val hashSet = LinkedHashSet<Song>(oldSongs).apply {
-                                        addAll(songs)
-                                    }
-                                    state = state.copy(songs = hashSet.toList())
-                                } else {
-                                    state = state.copy(songs = ArrayList(songs))
-                                }
+                                state = state.copy(songs = songs)
                                 L("viewmodel.getSongs SONGS size at the end", state.songs.size)
                             }
                         }

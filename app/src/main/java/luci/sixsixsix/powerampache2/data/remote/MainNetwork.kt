@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.data.remote
 
 import kotlinx.coroutines.flow.Flow
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.common.Resource
@@ -16,8 +17,12 @@ import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Song
+import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
+import retrofit2.http.Streaming
+import retrofit2.http.Url
 
 /**
  * Main network interface which will fetch a new welcome title for us
@@ -80,7 +85,7 @@ interface MainNetwork {
         @Query("filter") filter: String = "",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
-        @Query("hide_search") hideSearch: Int = 1, // 0, 1 (if true do not include searches/smartlists in the result)
+        @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
         @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true if true ignore 'api_hide_dupe_searches' setting)
     ): PlaylistsResponse // TODO remove default values
 
@@ -120,66 +125,14 @@ interface MainNetwork {
         @Query("filter") albumId: String = "",
         @Query("offset") offset: Int = 0, ): SongsResponse
 
-// ------------------------- STATS CALLS -----------------------------------
-
     @GET("json.server.php?action=stats")
-    suspend fun getSongsFlagged( // flagged = favourites
+    suspend fun getSongsStats(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
-        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "flagged", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): SongsResponse
-
-    @GET("json.server.php?action=stats")
-    suspend fun getSongsNewest( // flagged = favourites
-        @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "newest", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): SongsResponse
-
-    @GET("json.server.php?action=stats")
-    suspend fun getSongsHighest( // flagged = favourites
-        @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "highest", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): SongsResponse
-
-    @GET("json.server.php?action=stats")
-    suspend fun getSongsFrequent( // flagged = favourites
-        @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "frequent", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): SongsResponse
-
-    @GET("json.server.php?action=stats")
-    suspend fun getSongsRecent( // flagged = favourites
-        @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "recent", // newest, highest, frequent, recent, forgotten, flagged, random
-        @Query("offset") offset: Int = 0, ): SongsResponse
-
-    @GET("json.server.php?action=stats")
-    suspend fun getSongsRandom( // flagged = favourites
-        @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
-        //@Query("user_id") userId: Int,
-        @Query("username") username: String? = null,
-        @Query("type") _type: String = "song", // song, album, artist, video, playlist, podcast, podcast_episode
-        @Query("filter") _filter: String = "random", // newest, highest, frequent, recent, forgotten, flagged, random
+        @Query("type") _type: Type = Type.song,
+        @Query("filter") filter: StatFilter,
         @Query("offset") offset: Int = 0, ): SongsResponse
 
     @GET("json.server.php?action=stats")
@@ -188,7 +141,7 @@ interface MainNetwork {
         @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
-        @Query("type") type: Type = Type.album,
+        @Query("type") _type: Type = Type.album,
         @Query("filter") filter: StatFilter,
         @Query("offset") offset: Int = 0, ): AlbumsResponse
 
@@ -199,8 +152,17 @@ interface MainNetwork {
         @Query("flag") flag: Int,
         @Query("type") type: Type): LikeResponse
 
+    @Streaming
+    @GET("json.server.php?action=download")
+    suspend fun downloadSong(
+        @Query("auth") authKey: String,
+        @Query("id") songId: String,
+        @Query("type") type: String = "song", // song, podcast_episode, search, playlist
+        @Query("format") format: String = "raw", // mp3, ogg, raw, etc (raw returns the original format)
+    ): Response<ResponseBody>
+
     companion object {
-        const val API_KEY = "0db9dcbb4a945e443547e3c082110abf"
+        const val API_KEY = BuildConfig.API_KEY
         const val BASE_URL = "http://localhost/"
     }
 

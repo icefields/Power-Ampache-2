@@ -1,18 +1,20 @@
 package luci.sixsixsix.powerampache2.data
 
-const val DEBUG_USER = "test-user"
-const val DEBUG_PASSWORD = "testtest"
+import luci.sixsixsix.powerampache2.BuildConfig
+
+const val DEBUG_USER = BuildConfig.AMPACHE_USER
+const val DEBUG_PASSWORD = BuildConfig.AMPACHE_PASSWORD
 const val DEBUG_LOCAL_DEMO_URL = "http://192.168.1.100/ampache/public/"
 
-const val DEBUG_REMOTE_USER = "test-user"
-const val DEBUG_REMOTE_PASSWORD = "testtest"
-const val DEBUG_REMOTE_DEMO_URL = "tari.ddns.net/"
+const val DEBUG_REMOTE_USER = BuildConfig.AMPACHE_USER
+const val DEBUG_REMOTE_PASSWORD = BuildConfig.AMPACHE_PASSWORD
+const val DEBUG_REMOTE_DEMO_URL = BuildConfig.AMPACHE_URL
 
 const val AMPACHE_DEMO_APIKEY = "demodemo"
 const val AMPACHE_DEMO_URL = "demo.ampache.dev"
 
-const val DOGMAZIC_USER = "ths6hh"
-const val DOGMAZIC_PASSWORD = "8z19xeid0f6b4"
+const val DOGMAZIC_USER = BuildConfig.DOGMAZIC_USER
+const val DOGMAZIC_PASSWORD = BuildConfig.DOGMAZIC_PASSWORD
 const val DOGMAZIC_URL = "play.dogmazic.net"
 
 sealed class Servers(

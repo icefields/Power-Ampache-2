@@ -83,15 +83,21 @@ class MusicRepositoryImpl @Inject constructor(
 
     private suspend fun getUser() {
         getCredentials()?.username?.let { username ->
-            setUser(
-                api.getUser(
-                    authKey = getSession()?.auth ?: "",
-                    username = username
-                ).toUser()
-            )
+            getSession()?.let { session ->
+                api.getUser(authKey = session.auth, username = username)
+                    .also { userDto ->
+                        userDto.id?.let {
+                            setUser(userDto.toUser())
+                        }
+                    }
+            }
         }
     }
 
+    /**
+     * updating the user in the database will trigger the user live data, observe that
+     * to get updates on the user
+     */
     private suspend fun setUser(user: User) = dao.updateUser(user.toUserEntity())
 
     private suspend fun setCredentials(se: CredentialsEntity) = dao.updateCredentials(se)

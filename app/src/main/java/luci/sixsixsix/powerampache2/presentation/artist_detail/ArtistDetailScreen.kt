@@ -77,7 +77,7 @@ fun ArtistDetailScreen(
             model = state.artist.artUrl,
             contentScale = ContentScale.Crop,
 //            placeholder = painterResource(id = R.drawable.placeholder_album),
-            error = painterResource(id = R.drawable.ic_image),
+//            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name
         )
         AsyncImage(
@@ -87,7 +87,7 @@ fun ArtistDetailScreen(
             model = state.artist.artUrl,
             contentScale = ContentScale.FillWidth,
 //            placeholder = painterResource(id = R.drawable.placeholder_album),
-            error = painterResource(id = R.drawable.ic_image),
+//            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name,
         )
         // full screen view to add a transparent black layer on top
@@ -148,25 +148,12 @@ fun ArtistDetailScreen(
                                 val album = state.albums[i]
                                 AlbumItem(
                                     album = album,
-//                                    albumItemEventListener = { event ->
-//                                        when(event) {
-//                                            SongItemEvent.PLAY_NEXT -> viewModel.onEvent(
-//                                                AlbumDetailEvent.OnAddSongToQueueNext(song))
-//                                            SongItemEvent.SHARE_SONG -> viewModel.onEvent(
-//                                                AlbumDetailEvent.OnShareSong(song))
-//                                            SongItemEvent.DOWNLOAD_SONG -> viewModel.onEvent(
-//                                                AlbumDetailEvent.OnDownloadSong(song))
-//                                            SongItemEvent.GO_TO_ALBUM -> navigator.navigate(AlbumDetailScreenDestination(album.id, album))
-//                                            SongItemEvent.GO_TO_ARTIST -> navigator.navigate(ArtistDetailScreenDestination(album.artist.id))
-//                                            SongItemEvent.ADD_SONG_TO_QUEUE -> viewModel.onEvent(
-//                                                AlbumDetailEvent.OnAddSongToQueue(song))
-//                                            SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
-//                                        }
-//                                    },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            navigator.navigate(AlbumDetailScreenDestination(album.id, album))
+                                            navigator.navigate(
+                                                AlbumDetailScreenDestination(album.id, album)
+                                            )
                                         }
                                         .padding(10.dp)
                                 )

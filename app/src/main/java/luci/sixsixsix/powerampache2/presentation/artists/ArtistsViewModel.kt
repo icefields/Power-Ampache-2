@@ -39,8 +39,12 @@ class ArtistsViewModel @Inject constructor(
                 getArtists(fetchRemote = true)
             }
             is ArtistEvent.OnSearchQueryChange -> {
-                state = state.copy(searchQuery = event.query)
-                getArtists()
+                if (event.query.isBlank() && state.searchQuery.isBlank()) {
+
+                } else {
+                    state = state.copy(searchQuery = event.query)
+                    getArtists()
+                }
             }
             is ArtistEvent.OnBottomListReached -> {
                 if (!state.isFetchingMore && !isEndOfDataReached) {
