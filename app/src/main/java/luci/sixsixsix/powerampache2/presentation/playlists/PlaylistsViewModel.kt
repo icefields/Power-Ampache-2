@@ -35,14 +35,10 @@ class PlaylistsViewModel @Inject constructor(
         // playlists can change or be edited, make sure to always listen to the latest version
         repository.playlistsLiveData.observeForever { playlists ->
             L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
-            updatePlaylistsState(playlists)
-        }
-    }
-
-    private fun updatePlaylistsState(playlists: List<Playlist>) {
-        if (state.searchQuery.isBlank() && state.playlists != playlists) {
-            L("viewmodel.getPlaylists playlists are different, update")
-            state = state.copy(playlists = playlists)
+            if (playlists.isNotEmpty() && state.searchQuery.isBlank() && state.playlists != playlists) {
+                L("viewmodel.getPlaylists playlists are different, update", playlists.size, state.playlists.size)
+                state = state.copy(playlists = playlists)
+            }
         }
     }
 
@@ -83,7 +79,7 @@ class PlaylistsViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { playlists ->
-                                updatePlaylistsState(playlists)
+                                state = state.copy(playlists = playlists)
                                 L("viewmodel.getPlaylists size", state.playlists.size)
                             }
                             isEndOfDataReached =

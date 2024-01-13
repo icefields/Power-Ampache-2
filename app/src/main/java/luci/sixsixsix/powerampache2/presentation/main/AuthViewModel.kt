@@ -45,7 +45,7 @@ class AuthViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            repository.userLiveData().observeForever {
+            repository.userLiveData.observeForever {
                 L(it)
                 it?.let { user ->
                     state = state.copy(user = user)

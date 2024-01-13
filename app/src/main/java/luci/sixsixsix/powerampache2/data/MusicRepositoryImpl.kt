@@ -1,13 +1,15 @@
 package luci.sixsixsix.powerampache2.data
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
@@ -53,6 +55,8 @@ class MusicRepositoryImpl @Inject constructor(
     private var serverInfo: ServerInfo? = null
     private val dao = db.dao
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
+    override val userLiveData: LiveData<User?>
+        get() = userLiveData()
 
     init {
         // Things to do when we get new or different session
@@ -60,13 +64,14 @@ class MusicRepositoryImpl @Inject constructor(
         sessionLiveData.observeForever { session ->
             session?.auth?.let {
                 GlobalScope.launch {
-                    getUser()
+                    getUserNetwork()
                 }
             }
         }
     }
 
-    override fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
+    private fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
+
 
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
 
@@ -81,7 +86,7 @@ class MusicRepositoryImpl @Inject constructor(
 
     private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
 
-    private suspend fun getUser() {
+    private suspend fun getUserNetwork() {
         getCredentials()?.username?.let { username ->
             getSession()?.let { session ->
                 api.getUser(authKey = session.auth, username = username)
@@ -91,6 +96,12 @@ class MusicRepositoryImpl @Inject constructor(
                         }
                     }
             }
+        }
+    }
+
+    override suspend fun getUser(): User? = withContext(Dispatchers.IO) {
+        dao.getUser()?.let {
+            it.toUser()
         }
     }
 

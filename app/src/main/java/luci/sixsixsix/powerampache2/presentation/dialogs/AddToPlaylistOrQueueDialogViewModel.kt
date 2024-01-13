@@ -25,6 +25,7 @@ import kotlin.math.abs
 @HiltViewModel
 class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
+    private val musicRepository: MusicRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(AddToPlaylistOrQueueDialogState())
@@ -33,18 +34,27 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     init {
         getPlaylists()
         // playlists can change or be edited, make sure to always listen to the latest version
-        playlistsRepository.playlistsLiveData.observeForever { playlists ->
-            L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
-            updatePlaylistsState(playlists)
+        playlistsRepository.playlistsLiveData.observeForever {
+            viewModelScope.launch {
+                L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
+                val playlists = filterPlaylists(it)
+                if (playlists.isNotEmpty() && state.playlists != playlists) {
+                    L("viewmodel.getPlaylists playlists are different, update")
+                    state = state.copy(playlists = playlists)
+                }
+            }
         }
     }
 
-    private fun updatePlaylistsState(playlists: List<Playlist>) {
-        if (state.playlists != playlists) {
-            L("viewmodel.getPlaylists playlists are different, update")
-            state = state.copy(playlists = playlists)
+    private suspend fun filterPlaylists(playlists: List<Playlist>) =
+        ArrayList<Playlist>().apply {
+            playlists.forEach { playlist: Playlist ->
+                L(musicRepository.getUser()?.username, playlist.owner)
+                if (playlist.owner == musicRepository.getUser()?.username) {
+                    add(playlist)
+                }
+            }
         }
-    }
 
     fun onEvent(event: AddToPlaylistOrQueueDialogEvent) {
         when (event) {
@@ -70,8 +80,12 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            result.data?.let { playlists ->
-                                updatePlaylistsState(playlists)
+                            result.data?.let {
+                                val playlists = filterPlaylists(it)
+                                if (state.playlists != playlists) {
+                                    L("viewmodel.getPlaylists playlists are different, update")
+                                    state = state.copy(playlists = playlists)
+                                }
                                 L("viewmodel.getPlaylists size", state.playlists.size)
                             }
                             isEndOfDataReached = (result.networkData?.isEmpty() == true && offset > 0)

@@ -87,7 +87,7 @@ class HomeScreenViewModel @Inject constructor(
             FlaggedPlaylist()
         )
         playlistList.addAll(playlists)
-        if (state.playlists != playlistList) {
+        if (playlists.isNotEmpty() && state.playlists != playlistList) {
             L("viewmodel.getPlaylists playlists are different, update")
             state = state.copy(playlists = playlistList)
         }

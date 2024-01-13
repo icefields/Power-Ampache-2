@@ -130,6 +130,8 @@ fun PlaylistDetailScreen(
                     .background(brush = albumBackgroundGradient),
                 color = Color.Transparent
             ) {
+                val isPlayingPlaylist = mainViewModel.isPlaying && state.songs.contains(mainViewModel.state.song)
+
                 Column {
                     PlaylistInfoSection(
                         modifier = Modifier
@@ -145,7 +147,7 @@ fun PlaylistDetailScreen(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
                         playlist = playlist,
-                        shuffleOn = mainViewModel.shuffleOn,
+                        isPlayingPlaylist = isPlayingPlaylist,
                         songs = viewModel.state.songs,
                         eventListener = { event ->
                             when(event) {

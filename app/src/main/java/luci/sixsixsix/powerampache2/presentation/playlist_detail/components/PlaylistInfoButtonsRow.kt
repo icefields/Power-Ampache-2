@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.ShuffleOn
@@ -28,7 +29,7 @@ import luci.sixsixsix.powerampache2.domain.models.Playlist
 fun PlaylistInfoButtonsRow(
     modifier: Modifier = Modifier,
     playlist: Playlist,
-    shuffleOn: Boolean,
+    isPlayingPlaylist: Boolean,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit) {
     Row(modifier = modifier
         .padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding)),
@@ -51,7 +52,7 @@ fun PlaylistInfoButtonsRow(
             }) {
             Icon(
                 modifier = Modifier.aspectRatio(1f/1f),
-                imageVector = Icons.Default.PlayCircle, // Pause
+                imageVector = if (!isPlayingPlaylist) Icons.Default.PlayCircle else Icons.Default.PauseCircle, // Pause
                 contentDescription = "Play"
             )
         }

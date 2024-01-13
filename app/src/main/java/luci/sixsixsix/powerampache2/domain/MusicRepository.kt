@@ -13,9 +13,10 @@ import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 interface MusicRepository {
 
     val sessionLiveData: LiveData<Session?>
-    fun userLiveData(): LiveData<User?>
+    val userLiveData: LiveData<User?>
     suspend fun ping(): Resource<Pair<ServerInfo, Session?>>
     suspend fun autoLogin(): Flow<Resource<Session>>
     suspend fun logout(): Flow<Resource<Boolean>>
     suspend fun authorize(username:String, password:String, serverUrl: String, authToken: String, force: Boolean = true): Flow<Resource<Session>>
+    suspend fun getUser(): User?
 }
