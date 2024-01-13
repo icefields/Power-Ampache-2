@@ -103,6 +103,10 @@ interface MusicDao {
     @Query("""SELECT * FROM playlistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by rating DESC, id DESC""")
     suspend fun searchPlaylists(query: String): List<PlaylistEntity>
 
+    @Query("""SELECT * FROM playlistentity order by rating DESC, id DESC""")
+    fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
+
+
     //@Query("""DELETE FROM playlistentity artistentity, songentity, albumentity""")
     suspend fun clearCachedData() {
         clearAlbums()

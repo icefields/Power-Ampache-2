@@ -46,7 +46,10 @@ import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumIn
 import luci.sixsixsix.powerampache2.presentation.album_detail.components.AlbumInfoViewEvents
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogEvent
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.NewPlaylistDialog
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.playlist_detail.PlaylistDetailEvent
@@ -71,6 +74,7 @@ fun AlbumDetailScreen(
     var infoVisibility by remember { mutableStateOf(true) }
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
 
+
     if (playlistsDialogOpen.isOpen) {
         playlistsDialogOpen.song?.let {
             AddToPlaylistOrQueueDialog(
@@ -78,7 +82,11 @@ fun AlbumDetailScreen(
                 onDismissRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 },
-                mainViewModel = mainViewModel
+                mainViewModel = mainViewModel,
+                onCreatePlaylistRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                    //createPlaylistDialogOpen = true
+                }
             )
         }
     }
@@ -221,8 +229,10 @@ fun AlbumDetailScreen(
                                                         artist = null
                                                     )
                                                 )
-                                            SongItemEvent.ADD_SONG_TO_QUEUE -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
-                                            SongItemEvent.ADD_SONG_TO_PLAYLIST -> playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, song)
+                                            SongItemEvent.ADD_SONG_TO_QUEUE ->
+                                                mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
+                                            SongItemEvent.ADD_SONG_TO_PLAYLIST ->
+                                                playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, song)
                                         }
                                     },
                                     modifier = Modifier

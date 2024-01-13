@@ -41,6 +41,11 @@ class HomeScreenViewModel @Inject constructor(
     init {
         L()
         fetchAllAsync()
+        // playlists can change or be edited, make sure to always listen to the latest version
+        playlistsRepository.playlistsLiveData.observeForever { playlists ->
+            L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
+            updatePlaylistsState(playlists)
+        }
     }
 
     private fun fetchAllAsync() = viewModelScope.launch {
@@ -73,6 +78,21 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
+    private fun updatePlaylistsState(playlists: List<Playlist>) {
+        // inject generated playlists
+        val playlistList = mutableListOf<Playlist>(
+            HighestPlaylist(),
+            RecentPlaylist(),
+            FrequentPlaylist(),
+            FlaggedPlaylist()
+        )
+        playlistList.addAll(playlists)
+        if (state.playlists != playlistList) {
+            L("viewmodel.getPlaylists playlists are different, update")
+            state = state.copy(playlists = playlistList)
+        }
+    }
+
     private suspend fun getPlaylists(fetchRemote: Boolean = true) {
         playlistsRepository
             .getPlaylists(fetchRemote)
@@ -80,15 +100,7 @@ class HomeScreenViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let { playlists ->
-                            // inject generated playlists
-                            val playlistList = mutableListOf<Playlist>(
-                                HighestPlaylist(),
-                                RecentPlaylist(),
-                                FrequentPlaylist(),
-                                FlaggedPlaylist()
-                            )
-                            playlistList.addAll(playlists)
-                            state = state.copy(playlists = playlistList)
+                            updatePlaylistsState(playlists)
                             L("HomeScreenViewModel.getPlaylists size ${state.playlists.size}")
                         }
                         L("HomeScreenViewModel.getPlaylists size of network array ${result.networkData?.size}")

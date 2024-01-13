@@ -2,7 +2,6 @@ package luci.sixsixsix.powerampache2.presentation.playlists.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 
@@ -50,7 +49,7 @@ fun PlaylistItem(
         Card(
             border = BorderStroke(
                 width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
-                color = MaterialTheme.colorScheme.background
+                color = MaterialTheme.colorScheme.onBackground
             ),
             modifier = Modifier
                 .weight(1f)
@@ -62,12 +61,19 @@ fun PlaylistItem(
             elevation = CardDefaults.cardElevation(1.dp),
             shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
         ) {
+            val isSmartPlaylist = playlistInfo.id.lowercase().startsWith("smart_")
             AsyncImage(
-                model = playlistInfo.artUrl,
+                model = if(isSmartPlaylist) playlistInfo.artUrl else "",
                 contentScale = ContentScale.FillWidth,
                 placeholder = painterResource(id = R.drawable.placeholder_album),
-                error = painterResource(id = R.drawable.ic_playlist),
+                error = painterResource(id = R.drawable.placeholder_album),
                 contentDescription = playlistInfo.name,
+                colorFilter = if(!isSmartPlaylist) {
+                    ColorFilter.lighting(
+                        add = Color.Black.copy(alpha = 0.2f),
+                        multiply = RandomThemeBackgroundColour(playlistInfo)
+                    )
+                } else null
             )
         }
 

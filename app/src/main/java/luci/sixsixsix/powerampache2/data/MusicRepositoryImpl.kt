@@ -66,7 +66,7 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
+    override fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
 
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
 

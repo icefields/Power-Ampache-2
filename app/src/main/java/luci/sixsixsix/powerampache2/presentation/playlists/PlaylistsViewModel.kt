@@ -11,6 +11,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
@@ -30,6 +31,18 @@ class PlaylistsViewModel @Inject constructor(
                 L("PlaylistsViewModel collect" , query)
                 onEvent(PlaylistEvent.OnSearchQueryChange(query))
             }
+        }
+        // playlists can change or be edited, make sure to always listen to the latest version
+        repository.playlistsLiveData.observeForever { playlists ->
+            L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
+            updatePlaylistsState(playlists)
+        }
+    }
+
+    private fun updatePlaylistsState(playlists: List<Playlist>) {
+        if (state.searchQuery.isBlank() && state.playlists != playlists) {
+            L("viewmodel.getPlaylists playlists are different, update")
+            state = state.copy(playlists = playlists)
         }
     }
 
@@ -70,7 +83,7 @@ class PlaylistsViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { playlists ->
-                                state = state.copy(playlists = playlists)
+                                updatePlaylistsState(playlists)
                                 L("viewmodel.getPlaylists size", state.playlists.size)
                             }
                             isEndOfDataReached =

@@ -1,13 +1,17 @@
 package luci.sixsixsix.powerampache2.data
 
+import androidx.lifecycle.map
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
@@ -35,6 +39,11 @@ class PlaylistsRepositoryImpl @Inject constructor(
 ): PlaylistsRepository {
     private val dao = db.dao
     private fun getSession(): Session? = musicRepository.sessionLiveData.value
+    override val playlistsLiveData = dao.playlistsLiveData().map { entities ->
+        entities.map {
+            it.toPlaylist()
+        }
+    }
 
     override suspend fun getPlaylists(
         fetchRemote: Boolean,
@@ -61,7 +70,11 @@ class PlaylistsRepositoryImpl @Inject constructor(
         response.error?.let { throw(MusicException(it.toError())) }
         val playlists = response.playlist!!.map { it.toPlaylist() } // will throw exception if playlist null
 
-        if (query.isNullOrBlank() && offset == 0 && Constants.CLEAR_TABLE_AFTER_FETCH) {
+        if ( // Playlists change too often, clear every time
+            query.isNullOrBlank() &&
+            offset == 0
+            //&& Constants.CLEAR_TABLE_AFTER_FETCH
+            ) {
             // if it's just a search do not clear cache
             dao.clearPlaylists()
         }
@@ -96,4 +109,63 @@ class PlaylistsRepositoryImpl @Inject constructor(
     override suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.artist)
 
     override suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.playlist)
+    override suspend fun addSongToPlaylist(
+        playlistId: String,
+        songId: String
+    ) = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.addSongToPlaylist(
+            authKey = auth.auth,
+            playlistId = playlistId,
+            songId = songId
+        ).apply {
+            error?.let { throw(MusicException(it.toError())) }
+            if (success != null) {
+                emit(Resource.Success(data = Any(), networkData = Any()))
+            } else {
+                throw Exception("error getting a response from addSongToPlaylist call")
+            }
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("addSongToPlaylist()", e, this) }
+
+    override suspend fun removeSongFromPlaylist(
+        playlistId: String,
+        songId: String
+    ): Flow<Resource<Any>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun createNewPlaylist(
+        name: String,
+        playlistType: MainNetwork.PlaylistType
+    ) = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.createNewPlaylist(
+            authKey = auth.auth,
+            name = name,
+            playlistType = playlistType
+        ).run {
+            toPlaylist() // TODO no error check
+        }.also {
+            emit(Resource.Success(data = it, networkData = it))
+        }
+        emit(Resource.Loading(false))
+    }
+
+    override suspend fun deletePlaylist(id: String): Flow<Resource<Any>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun editPlaylist(
+        playlistId: String,
+        owner: String?,
+        items: String?,
+        tracks: String?,
+        playlistType: MainNetwork.PlaylistType
+    ): Flow<Resource<Any>> {
+        TODO("Not yet implemented")
+    }
 }

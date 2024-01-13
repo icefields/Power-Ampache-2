@@ -3,6 +3,7 @@ package luci.sixsixsix.powerampache2.common
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import kotlin.math.abs
 import kotlin.random.Random
 
 object RandomThemeBackgroundColour {
@@ -19,6 +20,23 @@ object RandomThemeBackgroundColour {
 
     @Composable
     operator fun invoke(hash: Int): Color {
+        // not using remainingPlaylistBgColours here, but cycle through colours anyway
+        if (remainingPlaylistBgColours.isEmpty()) {
+            remainingPlaylistBgColours = ArrayList(playlistBgColours)
+        }
+
+        val randomIndex = abs(hash) % playlistBgColours.size
+        val randomColour = playlistBgColours[randomIndex]
+
+        // not using remainingPlaylistBgColours here, but cycle through colours anyway
+        remainingPlaylistBgColours.remove(randomColour)
+
+        return randomColour
+    }
+
+    @Composable
+    operator fun invoke(obj: Any): Color {
+        val hash = abs(obj.hashCode())
         // not using remainingPlaylistBgColours here, but cycle through colours anyway
         if (remainingPlaylistBgColours.isEmpty()) {
             remainingPlaylistBgColours = ArrayList(playlistBgColours)

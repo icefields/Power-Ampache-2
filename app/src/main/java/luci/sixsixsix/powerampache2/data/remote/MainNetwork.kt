@@ -1,28 +1,25 @@
 package luci.sixsixsix.powerampache2.data.remote
 
-import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
-import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumDto
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.AuthDto
 import luci.sixsixsix.powerampache2.data.remote.dto.GoodbyeDto
-import luci.sixsixsix.powerampache2.data.remote.dto.LikeResponse
+import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistDto
+import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
-import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.http.Streaming
-import retrofit2.http.Url
 
 /**
  * Main network interface which will fetch a new welcome title for us
@@ -150,7 +147,7 @@ interface MainNetwork {
         @Query("auth") authKey: String,
         @Query("id") id: String,
         @Query("flag") flag: Int,
-        @Query("type") type: Type): LikeResponse
+        @Query("type") type: Type): SuccessResponse
 
     @Streaming
     @GET("json.server.php?action=download")
@@ -160,6 +157,45 @@ interface MainNetwork {
         @Query("type") type: String = "song", // song, podcast_episode, search, playlist
         @Query("format") format: String = "raw", // mp3, ogg, raw, etc (raw returns the original format)
     ): Response<ResponseBody>
+
+
+    @GET("json.server.php?action=playlist_add_song")
+    suspend fun addSongToPlaylist(
+        @Query("auth") authKey: String,
+        @Query("filter") playlistId: String,
+        @Query("song") songId: String,
+        @Query("check") check: Int = 1
+    ): SuccessResponse
+
+    @GET("json.server.php?action=playlist_remove_song")
+    suspend fun removeSongFromPlaylist(
+        @Query("auth") authKey: String,
+        @Query("filter") playlistId: String,
+        @Query("song") songId: String
+    ): SuccessResponse
+
+    @GET("json.server.php?action=playlist_create")
+    suspend fun createNewPlaylist(
+        @Query("auth") authKey: String,
+        @Query("name") name: String,
+        @Query("type") playlistType: PlaylistType
+    ): PlaylistDto
+
+    @GET("json.server.php?action=playlist_delete")
+    suspend fun deletePlaylist(
+        @Query("auth") authKey: String,
+        @Query("filter") playlistId: String
+    ): SuccessResponse
+
+    @GET("json.server.php?action=playlist_edit")
+    suspend fun editPlaylist(
+        @Query("auth") authKey: String,
+        @Query("filter") playlistId: String,
+        @Query("owner") owner: String? = null, // Change playlist owner to the user id (-1 = System playlist)
+        @Query("items") items: String? = null, // comma-separated song_id's (replaces existing items with a new id)
+        @Query("name") tracks: String? = null, // comma-separated playlisttrack numbers matched to 'items' in order
+        @Query("type") playlistType: PlaylistType
+    ): SuccessResponse
 
     companion object {
         const val API_KEY = BuildConfig.API_KEY
@@ -182,4 +218,6 @@ interface MainNetwork {
         forgotten("forgotten"),
         highest("highest")
     }
+
+    enum class PlaylistType { public, private }
 }

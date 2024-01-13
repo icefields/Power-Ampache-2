@@ -37,6 +37,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -45,11 +46,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
+import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import java.util.UUID
 
 val textPaddingVertical = 10.dp
 
@@ -62,6 +66,7 @@ data class AddToPlaylistOrQueueDialogOpen(
 fun AddToPlaylistOrQueueDialog(
     song: Song,
     onDismissRequest: () -> Unit,
+    onCreatePlaylistRequest: (success: Boolean) -> Unit = {},
     mainViewModel: MainViewModel,
     viewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
@@ -69,10 +74,34 @@ fun AddToPlaylistOrQueueDialog(
     if (headerBgColour == Color.Transparent)
         headerBgColour = RandomThemeBackgroundColour()
 
+    var createPlaylistDialogOpen by remember { mutableStateOf(false) }
+
+    if (createPlaylistDialogOpen) {
+        L("createPlaylistDialogOpen")
+        NewPlaylistDialog(
+            onConfirm = { playlistName, playlistType ->
+                    viewModel.onEvent(
+                        AddToPlaylistOrQueueDialogEvent.CreatePlaylistAndAdd(
+                            song = song,
+                            playlistName = playlistName,
+                            playlistType = playlistType
+                        )
+                    )
+                createPlaylistDialogOpen = false
+                onDismissRequest()
+            }
+        ) {
+            createPlaylistDialogOpen = false
+        }
+    }
+
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
-                .padding(16.dp),
+                .padding(16.dp)
+                .alpha(
+                    if (createPlaylistDialogOpen) 0.1f else 1.0f
+                ),
             shape = RoundedCornerShape(4.dp),
         ) {
             Column(
@@ -107,8 +136,10 @@ fun AddToPlaylistOrQueueDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
-                            onDismissRequest()
+                            //onCreatePlaylistRequest()
+                            L("PlaylistDialogItem createPlaylistDialogOpen")
+
+                            createPlaylistDialogOpen = true
                         },
                     backgroundColour = headerBgColour
                 )

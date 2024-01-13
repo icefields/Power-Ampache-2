@@ -150,7 +150,7 @@ class MainViewModel @Inject constructor(
                 state = state.copy(searchQuery = event.query)
                 searchJob?.cancel()
                 searchJob = viewModelScope.launch {
-                    delay(2000L)
+                    delay(1500)
                     playlistManager.updateSearchQuery(event.query)
                 }
             }
@@ -164,10 +164,14 @@ class MainViewModel @Inject constructor(
                     simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
                 }
             }
-            MainEvent.OnDismissErrorMessage -> playlistManager.updateErrorMessage("")
-            MainEvent.OnLogout -> logout()
-            is MainEvent.OnAddSongToQueueNext -> playlistManager.addToCurrentQueueNext(event.song)
-            is MainEvent.OnAddSongToQueue -> playlistManager.addToCurrentQueue(event.song)
+            MainEvent.OnDismissErrorMessage ->
+                playlistManager.updateErrorMessage("")
+            MainEvent.OnLogout ->
+                logout()
+            is MainEvent.OnAddSongToQueueNext ->
+                playlistManager.addToCurrentQueueNext(event.song)
+            is MainEvent.OnAddSongToQueue ->
+                playlistManager.addToCurrentQueue(event.song)
             is MainEvent.OnAddSongToPlaylist -> {}
             is MainEvent.OnDownloadSong -> {}
             is MainEvent.OnShareSong -> {}
