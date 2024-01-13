@@ -49,7 +49,7 @@ fun PlaylistItem(
         Card(
             border = BorderStroke(
                 width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.background
             ),
             modifier = Modifier
                 .weight(1f)
@@ -70,8 +70,8 @@ fun PlaylistItem(
                 contentDescription = playlistInfo.name,
                 colorFilter = if(isSmartPlaylist) {
                     ColorFilter.lighting(
-                        add = Color.Black.copy(alpha = 0.2f),
-                        multiply = RandomThemeBackgroundColour(playlistInfo)
+                        add = Color.Black.copy(alpha = 0.4f),
+                        multiply = RandomThemeBackgroundColour(playlistInfo.id)
                     )
                 } else null
             )
