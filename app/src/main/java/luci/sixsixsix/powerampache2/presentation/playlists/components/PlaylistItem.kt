@@ -63,12 +63,12 @@ fun PlaylistItem(
         ) {
             val isSmartPlaylist = playlistInfo.id.lowercase().startsWith("smart_")
             AsyncImage(
-                model = if(isSmartPlaylist) playlistInfo.artUrl else "",
+                model = if(!isSmartPlaylist) playlistInfo.artUrl else "",
                 contentScale = ContentScale.FillWidth,
                 placeholder = painterResource(id = R.drawable.placeholder_album),
                 error = painterResource(id = R.drawable.placeholder_album),
                 contentDescription = playlistInfo.name,
-                colorFilter = if(!isSmartPlaylist) {
+                colorFilter = if(isSmartPlaylist) {
                     ColorFilter.lighting(
                         add = Color.Black.copy(alpha = 0.2f),
                         multiply = RandomThemeBackgroundColour(playlistInfo)
