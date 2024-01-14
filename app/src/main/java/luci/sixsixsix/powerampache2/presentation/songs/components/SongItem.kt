@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.songs.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -20,17 +21,21 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -63,19 +68,14 @@ enum class SongItemEvent {
 @Composable
 fun SongItem(
     song: Song,
+    isLandscape: Boolean = false,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
 ) {
-    var isContextMenuVisible by rememberSaveable { // put in viewModel?
-         mutableStateOf(false)
-    }
-    var pressOffset by remember {
-        mutableStateOf(DpOffset.Zero)
-    }
-    var itemHeight by remember {
-        mutableStateOf(0.dp)
-    }
+    var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
+    var pressOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var itemHeight by remember { mutableStateOf(0.dp) }
 
     Row(
         modifier = modifier
@@ -85,30 +85,31 @@ fun SongItem(
                 vertical = dimensionResource(id = R.dimen.songItem_row_paddingVertical)
             )
     ) {
-        Card(
-            border = BorderStroke(
-                width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
-                color = MaterialTheme.colorScheme.background
-            ),
-            modifier = Modifier
-                .weight(1f)
-                .background(Color.Transparent)
-                .align(Alignment.CenterVertically),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.Transparent
-            ),
-            elevation = CardDefaults.cardElevation(1.dp),
-            shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
-        ) {
-            AsyncImage(
-                model = song.imageUrl,
-                contentScale = ContentScale.FillWidth,
-                placeholder = painterResource(id = R.drawable.placeholder_album),
-                error = painterResource(id = R.drawable.ic_playlist),
-                contentDescription = song.title,
-            )
+        if(!isLandscape) {
+            Card(
+                border = BorderStroke(
+                    width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
+                    color = MaterialTheme.colorScheme.background
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .background(Color.Transparent)
+                    .align(Alignment.CenterVertically),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Transparent
+                ),
+                elevation = CardDefaults.cardElevation(1.dp),
+                shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
+            ) {
+                AsyncImage(
+                    model = song.imageUrl,
+                    contentScale = ContentScale.FillWidth,
+                    placeholder = painterResource(id = R.drawable.placeholder_album),
+                    error = painterResource(id = R.drawable.ic_playlist),
+                    contentDescription = song.title,
+                )
+            }
         }
-
         Spacer(modifier = Modifier
                 .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
 

@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.artist_detail
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -19,10 +20,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -51,6 +55,7 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
 private const val GRID_ITEMS_ROW = 2
+private const val GRID_ITEMS_ROW_LAND = 5
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,8 +71,28 @@ fun ArtistDetailScreen(
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val summaryOpen = remember { mutableStateOf(false) }
-    val cardsPerRow = if (state.albums.size < 2) { 1 } else { GRID_ITEMS_ROW }
-    val albumCardSize = (LocalConfiguration.current.screenWidthDp / cardsPerRow).dp
+    var cardsPerRow by remember {
+        mutableIntStateOf(if (state.albums.size < 2) { 1 } else { GRID_ITEMS_ROW })
+    }
+    // val albumCardSize = (LocalConfiguration.current.screenWidthDp / cardsPerRow).dp
+    var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
+    val configuration = LocalConfiguration.current
+    // If our configuration changes then this will launch a new coroutine scope for it
+    LaunchedEffect(configuration) {
+        // Save any changes to the orientation value on the configuration object
+        snapshotFlow { configuration.orientation }
+            .collect { orientation = it }
+    }
+    val isLandscape = when (orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            cardsPerRow = GRID_ITEMS_ROW_LAND
+            true
+        }
+        else -> {
+            cardsPerRow = GRID_ITEMS_ROW
+            false
+        }
+    }
 
     Box(modifier = modifier) {
         AsyncImage(
@@ -93,9 +118,9 @@ fun ArtistDetailScreen(
         // full screen view to add a transparent black layer on top
         // of the images for readability
         Box(modifier = Modifier
-                .fillMaxSize()
-                .alpha(0.4f)
-                .background(brush = screenBackgroundGradient))
+            .fillMaxSize()
+            .alpha(0.4f)
+            .background(brush = screenBackgroundGradient))
 
         if (state.isLoading) {
             LoadingScreen()

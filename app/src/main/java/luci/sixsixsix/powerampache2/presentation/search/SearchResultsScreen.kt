@@ -121,7 +121,7 @@ fun SearchResultsScreen(
                 modifier = Modifier.weight(1f),
                 navigator = navigator,
                 viewModel = artistsViewModel,
-                gridItemsRow = 4
+                gridPerRow = 4
             )
         }
 

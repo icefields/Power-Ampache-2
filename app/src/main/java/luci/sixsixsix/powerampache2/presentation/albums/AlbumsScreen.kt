@@ -1,23 +1,24 @@
 package luci.sixsixsix.powerampache2.presentation.albums
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ import luci.sixsixsix.powerampache2.presentation.albums.components.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 
 const val GRID_ITEMS_ROW = 2
+const val GRID_ITEMS_ROW_LAND = 5
 const val GRID_ITEMS_ROW_MIN = 2
 
 @Destination
@@ -46,7 +48,25 @@ fun AlbumsScreen(
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
-    val cardsPerRow = if (state.albums.size < 5) { minGridItemsRow } else { gridItemsRow }
+
+    var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
+    val configuration = LocalConfiguration.current
+    // If our configuration changes then this will launch a new coroutine scope for it
+    LaunchedEffect(configuration) {
+        // Save any changes to the orientation value on the configuration object
+        snapshotFlow { configuration.orientation }
+            .collect { orientation = it }
+    }
+    val cardsPerRow = when (orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            GRID_ITEMS_ROW_LAND
+        }
+        else -> {
+            if (state.albums.size < 5) { minGridItemsRow } else { gridItemsRow }
+        }
+    }
+
+    //val cardsPerRow = if (state.albums.size < 5) { minGridItemsRow } else { gridItemsRow }
     val albumCardSize = (LocalConfiguration.current.screenWidthDp / cardsPerRow).dp
 
     if (state.isLoading && state.albums.isEmpty()) {

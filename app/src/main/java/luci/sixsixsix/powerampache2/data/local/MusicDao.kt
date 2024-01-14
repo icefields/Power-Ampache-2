@@ -108,7 +108,7 @@ interface MusicDao {
 
     // TODO get only playlists user owns
     @Query("""SELECT * FROM playlistentity WHERE owner = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') order by rating DESC, id DESC""")
-    suspend fun getMyPlaylists(query: String): List<PlaylistEntity>
+    suspend fun getMyPlaylists(): List<PlaylistEntity>
 
     @Query("""SELECT * FROM playlistentity order by rating DESC, id DESC""")
     fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
