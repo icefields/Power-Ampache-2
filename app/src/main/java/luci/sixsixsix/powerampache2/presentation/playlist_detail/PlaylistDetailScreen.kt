@@ -64,6 +64,7 @@ import luci.sixsixsix.powerampache2.presentation.playlist_detail.components.Play
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.songs.components.SubtitleString
 import kotlin.random.Random
 
 
@@ -242,6 +243,7 @@ fun PlaylistDetailScreen(
                                             )
                                             mainViewModel.onEvent(MainEvent.Play(song))
                                         },
+                                    subtitleString = SubtitleString.ARTIST,
                                     songInfoThirdRow = SongInfoThirdRow.Time,
 
                                     )

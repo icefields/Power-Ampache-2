@@ -24,6 +24,7 @@ import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.songs.components.SubtitleString
 
 @Composable
 @Destination(start = false)
@@ -68,6 +69,7 @@ fun SongsListScreen(
                                     SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
                                 }
                             },
+                            subtitleString = SubtitleString.ARTIST,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {

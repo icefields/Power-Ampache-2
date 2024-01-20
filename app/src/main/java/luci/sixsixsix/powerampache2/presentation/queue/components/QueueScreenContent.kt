@@ -20,6 +20,7 @@ import luci.sixsixsix.powerampache2.presentation.queue.QueueViewModel
 import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.songs.components.SubtitleString
 
 @Composable
 fun QueueScreenContent(
@@ -53,6 +54,7 @@ fun QueueScreenContent(
                         SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
                     }
                 },
+                subtitleString = SubtitleString.ARTIST,
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(if (song == mainViewModel.state.song) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)

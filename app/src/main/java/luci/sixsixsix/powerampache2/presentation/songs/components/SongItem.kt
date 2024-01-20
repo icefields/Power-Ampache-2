@@ -41,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -53,6 +54,12 @@ import luci.sixsixsix.powerampache2.domain.models.totalTime
 enum class SongInfoThirdRow {
     AlbumTitle,
     Time
+}
+
+enum class SubtitleString {
+    NOTHING,
+    ARTIST,
+    ALBUM
 }
 
 enum class SongItemEvent {
@@ -68,9 +75,10 @@ enum class SongItemEvent {
 @Composable
 fun SongItem(
     song: Song,
-    isLandscape: Boolean = false,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
+    isLandscape: Boolean = false,
+    subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
 ) {
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
@@ -78,6 +86,7 @@ fun SongItem(
     var itemHeight by remember { mutableStateOf(0.dp) }
 
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .padding(
@@ -92,7 +101,7 @@ fun SongItem(
                     color = MaterialTheme.colorScheme.background
                 ),
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(if (subtitleString == SubtitleString.NOTHING) 0.7f else 1f)
                     .background(Color.Transparent)
                     .align(Alignment.CenterVertically),
                 colors = CardDefaults.cardColors(
@@ -122,24 +131,30 @@ fun SongItem(
                 )
                 .align(Alignment.CenterVertically),
             song = song,
+            subtitleString = subtitleString,
             songInfoThirdRow = songInfoThirdRow
         )
 
-        Image(Icons.Outlined.MoreVert,
-                stringResource(id = R.string.menu_content_description),
-                modifier = Modifier
-                    .background(Color.Transparent)
-                    .weight(0.5f)
-                    .pointerInput(true) {
-                        detectTapGestures(
-                            onPress = { offset ->
-                                pressOffset = DpOffset(offset.x.toDp(), offset.y.toDp())
-                                isContextMenuVisible = true
-                            })
-                    },
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary)
-            )
+        Image(
+            alignment = Alignment.Center,
+            imageVector = Icons.Outlined.MoreVert,
+            contentDescription = stringResource(id = R.string.menu_content_description),
+            modifier = Modifier
+                .background(Color.Transparent)
+                .weight(0.5f)
+                .pointerInput(true) {
+                    detectTapGestures(
+                        onPress = { offset ->
+                            pressOffset = DpOffset(offset.x.toDp(), offset.y.toDp())
+                            isContextMenuVisible = true
+                        })
+                },
+            contentScale = ContentScale.Fit,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary)
+        )
+
+        Spacer(modifier = Modifier
+            .width(15.dp))
     }
 
     Spacer(modifier = Modifier
@@ -162,6 +177,7 @@ fun SongItem(
 private fun InfoTextSection(
     modifier: Modifier,
     song: Song,
+    subtitleString: SubtitleString,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
 ) {
     val songInfoThirdRowText = when(songInfoThirdRow) {
@@ -181,14 +197,29 @@ private fun InfoTextSection(
         )
         Spacer(modifier = Modifier
                 .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
-        Text(
-            modifier = Modifier.basicMarquee(),
-            text = song.artist.name,
-            fontWeight = FontWeight.Light,
-            fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_artist),
-            maxLines = 1,
-            textAlign = TextAlign.Start
-        )
+
+        when(subtitleString) {
+            SubtitleString.NOTHING -> {
+
+            }
+            SubtitleString.ARTIST -> Text(
+                modifier = Modifier.basicMarquee(),
+                text = song.artist.name,
+                fontWeight = FontWeight.Light,
+                fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_artist),
+                maxLines = 1,
+                textAlign = TextAlign.Start
+            )
+            SubtitleString.ALBUM -> Text(
+                modifier = Modifier.basicMarquee(),
+                text = song.album.name,
+                fontWeight = FontWeight.Light,
+                fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_artist),
+                maxLines = 1,
+                textAlign = TextAlign.Start
+            )
+        }
+
         Spacer(modifier = Modifier
                 .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
         Text(
@@ -200,4 +231,14 @@ private fun InfoTextSection(
             textAlign = TextAlign.Start
         )
     }
+}
+
+@Preview
+@Composable
+fun SongItemPreview() {
+    SongItem(
+        song = Song.mockSong,
+        songItemEventListener = {},
+        subtitleString = SubtitleString.NOTHING
+    )
 }

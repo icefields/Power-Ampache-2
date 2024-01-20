@@ -61,6 +61,7 @@ import luci.sixsixsix.powerampache2.presentation.playlist_detail.PlaylistDetailE
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
 import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.songs.components.SubtitleString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -267,6 +268,7 @@ fun AlbumDetailScreen(
                                             viewModel.onEvent(AlbumDetailEvent.OnSongSelected(song))
                                             mainViewModel.onEvent(MainEvent.Play(song))
                                         },
+                                    subtitleString = SubtitleString.NOTHING,
                                     songInfoThirdRow = SongInfoThirdRow.Time,
 
                                 )
