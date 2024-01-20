@@ -15,7 +15,7 @@ val coroutinesVersion = "1.7.3" //rootProject.extra.get("coroutines_version") as
 val exoplayerVersion = "2.19.1" // rootProject.extra.get("exoplayer_version") as String
 val composeNavVersion = "1.8.42-beta" // rootProject.extra.get("composeNav_version") as String
 
-val media3Version = "1.2.0"
+val media3Version = "1.2.1"
 
 val localProperties = Properties()
 localProperties.load(project.rootProject.file("local.properties").inputStream())

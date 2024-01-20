@@ -45,7 +45,7 @@ class SimpleMediaNotificationManager @Inject constructor(
     private fun buildNotification(mediaSession: MediaSession) {
         PlayerNotificationManager.Builder(context, NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID)
             .setMediaDescriptionAdapter(SimpleMediaNotificationAdapter(context, mediaSession.sessionActivity))
-            .setSmallIconResourceId(R.drawable.ic_playlist)
+            .setSmallIconResourceId(R.drawable.ic_power_ampache_mono)
             .build()
             .apply {
                 setMediaSessionToken(mediaSession.sessionCompatToken)
