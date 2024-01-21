@@ -33,10 +33,10 @@ import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 @Composable
 fun NewPlaylistDialog(
     onConfirm: (playlistName: String, playlistType: MainNetwork.PlaylistType) -> Unit,
-    onCancel: () -> Unit,
+    onCancel: () -> Unit
 ) {
     var playlistName by remember { mutableStateOf("") }
-    var playlistType by remember { mutableStateOf(MainNetwork.PlaylistType.private) }
+    val playlistType by remember { mutableStateOf(MainNetwork.PlaylistType.private) }
     val radioOptions = listOf(MainNetwork.PlaylistType.private, MainNetwork.PlaylistType.public)
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0] ) }
 

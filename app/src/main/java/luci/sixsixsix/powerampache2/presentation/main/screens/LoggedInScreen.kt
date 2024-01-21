@@ -24,12 +24,12 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.MainActivity
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
-import luci.sixsixsix.powerampache2.presentation.home.HomeScreenViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.SheetDragHandle
-import luci.sixsixsix.powerampache2.presentation.song_detail.SongDetailScreen
+import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.SongDetailScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)

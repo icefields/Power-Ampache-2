@@ -17,10 +17,10 @@ import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.QueueEvent
 import luci.sixsixsix.powerampache2.presentation.queue.QueueViewModel
-import luci.sixsixsix.powerampache2.presentation.songs.SongsEvent
-import luci.sixsixsix.powerampache2.presentation.songs.components.SongItem
-import luci.sixsixsix.powerampache2.presentation.songs.components.SongItemEvent
-import luci.sixsixsix.powerampache2.presentation.songs.components.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsEvent
+import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongItem
+import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SubtitleString
 
 @Composable
 fun QueueScreenContent(

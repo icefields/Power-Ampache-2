@@ -1,26 +1,25 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.map
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
+import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Session
+import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -172,13 +171,126 @@ class PlaylistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("deletePlaylist()", e, this) }
 
+    private fun songListToCommaSeparatedIds(items: List<Song>) =
+        items.joinToString(separator = ", ") { it.mediaId }
+
+    private fun trackPositionsCommaSeparated(items: List<Song>) =
+        ArrayList<Int>().apply {
+            for(i in 1..items.size) {
+                add(i)
+            }
+        }.joinToString(separator = ", ")
+
     override suspend fun editPlaylist(
         playlistId: String,
+        playlistName: String?,
+        items: List<Song>,
         owner: String?,
-        items: String?,
         tracks: String?,
         playlistType: MainNetwork.PlaylistType
-    ): Flow<Resource<Any>> {
-        TODO("Not yet implemented")
-    }
+    ) = flow {
+        emit(Resource.Loading(true))
+        val commaSeparatedIds = when(items.size) {
+            0 -> null
+            else -> songListToCommaSeparatedIds(items)
+        }
+        val auth = getSession()!!
+        api.editPlaylist(
+            authKey = auth.auth,
+            playlistId = playlistId,
+            items = commaSeparatedIds,
+            tracks = tracks,
+            name = playlistName,
+            playlistType = playlistType
+        ).apply {
+            error?.let { throw(MusicException(it.toError())) }
+            if (success != null) {
+                emit(Resource.Success(data = Any(), networkData = Any()))
+            } else {
+                throw Exception("error getting a response from editPlaylist call")
+            }
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("editPlaylist()", e, this) }
+
+    override suspend fun addSongsToPlaylist(
+        playlist: Playlist,
+        songsToAdd: List<Song>
+    ) = flow {
+        emit(Resource.Loading(true))
+
+        // Get old version of the playlist
+        val auth = getSession()!!
+        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlist.id)
+        response.error?.let { throw(MusicException(it.toError())) }
+        val songList = response.songs!!.map { songDto -> songDto.toSong() }.toMutableList() // will throw exception if songs null
+        songList.addAll(songsToAdd)
+
+        // generate comma separated list of ids
+        val commaSeparatedIds = when(songList.size) {
+            0 -> null
+            else -> songListToCommaSeparatedIds(songList)
+        }
+        L(commaSeparatedIds)
+        L(trackPositionsCommaSeparated(songList))
+
+        api.editPlaylist(
+            authKey = auth.auth,
+            playlistId = playlist.id,
+            items = commaSeparatedIds,
+            tracks = trackPositionsCommaSeparated(songList),
+            owner = playlist.owner,
+            playlistType = MainNetwork.PlaylistType.valueOf(
+                playlist.type ?:
+                throw Exception("addSongsToPlaylist problem with playlist type")
+            )
+        ).apply {
+            error?.let { throw(MusicException(it.toError())) }
+            if (success != null) {
+                emit(Resource.Success(data = Any(), networkData = Any()))
+            } else {
+                throw Exception("error getting a response from editPlaylist call")
+            }
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("editPlaylist()", e, this) }
+
+    override suspend fun createNewPlaylistAddSongs(
+        name: String,
+        playlistType: MainNetwork.PlaylistType,
+        songsToAdd: List<Song>
+    ) = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        // create new playlist
+        val playlist = api.createNewPlaylist(
+            authKey = auth.auth,
+            name = name,
+            playlistType = playlistType
+        ).toPlaylist() // TODO no error check
+
+        // generate comma separated list of ids
+        val commaSeparatedIds = when(songsToAdd.size) {
+            0 -> null
+            else -> songListToCommaSeparatedIds(songsToAdd)
+        }
+        api.editPlaylist(
+            authKey = auth.auth,
+            playlistId = playlist.id,
+            items = commaSeparatedIds,
+            owner = playlist.owner,
+            playlistType = MainNetwork.PlaylistType.valueOf(
+                playlist.type ?:
+                throw Exception("addSongsToPlaylist problem with playlist type")
+            )
+        ).apply {
+            error?.let { throw(MusicException(it.toError())) }
+            if (success != null) {
+                emit(Resource.Success(playlist))
+            } else {
+                throw Exception("error getting a response from editPlaylist call")
+            }
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("editPlaylist()", e, this) }
 }

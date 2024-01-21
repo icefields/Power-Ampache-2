@@ -33,7 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.presentation.CircleBackButton
+import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
@@ -54,9 +54,9 @@ fun QueueScreen(
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
 
     if (playlistsDialogOpen.isOpen) {
-        playlistsDialogOpen.song?.let {
+        if(playlistsDialogOpen.songs.isNotEmpty()) {
             AddToPlaylistOrQueueDialog(
-                song = it,
+                songs = playlistsDialogOpen.songs,
                 onDismissRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 },
@@ -91,7 +91,7 @@ fun QueueScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, mainViewModel.state.queue[0])
+                            playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, mainViewModel.state.queue)
                         }
                     ) {
                         Icon(

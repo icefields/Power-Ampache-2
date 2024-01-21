@@ -1,12 +1,9 @@
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -48,11 +45,11 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
-import luci.sixsixsix.powerampache2.presentation.artists.ArtistsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
-import luci.sixsixsix.powerampache2.presentation.home.HomeScreen
-import luci.sixsixsix.powerampache2.presentation.home.HomeScreenViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreen
+import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
@@ -66,10 +63,9 @@ import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTab
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.TabItem
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.drawerItems
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
-import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigator
-import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
-import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
+import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
 
 @Composable
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
