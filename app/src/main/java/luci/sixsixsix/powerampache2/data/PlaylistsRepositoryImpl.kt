@@ -155,9 +155,22 @@ class PlaylistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }
 
-    override suspend fun deletePlaylist(id: String): Flow<Resource<Any>> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun deletePlaylist(id: String) = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.deletePlaylist(
+            authKey = auth.auth,
+            playlistId = id
+        ).apply {
+            error?.let { throw(MusicException(it.toError())) }
+            if (success != null) {
+                emit(Resource.Success(data = Any(), networkData = Any()))
+            } else {
+                throw Exception("error getting a response from deletePlaylist call")
+            }
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("deletePlaylist()", e, this) }
 
     override suspend fun editPlaylist(
         playlistId: String,
