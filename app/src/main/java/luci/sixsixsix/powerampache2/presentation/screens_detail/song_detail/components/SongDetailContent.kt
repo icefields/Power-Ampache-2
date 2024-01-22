@@ -50,7 +50,6 @@ import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SongDetailContent(
-    // navigator: DestinationsNavigator,
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel
@@ -80,6 +79,8 @@ fun SongDetailContent(
                 }
             )
     }
+
+    var isOffline by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -139,9 +140,15 @@ fun SongDetailContent(
 
         Divider(Modifier.padding(vertical = 0.dp))
         mainViewModel.state.song?.let { song ->
+
+            mainViewModel.isOfflineSong(song) {
+                isOffline = it
+            }
+
             SongDetailButtonRow(
                 modifier = Modifier.fillMaxWidth(),
                 song = song,
+                isOffline = isOffline,
                 tint = buttonsTint
             ) { event ->
                 when(event) {
@@ -165,7 +172,13 @@ fun SongDetailContent(
                                 mainScaffoldState.bottomSheetState.partialExpand()
                             }
                         }
-                    SongDetailButtonEvents.SHOW_INFO -> infoDialogOpen = true
+                    SongDetailButtonEvents.SHOW_INFO ->
+                        infoDialogOpen = true
+                    SongDetailButtonEvents.DELETE_DOWNLOADED_SONG -> {
+                        mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(song = song))
+                        // TODO BREAKING_RULE anti-pattern. verify the song is actually deleted
+                        isOffline = false
+                    }
                 }
             }
         }

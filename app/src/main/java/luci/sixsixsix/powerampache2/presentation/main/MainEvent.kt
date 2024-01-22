@@ -2,6 +2,7 @@ package luci.sixsixsix.powerampache2.presentation.main
 
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.RepeatMode
+import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsEvent
 
 sealed class MainEvent {
     data class OnSearchQueryChange(val query: String): MainEvent()
@@ -25,5 +26,5 @@ sealed class MainEvent {
     data class OnAddSongToQueueNext(val song: Song): MainEvent()
     data class OnShareSong(val song: Song): MainEvent()
     data class OnDownloadSong(val song: Song): MainEvent()
-
+    data class OnDownloadedSongDelete(val song: Song): MainEvent()
 }

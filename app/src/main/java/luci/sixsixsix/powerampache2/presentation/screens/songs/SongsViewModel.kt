@@ -26,12 +26,10 @@ class SongsViewModel @Inject constructor(
         getSongs()
         viewModelScope.launch {
             playlistManager.currentSearchQuery.collect { query ->
-                L("AlbumsViewModel collect ${query}")
+                L(query)
                 onEvent(SongsEvent.OnSearchQueryChange(query))
             }
         }
-        // TODO original code
-        // updateCurrentPlayerPosition()
     }
 
     fun onEvent(event: SongsEvent) {

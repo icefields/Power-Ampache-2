@@ -69,7 +69,7 @@ fun SongsListScreen(
                 LazyColumn(modifier = Modifier.fillMaxSize(),) {
                     items(
                         state.songs.size,
-                        // TODO conflicts, why? key = { i -> state.songs[i].key() }
+                        //key = { i -> state.songs[i].mediaId }
                     ) { i ->
                         val song = state.songs[i]
                         SongItem(
@@ -85,7 +85,8 @@ fun SongsListScreen(
                                     SongItemEvent.GO_TO_ARTIST -> navigator.navigate(
                                         ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
                                     )
-                                    SongItemEvent.ADD_SONG_TO_QUEUE -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
+                                    SongItemEvent.ADD_SONG_TO_QUEUE ->
+                                        mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                                     SongItemEvent.ADD_SONG_TO_PLAYLIST ->
                                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                                 }

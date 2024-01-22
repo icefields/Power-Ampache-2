@@ -32,7 +32,7 @@ fun LikeButton(
         onClick = { onClick() }
     ) {
         Card(
-            colors = CardDefaults.cardColors(containerColor = background.copy(alpha = 0.4f)),
+            colors = CardDefaults.cardColors(containerColor = background),
             modifier = Modifier.fillMaxSize()
         ) {
             Box(

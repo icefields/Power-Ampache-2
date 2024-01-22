@@ -15,6 +15,7 @@ object Constants {
 
 
     const val ERROR_INT = -1
+    const val ERROR_FLOAT = -1f
     const val ERROR_STRING = "ERROR"
     const val LOADING_STRING = "LOADING"
 

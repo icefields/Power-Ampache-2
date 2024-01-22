@@ -90,7 +90,8 @@ fun QueueScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, mainViewModel.state.queue)
+                            playlistsDialogOpen =
+                                AddToPlaylistOrQueueDialogOpen(true, viewModel.queueState)
                         }
                     ) {
                         Icon(

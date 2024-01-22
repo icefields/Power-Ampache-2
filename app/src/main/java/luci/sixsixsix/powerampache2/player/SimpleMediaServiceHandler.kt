@@ -38,7 +38,7 @@ class SimpleMediaServiceHandler @Inject constructor(
         // split current list in 2, before and after current element
         // remove everything from mediaItems except the current
         if (
-            player.mediaItemCount > 0 && playlistManager.getCurrentSong()?.toMediaItem()?.mediaId == player.currentMediaItem?.mediaId
+            player.mediaItemCount > 0 && playlistManager.getCurrentSong()?.mediaId == player.currentMediaItem?.mediaId
         ) {
             player.removeMediaItems(0, player.currentMediaItemIndex)
             player.removeMediaItems(player.currentMediaItemIndex + 1, player.mediaItemCount)

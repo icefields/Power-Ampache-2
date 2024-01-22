@@ -1,10 +1,12 @@
 package luci.sixsixsix.powerampache2.domain
 
+import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface SongsRepository {
+    val offlineSongsLiveData: LiveData<List<Song>>
     suspend fun getSongs(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Song>>>
     suspend fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
     suspend fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
@@ -14,4 +16,7 @@ interface SongsRepository {
     suspend fun getFrequentSongs(): Flow<Resource<List<Song>>>
     suspend fun getFlaggedSongs(): Flow<Resource<List<Song>>>
     suspend fun getRandomSongs(): Flow<Resource<List<Song>>>
+    suspend fun getSongUri(song: Song): String
+    suspend fun downloadSong(song: Song): Flow<Resource<Any>>
+    suspend fun deleteDownloadedSong(song: Song): Flow<Resource<Any>>
 }

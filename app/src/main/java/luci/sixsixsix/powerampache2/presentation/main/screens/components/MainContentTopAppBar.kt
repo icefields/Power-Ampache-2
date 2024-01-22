@@ -54,6 +54,7 @@ import kotlin.math.abs
 fun MainContentTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     searchVisibility: MutableState<Boolean>,
+    title: String,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     onNavigationIconClick: (MainContentTopAppBarEvent) -> Unit
@@ -73,7 +74,7 @@ fun MainContentTopAppBar(
                 Text(
                     modifier = Modifier
                         .basicMarquee(),
-                    text = generateBarTitle(viewModel.state.song),
+                    text = title,
                     maxLines = 1
                 )
             }
@@ -143,12 +144,6 @@ fun TopBarOLD(
         }
     }
 }
-
-@Composable
-private fun generateBarTitle(song: Song?): String =
-    stringResource(id = R.string.app_name) + (song?.title?.let {
-        "(${song.artist.name} - ${song.title})"
-    } ?: "" )
 
 sealed class MainContentTopAppBarEvent {
     data object OnLeftDrawerIconClick: MainContentTopAppBarEvent()
