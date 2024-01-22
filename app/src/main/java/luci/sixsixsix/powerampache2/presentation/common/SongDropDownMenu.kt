@@ -1,4 +1,4 @@
-package luci.sixsixsix.powerampache2.presentation.screens.songs.components
+package luci.sixsixsix.powerampache2.presentation.common
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding

@@ -7,9 +7,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
@@ -25,13 +28,22 @@ class PlaylistDetailViewModel @Inject constructor(
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
     private val songsRepository: SongsRepository,
+    private val musicRepository: MusicRepository,
+    private val playlistsRepository: PlaylistsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(PlaylistDetailState())
 
     init {
         savedStateHandle.get<Playlist>("playlist")?.let { playlist ->
+            state = state.copy(playlist = playlist)
             onEvent(PlaylistDetailEvent.Fetch(playlist))
+
+            musicRepository.userLiveData.observeForever {
+                it?.let { user ->
+                    state = state.copy(isUserOwner = user.username == playlist.owner)
+                }
+            }
         }
     }
 
@@ -51,16 +63,24 @@ class PlaylistDetailViewModel @Inject constructor(
 
             is PlaylistDetailEvent.OnSongSelected -> playlistManager.updateTopSong(event.song)
             PlaylistDetailEvent.OnDownloadPlaylist -> TODO()
-            PlaylistDetailEvent.OnPlayPlaylist -> {
-                L("OnPlayPlaylist")
+            PlaylistDetailEvent.OnPlayPlaylist -> if (state.songs.isNotEmpty()) {
                 playlistManager.updateCurrentSong(state.songs[0])
                 playlistManager.addToCurrentQueueTop(state.songs)
             }
             PlaylistDetailEvent.OnSharePlaylist -> TODO()
-            PlaylistDetailEvent.OnShufflePlaylist -> {
+            PlaylistDetailEvent.OnShufflePlaylist -> if (state.songs.isNotEmpty()) {
                 val shuffled = state.songs.shuffled()
                 playlistManager.addToCurrentQueueNext(shuffled)
                 playlistManager.moveToSongInQueue(shuffled[0])
+            }
+            is PlaylistDetailEvent.OnRemoveSong ->
+                removeSongFromPlaylist(playlistId = state.playlist.id, songId = event.song.mediaId)
+            PlaylistDetailEvent.OnRemoveSongDismiss -> viewModelScope.launch {
+                // TODO HACK FORCE refresh of list
+                val songs = state.songs.toMutableList()
+                state = state.copy(songs = listOf())
+                delay(100)
+                state = state.copy(songs = songs)
             }
         }
     }
@@ -93,6 +113,24 @@ class PlaylistDetailViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    private fun removeSongFromPlaylist(playlistId: String, songId: String) = viewModelScope.launch {
+        playlistsRepository
+            .removeSongFromPlaylist(playlistId = playlistId, songId = songId).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            getSongsFromPlaylist(playlistId, true)
+                            playlistManager.updateErrorMessage("Song removed from playlist")
+                        }
+                    }
+                    is Resource.Error ->
+                        state = state.copy(isPlaylistRemoveLoading = false)
+                    is Resource.Loading ->
+                        state = state.copy(isPlaylistRemoveLoading = result.isLoading)
+                }
+            }
     }
 
     private fun getRecentSongs(fetchRemote: Boolean = true, ) {

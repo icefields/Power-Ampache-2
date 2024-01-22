@@ -76,6 +76,17 @@ class MusicPlaylistManager @Inject constructor() {
         addToCurrentQueue(listOf(newSong))
     }
 
+    fun removeFromCurrentQueue(songsToRemove: List<Song>) {
+        L( "MusicPlaylistManager removeFromCurrentQueue", songsToRemove.size, songsToRemove[0].name)
+        _currentQueueState.value = LinkedHashSet(_currentQueueState.value)
+            .apply { removeAll(songsToRemove.toSet()) }
+            .toList()
+        checkCurrentSong()
+        L( "MusicPlaylistManager removeFromCurrentQueue", songsToRemove.size, songsToRemove[0].name)
+    }
+
+    fun removeFromCurrentQueue(songToRemove: Song) = removeFromCurrentQueue(listOf(songToRemove))
+
     /**
      * add items to the current queue as next in queue
      */

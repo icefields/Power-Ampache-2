@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +50,8 @@ import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
+import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.common.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
@@ -57,10 +60,12 @@ import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongInfoThirdRow
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongItem
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongItemEvent
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.common.SongInfoThirdRow
+import luci.sixsixsix.powerampache2.presentation.common.SongItem
+import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,6 +82,7 @@ fun PlaylistDetailScreen(
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
+    var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
 
     val backgrounds = viewModel.generateBackgrounds()
     val randomBackgroundTop = backgrounds.first
@@ -87,8 +93,7 @@ fun PlaylistDetailScreen(
     // If our configuration changes then this will launch a new coroutine scope for it
     LaunchedEffect(configuration) {
         // Save any changes to the orientation value on the configuration object
-        snapshotFlow { configuration.orientation }
-            .collect { orientation = it }
+        snapshotFlow { configuration.orientation }.collect { orientation = it }
     }
 
     val isLandscape = when (orientation) {
@@ -99,6 +104,38 @@ fun PlaylistDetailScreen(
         else -> {
             infoVisibility = true
             false
+        }
+    }
+
+    showDeleteSongDialog?.let { songToRemove ->
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteSongDialog = null
+                // The song is dismissed automatically even when dismissing the dialog,
+                // refresh the song list automatically
+                viewModel.onEvent(PlaylistDetailEvent.OnRemoveSongDismiss)
+            },
+            onConfirmation = {
+                showDeleteSongDialog = null
+                viewModel.onEvent(PlaylistDetailEvent.OnRemoveSong(songToRemove))
+            },
+            dialogTitle = "Delete \n${songToRemove.name} \nfrom playlist \n${state.playlist.name}?"
+        )
+    }
+
+    var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
+    if (playlistsDialogOpen.isOpen) {
+        if (playlistsDialogOpen.songs.isNotEmpty()) {
+            AddToPlaylistOrQueueDialog(
+                songs = playlistsDialogOpen.songs,
+                onDismissRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                },
+                mainViewModel = mainViewModel,
+                onCreatePlaylistRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                }
+            )
         }
     }
 
@@ -139,7 +176,7 @@ fun PlaylistDetailScreen(
                 PlaylistDetailTopBar(
                     navigator = navigator,
                     playlist = playlist,
-                    isLoading = state.isLoading,
+                    isLoading = state.isLoading || state.isPlaylistRemoveLoading,
                     scrollBehavior = scrollBehavior
                 ) { infoVisibility = !infoVisibility }
             }
@@ -208,24 +245,33 @@ fun PlaylistDetailScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                         ) {
-                            items(state.songs.size) { i ->
-                                val song = state.songs[i]
+                            itemsIndexed(
+                                items = state.songs,
+                                key = { _, item -> item.mediaId }
+                            ) { _, song ->
                                 SongItem(
                                     song = song,
                                     isLandscape = isLandscape,
                                     songItemEventListener = { event ->
                                         when(event) {
-                                            SongItemEvent.PLAY_NEXT -> mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                                            SongItemEvent.SHARE_SONG -> mainViewModel.onEvent(MainEvent.OnShareSong(song))
-                                            SongItemEvent.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
-                                            SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
-                                                AlbumDetailScreenDestination(albumId = song.album.id, album = null)
-                                            )
-                                            SongItemEvent.GO_TO_ARTIST -> navigator.navigate(
-                                                ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
-                                            )
-                                            SongItemEvent.ADD_SONG_TO_QUEUE -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
-                                            SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
+                                            SongItemEvent.PLAY_NEXT ->
+                                                mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                                            SongItemEvent.SHARE_SONG ->
+                                                mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                                            SongItemEvent.DOWNLOAD_SONG ->
+                                                mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                                            SongItemEvent.GO_TO_ALBUM ->
+                                                navigator.navigate(AlbumDetailScreenDestination(
+                                                    albumId = song.album.id,
+                                                    album = null))
+                                            SongItemEvent.GO_TO_ARTIST ->
+                                                navigator.navigate(ArtistDetailScreenDestination(
+                                                    artistId = song.artist.id,
+                                                    artist = null))
+                                            SongItemEvent.ADD_SONG_TO_QUEUE ->
+                                                mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
+                                            SongItemEvent.ADD_SONG_TO_PLAYLIST ->
+                                                playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                                         }
                                     },
                                     modifier = Modifier
@@ -240,13 +286,15 @@ fun PlaylistDetailScreen(
                                         },
                                     subtitleString = SubtitleString.ARTIST,
                                     songInfoThirdRow = SongInfoThirdRow.Time,
-
-                                    )
+                                    enableSwipeToRemove = viewModel.state.isUserOwner,
+                                    onRemove = { songToRemove ->
+                                        showDeleteSongDialog = songToRemove
+                                    }
+                                )
                             }
                         }
-                        if (state.isLoading && state.songs.isEmpty()) {
-                            LoadingScreen()
-                        }
+
+                        if (state.isLoading && state.songs.isEmpty()) { LoadingScreen() }
                     }
                 }
             }
@@ -257,10 +305,10 @@ fun PlaylistDetailScreen(
 @Composable
 private fun showHideEmptyPlaylistView(playlist: Playlist, state: PlaylistDetailState) {
     if (
-        (playlist is RecentPlaylist ||
+        /*(playlist is RecentPlaylist ||
                 playlist is FrequentPlaylist ||
                 playlist is HighestPlaylist ||
-                playlist is FlaggedPlaylist) &&
+                playlist is FlaggedPlaylist) &&*/
         !state.isLoading && !state.isRefreshing && state.songs.isNullOrEmpty()
     ){
         Card(modifier = Modifier.fillMaxSize()) {

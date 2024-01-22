@@ -32,9 +32,11 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.presentation.common.SongItemMain
+import luci.sixsixsix.powerampache2.presentation.common.SwipeToDismissItem
 
 @Composable
-fun PlaylistItem(
+fun PlaylistItemMain(
     playlistInfo: Playlist,
     modifier: Modifier = Modifier
 ) {
@@ -93,6 +95,23 @@ fun PlaylistItem(
     }
     Spacer(modifier = Modifier
         .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer) * 2))
+}
+
+@Composable
+fun PlaylistItem(
+    playlistInfo: Playlist,
+    modifier: Modifier = Modifier,
+    enableSwipeToRemove: Boolean,
+    onRemove: (Playlist) -> Unit
+) {
+    SwipeToDismissItem(
+        item = playlistInfo,
+        foregroundView = {
+            PlaylistItemMain(playlistInfo, modifier)
+        },
+        enableSwipeToRemove = enableSwipeToRemove,
+        onRemove = onRemove
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

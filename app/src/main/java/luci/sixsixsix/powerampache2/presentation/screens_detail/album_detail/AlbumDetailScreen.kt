@@ -53,10 +53,10 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongInfoThirdRow
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongItem
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongItemEvent
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.common.SongInfoThirdRow
+import luci.sixsixsix.powerampache2.presentation.common.SongItem
+import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,18 +83,16 @@ fun AlbumDetailScreen(
             .collect { orientation = it }
     }
 
-    val isLandscape =
-            when (orientation) {
-                Configuration.ORIENTATION_LANDSCAPE -> {
-                    infoVisibility = false
-                    true
-                }
-
-                else -> {
-                    infoVisibility = true
-                    false
-                }
-            }
+    val isLandscape = when (orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            infoVisibility = false
+            true
+        }
+        else -> {
+            infoVisibility = true
+            false
+        }
+    }
 
     if (playlistsDialogOpen.isOpen) {
         if (playlistsDialogOpen.songs.isNotEmpty()) {
@@ -106,7 +104,6 @@ fun AlbumDetailScreen(
                 mainViewModel = mainViewModel,
                 onCreatePlaylistRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
-                    //createPlaylistDialogOpen = true
                 }
             )
         }

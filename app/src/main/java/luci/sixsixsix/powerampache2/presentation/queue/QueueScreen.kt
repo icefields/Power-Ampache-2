@@ -50,7 +50,6 @@ fun QueueScreen(
     viewModel: QueueViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    var infoVisibility by remember { mutableStateOf(true) }
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
 
     if (playlistsDialogOpen.isOpen) {

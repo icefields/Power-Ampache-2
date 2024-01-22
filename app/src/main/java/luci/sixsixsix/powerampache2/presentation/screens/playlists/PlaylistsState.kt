@@ -6,6 +6,7 @@ data class PlaylistsState (
     val playlists: List<Playlist> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
+    val isDeletePlaylistLoading: Boolean = false,
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false
 )

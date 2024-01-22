@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -21,9 +25,11 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongItem
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SongItemEvent
-import luci.sixsixsix.powerampache2.presentation.screens.songs.components.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.common.SongItem
+import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 
 @Composable
 @Destination(start = false)
@@ -35,6 +41,21 @@ fun SongsListScreen(
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
+    var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
+    if (playlistsDialogOpen.isOpen) {
+        if (playlistsDialogOpen.songs.isNotEmpty()) {
+            AddToPlaylistOrQueueDialog(
+                songs = playlistsDialogOpen.songs,
+                onDismissRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                },
+                mainViewModel = mainViewModel,
+                onCreatePlaylistRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                }
+            )
+        }
+    }
 
     Box(modifier = modifier) {
         if (state.isLoading && state.songs.isEmpty()) {
@@ -65,7 +86,8 @@ fun SongsListScreen(
                                         ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
                                     )
                                     SongItemEvent.ADD_SONG_TO_QUEUE -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
-                                    SongItemEvent.ADD_SONG_TO_PLAYLIST -> {}
+                                    SongItemEvent.ADD_SONG_TO_PLAYLIST ->
+                                        playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                                 }
                             },
                             subtitleString = SubtitleString.ARTIST,
