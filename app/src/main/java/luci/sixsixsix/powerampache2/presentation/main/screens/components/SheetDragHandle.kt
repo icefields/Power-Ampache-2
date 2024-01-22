@@ -16,8 +16,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.song_detail.components.SongDetailTopBar
-import luci.sixsixsix.powerampache2.presentation.song_detail.components.MiniPlayer
+import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailTopBar
+import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.MiniPlayer
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)

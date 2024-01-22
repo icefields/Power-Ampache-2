@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.Song
 import retrofit2.http.Query
 
 interface PlaylistsRepository {
@@ -14,23 +15,21 @@ interface PlaylistsRepository {
 
     suspend fun getPlaylists(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Playlist>>>
     suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>>
-
-    // playlist_add_song
     suspend fun addSongToPlaylist(playlistId: String, songId: String): Flow<Resource<Any>>
-    // playlist_remove_song
+    suspend fun addSongsToPlaylist(playlist: Playlist, songsToAdd: List<Song>): Flow<Resource<Any>>
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String): Flow<Resource<Any>>
-
-    // playlist_create
     suspend fun createNewPlaylist(name: String, playlistType: MainNetwork.PlaylistType): Flow<Resource<Playlist>>
-    // playlist_delete
+    suspend fun createNewPlaylistAddSongs(name: String, playlistType: MainNetwork.PlaylistType, songsToAdd: List<Song>): Flow<Resource<Playlist>>
     suspend fun deletePlaylist(id: String): Flow<Resource<Any>>
-    // playlist_edit
-    suspend fun editPlaylist(playlistId: String, owner: String? = null,
-                             items: String? = null, tracks: String? = null,
-                             playlistType: MainNetwork.PlaylistType): Flow<Resource<Any>>
-
+    suspend fun editPlaylist(
+        playlistId: String,
+        playlistName: String? = null,
+        items: List<Song> = listOf(),
+        owner: String? = null,
+        tracks: String? = null,
+        playlistType: MainNetwork.PlaylistType = MainNetwork.PlaylistType.private
+    ): Flow<Resource<Any>>
     suspend fun likeAlbum(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun likeSong(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>>
-
 }

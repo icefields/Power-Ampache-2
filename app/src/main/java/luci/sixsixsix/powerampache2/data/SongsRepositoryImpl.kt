@@ -177,7 +177,7 @@ class SongsRepositoryImpl @Inject constructor(
         fetchRemote: Boolean
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-        L("repo getSongsFromPlaylist $playlistId")
+        L("repo getSongsFromPlaylist playlistId: $playlistId")
 
         val auth = getSession()!!
         val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId)

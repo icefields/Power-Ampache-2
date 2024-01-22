@@ -3,17 +3,11 @@ package luci.sixsixsix.powerampache2.presentation.search
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,23 +17,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.presentation.LoadingScreen
-import luci.sixsixsix.powerampache2.presentation.albums.AlbumsScreen
-import luci.sixsixsix.powerampache2.presentation.albums.AlbumsViewModel
-import luci.sixsixsix.powerampache2.presentation.artists.ArtistsScreen
-import luci.sixsixsix.powerampache2.presentation.artists.ArtistsViewModel
+import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
+import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsScreen
-import luci.sixsixsix.powerampache2.presentation.playlists.PlaylistsViewModel
-import luci.sixsixsix.powerampache2.presentation.songs.SongsListScreen
-import luci.sixsixsix.powerampache2.presentation.songs.SongsViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
+import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

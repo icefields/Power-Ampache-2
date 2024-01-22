@@ -193,7 +193,8 @@ interface MainNetwork {
         @Query("filter") playlistId: String,
         @Query("owner") owner: String? = null, // Change playlist owner to the user id (-1 = System playlist)
         @Query("items") items: String? = null, // comma-separated song_id's (replaces existing items with a new id)
-        @Query("name") tracks: String? = null, // comma-separated playlisttrack numbers matched to 'items' in order
+        @Query("tracks") tracks: String? = null, // comma-separated playlisttrack numbers matched to 'items' in order
+        @Query("name") name: String? = null,
         @Query("type") playlistType: PlaylistType
     ): SuccessResponse
 

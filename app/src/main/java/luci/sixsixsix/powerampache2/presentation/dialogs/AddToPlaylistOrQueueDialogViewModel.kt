@@ -6,12 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
-import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
@@ -20,12 +18,12 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import java.util.UUID
 import javax.inject.Inject
-import kotlin.math.abs
 
 @HiltViewModel
 class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
     private val musicRepository: MusicRepository,
+    private val songsRepository: SongsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(AddToPlaylistOrQueueDialogState())
@@ -58,15 +56,20 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
 
     fun onEvent(event: AddToPlaylistOrQueueDialogEvent) {
         when (event) {
-            is AddToPlaylistOrQueueDialogEvent.AddToPlaylist ->
+            is AddToPlaylistOrQueueDialogEvent.AddSongToPlaylist ->
                 addSongToPlaylist(playlistId = event.playlistId, songId = event.song.mediaId)
-
-            is AddToPlaylistOrQueueDialogEvent.CreatePlaylistAndAdd ->
+            is AddToPlaylistOrQueueDialogEvent.CreatePlaylistAndAddSong ->
                 createPlaylistAddSong(
                     playlistName = event.playlistName.ifBlank { UUID.randomUUID().toString() },
                     playlistType = event.playlistType,
                     songId = event.song.mediaId
                 )
+            is AddToPlaylistOrQueueDialogEvent.OnAddAlbumToQueue ->
+                playlistManager.addToCurrentQueue(event.songs)
+            is AddToPlaylistOrQueueDialogEvent.AddSongsToPlaylist ->
+                addSongsToPlaylist(songs = event.songs, playlist =  event.playlist)
+            is AddToPlaylistOrQueueDialogEvent.CreatePlaylistAndAddSongs ->
+                createPlaylistAndAddSongs(event.playlistName, event.playlistType, event.songs)
         }
     }
 
@@ -122,6 +125,28 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
             }
     }
 
+    private fun createPlaylistAndAddSongs(
+        playlistName: String,
+        playlistType: MainNetwork.PlaylistType = MainNetwork.PlaylistType.private,
+        songsToAdd: List<Song>
+    ) = viewModelScope.launch {
+        playlistsRepository
+            .createNewPlaylistAddSongs(playlistName, playlistType, songsToAdd).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            getPlaylists()
+                            playlistManager.updateErrorMessage("Playlist $playlistName created and songs added")
+                        }
+                    }
+                    is Resource.Error ->
+                        state = state.copy(isPlaylistEditLoading = false)
+                    is Resource.Loading ->
+                        state = state.copy(isPlaylistEditLoading = result.isLoading)
+                }
+            }
+    }
+
     private fun addSongToPlaylist(playlistId: String, songId: String) = viewModelScope.launch {
         playlistsRepository
             .addSongToPlaylist(playlistId = playlistId, songId = songId).collect { result ->
@@ -130,6 +155,24 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
                         result.data?.let {
                             getPlaylists()
                             playlistManager.updateErrorMessage("Song added to playlist")
+                        }
+                    }
+                    is Resource.Error ->
+                        state = state.copy(isPlaylistEditLoading = false)
+                    is Resource.Loading ->
+                        state = state.copy(isPlaylistEditLoading = result.isLoading)
+                }
+            }
+    }
+
+    private fun addSongsToPlaylist(playlist: Playlist, songs: List<Song>) = viewModelScope.launch {
+        playlistsRepository
+            .addSongsToPlaylist(playlist = playlist, songsToAdd = songs).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            getPlaylists()
+                            playlistManager.updateErrorMessage("Songs added to playlist ${playlist.name}")
                         }
                     }
                     is Resource.Error ->
@@ -148,6 +191,9 @@ data class AddToPlaylistOrQueueDialogState (
 )
 
 sealed class AddToPlaylistOrQueueDialogEvent {
-    data class AddToPlaylist(val song: Song, val playlistId: String): AddToPlaylistOrQueueDialogEvent()
-    data class CreatePlaylistAndAdd(val song: Song, val playlistName: String, val playlistType: MainNetwork.PlaylistType): AddToPlaylistOrQueueDialogEvent()
+    data class OnAddAlbumToQueue(val songs: List<Song>): AddToPlaylistOrQueueDialogEvent()
+    data class AddSongsToPlaylist(val songs: List<Song>, val playlist: Playlist): AddToPlaylistOrQueueDialogEvent()
+    data class CreatePlaylistAndAddSongs(val songs: List<Song>, val playlistName: String, val playlistType: MainNetwork.PlaylistType): AddToPlaylistOrQueueDialogEvent()
+    data class AddSongToPlaylist(val song: Song, val playlistId: String): AddToPlaylistOrQueueDialogEvent()
+    data class CreatePlaylistAndAddSong(val song: Song, val playlistName: String, val playlistType: MainNetwork.PlaylistType): AddToPlaylistOrQueueDialogEvent()
 }

@@ -48,7 +48,7 @@ class MainViewModel @Inject constructor(
     private var searchJob: Job? = null
     private var isServiceRunning = false
 
-    var duration by mutableLongStateOf(0L)
+    private var duration by mutableLongStateOf(0L)
     var progress by mutableFloatStateOf(0f)
     var progressStr by mutableStateOf("00:00")
     var isPlaying by mutableStateOf(false)
@@ -106,7 +106,7 @@ class MainViewModel @Inject constructor(
                     stopMusicService()
                 }
 
-                L("queue:", queue)
+                L("queue:", queue.size)
                 // this is used to update the UI
                 state = state.copy(queue = queue)
                 loadSongData()
