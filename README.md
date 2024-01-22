@@ -7,7 +7,7 @@ Using the latest Material3 design guidelines <br>
 # Development
 The app follows, strictly, SOLID principles, it's developed using Clean Architecture on top of MVVM. Contribution guidelines coming soon, please make sure to read before opening a PR.
 
-# Screenshots
+# Screenshots (MaterialYou Theme, matches the colour scheme of the phone)
 | |  | |
 | ----------- | ----------- | ----------- |
 | **Home Screen** |  | **Music Player pull-up view** |
