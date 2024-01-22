@@ -229,19 +229,6 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun getSongUri(song: Song) =
         dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri ?: song.songUrl
 
-
-    suspend fun downloadSong2(song: Song) {
-        val auth = getSession()!!
-        val responseBody = api.downloadSong(
-            authKey = auth.auth,
-            songId = song.mediaId
-        ).body()
-        when (val filepath = fileUtils.saveFile(song, responseBody)) {
-            "" -> throw Exception("cannot download/save file")
-            else -> dao.addDownloadedSong(song.toDownloadedSongEntity(filepath))
-        }
-    }
-
     // TODO use worker
     override suspend fun downloadSong(song: Song) = flow {
         emit(Resource.Loading(true))

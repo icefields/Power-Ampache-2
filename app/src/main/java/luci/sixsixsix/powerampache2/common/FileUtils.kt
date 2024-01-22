@@ -1,8 +1,6 @@
 package luci.sixsixsix.powerampache2.common
 
-import android.R.string
 import android.content.Context
-import android.os.Environment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
@@ -63,11 +61,7 @@ class FileUtils @Inject constructor(val context: Context) {
         L(absolutePath)
         val myFile = File(absolutePath)
         if (myFile.exists()) {
-            L("deleting file")
             myFile.delete()
-        } else {
-            L("file not exists")
-
         }
     }
 }
