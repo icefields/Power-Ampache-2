@@ -9,6 +9,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CREDENTIALS_PRIMARY_KEY
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.DownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SESSION_PRIMARY_KEY
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
@@ -113,6 +114,17 @@ interface MusicDao {
     @Query("""SELECT * FROM playlistentity order by rating DESC, id DESC""")
     fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addDownloadedSong(downloadedSongEntity: DownloadedSongEntity)
+
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND LOWER(artistId) == LOWER(:artistId) AND LOWER(albumId) == LOWER(:albumId)""")
+    suspend fun getDownloadedSong(songId: String, artistId: String, albumId: String): DownloadedSongEntity?
+
+    @Query("""SELECT * FROM downloadedsongentity""")
+    fun getDownloadedSongs(): LiveData<List<DownloadedSongEntity>>
+
+    @Query("DELETE FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId)")
+    suspend fun deleteDownloadedSong(songId: String)
 
     //@Query("""DELETE FROM playlistentity artistentity, songentity, albumentity""")
     suspend fun clearCachedData() {

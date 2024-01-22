@@ -1,28 +1,30 @@
 package luci.sixsixsix.powerampache2.data
 
+import androidx.lifecycle.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.FileUtils
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
-import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
-import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import okhttp3.internal.http.HTTP_OK
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,9 +38,16 @@ import javax.inject.Singleton
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
-    private val errorHandler: ErrorHandler
+    private val errorHandler: ErrorHandler,
+    private val fileUtils: FileUtils
 ): SongsRepository {
     private val dao = db.dao
+
+    override val offlineSongsLiveData = dao.getDownloadedSongs().map { entities ->
+        entities.map {
+            it.toSong()
+        }
+    }
 
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
     private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
@@ -217,6 +226,37 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun getFlaggedSongs() = getSongsStats(MainNetwork.StatFilter.flagged)
     override suspend fun getRandomSongs() = getSongsStats(MainNetwork.StatFilter.random)
 
+    override suspend fun getSongUri(song: Song) =
+        dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri ?: song.songUrl
+
+    // TODO use worker
+    override suspend fun downloadSong(song: Song) = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.downloadSong(
+            authKey = auth.auth,
+            songId = song.mediaId
+        ).apply {
+            if (code() == HTTP_OK) {
+                // save file to disk and register in database
+                val filepath = fileUtils.saveFile(song, body())
+                dao.addDownloadedSong(song.toDownloadedSongEntity(filepath))
+                emit(Resource.Success(data = Any(), networkData = Any()))
+            } else {
+                throw Exception("cannot download/save file, response code: ${code()}, " +
+                        "response body: ${body().toString()}")
+            }
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("downloadSong()", e, this) }
+
+    override suspend fun deleteDownloadedSong(song: Song) = flow {
+        emit(Resource.Loading(true))
+        dao.deleteDownloadedSong(songId = song.mediaId)
+        fileUtils.deleteSong(song)
+        emit(Resource.Success(data = Any(), networkData = Any()))
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("downloadSong()", e, this) }
 
     /**
      * returns false if Network data is not required, true otherwise

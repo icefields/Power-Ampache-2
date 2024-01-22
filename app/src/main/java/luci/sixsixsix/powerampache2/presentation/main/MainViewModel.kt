@@ -18,10 +18,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -40,6 +43,7 @@ class MainViewModel @Inject constructor(
     private val playlistManager: MusicPlaylistManager,
     private val playlistsRepository: PlaylistsRepository,
     private val musicRepository: MusicRepository,
+    private val songsRepository: SongsRepository,
     private val simpleMediaServiceHandler: SimpleMediaServiceHandler
 ) : AndroidViewModel(application) {
 
@@ -81,9 +85,7 @@ class MainViewModel @Inject constructor(
                     startMusicServiceIfNecessary()
                 } ?: stopMusicService()
                 // this is used to update the UI
-                //songState.song?.let {
-                    state = state.copy(song = songState.song)
-                //}
+                state = state.copy(song = songState.song)
             }
         }
 
@@ -122,23 +124,24 @@ class MainViewModel @Inject constructor(
                         isBuffering = true
                         calculateProgressValue(mediaState.progress)
                     }
-                    SimpleMediaState.Initial -> {
-                    } // UI STATE Initial
-                    is SimpleMediaState.Playing -> {
+                    SimpleMediaState.Initial -> { /* UI STATE Initial */ }
+                    is SimpleMediaState.Playing ->
                         isPlaying = mediaState.isPlaying
-                    }
                     is SimpleMediaState.Progress ->
                         calculateProgressValue(mediaState.progress)
-                    is SimpleMediaState.Ready -> {
+                    is SimpleMediaState.Ready -> { // UI STATE READY
                         isBuffering = false
                         duration = mediaState.duration
-                        // UI STATE READY
                     }
-
-                    is SimpleMediaState.Loading -> isLoading = mediaState.isLoading
+                    is SimpleMediaState.Loading ->
+                        isLoading = mediaState.isLoading
                 }
             }
         }
+    }
+
+    fun isOfflineSong(song: Song, callback: (Boolean) -> Unit) = viewModelScope.launch {
+        callback(!songsRepository.getSongUri(song).startsWith("http"))
     }
 
     /**
@@ -155,8 +158,9 @@ class MainViewModel @Inject constructor(
                 }
             }
             is MainEvent.Play -> viewModelScope.launch {
-                L( "MainEvent.Play", event.song)
-                simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.ForcePlay(event.song.toMediaItem()))
+                L( "MainEvent.Play", event.song, songsRepository.getSongUri(event.song))
+                //delay(1000)
+                simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.ForcePlay(event.song.toMediaItem(songsRepository.getSongUri(event.song))))
             }
             MainEvent.PlayPauseCurrent -> state.song?.let {
                 viewModelScope.launch {
@@ -173,7 +177,8 @@ class MainViewModel @Inject constructor(
             is MainEvent.OnAddSongToQueue ->
                 playlistManager.addToCurrentQueue(event.song)
             is MainEvent.OnAddSongToPlaylist -> {}
-            is MainEvent.OnDownloadSong -> {}
+            is MainEvent.OnDownloadSong ->
+                downloadSong(event.song)
             is MainEvent.OnShareSong -> {}
             is MainEvent.Repeat -> viewModelScope.launch {
                 val nextRepeatMode = nextRepeatMode()
@@ -203,22 +208,55 @@ class MainViewModel @Inject constructor(
             MainEvent.FavouriteSong -> state.song?.let {
                 favouriteSong(it)
             }
+            is MainEvent.OnDownloadedSongDelete ->
+                deleteDownloadedSong(event.song)
         }
     }
 
     private fun favouriteSong(song: Song) = viewModelScope.launch {
         playlistsRepository.likeSong(song.mediaId, (song.flag != 1)).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        result.data?.let {
-                            // refresh song
-                            state = state.copy(song = song.copy(flag = abs(song.flag - 1)))
-                        }
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let {
+                        // refresh song
+                        state = state.copy(song = song.copy(flag = abs(song.flag - 1)))
                     }
-                    is Resource.Error -> state = state.copy(isLikeLoading = false)
-                    is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
                 }
+                is Resource.Error -> state = state.copy(isLikeLoading = false)
+                is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
             }
+        }
+    }
+
+    // TODO USE worker
+    private fun downloadSong(song: Song) = viewModelScope.launch {
+        songsRepository.downloadSong(song).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let {
+                        // song downloaded
+                        playlistManager.updateErrorMessage("${song.name} downloaded")
+                    }
+                }
+                is Resource.Error -> state = state.copy(isLikeLoading = false)
+                is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+            }
+        }
+    }
+
+    private fun deleteDownloadedSong(song: Song) = viewModelScope.launch {
+        songsRepository.deleteDownloadedSong(song).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let {
+                        // song deleted
+                        playlistManager.updateErrorMessage("${song.name} deleted from downloads")
+                    }
+                }
+                is Resource.Error -> playlistManager.updateErrorMessage("ERROR deleting ${song.name}")
+                is Resource.Loading -> {}
+            }
+        }
     }
 
     private fun logout() {
@@ -255,7 +293,12 @@ class MainViewModel @Inject constructor(
         val mediaItemList = mutableListOf<MediaItem>()
         for (song: Song? in state.queue) {
             song?.let {
-                mediaItemList.add(it.toMediaItem())
+                // TODO FIX runBlocking (this functions has to be executed before calling play)
+                //  run blocking makes sure the call is sequential. FIND A BETTER SOLUTION.
+                //  test: with 10000 songs in queue, thread blocked 1.4s on pixel 6a
+                runBlocking {
+                    mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it)))
+                }
             }
         }
         simpleMediaServiceHandler.addMediaItemList(mediaItemList)
@@ -293,7 +336,7 @@ class MainViewModel @Inject constructor(
         super.onCleared()
     }
 
-    fun nextRepeatMode(): RepeatMode =
+    private fun nextRepeatMode(): RepeatMode =
         when(repeatMode) {
             RepeatMode.OFF -> RepeatMode.ONE
             RepeatMode.ONE -> RepeatMode.ALL

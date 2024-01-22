@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_FLOAT
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
@@ -11,13 +12,13 @@ data class SongDto(
     val album: MusicAttributeDto?,
 
     @SerializedName("album_mbid")
-    val albumMbid: Any,
+    val albumMbid: String? = null,
 
     @SerializedName("albumartist")
     val albumartist: MusicAttributeDto?,
 
     @SerializedName("albumartist_mbid")
-    val albumartistMbid: Any,
+    val albumartistMbid: String? = null,
 
     @SerializedName("art")
     val art: String?,
@@ -26,10 +27,10 @@ data class SongDto(
     val artist: MusicAttributeDto?,
 
     @SerializedName("artist_mbid")
-    val artistMbid: Any,
+    val artistMbid: String? = null,
 
     @SerializedName("averagerating")
-    val averagerating: Float = 0.0f,
+    val averagerating: Float? = null,
 
     @SerializedName("bitrate")
     val bitrate: Int?,
@@ -41,13 +42,13 @@ data class SongDto(
     val channels: Int?,
 
     @SerializedName("comment")
-    val comment: Any,
+    val comment: String? = null,
 
     @SerializedName("composer")
     val composer: String?,
 
     @SerializedName("disk")
-    val disk: Int,
+    val disk: Int? = null,
 
     @SerializedName("filename")
     val filename: String?,
@@ -62,16 +63,16 @@ data class SongDto(
     val id: String,
 
     @SerializedName("language")
-    val language: Any,
+    val language: String? = null,
 
     @SerializedName("license")
-    val license: Any,
+    val license: Any? = null,
 
     @SerializedName("lyrics")
-    val lyrics: Any,
+    val lyrics: String? = null,
 
     @SerializedName("mbid")
-    val mbid: Any,
+    val mbid: String? = null,
 
     @SerializedName("mime")
     val mime: String?,
@@ -89,7 +90,7 @@ data class SongDto(
     val playlisttrack: Int?,
 
     @SerializedName("preciserating")
-    val preciserating: Any,
+    val preciserating: Float? = null,
 
     @SerializedName("publisher")
     val publisher: String? = null,
@@ -104,13 +105,13 @@ data class SongDto(
     val rate: Int?,
 
     @SerializedName("rating")
-    val rating: Any,
+    val rating: Float? = null,
 
     @SerializedName("replaygain_album_gain")
-    val replaygainAlbumGain: Any,
+    val replaygainAlbumGain: Any? = null,
 
     @SerializedName("replaygain_album_peak")
-    val replaygainAlbumPeak: Any,
+    val replaygainAlbumPeak: Any? = null,
 
     @SerializedName("replaygain_track_gain")
     val replaygainTrackGain: Float? = null,
@@ -139,8 +140,17 @@ data class SongDto(
     @SerializedName("stream_format")
     val streamFormat: String? = null,
 
+    @SerializedName("format")
+    val format: String? = null,
+
     @SerializedName("stream_mime")
     val streamMime: String? = null,
+
+    @SerializedName("disksubtitle")
+    val diskSubtitle: String? = null,
+
+    @SerializedName("stream_bitrate")
+    val streamBitrate: Int? = null,
 
     @SerializedName("artists")
     val artists: List<MusicAttributeDto> = listOf()
@@ -160,16 +170,17 @@ fun SongDto.toSong() = Song(
     songUrl = url ?: "",
     imageUrl = art ?: "",
     bitrate = bitrate ?: ERROR_INT,
+    streamBitrate = streamBitrate ?: ERROR_INT,
     catalog = catalog ?: ERROR_INT,
     channels = channels ?: ERROR_INT,
     composer = composer ?: "",
     filename = filename ?: "",
-    genre = genre?.map { it.toMusicAttribute() } ?: listOf<MusicAttribute>(),
+    genre = genre?.map { it.toMusicAttribute() } ?: listOf(),
     mime = mime ?: "",
     name = name ?: "",
     playCount = playcount ?: ERROR_INT,
     playlistTrackNumber = playlisttrack ?: ERROR_INT,
-    rate = rate ?: ERROR_INT,
+    rateHz = rate ?: ERROR_INT,
     size = size ?: ERROR_INT,
     time = time ?: ERROR_INT,
     trackNumber = track ?: ERROR_INT,
@@ -178,8 +189,21 @@ fun SongDto.toSong() = Song(
     artists = artists?.map { it.toMusicAttribute() } ?: listOf<MusicAttribute>(),
     flag = processFlag(flag),
     streamFormat = streamFormat,
+    format = format,
     streamMime = streamMime,
     publisher = publisher,
     replayGainTrackGain = replaygainTrackGain,
     replayGainTrackPeak = replaygainTrackPeak,
+    lyrics = lyrics ?: "",
+    comment = comment ?: "",
+    language = language ?: "",
+    disk = disk ?: ERROR_INT,
+    diskSubtitle = diskSubtitle ?: "",
+    mbId = mbid ?: "",
+    albumMbId = albumMbid ?: "",
+    artistMbId = artistMbid ?: "",
+    albumArtistMbId = albumartistMbid ?: "",
+    rating = rating ?: ERROR_FLOAT,
+    preciseRating = preciserating ?: ERROR_FLOAT,
+    averageRating = averagerating ?: ERROR_FLOAT
 )

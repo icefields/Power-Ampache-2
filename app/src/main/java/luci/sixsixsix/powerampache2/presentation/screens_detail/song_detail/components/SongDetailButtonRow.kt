@@ -11,7 +11,9 @@ import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.Audiotrack
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.OfflinePin
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +33,7 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 enum class SongDetailButtonEvents {
     SHARE_SONG,
     DOWNLOAD_SONG,
+    DELETE_DOWNLOADED_SONG,
     ADD_SONG_TO_PLAYLIST_OR_QUEUE,
     GO_TO_ALBUM,
     GO_TO_ARTIST,
@@ -42,6 +45,7 @@ fun SongDetailButtonRow(
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.secondary,
     song: Song,
+    isOffline: Boolean,
     eventListener: (albumInfoViewEvents: SongDetailButtonEvents) -> Unit
 ) {
     val fontSize = 11.sp
@@ -81,11 +85,15 @@ fun SongDetailButtonRow(
                 ) {
                     IconButton(
                         onClick = {
-                            eventListener(SongDetailButtonEvents.DOWNLOAD_SONG)
+                            if (!isOffline) {
+                                eventListener(SongDetailButtonEvents.DOWNLOAD_SONG)
+                            } else {
+                                eventListener(SongDetailButtonEvents.DELETE_DOWNLOADED_SONG)
+                            }
                         }) {
                         Icon(
                             tint = tint,
-                            imageVector = Icons.Outlined.Download,
+                            imageVector = if (!isOffline) Icons.Outlined.DownloadForOffline else Icons.Outlined.OfflinePin,
                             contentDescription = "Download"
                         )
                     }

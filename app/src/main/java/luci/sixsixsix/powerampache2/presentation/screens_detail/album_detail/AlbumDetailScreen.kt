@@ -183,6 +183,7 @@ fun AlbumDetailScreen(
                         eventListener = { event ->
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {
+                                    if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@AlbumInfoSection
                                     if (!isPlayingAlbum) {
                                         // add next to the list and skip to the top of the album (which is next)
                                         viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)

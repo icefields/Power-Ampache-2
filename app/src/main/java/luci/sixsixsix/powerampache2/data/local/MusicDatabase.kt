@@ -6,6 +6,7 @@ import androidx.room.TypeConverters
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.DownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
@@ -19,8 +20,9 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         PlaylistEntity::class,
         SessionEntity::class,
         CredentialsEntity::class,
-        UserEntity::class
-    ], version = 59
+        UserEntity::class,
+        DownloadedSongEntity::class
+    ], version = 66
 )
 @TypeConverters(Converters::class)
 abstract class MusicDatabase: RoomDatabase() {

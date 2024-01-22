@@ -45,9 +45,13 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
+import luci.sixsixsix.powerampache2.presentation.destinations.OfflineSongsScreenDestination
 import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.SongsListScreenDestination
 import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreen
 import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
@@ -63,6 +67,8 @@ import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTab
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.TabItem
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.drawerItems
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
+import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsMainContent
+import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
@@ -88,6 +94,8 @@ fun MainContentScreen(
     var currentScreen: String by rememberSaveable { mutableStateOf(MainContentMenuItem.Home.id) }
     val isSearchActive = remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    val appName = stringResource(id = R.string.app_name)
+    var barTitle by remember { mutableStateOf(appName) }
 
     if (isSearchActive.value) {
         MainSearchBar(
@@ -120,7 +128,8 @@ fun MainContentScreen(
                 MainContentTopAppBar(
                     searchVisibility = isSearchActive,
                     scrollBehavior = scrollBehavior,
-                    viewModel = mainViewModel
+                    viewModel = mainViewModel,
+                    title = barTitle
                 ) { event ->
                     when(event) {
                         // OPEN-CLOSE drawer
@@ -142,22 +151,25 @@ fun MainContentScreen(
                        bottom = it.calculateBottomPadding()
                    )
                ) {
-                   when (MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
+                   when (val menuItem = MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
                        is MainContentMenuItem.Home -> HomeScreen(
                            navigator = navigator,
                            viewModel = homeScreenViewModel
-                       )
+                       ).also { barTitle = appName }
                        is MainContentMenuItem.Library -> TabbedLibraryView(
                            navigator = navigator,
                            pagerState = pagerState,
                            mainViewModel = mainViewModel
-                       )
-                       is MainContentMenuItem.Settings -> HomeScreen(
+                       ).also { barTitle = menuItem.title }
+                       is MainContentMenuItem.Offline -> OfflineSongsMainContent(
                            navigator = navigator,
-                           viewModel = homeScreenViewModel
-                       )
-                       MainContentMenuItem.Logout -> mainViewModel.onEvent(MainEvent.OnLogout)
-                       else -> {}
+                           mainViewModel = mainViewModel
+                       ).also { barTitle = menuItem.title }
+                       is MainContentMenuItem.Settings -> EmptyListView(
+                           "Coming Soon", "Settings and customizations will be available soon"
+                       ).also { barTitle = menuItem.title }
+                       MainContentMenuItem.Logout ->
+                           mainViewModel.onEvent(MainEvent.OnLogout) //.also { barTitle = appName }
                    }
                }
            }
@@ -232,3 +244,8 @@ fun TabbedLibraryView(
 
 
 
+@Composable
+private fun generateBarTitle(song: Song?): String =
+    stringResource(id = R.string.app_name) + (song?.title?.let {
+        "(${song.artist.name} - ${song.title})"
+    } ?: "" )

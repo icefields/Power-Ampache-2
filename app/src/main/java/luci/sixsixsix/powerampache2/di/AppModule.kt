@@ -10,6 +10,7 @@ import luci.sixsixsix.powerampache2.common.Constants.DB_LOCAL_NAME
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_READ_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_WRITE_S
+import luci.sixsixsix.powerampache2.common.FileUtils
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.mapping.AmpacheDateMapper
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -46,6 +47,10 @@ object AppModule {
     @Provides
     fun provideDateMapper(): DateMapper =
         AmpacheDateMapper()
+
+    @Provides
+    fun provideFileUtils(application: Application): FileUtils =
+        FileUtils(application)
 
     @Provides
     @Singleton
