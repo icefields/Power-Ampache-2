@@ -16,11 +16,11 @@ The app follows, strictly, SOLID principles, it's developed using Clean Architec
 | **Artist view, with info and discography** | **Single Album view, with info and songs** | **Single Album view, with info and songs** |
 | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/de081122-23db-4ef7-810f-95fe925dcc29") | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/b435281f-8f59-4b6a-927f-9e4a43999123) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/bdd61944-930f-4509-943f-d60928f1d8b5) |
 | | | |
-| **Queue from bottom drawer** | **Queue from menu** |**Edit Queue, Playlists. Remove/Add Playlists** |
-| ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/39de82b3-e09f-4e42-aa71-484944107103) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/a7a5cdbc-cdb1-428c-bcaa-4758f6efee8a) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/a33fbe04-375e-419a-a9b7-10587dc897eb) |
-| | | |
 | **Album Screen** | **Albums from collection** | **Artists** |
 | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/0a868e71-2f32-4d00-8cf4-6930492ceb74) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/59171ce6-b307-44c0-9e53-df8528eb66da) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/5daa7e07-8ab7-47cd-a653-30f12ab17733) |
+| | | |
+| **Queue from bottom drawer** | **Queue from menu** |**Edit Queue, Playlists. Remove/Add Playlists** |
+| ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/39de82b3-e09f-4e42-aa71-484944107103) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/a7a5cdbc-cdb1-428c-bcaa-4758f6efee8a) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/a33fbe04-375e-419a-a9b7-10587dc897eb) |
 | | | |
 | **Playlists**| **Notification with player controls** | **Notification on lock screen**|
 | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/0e98469b-f6eb-4e85-82f0-14819d23368d) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/cf66b7f9-634d-4245-b187-6b0f08171829) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/4527632c-e1ec-4147-964c-43317e984e26) |
