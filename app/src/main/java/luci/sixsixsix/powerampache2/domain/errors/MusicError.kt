@@ -18,6 +18,7 @@ data class MusicError(
 
     fun isSessionExpiredError(): Boolean = errorCode == ERROR_CODE_SESSION_EXPIRED
     fun isEmptyResult(): Boolean = errorCode == ERROR_CODE_EMPTY
+    fun isServerUrlNotInitialized(): Boolean = errorCode == ERROR_CODE_SERVER_URL_NOT_INITIALIZED
 }
 
 const val ERROR_CODE_SESSION_EXPIRED = "4701"

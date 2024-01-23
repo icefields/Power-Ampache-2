@@ -38,10 +38,11 @@ data class DownloadedSongEntity(
     val lyrics: String = "",
     val comment: String = "",
     val language: String = "",
-    val relativePath: String
+    val relativePath: String,
+    val owner: String
 )
 
-fun Song.toDownloadedSongEntity(localUri: String) = DownloadedSongEntity(
+fun Song.toDownloadedSongEntity(localUri: String, owner: String) = DownloadedSongEntity(
     mediaId = mediaId,
     title = title,
     artistId = artist.id,
@@ -67,7 +68,8 @@ fun Song.toDownloadedSongEntity(localUri: String) = DownloadedSongEntity(
     averageRating = averageRating,
     preciseRating = preciseRating,
     rating = rating,
-    relativePath = filename
+    relativePath = filename,
+    owner = owner
 )
 
 fun DownloadedSongEntity.toSong() = Song(

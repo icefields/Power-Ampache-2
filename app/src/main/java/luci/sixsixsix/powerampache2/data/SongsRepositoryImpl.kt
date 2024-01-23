@@ -7,18 +7,18 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.FileUtils
+import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
+import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -37,9 +37,10 @@ import javax.inject.Singleton
 @Singleton
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
-    private val db: MusicDatabase,
+    db: MusicDatabase,
+    private val musicRepository: MusicRepository,
     private val errorHandler: ErrorHandler,
-    private val fileUtils: FileUtils
+    private val storageManagerImpl: StorageManagerImpl
 ): SongsRepository {
     private val dao = db.dao
 
@@ -239,9 +240,13 @@ class SongsRepositoryImpl @Inject constructor(
         ).apply {
             if (code() == HTTP_OK) {
                 // save file to disk and register in database
-                val filepath = fileUtils.saveFile(song, body())
-                dao.addDownloadedSong(song.toDownloadedSongEntity(filepath))
-                emit(Resource.Success(data = Any(), networkData = Any()))
+                body()?.byteStream()?.let { inputStream ->
+                    val filepath = storageManagerImpl.saveSong(song, inputStream)
+                    dao.addDownloadedSong( // TODO fix double-bang!!
+                        song.toDownloadedSongEntity(filepath, musicRepository.getUser()?.username!!)
+                    )
+                    emit(Resource.Success(data = Any(), networkData = Any()))
+                } ?: throw Exception("cannot download/save file, body or input stream NULL response code: ${code()}")
             } else {
                 throw Exception("cannot download/save file, response code: ${code()}, " +
                         "response body: ${body().toString()}")
@@ -253,7 +258,7 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun deleteDownloadedSong(song: Song) = flow {
         emit(Resource.Loading(true))
         dao.deleteDownloadedSong(songId = song.mediaId)
-        fileUtils.deleteSong(song)
+        storageManagerImpl.deleteSong(song)
         emit(Resource.Success(data = Any(), networkData = Any()))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("downloadSong()", e, this) }

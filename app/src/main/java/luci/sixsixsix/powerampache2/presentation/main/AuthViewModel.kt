@@ -127,6 +127,7 @@ class AuthViewModel @Inject constructor(
                         is Resource.Success -> {
                             result.data?.let { auth ->
                                 state = state.copy(session = auth)
+                                playlistManager.updateErrorMessage("")
                             }
                         }
 
