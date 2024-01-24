@@ -13,7 +13,9 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
+import luci.sixsixsix.powerampache2.data.remote.PingScheduler
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
@@ -21,6 +23,7 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val repository: MusicRepository,
     private val playlistManager: MusicPlaylistManager,
+    pingScheduler: AlarmScheduler,
     application: Application
 ) : AndroidViewModel(application) {
     var state by mutableStateOf(AuthState())
@@ -30,9 +33,10 @@ class AuthViewModel @Inject constructor(
         verifyAndAutologin()
         // Listen to changes of the session table from the database
         repository.sessionLiveData.observeForever {
-            state = state.copy(session = it)//?.toSession())
+            state = state.copy(session = it)
             L(it)
             if (it == null) {
+                pingScheduler.cancel()
                 playlistManager.reset()
                 // setting the session to null will show the login screen, but the autologin call
                 // will immediately set isLoading to true which will show the loading screen instead
@@ -41,6 +45,8 @@ class AuthViewModel @Inject constructor(
                 viewModelScope.launch {
                     autologin()
                 }
+            } else {
+                pingScheduler.schedule()
             }
         }
 

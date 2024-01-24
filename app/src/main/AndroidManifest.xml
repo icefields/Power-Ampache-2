@@ -36,6 +36,8 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
+        
+        <receiver android:name=".data.remote.AlarmReceiver"/>
 
         <!-- remove default worker initializer to provide custom one-->
         <provider
