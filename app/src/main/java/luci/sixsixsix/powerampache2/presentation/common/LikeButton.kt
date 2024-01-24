@@ -2,6 +2,7 @@ package luci.sixsixsix.powerampache2.presentation.common
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -28,7 +29,7 @@ fun LikeButton(
     onClick: () -> Unit
 ) {
     IconButton(
-        modifier = modifier.size(24.dp),
+        modifier = modifier.size(34.dp),
         onClick = { onClick() }
     ) {
         Card(
@@ -36,7 +37,7 @@ fun LikeButton(
             modifier = Modifier.fillMaxSize()
         ) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(4.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (isLikeLoading) {

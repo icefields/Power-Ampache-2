@@ -18,22 +18,28 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.DownloadDone
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissState
 import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismiss
@@ -132,10 +138,24 @@ fun SongItemMain(
                         contentDescription = song.title,
                     )
                 if(isSongDownloaded) {
-                    Icon( Icons.Outlined.DownloadDone,
-                        contentDescription = "",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                        Card(
+                            //colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.),
+                            modifier = Modifier.size(20.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .wrapContentSize()
+                                    .padding(2.dp)
+                                    .background(Color.Transparent),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.DownloadDone,
+                                    contentDescription = "download done",
+                                    //tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                 }
 }
             }
