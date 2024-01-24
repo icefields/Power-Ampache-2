@@ -15,23 +15,25 @@ class PingScheduler @Inject constructor(
     private val context: Context
 ): AlarmScheduler {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
+    private val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        665,
+        Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("MESSAGE", "PING")
+        },
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
     private var isScheduled = false
+
     override fun schedule() {
         L("schedule alarm ping")
         if (isScheduled) return
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("MESSAGE", "PING")
-        }
 
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
             System.currentTimeMillis(),
             INTERVAL_HOUR * 2,
-            PendingIntent.getBroadcast(
-            context,
-            665,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        ))
+            pendingIntent
+        )
 
         isScheduled = true
 
@@ -48,12 +50,6 @@ class PingScheduler @Inject constructor(
 
     override fun cancel() {
         isScheduled = false
-
-        alarmManager.cancel(PendingIntent.getBroadcast(
-            context,
-            665,
-            Intent(context, AlarmReceiver::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        ))
+        alarmManager.cancel(pendingIntent)
     }
 }
