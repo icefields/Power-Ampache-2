@@ -38,7 +38,8 @@ class SongDownloadWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val authKey = params.inputData.getString(KEY_AUTH_TOKEN)
         val username = params.inputData.getString(KEY_USERNAME)
-        val song = Gson().fromJson(params.inputData.getString(KEY_SONG), Song::class.java)
+        val songStr = params.inputData.getString(KEY_SONG)
+        val song = Gson().fromJson(songStr, Song::class.java)
 
         val firstUpdate = workDataOf(KEY_PROGRESS to 0, KEY_SONG to "${song.artist.name} - ${song.name}")
         val lastUpdate = workDataOf(KEY_PROGRESS to 100, KEY_SONG to "${song.artist.name} - ${song.name}")
@@ -57,8 +58,9 @@ class SongDownloadWorker @AssistedInject constructor(
                         song.toDownloadedSongEntity(filepath, username!!)
                     )
                     setProgress(lastUpdate)
+                    //if ()
                     Result.success(
-                        workDataOf(KEY_RESULT_PATH to filepath)
+                        workDataOf(KEY_RESULT_SONG to songStr)
                     )
                 } ?: Result.failure(
                     workDataOf(
@@ -75,19 +77,18 @@ class SongDownloadWorker @AssistedInject constructor(
 
     companion object {
         private const val prefix = "luci.sixsixsix.powerampache2.worker."
-        private const val WORKER_NAME = "ttitsong_download_worker"
 
         const val KEY_USERNAME = "${prefix}KEY_USERNAME"
         const val KEY_AUTH_TOKEN = "${prefix}KEY_AUTH_TOKEN"
         const val KEY_SONG = "${prefix}KEY_SONG"
         const val KEY_RESULT_PATH = "${prefix}KEY_RESULT_PATH"
+        const val KEY_RESULT_SONG = "${prefix}KEY_RESULT_SONG"
         const val KEY_RESULT_ERROR = "${prefix}KEY_RESULT_ERROR"
         const val KEY_PROGRESS = "${prefix}KEY_PROGRESS"
 
-        private var workerName: String = "${System.currentTimeMillis()}$WORKER_NAME"
-
         fun startSongDownloadWorker(
             context: Context,
+            workerName: String,
             authToken: String,
             username: String,
             song: Song
@@ -97,29 +98,23 @@ class SongDownloadWorker @AssistedInject constructor(
                     workDataOf(
                         KEY_SONG to Gson().toJson(song),
                         KEY_AUTH_TOKEN to authToken,
-                        KEY_USERNAME to username
-                    )
-                )
-                .setConstraints(
+                        KEY_USERNAME to username)
+                ).setConstraints(
                     Constraints(
                         requiresStorageNotLow = true,
-                        requiredNetworkType = NetworkType.CONNECTED
-                    )
-                )
-                .setBackoffCriteria(
+                        requiredNetworkType = NetworkType.CONNECTED)
+                ).setBackoffCriteria(
                     backoffPolicy = BackoffPolicy.LINEAR,
                     Duration.ofSeconds(10L)
-                )
-                .build()
+                ).build()
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(workerName, ExistingWorkPolicy.APPEND, request)
             return request.id
         }
 
-        fun stopAllDownloads(context: Context) {
+        fun stopAllDownloads(context: Context, workerName: String) {
             WorkManager.getInstance(context).cancelUniqueWork(workerName)
             // change worker name otherwise cannot restart work
-            workerName = "${System.currentTimeMillis()}$WORKER_NAME"
         }
     }
 }

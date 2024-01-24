@@ -82,6 +82,8 @@ import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsScr
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
+import luci.sixsixsix.powerampache2.presentation.settings.SettingsScreen
+import luci.sixsixsix.powerampache2.presentation.settings.SettingsViewModel
 
 @Composable
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
@@ -91,6 +93,7 @@ fun MainContentScreen(
     navigator: DestinationsNavigator,
     mainViewModel: MainViewModel,
     authViewModel: AuthViewModel,
+    settingsViewModel: SettingsViewModel,
     homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     // IMPORTANT : set the main navigator right away here in MainScreen
@@ -181,8 +184,9 @@ fun MainContentScreen(
                                navigator = navigator,
                                mainViewModel = mainViewModel
                            ).also { barTitle = menuItem.title }
-                           is MainContentMenuItem.Settings -> EmptyListView(
-                               "Coming Soon", "Settings and customizations will be available soon"
+                           is MainContentMenuItem.Settings -> SettingsScreen( navigator,
+                                settingsViewModel
+                               //"Coming Soon", "Settings and customizations will be available soon"
                            ).also { barTitle = menuItem.title }
                            MainContentMenuItem.Logout ->
                                mainViewModel.onEvent(MainEvent.OnLogout) //.also { barTitle = appName }

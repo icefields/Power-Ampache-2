@@ -11,4 +11,5 @@ sealed class AlbumDetailEvent {
     data object OnShareAlbum: AlbumDetailEvent()
     data object OnShuffleAlbum: AlbumDetailEvent()
     data object OnFavouriteAlbum: AlbumDetailEvent()
+    data object RefreshFromCache: AlbumDetailEvent()
 }

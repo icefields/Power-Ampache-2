@@ -11,6 +11,7 @@ import luci.sixsixsix.powerampache2.data.AlbumsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.ArtistsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.ErrorHandlerImpl
 import luci.sixsixsix.powerampache2.data.MusicRepositoryImpl
+import luci.sixsixsix.powerampache2.data.SettingsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
@@ -18,6 +19,7 @@ import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
@@ -57,6 +59,12 @@ abstract class RepositoryModule {
     abstract fun bindPlaylistsRepository(
         playlistsRepositoryImpl: PlaylistsRepositoryImpl
     ): PlaylistsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(
+        settingsRepositoryImpl: SettingsRepositoryImpl
+    ): SettingsRepository
 
     @Binds
     @Singleton

@@ -132,7 +132,10 @@ fun SongItemMain(
                         contentDescription = song.title,
                     )
                 if(isSongDownloaded) {
-                    Icon( Icons.Outlined.DownloadDone, contentDescription = "", tint = MaterialTheme.colorScheme.secondary)
+                    Icon( Icons.Outlined.DownloadDone,
+                        contentDescription = "",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
 }
             }

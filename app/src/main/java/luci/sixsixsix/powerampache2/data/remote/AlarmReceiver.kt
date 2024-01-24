@@ -16,7 +16,12 @@ class AlarmReceiver: BroadcastReceiver() {
     @Inject
     lateinit var musicRepository: MusicRepository
     override fun onReceive(context: Context?, intent: Intent?) {
-        val message = intent?.getStringArrayExtra("MESSAGE")
+        try {
+            val message = intent?.getStringExtra("MESSAGE")
+            L(message)
+        } catch (e: Exception) {
+            L.e(e)
+        }
         // ping to refresh token
         GlobalScope.launch {
             val ping = musicRepository.ping()

@@ -42,6 +42,7 @@ import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Compan
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.KEY_RESULT_PATH
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -65,6 +66,7 @@ class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     db: MusicDatabase,
     private val musicRepository: MusicRepository,
+    private val settingsRepository: SettingsRepository,
     private val errorHandler: ErrorHandler,
     private val storageManagerImpl: StorageManagerImpl,
     private val weakContext: WeakReference<Application>
@@ -281,10 +283,15 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("downloadSong()", e, this) }
 
+
+    override suspend fun isSongAvailableOffline(song: Song): Boolean =
+        dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
+
     override suspend fun downloadSong(song: Song): Flow<Resource<Any>> = channelFlow {
         send(Resource.Loading(true))
 
-        val isSongDownloadedAlready = dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
+        val isSongDownloadedAlready =
+            dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
         if (isSongDownloadedAlready) {
             send(Resource.Loading(false))
             return@channelFlow
@@ -292,30 +299,19 @@ class SongsRepositoryImpl @Inject constructor(
 
         val auth = getSession()!!
         weakContext.get()?.let { context ->
-            val requestId = startSongDownloadWorker(context, auth.auth, musicRepository.getUser()?.username!!, song)
+            val requestId = startSongDownloadWorker(
+                context = context,
+                workerName = settingsRepository.getDownloadWorkerId(),
+                authToken = auth.auth,
+                username = musicRepository.getUser()?.username!!,
+                song = song
+            )
             L(requestId)
-             WorkManager.getInstance(context)
-                .getWorkInfoByIdFlow(requestId)
-                //.mapNotNull { it.outputData.getString(KEY_RESULT_PATH) }
-                //.cancellable()
-                .collectLatest {
-                    // update progress
-                    it?.progress?.getInt(KEY_PROGRESS, -1)?.let { progress ->
-                        emitDownloadProgress(this, progress)
-                    }
-                    it?.outputData?.getString(KEY_RESULT_PATH)?.let {
-                        emitDownloadSuccess(this)
-                    }
-                    L(it.state.name, it.outputData.keyValueMap)
-                    it?.state?.let { downloadState ->
-                        if (downloadState == WorkInfo.State.CANCELLED) {
-                            emitDownloadProgress(this, 100)
-                        }
-                    }
-                }
         } ?: run {
             throw NullPointerException("context was null")
         }
+        send(Resource.Success(data = Any(), networkData = Any()))
+        send(Resource.Loading(false))
     }.catch { e -> errorHandler("downloadSong()", e, this) }
 
     private suspend fun emitDownloadSuccess(fc: ProducerScope<Resource<Any>>){

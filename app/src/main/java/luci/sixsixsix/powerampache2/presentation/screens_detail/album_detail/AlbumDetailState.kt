@@ -8,10 +8,16 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 @Parcelize
 data class AlbumDetailState (
     val album: Album = Album(),
-    val songs: List<Song> = emptyList(),
+    val songs: List<SongWrapper> = emptyList(),
     val isLoading: Boolean = false,
     val isLikeLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false
+): Parcelable
+
+@Parcelize
+data class SongWrapper(
+    val song: Song,
+    val isOffline: Boolean
 ): Parcelable

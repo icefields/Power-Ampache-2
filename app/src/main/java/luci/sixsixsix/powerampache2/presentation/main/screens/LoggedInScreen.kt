@@ -30,6 +30,7 @@ import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.SheetDragHandle
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.SongDetailScreen
+import luci.sixsixsix.powerampache2.presentation.settings.SettingsViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,6 +38,7 @@ import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.Song
 fun LoggedInScreen(
     mainViewModel: MainViewModel,
     authViewModel: AuthViewModel,
+    settingsViewModel: SettingsViewModel
     //homeScreenViewModel: HomeScreenViewModel
 ) {
     val state = mainViewModel.state
@@ -78,6 +80,7 @@ fun LoggedInScreen(
                     // those are declared in the activity
                     dependency(mainViewModel)
                     dependency(authViewModel)
+                    dependency(settingsViewModel)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
