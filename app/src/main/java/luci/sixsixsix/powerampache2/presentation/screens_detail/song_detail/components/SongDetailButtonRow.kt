@@ -96,7 +96,7 @@ fun SongDetailButtonRow(
                             contentDescription = "Download"
                         )
                     }
-                    Text(text = "Download", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
+                    Text(text = if (!isOffline) "Download" else "Downloaded", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
                 }
 
                 3 -> Column(

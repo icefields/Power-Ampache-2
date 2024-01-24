@@ -37,38 +37,44 @@ fun DownloadProgressView(onStopDownload: () -> Unit) {
         shape = RoundedCornerShape(1.dp),
         elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.albumDetail_chip_elevation))
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp)
-                .padding(top = 5.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp, horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Download in progress",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontStyle = FontStyle.Normal,
-                fontFamily = FontFamily.SansSerif)
-            Spacer(modifier = Modifier.padding(vertical = 4.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 10.dp)
+                    .padding(top = 5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                LinearProgressIndicator(
-                    modifier = Modifier.weight(1f).padding(horizontal = 10.dp),
-                )
+                Text(text = "Download in progress",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontStyle = FontStyle.Normal,
+                    fontFamily = FontFamily.SansSerif)
+                Spacer(modifier = Modifier.padding(vertical = 4.dp))
 
-                Button(onClick = {
+                LinearProgressIndicator(
+                    modifier = Modifier.padding(horizontal = 10.dp),
+                )
+            }
+
+            Button(
+                shape = RoundedCornerShape(1.dp),
+                onClick = {
                     onStopDownload()
-                }) {
-                    Icon(Icons.Outlined.FileDownloadOff, contentDescription = "stop download progress")
-                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                    Text(text = "Cancel")
                 }
+            ) {
+                Icon(Icons.Outlined.FileDownloadOff, contentDescription = "stop download progress")
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                Text(text = "Cancel")
             }
         }
+
+
     }
 
 }

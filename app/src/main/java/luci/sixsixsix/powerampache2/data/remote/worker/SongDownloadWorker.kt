@@ -40,8 +40,8 @@ class SongDownloadWorker @AssistedInject constructor(
         val username = params.inputData.getString(KEY_USERNAME)
         val song = Gson().fromJson(params.inputData.getString(KEY_SONG), Song::class.java)
 
-        val firstUpdate = workDataOf(KEY_PROGRESS to 0)
-        val lastUpdate = workDataOf(KEY_PROGRESS to 100)
+        val firstUpdate = workDataOf(KEY_PROGRESS to 0, KEY_SONG to "${song.artist.name} - ${song.name}")
+        val lastUpdate = workDataOf(KEY_PROGRESS to 100, KEY_SONG to "${song.artist.name} - ${song.name}")
 
         setProgress(firstUpdate)
 
