@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -22,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
+import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
@@ -210,6 +212,12 @@ class MainViewModel @Inject constructor(
             }
             is MainEvent.OnDownloadedSongDelete ->
                 deleteDownloadedSong(event.song)
+            is MainEvent.OnDownloadSongs ->
+                downloadSongs(event.songs)
+            is MainEvent.OnStopDownloadSongs -> {
+                SongDownloadWorker.stopAllDownloads(application)
+                state = state.copy(isDownloading = false)
+            }
         }
     }
 
@@ -228,7 +236,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // TODO USE worker
     private fun downloadSong(song: Song) = viewModelScope.launch {
         songsRepository.downloadSong(song).collect { result ->
             when (result) {
@@ -238,11 +245,13 @@ class MainViewModel @Inject constructor(
                         playlistManager.updateErrorMessage("${song.name} downloaded")
                     }
                 }
-                is Resource.Error -> state = state.copy(isLikeLoading = false)
-                is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+                is Resource.Error -> state = state.copy(isDownloading = false)
+                is Resource.Loading -> state = state.copy(isDownloading = result.isLoading)
             }
         }
     }
+
+    private fun downloadSongs(songs: List<Song>) = songs.forEach { song -> downloadSong(song) }
 
     private fun deleteDownloadedSong(song: Song) = viewModelScope.launch {
         songsRepository.deleteDownloadedSong(song).collect { result ->

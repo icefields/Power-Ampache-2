@@ -9,7 +9,6 @@ sealed class AlbumDetailEvent {
     data class OnSongSelected(val song: Song): AlbumDetailEvent()
     data object OnPlayAlbum: AlbumDetailEvent()
     data object OnShareAlbum: AlbumDetailEvent()
-    data object OnDownloadAlbum: AlbumDetailEvent()
     data object OnShuffleAlbum: AlbumDetailEvent()
     data object OnFavouriteAlbum: AlbumDetailEvent()
 }

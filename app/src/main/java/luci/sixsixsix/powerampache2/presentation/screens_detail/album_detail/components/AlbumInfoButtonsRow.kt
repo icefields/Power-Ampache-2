@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,7 +52,7 @@ fun AlbumInfoButtonsRow(
                 eventListener(AlbumInfoViewEvents.DOWNLOAD_ALBUM)
             }) {
             Icon(
-                imageVector = Icons.Outlined.Download,
+                imageVector = Icons.Outlined.DownloadForOffline,
                 contentDescription = "Download"
             )
         }

@@ -78,7 +78,7 @@ fun SongDetailTopBar(
         }
 
         TopBarCircularProgress(
-            isLoading = mainViewModel.isLoading,
+            isLoading = mainViewModel.isLoading || mainViewModel.state.isDownloading,
             modifier = Modifier.align(Alignment.CenterEnd)
         )
     }

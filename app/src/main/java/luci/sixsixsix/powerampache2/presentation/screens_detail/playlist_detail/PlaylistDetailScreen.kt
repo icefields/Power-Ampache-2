@@ -216,7 +216,7 @@ fun PlaylistDetailScreen(
                                 PlaylistInfoViewEvents.SHARE_PLAYLIST ->
                                     viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)
                                 PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST ->
-                                    viewModel.onEvent(PlaylistDetailEvent.OnDownloadPlaylist)
+                                    mainViewModel.onEvent(MainEvent.OnDownloadSongs(viewModel.state.songs))
                                 PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST -> {
                                     // this will add the shuffled playlist next and update the current song
                                     // in main view model (which is listening to playlist manager)

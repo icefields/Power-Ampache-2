@@ -57,7 +57,6 @@ class AlbumDetailViewModel @Inject constructor(
                 playlistManager.updateCurrentSong(state.songs[0])
                 playlistManager.addToCurrentQueueTop(state.songs)
             }
-            AlbumDetailEvent.OnDownloadAlbum -> {}
             AlbumDetailEvent.OnShareAlbum -> {}
             AlbumDetailEvent.OnShuffleAlbum -> {
                 val shuffled = state.songs.shuffled()

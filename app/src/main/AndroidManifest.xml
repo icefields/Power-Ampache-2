@@ -30,15 +30,17 @@
         </activity>
 
         <service android:name=".player.SimpleMediaService"
-            android:foregroundServiceType="mediaPlayback"/>
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
 
-<!--        <service android:name=".exoplayer.MusicService"-->
-<!--            android:foregroundServiceType="mediaPlayback"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.media.browse.MediaBrowserService" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
+        <!-- remove default worker initializer to provide custom one-->
+        <provider
+            android:authorities="${applicationId}.androidx-startup"
+            android:name="androidx.startup.InitializationProvider"
+            tools:node="remove"/>
     </application>
-
 </manifest>

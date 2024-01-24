@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.DownloadDone
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -89,6 +91,7 @@ fun SongItemMain(
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
     isLandscape: Boolean = false,
+    isSongDownloaded: Boolean = false,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
 ) {
@@ -120,13 +123,18 @@ fun SongItemMain(
                 elevation = CardDefaults.cardElevation(1.dp),
                 shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
             ) {
-                AsyncImage(
-                    model = song.imageUrl,
-                    contentScale = ContentScale.FillWidth,
-                    placeholder = painterResource(id = R.drawable.placeholder_album),
-                    error = painterResource(id = R.drawable.ic_playlist),
-                    contentDescription = song.title,
-                )
+                Box(contentAlignment = Alignment.BottomEnd) {
+                    AsyncImage(
+                        model = song.imageUrl,
+                        contentScale = ContentScale.FillWidth,
+                        placeholder = painterResource(id = R.drawable.placeholder_album),
+                        error = painterResource(id = R.drawable.ic_playlist),
+                        contentDescription = song.title,
+                    )
+                if(isSongDownloaded) {
+                    Icon( Icons.Outlined.DownloadDone, contentDescription = "", tint = MaterialTheme.colorScheme.secondary)
+                }
+}
             }
         }
         Spacer(modifier = Modifier
@@ -249,6 +257,7 @@ fun SongItem(
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
     isLandscape: Boolean = false,
+    isSongDownloaded: Boolean = false,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
     enableSwipeToRemove: Boolean = false,
@@ -257,7 +266,7 @@ fun SongItem(
     SwipeToDismissItem(
         item = song,
         foregroundView = {
-            SongItemMain(song, songItemEventListener, modifier, isLandscape, subtitleString, songInfoThirdRow)
+            SongItemMain(song, songItemEventListener, modifier, isLandscape, isSongDownloaded,subtitleString, songInfoThirdRow)
         },
         enableSwipeToRemove = enableSwipeToRemove,
         onRemove = onRemove
@@ -301,7 +310,8 @@ fun SongItemPreview() {
     SongItem(
         song = Song.mockSong,
         songItemEventListener = {},
-        subtitleString = SubtitleString.NOTHING
+        subtitleString = SubtitleString.NOTHING,
+        isSongDownloaded = true
     ) {
 
     }

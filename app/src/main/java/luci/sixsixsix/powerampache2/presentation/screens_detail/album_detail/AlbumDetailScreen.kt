@@ -150,7 +150,7 @@ fun AlbumDetailScreen(
                 AlbumDetailTopBar(
                     navigator = navigator,
                     album = viewModel.state.album,
-                    isLoading = state.isLoading,
+                    isLoading = state.isLoading || mainViewModel.state.isDownloading,
                     scrollBehavior = scrollBehavior
                 ) { infoVisibility = !infoVisibility }
             }
@@ -196,7 +196,7 @@ fun AlbumDetailScreen(
                                 AlbumInfoViewEvents.SHARE_ALBUM ->
                                     viewModel.onEvent(AlbumDetailEvent.OnShareAlbum)
                                 AlbumInfoViewEvents.DOWNLOAD_ALBUM ->
-                                    viewModel.onEvent(AlbumDetailEvent.OnDownloadAlbum)
+                                    mainViewModel.onEvent(MainEvent.OnDownloadSongs(viewModel.state.songs))
                                 AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM -> {
                                     // this will add the shuffled playlist next and update the current song
                                     // in main view model (which is listening to playlist manager)

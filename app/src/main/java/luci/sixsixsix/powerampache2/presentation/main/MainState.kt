@@ -7,5 +7,6 @@ data class MainState (
     val errorMessage: String = "",
     val song: Song? = null,
     val queue: List<Song> = listOf(),
-    val isLikeLoading:Boolean = false
+    val isLikeLoading:Boolean = false,
+    val isDownloading:Boolean = false
 )
