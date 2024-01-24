@@ -10,7 +10,10 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
+import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
@@ -43,6 +46,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.abs
 
+@kotlin.OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val application: Application,
@@ -51,10 +55,13 @@ class MainViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
     private val songsRepository: SongsRepository,
     private val settingsRepository: SettingsRepository,
-    private val simpleMediaServiceHandler: SimpleMediaServiceHandler
+    private val simpleMediaServiceHandler: SimpleMediaServiceHandler,
+    private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
-    var state by mutableStateOf(MainState())
-        private set
+//    var state by mutableStateOf(MainState())
+//        private set
+    var state by savedStateHandle.saveable { mutableStateOf(MainState()) }
+
     private var duration by mutableLongStateOf(0L)
     var progress by mutableFloatStateOf(0f)
     var progressStr by mutableStateOf("00:00")
@@ -70,6 +77,13 @@ class MainViewModel @Inject constructor(
 
     init {
         L()
+        // restore song and queue if saved in statehandle
+        if (state.queue.isNotEmpty()) {
+            playlistManager.replaceCurrentQueue(state.queue)
+        }
+        state.song?.let {
+            playlistManager.updateCurrentSong(it)
+        }
         observePlaylistManager()
         observePlayerEvents()
         observeSession()
@@ -87,16 +101,19 @@ class MainViewModel @Inject constructor(
                     L("observeForever")
                     var atLeastOneRunning = false
                     var atLeastOneEnqueued = false
+                    var atLeastOneBlocked = false
                     workInfoList.forEach { workInfo ->
                         L(workInfo.state.name)
-                        if (!atLeastOneRunning &&
-                            workInfo.state == WorkInfo.State.RUNNING) {
+                        if (!atLeastOneRunning && workInfo.state == WorkInfo.State.RUNNING) {
                             atLeastOneRunning = true
                         }
-                        if (!atLeastOneEnqueued &&
-                            workInfo.state == WorkInfo.State.ENQUEUED) {
+                        if (!atLeastOneEnqueued && workInfo.state == WorkInfo.State.ENQUEUED) {
                             atLeastOneEnqueued = true
                         }
+                        if (!atLeastOneBlocked && workInfo.state == WorkInfo.State.BLOCKED) {
+                            atLeastOneBlocked = true
+                        }
+
                         if (workInfo.state == WorkInfo.State.SUCCEEDED) {
                             workInfo?.outputData?.getString(SongDownloadWorker.KEY_RESULT_SONG)?.let { songStr ->
                                 val finishedSong: Song = Gson().fromJson(songStr, Song::class.java)
@@ -118,7 +135,11 @@ class MainViewModel @Inject constructor(
 //                            }
 //                        }
                     }
-                    state = state.copy(isDownloading = atLeastOneRunning || atLeastOneEnqueued)
+                    state = state.copy(isDownloading = atLeastOneRunning || atLeastOneEnqueued || atLeastOneBlocked)
+                    if(!atLeastOneRunning && !atLeastOneBlocked && !atLeastOneEnqueued) {
+                        // no more work to be done
+                        // switch worker id ?
+                    }
                 }
         }
     }

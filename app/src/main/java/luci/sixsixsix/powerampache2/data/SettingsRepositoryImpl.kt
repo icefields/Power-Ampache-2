@@ -24,8 +24,10 @@ class SettingsRepositoryImpl @Inject constructor(
     private val errorHandler: ErrorHandler
 ): SettingsRepository {
     private val dao = db.dao
-    override val settingsLiveData: LiveData<LocalSettings>
-        get() = dao.settingsLiveData().map { it.toLocalSettings() }
+    override val settingsLiveData: LiveData<LocalSettings?>
+        get() = dao.settingsLiveData().map {
+                it?.toLocalSettings()
+        }
 
     override suspend fun getDownloadWorkerId() = getLocalSettings().workerId
 

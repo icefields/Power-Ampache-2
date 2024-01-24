@@ -131,7 +131,7 @@ interface MusicDao {
     suspend fun getSettings(): LocalSettingsEntity
 
     @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
-    fun settingsLiveData(): LiveData<LocalSettingsEntity>
+    fun settingsLiveData(): LiveData<LocalSettingsEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun writeSettings(localSettingsEntity: LocalSettingsEntity)

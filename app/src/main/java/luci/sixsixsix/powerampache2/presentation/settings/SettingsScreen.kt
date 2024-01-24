@@ -22,7 +22,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
+import luci.sixsixsix.powerampache2.domain.models.User
 
 @Composable
 @Destination
@@ -30,13 +33,13 @@ fun SettingsScreen(
     navigator: DestinationsNavigator,
     settingsViewModel: SettingsViewModel
 ) {
-    KindRadioGroupUsage(currentTheme = settingsViewModel.state.theme) {
+    KindRadioGroupUsage(currentTheme = settingsViewModel.state.theme, user = settingsViewModel.userState) {
         settingsViewModel.setTheme(it)
     }
 }
 
 @Composable
-fun KindRadioGroupUsage(currentTheme: PowerAmpTheme, onThemeSelected: (selected: PowerAmpTheme) -> Unit) {
+fun KindRadioGroupUsage(user: User?, currentTheme: PowerAmpTheme, onThemeSelected: (selected: PowerAmpTheme) -> Unit) {
     val kinds = PowerAmpTheme.entries
     val (selected, setSelected) = remember { mutableStateOf(currentTheme) }
     Column {
@@ -50,6 +53,11 @@ fun KindRadioGroupUsage(currentTheme: PowerAmpTheme, onThemeSelected: (selected:
         )
         Text(
             text = "Selected Option : $selected",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = user?.toDebugString() ?: ERROR_STRING,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )

@@ -5,7 +5,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
+import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -17,16 +20,28 @@ import luci.sixsixsix.powerampache2.data.remote.PingScheduler
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenState
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(SavedStateHandleSaveableApi::class)
 class AuthViewModel @Inject constructor(
     private val repository: MusicRepository,
     private val playlistManager: MusicPlaylistManager,
     pingScheduler: AlarmScheduler,
-    application: Application
+    application: Application,
+    private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
-    var state by mutableStateOf(AuthState())
+    //var stateSaved = savedStateHandle.getStateFlow("keyauth", AuthState())
+
+    // var state by mutableStateOf(AuthState())
+    var state by savedStateHandle.saveable { mutableStateOf(AuthState()) }
+
+//    var state = savedStateHandle.get<AuthState>("keyauth") ?: AuthState()
+//        set(value) {
+//            savedStateHandle["keyauth"] = value
+//            field = value
+//        }
 
     init {
         state = state.copy(isLoading = true)

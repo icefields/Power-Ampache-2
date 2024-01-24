@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,6 +18,7 @@ import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 import kotlin.math.abs
 
+@OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
