@@ -3,7 +3,7 @@ package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
 
 @Parcelize
 data class AlbumDetailState (
@@ -14,10 +14,4 @@ data class AlbumDetailState (
     val isRefreshing: Boolean = false,
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false
-): Parcelable
-
-@Parcelize
-data class SongWrapper(
-    val song: Song,
-    val isOffline: Boolean
 ): Parcelable

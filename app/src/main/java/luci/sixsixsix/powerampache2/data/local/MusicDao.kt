@@ -128,7 +128,7 @@ interface MusicDao {
     suspend fun deleteDownloadedSong(songId: String)
 
     @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
-    suspend fun getSettings(): LocalSettingsEntity
+    suspend fun getSettings(): LocalSettingsEntity?
 
     @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
     fun settingsLiveData(): LiveData<LocalSettingsEntity?>

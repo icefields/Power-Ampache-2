@@ -24,7 +24,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         UserEntity::class,
         LocalSettingsEntity::class,
         DownloadedSongEntity::class
-    ], version = 68
+    ], version = 69
 )
 @TypeConverters(Converters::class)
 abstract class MusicDatabase: RoomDatabase() {

@@ -94,7 +94,7 @@ class MainViewModel @Inject constructor(
         WorkManager.getInstance(application).pruneWork()
         viewModelScope.launch {
             WorkManager.getInstance(application)
-                .getWorkInfosForUniqueWorkLiveData(settingsRepository.getDownloadWorkerId())
+                .getWorkInfosForUniqueWorkLiveData(SongDownloadWorker.getDownloadWorkerId(application))
                 //.getWorkInfosForUniqueWorkFlow(SongDownloadWorker.workerName)
                 //.getWorkInfoByIdFlow(requestId).mapNotNull { it.outputData.getString(KEY_RESULT_PATH) }.cancellable()
                 .observeForever { workInfoList ->
@@ -289,8 +289,7 @@ class MainViewModel @Inject constructor(
             is MainEvent.OnDownloadSongs ->
                 downloadSongs(event.songs)
             is MainEvent.OnStopDownloadSongs -> viewModelScope.launch {
-                SongDownloadWorker.stopAllDownloads(application, settingsRepository.getDownloadWorkerId())
-                settingsRepository.resetDownloadWorkerId()
+                SongDownloadWorker.stopAllDownloads(application)
                 observeDownloads()
                 state = state.copy(isDownloading = false)
             }

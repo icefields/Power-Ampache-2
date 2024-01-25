@@ -1,7 +1,7 @@
 package luci.sixsixsix.powerampache2.domain.models
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
 /**
@@ -10,17 +10,19 @@ import java.util.UUID
 @Parcelize
 data class LocalSettings(
     val username: String,
-    val theme: PowerAmpTheme,
-    val workerId: String
+    val theme: PowerAmpTheme
 ): Parcelable {
     companion object {
-        fun defaultSettings() = LocalSettings("", PowerAmpTheme.MATERIAL_YOU_DARK, UUID.randomUUID().toString())
+        fun defaultSettings() =
+            LocalSettings("luci.sixsixsix.powerampache2.user.db.pa_default_user",
+                PowerAmpTheme.MATERIAL_YOU_DARK
+            )
     }
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is LocalSettings) return false
-        return "${username}${theme}${workerId}" == "${other.username}${other.theme}${other.workerId}"
+        return "${username}${theme}" == "${other.username}${other.theme}"
     }
 }
 

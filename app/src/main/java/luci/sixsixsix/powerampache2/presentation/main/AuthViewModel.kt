@@ -53,6 +53,8 @@ class AuthViewModel @Inject constructor(
             if (it == null) {
                 pingScheduler.cancel()
                 playlistManager.reset()
+                // apply default settings
+
                 // setting the session to null will show the login screen, but the autologin call
                 // will immediately set isLoading to true which will show the loading screen instead
                 state = state.copy(session = null, isLoading = true)
