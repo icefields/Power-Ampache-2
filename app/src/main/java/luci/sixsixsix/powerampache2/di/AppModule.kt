@@ -10,15 +10,20 @@ import luci.sixsixsix.powerampache2.common.Constants.DB_LOCAL_NAME
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_READ_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_WRITE_S
+import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.mapping.AmpacheDateMapper
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork.Companion.BASE_URL
+import luci.sixsixsix.powerampache2.data.remote.PingScheduler
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
+import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
+import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -51,6 +56,16 @@ object AppModule {
     @Singleton
     fun provideAmpacheApi(retrofit: Retrofit): MainNetwork =
         retrofit.create(MainNetwork::class.java)
+
+    @Provides
+    @Singleton
+    fun provideWeakApplicationContext(application: Application) =
+        WeakReference(application)
+
+    @Provides
+    @Singleton
+    fun provideAlarmScheduler(application: Application): AlarmScheduler =
+        PingScheduler(application)
 
     @Provides
     @Singleton

@@ -24,6 +24,9 @@ class MusicPlaylistManager @Inject constructor() {
     private val _currentQueueState = MutableStateFlow(listOf<Song>())
     val currentQueueState: StateFlow<List<Song>> = _currentQueueState
 
+    private val _downloadedSongFlow = MutableStateFlow<Song?>(null)
+    val downloadedSongFlow: StateFlow<Song?> = _downloadedSongFlow
+
     fun updateTopSong(newSong: Song?) = newSong?.let {
         L( "MusicPlaylistManager updateTopSong", newSong)
         _currentSongState.value = CurrentSongState(song = newSong)
@@ -50,6 +53,10 @@ class MusicPlaylistManager @Inject constructor() {
     fun updateErrorMessage(errorMessage: String?) {
         L("MusicPlaylistManager updateErrorMessage", errorMessage)
         _errorMessageState.value = ErrorMessageState(errorMessage = errorMessage)
+    }
+
+    fun updateDownloadedSong(song: Song?) {
+        _downloadedSongFlow.value = song
     }
 
     fun updateSearchQuery(searchQuery: String) {

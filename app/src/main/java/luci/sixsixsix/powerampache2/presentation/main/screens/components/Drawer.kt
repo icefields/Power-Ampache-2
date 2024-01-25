@@ -25,6 +25,7 @@ import luci.sixsixsix.powerampache2.domain.models.User
 val drawerItems = listOf(
     MainContentMenuItem.Home,
     MainContentMenuItem.Library,
+    MainContentMenuItem.Offline,
     MainContentMenuItem.Settings,
     MainContentMenuItem.Logout
 )

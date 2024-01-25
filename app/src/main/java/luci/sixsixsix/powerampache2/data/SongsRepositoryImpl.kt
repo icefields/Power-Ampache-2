@@ -1,28 +1,36 @@
 package luci.sixsixsix.powerampache2.data
 
+import android.app.Application
+import androidx.lifecycle.map
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
-import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
-import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
+import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
+import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
-import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import okhttp3.internal.http.HTTP_OK
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,10 +43,20 @@ import javax.inject.Singleton
 @Singleton
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
-    private val db: MusicDatabase,
-    private val errorHandler: ErrorHandler
+    db: MusicDatabase,
+    private val musicRepository: MusicRepository,
+    private val settingsRepository: SettingsRepository,
+    private val errorHandler: ErrorHandler,
+    private val storageManagerImpl: StorageManagerImpl,
+    private val weakContext: WeakReference<Application>
 ): SongsRepository {
     private val dao = db.dao
+
+    override val offlineSongsLiveData = dao.getDownloadedSongs().map { entities ->
+        entities.map {
+            it.toSong()
+        }
+    }
 
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
     private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
@@ -217,6 +235,81 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun getFlaggedSongs() = getSongsStats(MainNetwork.StatFilter.flagged)
     override suspend fun getRandomSongs() = getSongsStats(MainNetwork.StatFilter.random)
 
+    override suspend fun getSongUri(song: Song) =
+        dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri ?: song.songUrl
+
+    suspend fun downloadSong2(song: Song) = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.downloadSong(
+            authKey = auth.auth,
+            songId = song.mediaId
+        ).apply {
+            if (code() == HTTP_OK) {
+                // save file to disk and register in database
+                body()?.byteStream()?.let { inputStream ->
+                    val filepath = storageManagerImpl.saveSong(song, inputStream)
+                    dao.addDownloadedSong( // TODO fix double-bang!!
+                        song.toDownloadedSongEntity(filepath, musicRepository.getUser()?.username!!)
+                    )
+                    emit(Resource.Success(data = Any(), networkData = Any()))
+                } ?: throw Exception("cannot download/save file, body or input stream NULL response code: ${code()}")
+            } else {
+                throw Exception("cannot download/save file, response code: ${code()}, " +
+                        "response body: ${body().toString()}")
+            }
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("downloadSong()", e, this) }
+
+
+    override suspend fun isSongAvailableOffline(song: Song): Boolean =
+        dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
+
+    // TODO FIX maybe should not be a flow since it only launches the worker,
+    //  I don't need any result from this function
+    override suspend fun downloadSong(song: Song): Flow<Resource<Any>> = channelFlow {
+        send(Resource.Loading(true))
+
+        val isSongDownloadedAlready =
+            dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
+        if (isSongDownloadedAlready) {
+            send(Resource.Loading(false))
+            return@channelFlow
+        }
+
+        val auth = getSession()!!
+        weakContext.get()?.let { context ->
+            val requestId = startSongDownloadWorker(
+                context = context,
+                authToken = auth.auth,
+                username = musicRepository.getUser()?.username!!,
+                song = song
+            )
+            L(requestId)
+        } ?: run {
+            throw NullPointerException("context was null")
+        }
+        send(Resource.Success(data = Any(), networkData = Any()))
+        send(Resource.Loading(false))
+    }.catch { e -> errorHandler("downloadSong()", e, this) }
+
+    private suspend fun emitDownloadSuccess(fc: ProducerScope<Resource<Any>>){
+        fc.send(Resource.Success(data = Any(), networkData = Any()))
+        fc.send(Resource.Loading(false))
+    }
+
+    private suspend fun emitDownloadProgress(fc: ProducerScope<Resource<Any>>, value: Int){
+        fc.send(Resource.Loading((value != 100)))
+    }
+
+    override suspend fun deleteDownloadedSong(song: Song) = flow {
+        emit(Resource.Loading(true))
+        dao.deleteDownloadedSong(songId = song.mediaId)
+        storageManagerImpl.deleteSong(song)
+        emit(Resource.Success(data = Any(), networkData = Any()))
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("downloadSong()", e, this) }
 
     /**
      * returns false if Network data is not required, true otherwise

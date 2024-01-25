@@ -72,7 +72,6 @@ class MusicRepositoryImpl @Inject constructor(
 
     private fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
 
-
     private suspend fun getSession(): Session? = dao.getSession()?.toSession()
 
     private suspend fun setSession(se: Session) {
@@ -115,17 +114,14 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun logout(): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading(true))
-
-        // clear database first so even with lack of connection the user will be logged out
         val currentAuth = getSession()?.auth // need this to make the logout call
+        val resp = currentAuth?.let {
+            api.goodbye(it)
+        }
         dao.clearCredentials()
         dao.clearSession()
         dao.clearCachedData()
         dao.clearUser()
-
-        val resp = currentAuth?.let {
-            api.goodbye(it)
-        }
 
         L( "LOGOUT $resp")
 

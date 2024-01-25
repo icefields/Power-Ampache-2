@@ -20,6 +20,7 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.http.Streaming
+import retrofit2.http.Url
 
 /**
  * Main network interface which will fetch a new welcome title for us
@@ -149,16 +150,6 @@ interface MainNetwork {
         @Query("flag") flag: Int,
         @Query("type") type: Type): SuccessResponse
 
-    @Streaming
-    @GET("json.server.php?action=download")
-    suspend fun downloadSong(
-        @Query("auth") authKey: String,
-        @Query("id") songId: String,
-        @Query("type") type: String = "song", // song, podcast_episode, search, playlist
-        @Query("format") format: String = "raw", // mp3, ogg, raw, etc (raw returns the original format)
-    ): Response<ResponseBody>
-
-
     @GET("json.server.php?action=playlist_add_song")
     suspend fun addSongToPlaylist(
         @Query("auth") authKey: String,
@@ -197,6 +188,20 @@ interface MainNetwork {
         @Query("name") name: String? = null,
         @Query("type") playlistType: PlaylistType
     ): SuccessResponse
+
+    /**
+     * 'id'	integer	$object_id	NO
+     * 'type'	string	song, podcast_episode, search, playlist	NO
+     * 'format'	string	mp3, ogg, raw, etc (raw returns the original format)	YES
+     */
+    @Streaming
+    @GET("json.server.php?action=download")
+    suspend fun downloadSong(
+        @Query("auth") authKey: String,
+        @Query("id") songId: String,
+        @Query("type") type: Type = Type.song, // song, podcast_episode, search, playlist
+        @Query("format") format: String = "raw", // mp3, ogg, raw, etc (raw returns the original format)
+    ): Response<ResponseBody>
 
     companion object {
         const val API_KEY = BuildConfig.API_KEY

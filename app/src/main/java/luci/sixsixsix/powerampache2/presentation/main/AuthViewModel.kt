@@ -5,7 +5,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
+import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -13,27 +16,45 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
+import luci.sixsixsix.powerampache2.data.remote.PingScheduler
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenState
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(SavedStateHandleSaveableApi::class)
 class AuthViewModel @Inject constructor(
     private val repository: MusicRepository,
     private val playlistManager: MusicPlaylistManager,
-    application: Application
+    pingScheduler: AlarmScheduler,
+    application: Application,
+    private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
-    var state by mutableStateOf(AuthState())
+    //var stateSaved = savedStateHandle.getStateFlow("keyauth", AuthState())
+
+    // var state by mutableStateOf(AuthState())
+    var state by savedStateHandle.saveable { mutableStateOf(AuthState()) }
+
+//    var state = savedStateHandle.get<AuthState>("keyauth") ?: AuthState()
+//        set(value) {
+//            savedStateHandle["keyauth"] = value
+//            field = value
+//        }
 
     init {
         state = state.copy(isLoading = true)
         verifyAndAutologin()
         // Listen to changes of the session table from the database
         repository.sessionLiveData.observeForever {
-            state = state.copy(session = it)//?.toSession())
+            state = state.copy(session = it)
             L(it)
             if (it == null) {
+                pingScheduler.cancel()
                 playlistManager.reset()
+                // apply default settings
+
                 // setting the session to null will show the login screen, but the autologin call
                 // will immediately set isLoading to true which will show the loading screen instead
                 state = state.copy(session = null, isLoading = true)
@@ -41,6 +62,8 @@ class AuthViewModel @Inject constructor(
                 viewModelScope.launch {
                     autologin()
                 }
+            } else {
+                pingScheduler.schedule()
             }
         }
 
@@ -127,6 +150,7 @@ class AuthViewModel @Inject constructor(
                         is Resource.Success -> {
                             result.data?.let { auth ->
                                 state = state.copy(session = auth)
+                                playlistManager.updateErrorMessage("")
                             }
                         }
 

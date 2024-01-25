@@ -12,6 +12,8 @@ import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.ShuffleOn
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.DownloadForOffline
+import androidx.compose.material.icons.outlined.OfflinePin
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material.icons.outlined.ShuffleOn
@@ -43,7 +45,7 @@ fun PlaylistInfoButtonsRow(
                 eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST)
             }) {
             Icon(
-                imageVector = Icons.Outlined.Download,
+                imageVector = Icons.Outlined.DownloadForOffline,
                 contentDescription = "Download"
             )
         }

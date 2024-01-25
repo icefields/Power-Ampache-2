@@ -45,18 +45,18 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumDetailTopBar
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoSection
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
+import luci.sixsixsix.powerampache2.presentation.common.SongInfoThirdRow
+import luci.sixsixsix.powerampache2.presentation.common.SongItem
+import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.common.SongInfoThirdRow
-import luci.sixsixsix.powerampache2.presentation.common.SongItem
-import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
-import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumDetailTopBar
+import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoSection
+import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +70,7 @@ fun AlbumDetailScreen(
     mainViewModel: MainViewModel,
 ) {
     val state = viewModel.state
+    val songs = viewModel.getSongs()
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
@@ -150,7 +151,7 @@ fun AlbumDetailScreen(
                 AlbumDetailTopBar(
                     navigator = navigator,
                     album = viewModel.state.album,
-                    isLoading = state.isLoading,
+                    isLoading = state.isLoading || mainViewModel.state.isDownloading,
                     scrollBehavior = scrollBehavior
                 ) { infoVisibility = !infoVisibility }
             }
@@ -162,7 +163,7 @@ fun AlbumDetailScreen(
                     .background(brush = albumBackgroundGradient),
                 color = Color.Transparent
             ) {
-                val isPlayingAlbum = mainViewModel.isPlaying && state.songs.contains(mainViewModel.state.song)
+                val isPlayingAlbum = mainViewModel.isPlaying && songs.contains(mainViewModel.state.song)
                 Column {
                     AlbumInfoSection(
                         modifier = Modifier
@@ -183,10 +184,11 @@ fun AlbumDetailScreen(
                         eventListener = { event ->
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {
+                                    if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@AlbumInfoSection
                                     if (!isPlayingAlbum) {
                                         // add next to the list and skip to the top of the album (which is next)
                                         viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
-                                        mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0]))
+                                        mainViewModel.onEvent(MainEvent.Play(songs[0]))
                                     } else {
                                         // will pause if playing
                                         mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
@@ -195,7 +197,7 @@ fun AlbumDetailScreen(
                                 AlbumInfoViewEvents.SHARE_ALBUM ->
                                     viewModel.onEvent(AlbumDetailEvent.OnShareAlbum)
                                 AlbumInfoViewEvents.DOWNLOAD_ALBUM ->
-                                    viewModel.onEvent(AlbumDetailEvent.OnDownloadAlbum)
+                                    mainViewModel.onEvent(MainEvent.OnDownloadSongs(songs))
                                 AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM -> {
                                     // this will add the shuffled playlist next and update the current song
                                     // in main view model (which is listening to playlist manager)
@@ -213,7 +215,7 @@ fun AlbumDetailScreen(
                                 AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST ->
                                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(
                                         isOpen = true,
-                                        songs = state.songs
+                                        songs = songs
                                     )
                                 AlbumInfoViewEvents.FAVOURITE_ALBUM ->
                                     viewModel.onEvent(AlbumDetailEvent.OnFavouriteAlbum)
@@ -230,7 +232,8 @@ fun AlbumDetailScreen(
                                 .fillMaxSize()
                         ) {
                             items(state.songs.size) { i ->
-                                val song = state.songs[i]
+                                val song = state.songs[i].song
+                                val isOffline = state.songs[i].isOffline
                                 SongItem(
                                     song = song,
                                     isLandscape = isLandscape,
@@ -264,7 +267,7 @@ fun AlbumDetailScreen(
                                         },
                                     subtitleString = SubtitleString.NOTHING,
                                     songInfoThirdRow = SongInfoThirdRow.Time,
-
+                                    isSongDownloaded = isOffline
                                 )
                             }
                         }

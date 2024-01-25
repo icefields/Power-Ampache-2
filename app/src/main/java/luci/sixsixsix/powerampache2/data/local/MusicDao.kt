@@ -9,6 +9,8 @@ import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CREDENTIALS_PRIMARY_KEY
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.DownloadedSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.LocalSettingsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SESSION_PRIMARY_KEY
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
@@ -49,7 +51,7 @@ interface MusicDao {
     suspend fun clearUser()
 
     @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
-    fun getUser(): UserEntity?
+    suspend fun getUser(): UserEntity?
 
     @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
     fun getUserLiveData(): LiveData<UserEntity?>
@@ -113,6 +115,26 @@ interface MusicDao {
     @Query("""SELECT * FROM playlistentity order by rating DESC, id DESC""")
     fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addDownloadedSong(downloadedSongEntity: DownloadedSongEntity)
+
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND LOWER(artistId) == LOWER(:artistId) AND LOWER(albumId) == LOWER(:albumId)""")
+    suspend fun getDownloadedSong(songId: String, artistId: String, albumId: String): DownloadedSongEntity?
+
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    fun getDownloadedSongs(): LiveData<List<DownloadedSongEntity>>
+
+    @Query("DELETE FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId)")
+    suspend fun deleteDownloadedSong(songId: String)
+
+    @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    suspend fun getSettings(): LocalSettingsEntity?
+
+    @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    fun settingsLiveData(): LiveData<LocalSettingsEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun writeSettings(localSettingsEntity: LocalSettingsEntity)
 
     //@Query("""DELETE FROM playlistentity artistentity, songentity, albumentity""")
     suspend fun clearCachedData() {

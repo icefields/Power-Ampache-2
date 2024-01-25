@@ -10,18 +10,30 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
+import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -34,19 +46,21 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.abs
 
+@kotlin.OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val application: Application,
     private val playlistManager: MusicPlaylistManager,
     private val playlistsRepository: PlaylistsRepository,
     private val musicRepository: MusicRepository,
-    private val simpleMediaServiceHandler: SimpleMediaServiceHandler
+    private val songsRepository: SongsRepository,
+    private val settingsRepository: SettingsRepository,
+    private val simpleMediaServiceHandler: SimpleMediaServiceHandler,
+    private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
-
-    var state by mutableStateOf(MainState())
-        private set
-    private var searchJob: Job? = null
-    private var isServiceRunning = false
+//    var state by mutableStateOf(MainState())
+//        private set
+    var state by savedStateHandle.saveable { mutableStateOf(MainState()) }
 
     private var duration by mutableLongStateOf(0L)
     var progress by mutableFloatStateOf(0f)
@@ -57,11 +71,77 @@ class MainViewModel @Inject constructor(
     var shuffleOn by mutableStateOf(false)
     var repeatMode by mutableStateOf(RepeatMode.OFF)
 
+    private var searchJob: Job? = null
+    private var isServiceRunning = false
+    private val emittedDownloads = mutableListOf<String>()
+
     init {
         L()
+        // restore song and queue if saved in statehandle
+        if (state.queue.isNotEmpty()) {
+            playlistManager.replaceCurrentQueue(state.queue)
+        }
+        state.song?.let {
+            playlistManager.updateCurrentSong(it)
+        }
         observePlaylistManager()
         observePlayerEvents()
         observeSession()
+        observeDownloads()
+    }
+
+    private fun observeDownloads() {
+        WorkManager.getInstance(application).pruneWork()
+        viewModelScope.launch {
+            WorkManager.getInstance(application)
+                .getWorkInfosForUniqueWorkLiveData(SongDownloadWorker.getDownloadWorkerId(application))
+                //.getWorkInfosForUniqueWorkFlow(SongDownloadWorker.workerName)
+                //.getWorkInfoByIdFlow(requestId).mapNotNull { it.outputData.getString(KEY_RESULT_PATH) }.cancellable()
+                .observeForever { workInfoList ->
+                    L("observeForever")
+                    var atLeastOneRunning = false
+                    var atLeastOneEnqueued = false
+                    var atLeastOneBlocked = false
+                    workInfoList.forEach { workInfo ->
+                        L(workInfo.state.name)
+                        if (!atLeastOneRunning && workInfo.state == WorkInfo.State.RUNNING) {
+                            atLeastOneRunning = true
+                        }
+                        if (!atLeastOneEnqueued && workInfo.state == WorkInfo.State.ENQUEUED) {
+                            atLeastOneEnqueued = true
+                        }
+                        if (!atLeastOneBlocked && workInfo.state == WorkInfo.State.BLOCKED) {
+                            atLeastOneBlocked = true
+                        }
+
+                        if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                            workInfo?.outputData?.getString(SongDownloadWorker.KEY_RESULT_SONG)?.let { songStr ->
+                                val finishedSong: Song = Gson().fromJson(songStr, Song::class.java)
+                                if (!emittedDownloads.contains(finishedSong.mediaId)) {
+                                    emittedDownloads.add(finishedSong.mediaId)
+                                    //if(songsRepository.isSongAvailableOffline(song)) {}
+                                    playlistManager.updateDownloadedSong(finishedSong)
+                                    playlistManager.updateErrorMessage("${finishedSong.name} downloaded")
+                                    state = state.copy(isDownloading = false)
+                                    //WorkManager.getInstance(application).pruneWork()
+                                    L("emitting", finishedSong.name)
+                                }
+                            }
+                        }
+//                        it?.progress?.getInt(SongDownloadWorker.KEY_PROGRESS, ERROR_INT)?.let { progress ->
+//                            if (progress != ERROR_INT) {
+//                                state = state.copy(isDownloading = progress in 0..99)
+//                                L(progress)
+//                            }
+//                        }
+                    }
+                    state = state.copy(isDownloading = atLeastOneRunning || atLeastOneEnqueued || atLeastOneBlocked)
+                    if(!atLeastOneRunning && !atLeastOneBlocked && !atLeastOneEnqueued) {
+                        // no more work to be done
+                        // switch worker id ?
+                    }
+                }
+        }
     }
 
     private fun observeSession() {
@@ -81,9 +161,7 @@ class MainViewModel @Inject constructor(
                     startMusicServiceIfNecessary()
                 } ?: stopMusicService()
                 // this is used to update the UI
-                //songState.song?.let {
-                    state = state.copy(song = songState.song)
-                //}
+                state = state.copy(song = songState.song)
             }
         }
 
@@ -122,23 +200,24 @@ class MainViewModel @Inject constructor(
                         isBuffering = true
                         calculateProgressValue(mediaState.progress)
                     }
-                    SimpleMediaState.Initial -> {
-                    } // UI STATE Initial
-                    is SimpleMediaState.Playing -> {
+                    SimpleMediaState.Initial -> { /* UI STATE Initial */ }
+                    is SimpleMediaState.Playing ->
                         isPlaying = mediaState.isPlaying
-                    }
                     is SimpleMediaState.Progress ->
                         calculateProgressValue(mediaState.progress)
-                    is SimpleMediaState.Ready -> {
+                    is SimpleMediaState.Ready -> { // UI STATE READY
                         isBuffering = false
                         duration = mediaState.duration
-                        // UI STATE READY
                     }
-
-                    is SimpleMediaState.Loading -> isLoading = mediaState.isLoading
+                    is SimpleMediaState.Loading ->
+                        isLoading = mediaState.isLoading
                 }
             }
         }
+    }
+
+    fun isOfflineSong(song: Song, callback: (Boolean) -> Unit) = viewModelScope.launch {
+        callback(!songsRepository.getSongUri(song).startsWith("http"))
     }
 
     /**
@@ -155,8 +234,9 @@ class MainViewModel @Inject constructor(
                 }
             }
             is MainEvent.Play -> viewModelScope.launch {
-                L( "MainEvent.Play", event.song)
-                simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.ForcePlay(event.song.toMediaItem()))
+                L( "MainEvent.Play", event.song, songsRepository.getSongUri(event.song))
+                //delay(1000)
+                simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.ForcePlay(event.song.toMediaItem(songsRepository.getSongUri(event.song))))
             }
             MainEvent.PlayPauseCurrent -> state.song?.let {
                 viewModelScope.launch {
@@ -173,7 +253,8 @@ class MainViewModel @Inject constructor(
             is MainEvent.OnAddSongToQueue ->
                 playlistManager.addToCurrentQueue(event.song)
             is MainEvent.OnAddSongToPlaylist -> {}
-            is MainEvent.OnDownloadSong -> {}
+            is MainEvent.OnDownloadSong ->
+                downloadSong(event.song)
             is MainEvent.OnShareSong -> {}
             is MainEvent.Repeat -> viewModelScope.launch {
                 val nextRepeatMode = nextRepeatMode()
@@ -203,22 +284,63 @@ class MainViewModel @Inject constructor(
             MainEvent.FavouriteSong -> state.song?.let {
                 favouriteSong(it)
             }
+            is MainEvent.OnDownloadedSongDelete ->
+                deleteDownloadedSong(event.song)
+            is MainEvent.OnDownloadSongs ->
+                downloadSongs(event.songs)
+            is MainEvent.OnStopDownloadSongs -> viewModelScope.launch {
+                SongDownloadWorker.stopAllDownloads(application)
+                observeDownloads()
+                state = state.copy(isDownloading = false)
+            }
         }
     }
 
     private fun favouriteSong(song: Song) = viewModelScope.launch {
         playlistsRepository.likeSong(song.mediaId, (song.flag != 1)).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        result.data?.let {
-                            // refresh song
-                            state = state.copy(song = song.copy(flag = abs(song.flag - 1)))
-                        }
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let {
+                        // refresh song
+                        state = state.copy(song = song.copy(flag = abs(song.flag - 1)))
                     }
-                    is Resource.Error -> state = state.copy(isLikeLoading = false)
-                    is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
                 }
+                is Resource.Error -> state = state.copy(isLikeLoading = false)
+                is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
             }
+        }
+    }
+
+    private fun downloadSong(song: Song) = viewModelScope.launch {
+        songsRepository.downloadSong(song).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let {
+                        // song downloaded
+
+                    }
+                }
+                is Resource.Error -> state = state.copy(isDownloading = false)
+                is Resource.Loading -> state = state.copy(isDownloading = result.isLoading)
+            }
+        }
+    }
+
+    private fun downloadSongs(songs: List<Song>) = songs.forEach { song -> downloadSong(song) }
+
+    private fun deleteDownloadedSong(song: Song) = viewModelScope.launch {
+        songsRepository.deleteDownloadedSong(song).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let {
+                        // song deleted
+                        playlistManager.updateErrorMessage("${song.name} deleted from downloads")
+                    }
+                }
+                is Resource.Error -> playlistManager.updateErrorMessage("ERROR deleting ${song.name}")
+                is Resource.Loading -> {}
+            }
+        }
     }
 
     private fun logout() {
@@ -255,7 +377,12 @@ class MainViewModel @Inject constructor(
         val mediaItemList = mutableListOf<MediaItem>()
         for (song: Song? in state.queue) {
             song?.let {
-                mediaItemList.add(it.toMediaItem())
+                // TODO FIX runBlocking (this functions has to be executed before calling play)
+                //  run blocking makes sure the call is sequential. FIND A BETTER SOLUTION.
+                //  test: with 10000 songs in queue, thread blocked 1.4s on pixel 6a
+                runBlocking {
+                    mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it)))
+                }
             }
         }
         simpleMediaServiceHandler.addMediaItemList(mediaItemList)
@@ -293,7 +420,7 @@ class MainViewModel @Inject constructor(
         super.onCleared()
     }
 
-    fun nextRepeatMode(): RepeatMode =
+    private fun nextRepeatMode(): RepeatMode =
         when(repeatMode) {
             RepeatMode.OFF -> RepeatMode.ONE
             RepeatMode.ONE -> RepeatMode.ALL
