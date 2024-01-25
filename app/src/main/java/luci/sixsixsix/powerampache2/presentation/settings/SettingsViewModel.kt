@@ -16,7 +16,6 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.User
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.AlbumDetailState
 import javax.inject.Inject
 
 @OptIn(SavedStateHandleSaveableApi::class)
@@ -57,7 +56,7 @@ class SettingsViewModel @Inject constructor(
 
     fun setTheme(theme: PowerAmpTheme) {
         viewModelScope.launch {
-            settingsRepository.saveLocalSettings(settingsRepository.getLocalSettings().copy(theme = theme))
+            settingsRepository.saveLocalSettings(settingsRepository.getLocalSettings(userState?.username).copy(theme = theme))
         }
     }
 }

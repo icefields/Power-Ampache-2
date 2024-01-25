@@ -13,8 +13,8 @@ data class LocalSettings(
     val theme: PowerAmpTheme
 ): Parcelable {
     companion object {
-        fun defaultSettings() =
-            LocalSettings("luci.sixsixsix.powerampache2.user.db.pa_default_user",
+        fun defaultSettings(username: String? = null) =
+            LocalSettings(username ?: "luci.sixsixsix.powerampache2.user.db.pa_default_user",
                 PowerAmpTheme.MATERIAL_YOU_DARK
             )
     }

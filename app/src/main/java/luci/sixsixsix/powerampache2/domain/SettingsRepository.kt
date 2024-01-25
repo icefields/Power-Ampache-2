@@ -6,6 +6,6 @@ import luci.sixsixsix.powerampache2.domain.models.User
 
 interface SettingsRepository {
     val settingsLiveData: LiveData<LocalSettings?>
-    suspend fun getLocalSettings(): LocalSettings
+    suspend fun getLocalSettings(username: String? = null): LocalSettings
     suspend fun saveLocalSettings(localSettings: LocalSettings)
 }

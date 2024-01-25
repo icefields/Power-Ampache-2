@@ -28,9 +28,9 @@ class SettingsRepositoryImpl @Inject constructor(
 
     private fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
 
-    override suspend fun getLocalSettings() =
+    override suspend fun getLocalSettings(username: String?) =
         dao.getSettings()?.toLocalSettings()
-            ?: LocalSettings.defaultSettings()
+            ?: LocalSettings.defaultSettings(username)
 
     override suspend fun saveLocalSettings(localSettings: LocalSettings) =
         dao.writeSettings(localSettings.toLocalSettingsEntity())

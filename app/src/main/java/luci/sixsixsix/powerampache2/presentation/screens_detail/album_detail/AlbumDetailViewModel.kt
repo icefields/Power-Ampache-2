@@ -15,6 +15,7 @@ import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
 import javax.inject.Inject
 import kotlin.math.abs
 
