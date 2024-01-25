@@ -41,7 +41,10 @@ class AlbumDetailViewModel @Inject constructor(
         }
 
         savedStateHandle.get<String>("albumId")?.let {
-            getSongsFromAlbum(it)
+            L("albumId", it)
+            if (!it.isNullOrBlank()) {
+                getSongsFromAlbum(it)
+            }
             if (album == null) {
                 getAlbumInfo(it)
             }
@@ -50,6 +53,7 @@ class AlbumDetailViewModel @Inject constructor(
         viewModelScope.launch {
             playlistManager.downloadedSongFlow.collect {
                 if(it != null) {
+                    L("RefreshFromCache")
                     onEvent(AlbumDetailEvent.RefreshFromCache)
                 }
             }
