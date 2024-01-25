@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.data.remote.worker
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
@@ -19,6 +20,7 @@ import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettingsEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
@@ -81,14 +83,37 @@ class SongDownloadWorker @AssistedInject constructor(
         const val KEY_USERNAME = "${prefix}KEY_USERNAME"
         const val KEY_AUTH_TOKEN = "${prefix}KEY_AUTH_TOKEN"
         const val KEY_SONG = "${prefix}KEY_SONG"
-        const val KEY_RESULT_PATH = "${prefix}KEY_RESULT_PATH"
         const val KEY_RESULT_SONG = "${prefix}KEY_RESULT_SONG"
         const val KEY_RESULT_ERROR = "${prefix}KEY_RESULT_ERROR"
         const val KEY_PROGRESS = "${prefix}KEY_PROGRESS"
 
-        fun startSongDownloadWorker(
+        private const val KEY_WORKER_PREFERENCE = "${prefix}KEY_WORKER_PREFERENCE"
+        private const val KEY_WORKER_PREFERENCE_ID = "${prefix}downloadWorkerId"
+
+        suspend fun getDownloadWorkerId(context: Context):String = context
+            .getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
+            .getString(KEY_WORKER_PREFERENCE_ID, null) ?: run {
+                // if not existent create one now
+                resetDownloadWorkerId(context)
+            }
+
+        private suspend fun resetDownloadWorkerId(context: Context) =
+            writeDownloadWorkerId(context, UUID.randomUUID().toString())
+
+        @SuppressLint("ApplySharedPref")
+        private suspend fun writeDownloadWorkerId(context: Context, newWorkerId: String): String = withContext(Dispatchers.IO) {
+                val sharedPreferences = context.getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
+                val editor = sharedPreferences.edit()
+                editor.apply {
+                    putString(KEY_WORKER_PREFERENCE_ID, newWorkerId)
+                    commit()
+                }
+            return@withContext newWorkerId
+        }
+
+
+        suspend fun startSongDownloadWorker(
             context: Context,
-            workerName: String,
             authToken: String,
             username: String,
             song: Song
@@ -108,13 +133,14 @@ class SongDownloadWorker @AssistedInject constructor(
                     Duration.ofSeconds(10L)
                 ).build()
             WorkManager.getInstance(context)
-                .enqueueUniqueWork(workerName, ExistingWorkPolicy.APPEND, request)
+                .enqueueUniqueWork(getDownloadWorkerId(context), ExistingWorkPolicy.APPEND, request)
             return request.id
         }
 
-        fun stopAllDownloads(context: Context, workerName: String) {
-            WorkManager.getInstance(context).cancelUniqueWork(workerName)
+        suspend fun stopAllDownloads(context: Context) {
+            WorkManager.getInstance(context).cancelUniqueWork(getDownloadWorkerId(context))
             // change worker name otherwise cannot restart work
+            resetDownloadWorkerId(context)
         }
     }
 }

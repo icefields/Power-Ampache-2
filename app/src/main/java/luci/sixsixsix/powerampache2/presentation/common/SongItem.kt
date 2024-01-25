@@ -1,5 +1,6 @@
 package luci.sixsixsix.powerampache2.presentation.common
 
+import android.os.Parcelable
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
@@ -72,6 +73,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
+import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -90,6 +92,12 @@ enum class SongItemEvent {
     ADD_SONG_TO_QUEUE,
     ADD_SONG_TO_PLAYLIST,
 }
+
+@Parcelize
+data class SongWrapper(
+    val song: Song,
+    val isOffline: Boolean
+): Parcelable
 
 @Composable
 fun SongItemMain(

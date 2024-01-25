@@ -1,34 +1,18 @@
 package luci.sixsixsix.powerampache2.data
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.map
-import androidx.work.BackoffPolicy
-import androidx.work.Constraints
-import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import androidx.work.workDataOf
-import com.google.gson.Gson
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
@@ -37,9 +21,6 @@ import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.KEY_PROGRESS
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.KEY_RESULT_PATH
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
@@ -50,8 +31,6 @@ import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import okhttp3.internal.http.HTTP_OK
 import java.lang.ref.WeakReference
-import java.time.Duration
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -287,6 +266,8 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun isSongAvailableOffline(song: Song): Boolean =
         dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
 
+    // TODO FIX maybe should not be a flow since it only launches the worker,
+    //  I don't need any result from this function
     override suspend fun downloadSong(song: Song): Flow<Resource<Any>> = channelFlow {
         send(Resource.Loading(true))
 
@@ -301,7 +282,6 @@ class SongsRepositoryImpl @Inject constructor(
         weakContext.get()?.let { context ->
             val requestId = startSongDownloadWorker(
                 context = context,
-                workerName = settingsRepository.getDownloadWorkerId(),
                 authToken = auth.auth,
                 username = musicRepository.getUser()?.username!!,
                 song = song

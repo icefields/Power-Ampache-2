@@ -27,6 +27,8 @@ import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.User
 
+// TODO WIP rename functions, finish this screen. add donation links
+
 @Composable
 @Destination
 fun SettingsScreen(

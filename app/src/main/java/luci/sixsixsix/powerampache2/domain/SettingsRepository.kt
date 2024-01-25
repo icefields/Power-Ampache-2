@@ -7,7 +7,5 @@ import luci.sixsixsix.powerampache2.domain.models.User
 interface SettingsRepository {
     val settingsLiveData: LiveData<LocalSettings?>
     suspend fun getLocalSettings(): LocalSettings
-    suspend fun getDownloadWorkerId(): String
-    suspend fun resetDownloadWorkerId(): String
     suspend fun saveLocalSettings(localSettings: LocalSettings)
 }
