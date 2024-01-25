@@ -15,7 +15,9 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.mapping.AmpacheDateMapper
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork.Companion.BASE_URL
+import luci.sixsixsix.powerampache2.data.remote.PingScheduler
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
+import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -59,6 +61,11 @@ object AppModule {
     @Singleton
     fun provideWeakApplicationContext(application: Application) =
         WeakReference(application)
+
+    @Provides
+    @Singleton
+    fun provideAlarmScheduler(application: Application): AlarmScheduler =
+        PingScheduler(application)
 
     @Provides
     @Singleton

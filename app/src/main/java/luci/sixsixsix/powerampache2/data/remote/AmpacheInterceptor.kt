@@ -52,7 +52,17 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
                 }
             }
             L(request.url)
-            chain.proceed(request)
+            try {
+                chain.proceed(request)
+            } catch (e: Exception) {
+                Response.Builder()
+                    .body("{ \"exception\" : \"${e.localizedMessage}\" }".toResponseBody(null))
+                    .protocol(Protocol.HTTP_2)
+                    .message("{ \"exception\" : \"${e.localizedMessage}\" }")
+                    .request(chain.request())
+                    .code(404)
+                    .build()
+            }
         } else {
             Response.Builder()
                 .body("{ \"error\" : $errorStr}".toResponseBody(null))

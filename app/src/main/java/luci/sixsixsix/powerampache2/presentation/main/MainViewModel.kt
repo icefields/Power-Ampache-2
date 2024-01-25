@@ -10,20 +10,29 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
+import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
+import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
@@ -37,6 +46,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.abs
 
+@kotlin.OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val application: Application,
@@ -44,13 +54,13 @@ class MainViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
     private val musicRepository: MusicRepository,
     private val songsRepository: SongsRepository,
-    private val simpleMediaServiceHandler: SimpleMediaServiceHandler
+    private val settingsRepository: SettingsRepository,
+    private val simpleMediaServiceHandler: SimpleMediaServiceHandler,
+    private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
-
-    var state by mutableStateOf(MainState())
-        private set
-    private var searchJob: Job? = null
-    private var isServiceRunning = false
+//    var state by mutableStateOf(MainState())
+//        private set
+    var state by savedStateHandle.saveable { mutableStateOf(MainState()) }
 
     private var duration by mutableLongStateOf(0L)
     var progress by mutableFloatStateOf(0f)
@@ -61,11 +71,77 @@ class MainViewModel @Inject constructor(
     var shuffleOn by mutableStateOf(false)
     var repeatMode by mutableStateOf(RepeatMode.OFF)
 
+    private var searchJob: Job? = null
+    private var isServiceRunning = false
+    private val emittedDownloads = mutableListOf<String>()
+
     init {
         L()
+        // restore song and queue if saved in statehandle
+        if (state.queue.isNotEmpty()) {
+            playlistManager.replaceCurrentQueue(state.queue)
+        }
+        state.song?.let {
+            playlistManager.updateCurrentSong(it)
+        }
         observePlaylistManager()
         observePlayerEvents()
         observeSession()
+        observeDownloads()
+    }
+
+    private fun observeDownloads() {
+        WorkManager.getInstance(application).pruneWork()
+        viewModelScope.launch {
+            WorkManager.getInstance(application)
+                .getWorkInfosForUniqueWorkLiveData(settingsRepository.getDownloadWorkerId())
+                //.getWorkInfosForUniqueWorkFlow(SongDownloadWorker.workerName)
+                //.getWorkInfoByIdFlow(requestId).mapNotNull { it.outputData.getString(KEY_RESULT_PATH) }.cancellable()
+                .observeForever { workInfoList ->
+                    L("observeForever")
+                    var atLeastOneRunning = false
+                    var atLeastOneEnqueued = false
+                    var atLeastOneBlocked = false
+                    workInfoList.forEach { workInfo ->
+                        L(workInfo.state.name)
+                        if (!atLeastOneRunning && workInfo.state == WorkInfo.State.RUNNING) {
+                            atLeastOneRunning = true
+                        }
+                        if (!atLeastOneEnqueued && workInfo.state == WorkInfo.State.ENQUEUED) {
+                            atLeastOneEnqueued = true
+                        }
+                        if (!atLeastOneBlocked && workInfo.state == WorkInfo.State.BLOCKED) {
+                            atLeastOneBlocked = true
+                        }
+
+                        if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                            workInfo?.outputData?.getString(SongDownloadWorker.KEY_RESULT_SONG)?.let { songStr ->
+                                val finishedSong: Song = Gson().fromJson(songStr, Song::class.java)
+                                if (!emittedDownloads.contains(finishedSong.mediaId)) {
+                                    emittedDownloads.add(finishedSong.mediaId)
+                                    //if(songsRepository.isSongAvailableOffline(song)) {}
+                                    playlistManager.updateDownloadedSong(finishedSong)
+                                    playlistManager.updateErrorMessage("${finishedSong.name} downloaded")
+                                    state = state.copy(isDownloading = false)
+                                    //WorkManager.getInstance(application).pruneWork()
+                                    L("emitting", finishedSong.name)
+                                }
+                            }
+                        }
+//                        it?.progress?.getInt(SongDownloadWorker.KEY_PROGRESS, ERROR_INT)?.let { progress ->
+//                            if (progress != ERROR_INT) {
+//                                state = state.copy(isDownloading = progress in 0..99)
+//                                L(progress)
+//                            }
+//                        }
+                    }
+                    state = state.copy(isDownloading = atLeastOneRunning || atLeastOneEnqueued || atLeastOneBlocked)
+                    if(!atLeastOneRunning && !atLeastOneBlocked && !atLeastOneEnqueued) {
+                        // no more work to be done
+                        // switch worker id ?
+                    }
+                }
+        }
     }
 
     private fun observeSession() {
@@ -210,6 +286,14 @@ class MainViewModel @Inject constructor(
             }
             is MainEvent.OnDownloadedSongDelete ->
                 deleteDownloadedSong(event.song)
+            is MainEvent.OnDownloadSongs ->
+                downloadSongs(event.songs)
+            is MainEvent.OnStopDownloadSongs -> viewModelScope.launch {
+                SongDownloadWorker.stopAllDownloads(application, settingsRepository.getDownloadWorkerId())
+                settingsRepository.resetDownloadWorkerId()
+                observeDownloads()
+                state = state.copy(isDownloading = false)
+            }
         }
     }
 
@@ -228,21 +312,22 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // TODO USE worker
     private fun downloadSong(song: Song) = viewModelScope.launch {
         songsRepository.downloadSong(song).collect { result ->
             when (result) {
                 is Resource.Success -> {
                     result.data?.let {
                         // song downloaded
-                        playlistManager.updateErrorMessage("${song.name} downloaded")
+
                     }
                 }
-                is Resource.Error -> state = state.copy(isLikeLoading = false)
-                is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+                is Resource.Error -> state = state.copy(isDownloading = false)
+                is Resource.Loading -> state = state.copy(isDownloading = result.isLoading)
             }
         }
     }
+
+    private fun downloadSongs(songs: List<Song>) = songs.forEach { song -> downloadSong(song) }
 
     private fun deleteDownloadedSong(song: Song) = viewModelScope.launch {
         songsRepository.deleteDownloadedSong(song).collect { result ->

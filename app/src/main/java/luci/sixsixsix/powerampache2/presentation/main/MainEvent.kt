@@ -17,14 +17,13 @@ sealed class MainEvent {
     data object Repeat: MainEvent()
     data class Shuffle(val shuffleOn: Boolean): MainEvent()
     data object FavouriteSong: MainEvent()
-
     data class UpdateProgress(val newProgress: Float): MainEvent()
-
-
     data class OnAddSongToQueue(val song: Song): MainEvent()
     data class OnAddSongToPlaylist(val song: Song): MainEvent()
     data class OnAddSongToQueueNext(val song: Song): MainEvent()
     data class OnShareSong(val song: Song): MainEvent()
     data class OnDownloadSong(val song: Song): MainEvent()
+    data class OnDownloadSongs(val songs: List<Song>): MainEvent()
+    data object OnStopDownloadSongs: MainEvent()
     data class OnDownloadedSongDelete(val song: Song): MainEvent()
 }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.OptIn
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -12,9 +13,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import dagger.hilt.android.AndroidEntryPoint
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainScreen
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.settings.SettingsViewModel
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
 
 @AndroidEntryPoint
@@ -22,6 +25,7 @@ import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
 class MainActivity : ComponentActivity() {
     private lateinit var authViewModel: AuthViewModel
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var settingsViewModel: SettingsViewModel
     //private lateinit var homeScreenViewModel: HomeScreenViewModel
     //private val authViewModel: AuthViewModel by viewModels()
     //private val mainViewModel: MainViewModel by viewModels()
@@ -29,20 +33,54 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            PowerAmpache2Theme {
+            authViewModel = hiltViewModel<AuthViewModel>(this)
+            mainViewModel = hiltViewModel<MainViewModel>(this)
+            settingsViewModel = hiltViewModel<SettingsViewModel>(this)
+            // homeScreenViewModel = hiltViewModel<HomeScreenViewModel>(this)
+
+            var dynamicColour = true
+            var isDarkTheme = true
+            when (settingsViewModel.state.theme) {
+                PowerAmpTheme.SYSTEM -> {
+                    dynamicColour = false
+                    isDarkTheme = isSystemInDarkTheme()
+                }
+                PowerAmpTheme.DARK -> {
+                    dynamicColour = false
+                    isDarkTheme = true
+                }
+                PowerAmpTheme.LIGHT -> {
+                    dynamicColour = false
+                    isDarkTheme = false
+                }
+                PowerAmpTheme.MATERIAL_YOU_SYSTEM -> {
+                    dynamicColour = true
+                    isDarkTheme = isSystemInDarkTheme()
+                }
+                PowerAmpTheme.MATERIAL_YOU_DARK -> {
+                    dynamicColour = true
+                    isDarkTheme = true
+                }
+                PowerAmpTheme.MATERIAL_YOU_LIGHT -> {
+                    dynamicColour = true
+                    isDarkTheme = false
+                }
+            }
+
+            PowerAmpache2Theme(
+                darkTheme = isDarkTheme,
+                dynamicColor = dynamicColour
+            ) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    authViewModel = hiltViewModel<AuthViewModel>(this)
-                    mainViewModel = hiltViewModel<MainViewModel>(this)
-                   // homeScreenViewModel = hiltViewModel<HomeScreenViewModel>(this)
-
                     MainScreen(
                         modifier = Modifier.fillMaxSize(),
                         authViewModel = authViewModel,
                         mainViewModel = mainViewModel,
+                        settingsViewModel = settingsViewModel
                       //  homeScreenViewModel = homeScreenViewModel
                     )
                 }

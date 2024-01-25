@@ -1,7 +1,10 @@
 package luci.sixsixsix.powerampache2.domain.models
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import luci.sixsixsix.powerampache2.common.Constants
 
+@Parcelize
 data class User(
     val id: String,
     val username: String,
@@ -16,4 +19,4 @@ data class User(
     val website: String,
     val state: String,
     val city: String
-)
+): Parcelable

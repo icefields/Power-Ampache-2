@@ -1,19 +1,25 @@
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.FileDownloadOff
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -36,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,9 +50,12 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.destinations.OfflineSongsScreenDestination
 import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
@@ -72,6 +82,8 @@ import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsScr
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
+import luci.sixsixsix.powerampache2.presentation.settings.SettingsScreen
+import luci.sixsixsix.powerampache2.presentation.settings.SettingsViewModel
 
 @Composable
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
@@ -81,6 +93,7 @@ fun MainContentScreen(
     navigator: DestinationsNavigator,
     mainViewModel: MainViewModel,
     authViewModel: AuthViewModel,
+    settingsViewModel: SettingsViewModel,
     homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     // IMPORTANT : set the main navigator right away here in MainScreen
@@ -140,7 +153,6 @@ fun MainContentScreen(
                         }
                         MainContentTopAppBarEvent.OnPlaylistIconClick ->
                             navigator.navigate(QueueScreenDestination)
-                        else -> {}
                     }
                 }
             }
@@ -151,26 +163,36 @@ fun MainContentScreen(
                        bottom = it.calculateBottomPadding()
                    )
                ) {
-                   when (val menuItem = MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
-                       is MainContentMenuItem.Home -> HomeScreen(
-                           navigator = navigator,
-                           viewModel = homeScreenViewModel
-                       ).also { barTitle = appName }
-                       is MainContentMenuItem.Library -> TabbedLibraryView(
-                           navigator = navigator,
-                           pagerState = pagerState,
-                           mainViewModel = mainViewModel
-                       ).also { barTitle = menuItem.title }
-                       is MainContentMenuItem.Offline -> OfflineSongsMainContent(
-                           navigator = navigator,
-                           mainViewModel = mainViewModel
-                       ).also { barTitle = menuItem.title }
-                       is MainContentMenuItem.Settings -> EmptyListView(
-                           "Coming Soon", "Settings and customizations will be available soon"
-                       ).also { barTitle = menuItem.title }
-                       MainContentMenuItem.Logout ->
-                           mainViewModel.onEvent(MainEvent.OnLogout) //.also { barTitle = appName }
+                   Column {
+                       AnimatedVisibility (mainViewModel.state.isDownloading) {
+                           DownloadProgressView {
+                               mainViewModel.onEvent(MainEvent.OnStopDownloadSongs)
+                           }
+                       }
+
+                       when (val menuItem = MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
+                           is MainContentMenuItem.Home -> HomeScreen(
+                               navigator = navigator,
+                               viewModel = homeScreenViewModel
+                           ).also { barTitle = appName }
+                           is MainContentMenuItem.Library -> TabbedLibraryView(
+                               navigator = navigator,
+                               pagerState = pagerState,
+                               mainViewModel = mainViewModel
+                           ).also { barTitle = menuItem.title }
+                           is MainContentMenuItem.Offline -> OfflineSongsMainContent(
+                               navigator = navigator,
+                               mainViewModel = mainViewModel
+                           ).also { barTitle = menuItem.title }
+                           is MainContentMenuItem.Settings -> SettingsScreen( navigator,
+                                settingsViewModel
+                               //"Coming Soon", "Settings and customizations will be available soon"
+                           ).also { barTitle = menuItem.title }
+                           MainContentMenuItem.Logout ->
+                               mainViewModel.onEvent(MainEvent.OnLogout) //.also { barTitle = appName }
+                       }
                    }
+
                }
            }
     }

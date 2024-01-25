@@ -3,12 +3,9 @@ package luci.sixsixsix.powerampache2.domain
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.User
-import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 
 interface MusicRepository {
 

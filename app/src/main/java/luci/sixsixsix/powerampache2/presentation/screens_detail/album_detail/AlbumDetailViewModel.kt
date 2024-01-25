@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,6 +18,7 @@ import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 import kotlin.math.abs
 
+@OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
@@ -43,6 +45,14 @@ class AlbumDetailViewModel @Inject constructor(
                 getAlbumInfo(it)
             }
         }
+
+        viewModelScope.launch {
+            playlistManager.downloadedSongFlow.collect {
+                if(it != null) {
+                    onEvent(AlbumDetailEvent.RefreshFromCache)
+                }
+            }
+        }
     }
 
     fun onEvent(event: AlbumDetailEvent) {
@@ -54,18 +64,20 @@ class AlbumDetailViewModel @Inject constructor(
                 playlistManager.updateTopSong(event.song)
             is AlbumDetailEvent.OnPlayAlbum -> {
                 L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
-                playlistManager.updateCurrentSong(state.songs[0])
-                playlistManager.addToCurrentQueueTop(state.songs)
+                playlistManager.updateCurrentSong(state.songs[0].song)
+                playlistManager.addToCurrentQueueTop(getSongs())
             }
-            AlbumDetailEvent.OnDownloadAlbum -> {}
             AlbumDetailEvent.OnShareAlbum -> {}
             AlbumDetailEvent.OnShuffleAlbum -> {
-                val shuffled = state.songs.shuffled()
+                val shuffled = getSongs().shuffled()
                 playlistManager.addToCurrentQueueNext(shuffled)
                 playlistManager.moveToSongInQueue(shuffled[0])
             }
             AlbumDetailEvent.OnFavouriteAlbum ->
                 favouriteAlbum()
+
+            AlbumDetailEvent.RefreshFromCache ->
+                getSongsFromAlbum(albumId = state.album.id, fetchRemote = false)
         }
     }
 
@@ -108,15 +120,25 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 
+    fun getSongs() = state.songs.map { it.song }
+
     private fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             songsRepository
-                .getSongsFromAlbum(albumId)
+                .getSongsFromAlbum(albumId, fetchRemote)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                state = state.copy(songs = songs)
+                                val songWrapperList = mutableListOf<SongWrapper>()
+                                songs.forEach { song ->
+                                    songWrapperList.add(SongWrapper(
+                                        song = song,
+                                        isOffline = !songsRepository.getSongUri(song).startsWith("http")
+                                        )
+                                    )
+                                }
+                                state = state.copy(songs = songWrapperList)
                                 L("AlbumDetailViewModel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)
                             }
                         }

@@ -62,7 +62,6 @@ class PlaylistDetailViewModel @Inject constructor(
             }
 
             is PlaylistDetailEvent.OnSongSelected -> playlistManager.updateTopSong(event.song)
-            PlaylistDetailEvent.OnDownloadPlaylist -> TODO()
             PlaylistDetailEvent.OnPlayPlaylist -> if (state.songs.isNotEmpty()) {
                 playlistManager.updateCurrentSong(state.songs[0])
                 playlistManager.addToCurrentQueueTop(state.songs)

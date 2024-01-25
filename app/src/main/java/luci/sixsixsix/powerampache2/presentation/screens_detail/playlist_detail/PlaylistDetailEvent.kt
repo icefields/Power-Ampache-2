@@ -11,6 +11,5 @@ sealed class PlaylistDetailEvent {
     data object OnRemoveSongDismiss: PlaylistDetailEvent()
     data object OnPlayPlaylist: PlaylistDetailEvent()
     data object OnSharePlaylist: PlaylistDetailEvent()
-    data object OnDownloadPlaylist: PlaylistDetailEvent()
     data object OnShufflePlaylist: PlaylistDetailEvent()
 }

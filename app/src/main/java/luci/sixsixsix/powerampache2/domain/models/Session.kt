@@ -1,7 +1,10 @@
 package luci.sixsixsix.powerampache2.domain.models
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import java.time.LocalDateTime
 
+@Parcelize
 data class Session(
     val add: LocalDateTime,
     val albums: Int,
@@ -25,6 +28,6 @@ data class Session(
     val update: LocalDateTime,
     val users: Int,
     val videos: Int,
-) {
+): Parcelable {
     fun isTokenExpired(): Boolean = !LocalDateTime.now().isBefore(sessionExpire)
 }

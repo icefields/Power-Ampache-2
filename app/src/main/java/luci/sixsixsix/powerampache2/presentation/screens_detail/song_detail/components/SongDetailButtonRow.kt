@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.Audiotrack
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.OfflinePin
@@ -97,7 +96,7 @@ fun SongDetailButtonRow(
                             contentDescription = "Download"
                         )
                     }
-                    Text(text = "Download", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
+                    Text(text = if (!isOffline) "Download" else "Downloaded", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
                 }
 
                 3 -> Column(

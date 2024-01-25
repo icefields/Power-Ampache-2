@@ -16,6 +16,7 @@ val coroutinesVersion = "1.7.3" //rootProject.extra.get("coroutines_version") as
 val exoplayerVersion = "2.19.1" // rootProject.extra.get("exoplayer_version") as String
 val composeNavVersion = "1.8.42-beta" // rootProject.extra.get("composeNav_version") as String
 val media3Version = "1.2.1"
+val hiltVersion = "1.1.0"
 
 val localProperties = Properties()
 localProperties.load(project.rootProject.file("local.properties").inputStream())
@@ -98,6 +99,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.media:media:1.7.0")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
 
     // --- Compose --- //
     implementation("androidx.compose.ui:ui:$composeVersion")
@@ -150,8 +152,11 @@ dependencies {
     // --- Dagger Hilt --- //
     implementation("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-android-compiler:2.48")
-    kapt("androidx.hilt:hilt-compiler:1.1.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    kapt("androidx.hilt:hilt-compiler:$hiltVersion")
+    implementation("androidx.hilt:hilt-navigation-compose:$hiltVersion")
+    implementation("androidx.hilt:hilt-common:$hiltVersion")
+    implementation("androidx.hilt:hilt-work:$hiltVersion")
+
     //implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
 
     // --- Retrofit --- //
