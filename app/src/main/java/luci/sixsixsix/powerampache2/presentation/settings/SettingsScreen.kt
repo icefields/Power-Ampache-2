@@ -66,6 +66,7 @@ fun SettingsScreen(
 ) {
     SettingsScreenContent(
         userState = settingsViewModel.userState,
+        serverInfo = settingsViewModel.serverInfoState,
         powerAmpTheme = settingsViewModel.state.theme,
         onThemeSelected = {
             settingsViewModel.setTheme(it)
@@ -77,31 +78,33 @@ fun SettingsScreen(
 @Destination
 fun SettingsScreenContent(
     userState: User?,
+    serverInfo: ServerInfo?,
     powerAmpTheme: PowerAmpTheme,
     onThemeSelected: (selected: PowerAmpTheme) -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(bottom = 10.dp)) {
-        items(5) { index ->
+        items(6) { index ->
             when(index) {
-                0 -> Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.errorContainer),
-                    text = "WORK IN PROGRESS. \nMore Settings and Themes coming soon",
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    fontSize = 16.sp
-                )
-
-                1 -> UserInfoSection(user = userState!!)
-
+                0 -> Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.errorContainer)) {
+                    Text(
+                        modifier = Modifier.padding(8.dp)
+                            .fillMaxWidth(),
+                        text = "WORK IN PROGRESS. \nMore Settings and Themes coming soon",
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontSize = 16.sp
+                    )
+                }
+                1 -> userState?.let { user -> UserInfoSection(user = user) }
                 2 ->  SettingsThemeSelector(currentTheme = powerAmpTheme) {
                     onThemeSelected(it)
                 }
-                //ServerInfoSection(serverInfo)
                 3 -> DonateBtcButton()
                 4 -> DonatePaypalButton()
+                5 -> serverInfo?.let {ServerInfoSection(it) }
                 else -> {}
             }
         }
@@ -193,7 +196,7 @@ fun UserInfoSection(user: User) {
                 UserInfoText("City", user.city)
                 UserInfoText("State", user.state)
                 UserInfoText("ID", user.id)
-                UserInfoText("Access", user.access?.toString())
+                //UserInfoText("Access", user.access?.toString())
                 //UserInfoText("ID", LocalDateTime.parse(user.createDate).toString())
             }
         }
@@ -208,27 +211,12 @@ fun ServerInfoSection(serverInfo: ServerInfo) {
             .padding(all = 10.dp),
         contentAlignment = Alignment.Center
     ) {
-        Card(
-            border = BorderStroke(
-                width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
-                color = MaterialTheme.colorScheme.background
-            ),
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(all = 10.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(4.dp),
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Column(modifier = Modifier
-                .wrapContentHeight()
-                .padding(horizontal = 16.dp, vertical = 9.dp)) {
-                UserInfoText("Server", serverInfo.server)
-                UserInfoText("Version", serverInfo.version)
-                UserInfoText("Compatible", serverInfo.compatible)
-            }
+        Column(modifier = Modifier
+            .wrapContentHeight()
+            .padding(horizontal = 16.dp, vertical = 9.dp)) {
+            UserInfoText("Server", serverInfo.server)
+            UserInfoText("Version", serverInfo.version)
+            UserInfoText("Compatible", serverInfo.compatible)
         }
     }
 }
@@ -368,6 +356,7 @@ fun ThemesRadioGroup(
 fun PreviewSettingsScreen() {
     SettingsScreenContent(
         userState = User.mockUser(),
+        serverInfo = ServerInfo("some server", "6.78"),
         powerAmpTheme = PowerAmpTheme.DARK,
         onThemeSelected = {
         }
