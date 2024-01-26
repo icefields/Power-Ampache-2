@@ -18,6 +18,10 @@ object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
 
+    // DONATION LINKS
+    const val DONATION_BITCOIN_URI = "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W"
+    const val DONATION_PAYPAL_URI = "https://www.paypal.com/your_paypal"
+
     // DEBUG
     const val NETWORK_REQUEST_LIMIT_DEBUG = 20
     const val ERROR_TITLE = ERROR_STRING

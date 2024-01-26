@@ -15,8 +15,10 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
+import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
 import javax.inject.Inject
+
 
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
@@ -31,9 +33,14 @@ class SettingsViewModel @Inject constructor(
         mutableStateOf(LocalSettings.defaultSettings())
     }
 
-    var userState by mutableStateOf<User?>(null)
+    var userState by savedStateHandle.saveable {
+        mutableStateOf<User>(User.emptyUser())
+    }
+
+    var serverInfoState by mutableStateOf<ServerInfo?>(null)
 
     init {
+        getServerInfo()
         observeSettings()
 
         viewModelScope.launch {
@@ -59,6 +66,12 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.saveLocalSettings(
                 settingsRepository.getLocalSettings(userState?.username).copy(theme = theme)
             )
+        }
+    }
+
+    private fun getServerInfo() {
+        viewModelScope.launch {
+            serverInfoState = musicRepository.ping().data?.first
         }
     }
 }

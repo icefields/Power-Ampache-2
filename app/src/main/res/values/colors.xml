@@ -14,4 +14,6 @@
     <color name="mediumDarkBackground">#303030</color>
     <color name="darkBackground">#202020</color>
     <color name="lightBackground">#404040</color>
+
+    <color name="launcherBgColour">#FF879099</color>
 </resources>

@@ -19,9 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CurrencyBitcoin
 import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -48,13 +46,11 @@ import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
-import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
-import java.time.LocalDateTime
+import luci.sixsixsix.powerampache2.presentation.common.DonateButton
+
 
 // TODO WIP rename functions, finish this screen. add donation links
 
@@ -66,6 +62,7 @@ fun SettingsScreen(
 ) {
     SettingsScreenContent(
         userState = settingsViewModel.userState,
+        serverInfo = settingsViewModel.serverInfoState,
         powerAmpTheme = settingsViewModel.state.theme,
         onThemeSelected = {
             settingsViewModel.setTheme(it)
@@ -77,31 +74,37 @@ fun SettingsScreen(
 @Destination
 fun SettingsScreenContent(
     userState: User?,
+    serverInfo: ServerInfo?,
     powerAmpTheme: PowerAmpTheme,
     onThemeSelected: (selected: PowerAmpTheme) -> Unit
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(bottom = 10.dp)) {
-        items(5) { index ->
+
+    LazyColumn(modifier = Modifier
+        .fillMaxSize()
+        .padding(bottom = 10.dp)) {
+        items(6) { index ->
             when(index) {
-                0 -> Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.errorContainer),
-                    text = "WORK IN PROGRESS. \nMore Settings and Themes coming soon",
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    fontSize = 16.sp
-                )
-
-                1 -> UserInfoSection(user = userState!!)
-
+                0 -> Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.errorContainer)) {
+                    Text(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth(),
+                        text = "WORK IN PROGRESS. \nMore Settings and Themes coming soon",
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontSize = 16.sp
+                    )
+                }
+                1 -> userState?.let { user -> UserInfoSection(user = user) }
                 2 ->  SettingsThemeSelector(currentTheme = powerAmpTheme) {
                     onThemeSelected(it)
                 }
-                //ServerInfoSection(serverInfo)
-                3 -> DonateBtcButton()
-                4 -> DonatePaypalButton()
+                3 -> DonateButton(isExpanded = true)
+                //4 -> DonatePaypalButton(onDonatePaypalButtonClick)
+                4 -> serverInfo?.let {ServerInfoSection(it) }
                 else -> {}
             }
         }
@@ -109,17 +112,21 @@ fun SettingsScreenContent(
 }
 
 @Composable
-fun DonateBtcButton() {
+fun DonateBtcButton(
+    onDonateBtcButtonClick: () -> Unit
+) {
     TextButton(
         modifier = Modifier
-            .padding(horizontal = 26.dp, vertical = 10.dp)
+            .padding(bottom = 10.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
-        onClick = {  }
+        onClick = {
+            onDonateBtcButtonClick()
+        }
     ) {
         Icon(imageVector = Icons.Default.CurrencyBitcoin, contentDescription = "Donate Bitcoin")
         Text(
@@ -135,17 +142,19 @@ fun DonateBtcButton() {
 }
 
 @Composable
-fun DonatePaypalButton() {
+fun DonatePaypalButton(
+    onDonatePaypalButtonClick: () -> Unit
+) {
     TextButton(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 26.dp),
+            .padding(horizontal = 0.dp),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
-        onClick = {  }
+        onClick = { onDonatePaypalButtonClick() }
     ) {
         Icon(imageVector = Icons.Default.MonetizationOn, contentDescription = "Donate Paypal")
         Text(
@@ -179,7 +188,7 @@ fun UserInfoSection(user: User) {
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
-            elevation = CardDefaults.cardElevation(4.dp),
+            elevation = CardDefaults.cardElevation(1.dp),
             shape = RoundedCornerShape(10.dp)
         ) {
             Column(modifier = Modifier
@@ -193,7 +202,7 @@ fun UserInfoSection(user: User) {
                 UserInfoText("City", user.city)
                 UserInfoText("State", user.state)
                 UserInfoText("ID", user.id)
-                UserInfoText("Access", user.access?.toString())
+                //UserInfoText("Access", user.access?.toString())
                 //UserInfoText("ID", LocalDateTime.parse(user.createDate).toString())
             }
         }
@@ -208,27 +217,12 @@ fun ServerInfoSection(serverInfo: ServerInfo) {
             .padding(all = 10.dp),
         contentAlignment = Alignment.Center
     ) {
-        Card(
-            border = BorderStroke(
-                width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
-                color = MaterialTheme.colorScheme.background
-            ),
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(all = 10.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(4.dp),
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Column(modifier = Modifier
-                .wrapContentHeight()
-                .padding(horizontal = 16.dp, vertical = 9.dp)) {
-                UserInfoText("Server", serverInfo.server)
-                UserInfoText("Version", serverInfo.version)
-                UserInfoText("Compatible", serverInfo.compatible)
-            }
+        Column(modifier = Modifier
+            .wrapContentHeight()
+            .padding(horizontal = 16.dp, vertical = 9.dp)) {
+            UserInfoText("Server", serverInfo.server)
+            UserInfoText("Version", serverInfo.version)
+            UserInfoText("Compatible", serverInfo.compatible)
         }
     }
 }
@@ -294,7 +288,7 @@ fun SettingsThemeSelector(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
-            elevation = CardDefaults.cardElevation(4.dp),
+            elevation = CardDefaults.cardElevation(1.dp),
             shape = RoundedCornerShape(10.dp)
         ) {
 
@@ -368,6 +362,7 @@ fun ThemesRadioGroup(
 fun PreviewSettingsScreen() {
     SettingsScreenContent(
         userState = User.mockUser(),
+        serverInfo = ServerInfo("some server", "6.78"),
         powerAmpTheme = PowerAmpTheme.DARK,
         onThemeSelected = {
         }

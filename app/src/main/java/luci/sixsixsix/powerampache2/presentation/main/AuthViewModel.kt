@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.presentation.main
 
 import android.app.Application
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -134,6 +135,7 @@ class AuthViewModel @Inject constructor(
             is AuthEvent.OnChangeServerUrl -> state = state.copy(url = event.url)
             is AuthEvent.OnChangeUsername -> state = state.copy(username = event.username)
             is AuthEvent.OnChangeAuthToken -> state = state.copy(authToken = event.token)
+            AuthEvent.SignUp -> Toast.makeText(getApplication(), "Coming Soon", Toast.LENGTH_LONG).show()
         }
     }
 

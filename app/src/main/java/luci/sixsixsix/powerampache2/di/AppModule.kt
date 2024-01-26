@@ -10,7 +10,7 @@ import luci.sixsixsix.powerampache2.common.Constants.DB_LOCAL_NAME
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_READ_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_WRITE_S
-import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
+import luci.sixsixsix.powerampache2.data.local.MIGRATION_73_74
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.mapping.AmpacheDateMapper
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -18,7 +18,6 @@ import luci.sixsixsix.powerampache2.data.remote.MainNetwork.Companion.BASE_URL
 import luci.sixsixsix.powerampache2.data.remote.PingScheduler
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
-import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -74,6 +73,7 @@ object AppModule {
             application,
             MusicDatabase::class.java,
             DB_LOCAL_NAME
-        ).fallbackToDestructiveMigration()
-            .build()
+        )
+        .addMigrations(MIGRATION_73_74())
+        .build()
 }
