@@ -6,6 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
@@ -19,7 +21,7 @@ class AlbumsViewModel @Inject constructor(
     private val repository: AlbumsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
-
+    private var fetchMoreJob: Job? = null
     var state by mutableStateOf(AlbumsState())
     private var isEndOfDataList: Boolean = false
 
@@ -50,9 +52,13 @@ class AlbumsViewModel @Inject constructor(
 
             is AlbumsEvent.OnBottomListReached -> {
                 if (!state.isFetchingMore && !isEndOfDataList) {
-                    L("AlbumsEvent.OnBottomListReached")
-                    state = state.copy(isFetchingMore = true)
-                    getAlbums(fetchRemote = true, offset = state.albums.size)
+                    fetchMoreJob?.cancel()
+                    fetchMoreJob = viewModelScope.launch {
+                        delay(500)
+                        L("AlbumsEvent.OnBottomListReached")
+                        state = state.copy(isFetchingMore = true)
+                        getAlbums(fetchRemote = true, offset = state.albums.size)
+                    }
                 }
             }
         }

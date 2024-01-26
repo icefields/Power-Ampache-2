@@ -5,7 +5,8 @@ Using the latest Material3 design guidelines <br>
 ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/02e34f44-5145-4041-b57f-683843b4feec)
 
 # Development
-The code follows, strictly, SOLID principles, it's developed using Clean Architecture on top of MVVM. Contribution guidelines coming soon, please make sure to read before opening a PR.
+The app is developed using Clean Architecture on top of MVVM, following SOLID principles. 
+Contribution guidelines coming soon, please make sure to read before opening a PR.
 
 # Screenshots (MaterialYou Theme, matches the colour scheme of the phone)
 | |  | |

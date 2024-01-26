@@ -21,6 +21,8 @@ data class UserDto(
     val streamToken: String? = null,
     @SerializedName("fullname_public")
     val fullNamePublic: Any? = null,
+    @SerializedName("fullname")
+    val fullName: String? = null,
     @SerializedName("validation")
     val validation: Any? = null,
     @SerializedName("disabled")
@@ -38,16 +40,17 @@ data class UserDto(
 )
 
 fun UserDto.toUser() = User(
-    id,
-    username,
-    email ?: "",
-    access ?: ERROR_INT,
-    streamToken,
-    processFlag( fullNamePublic),
-    disabled ?: false,
-    createDate ?: ERROR_INT,
-    lastSeen ?: ERROR_INT,
-    website ?: "",
-    state ?: "",
-    city ?: ""
+    id = id,
+    username = username,
+    email = email ?: "",
+    access = access ?: ERROR_INT,
+    streamToken = streamToken,
+    fullNamePublic = processFlag(fullNamePublic),
+    disabled = disabled ?: false,
+    createDate = createDate ?: ERROR_INT,
+    lastSeen = lastSeen ?: ERROR_INT,
+    website = website ?: "",
+    state = state ?: "",
+    city = city ?: "",
+    fullName = fullName
 )

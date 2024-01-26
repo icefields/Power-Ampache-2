@@ -15,10 +15,10 @@ data class LocalSettingsEntity(
 
 fun LocalSettingsEntity.toLocalSettings() = LocalSettings(
     username = username,
-    theme = PowerAmpTheme.valueOf(theme)
+    theme = PowerAmpTheme.getThemeFromId(theme)
 )
 
 fun LocalSettings.toLocalSettingsEntity() = LocalSettingsEntity(
     username = username,
-    theme = theme.name
+    theme = theme.themeId
 )
