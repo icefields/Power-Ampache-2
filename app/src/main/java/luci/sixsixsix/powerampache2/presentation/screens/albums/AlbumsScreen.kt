@@ -101,7 +101,7 @@ fun AlbumsScreen(
                             )
                     )
                     // search queries are limited, do not fetch more in case of a search string
-                    if (i == (state.albums.size - 1) && state.searchQuery.isBlank()) {
+                    if (i == (state.albums.size - 8) && state.searchQuery.isBlank()) {
                         // if last item, fetch more
                         viewModel.onEvent(AlbumsEvent.OnBottomListReached(i))
                     }

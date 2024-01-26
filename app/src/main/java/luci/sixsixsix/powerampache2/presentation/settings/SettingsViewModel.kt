@@ -56,7 +56,9 @@ class SettingsViewModel @Inject constructor(
 
     fun setTheme(theme: PowerAmpTheme) {
         viewModelScope.launch {
-            settingsRepository.saveLocalSettings(settingsRepository.getLocalSettings(userState?.username).copy(theme = theme))
+            settingsRepository.saveLocalSettings(
+                settingsRepository.getLocalSettings(userState?.username).copy(theme = theme)
+            )
         }
     }
 }

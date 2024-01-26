@@ -63,7 +63,7 @@ interface MusicDao {
     @Query("DELETE FROM albumentity")
     suspend fun clearAlbums()
 
-    @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR UPPER(:query) == basename order by name""")
+    @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
     suspend fun searchAlbum(query: String): List<AlbumEntity>
 
     @Query("""SELECT * FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId) order by year DESC""")
