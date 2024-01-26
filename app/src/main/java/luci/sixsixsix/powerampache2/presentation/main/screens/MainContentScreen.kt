@@ -20,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -42,9 +43,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
@@ -55,6 +58,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.common.DonateButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.destinations.OfflineSongsScreenDestination
@@ -121,17 +125,22 @@ fun MainContentScreen(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        //scrimColor = MaterialTheme.colorScheme.scrim,
         drawerContent = {
             ModalDrawerSheet {
                 DrawerHeader(authViewModel.state.user?.username ?: ERROR_STRING)
                 Divider()
-                DrawerBody(items = drawerItems,
+                DrawerBody(
+                    modifier = Modifier.weight(1f),
+                    items = drawerItems,
                     onItemClick = {
                         currentScreen = it.id
                         scope.launch {
                             drawerState.close()
                         }
                 })
+
+                DonateButton()
             }
         }
     ) {

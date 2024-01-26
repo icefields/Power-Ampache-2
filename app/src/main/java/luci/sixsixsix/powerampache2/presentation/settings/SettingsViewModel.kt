@@ -19,6 +19,7 @@ import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
 import javax.inject.Inject
 
+
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -32,7 +33,9 @@ class SettingsViewModel @Inject constructor(
         mutableStateOf(LocalSettings.defaultSettings())
     }
 
-    var userState by mutableStateOf<User?>(null)
+    var userState by savedStateHandle.saveable {
+        mutableStateOf<User>(User.emptyUser())
+    }
 
     var serverInfoState by mutableStateOf<ServerInfo?>(null)
 

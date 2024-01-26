@@ -23,6 +23,19 @@ data class User(
     val city: String
 ): Parcelable {
     companion object {
+        fun emptyUser(): User = User(
+            "", "", "",
+            Constants.ERROR_INT,
+            null,
+            Constants.ERROR_INT,
+            null,
+            true,
+            Constants.ERROR_INT,
+            Constants.ERROR_INT,
+            "",
+            "",
+            ""
+        )
         fun mockUser(): User = Gson().fromJson("{\n" +
                 "    \"id\": \"3\",\n" +
                 "    \"username\": \"luci\",\n" +

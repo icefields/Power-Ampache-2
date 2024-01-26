@@ -19,9 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CurrencyBitcoin
 import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -48,13 +46,11 @@ import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
-import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
-import java.time.LocalDateTime
+import luci.sixsixsix.powerampache2.presentation.common.DonateButton
+
 
 // TODO WIP rename functions, finish this screen. add donation links
 
@@ -82,14 +78,18 @@ fun SettingsScreenContent(
     powerAmpTheme: PowerAmpTheme,
     onThemeSelected: (selected: PowerAmpTheme) -> Unit
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(bottom = 10.dp)) {
+
+    LazyColumn(modifier = Modifier
+        .fillMaxSize()
+        .padding(bottom = 10.dp)) {
         items(6) { index ->
             when(index) {
                 0 -> Box(modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.errorContainer)) {
                     Text(
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
+                            .padding(8.dp)
                             .fillMaxWidth(),
                         text = "WORK IN PROGRESS. \nMore Settings and Themes coming soon",
                         textAlign = TextAlign.Center,
@@ -102,9 +102,9 @@ fun SettingsScreenContent(
                 2 ->  SettingsThemeSelector(currentTheme = powerAmpTheme) {
                     onThemeSelected(it)
                 }
-                3 -> DonateBtcButton()
-                4 -> DonatePaypalButton()
-                5 -> serverInfo?.let {ServerInfoSection(it) }
+                3 -> DonateButton(isExpanded = true)
+                //4 -> DonatePaypalButton(onDonatePaypalButtonClick)
+                4 -> serverInfo?.let {ServerInfoSection(it) }
                 else -> {}
             }
         }
@@ -112,17 +112,21 @@ fun SettingsScreenContent(
 }
 
 @Composable
-fun DonateBtcButton() {
+fun DonateBtcButton(
+    onDonateBtcButtonClick: () -> Unit
+) {
     TextButton(
         modifier = Modifier
-            .padding(horizontal = 26.dp, vertical = 10.dp)
+            .padding(bottom = 10.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
-        onClick = {  }
+        onClick = {
+            onDonateBtcButtonClick()
+        }
     ) {
         Icon(imageVector = Icons.Default.CurrencyBitcoin, contentDescription = "Donate Bitcoin")
         Text(
@@ -138,17 +142,19 @@ fun DonateBtcButton() {
 }
 
 @Composable
-fun DonatePaypalButton() {
+fun DonatePaypalButton(
+    onDonatePaypalButtonClick: () -> Unit
+) {
     TextButton(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 26.dp),
+            .padding(horizontal = 0.dp),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
-        onClick = {  }
+        onClick = { onDonatePaypalButtonClick() }
     ) {
         Icon(imageVector = Icons.Default.MonetizationOn, contentDescription = "Donate Paypal")
         Text(
@@ -182,7 +188,7 @@ fun UserInfoSection(user: User) {
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
-            elevation = CardDefaults.cardElevation(4.dp),
+            elevation = CardDefaults.cardElevation(1.dp),
             shape = RoundedCornerShape(10.dp)
         ) {
             Column(modifier = Modifier
@@ -282,7 +288,7 @@ fun SettingsThemeSelector(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
-            elevation = CardDefaults.cardElevation(4.dp),
+            elevation = CardDefaults.cardElevation(1.dp),
             shape = RoundedCornerShape(10.dp)
         ) {
 
