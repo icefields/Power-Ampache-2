@@ -92,6 +92,7 @@ fun LoginScreenContent(
 
     Column(
         verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()
     ) {
 
