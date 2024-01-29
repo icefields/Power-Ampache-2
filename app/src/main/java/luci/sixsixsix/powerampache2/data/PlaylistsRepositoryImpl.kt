@@ -108,6 +108,21 @@ class PlaylistsRepositoryImpl @Inject constructor(
     override suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.artist)
 
     override suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.playlist)
+
+    override suspend fun getPlaylistShareLink(playlistId: String) = flow {
+        emit(Resource.Loading(true))
+        val response = api.createShare(
+            getSession()!!.auth,
+            id = playlistId,
+            type = MainNetwork.Type.playlist
+        )
+        response.error?.let { throw(MusicException(it.toError())) }
+        response.publicUrl!!.apply {
+            emit(Resource.Success(data = this, networkData = this))
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getPlaylistShareLink()", e, this) }
+
     override suspend fun addSongToPlaylist(
         playlistId: String,
         songId: String

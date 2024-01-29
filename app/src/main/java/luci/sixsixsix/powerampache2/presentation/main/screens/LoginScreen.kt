@@ -105,7 +105,7 @@ fun LoginScreenContent(
                 .padding(top = 20.dp)
                 .clickable {
                     if (BuildConfig.DEBUG) {
-                        isDebugButtonsSheetOpen = true
+                        isDebugButtonsSheetOpen = !isDebugButtonsSheetOpen
                     }
                 },
             painter = painterResource(id = R.drawable.ic_power_ampache_mono),
@@ -137,7 +137,7 @@ fun LoginScreenContent(
                 when(it) {
                     1 -> { }
                     3 -> SignUpButton {
-                        isSignUpSheetOpen = true
+                        isSignUpSheetOpen = !isSignUpSheetOpen
                         onEvent(AuthEvent.SignUp)
                     }
                     2 -> LoginButton {
@@ -164,7 +164,10 @@ fun LoginScreenContent(
             onDismissRequest = { isLoginSheetOpen = false }
         ) {
             Column {
-                LoginButton(onEvent = onEvent)
+                LoginButton(onEvent = {
+                    isLoginSheetOpen = false
+                    onEvent(it)
+                })
                 AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
                 LoginTextFields(
                     username = username,
@@ -184,7 +187,7 @@ fun LoginScreenContent(
     if (isDebugButtonsSheetOpen) {
         ModalBottomSheet(
             sheetState = sheetState,
-            onDismissRequest = { isLoginSheetOpen = false }
+            onDismissRequest = { isDebugButtonsSheetOpen = false }
         ) {
             Column {
                 DebugLoginButtons(onEvent, modifier = Modifier
@@ -458,7 +461,7 @@ fun LoginScreenPreview() {
         authToken = "state.authToken",
         error = "state.error",
         onEvent = {},
-        isLoginSheetOpen = false,
+        isLoginSheetOpen = true,
         isSignUpSheetOpen = false,
         modifier = Modifier.fillMaxSize()
     )

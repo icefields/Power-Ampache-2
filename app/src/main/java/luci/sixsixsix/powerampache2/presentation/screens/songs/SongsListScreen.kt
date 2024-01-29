@@ -80,9 +80,12 @@ fun SongsListScreen(
                             song = song,
                             songItemEventListener = { event ->
                                 when(event) {
-                                    SongItemEvent.PLAY_NEXT -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
-                                    SongItemEvent.SHARE_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
-                                    SongItemEvent.DOWNLOAD_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
+                                    SongItemEvent.PLAY_NEXT ->
+                                        mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                                    SongItemEvent.SHARE_SONG ->
+                                        mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                                    SongItemEvent.DOWNLOAD_SONG ->
+                                        mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                                     SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
                                         AlbumDetailScreenDestination(albumId = song.album.id, album = null)
                                     )

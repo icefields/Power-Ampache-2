@@ -1,7 +1,6 @@
 package luci.sixsixsix.powerampache2.data
 
 import android.app.Application
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.FlowCollector
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
@@ -45,27 +44,34 @@ class ErrorHandlerImpl @Inject constructor(
                     "cannot load data IOException $e"
                 }
                 is HttpException -> {
-                    readableMessage = applicationContext.getString(R.string.error_http_exception)
+                    readableMessage = e.localizedMessage
                     "cannot load data HttpException $e"
                 }
-                is ServerUrlNotInitializedException -> "ServerUrlNotInitializedException $e"
+                is ServerUrlNotInitializedException ->
+                    "ServerUrlNotInitializedException $e"
                 is MusicException -> {
                     when(e.musicError.getErrorType()) {
-                        ErrorType.SESSION_EXPIRED -> {
+                        ErrorType.ACCOUNT -> {
                             // clear session and try to autologin using the saved credentials
                             db.dao.clearCachedData()
                             db.dao.clearSession()
+                            readableMessage = e.musicError.errorMessage
                         }
                         ErrorType.EMPTY ->
                             readableMessage = applicationContext.getString(R.string.error_empty_result)
                         ErrorType.DUPLICATE ->
                             readableMessage = applicationContext.getString(R.string.error_duplicate)
-                        ErrorType.Other -> { }
+                        ErrorType.Other ->
+                            readableMessage = e.musicError.errorMessage
+                        ErrorType.SYSTEM ->
+                            readableMessage = e.musicError.errorMessage
                     }
-
                     e.musicError.toString()
                 }
-                else -> "generic exception $e"
+                else -> {
+                    readableMessage = e.localizedMessage
+                    "generic exception $e"
+                }
             }).toString().apply {
                 // check on error on the emitted data for detailed logging
                 fc.emit(Resource.Error<T>(message = this, exception = e))
@@ -76,7 +82,7 @@ class ErrorHandlerImpl @Inject constructor(
                     playlistManager.updateErrorMessage(readableMessage)
                 }
                 onError(this, e)
-                L.e(e)
+                L.e(readableMessage, e)
             }
     }
 }

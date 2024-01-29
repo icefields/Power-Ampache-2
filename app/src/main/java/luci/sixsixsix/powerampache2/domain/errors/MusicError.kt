@@ -30,16 +30,19 @@ data class MusicError(
 }
 
 enum class ErrorType(val code: String) {
-    SESSION_EXPIRED(ERROR_CODE_SESSION_EXPIRED),
+    ACCOUNT(ERROR_CODE_SESSION_EXPIRED),
     EMPTY(ERROR_CODE_EMPTY),
     DUPLICATE(ERROR_CODE_DUPLICATE),
+    SYSTEM(ERROR_CODE_SYSTEM),
     Other("_")
 }
 
 private const val ERROR_CODE_SESSION_EXPIRED = "4701"
 private const val ERROR_CODE_EMPTY = "4704"
 private const val ERROR_CODE_DUPLICATE = "4710"
+private const val ERROR_CODE_SYSTEM = "4703"
 
 const val ERROR_TYPE_EMPTY = "empty"
 const val ERROR_TYPE_ACCOUNT = "account"
 const val ERROR_TYPE_DUPLICATE = "duplicate"
+const val ERROR_TYPE_SYSTEM = "system"

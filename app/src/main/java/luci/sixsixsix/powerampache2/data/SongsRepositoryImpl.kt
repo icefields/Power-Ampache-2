@@ -311,6 +311,20 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("downloadSong()", e, this) }
 
+    override suspend fun getSongShareLink(song: Song) = flow {
+        emit(Resource.Loading(true))
+        val response = api.createShare(
+            getSession()!!.auth,
+            id = song.mediaId,
+            type = MainNetwork.Type.song
+        )
+        response.error?.let { throw(MusicException(it.toError())) }
+        response.publicUrl!!.apply {
+            emit(Resource.Success(data = this, networkData = this))
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getSongShareLink()", e, this) }
+
     /**
      * returns false if Network data is not required, true otherwise
      */

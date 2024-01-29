@@ -1,16 +1,21 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
+import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
@@ -22,10 +27,13 @@ import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.main.MainState
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(SavedStateHandleSaveableApi::class)
 class PlaylistDetailViewModel @Inject constructor(
+    private val application: Application,
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
@@ -33,8 +41,9 @@ class PlaylistDetailViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
     private val playlistsRepository: PlaylistsRepository,
     private val playlistManager: MusicPlaylistManager
-) : ViewModel() {
-    var state by mutableStateOf(PlaylistDetailState())
+) : AndroidViewModel(application = application) {
+    //var state by mutableStateOf(PlaylistDetailState())
+    var state by savedStateHandle.saveable { mutableStateOf(PlaylistDetailState()) }
 
     init {
         savedStateHandle.get<Playlist>("playlist")?.let { playlist ->
@@ -70,7 +79,8 @@ class PlaylistDetailViewModel @Inject constructor(
                 playlistManager.updateCurrentSong(state.songs[0].song)
                 playlistManager.addToCurrentQueueTop(state.getSongList())
             }
-            PlaylistDetailEvent.OnSharePlaylist -> TODO()
+            PlaylistDetailEvent.OnSharePlaylist ->
+                sharePlaylist(playlistId = state.playlist.id)
             PlaylistDetailEvent.OnShufflePlaylist -> if (state.songs.isNotEmpty()) {
                 val shuffled = state.getSongList().shuffled()
                 playlistManager.addToCurrentQueueNext(shuffled)
@@ -84,6 +94,18 @@ class PlaylistDetailViewModel @Inject constructor(
                 state = state.copy(songs = listOf())
                 delay(100)
                 state = state.copy(songs = songs)
+            }
+        }
+    }
+
+    private fun sharePlaylist(playlistId: String) = viewModelScope.launch {
+        playlistsRepository.getPlaylistShareLink(playlistId).collect { result ->
+            when (result) {
+                is Resource.Success -> result.data?.let {
+                    application.shareLink(it)
+                }
+                is Resource.Error -> { }
+                is Resource.Loading -> { }
             }
         }
     }

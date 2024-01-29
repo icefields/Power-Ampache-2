@@ -1,6 +1,8 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 
+import android.app.Application
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
@@ -22,6 +25,7 @@ import kotlin.math.abs
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
+    private val application: Application,
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
@@ -29,7 +33,7 @@ class AlbumDetailViewModel @Inject constructor(
     private val albumsRepository: AlbumsRepository,
     private val playlistsRepository: PlaylistsRepository,
     private val playlistManager: MusicPlaylistManager,
-) : ViewModel() {
+) : AndroidViewModel(application) {
     //var state by mutableStateOf(AlbumDetailState())
     var state by savedStateHandle.saveable {
         mutableStateOf(AlbumDetailState())
@@ -76,7 +80,8 @@ class AlbumDetailViewModel @Inject constructor(
                 playlistManager.updateCurrentSong(state.songs[0].song)
                 playlistManager.addToCurrentQueueTop(state.getSongList())
             }
-            AlbumDetailEvent.OnShareAlbum -> {}
+            AlbumDetailEvent.OnShareAlbum ->
+                shareAlbum(state.album.id)
             AlbumDetailEvent.OnShuffleAlbum -> {
                 val shuffled = state.getSongList().shuffled()
                 playlistManager.addToCurrentQueueNext(shuffled)
@@ -157,6 +162,18 @@ class AlbumDetailViewModel @Inject constructor(
                         is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                     }
                 }
+        }
+    }
+
+    private fun shareAlbum(albumId: String) = viewModelScope.launch {
+        albumsRepository.getAlbumShareLink(albumId).collect { result ->
+            when (result) {
+                is Resource.Success -> result.data?.let {
+                    application.shareLink(it)
+                }
+                is Resource.Error -> { }
+                is Resource.Loading -> { }
+            }
         }
     }
 }

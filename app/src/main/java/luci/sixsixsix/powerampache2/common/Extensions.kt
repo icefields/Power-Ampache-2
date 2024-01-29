@@ -1,12 +1,13 @@
 package luci.sixsixsix.powerampache2.common
 
+import android.content.Context
+import android.content.Intent
 import androidx.annotation.DimenRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
-import java.lang.StringBuilder
 import java.security.MessageDigest
 
 fun String.md5(): String {
@@ -23,6 +24,18 @@ private fun hashString(input: String, algorithm: String): String {
         .digest(input.toByteArray())
         .fold("") { str, it -> str + "%02x".format(it) }
 }
+
+fun Context.shareLink(link: String) =
+    startActivity(
+        Intent.createChooser(
+            Intent(Intent.ACTION_SEND).apply {
+                putExtra(Intent.EXTRA_TEXT, link)
+                type ="text/plain"
+            }, null
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+        }
+    )
 
 /**
  * TODO DEBUG

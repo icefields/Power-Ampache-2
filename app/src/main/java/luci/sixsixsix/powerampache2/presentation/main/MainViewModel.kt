@@ -29,6 +29,7 @@ import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
@@ -260,7 +261,9 @@ class MainViewModel @Inject constructor(
             is MainEvent.OnAddSongToPlaylist -> {}
             is MainEvent.OnDownloadSong ->
                 downloadSong(event.song)
-            is MainEvent.OnShareSong -> {}
+            is MainEvent.OnShareSong -> viewModelScope.launch {
+                shareSong(event.song)
+            }
             is MainEvent.Repeat -> viewModelScope.launch {
                 val nextRepeatMode = nextRepeatMode()
                 simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.RepeatToggle(nextRepeatMode))
@@ -312,6 +315,18 @@ class MainViewModel @Inject constructor(
                 }
                 is Resource.Error -> state = state.copy(isLikeLoading = false)
                 is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+            }
+        }
+    }
+
+    private fun shareSong(song: Song) = viewModelScope.launch {
+        songsRepository.getSongShareLink(song).collect { result ->
+            when (result) {
+                is Resource.Success -> result.data?.let {
+                    application.shareLink(it)
+                }
+                is Resource.Error -> { }
+                is Resource.Loading -> { }
             }
         }
     }
