@@ -74,6 +74,7 @@ object AppModule {
             MusicDatabase::class.java,
             DB_LOCAL_NAME
         )
+        //.fallbackToDestructiveMigration()
         .addMigrations(MIGRATION_73_74())
         .build()
 }
