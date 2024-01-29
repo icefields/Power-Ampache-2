@@ -79,9 +79,8 @@ class SongsViewModel @Inject constructor(
                                     songWrapperList.add(
                                         SongWrapper(
                                         song = song,
-                                        isOffline = !repository.getSongUri(song).startsWith("http")
-                                    )
-                                    )
+                                        isOffline = repository.isSongAvailableOffline(song)
+                                    ))
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("viewmodel.getSongs SONGS size at the end", state.songs.size)

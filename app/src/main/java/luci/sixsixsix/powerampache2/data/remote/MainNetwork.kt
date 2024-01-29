@@ -190,6 +190,25 @@ interface MainNetwork {
     ): SuccessResponse
 
     /**
+     * Create a public url that can be used by anyone to stream media.
+     * Takes the file id with optional description and expires parameters.
+     *
+     * 'filter'	string	UID of object you are sharing	NO
+     * 'type'	string	object_type	NO
+     * 'description'	string	description (will be filled for you if empty)	YES
+     * 'expires'	integer	days to keep active	YES
+     */
+    @GET("json.server.php?action=share_create")
+    suspend fun createShare(
+        @Query("auth") authKey: String,
+        @Query("filter") playlistId: String,
+        @Query("description") description: String = "",
+        @Query("expires") expires: Int = 7,
+        @Query("type") type: Type
+    ): SuccessResponse
+
+
+    /**
      * 'id'	integer	$object_id	NO
      * 'type'	string	song, podcast_episode, search, playlist	NO
      * 'format'	string	mp3, ogg, raw, etc (raw returns the original format)	YES

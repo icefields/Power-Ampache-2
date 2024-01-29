@@ -19,7 +19,6 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Session
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,7 +32,6 @@ import javax.inject.Singleton
 class AlbumsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
-    private val playlistManager: MusicPlaylistManager,
     private val errorHandler: ErrorHandler
 ): AlbumsRepository {
     private val dao = db.dao

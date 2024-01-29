@@ -34,6 +34,8 @@ fun AlbumInfoSection(
     album: Album,
     isPlayingAlbum: Boolean,
     isLikeLoading: Boolean,
+    isDownloading: Boolean,
+    isPlaylistEditLoading: Boolean,
     modifier: Modifier,
     eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit
 ) {
@@ -91,6 +93,8 @@ fun AlbumInfoSection(
             modifier = Modifier.fillMaxWidth(),
             album = album,
             isPlayingAlbum = isPlayingAlbum,
+            isPlaylistEditLoading = isPlaylistEditLoading,
+            isDownloading = isDownloading,
             eventListener = eventListener
         )
         Spacer(modifier = Modifier.width(20.dp))
@@ -105,6 +109,8 @@ fun AlbumInfoSectionPreview() {
         album = Album.mock(),
         isPlayingAlbum = false,
         isLikeLoading = false,
+        isPlaylistEditLoading = false,
+        isDownloading = true,
         eventListener = {},
     )
 }

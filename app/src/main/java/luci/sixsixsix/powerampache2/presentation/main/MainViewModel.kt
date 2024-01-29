@@ -222,7 +222,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun isOfflineSong(song: Song, callback: (Boolean) -> Unit) = viewModelScope.launch {
-        callback(!songsRepository.getSongUri(song).startsWith("http"))
+        callback(songsRepository.isSongAvailableOffline(song))
     }
 
     /**

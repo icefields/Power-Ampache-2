@@ -57,7 +57,7 @@ fun AddToPlaylistOrQueueDialog(
     onDismissRequest: () -> Unit,
     onCreatePlaylistRequest: (success: Boolean) -> Unit = {},
     mainViewModel: MainViewModel,
-    viewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
+    viewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
     var headerBgColour by remember { mutableStateOf(Color.Transparent) }
     // workaround, not allowed to call RandomThemeBackgroundColour() inside remember block

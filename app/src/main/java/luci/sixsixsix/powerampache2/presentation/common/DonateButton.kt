@@ -1,8 +1,15 @@
 package luci.sixsixsix.powerampache2.presentation.common
 
+import android.R.attr.label
+import android.R.attr.text
 import android.app.Application
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Context.CLIPBOARD_SERVICE
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
@@ -32,12 +39,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.AndroidViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.DONATION_BITCOIN_ADDRESS
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
+
 
 @Composable
 fun DonateButton(
@@ -210,13 +221,25 @@ fun DonatePaypalButton(
 
 @HiltViewModel
 class DonateViewModel @Inject constructor(
-    private val application: Application
+    private val application: Application,
+    private val playlistManager: MusicPlaylistManager
 ) : AndroidViewModel(application) {
+
     fun donateBtc() {
-        application.startActivity(Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(Constants.DONATION_BITCOIN_URI)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-        })
+        try {
+            application.startActivity(Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(Constants.DONATION_BITCOIN_URI)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+            })
+        } catch (e: Exception) {
+            (application.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager).apply {
+                setPrimaryClip(ClipData.newPlainText(
+                    "BITCOIN donation address for ${application.getString(R.string.app_name)}",
+                    DONATION_BITCOIN_ADDRESS
+                ))
+            }
+            playlistManager.updateErrorMessage("No Bitcoin Wallet found on this device, BTC address copied to clipboard")
+        }
     }
 
     fun donatePaypal() {

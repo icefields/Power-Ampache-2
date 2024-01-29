@@ -1,6 +1,5 @@
 package luci.sixsixsix.powerampache2.presentation.queue
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -29,25 +28,29 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.components.QueueScreenContent
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Destination(start = false)
 fun QueueScreen(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
-    viewModel: QueueViewModel = hiltViewModel()
+    queueViewModel: QueueViewModel = hiltViewModel(),
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
@@ -59,13 +62,14 @@ fun QueueScreen(
                 onDismissRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 },
-                mainViewModel = mainViewModel
+                mainViewModel = mainViewModel,
+                viewModel = addToPlaylistOrQueueDialogViewModel
             )
         }
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
@@ -88,20 +92,17 @@ fun QueueScreen(
                 },
                 scrollBehavior = scrollBehavior,
                 actions = {
-                    IconButton(
-                        onClick = {
-                            playlistsDialogOpen =
-                                AddToPlaylistOrQueueDialogOpen(true, viewModel.queueState)
-                        }
+                    ButtonWithLoadingIndicator(
+                        imageVector = Icons.Default.PlaylistAdd,
+                        imageContentDescription = "add all songs in queue to playlist",
+                        isLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.PlaylistAdd,
-                            contentDescription = "add all songs in queue to playlist"
-                        )
+                        playlistsDialogOpen =
+                            AddToPlaylistOrQueueDialogOpen(true, queueViewModel.queueState)
                     }
                     IconButton(
                         onClick = {
-                            viewModel.onEvent(QueueEvent.OnClearQueue)
+                            queueViewModel.onEvent(QueueEvent.OnClearQueue)
                         }
                     ) {
                         Icon(
@@ -132,7 +133,8 @@ fun QueueScreen(
             QueueScreenContent(
                 navigator = navigator,
                 mainViewModel = mainViewModel,
-                viewModel = viewModel
+                queueViewModel = queueViewModel,
+                addToPlaylistOrQueueDialogViewModel = addToPlaylistOrQueueDialogViewModel
             )
         }
     }

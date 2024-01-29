@@ -19,8 +19,9 @@ object Constants {
     const val DB_LOCAL_NAME = "musicdb.db"
 
     // DONATION LINKS
-    const val DONATION_BITCOIN_URI = "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W"
-    const val DONATION_PAYPAL_URI = "https://www.paypal.com/your_paypal"
+    const val DONATION_BITCOIN_ADDRESS = "bc1qm9dvdrukgrqpg5f7466u4cy7tfvwcsc8pqshl4"
+    const val DONATION_BITCOIN_URI = "bitcoin:$DONATION_BITCOIN_ADDRESS"
+    const val DONATION_PAYPAL_URI = "https://paypal.me/powerampache"
 
     // DEBUG
     const val NETWORK_REQUEST_LIMIT_DEBUG = 20

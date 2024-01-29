@@ -12,7 +12,6 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
-import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -23,7 +22,6 @@ import javax.inject.Inject
 class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
     private val musicRepository: MusicRepository,
-    private val songsRepository: SongsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(AddToPlaylistOrQueueDialogState())

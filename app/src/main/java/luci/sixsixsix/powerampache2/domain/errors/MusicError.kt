@@ -16,12 +16,30 @@ data class MusicError(
         super.toString()
     }
 
+    fun getErrorType(): ErrorType = try {
+        ErrorType.valueOf(errorCode)
+    } catch (e: Exception) {
+        ErrorType.Other
+    }
+
+
     fun isSessionExpiredError(): Boolean = errorCode == ERROR_CODE_SESSION_EXPIRED
     fun isEmptyResult(): Boolean = errorCode == ERROR_CODE_EMPTY
+    fun isDuplicateResult(): Boolean = errorCode == ERROR_CODE_DUPLICATE
     fun isServerUrlNotInitialized(): Boolean = errorCode == ERROR_CODE_SERVER_URL_NOT_INITIALIZED
 }
 
-const val ERROR_CODE_SESSION_EXPIRED = "4701"
-const val ERROR_CODE_EMPTY = "4704"
+enum class ErrorType(val code: String) {
+    SESSION_EXPIRED(ERROR_CODE_SESSION_EXPIRED),
+    EMPTY(ERROR_CODE_EMPTY),
+    DUPLICATE(ERROR_CODE_DUPLICATE),
+    Other("_")
+}
+
+private const val ERROR_CODE_SESSION_EXPIRED = "4701"
+private const val ERROR_CODE_EMPTY = "4704"
+private const val ERROR_CODE_DUPLICATE = "4710"
+
 const val ERROR_TYPE_EMPTY = "empty"
 const val ERROR_TYPE_ACCOUNT = "account"
+const val ERROR_TYPE_DUPLICATE = "duplicate"

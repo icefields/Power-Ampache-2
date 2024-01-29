@@ -62,8 +62,10 @@ class AlbumDetailViewModel @Inject constructor(
 
     fun onEvent(event: AlbumDetailEvent) {
         when (event) {
-            is AlbumDetailEvent.Fetch ->
+            is AlbumDetailEvent.Fetch -> {
+                L("AlbumDetailEvent.Fetch", event.albumId)
                 getSongsFromAlbum(albumId = event.albumId, fetchRemote = true)
+            }
             is AlbumDetailEvent.OnSongSelected -> {
                 // play the selected song and add the rest of the album to the queue
                 playlistManager.updateTopSong(event.song)
@@ -83,8 +85,12 @@ class AlbumDetailViewModel @Inject constructor(
             AlbumDetailEvent.OnFavouriteAlbum ->
                 favouriteAlbum()
 
-            AlbumDetailEvent.RefreshFromCache ->
-                getSongsFromAlbum(albumId = state.album.id, fetchRemote = false)
+            AlbumDetailEvent.RefreshFromCache -> {
+                L("AlbumDetailEvent.RefreshFromCache", state.album.id)
+                if (!state.album.id.isNullOrBlank()) {
+                    getSongsFromAlbum(albumId = state.album.id, fetchRemote = false)
+                }
+            }
         }
     }
 
@@ -139,10 +145,8 @@ class AlbumDetailViewModel @Inject constructor(
                                 songs.forEach { song ->
                                     songWrapperList.add(SongWrapper(
                                         song = song,
-                                        // TODO replace with database check instead of check for url scheme
-                                        isOffline = !songsRepository.getSongUri(song).startsWith("http")
-                                        )
-                                    )
+                                        isOffline = songsRepository.isSongAvailableOffline(song)
+                                    ))
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("AlbumDetailViewModel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)

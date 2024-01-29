@@ -111,8 +111,7 @@ class PlaylistDetailViewModel @Inject constructor(
                                     songWrapperList.add(
                                         SongWrapper(
                                         song = song,
-                                        // TODO replace with database check instead of checking the url scheme
-                                        isOffline = !songsRepository.getSongUri(song).startsWith("http")
+                                        isOffline = songsRepository.isSongAvailableOffline(song)
                                     ))
                                 }
                                 state = state.copy(songs = songWrapperList)
@@ -157,8 +156,7 @@ class PlaylistDetailViewModel @Inject constructor(
                                     songWrapperList.add(
                                         SongWrapper(
                                             song = song,
-                                            // TODO replace with database check instead of checking the url scheme
-                                            isOffline = !songsRepository.getSongUri(song).startsWith("http")
+                                            isOffline = songsRepository.isSongAvailableOffline(song)
                                         ))
                                 }
                                 state = state.copy(songs = songWrapperList)
@@ -190,8 +188,7 @@ class PlaylistDetailViewModel @Inject constructor(
                                     songWrapperList.add(
                                         SongWrapper(
                                             song = song,
-                                            // TODO replace with database check instead of checking the url scheme
-                                            isOffline = !songsRepository.getSongUri(song).startsWith("http")
+                                            isOffline = songsRepository.isSongAvailableOffline(song)
                                         ))
                                 }
                                 state = state.copy(songs = songWrapperList)
@@ -224,11 +221,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                     songWrapperList.add(
                                         SongWrapper(
                                             song = song,
-                                            // TODO replace with database check instead of checking the url scheme
-                                            isOffline = !songsRepository.getSongUri(song)
-                                                .startsWith("http")
-                                        )
-                                    )
+                                            isOffline = songsRepository.isSongAvailableOffline(song = song)
+                                        ))
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getFrequentSongs size ${state.songs.size}")
@@ -260,11 +254,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                     songWrapperList.add(
                                         SongWrapper(
                                             song = song,
-                                            // TODO replace with database check instead of checking the url scheme
-                                            isOffline = !songsRepository.getSongUri(song)
-                                                .startsWith("http")
-                                        )
-                                    )
+                                            isOffline = songsRepository.isSongAvailableOffline(song)
+                                        ))
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getHighestSongs size ${state.songs.size}")
