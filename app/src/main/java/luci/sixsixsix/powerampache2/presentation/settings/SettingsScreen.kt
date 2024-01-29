@@ -102,70 +102,12 @@ fun SettingsScreenContent(
                 2 ->  SettingsThemeSelector(currentTheme = powerAmpTheme) {
                     onThemeSelected(it)
                 }
-                3 -> DonateButton(isExpanded = true)
+                3 -> DonateButton(isExpanded = true, isTransparent = false)
                 //4 -> DonatePaypalButton(onDonatePaypalButtonClick)
                 4 -> serverInfo?.let {ServerInfoSection(it) }
                 else -> {}
             }
         }
-    }
-}
-
-@Composable
-fun DonateBtcButton(
-    onDonateBtcButtonClick: () -> Unit
-) {
-    TextButton(
-        modifier = Modifier
-            .padding(bottom = 10.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        onClick = {
-            onDonateBtcButtonClick()
-        }
-    ) {
-        Icon(imageVector = Icons.Default.CurrencyBitcoin, contentDescription = "Donate Bitcoin")
-        Text(
-            modifier = Modifier
-                .padding(vertical = 9.dp),
-            text = "Donate ",
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp
-        )
-        Text(text = "Bitcoin")
-    }
-}
-
-@Composable
-fun DonatePaypalButton(
-    onDonatePaypalButtonClick: () -> Unit
-) {
-    TextButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 0.dp),
-        shape = RoundedCornerShape(10.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        onClick = { onDonatePaypalButtonClick() }
-    ) {
-        Icon(imageVector = Icons.Default.MonetizationOn, contentDescription = "Donate Paypal")
-        Text(
-            modifier = Modifier
-                .padding(vertical = 9.dp),
-            text = "Donate ",
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp
-        )
-        Text(text = "Paypal")
     }
 }
 

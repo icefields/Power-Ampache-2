@@ -62,8 +62,10 @@ class PlaylistDetailViewModel @Inject constructor(
                     else -> getSongsFromPlaylist(playlistId = event.playlist.id, fetchRemote = true)
                 }
             }
-
-            is PlaylistDetailEvent.OnSongSelected -> playlistManager.updateTopSong(event.song)
+            is PlaylistDetailEvent.OnSongSelected -> {
+                playlistManager.updateTopSong(state.songs[0].song)
+                playlistManager.addToCurrentQueue(state.getSongList())
+            }
             PlaylistDetailEvent.OnPlayPlaylist -> if (state.songs.isNotEmpty()) {
                 playlistManager.updateCurrentSong(state.songs[0].song)
                 playlistManager.addToCurrentQueueTop(state.getSongList())

@@ -113,21 +113,38 @@ class PlaylistsRepositoryImpl @Inject constructor(
         songId: String
     ) = flow {
         emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.addSongToPlaylist(
-            authKey = auth.auth,
-            playlistId = playlistId,
-            songId = songId
-        ).apply {
-            error?.let { throw(MusicException(it.toError())) }
-            if (success != null) {
-                emit(Resource.Success(data = Any(), networkData = Any()))
-            } else {
-                throw Exception("error getting a response from addSongToPlaylist call")
-            }
+//        val auth = getSession()!!
+//        api.addSongToPlaylist(
+//            authKey = auth.auth,
+//            playlistId = playlistId,
+//            songId = songId
+//        ).apply {
+//            error?.let { throw(MusicException(it.toError())) }
+//            if (success != null) {
+//                emit(Resource.Success(data = Any(), networkData = Any()))
+//            } else {
+//                throw Exception("error getting a response from addSongToPlaylist call")
+//            }
+//        }
+        if (addSingleSongToPlaylist(playlistId = playlistId, songId = songId)) {
+            emit(Resource.Success(data = Any(), networkData = Any()))
+        } else {
+            throw Exception("error getting a response from addSongToPlaylist call")
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("addSongToPlaylist()", e, this) }
+
+    private suspend fun addSingleSongToPlaylist(
+        playlistId: String,
+        songId: String
+    ): Boolean = api.addSongToPlaylist(
+        authKey = getSession()!!.auth,
+        playlistId = playlistId,
+        songId = songId
+    ).run {
+        error?.let { throw (MusicException(it.toError())) }
+        success != null
+    }
 
     override suspend fun removeSongFromPlaylist(
         playlistId: String,
@@ -227,7 +244,101 @@ class PlaylistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("editPlaylist()", e, this) }
 
+
+    /**
+     * TODO waiting for backend fix to use this function, THIS IS a temporary hack
+     */
     override suspend fun addSongsToPlaylist(
+        playlist: Playlist,
+        songs: List<Song>
+    ) = flow {
+        emit(Resource.Loading(true))
+
+        // Get old version of the playlist
+        val auth = getSession()!!
+        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlist.id)
+        response.error?.let { throw(MusicException(it.toError())) }
+        val songList = response.songs!!.map { songDto -> songDto.toSong() }.toMutableList() // will throw exception if songs null
+        val songsToAdd = ArrayList(songs).apply {
+            removeAll(songList.toSet())
+        }
+
+        for (song in songsToAdd) {
+            addSingleSongToPlaylist(playlistId = playlist.id, songId = song.mediaId)
+        }
+
+        emit(Resource.Success(data = Any(), networkData = Any()))
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("editPlaylist()", e, this) }
+
+    override suspend fun createNewPlaylistAddSongs(
+        name: String,
+        playlistType: MainNetwork.PlaylistType,
+        songsToAdd: List<Song>
+    ) = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        // create new playlist
+        val playlist = api.createNewPlaylist(
+            authKey = auth.auth,
+            name = name,
+            playlistType = playlistType
+        ).toPlaylist() // TODO no error check
+
+        for (song in songsToAdd) {
+            addSingleSongToPlaylist(playlistId = playlist.id, songId = song.mediaId)
+        }
+
+        emit(Resource.Success(data = playlist, networkData = playlist))
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("editPlaylist()", e, this) }
+
+    /**
+     * TODO waiting for backend fix to use this function, using a temporary hack in the meantime
+     */
+    suspend fun createNewPlaylistAddSongsNOTWorking(
+        name: String,
+        playlistType: MainNetwork.PlaylistType,
+        songsToAdd: List<Song>
+    ) = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        // create new playlist
+        val playlist = api.createNewPlaylist(
+            authKey = auth.auth,
+            name = name,
+            playlistType = playlistType
+        ).toPlaylist() // TODO no error check
+
+        // generate comma separated list of ids
+        val commaSeparatedIds = when(songsToAdd.size) {
+            0 -> null
+            else -> songListToCommaSeparatedIds(songsToAdd)
+        }
+        api.editPlaylist(
+            authKey = auth.auth,
+            playlistId = playlist.id,
+            items = commaSeparatedIds,
+            owner = playlist.owner,
+            playlistType = MainNetwork.PlaylistType.valueOf(
+                playlist.type ?:
+                throw Exception("addSongsToPlaylist problem with playlist type")
+            )
+        ).apply {
+            error?.let { throw(MusicException(it.toError())) }
+            if (success != null) {
+                emit(Resource.Success(playlist))
+            } else {
+                throw Exception("error getting a response from editPlaylist call")
+            }
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("editPlaylist()", e, this) }
+
+    /**
+     * TODO waiting for backend fix to use this function, using a temporary hack in the meantime
+     */
+    suspend fun addSongsToPlaylistNotWorking(
         playlist: Playlist,
         songsToAdd: List<Song>
     ) = flow {
@@ -262,45 +373,6 @@ class PlaylistsRepositoryImpl @Inject constructor(
             error?.let { throw(MusicException(it.toError())) }
             if (success != null) {
                 emit(Resource.Success(data = Any(), networkData = Any()))
-            } else {
-                throw Exception("error getting a response from editPlaylist call")
-            }
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("editPlaylist()", e, this) }
-
-    override suspend fun createNewPlaylistAddSongs(
-        name: String,
-        playlistType: MainNetwork.PlaylistType,
-        songsToAdd: List<Song>
-    ) = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        // create new playlist
-        val playlist = api.createNewPlaylist(
-            authKey = auth.auth,
-            name = name,
-            playlistType = playlistType
-        ).toPlaylist() // TODO no error check
-
-        // generate comma separated list of ids
-        val commaSeparatedIds = when(songsToAdd.size) {
-            0 -> null
-            else -> songListToCommaSeparatedIds(songsToAdd)
-        }
-        api.editPlaylist(
-            authKey = auth.auth,
-            playlistId = playlist.id,
-            items = commaSeparatedIds,
-            owner = playlist.owner,
-            playlistType = MainNetwork.PlaylistType.valueOf(
-                playlist.type ?:
-                throw Exception("addSongsToPlaylist problem with playlist type")
-            )
-        ).apply {
-            error?.let { throw(MusicException(it.toError())) }
-            if (success != null) {
-                emit(Resource.Success(playlist))
             } else {
                 throw Exception("error getting a response from editPlaylist call")
             }

@@ -283,11 +283,7 @@ fun PlaylistDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.onEvent(
-                                                PlaylistDetailEvent.OnSongSelected(
-                                                    song
-                                                )
-                                            )
+                                            viewModel.onEvent(PlaylistDetailEvent.OnSongSelected(song))
                                             mainViewModel.onEvent(MainEvent.Play(song))
                                         },
                                     subtitleString = SubtitleString.ARTIST,

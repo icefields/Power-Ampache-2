@@ -64,9 +64,11 @@ class AlbumDetailViewModel @Inject constructor(
         when (event) {
             is AlbumDetailEvent.Fetch ->
                 getSongsFromAlbum(albumId = event.albumId, fetchRemote = true)
-            is AlbumDetailEvent.OnSongSelected ->
+            is AlbumDetailEvent.OnSongSelected -> {
                 // play the selected song and add the rest of the album to the queue
                 playlistManager.updateTopSong(event.song)
+                playlistManager.addToCurrentQueue(state.getSongList())
+            }
             is AlbumDetailEvent.OnPlayAlbum -> {
                 L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
                 playlistManager.updateCurrentSong(state.songs[0].song)

@@ -205,12 +205,17 @@ class MainViewModel @Inject constructor(
                         isPlaying = mediaState.isPlaying
                     is SimpleMediaState.Progress ->
                         calculateProgressValue(mediaState.progress)
-                    is SimpleMediaState.Ready -> { // UI STATE READY
+                    is SimpleMediaState.Ready -> {
                         isBuffering = false
                         duration = mediaState.duration
                     }
                     is SimpleMediaState.Loading ->
                         isLoading = mediaState.isLoading
+                    SimpleMediaState.Ended -> { }
+                    SimpleMediaState.Idle -> {
+                        isBuffering = false
+                        isPlaying = false
+                    }
                 }
             }
         }

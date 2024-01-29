@@ -25,6 +25,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,14 +37,13 @@ import androidx.lifecycle.AndroidViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.presentation.settings.DonateBtcButton
-import luci.sixsixsix.powerampache2.presentation.settings.DonatePaypalButton
 import javax.inject.Inject
 
 @Composable
 fun DonateButton(
     modifier: Modifier = Modifier,
     isExpanded:Boolean = false,
+    isTransparent: Boolean = false,
     donateViewModel: DonateViewModel = hiltViewModel(),
     onDonateBtcButtonClick: () -> Unit = {},
     onDonatePaypalButtonClick: () -> Unit = {}
@@ -51,6 +51,7 @@ fun DonateButton(
     DonateButtonContent(
         modifier = modifier,
         isExpanded = isExpanded,
+        isTransparent = isTransparent,
         onDonateBtcButtonClick = {
             onDonateBtcButtonClick()
             donateViewModel.donateBtc()
@@ -65,6 +66,7 @@ fun DonateButton(
 fun DonateButtonContent(
     modifier: Modifier = Modifier,
     isExpanded:Boolean = false,
+    isTransparent: Boolean = false,
     onDonateBtcButtonClick: () -> Unit = {},
     onDonatePaypalButtonClick: () -> Unit = {}
 ) {
@@ -72,21 +74,24 @@ fun DonateButtonContent(
     Card(
         border = BorderStroke(
             width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
-            color = MaterialTheme.colorScheme.background
+            color = if (isTransparent) {
+                MaterialTheme.colorScheme.onSurface
+            } else MaterialTheme.colorScheme.background
         ),
         modifier = modifier
             .wrapContentSize()
-            .padding(horizontal = 26.dp, vertical = 10.dp)
-        //.padding(all = 10.dp)
-        ,
+            .padding(horizontal = 26.dp, vertical = 10.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = if (!isTransparent) {
+                MaterialTheme.colorScheme.background
+            } else Color.Transparent
         ),
         elevation = CardDefaults.cardElevation(0.dp),
         shape = RoundedCornerShape(10.dp)
     ) {
         AnimatedVisibility (isShowDonateButtons.value) {
             DonateButtons(
+                isTransparent = isTransparent,
                 onDonateBtcButtonClick = {
                     onDonateBtcButtonClick()
                 }, onDonatePaypalButtonClick = {
@@ -95,35 +100,30 @@ fun DonateButtonContent(
             )
         }
         AnimatedVisibility (!isShowDonateButtons.value) {
-            DonateButtonSingle(isShowDonateButtons)
+            DonateButtonSingle(isShowDonateButtons, isTransparent)
         }
     }
 }
 
 @Composable
 fun DonateButtons(
+    isTransparent: Boolean,
     onDonateBtcButtonClick: () -> Unit,
     onDonatePaypalButtonClick: () -> Unit
 ) {
     Column {
-        DonateBtcButton(onDonateBtcButtonClick)
-        DonatePaypalButton(onDonatePaypalButtonClick)
+        DonateBtcButton(isTransparent, onDonateBtcButtonClick)
+        DonatePaypalButton(isTransparent, onDonatePaypalButtonClick)
     }
 }
 
 @Composable
 fun DonateButtonSingle(
-    isShowDonateButtons: MutableState<Boolean>
+    isShowDonateButtons: MutableState<Boolean>,
+    isTransparent: Boolean = false
 ) {
-    TextButton(
-        modifier = Modifier
-
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
+    DefaultFullWidthButton(
+        colours = getButtonBgColour(isTransparent = isTransparent),
         onClick = {
             isShowDonateButtons.value = true
         }
@@ -138,6 +138,73 @@ fun DonateButtonSingle(
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp
         )
+    }
+}
+
+@Composable
+private fun getButtonBgColour(isTransparent: Boolean) = if (!isTransparent) {
+    ButtonDefaults.textButtonColors(
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+} else {
+    ButtonDefaults.textButtonColors(
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+fun DonateBtcButton(
+    isTransparent: Boolean,
+    onDonateBtcButtonClick: () -> Unit
+) {
+    TextButton(
+        modifier = Modifier
+            .padding(bottom = 10.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        colors = getButtonBgColour(isTransparent = isTransparent),
+        onClick = {
+            onDonateBtcButtonClick()
+        }
+    ) {
+        Icon(imageVector = Icons.Default.CurrencyBitcoin, contentDescription = "Donate Bitcoin")
+        Text(
+            modifier = Modifier
+                .padding(vertical = 9.dp),
+            text = "Donate ",
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp
+        )
+        Text(text = "Bitcoin")
+    }
+}
+
+@Composable
+fun DonatePaypalButton(
+    isTransparent: Boolean,
+    onDonatePaypalButtonClick: () -> Unit
+) {
+    TextButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 0.dp),
+        shape = RoundedCornerShape(10.dp),
+        colors = getButtonBgColour(isTransparent = isTransparent),
+        onClick = { onDonatePaypalButtonClick() }
+    ) {
+        Icon(imageVector = Icons.Default.MonetizationOn, contentDescription = "Donate Paypal")
+        Text(
+            modifier = Modifier
+                .padding(vertical = 9.dp),
+            text = "Donate ",
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp
+        )
+        Text(text = "Paypal")
     }
 }
 
@@ -164,7 +231,8 @@ class DonateViewModel @Inject constructor(
 @Preview
 fun DonateButtonPreview() {
     DonateButtonContent(
-        isExpanded = true,
+        isExpanded = false,
+        isTransparent = true,
         onDonateBtcButtonClick = { },
         onDonatePaypalButtonClick = { }
     )
