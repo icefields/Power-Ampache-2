@@ -12,6 +12,7 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
 import javax.inject.Inject
 
 @HiltViewModel
@@ -69,7 +70,16 @@ class SongsViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                state = state.copy(songs = songs)
+                                val songWrapperList = mutableListOf<SongWrapper>()
+                                songs.forEach { song ->
+                                    songWrapperList.add(
+                                        SongWrapper(
+                                        song = song,
+                                        isOffline = !repository.getSongUri(song).startsWith("http")
+                                    )
+                                    )
+                                }
+                                state = state.copy(songs = songWrapperList)
                                 L("viewmodel.getSongs SONGS size at the end", state.songs.size)
                             }
                         }

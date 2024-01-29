@@ -71,7 +71,8 @@ fun SongsListScreen(
                         state.songs.size,
                         //key = { i -> state.songs[i].mediaId }
                     ) { i ->
-                        val song = state.songs[i]
+                        val song = state.songs[i].song
+                        val isOffline = state.songs[i].isOffline
                         SongItem(
                             song = song,
                             songItemEventListener = { event ->
@@ -92,6 +93,7 @@ fun SongsListScreen(
                                 }
                             },
                             subtitleString = SubtitleString.ARTIST,
+                            isSongDownloaded = isOffline,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {

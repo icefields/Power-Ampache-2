@@ -70,7 +70,7 @@ fun AlbumDetailScreen(
     mainViewModel: MainViewModel,
 ) {
     val state = viewModel.state
-    val songs = viewModel.getSongs()
+    val songs = viewModel.state.getSongList()
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }

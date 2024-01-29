@@ -21,7 +21,7 @@
     <string name="loginScreen_login">Login</string>
     <string name="loginScreen_signup">Sign Up</string>
     <string name="loginScreen_demo_server">Demo</string>
-    <string name="loginScreen_local_server">Local Debug Server</string>
+    <string name="loginScreen_local_server">Local Development Server</string>
     <string name="loginScreen_remote_server">Remote Debug Server</string>
     <string name="loginScreen_dogmazic_server">Dogmazic</string>
     <string name="home_section_title_recent">Recent</string>

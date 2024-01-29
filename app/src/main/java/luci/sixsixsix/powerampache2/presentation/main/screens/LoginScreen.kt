@@ -2,8 +2,10 @@ package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -99,7 +101,8 @@ fun LoginScreenContent(
         Icon(
             tint = MaterialTheme.colorScheme.inversePrimary,
             modifier = Modifier
-                .padding(horizontal = 20.dp).padding(top = 20.dp)
+                .padding(horizontal = 20.dp)
+                .padding(top = 20.dp)
                 .clickable {
                     if (BuildConfig.DEBUG) {
                         isDebugButtonsSheetOpen = true
@@ -112,10 +115,19 @@ fun LoginScreenContent(
         Icon(
             tint = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
-                .padding(horizontal = 40.dp).padding(top = 1.dp, bottom = 10.dp),
+                .fillMaxWidth(0.7f)
+                //.padding(horizontal = 40.dp)
+                .padding(top = 1.dp, bottom = 10.dp),
             painter = painterResource(id = R.drawable.powerampache_title),
             contentDescription = "Power Ampache Title"
         )
+
+        if (!error.isNullOrBlank()) {
+            ErrorView(
+                error = error,
+                modifier = modifier.fillMaxWidth()
+            )
+        }
 
         LazyColumn(
             modifier = modifier.fillMaxSize(),
@@ -175,7 +187,6 @@ fun LoginScreenContent(
             onDismissRequest = { isLoginSheetOpen = false }
         ) {
             Column {
-                Text(text = error)
                 DebugLoginButtons(onEvent, modifier = Modifier
                     .wrapContentHeight()
                     .fillMaxWidth())
@@ -198,11 +209,6 @@ fun DebugLoginButtons(
 ) {
     Column(modifier = modifier) {
         DebugLoginButton(
-            server = Servers.LocalDebug,
-            buttonText = R.string.loginScreen_local_server,
-            onEvent = onEvent
-        )
-        DebugLoginButton(
             server = Servers.RemoteDebug,
             buttonText = R.string.loginScreen_remote_server,
             onEvent = onEvent
@@ -215,6 +221,11 @@ fun DebugLoginButtons(
         DebugLoginButton(
             server = Servers.AmpacheDemo,
             buttonText = R.string.loginScreen_demo_server,
+            onEvent = onEvent
+        )
+        DebugLoginButton(
+            server = Servers.LocalDev,
+            buttonText = R.string.loginScreen_local_server,
             onEvent = onEvent
         )
     }
@@ -412,6 +423,28 @@ fun AuthTokenCheckBox(
             enabled = true
         )
         Text(text = "Use Auth Token")
+    }
+}
+
+@Composable
+fun ErrorView(
+    error: String,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier
+        .wrapContentHeight()
+        .background(MaterialTheme.colorScheme.errorContainer)
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            text = error,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            fontSize = 16.sp
+        )
     }
 }
 

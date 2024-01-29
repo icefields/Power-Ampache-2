@@ -70,11 +70,11 @@ class AlbumDetailViewModel @Inject constructor(
             is AlbumDetailEvent.OnPlayAlbum -> {
                 L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
                 playlistManager.updateCurrentSong(state.songs[0].song)
-                playlistManager.addToCurrentQueueTop(getSongs())
+                playlistManager.addToCurrentQueueTop(state.getSongList())
             }
             AlbumDetailEvent.OnShareAlbum -> {}
             AlbumDetailEvent.OnShuffleAlbum -> {
-                val shuffled = getSongs().shuffled()
+                val shuffled = state.getSongList().shuffled()
                 playlistManager.addToCurrentQueueNext(shuffled)
                 playlistManager.moveToSongInQueue(shuffled[0])
             }
@@ -125,8 +125,6 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 
-    fun getSongs() = state.songs.map { it.song }
-
     private fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             songsRepository
@@ -139,6 +137,7 @@ class AlbumDetailViewModel @Inject constructor(
                                 songs.forEach { song ->
                                     songWrapperList.add(SongWrapper(
                                         song = song,
+                                        // TODO replace with database check instead of check for url scheme
                                         isOffline = !songsRepository.getSongUri(song).startsWith("http")
                                         )
                                     )

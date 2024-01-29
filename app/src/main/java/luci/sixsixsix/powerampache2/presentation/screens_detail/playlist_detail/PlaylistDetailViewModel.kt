@@ -19,7 +19,9 @@ import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,12 +65,12 @@ class PlaylistDetailViewModel @Inject constructor(
 
             is PlaylistDetailEvent.OnSongSelected -> playlistManager.updateTopSong(event.song)
             PlaylistDetailEvent.OnPlayPlaylist -> if (state.songs.isNotEmpty()) {
-                playlistManager.updateCurrentSong(state.songs[0])
-                playlistManager.addToCurrentQueueTop(state.songs)
+                playlistManager.updateCurrentSong(state.songs[0].song)
+                playlistManager.addToCurrentQueueTop(state.getSongList())
             }
             PlaylistDetailEvent.OnSharePlaylist -> TODO()
             PlaylistDetailEvent.OnShufflePlaylist -> if (state.songs.isNotEmpty()) {
-                val shuffled = state.songs.shuffled()
+                val shuffled = state.getSongList().shuffled()
                 playlistManager.addToCurrentQueueNext(shuffled)
                 playlistManager.moveToSongInQueue(shuffled[0])
             }
@@ -85,8 +87,8 @@ class PlaylistDetailViewModel @Inject constructor(
     }
 
     fun generateBackgrounds(): Pair<String, String> =
-        if (state.songs.isNotEmpty()) {
-            val urls = state.songs.map { it.imageUrl }.toSet().shuffled()
+        if (state.getSongList().isNotEmpty()) {
+            val urls = state.getSongList().map { it.imageUrl }.toSet().shuffled()
             // try to have different images, get first and last
             val randomBackgroundTop = urls[0]
             val randomBackgroundBottom = urls[urls.size - 1]
@@ -101,9 +103,17 @@ class PlaylistDetailViewModel @Inject constructor(
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            // USE NETWORK DATA FOR THIS CALL
                             result.networkData?.let { songs ->
-                                state = state.copy(songs = songs)
+                                val songWrapperList = mutableListOf<SongWrapper>()
+                                songs.forEach { song ->
+                                    songWrapperList.add(
+                                        SongWrapper(
+                                        song = song,
+                                        // TODO replace with database check instead of checking the url scheme
+                                        isOffline = !songsRepository.getSongUri(song).startsWith("http")
+                                    ))
+                                }
+                                state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getSongsFromPlaylist size ${result.data?.size} network: ${result.networkData?.size}")
                             }
                         }
@@ -140,10 +150,18 @@ class PlaylistDetailViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                state = state.copy(songs = songs)
+                                val songWrapperList = mutableListOf<SongWrapper>()
+                                songs.forEach { song ->
+                                    songWrapperList.add(
+                                        SongWrapper(
+                                            song = song,
+                                            // TODO replace with database check instead of checking the url scheme
+                                            isOffline = !songsRepository.getSongUri(song).startsWith("http")
+                                        ))
+                                }
+                                state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getRecentSongs size ${state.songs.size}")
                             }
-                            L( "PlaylistDetailViewModel.getRecentSongs size of network array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {
                             state = state.copy(isLoading = false)
@@ -165,7 +183,16 @@ class PlaylistDetailViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                state = state.copy(songs = songs)
+                                val songWrapperList = mutableListOf<SongWrapper>()
+                                songs.forEach { song ->
+                                    songWrapperList.add(
+                                        SongWrapper(
+                                            song = song,
+                                            // TODO replace with database check instead of checking the url scheme
+                                            isOffline = !songsRepository.getSongUri(song).startsWith("http")
+                                        ))
+                                }
+                                state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getFlaggedSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getFlaggedSongs size of network array ${result.networkData?.size}")
@@ -190,7 +217,18 @@ class PlaylistDetailViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                state = state.copy(songs = songs)
+                                val songWrapperList = mutableListOf<SongWrapper>()
+                                songs.forEach { song ->
+                                    songWrapperList.add(
+                                        SongWrapper(
+                                            song = song,
+                                            // TODO replace with database check instead of checking the url scheme
+                                            isOffline = !songsRepository.getSongUri(song)
+                                                .startsWith("http")
+                                        )
+                                    )
+                                }
+                                state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getFrequentSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getFrequentSongs size of network array ${result.networkData?.size}")
@@ -215,7 +253,18 @@ class PlaylistDetailViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                state = state.copy(songs = songs)
+                                val songWrapperList = mutableListOf<SongWrapper>()
+                                songs.forEach { song ->
+                                    songWrapperList.add(
+                                        SongWrapper(
+                                            song = song,
+                                            // TODO replace with database check instead of checking the url scheme
+                                            isOffline = !songsRepository.getSongUri(song)
+                                                .startsWith("http")
+                                        )
+                                    )
+                                }
+                                state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getHighestSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getHighestSongs size of network array ${result.networkData?.size}")

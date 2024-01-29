@@ -188,7 +188,8 @@ fun PlaylistDetailScreen(
                     .background(brush = albumBackgroundGradient),
                 color = Color.Transparent
             ) {
-                val isPlayingPlaylist = mainViewModel.isPlaying && state.songs.contains(mainViewModel.state.song)
+                val isPlayingPlaylist = mainViewModel.isPlaying
+                        && state.getSongList().contains(mainViewModel.state.song)
 
                 Column {
                     PlaylistInfoSection(
@@ -206,17 +207,19 @@ fun PlaylistDetailScreen(
                             ),
                         playlist = playlist,
                         isPlayingPlaylist = isPlayingPlaylist,
-                        songs = viewModel.state.songs,
+                        songs = viewModel.state.getSongList(),
                         eventListener = { event ->
                             when(event) {
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
                                     viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
-                                    mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0]))
+                                    mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
                                 }
                                 PlaylistInfoViewEvents.SHARE_PLAYLIST ->
                                     viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)
                                 PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST ->
-                                    mainViewModel.onEvent(MainEvent.OnDownloadSongs(viewModel.state.songs))
+                                    mainViewModel.onEvent(MainEvent.OnDownloadSongs(
+                                        viewModel.state.getSongList())
+                                    )
                                 PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST -> {
                                     // this will add the shuffled playlist next and update the current song
                                     // in main view model (which is listening to playlist manager)
@@ -247,11 +250,14 @@ fun PlaylistDetailScreen(
                         ) {
                             itemsIndexed(
                                 items = state.songs,
-                                key = { _, item -> item.mediaId }
-                            ) { _, song ->
+                                key = { _, item -> item.song.mediaId }
+                            ) { _, songWrapped ->
+                                val song = songWrapped.song
+                                val isOffline = songWrapped.isOffline
                                 SongItem(
                                     song = song,
                                     isLandscape = isLandscape,
+                                    isSongDownloaded = isOffline,
                                     songItemEventListener = { event ->
                                         when(event) {
                                             SongItemEvent.PLAY_NEXT ->

@@ -100,6 +100,28 @@ data class SongWrapper(
 ): Parcelable
 
 @Composable
+fun SongItem(
+    song: Song,
+    songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    isLandscape: Boolean = false,
+    isSongDownloaded: Boolean = false,
+    subtitleString: SubtitleString = SubtitleString.ARTIST,
+    songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
+    enableSwipeToRemove: Boolean = false,
+    onRemove: (Song) -> Unit = {}
+) {
+    SwipeToDismissItem(
+        item = song,
+        foregroundView = {
+            SongItemMain(song, songItemEventListener, modifier, isLandscape, isSongDownloaded,subtitleString, songInfoThirdRow)
+        },
+        enableSwipeToRemove = enableSwipeToRemove,
+        onRemove = onRemove
+    )
+}
+
+@Composable
 fun SongItemMain(
     song: Song,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
@@ -281,59 +303,6 @@ private fun InfoTextSection(
         )
     }
 }
-
-@Composable
-fun SongItem(
-    song: Song,
-    songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    isLandscape: Boolean = false,
-    isSongDownloaded: Boolean = false,
-    subtitleString: SubtitleString = SubtitleString.ARTIST,
-    songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
-    enableSwipeToRemove: Boolean = false,
-    onRemove: (Song) -> Unit = {}
-) {
-    SwipeToDismissItem(
-        item = song,
-        foregroundView = {
-            SongItemMain(song, songItemEventListener, modifier, isLandscape, isSongDownloaded,subtitleString, songInfoThirdRow)
-        },
-        enableSwipeToRemove = enableSwipeToRemove,
-        onRemove = onRemove
-    )
-
-//    val currentItem by rememberUpdatedState(song)
-//    if (enableSwipeToRemove) {
-//        var show by remember { mutableStateOf(true) }
-//        val dismissState = rememberDismissState(
-//            confirmValueChange = {
-//                if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
-//                    show = false
-//                    true
-//                } else false
-//            },
-//            positionalThreshold = { 150.dp.toPx() }
-//        )
-//        AnimatedVisibility(
-//            visible = show,
-//            exit = fadeOut(spring())
-//        ) {
-//            SwipeToDismiss(
-//                state = dismissState,
-//                modifier = Modifier,
-//                background = { SwipeToDismissBackground(dismissState) },
-//                dismissContent = {
-//                    SongItemMain(currentItem, songItemEventListener, modifier, isLandscape, subtitleString, songInfoThirdRow)
-//                }
-//            )
-//        }
-//        LaunchedEffect(show) { if (!show) { onRemove(currentItem) } }
-//    } else {
-//        SongItemMain(currentItem, songItemEventListener, modifier, isLandscape, subtitleString, songInfoThirdRow)
-//    }
-}
-
 
 @Preview
 @Composable

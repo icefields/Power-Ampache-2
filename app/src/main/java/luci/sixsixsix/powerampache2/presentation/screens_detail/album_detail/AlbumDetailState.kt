@@ -14,4 +14,7 @@ data class AlbumDetailState (
     val isRefreshing: Boolean = false,
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false
-): Parcelable
+): Parcelable {
+    fun getSongList() = songs.map { it.song }
+
+}

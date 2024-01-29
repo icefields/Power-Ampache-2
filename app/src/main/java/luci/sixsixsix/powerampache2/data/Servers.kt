@@ -4,7 +4,7 @@ import luci.sixsixsix.powerampache2.BuildConfig
 
 const val DEBUG_USER = BuildConfig.AMPACHE_USER
 const val DEBUG_PASSWORD = BuildConfig.AMPACHE_PASSWORD
-const val DEBUG_LOCAL_DEMO_URL = "http://192.168.1.100/ampache/public/"
+const val DEBUG_LOCAL_DEVELOPMENT_URL = "http://192.168.50.244/"
 
 const val DEBUG_REMOTE_USER = BuildConfig.AMPACHE_USER
 const val DEBUG_REMOTE_PASSWORD = BuildConfig.AMPACHE_PASSWORD
@@ -23,8 +23,8 @@ sealed class Servers(
     val password: String = "",
     val apiKey: String = ""
 ) {
-    data object LocalDebug: Servers(
-        url = DEBUG_LOCAL_DEMO_URL,
+    data object LocalDev: Servers(
+        url = DEBUG_LOCAL_DEVELOPMENT_URL,
         user = DEBUG_USER,
         password = DEBUG_REMOTE_PASSWORD
     )
