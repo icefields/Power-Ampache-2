@@ -114,10 +114,11 @@ Power Ampache app is completely free of ads and does not request unnecessary per
 ## FDroid and PlayStore links coming soon
 
 [<img src="https://s1.ax1x.com/2023/01/12/pSu1a36.png" alt="Get it on GitHub" height="80">](https://github.com/icefields/Power-Ampache-2/releases)
-<!--
+
 [<img src="https://s1.ax1x.com/2023/01/12/pSnTZ0f.png"
      alt="Get it on Telegram Channel"
-     height="80">](https://t.me/ReadYouApp)
+     height="80">](https://t.me/powerampache)
+<!--
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/me.ash.reader/)
