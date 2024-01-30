@@ -3,7 +3,7 @@ app is currenly under heavy development, a more complete README coming soon
 ### A complete Android music client for [Ampache](https://ampache.org/)
 Using the latest Material3 design guidelines <br>
 ![image](https://www.gnu.org/graphics/agplv3-88x31.png)
-![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/01b13919-4f65-4939-8b96-504ccf157424)
+![ic_power_ampache_colored_light_theme_512px](https://github.com/icefields/Power-Ampache-2/assets/149625124/7614a6a7-898b-4a8c-b891-9a07505529be)
 
 # Development
 The app is developed using Clean Architecture on top of MVVM, following SOLID principles.
