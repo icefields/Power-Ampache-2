@@ -1,12 +1,47 @@
-# Power Ampache 2
-app is currenly under heavy development, a more complete README coming soon
-### A complete Android music client for [Ampache](https://ampache.org/)
-Using the latest Material3 design guidelines <br>
-![image](https://www.gnu.org/graphics/agplv3-88x31.png)
-![ic_power_ampache_colored_light_theme_512px](https://github.com/icefields/Power-Ampache-2/assets/149625124/7614a6a7-898b-4a8c-b891-9a07505529be)
+<div align="center">
+<h1> Power Ampache 2 </h1>
+    <img width="350" height="350" style="display: block; border: 0px solid #f5f5f5; border-radius: 9999px;" src="https://github.com/icefields/Power-Ampache-2/assets/149625124/7614a6a7-898b-4a8c-b891-9a07505529be">
+</div>
+
+<br>
+<br>
+
+<div align="center">
+    <img alt="GitHub" src="https://img.shields.io/github/license/icefields/Power-Ampache-2?color=c3e7ff&style=flat-square">
+    <a target="_blank" href="https://github.com/icefields/Power-Ampache-2/releases">
+        <img alt="Version" src="https://img.shields.io/github/v/release/icefields/Power-Ampache-2?color=c3e7ff&label=version&style=flat-square">
+    </a>
+    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/icefields/Power-Ampache-2?color=c3e7ff&style=flat-square">
+
+<!--
+    <a target="_blank" href="https://t.me/PowerAmpache">
+        <img alt="Telegram" src="https://img.shields.io/badge/Telegram-Power-Ampache-c3e7ff?logo=telegram&style=flat-square">
+    </a>
+    <a target="_blank" href="https://www.figma.com/file/ViBW8GbUgkTMmK6a80h8X1/Read-You?node-id=7028%3A23673">
+        <img alt="Figma" src="https://img.shields.io/badge/Figma-Power-Ampache-c3e7ff?logo=figma&style=flat-square">
+    </a>
+	-->
+</div>
+
+
+<div align="center">
+<h2> 
+	Android music client for <a target="_blank" href="https://ampache.org/"> Ampache </a>
+</h2>
+Using the latest Material3 design guidelines .
+<br>
+<br>
+ <img alt="GPLv3 badge" src="https://www.gnu.org/graphics/gplv3-88x31.png">
+
+*The app is currenly under heavy development, a more complete README coming soon.* 
+
+</div>
+
+[//]: #![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/7614a6a7-898b-4a8c-b891-9a07505529be)
+
 
 # Development
-The app is developed using Clean Architecture on top of MVVM, following SOLID principles.
+Power Ampache 2 is developed using Clean Architecture on top of MVVM, following SOLID principles. 
 Contribution guidelines coming soon, please make sure to read before opening a PR.
 
 # Screenshots (MaterialYou Theme, matches the colour scheme of the phone)
@@ -41,6 +76,25 @@ Expect the same feature as any other mainstream music player (such as Spotify, Y
 - Advanced search
 - Offline mode
 - Create, edit, share your playlists
+<br>
+
+**📱 CONNECT TO AMPACHE MUSIC SERVERS**  
+With Power Ampache 2, you can effortlessly connect to Ampache servers and freely listen to music, without any tracker or ads. You can even download the music you want for offline use, or share with friends.
+
+**🚀 LIGHTNING-FAST AND LIGHTWEIGHT:**  
+Despite its powerful features, Power Ampache 2 boasts a remarkable performance, making it quick and easy to listen music at full quality (FLAC support coming soon), create your own playlists (public or private) and queue. Experience speed and efficiency while enjoying your favourite music.
+
+**🔐 ENHANCED PRIVACY:**  
+Your data is not collected and sold, there are no ads in the app. 
+
+**🔍 EFFICIENT SONG SEARCH:**  
+Power Ampache 2 provides a quick and efficient search for finding songs/albums/artists/playlists. Find what you need, when you need it.
+
+**🌈 MODERN DESIGN & USER-FRIENDLY INTERFACE:**  
+Enjoy a clean, modern design with a user-friendly interface. The app features a material3 design, MaterialYou and other themes, providing a visually appealing and comfortable user experience.
+
+**🌐 OPEN-SOURCE TRANSPARENCY:**  
+Power Ampache app is completely free of ads and does not request unnecessary permissions. Moreover, it is fully open-source, providing you with peace of mind, as you have access to the source code for security and privacy audits.
 
 ## Demo
 You can select a demo instance from the login screen or login into your own server.
@@ -48,3 +102,4 @@ You can select a demo instance from the login screen or login into your own serv
 ## Translations coming soon
 
 ## Release and store links coming soon
+
