@@ -135,7 +135,7 @@ fun MiniPlayerContent(
                     model = song.imageUrl,
                     contentScale = ContentScale.FillHeight,
                     placeholder = painterResource(id = R.drawable.placeholder_album),
-                    error = painterResource(id = R.drawable.ic_playlist),
+                    error = painterResource(id = R.drawable.placeholder_album),
                     contentDescription = song.title,
                 )
             }

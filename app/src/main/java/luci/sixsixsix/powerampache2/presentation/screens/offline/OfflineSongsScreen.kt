@@ -2,9 +2,7 @@ package luci.sixsixsix.powerampache2.presentation.screens.offline
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +12,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.PlaylistRemove
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -40,11 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
-import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
-import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
-import luci.sixsixsix.powerampache2.domain.models.Playlist
-import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
@@ -56,10 +48,10 @@ import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigator
-import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.PlaylistDetailState
+import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.PlaylistDetailEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -178,6 +170,22 @@ fun OfflineSongsMainContent(
         }
     }
 
+    var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
+    showDeleteSongDialog?.let { songToRemove ->
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteSongDialog = null
+            },
+            onConfirmation = {
+                showDeleteSongDialog = null
+                // delete downloaded song, delete database entry
+                mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(songToRemove))
+            },
+            dialogTitle = "REMOVE SONG",
+            dialogText = "Delete \n${songToRemove.name} from downloaded songs?"
+        )
+    }
+
     Box(modifier = modifier) {
         if (state.isLoading && state.songs.isEmpty()) {
             LoadingScreen()
@@ -194,9 +202,11 @@ fun OfflineSongsMainContent(
                     song = song,
                     songItemEventListener = { event ->
                         when(event) {
-                            SongItemEvent.PLAY_NEXT -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
-                            SongItemEvent.SHARE_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
-                            SongItemEvent.DOWNLOAD_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
+                            SongItemEvent.PLAY_NEXT ->
+                                mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                            SongItemEvent.SHARE_SONG ->
+                                mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                            SongItemEvent.DOWNLOAD_SONG -> { } // DO NOTHING
                             SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
                                 AlbumDetailScreenDestination(albumId = song.album.id, album = null)
                             )
@@ -217,9 +227,8 @@ fun OfflineSongsMainContent(
                             mainViewModel.onEvent(MainEvent.Play(song))
                         },
                     enableSwipeToRemove = true,
-                    onRemove = {
-                        // delete downloaded song, delete database entry
-                        mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(song))
+                    onRemove = { songToRemove ->
+                        showDeleteSongDialog = songToRemove
                     },
                     onRightToLeftSwipe = {
                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))

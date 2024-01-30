@@ -1,8 +1,5 @@
 package luci.sixsixsix.powerampache2.presentation.common
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -12,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlaylistAdd
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissState
 import androidx.compose.material3.DismissValue
@@ -56,13 +52,13 @@ fun <T> SwipeToDismissItem(
                     false
                 } else false
             },
-            positionalThreshold = { 200.dp.toPx() }
+            positionalThreshold = { 250.dp.toPx() }
         )
 
-        AnimatedVisibility(
-            visible = show && rightShow,
-            exit = fadeOut(spring())
-        ) {
+//        AnimatedVisibility(
+//            visible = show,
+//            exit = fadeOut(spring())
+//        ) {
             SwipeToDismiss(
                 state = dismissState,
                 modifier = Modifier,
@@ -71,9 +67,21 @@ fun <T> SwipeToDismissItem(
                     foregroundView()
                 }
             )
+        //}
+        LaunchedEffect(show) {
+            if (!show) {
+                onRemove(currentItem)
+                show = true
+            }
+
         }
-        LaunchedEffect(show) { if (!show) { onRemove(currentItem) } }
-        LaunchedEffect(rightShow) { if (!rightShow) { onRightToLeftSwipe(currentItem) } }
+        LaunchedEffect(rightShow) {
+            if (!rightShow) {
+                onRightToLeftSwipe(currentItem)
+                rightShow = true
+            }
+        }
+
     } else {
         foregroundView()
     }

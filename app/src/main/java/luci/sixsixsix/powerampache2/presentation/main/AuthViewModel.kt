@@ -163,7 +163,8 @@ class AuthViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { auth ->
-                                state = state.copy(session = auth)
+                                // clear credentials after login
+                                state = state.copy(session = auth, username = "", authToken = "", password = "")
                                 playlistManager.updateErrorMessage("")
                             }
                         }
