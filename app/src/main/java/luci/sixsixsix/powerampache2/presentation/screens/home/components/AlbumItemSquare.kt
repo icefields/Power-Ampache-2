@@ -55,7 +55,7 @@ fun AlbumItemSquare(modifier: Modifier = Modifier, album: Album) {
                 model = album.artUrl,
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(id = R.drawable.placeholder_album),
-                error = painterResource(id = R.drawable.ic_playlist),
+                error = painterResource(id = R.drawable.placeholder_album),
                 contentDescription = album.name,
             )
         }

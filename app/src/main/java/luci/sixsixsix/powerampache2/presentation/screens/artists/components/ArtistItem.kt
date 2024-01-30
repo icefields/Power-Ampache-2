@@ -56,7 +56,7 @@ fun ArtistItem(
                     .border(1.dp, MaterialTheme.colorScheme.tertiary, CircleShape),
                 model = artist.artUrl,
                 placeholder = painterResource(id = R.drawable.placeholder_album),
-                error = painterResource(id = R.drawable.ic_playlist),
+                error = painterResource(id = R.drawable.placeholder_album),
                 contentDescription = artist.name,
                 contentScale = ContentScale.Crop
             )

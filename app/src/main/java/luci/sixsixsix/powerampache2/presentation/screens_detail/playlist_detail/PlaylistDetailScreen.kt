@@ -133,8 +133,6 @@ fun PlaylistDetailScreen(
         EraseConfirmDialog(
             onDismissRequest = {
                 showDeleteSongDialog = null
-                // The song is dismissed automatically even when dismissing the dialog,
-                // refresh the song list automatically
                 viewModel.onEvent(PlaylistDetailEvent.OnRemoveSongDismiss)
             },
             onConfirmation = {

@@ -38,8 +38,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.1-beta"
+        versionCode = 3
+        versionName = "0.02-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -65,7 +65,7 @@ android {
             buildConfigField("String", "API_KEY", "\"\"")
             buildConfigField("String", "DOGMAZIC_PASSWORD", "\"\"")
             buildConfigField("String", "DOGMAZIC_USER", "\"\"")
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

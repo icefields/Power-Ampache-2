@@ -300,7 +300,9 @@ class PlaylistsRepositoryImpl @Inject constructor(
         }
 
         for (song in songsToAdd) {
-            addSingleSongToPlaylist(playlistId = playlist.id, songId = song.mediaId)
+            try {
+                addSingleSongToPlaylist(playlistId = playlist.id, songId = song.mediaId)
+            }catch (e: Exception) {}
         }
 
         emit(Resource.Success(data = Any(), networkData = Any()))
@@ -322,7 +324,9 @@ class PlaylistsRepositoryImpl @Inject constructor(
         ).toPlaylist() // TODO no error check
 
         for (song in songsToAdd) {
-            addSingleSongToPlaylist(playlistId = playlist.id, songId = song.mediaId)
+            try {
+                addSingleSongToPlaylist(playlistId = playlist.id, songId = song.mediaId)
+            }catch (e: Exception) {}
         }
 
         emit(Resource.Success(data = playlist, networkData = playlist))
