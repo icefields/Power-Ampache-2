@@ -34,7 +34,7 @@ Using the latest Material3 design guidelines .
  <img alt="GPLv3 badge" src="https://www.gnu.org/graphics/gplv3-88x31.png">
 
 *The app is currenly under heavy development, a more complete README coming soon.* 
-
+<br><br>
 </div>
 
 [//]: #![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/7614a6a7-898b-4a8c-b891-9a07505529be)
