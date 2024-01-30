@@ -140,7 +140,7 @@ fun PlaylistDetailScreen(
                 viewModel.onEvent(PlaylistDetailEvent.OnRemoveSong(songToRemove))
             },
             dialogTitle = "REMOVE SONG",
-            dialogText = "Delete \n${songToRemove.name} \nfrom playlist \n${state.playlist.name}?"
+            dialogText = "Delete ${songToRemove.name} from playlist \n${state.playlist.name}?"
         )
     }
 

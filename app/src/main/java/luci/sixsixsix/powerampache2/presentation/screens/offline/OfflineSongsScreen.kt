@@ -182,7 +182,7 @@ fun OfflineSongsMainContent(
                 mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(songToRemove))
             },
             dialogTitle = "REMOVE SONG",
-            dialogText = "Delete \n${songToRemove.name} from downloaded songs?"
+            dialogText = "Delete ${songToRemove.name} from downloaded songs?"
         )
     }
 

@@ -44,7 +44,7 @@ fun PlaylistItemSquare(
             ColourPlaylistHomeItem(
                 playlist = playlist,
                 modifier = modifier,
-                colour = RandomThemeBackgroundColour(playlist.hashCode()), // random bg colour based on hashcode
+                colour = RandomThemeBackgroundColour("${playlist.id}${playlist.name}"), // random bg colour based on hashcode
                 onPlaylistClick = onPlaylistClick
             )
             Spacer(modifier = Modifier.height(10.dp))
