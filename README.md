@@ -1,12 +1,12 @@
 # Power Ampache 2
 app is currenly under heavy development, a more complete README coming soon
-### A complete Android music client for [Ampache](https://ampache.org/) 
+### A complete Android music client for [Ampache](https://ampache.org/)
 Using the latest Material3 design guidelines <br>
-![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/01b13919-4f65-4939-8b96-504ccf157424)
 ![image](https://www.gnu.org/graphics/agplv3-88x31.png)
+![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/01b13919-4f65-4939-8b96-504ccf157424)
 
 # Development
-The app is developed using Clean Architecture on top of MVVM, following SOLID principles. 
+The app is developed using Clean Architecture on top of MVVM, following SOLID principles.
 Contribution guidelines coming soon, please make sure to read before opening a PR.
 
 # Screenshots (MaterialYou Theme, matches the colour scheme of the phone)
