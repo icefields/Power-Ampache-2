@@ -16,18 +16,12 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CurrencyBitcoin
-import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
@@ -233,14 +227,15 @@ fun SettingsThemeSelector(
             elevation = CardDefaults.cardElevation(1.dp),
             shape = RoundedCornerShape(10.dp)
         ) {
-
             Text(
-                text = "Theme Selector (${selected.title})",
+                text = "Theme Selector\n(${selected.title})",
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 17.sp,
+                minLines = 2,
+                maxLines = 2,
                 modifier = Modifier
-                    .wrapContentSize()
+                    .align(Alignment.CenterHorizontally)
                     .padding(horizontal = 26.dp, vertical = 10.dp),
             )
 

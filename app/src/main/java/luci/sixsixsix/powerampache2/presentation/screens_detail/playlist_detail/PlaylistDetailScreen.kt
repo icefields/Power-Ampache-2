@@ -51,7 +51,7 @@ import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.presentation.common.EraseConfirmDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
@@ -121,7 +121,8 @@ fun PlaylistDetailScreen(
                 showDeleteSongDialog = null
                 viewModel.onEvent(PlaylistDetailEvent.OnRemoveSong(songToRemove))
             },
-            dialogTitle = "Delete \n${songToRemove.name} \nfrom playlist \n${state.playlist.name}?"
+            dialogTitle = "REMOVE SONG",
+            dialogText = "Delete \n${songToRemove.name} \nfrom playlist \n${state.playlist.name}?"
         )
     }
 
@@ -294,6 +295,9 @@ fun PlaylistDetailScreen(
                                     enableSwipeToRemove = viewModel.state.isUserOwner,
                                     onRemove = { songToRemove ->
                                         showDeleteSongDialog = songToRemove
+                                    },
+                                    onRightToLeftSwipe = {
+                                        playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                                     }
                                 )
                             }

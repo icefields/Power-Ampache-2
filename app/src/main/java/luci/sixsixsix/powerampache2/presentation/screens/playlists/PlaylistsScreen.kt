@@ -25,7 +25,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Playlist
-import luci.sixsixsix.powerampache2.presentation.common.EraseConfirmDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.components.PlaylistItem
@@ -53,7 +53,8 @@ fun PlaylistsScreen(
                 showDeletePlaylistDialogData = null
                 viewModel.onEvent(PlaylistEvent.OnPlaylistDelete(playlistToRemove))
             },
-            dialogTitle = "Delete \n${playlistToRemove.name}?"
+            dialogTitle = "DELETE PLAYLIST",
+            dialogText = "Delete \n${playlistToRemove.name}?"
         )
     }
 
@@ -77,7 +78,8 @@ fun PlaylistsScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         navigator.navigate(
-                                            PlaylistDetailScreenDestination(playlist = playlist))
+                                            PlaylistDetailScreenDestination(playlist = playlist)
+                                        )
                                     },
                                 enableSwipeToRemove = viewModel.isCurrentUserOwner(playlist),
                                 onRemove = {

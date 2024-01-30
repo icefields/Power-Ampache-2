@@ -220,6 +220,9 @@ fun OfflineSongsMainContent(
                     onRemove = {
                         // delete downloaded song, delete database entry
                         mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(song))
+                    },
+                    onRightToLeftSwipe = {
+                        playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                     }
                 )
             }

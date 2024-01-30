@@ -109,15 +109,17 @@ fun SongItem(
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
     enableSwipeToRemove: Boolean = false,
-    onRemove: (Song) -> Unit = {}
+    onRemove: (Song) -> Unit = {},
+    onRightToLeftSwipe: (Song) -> Unit = {}
 ) {
     SwipeToDismissItem(
         item = song,
         foregroundView = {
-            SongItemMain(song, songItemEventListener, modifier, isLandscape, isSongDownloaded,subtitleString, songInfoThirdRow)
+            SongItemMain(song, songItemEventListener, modifier, isLandscape, isSongDownloaded, subtitleString, songInfoThirdRow)
         },
         enableSwipeToRemove = enableSwipeToRemove,
-        onRemove = onRemove
+        onRemove = onRemove,
+        onRightToLeftSwipe = onRightToLeftSwipe
     )
 }
 

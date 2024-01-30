@@ -42,6 +42,8 @@
     <string name="error_http_exception">Cannot load data, are you connected to the internet?\nIf the problem persist try to kill and reopen the app</string>
     <string name="error_empty_result">No results</string>
     <string name="error_duplicate">Duplicate Entry</string>
+    <string name="crash_mail_subject">Crash Report</string>
+    <string name="crash_mail_body">Crash Report Data. Thanks</string>
 
 </resources>
 

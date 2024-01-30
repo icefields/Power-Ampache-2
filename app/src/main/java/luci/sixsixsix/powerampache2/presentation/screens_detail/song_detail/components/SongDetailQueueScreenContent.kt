@@ -101,7 +101,10 @@ fun SongDetailQueueScreenContent(
                         viewModel.onEvent(QueueEvent.OnSongSelected(song))
                     },
                 enableSwipeToRemove = true,
-                onRemove = { viewModel.onEvent(QueueEvent.OnSongRemove(it)) }
+                onRemove = { viewModel.onEvent(QueueEvent.OnSongRemove(it)) },
+                onRightToLeftSwipe = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
+                }
             )
         }
     }

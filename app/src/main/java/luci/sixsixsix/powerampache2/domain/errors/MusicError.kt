@@ -16,12 +16,13 @@ data class MusicError(
         super.toString()
     }
 
-    fun getErrorType(): ErrorType = try {
-        ErrorType.valueOf(errorCode)
-    } catch (e: Exception) {
-        ErrorType.Other
+    fun getErrorType(): ErrorType {
+        ErrorType.entries.forEach {
+            if (it.code == errorCode)
+                return it
+        }
+        return ErrorType.Other
     }
-
 
     fun isSessionExpiredError(): Boolean = errorCode == ERROR_CODE_SESSION_EXPIRED
     fun isEmptyResult(): Boolean = errorCode == ERROR_CODE_EMPTY

@@ -70,11 +70,11 @@ class PlaylistsViewModel @Inject constructor(
                 }
             is PlaylistEvent.OnPlaylistDelete -> deletePlaylist(event.playlist.id)
             PlaylistEvent.OnRemovePlaylistDismiss -> viewModelScope.launch {
-                // TODO HACK FORCE refresh of list
-                val playlists = state.playlists.toMutableList()
-                state = state.copy(playlists = listOf())
-                delay(100)
-                state = state.copy(playlists = playlists)
+//                // TODO HACK FORCE refresh of list
+//                val playlists = state.playlists.toMutableList()
+//                state = state.copy(playlists = listOf())
+//                delay(100)
+//                state = state.copy(playlists = playlists)
             }
         }
     }

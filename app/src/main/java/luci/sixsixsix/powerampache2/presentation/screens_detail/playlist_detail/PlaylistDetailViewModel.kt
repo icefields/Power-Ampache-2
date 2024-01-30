@@ -88,13 +88,15 @@ class PlaylistDetailViewModel @Inject constructor(
             }
             is PlaylistDetailEvent.OnRemoveSong ->
                 removeSongFromPlaylist(playlistId = state.playlist.id, songId = event.song.mediaId)
-            PlaylistDetailEvent.OnRemoveSongDismiss -> viewModelScope.launch {
-                // TODO HACK FORCE refresh of list
-                val songs = state.songs.toMutableList()
-                state = state.copy(songs = listOf())
-                delay(100)
-                state = state.copy(songs = songs)
-            }
+            PlaylistDetailEvent.OnRemoveSongDismiss -> { }
+//                viewModelScope.launch {
+//                // TODO HACK FORCE refresh of list
+//                val songs = state.songs.toMutableList()
+//                state = state.copy(songs = listOf())
+//                delay(100)
+//                state = state.copy(songs = songs)
+//            }
+
         }
     }
 
@@ -154,7 +156,7 @@ class PlaylistDetailViewModel @Inject constructor(
                     is Resource.Success -> {
                         result.data?.let {
                             getSongsFromPlaylist(playlistId, true)
-                            playlistManager.updateErrorMessage("Song removed from playlist")
+                            // playlistManager.updateErrorMessage("Song removed from playlist")
                         }
                     }
                     is Resource.Error ->
