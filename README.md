@@ -12,11 +12,11 @@
         <img alt="Version" src="https://img.shields.io/github/v/release/icefields/Power-Ampache-2?color=c3e7ff&label=version&style=flat-square">
     </a>
     <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/icefields/Power-Ampache-2?color=c3e7ff&style=flat-square">
-
-<!--
-    <a target="_blank" href="https://t.me/PowerAmpache">
-        <img alt="Telegram" src="https://img.shields.io/badge/Telegram-Power-Ampache-c3e7ff?logo=telegram&style=flat-square">
+<br>    
+<a target="_blank" href="https://t.me/PowerAmpache">
+        <img alt="Telegram" src="https://img.shields.io/badge/telegram-%20Power%20Ampache%202-c3e7ff?logo=telegram&style=flat-square">
     </a>
+<!--
     <a target="_blank" href="https://www.figma.com/file/ViBW8GbUgkTMmK6a80h8X1/Read-You?node-id=7028%3A23673">
         <img alt="Figma" src="https://img.shields.io/badge/Figma-Power-Ampache-c3e7ff?logo=figma&style=flat-square">
     </a>
@@ -33,7 +33,7 @@ Power Ampache 2 is an Android Music Streaming App presented in <a target="_blank
 <br>
  <img alt="GPLv3 badge" src="https://www.gnu.org/graphics/gplv3-88x31.png">
 
-*The app is currenly undergoing heavy development, a more complete README coming soon.* 
+*The app is currenly undergoing heavy development, a more complete README coming soon.*
 <br><br>
 
 </div>
@@ -42,7 +42,7 @@ Power Ampache 2 is an Android Music Streaming App presented in <a target="_blank
 
 
 # Development
-Power Ampache 2 is developed using Clean Architecture on top of MVVM, following SOLID principles. 
+Power Ampache 2 is developed using Clean Architecture on top of MVVM, following SOLID principles.
 Contribution guidelines coming soon, please make sure to read before opening a PR.
 
 # Screenshots (MaterialYou Theme, matches the colour scheme of the phone)
@@ -77,7 +77,7 @@ Expect the same feature as any other mainstream music player (such as Spotify, Y
 - Advanced search
 - Offline mode
 - Create, edit, share your playlists
-<br>
+  <br>
 
 **What I'm working on right now and what's next**
 - [x] Genres screen
@@ -100,7 +100,7 @@ With Power Ampache 2, you can effortlessly connect to Ampache servers and freely
 Despite its powerful features, Power Ampache 2 boasts a remarkable performance, making it quick and easy to listen music at full quality (FLAC support coming soon), create your own playlists (public or private) and queue. Experience speed and efficiency while enjoying your favourite music.
 
 **🔐 ENHANCED PRIVACY:**  
-Your data is not collected and sold, there are no ads in the app. 
+Your data is not collected and sold, there are no ads in the app.
 
 **🔍 EFFICIENT SONG SEARCH:**  
 Power Ampache 2 provides a quick and efficient search for finding songs/albums/artists/playlists. Find what you need, when you need it.
@@ -111,7 +111,7 @@ Enjoy a clean, modern design with a user-friendly interface. The app features a 
 **🌐 OPEN-SOURCE TRANSPARENCY:**  
 Power Ampache app is completely free of ads and does not request unnecessary permissions. Moreover, it is fully open-source, providing you with peace of mind, as you have access to the source code for security and privacy audits.
 
-## Fdroid and PlayStore links coming soon
+## FDroid and PlayStore links coming soon
 
 [<img src="https://s1.ax1x.com/2023/01/12/pSu1a36.png" alt="Get it on GitHub" height="80">](https://github.com/icefields/Power-Ampache-2/releases)
 <!--

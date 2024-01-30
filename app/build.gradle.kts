@@ -56,6 +56,11 @@ android {
             buildConfigField("String", "API_KEY", apikey)
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
         release {
             buildConfigField("boolean", "MRLOG_ON", "false")
@@ -65,7 +70,7 @@ android {
             buildConfigField("String", "API_KEY", "\"\"")
             buildConfigField("String", "DOGMAZIC_PASSWORD", "\"\"")
             buildConfigField("String", "DOGMAZIC_USER", "\"\"")
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

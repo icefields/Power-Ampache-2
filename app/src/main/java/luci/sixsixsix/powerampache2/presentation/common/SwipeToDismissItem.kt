@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +36,8 @@ fun <T> SwipeToDismissItem(
     item: T,
     foregroundView: @Composable () -> Unit,
     enableSwipeToRemove: Boolean = false,
+    iconLeft: ImageVector = Icons.Default.Delete,
+    iconRight: ImageVector = Icons.Default.PlaylistAdd,
     onRemove: (T) -> Unit = { },
     onRightToLeftSwipe: (T) -> Unit = { }
 ) {
@@ -62,7 +65,11 @@ fun <T> SwipeToDismissItem(
             SwipeToDismiss(
                 state = dismissState,
                 modifier = Modifier,
-                background = { SwipeToDismissBackground(dismissState) },
+                background = { SwipeToDismissBackground(
+                    dismissState = dismissState,
+                    iconLeft = iconLeft,
+                    iconRight = iconRight
+                ) },
                 dismissContent = {
                     foregroundView()
                 }
@@ -89,7 +96,11 @@ fun <T> SwipeToDismissItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SwipeToDismissBackground(dismissState: DismissState) {
+fun SwipeToDismissBackground(
+    dismissState: DismissState,
+    iconLeft: ImageVector = Icons.Default.Delete,
+    iconRight: ImageVector = Icons.Default.PlaylistAdd
+) {
     val color = when (dismissState.dismissDirection) {
         DismissDirection.StartToEnd -> MaterialTheme.colorScheme.errorContainer
         DismissDirection.EndToStart -> MaterialTheme.colorScheme.primaryContainer
@@ -105,11 +116,11 @@ fun SwipeToDismissBackground(dismissState: DismissState) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         if (direction == DismissDirection.StartToEnd) {
-            Icon(Icons.Default.Delete, contentDescription = "delete")
+            Icon(iconLeft, contentDescription = "delete")
         }
         Spacer(modifier = Modifier)
         if (direction == DismissDirection.EndToStart) {
-            Icon(Icons.Default.PlaylistAdd, contentDescription = "Add to playlist")
+            Icon(iconRight, contentDescription = "Add to playlist")
         }
     }
 }

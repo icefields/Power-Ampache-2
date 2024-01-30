@@ -54,7 +54,7 @@ fun PlaylistsScreen(
                 viewModel.onEvent(PlaylistEvent.OnPlaylistDelete(playlistToRemove))
             },
             dialogTitle = "DELETE PLAYLIST",
-            dialogText = "Delete \n${playlistToRemove.name}?"
+            dialogText = "Delete ${playlistToRemove.name}?"
         )
     }
 

@@ -28,6 +28,10 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 object RandomThemeBackgroundColour {
+
+    private val hashColourMap = HashMap<Int, Color>()
+    private var remainingPlaylistBgColours = mutableListOf<Color>()
+
     @Composable
     operator fun invoke(): Color {
         if (remainingPlaylistBgColours.isEmpty()) {
@@ -41,38 +45,21 @@ object RandomThemeBackgroundColour {
 
     @Composable
     operator fun invoke(hash: Int): Color {
-        // not using remainingPlaylistBgColours here, but cycle through colours anyway
-        if (remainingPlaylistBgColours.isEmpty()) {
-            remainingPlaylistBgColours = ArrayList(playlistBgColours)
+        return hashColourMap[hash] ?: run {
+            if (remainingPlaylistBgColours.isEmpty()) {
+                remainingPlaylistBgColours = ArrayList(playlistBgColours)
+            }
+            val randomIndex = abs(hash) % remainingPlaylistBgColours.size
+            val randomColour = remainingPlaylistBgColours[randomIndex]
+            hashColourMap[hash] = randomColour
+            remainingPlaylistBgColours.removeAt(randomIndex)
+            randomColour
         }
-
-        val randomIndex = abs(hash) % playlistBgColours.size
-        val randomColour = playlistBgColours[randomIndex]
-
-        // not using remainingPlaylistBgColours here, but cycle through colours anyway
-        remainingPlaylistBgColours.remove(randomColour)
-
-        return randomColour
     }
 
     @Composable
-    operator fun invoke(obj: Any): Color {
-        val hash = abs(obj.hashCode())
-        // not using remainingPlaylistBgColours here, but cycle through colours anyway
-        if (remainingPlaylistBgColours.isEmpty()) {
-            remainingPlaylistBgColours = ArrayList(playlistBgColours)
-        }
+    operator fun invoke(obj: Any) = invoke(hash = abs(obj.hashCode()))
 
-        val randomIndex = hash % playlistBgColours.size
-        val randomColour = playlistBgColours[randomIndex]
-
-        // not using remainingPlaylistBgColours here, but cycle through colours anyway
-        remainingPlaylistBgColours.remove(randomColour)
-
-        return randomColour
-    }
-
-    private var remainingPlaylistBgColours = mutableListOf<Color>()
 
     private val playlistBgColours
         @Composable
@@ -89,6 +76,7 @@ object RandomThemeBackgroundColour {
                 MaterialTheme.colorScheme.background,
                 MaterialTheme.colorScheme.surface,
                 MaterialTheme.colorScheme.surfaceVariant,
-                MaterialTheme.colorScheme.inverseSurface
+                MaterialTheme.colorScheme.inversePrimary,
+                MaterialTheme.colorScheme.inverseSurface,
             )
 }
