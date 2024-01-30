@@ -14,14 +14,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PersonAddAlt
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -39,6 +43,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -163,11 +170,9 @@ fun LoginScreenContent(
             sheetState = sheetState,
             onDismissRequest = { isLoginSheetOpen = false }
         ) {
-            Column {
-                LoginButton(onEvent = {
-                    isLoginSheetOpen = false
-                    onEvent(it)
-                })
+            Column(
+                modifier = Modifier.padding(top = 6.dp, bottom = 16.dp)
+            ) {
                 AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
                 LoginTextFields(
                     username = username,
@@ -180,6 +185,10 @@ fun LoginScreenContent(
                         .wrapContentHeight()
                         .fillMaxWidth()
                 )
+                LoginButton(onEvent = {
+                    isLoginSheetOpen = false
+                    onEvent(it)
+                })
             }
         }
     }
@@ -245,9 +254,10 @@ fun LoginTextFields(
     modifier: Modifier
 ) {
     val topPaddingInputFields = 8.dp
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+
     Column(
         modifier = modifier
-            .fillMaxSize()
             .padding(horizontal = bottomDrawerPaddingHorizontal)
     ) {
 
@@ -282,8 +292,10 @@ fun LoginTextFields(
                     maxLines = 1,
                     singleLine = true
                 )
+
                 OutlinedTextField(
                     value = password,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     onValueChange = {
                         onEvent(AuthEvent.OnChangePassword(it))
                     },
@@ -294,7 +306,19 @@ fun LoginTextFields(
                         Text(text = stringResource(id = R.string.loginScreen_password))
                     },
                     maxLines = 1,
-                    singleLine = true
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        val image = if (passwordVisible) {
+                            Icons.Filled.Visibility
+                        } else {
+                            Icons.Filled.VisibilityOff
+                        }
+                        val description = if (passwordVisible) "Hide password" else "Show password"
+                        IconButton(onClick = {passwordVisible = !passwordVisible}){
+                            Icon(imageVector  = image, description)
+                        }
+                    }
                 )
             }
         }
@@ -388,11 +412,11 @@ fun DebugLoginButton(
             onEvent(AuthEvent.Login)
         },
         colours = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.inversePrimary,
-            contentColor = MaterialTheme.colorScheme.inverseSurface
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.tertiary
         )
     ) {
-        Icon(imageVector = Icons.Default.MusicNote, contentDescription = "Donate Bitcoin")
+        Icon(imageVector = Icons.Default.MusicNote, contentDescription = "Demo Server login")
         Text(
             modifier = Modifier
                 .padding(vertical = 9.dp),
