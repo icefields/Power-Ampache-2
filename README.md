@@ -28,13 +28,14 @@
 <h2> 
 	Android music client for <a target="_blank" href="https://ampache.org/"> Ampache </a>
 </h2>
-Using the latest Material3 design guidelines .
+Power Ampache 2 is an Android Music Streaming App presented in <a target="_blank" href="https://m3.material.io/">Material You</a> style.
 <br>
 <br>
  <img alt="GPLv3 badge" src="https://www.gnu.org/graphics/gplv3-88x31.png">
 
-*The app is currenly under heavy development, a more complete README coming soon.* 
+*The app is currenly undergoing heavy development, a more complete README coming soon.* 
 <br><br>
+
 </div>
 
 [//]: #![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/7614a6a7-898b-4a8c-b891-9a07505529be)
@@ -78,6 +79,20 @@ Expect the same feature as any other mainstream music player (such as Spotify, Y
 - Create, edit, share your playlists
 <br>
 
+**What I'm working on right now and what's next**
+- [x] Genres screen
+- [x] Lyrics support
+- [x] Notifications Screen
+- [x] Improve Search for Offline songs
+- [ ] Multi-account
+- [x] UI for Tablets
+- [ ] Android TV version
+- [ ] Android widget
+- [ ] implement share with app scheme
+- [ ] Android Auto
+
+<br>
+
 **📱 CONNECT TO AMPACHE MUSIC SERVERS**  
 With Power Ampache 2, you can effortlessly connect to Ampache servers and freely listen to music, without any tracker or ads. You can even download the music you want for offline use, or share with friends.
 
@@ -96,10 +111,28 @@ Enjoy a clean, modern design with a user-friendly interface. The app features a 
 **🌐 OPEN-SOURCE TRANSPARENCY:**  
 Power Ampache app is completely free of ads and does not request unnecessary permissions. Moreover, it is fully open-source, providing you with peace of mind, as you have access to the source code for security and privacy audits.
 
+## Fdroid and PlayStore links coming soon
+
+[<img src="https://s1.ax1x.com/2023/01/12/pSu1a36.png" alt="Get it on GitHub" height="80">](https://github.com/icefields/Power-Ampache-2/releases)
+<!--
+[<img src="https://s1.ax1x.com/2023/01/12/pSnTZ0f.png"
+     alt="Get it on Telegram Channel"
+     height="80">](https://t.me/ReadYouApp)
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/me.ash.reader/)
+
+F-Droid releases can not upgrade to other releases and it is compiled, signed and distributed uniformly by [F-Droid](https://f-droid.org/docs/FAQ_-_General/).
+
+
+➡️ Explore more Fossify apps: https://www..org<br>
+➡️ Open-Source Code: https://www.github.com/<br>
+➡️ Join the community on Reddit: https://www.reddit.com/r/<br>
+➡️ Connect on Telegram: https://t.me/
+
+-->
+
 ## Demo
 You can select a demo instance from the login screen or login into your own server.
 
 ## Translations coming soon
-
-## Release and store links coming soon
-
