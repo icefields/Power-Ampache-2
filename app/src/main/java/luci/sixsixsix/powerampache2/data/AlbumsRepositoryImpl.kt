@@ -19,7 +19,6 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Session
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,7 +32,6 @@ import javax.inject.Singleton
 class AlbumsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
-    private val playlistManager: MusicPlaylistManager,
     private val errorHandler: ErrorHandler
 ): AlbumsRepository {
     private val dao = db.dao
@@ -166,4 +164,18 @@ class AlbumsRepositoryImpl @Inject constructor(
     override suspend fun getFrequentAlbums() = getAlbumsStats(MainNetwork.StatFilter.frequent)
     override suspend fun getFlaggedAlbums() = getAlbumsStats(MainNetwork.StatFilter.flagged)
     override suspend fun getRandomAlbums() = getAlbumsStats(MainNetwork.StatFilter.random)
+
+    override suspend fun getAlbumShareLink(albumId: String) = flow {
+        emit(Resource.Loading(true))
+        val response = api.createShare(
+            getSession()!!.auth,
+            id = albumId,
+            type = MainNetwork.Type.album
+        )
+        response.error?.let { throw(MusicException(it.toError())) }
+        response.publicUrl!!.apply {
+            emit(Resource.Success(data = this, networkData = this))
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getPlaylistShareLink()", e, this) }
 }

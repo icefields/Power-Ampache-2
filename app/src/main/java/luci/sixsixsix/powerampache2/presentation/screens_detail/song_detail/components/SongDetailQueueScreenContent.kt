@@ -32,6 +32,7 @@ import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +40,8 @@ fun SongDetailQueueScreenContent(
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
-    viewModel: QueueViewModel = hiltViewModel()
+    viewModel: QueueViewModel = hiltViewModel(),
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val queue = viewModel.queueState
     val scope = rememberCoroutineScope()
@@ -53,6 +55,7 @@ fun SongDetailQueueScreenContent(
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 },
                 mainViewModel = mainViewModel,
+                viewModel = addToPlaylistOrQueueDialogViewModel,
                 onCreatePlaylistRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 }
@@ -98,7 +101,10 @@ fun SongDetailQueueScreenContent(
                         viewModel.onEvent(QueueEvent.OnSongSelected(song))
                     },
                 enableSwipeToRemove = true,
-                onRemove = { viewModel.onEvent(QueueEvent.OnSongRemove(it)) }
+                onRemove = { viewModel.onEvent(QueueEvent.OnSongRemove(it)) },
+                onRightToLeftSwipe = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
+                }
             )
         }
     }

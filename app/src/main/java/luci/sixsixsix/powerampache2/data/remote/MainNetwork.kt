@@ -12,6 +12,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.GoodbyeDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
+import luci.sixsixsix.powerampache2.data.remote.dto.ShareDto
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
 import luci.sixsixsix.powerampache2.domain.models.Playlist
@@ -188,6 +189,24 @@ interface MainNetwork {
         @Query("name") name: String? = null,
         @Query("type") playlistType: PlaylistType
     ): SuccessResponse
+
+    /**
+     * Create a public url that can be used by anyone to stream media.
+     * Takes the file id with optional description and expires parameters.
+     *
+     * 'filter'	string	UID of object you are sharing	NO
+     * 'type'	string	object_type	NO
+     * 'description'	string	description (will be filled for you if empty)	YES
+     * 'expires'	integer	days to keep active	YES
+     */
+    @GET("json.server.php?action=share_create")
+    suspend fun createShare(
+        @Query("auth") authKey: String,
+        @Query("filter") id: String,
+        @Query("description") description: String = "",
+        @Query("expires") expires: Int = 7,
+        @Query("type") type: Type
+    ): ShareDto
 
     /**
      * 'id'	integer	$object_id	NO

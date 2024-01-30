@@ -11,10 +11,10 @@ plugins {
 
 val composeVersion = "1.5.4" // rootProject.extra.get("compose_version") as String
 val lifecycleVersion = "2.7.0"
-val retrofit2Version = "2.9.0" //rootProject.extra.get("retrofit2_version") as String
-val coroutinesVersion = "1.7.3" //rootProject.extra.get("coroutines_version") as String
-val exoplayerVersion = "2.19.1" // rootProject.extra.get("exoplayer_version") as String
-val composeNavVersion = "1.8.42-beta" // rootProject.extra.get("composeNav_version") as String
+val retrofit2Version = "2.9.0"
+val coroutinesVersion = "1.7.3"
+val exoplayerVersion = "2.19.1"
+val composeNavVersion = "1.8.42-beta"
 val media3Version = "1.2.1"
 val hiltVersion = "1.1.0"
 
@@ -83,7 +83,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = composeVersion
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
 
     packaging {
@@ -99,11 +99,11 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.media:media:1.7.0")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
-    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
+    implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
 
     // --- Compose --- //
     implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     implementation("androidx.compose.material3:material3:1.1.2")
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
@@ -150,8 +150,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     // --- Dagger Hilt --- //
-    implementation("com.google.dagger:hilt-android:2.48")
-    kapt("com.google.dagger:hilt-android-compiler:2.48")
+    implementation("com.google.dagger:hilt-android:2.50")
+    kapt("com.google.dagger:hilt-android-compiler:2.50")
     kapt("androidx.hilt:hilt-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:$hiltVersion")
     implementation("androidx.hilt:hilt-common:$hiltVersion")
@@ -173,6 +173,9 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
     // Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:2.6.1")
+
+    // ERROR REPORT
+    implementation("ch.acra:acra-mail:5.11.3")
 
     // --- TESTING --- //
     testImplementation("junit:junit:4.13.2")

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissState
@@ -38,22 +39,28 @@ fun <T> SwipeToDismissItem(
     item: T,
     foregroundView: @Composable () -> Unit,
     enableSwipeToRemove: Boolean = false,
-    onRemove: (T) -> Unit = {}
+    onRemove: (T) -> Unit = { },
+    onRightToLeftSwipe: (T) -> Unit = { }
 ) {
     val currentItem by rememberUpdatedState(item)
     if (enableSwipeToRemove) {
         var show by remember { mutableStateOf(true) }
+        var rightShow by remember { mutableStateOf(true) }
         val dismissState = rememberDismissState(
             confirmValueChange = {
-                if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
+                if (it == DismissValue.DismissedToEnd) {
                     show = false
-                    true
+                    false
+                } else if (it == DismissValue.DismissedToStart) {
+                    rightShow = false
+                    false
                 } else false
             },
-            positionalThreshold = { 150.dp.toPx() }
+            positionalThreshold = { 200.dp.toPx() }
         )
+
         AnimatedVisibility(
-            visible = show,
+            visible = show && rightShow,
             exit = fadeOut(spring())
         ) {
             SwipeToDismiss(
@@ -66,6 +73,7 @@ fun <T> SwipeToDismissItem(
             )
         }
         LaunchedEffect(show) { if (!show) { onRemove(currentItem) } }
+        LaunchedEffect(rightShow) { if (!rightShow) { onRightToLeftSwipe(currentItem) } }
     } else {
         foregroundView()
     }
@@ -76,7 +84,7 @@ fun <T> SwipeToDismissItem(
 fun SwipeToDismissBackground(dismissState: DismissState) {
     val color = when (dismissState.dismissDirection) {
         DismissDirection.StartToEnd -> MaterialTheme.colorScheme.errorContainer
-        DismissDirection.EndToStart -> Color(0xFF1DE9B6)
+        DismissDirection.EndToStart -> MaterialTheme.colorScheme.primaryContainer
         null -> Color.Transparent
     }
     val direction = dismissState.dismissDirection
@@ -93,7 +101,7 @@ fun SwipeToDismissBackground(dismissState: DismissState) {
         }
         Spacer(modifier = Modifier)
         if (direction == DismissDirection.EndToStart) {
-            Icon(Icons.Default.Share, contentDescription = "Archive")
+            Icon(Icons.Default.PlaylistAdd, contentDescription = "Add to playlist")
         }
     }
 }

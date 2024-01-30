@@ -1,6 +1,8 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 
+import android.app.Application
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
@@ -22,6 +25,7 @@ import kotlin.math.abs
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
+    private val application: Application,
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
@@ -29,7 +33,7 @@ class AlbumDetailViewModel @Inject constructor(
     private val albumsRepository: AlbumsRepository,
     private val playlistsRepository: PlaylistsRepository,
     private val playlistManager: MusicPlaylistManager,
-) : ViewModel() {
+) : AndroidViewModel(application) {
     //var state by mutableStateOf(AlbumDetailState())
     var state by savedStateHandle.saveable {
         mutableStateOf(AlbumDetailState())
@@ -62,27 +66,36 @@ class AlbumDetailViewModel @Inject constructor(
 
     fun onEvent(event: AlbumDetailEvent) {
         when (event) {
-            is AlbumDetailEvent.Fetch ->
+            is AlbumDetailEvent.Fetch -> {
+                L("AlbumDetailEvent.Fetch", event.albumId)
                 getSongsFromAlbum(albumId = event.albumId, fetchRemote = true)
-            is AlbumDetailEvent.OnSongSelected ->
+            }
+            is AlbumDetailEvent.OnSongSelected -> {
                 // play the selected song and add the rest of the album to the queue
                 playlistManager.updateTopSong(event.song)
+                playlistManager.addToCurrentQueue(state.getSongList())
+            }
             is AlbumDetailEvent.OnPlayAlbum -> {
                 L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
                 playlistManager.updateCurrentSong(state.songs[0].song)
-                playlistManager.addToCurrentQueueTop(getSongs())
+                playlistManager.addToCurrentQueueTop(state.getSongList())
             }
-            AlbumDetailEvent.OnShareAlbum -> {}
+            AlbumDetailEvent.OnShareAlbum ->
+                shareAlbum(state.album.id)
             AlbumDetailEvent.OnShuffleAlbum -> {
-                val shuffled = getSongs().shuffled()
+                val shuffled = state.getSongList().shuffled()
                 playlistManager.addToCurrentQueueNext(shuffled)
                 playlistManager.moveToSongInQueue(shuffled[0])
             }
             AlbumDetailEvent.OnFavouriteAlbum ->
                 favouriteAlbum()
 
-            AlbumDetailEvent.RefreshFromCache ->
-                getSongsFromAlbum(albumId = state.album.id, fetchRemote = false)
+            AlbumDetailEvent.RefreshFromCache -> {
+                L("AlbumDetailEvent.RefreshFromCache", state.album.id)
+                if (!state.album.id.isNullOrBlank()) {
+                    getSongsFromAlbum(albumId = state.album.id, fetchRemote = false)
+                }
+            }
         }
     }
 
@@ -125,8 +138,6 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 
-    fun getSongs() = state.songs.map { it.song }
-
     private fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             songsRepository
@@ -139,9 +150,8 @@ class AlbumDetailViewModel @Inject constructor(
                                 songs.forEach { song ->
                                     songWrapperList.add(SongWrapper(
                                         song = song,
-                                        isOffline = !songsRepository.getSongUri(song).startsWith("http")
-                                        )
-                                    )
+                                        isOffline = songsRepository.isSongAvailableOffline(song)
+                                    ))
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("AlbumDetailViewModel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)
@@ -152,6 +162,18 @@ class AlbumDetailViewModel @Inject constructor(
                         is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                     }
                 }
+        }
+    }
+
+    private fun shareAlbum(albumId: String) = viewModelScope.launch {
+        albumsRepository.getAlbumShareLink(albumId).collect { result ->
+            when (result) {
+                is Resource.Success -> result.data?.let {
+                    application.shareLink(it)
+                }
+                is Resource.Error -> { }
+                is Resource.Loading -> { }
+            }
         }
     }
 }

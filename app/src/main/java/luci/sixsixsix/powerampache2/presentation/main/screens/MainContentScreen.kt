@@ -139,8 +139,7 @@ fun MainContentScreen(
                             drawerState.close()
                         }
                 })
-
-                DonateButton()
+                DonateButton(isTransparent = true)
             }
         }
     ) {

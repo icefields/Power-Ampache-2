@@ -74,6 +74,8 @@ fun PlaylistInfoButtonsRow(
             )
         }
 
+        /*
+        TODO not possible to share playlists, is this a bug?
         IconButton(
             onClick = {
                 eventListener(PlaylistInfoViewEvents.SHARE_PLAYLIST)
@@ -83,5 +85,6 @@ fun PlaylistInfoButtonsRow(
                 contentDescription = "Share"
             )
         }
+        */
     }
 }

@@ -21,7 +21,7 @@
     <string name="loginScreen_login">Login</string>
     <string name="loginScreen_signup">Sign Up</string>
     <string name="loginScreen_demo_server">Demo</string>
-    <string name="loginScreen_local_server">Local Debug Server</string>
+    <string name="loginScreen_local_server">Local Development Server</string>
     <string name="loginScreen_remote_server">Remote Debug Server</string>
     <string name="loginScreen_dogmazic_server">Dogmazic</string>
     <string name="home_section_title_recent">Recent</string>
@@ -36,6 +36,14 @@
     <string name="back_content_description">Back</string>
     <string name="search_content_description">Search</string>
     <string name="menu_content_description">Dropdown Menu</string>
+
+    <!-- ERROR messages-->
+    <string name="error_io_exception">Cannot load data, are you connected to the internet?\nIf the problem persist try to kill and reopen the app</string>
+    <string name="error_http_exception">Cannot load data, are you connected to the internet?\nIf the problem persist try to kill and reopen the app</string>
+    <string name="error_empty_result">No results</string>
+    <string name="error_duplicate">Duplicate Entry</string>
+    <string name="crash_mail_subject">Crash Report</string>
+    <string name="crash_mail_body">Crash Report Data. Thanks</string>
 
 </resources>
 

@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.AddBox
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
@@ -18,16 +17,21 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
 
 @Composable
 fun AlbumInfoButtonsRow(
     album: Album,
     isPlayingAlbum: Boolean,
+    isPlaylistEditLoading: Boolean,
+    isDownloading: Boolean,
     modifier: Modifier = Modifier,
     eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit
 ) {
@@ -36,25 +40,24 @@ fun AlbumInfoButtonsRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-
-        IconButton(
-            onClick = {
-                eventListener(AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST)
-            }) {
-            Icon(
-                imageVector = Icons.Outlined.AddBox,
-                contentDescription = "Add to playlist"
-            )
+        ButtonWithLoadingIndicator(
+            imageVector = Icons.Outlined.AddBox,
+            imageContentDescription = "Add to playlist",
+            background = Color.Transparent,
+            isLoading = isPlaylistEditLoading,
+            showBoth = true
+        ) {
+            eventListener(AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST)
         }
 
-        IconButton(
-            onClick = {
-                eventListener(AlbumInfoViewEvents.DOWNLOAD_ALBUM)
-            }) {
-            Icon(
-                imageVector = Icons.Outlined.DownloadForOffline,
-                contentDescription = "Download"
-            )
+        ButtonWithLoadingIndicator(
+            imageVector = Icons.Outlined.DownloadForOffline,
+            imageContentDescription= "Download",
+            background = Color.Transparent,
+            isLoading = isDownloading,
+            showBoth = true
+        ) {
+            eventListener(AlbumInfoViewEvents.DOWNLOAD_ALBUM)
         }
 
         IconButton(modifier = Modifier
@@ -90,4 +93,9 @@ fun AlbumInfoButtonsRow(
             )
         }
     }
+}
+
+@Composable @Preview
+fun AlbumInfoButtonsRowPreview() {
+    AlbumInfoButtonsRow(Album.mock(), isPlayingAlbum = true, false, isDownloading = false){}
 }

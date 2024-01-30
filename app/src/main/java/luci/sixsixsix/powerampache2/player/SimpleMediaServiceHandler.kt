@@ -117,7 +117,10 @@ class SimpleMediaServiceHandler @Inject constructor(
 
     override fun onPlaybackStateChanged(playbackState: Int) {
         when (playbackState) {
-            ExoPlayer.STATE_IDLE -> { L("STATE_IDLE")}
+            ExoPlayer.STATE_IDLE -> {
+                L("STATE_IDLE")
+                _simpleMediaState.value = SimpleMediaState.Idle
+            }
             ExoPlayer.STATE_BUFFERING -> {
                 L("STATE_BUFFERING")
                 _simpleMediaState.value = SimpleMediaState.Buffering(player.currentPosition)
@@ -125,6 +128,10 @@ class SimpleMediaServiceHandler @Inject constructor(
             ExoPlayer.STATE_READY -> {
                 _simpleMediaState.value = SimpleMediaState.Ready(player.duration)
                 L("STATE_READY")
+            }
+            ExoPlayer.STATE_ENDED -> {
+                _simpleMediaState.value = SimpleMediaState.Ended
+                L("STATE_ENDED")
             }
         }
     }
@@ -166,7 +173,8 @@ sealed class SimpleMediaState {
     data class Progress(val progress: Long): SimpleMediaState()
     data class Playing(val isPlaying: Boolean): SimpleMediaState()
     data class Loading(val isLoading: Boolean): SimpleMediaState()
-
+    data object Idle: SimpleMediaState()
+    data object Ended: SimpleMediaState()
 }
 
 sealed class PlayerEvent {

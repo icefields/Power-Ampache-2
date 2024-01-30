@@ -55,6 +55,7 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigator
@@ -148,7 +149,6 @@ fun OfflineSongsScreen(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Destination(start = false)
 fun OfflineSongsMainContent(
@@ -156,7 +156,8 @@ fun OfflineSongsMainContent(
     mainViewModel: MainViewModel,
     modifier: Modifier = Modifier,
     playlistOrQueueDialogOpen: AddToPlaylistOrQueueDialogOpen = AddToPlaylistOrQueueDialogOpen(false),
-    viewModel: OfflineSongsViewModel = hiltViewModel()
+    viewModel: OfflineSongsViewModel = hiltViewModel(),
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     var playlistsDialogOpen by remember { mutableStateOf(playlistOrQueueDialogOpen) }
@@ -169,6 +170,7 @@ fun OfflineSongsMainContent(
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 },
                 mainViewModel = mainViewModel,
+                viewModel = addToPlaylistOrQueueDialogViewModel,
                 onCreatePlaylistRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 }
@@ -218,6 +220,9 @@ fun OfflineSongsMainContent(
                     onRemove = {
                         // delete downloaded song, delete database entry
                         mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(song))
+                    },
+                    onRightToLeftSwipe = {
+                        playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                     }
                 )
             }

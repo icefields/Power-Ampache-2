@@ -52,6 +52,7 @@ import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumDetailTopBar
@@ -68,9 +69,10 @@ fun AlbumDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: AlbumDetailViewModel = hiltViewModel(),
     mainViewModel: MainViewModel,
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
-    val songs = viewModel.getSongs()
+    val songs = viewModel.state.getSongList()
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
@@ -103,6 +105,7 @@ fun AlbumDetailScreen(
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 },
                 mainViewModel = mainViewModel,
+                viewModel = addToPlaylistOrQueueDialogViewModel,
                 onCreatePlaylistRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 }
@@ -151,7 +154,7 @@ fun AlbumDetailScreen(
                 AlbumDetailTopBar(
                     navigator = navigator,
                     album = viewModel.state.album,
-                    isLoading = state.isLoading || mainViewModel.state.isDownloading,
+                    isLoading = mainViewModel.isLoading,
                     scrollBehavior = scrollBehavior
                 ) { infoVisibility = !infoVisibility }
             }
@@ -181,6 +184,8 @@ fun AlbumDetailScreen(
                         album = viewModel.state.album,
                         isPlayingAlbum = isPlayingAlbum,
                         isLikeLoading = state.isLikeLoading,
+                        isDownloading = mainViewModel.state.isDownloading,
+                        isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
                         eventListener = { event ->
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {

@@ -1,10 +1,13 @@
 package luci.sixsixsix.powerampache2.data
 
+import android.app.Application
 import kotlinx.coroutines.flow.FlowCollector
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
+import luci.sixsixsix.powerampache2.domain.errors.ErrorType
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -17,6 +20,7 @@ import javax.inject.Singleton
 class ErrorHandlerImpl @Inject constructor(
     private val playlistManager: MusicPlaylistManager,
     private val db: MusicDatabase,
+    private val applicationContext: Application
 ): ErrorHandler {
     override suspend fun <T> invoke(
         label:String,
@@ -31,28 +35,54 @@ class ErrorHandlerImpl @Inject constructor(
             return
         }
 
+        var readableMessage: String? = null
         StringBuilder(label)
             .append(if (label.isBlank())"" else " - ")
             .append( when(e) {
-                is IOException -> "cannot load data IOException $e"
-                is HttpException -> "cannot load data HttpException $e"
-                is ServerUrlNotInitializedException -> "ServerUrlNotInitializedException $e"
+                is IOException -> {
+                    readableMessage = applicationContext.getString(R.string.error_io_exception)
+                    "cannot load data IOException $e"
+                }
+                is HttpException -> {
+                    readableMessage = e.localizedMessage
+                    "cannot load data HttpException $e"
+                }
+                is ServerUrlNotInitializedException ->
+                    "ServerUrlNotInitializedException $e"
                 is MusicException -> {
-                    if (e.musicError.isSessionExpiredError()) {
-                        // clear session and try to autologin using the saved credentials
-                        db.dao.clearCachedData()
-                        db.dao.clearSession()
-                    } else if (e.musicError.isEmptyResult()) {
-                        // TODO handle empty result
+                    when(e.musicError.getErrorType()) {
+                        ErrorType.ACCOUNT -> {
+                            // clear session and try to autologin using the saved credentials
+                            db.dao.clearCachedData()
+                            db.dao.clearSession()
+                            readableMessage = e.musicError.errorMessage
+                        }
+                        ErrorType.EMPTY ->
+                            readableMessage = applicationContext.getString(R.string.error_empty_result)
+                        ErrorType.DUPLICATE ->
+                            readableMessage = applicationContext.getString(R.string.error_duplicate)
+                        ErrorType.Other ->
+                            readableMessage = e.musicError.errorMessage
+                        ErrorType.SYSTEM ->
+                            readableMessage = e.musicError.errorMessage
                     }
                     e.musicError.toString()
                 }
-                else -> "generic exception $e"
+                else -> {
+                    readableMessage = e.localizedMessage
+                    "generic exception $e"
+                }
             }).toString().apply {
+                // check on error on the emitted data for detailed logging
                 fc.emit(Resource.Error<T>(message = this, exception = e))
-                playlistManager.updateErrorMessage(this)
+                // log and report error here
+                // ....
+                // readable message here
+                readableMessage?.let {
+                    playlistManager.updateErrorMessage(readableMessage)
+                }
                 onError(this, e)
-                L.e(e)
+                L.e(readableMessage, e)
             }
     }
 }

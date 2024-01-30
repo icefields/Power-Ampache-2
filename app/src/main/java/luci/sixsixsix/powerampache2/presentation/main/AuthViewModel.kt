@@ -45,6 +45,7 @@ class AuthViewModel @Inject constructor(
 //        }
 
     init {
+        observeMessages()
         state = state.copy(isLoading = true)
         verifyAndAutologin()
         // Listen to changes of the session table from the database
@@ -78,6 +79,17 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    private fun observeMessages() {
+        viewModelScope.launch {
+            playlistManager.errorMessageState.collect { errorState ->
+                errorState.errorMessage?.let {
+                    state = state.copy(error = it)
+                }
+                L(errorState.errorMessage)
+            }
+        }
+    }
+
     fun verifyAndAutologin() {
         viewModelScope.launch {
             // try to login with saved auth token
@@ -98,7 +110,7 @@ class AuthViewModel @Inject constructor(
                 }
 
                 is Resource.Error -> {
-                    state = state.copy(error = "{${ping.exception}", isLoading = false)
+                    state = state.copy(isLoading = false)
                 }
 
                 is Resource.Loading ->
@@ -120,7 +132,7 @@ class AuthViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> state =
-                        state.copy(error = "${result.exception}", isLoading = false)
+                        state.copy(isLoading = false)
 
                     is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                 }
@@ -158,7 +170,6 @@ class AuthViewModel @Inject constructor(
 
                         is Resource.Error -> {
                             state = state.copy(
-                                error = result.exception?.toString() ?: "authorization error",
                                 isLoading = false
                             )
                         }

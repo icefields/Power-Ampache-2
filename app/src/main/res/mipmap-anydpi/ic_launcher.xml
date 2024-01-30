@@ -2,7 +2,7 @@
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/launcherBgColour" />
     <foreground>
-        <inset android:drawable="@drawable/ic_launcher_temp"
+        <inset android:drawable="@drawable/ic_launcher_coloured"
             android:inset="15%"/>
     </foreground>
     <monochrome>

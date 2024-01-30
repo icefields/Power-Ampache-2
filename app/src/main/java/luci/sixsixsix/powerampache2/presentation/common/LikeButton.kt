@@ -32,42 +32,19 @@ fun LikeButton(
     background: Color = MaterialTheme.colorScheme.background,
     iconTint: Color = MaterialTheme.colorScheme.onBackground,
     onClick: () -> Unit
-) {
-    IconButton(
-        modifier = modifier.size(29.dp),
-        onClick = { onClick() }
-    ) {
-        Card(
-            shape = RoundedCornerShape(17.dp), // half or icon size
-            //elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.albumDetail_chip_elevation)),
-            border = BorderStroke(
-                width = 1.dp,
-                color = iconTint
-            ),
-            colors = CardDefaults.cardColors(containerColor = background.copy(alpha = 0.3f)),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isLikeLoading) {
-                    CircularProgressIndicator()
-                } else {
-                    Icon(
-                        imageVector = if (isFavourite)
-                            Icons.Default.Favorite else
-                            Icons.Default.FavoriteBorder,
-                        contentDescription = "favourite album",
-                        tint = iconTint
-                    )
-                }
-            }
-        }
-    }
-}
+) = ButtonWithLoadingIndicator(
+    imageVector = if (isFavourite)
+        Icons.Default.Favorite else
+        Icons.Default.FavoriteBorder,
+    imageContentDescription = "favourite",
+    isLoading = isLikeLoading,
+    modifier = modifier.size(29.dp),
+    background = background.copy(alpha = 0.3f),
+    iconTint = iconTint,
+    borderStroke = 1.dp,
+    onClick = onClick
+)
+
 
 @Composable @Preview
 fun PreviewLikeButton() {

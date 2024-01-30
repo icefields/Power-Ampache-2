@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.common.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
@@ -22,6 +23,7 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.QueueEvent
@@ -31,10 +33,11 @@ import luci.sixsixsix.powerampache2.presentation.queue.QueueViewModel
 fun QueueScreenContent(
     navigator: DestinationsNavigator,
     mainViewModel: MainViewModel,
-    viewModel: QueueViewModel,
-    modifier: Modifier = Modifier
+    queueViewModel: QueueViewModel,
+    modifier: Modifier = Modifier,
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
-    val queue = viewModel.queueState
+    val queue = queueViewModel.queueState
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
     if (playlistsDialogOpen.isOpen) {
         if (playlistsDialogOpen.songs.isNotEmpty()) {
@@ -44,6 +47,7 @@ fun QueueScreenContent(
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 },
                 mainViewModel = mainViewModel,
+                viewModel = addToPlaylistOrQueueDialogViewModel,
                 onCreatePlaylistRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 }
@@ -86,11 +90,14 @@ fun QueueScreenContent(
                     .clickable {
                         // TODO BUG when tapping on a song, in the context of a playlist, do not
                         //  move the new song on top, just start playing from the selected song
-                        viewModel.onEvent(QueueEvent.OnSongSelected(song))
+                        queueViewModel.onEvent(QueueEvent.OnSongSelected(song))
                         mainViewModel.onEvent(MainEvent.Play(song))
                     },
                 enableSwipeToRemove = true,
-                onRemove = { viewModel.onEvent(QueueEvent.OnSongRemove(it)) }
+                onRemove = { queueViewModel.onEvent(QueueEvent.OnSongRemove(it)) },
+                onRightToLeftSwipe = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
+                }
             )
         }
     }

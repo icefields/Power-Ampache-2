@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
@@ -42,6 +43,7 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.InfoDialog
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
@@ -52,7 +54,8 @@ import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 fun SongDetailContent(
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
     val state = mainViewModel.state
     val scope = rememberCoroutineScope()
@@ -65,7 +68,8 @@ fun SongDetailContent(
                 onDismissRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 },
-                mainViewModel = mainViewModel
+                mainViewModel = mainViewModel,
+                viewModel = addToPlaylistOrQueueDialogViewModel
             )
         }
     }

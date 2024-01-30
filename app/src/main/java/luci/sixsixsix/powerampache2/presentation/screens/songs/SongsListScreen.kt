@@ -30,6 +30,7 @@ import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 
 @Composable
 @Destination(start = false)
@@ -37,7 +38,8 @@ fun SongsListScreen(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
-    viewModel: SongsViewModel = hiltViewModel()
+    viewModel: SongsViewModel = hiltViewModel(),
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
@@ -50,6 +52,7 @@ fun SongsListScreen(
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 },
                 mainViewModel = mainViewModel,
+                viewModel = addToPlaylistOrQueueDialogViewModel,
                 onCreatePlaylistRequest = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
                 }
@@ -71,14 +74,18 @@ fun SongsListScreen(
                         state.songs.size,
                         //key = { i -> state.songs[i].mediaId }
                     ) { i ->
-                        val song = state.songs[i]
+                        val song = state.songs[i].song
+                        val isOffline = state.songs[i].isOffline
                         SongItem(
                             song = song,
                             songItemEventListener = { event ->
                                 when(event) {
-                                    SongItemEvent.PLAY_NEXT -> {} // viewModel.onEvent(AlbumDetailEvent.OnAddSongToQueueNext(song))
-                                    SongItemEvent.SHARE_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnShareSong(song))
-                                    SongItemEvent.DOWNLOAD_SONG -> {} // viewModel.onEvent(AlbumDetailEvent.OnDownloadSong(song))
+                                    SongItemEvent.PLAY_NEXT ->
+                                        mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                                    SongItemEvent.SHARE_SONG ->
+                                        mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                                    SongItemEvent.DOWNLOAD_SONG ->
+                                        mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                                     SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
                                         AlbumDetailScreenDestination(albumId = song.album.id, album = null)
                                     )
@@ -92,6 +99,7 @@ fun SongsListScreen(
                                 }
                             },
                             subtitleString = SubtitleString.ARTIST,
+                            isSongDownloaded = isOffline,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {

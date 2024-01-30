@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailContent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailQueueDragHandle
@@ -22,7 +24,8 @@ fun SongDetailScreen(
     // navigator: DestinationsNavigator,
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val scaffoldState = rememberBottomSheetScaffoldState()
     val barHeight = dimensionResource(id = R.dimen.queue_dragHandle_height)
@@ -44,7 +47,8 @@ fun SongDetailScreen(
         SongDetailContent(
             mainScaffoldState = mainScaffoldState,
             modifier = Modifier.padding(paddingValues = it),
-            mainViewModel = viewModel
+            mainViewModel = viewModel,
+            addToPlaylistOrQueueDialogViewModel = addToPlaylistOrQueueDialogViewModel
         )
     }
 }
