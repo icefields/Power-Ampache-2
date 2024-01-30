@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.data.remote
 
 import luci.sixsixsix.powerampache2.BuildConfig
@@ -10,18 +31,16 @@ import luci.sixsixsix.powerampache2.data.remote.dto.ArtistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.AuthDto
 import luci.sixsixsix.powerampache2.data.remote.dto.GoodbyeDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistDto
-import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ShareDto
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
+import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
-import luci.sixsixsix.powerampache2.domain.models.Playlist
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.http.Streaming
-import retrofit2.http.Url
 
 /**
  * Main network interface which will fetch a new welcome title for us
