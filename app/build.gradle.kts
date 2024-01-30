@@ -59,6 +59,12 @@ android {
         }
         release {
             buildConfigField("boolean", "MRLOG_ON", "false")
+            buildConfigField("String", "AMPACHE_USER", "\"\"")
+            buildConfigField("String", "AMPACHE_PASSWORD", "\"\"")
+            buildConfigField("String", "AMPACHE_URL", "\"\"")
+            buildConfigField("String", "API_KEY", "\"\"")
+            buildConfigField("String", "DOGMAZIC_PASSWORD", "\"\"")
+            buildConfigField("String", "DOGMAZIC_USER", "\"\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
