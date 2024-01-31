@@ -38,9 +38,12 @@ import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
 import okhttp3.ResponseBody
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
 import retrofit2.http.Streaming
+import retrofit2.http.Url
 
 /**
  * Main network interface which will fetch a new welcome title for us
@@ -61,6 +64,25 @@ interface MainNetwork {
 
     @GET("json.server.php?action=goodbye")
     suspend fun goodbye(@Query("auth") authKey: String = ""): GoodbyeDto
+
+    /**
+     * Register as a new user if allowed.
+     * (Requires the username, password and email.)
+     *
+     * Input        Type    Optional
+     * 'username'	string  NO
+     * 'password'	string  NO
+     * 'email'	    string  NO
+     * 'fullname'	string	YES
+     *
+     */
+    @GET("json.server.php?action=register")
+    suspend fun register(
+        @Query("username") username: String,
+        @Query("password") password: String,
+        @Query("email") email: String,
+        @Query("fullname") fullName: String? = null
+    ): SuccessResponse
 
     @GET("json.server.php?action=user")
     suspend fun getUser(
@@ -240,6 +262,9 @@ interface MainNetwork {
         @Query("type") type: Type = Type.song, // song, podcast_episode, search, playlist
         @Query("format") format: String = "raw", // mp3, ogg, raw, etc (raw returns the original format)
     ): Response<ResponseBody>
+
+    @POST
+    suspend fun sendErrorReport(@Url url: String = BuildConfig.URL_ERROR_LOG, @Body body: String)
 
     companion object {
         const val API_KEY = BuildConfig.API_KEY

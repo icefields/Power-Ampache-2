@@ -33,15 +33,18 @@ android {
     val ampacheUrl = properties.getProperty("AMPACHE_URL")
     val dogmazicPass = properties.getProperty("DOGMAZIC_PASSWORD")
     val dogmazicUser = properties.getProperty("DOGMAZIC_USER")
+    val dogmazicEmail = properties.getProperty("DOGMAZIC_EMAIL")
+    val errorLogUrl = properties.getProperty("URL_ERROR_LOG")
 
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 4
-        versionName = "0.03-beta"
+        versionCode = 8
+        versionName = "0.07-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -50,12 +53,18 @@ android {
     buildTypes {
         debug {
             buildConfigField("boolean", "MRLOG_ON", "true")
+            buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
+            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
+            buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
+            buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("String", "AMPACHE_USER", ampacheUser)
             buildConfigField("String", "AMPACHE_PASSWORD", ampachePass)
             buildConfigField("String", "AMPACHE_URL", ampacheUrl)
             buildConfigField("String", "API_KEY", apikey)
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
+            buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -64,12 +73,18 @@ android {
         }
         release {
             buildConfigField("boolean", "MRLOG_ON", "false")
+            buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
+            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
+            buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
+            buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("String", "AMPACHE_USER", "\"\"")
             buildConfigField("String", "AMPACHE_PASSWORD", "\"\"")
             buildConfigField("String", "AMPACHE_URL", "\"\"")
             buildConfigField("String", "API_KEY", "\"\"")
-            buildConfigField("String", "DOGMAZIC_PASSWORD", "\"\"")
-            buildConfigField("String", "DOGMAZIC_USER", "\"\"")
+            buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
+            buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
+            buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

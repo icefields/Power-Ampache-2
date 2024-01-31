@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.data.remote
 
 import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.domain.errors.MusicError
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
@@ -37,10 +38,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDatabase) :
-    Interceptor {
+class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDatabase) : Interceptor {
+
+    private fun isErrorReportUrl(url: String) = url == BuildConfig.URL_ERROR_LOG
+
     override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
         var request = chain.request()
+
+        // if reporting an error no need to manipulate the url
+        if (isErrorReportUrl(request.url.toString())) {
+            return@runBlocking chain.proceed(request)
+        }
+
         var hostStr = musicDatabase.dao.getCredentials()?.serverUrl
 
         if (!hostStr.isNullOrBlank()) {

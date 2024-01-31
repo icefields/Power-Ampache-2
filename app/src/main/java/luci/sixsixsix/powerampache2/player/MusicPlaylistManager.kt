@@ -176,7 +176,6 @@ class MusicPlaylistManager @Inject constructor() {
         _currentSongState.value = CurrentSongState(song = null)
         updateSearchQuery(searchQuery= "")
         replaceCurrentQueue(listOf())
-        // TODO keep error message for now
-        // updateErrorMessage(errorMessage= null)
+        updateErrorMessage(errorMessage= null)
     }
 }

@@ -1,26 +1,41 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.FileDownloadOff
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -43,31 +58,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
-import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
-import luci.sixsixsix.powerampache2.presentation.destinations.OfflineSongsScreenDestination
-import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
-import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
-import luci.sixsixsix.powerampache2.presentation.destinations.SongsListScreenDestination
-import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreen
-import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
@@ -81,11 +84,14 @@ import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTab
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.TabItem
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.drawerItems
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
+import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreen
+import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsMainContent
-import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
-import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
+import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.settings.SettingsScreen
 import luci.sixsixsix.powerampache2.presentation.settings.SettingsViewModel
 
@@ -127,7 +133,9 @@ fun MainContentScreen(
         drawerState = drawerState,
         //scrimColor = MaterialTheme.colorScheme.scrim,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                modifier = Modifier.fillMaxWidth(0.8f)
+            ) {
                 DrawerHeader(authViewModel.state.user?.username ?: ERROR_STRING)
                 Divider()
                 DrawerBody(

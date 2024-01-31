@@ -36,9 +36,8 @@ class HomeScreenViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    //var state2 by mutableStateOf(HomeScreenState())
-    //private val state = savedStateHandle.getLiveData<HomeScreenState>("itemsKey").value
-    var state by savedStateHandle.saveable { mutableStateOf(HomeScreenState()) }
+    var state by mutableStateOf(HomeScreenState())
+    //var state by savedStateHandle.saveable { mutableStateOf(HomeScreenState()) }
 
     init {
         L()

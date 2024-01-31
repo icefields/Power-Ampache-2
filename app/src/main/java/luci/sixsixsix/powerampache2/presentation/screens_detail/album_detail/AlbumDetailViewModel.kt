@@ -22,7 +22,9 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 
 import android.app.Application
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -55,10 +57,8 @@ class AlbumDetailViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
     private val playlistManager: MusicPlaylistManager,
 ) : AndroidViewModel(application) {
-    //var state by mutableStateOf(AlbumDetailState())
-    var state by savedStateHandle.saveable {
-        mutableStateOf(AlbumDetailState())
-    }
+    var state by mutableStateOf(AlbumDetailState())
+    //var state by savedStateHandle.saveable { mutableStateOf(AlbumDetailState()) }
 
     init {
         val album = savedStateHandle.get<Album>("album")?.also {

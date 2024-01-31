@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -85,7 +86,11 @@ class MusicRepositoryImpl @Inject constructor(
         sessionLiveData.observeForever { session ->
             session?.auth?.let {
                 GlobalScope.launch {
-                    getUserNetwork()
+                    try {
+                        getUserNetwork()
+                    } catch (e: Exception) {
+                        errorHandler.logError(e)
+                    }
                 }
             }
         }
@@ -149,7 +154,9 @@ class MusicRepositoryImpl @Inject constructor(
         if (resp?.toBoolean() == true) {
             emit(Resource.Success(true))
         } else {
-            throw Exception("there is an error in the logout response")
+            // do not show anything to the user if in prod mode, log error instead
+            errorHandler.logError("there is an error in the logout response.\nLOGOUT $resp")
+            throw Exception(if (BuildConfig.DEBUG) "there is an error in the logout response" else "")
         }
 
         emit(Resource.Loading(false))
@@ -248,4 +255,39 @@ class MusicRepositoryImpl @Inject constructor(
         }
         return getSession()!! // will throw exception if session null
     }
+
+    override suspend fun register(
+        serverUrl: String,
+        username: String,
+        sha256password: String,
+        email: String,
+        fullName: String?
+    ): Flow<Resource<Any>> = flow {
+        emit(Resource.Loading(true))
+
+        setCredentials(CredentialsEntity(
+            username = username,
+            password = sha256password,
+            serverUrl = serverUrl,
+            authToken = "")
+        )
+
+        val resp = api.register(
+            username = username,
+            password = sha256password,
+            email = email,
+            fullName = fullName
+        )
+
+        resp.error?.let { throw (MusicException(it.toError())) }
+        resp.success?.let {
+            emit(Resource.Success(it))
+        } ?: run {
+            // do not show anything to the user if in prod mode, log error instead
+            errorHandler.logError("there is an error in the logout response.\nLOGOUT $resp")
+            throw Exception(if (BuildConfig.DEBUG) "there is an error registering your account\nIs user registration allowed on the server?" else "")
+        }
+
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("register()", e, this) }
 }

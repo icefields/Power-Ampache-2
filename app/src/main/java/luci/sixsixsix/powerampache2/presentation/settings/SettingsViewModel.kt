@@ -57,6 +57,10 @@ class SettingsViewModel @Inject constructor(
         mutableStateOf<User>(User.emptyUser())
     }
 
+    var remoteLoggingEnabled by savedStateHandle.saveable {
+        mutableStateOf(false)
+    }
+
     var serverInfoState by mutableStateOf<ServerInfo?>(null)
 
     init {

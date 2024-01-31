@@ -39,12 +39,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -60,14 +63,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
+import luci.sixsixsix.powerampache2.presentation.main.screens.bottomDrawerPaddingHorizontal
 
 
-// TODO WIP rename functions, finish this screen. add donation links
+// TODO WIP rename functions, finish this screen.
 
 @Composable
 @Destination
@@ -79,8 +84,12 @@ fun SettingsScreen(
         userState = settingsViewModel.userState,
         serverInfo = settingsViewModel.serverInfoState,
         powerAmpTheme = settingsViewModel.state.theme,
+        remoteLoggingEnabled = settingsViewModel.remoteLoggingEnabled,
         onThemeSelected = {
             settingsViewModel.setTheme(it)
+        },
+        onEnableLoggingChange = {
+            settingsViewModel.remoteLoggingEnabled = it
         }
     )
 }
@@ -90,9 +99,12 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     userState: User?,
     serverInfo: ServerInfo?,
+    remoteLoggingEnabled: Boolean = false,
     powerAmpTheme: PowerAmpTheme,
-    onThemeSelected: (selected: PowerAmpTheme) -> Unit
+    onThemeSelected: (selected: PowerAmpTheme) -> Unit,
+    onEnableLoggingChange: (newValue: Boolean) -> Unit
 ) {
+    //val loggingEnabled = remember { mutableStateOf(remoteLoggingEnabled) }
 
     LazyColumn(modifier = Modifier
         .fillMaxSize()
@@ -117,9 +129,13 @@ fun SettingsScreenContent(
                 2 ->  SettingsThemeSelector(currentTheme = powerAmpTheme) {
                     onThemeSelected(it)
                 }
-                3 -> DonateButton(isExpanded = true, isTransparent = false)
+                4 -> DonateButton(isExpanded = true, isTransparent = false)
                 //4 -> DonatePaypalButton(onDonatePaypalButtonClick)
-                4 -> serverInfo?.let {ServerInfoSection(it) }
+                5 -> serverInfo?.let {ServerInfoSection(it) }
+                3 -> EnableRemoteLoggingCheckBox(
+                    remoteLoggingEnabled = remoteLoggingEnabled,
+                    onCheckedChange = onEnableLoggingChange
+                )
                 else -> {}
             }
         }
@@ -151,16 +167,31 @@ fun UserInfoSection(user: User) {
             Column(modifier = Modifier
                 .wrapContentHeight()
                 .padding(horizontal = 16.dp, vertical = 9.dp)) {
-                UserInfoText("Username", user.username)
-                //if (user.fullNamePublic == 1)
+
+                // if using a demo server show static demo data
+                // TODO use server to determine if we're in demo mode, right now I'm using email,
+                //  which should be cryptic enough
+                if (user.email != BuildConfig.DOGMAZIC_EMAIL) {
+                    UserInfoText("Username", user.username)
+                    //if (user.fullNamePublic == 1)
                     UserInfoText("Full Name", user.fullName)
-                UserInfoText("Email", user.email)
-                UserInfoText("Website", user.website)
-                UserInfoText("City", user.city)
-                UserInfoText("State", user.state)
-                UserInfoText("ID", user.id)
-                //UserInfoText("Access", user.access?.toString())
-                //UserInfoText("ID", LocalDateTime.parse(user.createDate).toString())
+                    UserInfoText("Email", user.email)
+                    UserInfoText("Website", user.website)
+                    UserInfoText("City", user.city)
+                    UserInfoText("State", user.state)
+                    UserInfoText("ID", user.id)
+                    //UserInfoText("Access", user.access?.toString())
+                    //UserInfoText("ID", LocalDateTime.parse(user.createDate).toString())
+                } else {
+                    UserInfoText("Username", "Power Ampache 2 Demo")
+                    //if (user.fullNamePublic == 1)
+                    UserInfoText("Full Name", "Power Ampache")
+                    UserInfoText("Email", "powerampache.ducking336@silomails.com")
+                    UserInfoText("Website", "github.com/icefields/power-ampache-2")
+                    UserInfoText("City", "Pluto City")
+                    UserInfoText("State", "Solar System")
+                    UserInfoText("ID", "PowerAmp666")
+                }
             }
         }
     }
@@ -197,7 +228,8 @@ fun UserInfoText(title: String, value: String?) {
                 text = title,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                maxLines = 1
             )
             Spacer(modifier = Modifier
                 .width(5.dp)
@@ -205,7 +237,8 @@ fun UserInfoText(title: String, value: String?) {
             Text(
                 text = value,
                 textAlign = TextAlign.Center,
-                fontSize = 15.sp
+                fontSize = 15.sp,
+                maxLines = 1
             )
         }
     }
@@ -315,6 +348,28 @@ fun ThemesRadioGroup(
     }
 }
 
+@Composable
+fun EnableRemoteLoggingCheckBox(
+    remoteLoggingEnabled: Boolean,
+    onCheckedChange: ((Boolean) -> Unit),
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.padding(horizontal = bottomDrawerPaddingHorizontal),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = remoteLoggingEnabled,
+            onCheckedChange = {
+                onCheckedChange(it)
+            },
+            enabled = true
+        )
+        Text(text = "Enable Anonymous Debug Logging")
+    }
+}
+
 @Preview
 @Composable
 fun PreviewSettingsScreen() {
@@ -323,6 +378,7 @@ fun PreviewSettingsScreen() {
         serverInfo = ServerInfo("some server", "6.78"),
         powerAmpTheme = PowerAmpTheme.DARK,
         onThemeSelected = {
-        }
+        },
+        onEnableLoggingChange = {}
     )
 }

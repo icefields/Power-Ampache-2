@@ -31,4 +31,7 @@ interface ErrorHandler {
         fc: FlowCollector<Resource<T>>,
         onError: (message: String, e: Throwable) -> Unit = { _, _ -> { } }
     )
+
+    suspend fun logError(e: Throwable)
+    suspend fun logError(message: String)
 }

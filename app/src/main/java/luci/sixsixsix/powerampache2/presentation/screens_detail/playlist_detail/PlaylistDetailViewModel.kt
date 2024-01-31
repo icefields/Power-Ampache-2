@@ -63,8 +63,8 @@ class PlaylistDetailViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : AndroidViewModel(application = application) {
-    //var state by mutableStateOf(PlaylistDetailState())
-    var state by savedStateHandle.saveable { mutableStateOf(PlaylistDetailState()) }
+    var state by mutableStateOf(PlaylistDetailState())
+    //var state by savedStateHandle.saveable { mutableStateOf(PlaylistDetailState()) }
 
     init {
         savedStateHandle.get<Playlist>("playlist")?.let { playlist ->
