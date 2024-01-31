@@ -38,8 +38,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.02-beta"
+        versionCode = 4
+        versionName = "0.03-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
