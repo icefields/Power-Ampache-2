@@ -1,6 +1,26 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.domain.models
 
-import android.media.browse.MediaBrowser
 import android.net.Uri
 import android.os.Parcelable
 import androidx.media3.common.MediaItem
@@ -55,10 +75,8 @@ data class Song(
     val averageRating: Float,
     val preciseRating: Float,
     val rating: Float,
-
 ): Comparable<Song>, Parcelable {
     override fun compareTo(other: Song): Int = mediaId.compareTo(other.mediaId)
-    override fun hashCode(): Int = key().hashCode()
 
     companion object {
         val mockSong = Song(
@@ -81,11 +99,6 @@ fun Song.totalTime(): String {
     val seconds = time % 60
     return "$minutes:${if (seconds < 10) { "0" } else { "" } }${seconds}"
 }
-
-/**
- * LISTS PERFORMANCE . urls contain the token, do not rely only on id
- */
-fun Song.key(): String = "${mediaId}${songUrl}"//.md5()
 
 fun Song.toMediaItem(songUri: String) = MediaItem.Builder()
     .setMediaId(mediaId)

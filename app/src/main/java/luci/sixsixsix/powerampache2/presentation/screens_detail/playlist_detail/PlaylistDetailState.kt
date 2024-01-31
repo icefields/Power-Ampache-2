@@ -21,10 +21,13 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
 
+@Parcelize
 data class PlaylistDetailState (
     val playlist: Playlist = Playlist("", ""),
     val songs: List<SongWrapper> = emptyList(),
@@ -34,6 +37,6 @@ data class PlaylistDetailState (
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false,
     val isUserOwner: Boolean = false
-) {
+): Parcelable {
     fun getSongList(): List<Song> = songs.map { it.song }
 }
