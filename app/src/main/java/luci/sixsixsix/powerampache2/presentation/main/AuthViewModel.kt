@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.domain.MusicRepository
@@ -45,19 +46,13 @@ class AuthViewModel @Inject constructor(
     private val repository: MusicRepository,
     private val playlistManager: MusicPlaylistManager,
     pingScheduler: AlarmScheduler,
-    application: Application,
+    private val application: Application,
     private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
     //var stateSaved = savedStateHandle.getStateFlow("keyauth", AuthState())
 
     // var state by mutableStateOf(AuthState())
     var state by savedStateHandle.saveable { mutableStateOf(AuthState()) }
-
-//    var state = savedStateHandle.get<AuthState>("keyauth") ?: AuthState()
-//        set(value) {
-//            savedStateHandle["keyauth"] = value
-//            field = value
-//        }
 
     init {
         observeMessages()
@@ -162,7 +157,39 @@ class AuthViewModel @Inject constructor(
             is AuthEvent.OnChangeServerUrl -> state = state.copy(url = event.url)
             is AuthEvent.OnChangeUsername -> state = state.copy(username = event.username)
             is AuthEvent.OnChangeAuthToken -> state = state.copy(authToken = event.token)
-            AuthEvent.SignUp -> Toast.makeText(getApplication(), "Coming Soon", Toast.LENGTH_LONG).show()
+            is AuthEvent.SignUp -> signUp(
+                username = event.username,
+                serverUrl = event.serverUrl,
+                email = event.email,
+                password = event.password,
+                fullName = event.fullName
+            )
+        }
+    }
+
+    private fun signUp(
+        username: String,
+        password: String,
+        email: String,
+        serverUrl: String,
+        fullName: String
+    ) {
+        viewModelScope.launch {
+            repository.register(
+                username = username,
+                password = password.sha256(),
+                serverUrl = serverUrl,
+                fullName = fullName,
+                email = email
+            ).collect { result ->
+                when (result) {
+                    is Resource.Success -> { result.data?.let {
+                        playlistManager.updateErrorMessage(application.getString(R.string.loginScreen_register_success)) }
+                    }
+                    is Resource.Error -> { state = state.copy(isLoading = false) }
+                    is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                }
+            }
         }
     }
 

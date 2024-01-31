@@ -88,6 +88,7 @@ import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.AlbumDetailEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -233,8 +234,15 @@ fun PlaylistDetailScreen(
                         eventListener = { event ->
                             when(event) {
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
-                                    viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
-                                    mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
+                                    if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@PlaylistInfoSection
+                                    if (!isPlayingPlaylist) {
+                                        // add next to the list and skip to the top of the album (which is next)
+                                        viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
+                                        mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
+                                    } else {
+                                        // will pause if playing
+                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                    }
                                 }
                                 PlaylistInfoViewEvents.SHARE_PLAYLIST ->
                                     viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)

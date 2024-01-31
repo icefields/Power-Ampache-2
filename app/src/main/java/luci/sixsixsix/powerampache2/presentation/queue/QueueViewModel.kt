@@ -21,10 +21,8 @@ class QueueViewModel  @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
-
-    var queueState by savedStateHandle.saveable {
-        mutableStateOf(listOf<Song>())
-    }
+    //var queueState by savedStateHandle.saveable { mutableStateOf(listOf<Song>()) }
+    var queueState by mutableStateOf(listOf<Song>())
 
     init {
         viewModelScope.launch {

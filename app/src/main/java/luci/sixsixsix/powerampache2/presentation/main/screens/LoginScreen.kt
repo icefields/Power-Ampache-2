@@ -57,6 +57,7 @@ import luci.sixsixsix.powerampache2.data.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.SignUpBottomSheet
 
 val bottomDrawerPaddingHorizontal = 26.dp
 
@@ -140,25 +141,34 @@ fun LoginScreenContent(
             modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Bottom) {
 
-            items(6) {
+            items(7) {
                 when(it) {
                     1 -> { }
-                    3 -> SignUpButton {
-                        isSignUpSheetOpen = !isSignUpSheetOpen
-                        onEvent(AuthEvent.SignUp)
-                    }
                     2 -> LoginButton {
                         isLoginSheetOpen = true
-                        // DO NOT call onEvent(AuthEvent.Login), the function is already
-                        // calling that, and this callback is ignoring it. This is just
+                        // DO NOT call onEvent(AuthEvent.Login), This is just
                         // for opening the drawer
                     }
-                    4 -> DebugLoginButton(
-                        server = Servers.AmpacheDemo,
-                        buttonText = R.string.loginScreen_demo_server,
-                        onEvent = onEvent
-                    )
-                    5 -> LoginScreenFooter(modifier = Modifier.padding(top = 16.dp))
+                    3 -> SignUpButton {
+                        isSignUpSheetOpen = !isSignUpSheetOpen
+                        // DO NOT call onEvent(AuthEvent.SignUp), This is just
+                        // for opening the drawer
+                    }
+                    4 -> if (BuildConfig.ENABLE_OFFICIAL_DEMO_SERVER) {
+                        DebugLoginButton(
+                            server = Servers.AmpacheDemo,
+                            buttonText = R.string.loginScreen_demo_server,
+                            onEvent = onEvent
+                        )
+                    }
+                    5 -> if (BuildConfig.ENABLE_DOGMAZIC_DEMO_SERVER) {
+                        DebugLoginButton(
+                            server = Servers.Dogmazic,
+                            buttonText = R.string.loginScreen_dogmazic_server,
+                            onEvent = onEvent
+                        )
+                    }
+                    6 -> LoginScreenFooter(modifier = Modifier.padding(top = 16.dp))
                     else -> { }
                 }
             }
@@ -173,7 +183,10 @@ fun LoginScreenContent(
             Column(
                 modifier = Modifier.padding(top = 6.dp, bottom = 16.dp)
             ) {
-                AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
+                if (BuildConfig.ENABLE_TOKEN_LOGIN) {
+                    AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
+                }
+
                 LoginTextFields(
                     username = username,
                     password = password,
@@ -190,6 +203,18 @@ fun LoginScreenContent(
                     onEvent(it)
                 })
             }
+        }
+    }
+
+    if (isSignUpSheetOpen) {
+        ModalBottomSheet(
+            sheetState = sheetState,
+            onDismissRequest = { isSignUpSheetOpen = false }
+        ) {
+            SignUpBottomSheet(
+                onEvent = onEvent,
+                modifier = Modifier.wrapContentHeight().fillMaxWidth()
+            )
         }
     }
 
@@ -370,7 +395,7 @@ fun LoginButton(
 
 @Composable
 fun SignUpButton(
-    onEvent: (AuthEvent) -> Unit
+    onClick: () -> Unit
 ) {
     DefaultFullWidthButton(
         modifier = Modifier
@@ -380,7 +405,7 @@ fun SignUpButton(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.secondary
         ),
-        onClick = { onEvent(AuthEvent.SignUp) }
+        onClick = onClick
     ) {
         Icon(imageVector = Icons.Default.PersonAddAlt, contentDescription = "Sign Up")
         Text(
