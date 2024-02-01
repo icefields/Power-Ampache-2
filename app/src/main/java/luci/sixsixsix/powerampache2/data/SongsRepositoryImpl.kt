@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data
 
 import android.app.Application
+import androidx.core.app.PendingIntentCompat.send
 import androidx.lifecycle.map
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
@@ -52,8 +53,10 @@ import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import okhttp3.internal.http.HTTP_OK
 import java.lang.ref.WeakReference
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.jvm.Throws
 
 /**
  * the source of truth is the database, stick to the single source of truth pattern, only return
@@ -291,16 +294,28 @@ class SongsRepositoryImpl @Inject constructor(
     //  I don't need any result from this function
     override suspend fun downloadSong(song: Song): Flow<Resource<Any>> = channelFlow {
         send(Resource.Loading(true))
+        startDownloadingSong(song)?.let {
+            // retrieve the requestID
+        } ?: run {
+            // duplicate download
+        }
+        send(Resource.Success(data = Any(), networkData = Any()))
+        send(Resource.Loading(false))
+    }.catch { e -> errorHandler("downloadSong()", e, this) }
 
-        val isSongDownloadedAlready =
-            dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
+    /**
+     * @return a UUID if download started successfully or null if it's a duplicate
+     * @throws and exception in any other case
+     */
+    @Throws(Exception::class)
+    private suspend fun startDownloadingSong(song: Song): UUID? {
+        val isSongDownloadedAlready = dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
         if (isSongDownloadedAlready) {
-            send(Resource.Loading(false))
-            return@channelFlow
+            return null
         }
 
         val auth = getSession()!!
-        weakContext.get()?.let { context ->
+        return weakContext.get()?.let { context ->
             val requestId = startSongDownloadWorker(
                 context = context,
                 authToken = auth.auth,
@@ -308,12 +323,25 @@ class SongsRepositoryImpl @Inject constructor(
                 song = song
             )
             L(requestId)
+            requestId
         } ?: run {
             throw NullPointerException("context was null")
         }
-        send(Resource.Success(data = Any(), networkData = Any()))
-        send(Resource.Loading(false))
-    }.catch { e -> errorHandler("downloadSong()", e, this) }
+    }
+
+    override suspend fun downloadSongs(songs: List<Song>) {
+        songs.forEach { song ->
+            try {
+                startDownloadingSong(song)?.let {
+                    // retrieve the requestID
+                } ?: run {
+                    // duplicate download
+                }
+            } catch (e: Exception) {
+                errorHandler.logError(e)
+            }
+        }
+    }
 
     private suspend fun emitDownloadSuccess(fc: ProducerScope<Resource<Any>>){
         fc.send(Resource.Success(data = Any(), networkData = Any()))
