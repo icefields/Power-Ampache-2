@@ -210,7 +210,8 @@ fun MainContentScreen(
                     ) {
                         if (mainViewModel.state.isFabLoading) {
                             CircularProgressIndicator(
-                                Modifier
+                                color = MaterialTheme.colorScheme.onTertiary,
+                                modifier = Modifier
                                     .fillMaxSize()
                                     .padding(6.dp))
                         } else {
