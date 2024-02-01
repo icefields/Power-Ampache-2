@@ -37,7 +37,7 @@ android {
     val errorLogUrl = properties.getProperty("URL_ERROR_LOG")
 
     defaultConfig {
-        applicationId = "luci.sixsixsix.powerampache2"
+        applicationId = "luci.sixsixsix.powerampache2debug"
         minSdk = 28
         targetSdk = 34
         versionCode = 9

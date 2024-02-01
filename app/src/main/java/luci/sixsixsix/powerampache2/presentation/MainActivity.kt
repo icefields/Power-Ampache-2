@@ -117,7 +117,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        mainViewModel.stopMusicService()
+        //mainViewModel.stopMusicService()
         super.onDestroy()
     }
 }

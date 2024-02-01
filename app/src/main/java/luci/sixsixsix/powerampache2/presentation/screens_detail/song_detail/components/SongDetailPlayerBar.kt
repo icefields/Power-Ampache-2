@@ -62,6 +62,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -109,7 +110,6 @@ fun SongDetailPlayerBar(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlayerControls(
     isPlaying: Boolean,
@@ -241,8 +241,8 @@ fun PlayerTimeSlider(
     onEvent: (MainEvent) -> Unit
 ) {
     var newProgressiveValue by remember { mutableFloatStateOf(0.0f) }
-    var useNewProgressiveValue by remember { mutableStateOf(false) }
-
+    var useNewProgressiveValue by rememberSaveable { mutableStateOf(false) }
+L(newProgressiveValue , progress)
     Column (modifier = Modifier.fillMaxWidth()) {
         Slider(
             value = if (useNewProgressiveValue) newProgressiveValue else progress,

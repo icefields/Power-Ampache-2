@@ -118,7 +118,7 @@ class SongDownloadWorker @AssistedInject constructor(
                 resetDownloadWorkerId(context)
             }
 
-        private suspend fun resetDownloadWorkerId(context: Context) =
+        suspend fun resetDownloadWorkerId(context: Context) =
             writeDownloadWorkerId(context, UUID.randomUUID().toString())
 
         @SuppressLint("ApplySharedPref")
