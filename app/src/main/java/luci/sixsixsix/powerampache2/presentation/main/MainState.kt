@@ -32,5 +32,6 @@ data class MainState (
     val song: Song? = null,
     val queue: List<Song> = listOf(),
     val isLikeLoading:Boolean = false,
+    val isFabLoading:Boolean = false,
     val isDownloading:Boolean = false
 ): Parcelable

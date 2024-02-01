@@ -105,6 +105,7 @@ class MainViewModel @Inject constructor(
                     var atLeastOneEnqueued = false
                     var atLeastOneBlocked = false
                     var allCancelled = true // assume all cancelled, reset if if after the loop is still true
+                    var allFailed = true // assume all failed, reset if if after the loop is still true
                     workInfoList.forEach { workInfo ->
                         L(workInfo.state.name)
                         if (!atLeastOneRunning && workInfo.state == WorkInfo.State.RUNNING) {
@@ -119,18 +120,24 @@ class MainViewModel @Inject constructor(
                         if (allCancelled && workInfo.state != WorkInfo.State.CANCELLED) {
                             allCancelled = false
                         }
+                        if (allFailed && workInfo.state != WorkInfo.State.FAILED) {
+                            allFailed = false
+                        }
 
                         if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                            workInfo?.outputData?.getString(SongDownloadWorker.KEY_RESULT_SONG)?.let { songStr ->
-                                val finishedSong: Song = Gson().fromJson(songStr, Song::class.java)
-                                if (!emittedDownloads.contains(finishedSong.mediaId)) {
-                                    emittedDownloads.add(finishedSong.mediaId)
-                                    //if(songsRepository.isSongAvailableOffline(song)) {}
-                                    playlistManager.updateDownloadedSong(finishedSong)
-                                    playlistManager.updateErrorMessage("${finishedSong.name} downloaded")
-                                    state = state.copy(isDownloading = false)
-                                    //WorkManager.getInstance(application).pruneWork()
-                                    L("emitting", finishedSong.name)
+                            workInfo?.outputData?.getString(SongDownloadWorker.KEY_RESULT_SONG)?.let { songId ->
+                                viewModelScope.launch {
+                                    if (!emittedDownloads.contains(songId)) {
+                                        emittedDownloads.add(songId)
+                                        songsRepository.getDownloadedSongById(songId)?.let { finishedSong ->
+                                            //if(songsRepository.isSongAvailableOffline(song)) {}
+                                            playlistManager.updateDownloadedSong(finishedSong)
+                                            playlistManager.updateErrorMessage("${finishedSong.name} downloaded")
+                                            state = state.copy(isDownloading = false)
+                                            //WorkManager.getInstance(application).pruneWork()
+                                            L("emitting", finishedSong.name)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -143,11 +150,14 @@ class MainViewModel @Inject constructor(
                     }
                     state = state.copy(isDownloading = atLeastOneRunning || atLeastOneEnqueued || atLeastOneBlocked)
 
-                    if(workInfoList.isNotEmpty() && !atLeastOneRunning && !atLeastOneBlocked && !atLeastOneEnqueued && allCancelled) {
+                    if(workInfoList.isNotEmpty() && !atLeastOneRunning && !atLeastOneBlocked && !atLeastOneEnqueued && (allCancelled || allFailed)) {
                         // no more work to be done
-                        L("resetDownloadWorkerId(application)")
                         viewModelScope.launch {
+                            L("resetDownloadWorkerId(application) ${SongDownloadWorker.getDownloadWorkerId(application)}")
                             SongDownloadWorker.resetDownloadWorkerId(application)
+                            delay(200)
+                            L("resetDownloadWorkerId(application) AFTER REFRESH ${SongDownloadWorker.getDownloadWorkerId(application)}")
+
                             observeDownloads()
                         }
                     }
@@ -313,6 +323,24 @@ class MainViewModel @Inject constructor(
                 SongDownloadWorker.stopAllDownloads(application)
                 observeDownloads()
                 state = state.copy(isDownloading = false)
+            }
+            MainEvent.OnFabPress ->
+                getSongsForQuickPlay()
+        }
+    }
+
+    private fun getSongsForQuickPlay() = viewModelScope.launch {
+        songsRepository.getSongsForQuickPlay().collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let { songs ->
+                        playlistManager.updateCurrentSong(songs[0])
+                        playlistManager.addToCurrentQueueTop(songs)
+                        onEvent(MainEvent.Play(songs[0]))
+                    }
+                }
+                is Resource.Error -> state = state.copy(isFabLoading = false)
+                is Resource.Loading -> state = state.copy(isFabLoading = result.isLoading)
             }
         }
     }

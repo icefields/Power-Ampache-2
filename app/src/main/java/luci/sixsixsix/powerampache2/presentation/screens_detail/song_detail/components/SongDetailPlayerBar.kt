@@ -242,7 +242,7 @@ fun PlayerTimeSlider(
 ) {
     var newProgressiveValue by remember { mutableFloatStateOf(0.0f) }
     var useNewProgressiveValue by rememberSaveable { mutableStateOf(false) }
-L(newProgressiveValue , progress)
+
     Column (modifier = Modifier.fillMaxWidth()) {
         Slider(
             value = if (useNewProgressiveValue) newProgressiveValue else progress,
