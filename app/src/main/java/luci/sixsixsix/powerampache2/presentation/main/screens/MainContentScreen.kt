@@ -22,20 +22,38 @@
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -59,7 +77,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
@@ -68,6 +88,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
@@ -134,7 +155,7 @@ fun MainContentScreen(
         //scrimColor = MaterialTheme.colorScheme.scrim,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.fillMaxWidth(0.8f)
+                //modifier = Modifier.fillMaxWidth(0.8f)
             ) {
                 DrawerHeader(authViewModel.state.user?.username ?: ERROR_STRING)
                 Divider()
@@ -171,6 +192,38 @@ fun MainContentScreen(
                             navigator.navigate(QueueScreenDestination)
                     }
                 }
+            },
+            floatingActionButtonPosition = FabPosition.End,
+            floatingActionButton = {
+                AnimatedVisibility (
+                    visible = mainViewModel.state.queue.isEmpty() &&
+                            (MainContentMenuItem.toMainContentMenuItem(currentScreen) == MainContentMenuItem.Home),
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessVeryLow)),
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMedium))
+                ) {
+                    FloatingActionButton(
+                        modifier = Modifier.size(80.dp),
+                        //shape = RoundedCornerShape(40.dp),
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                        onClick = { mainViewModel.onEvent(MainEvent.OnFabPress) }
+                    ) {
+                        if (mainViewModel.state.isFabLoading) {
+                            CircularProgressIndicator(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(6.dp))
+                        } else {
+                            Icon(modifier = Modifier.fillMaxSize().padding(4.dp),
+                                //painter = painterResource(id = R.drawable.ic_shuffleplay),
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Quick Play",
+                                //tint = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                    }
+                }
+
             }
         ) {
                Surface(

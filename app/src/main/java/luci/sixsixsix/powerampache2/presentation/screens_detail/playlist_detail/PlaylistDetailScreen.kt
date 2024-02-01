@@ -281,7 +281,7 @@ fun PlaylistDetailScreen(
                         ) {
                             itemsIndexed(
                                 items = state.songs,
-                                key = { _, item -> item.song.mediaId }
+                                key = { _, item -> item }
                             ) { _, songWrapped ->
                                 val song = songWrapped.song
                                 val isOffline = songWrapped.isOffline

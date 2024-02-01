@@ -75,8 +75,6 @@ object RandomThemeBackgroundColour {
                 MaterialTheme.colorScheme.errorContainer,
                 MaterialTheme.colorScheme.background,
                 MaterialTheme.colorScheme.surface,
-                MaterialTheme.colorScheme.surfaceVariant,
-                MaterialTheme.colorScheme.inversePrimary,
-                MaterialTheme.colorScheme.inverseSurface,
+                MaterialTheme.colorScheme.surfaceVariant
             )
 }

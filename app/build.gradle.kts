@@ -37,11 +37,11 @@ android {
     val errorLogUrl = properties.getProperty("URL_ERROR_LOG")
 
     defaultConfig {
-        applicationId = "luci.sixsixsix.powerampache2debug"
+        applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 9
-        versionName = "0.08-beta"
+        versionCode = 10
+        versionName = "0.10-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -52,6 +52,9 @@ android {
 
     buildTypes {
         debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = ".debug"
+
             buildConfigField("boolean", "MRLOG_ON", "true")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
             buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
@@ -65,12 +68,14 @@ android {
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
             buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
+
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+
         release {
             buildConfigField("boolean", "MRLOG_ON", "false")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
@@ -85,7 +90,9 @@ android {
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
             buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
+
             isMinifyEnabled = false
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

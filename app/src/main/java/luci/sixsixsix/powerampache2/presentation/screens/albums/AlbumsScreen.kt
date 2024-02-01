@@ -85,7 +85,7 @@ fun AlbumsScreen(
             ) {
                 items(
                     count = state.albums.size,
-                    key = { i -> state.albums[i].key() })
+                    key = { i -> state.albums[i] })
                 { i ->
                     val album = state.albums[i]
                     AlbumItem(

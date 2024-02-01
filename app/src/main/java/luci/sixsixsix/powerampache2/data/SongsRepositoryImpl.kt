@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.data
 
 import android.app.Application
-import androidx.core.app.PendingIntentCompat.send
 import androidx.lifecycle.map
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +55,6 @@ import java.lang.ref.WeakReference
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.jvm.Throws
 
 /**
  * the source of truth is the database, stick to the single source of truth pattern, only return
@@ -76,7 +74,7 @@ class SongsRepositoryImpl @Inject constructor(
 ): SongsRepository {
     private val dao = db.dao
 
-    override val offlineSongsLiveData = dao.getDownloadedSongs().map { entities ->
+    override val offlineSongsLiveData = dao.getDownloadedSongsLiveData().map { entities ->
         entities.map {
             it.toSong()
         }
@@ -237,13 +235,8 @@ class SongsRepositoryImpl @Inject constructor(
     private suspend fun getSongsStats(statFilter: MainNetwork.StatFilter): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
-        api.getSongsStats(
-            auth.auth,
-            username = getCredentials()?.username,
-            filter = statFilter
-        ).songs?.map { it.toSong() }?.let { songs ->
+        getSongsStatCall(auth.auth, statFilter)?.map { it.toSong() }?.let { songs ->
             emit(Resource.Success(data = songs, networkData = songs))
-
             // cache songs after emitting success because the result of this is not used right now
             cacheSongs(songs)
         }?:run {
@@ -252,12 +245,39 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsStats()", e, this) }
 
+    private suspend fun getSongsStatCall(auth: String, statFilter: MainNetwork.StatFilter) =
+        api.getSongsStats(auth,
+            username = getCredentials()?.username,
+            filter = statFilter
+        ).songs
+
     override suspend fun getRecentSongs() = getSongsStats(MainNetwork.StatFilter.recent)
     override suspend fun getNewestSongs() = getSongsStats(MainNetwork.StatFilter.newest)
     override suspend fun getHighestSongs() = getSongsStats(MainNetwork.StatFilter.highest)
     override suspend fun getFrequentSongs() = getSongsStats(MainNetwork.StatFilter.frequent)
     override suspend fun getFlaggedSongs() = getSongsStats(MainNetwork.StatFilter.flagged)
     override suspend fun getRandomSongs() = getSongsStats(MainNetwork.StatFilter.random)
+
+    override suspend fun getSongsForQuickPlay() = flow {
+        emit(Resource.Loading(true))
+        val resultSet = HashSet<Song>()
+        resultSet.addAll(dao.getOfflineSongs().map { it.toSong() })
+        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+            // if not enough downloaded songs fetch most played songs
+            val auth = getSession()!!.auth
+            getSongsStatCall(auth, MainNetwork.StatFilter.frequent)?.let { freqSongs ->
+                resultSet.addAll(freqSongs.map { it.toSong() })
+                if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                    // if still not enough songs fetch random songs
+                    getSongsStatCall(auth, MainNetwork.StatFilter.random)?.let { randSongs ->
+                        resultSet.addAll(randSongs.map { it.toSong() })
+                    }
+                }
+            }
+        }
+        emit(Resource.Success(data = resultSet.toList(), networkData = resultSet.toList()))
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }
 
     override suspend fun getSongUri(song: Song) =
         dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri ?: song.songUrl
@@ -373,6 +393,8 @@ class SongsRepositoryImpl @Inject constructor(
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongShareLink()", e, this) }
+
+    override suspend fun getDownloadedSongById(songId: String): Song? = dao.getSongById(songId)?.toSong()
 
     /**
      * returns false if Network data is not required, true otherwise
