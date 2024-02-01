@@ -43,6 +43,7 @@ import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
+import org.acra.ACRA.init
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.abs
@@ -63,17 +64,17 @@ class MainViewModel @Inject constructor(
 //        private set
     var state by savedStateHandle.saveable { mutableStateOf(MainState()) }
 
-    private var duration by mutableLongStateOf(0L)
-    var progress by mutableFloatStateOf(0f)
-    var progressStr by mutableStateOf("00:00")
-    var isPlaying by mutableStateOf(false)
-    var isBuffering by mutableStateOf(false)
-    var isLoading by mutableStateOf(false)
-    var shuffleOn by mutableStateOf(false)
-    var repeatMode by mutableStateOf(RepeatMode.OFF)
+    private var duration by savedStateHandle.saveable { mutableLongStateOf(0L) }
+    var progress by savedStateHandle.saveable { mutableFloatStateOf(0f) }
+    var progressStr by savedStateHandle.saveable { mutableStateOf("00:00") }
+    var isPlaying by savedStateHandle.saveable { mutableStateOf(false) }
+    var isBuffering by savedStateHandle.saveable { mutableStateOf(false) }
+    var isLoading by savedStateHandle.saveable { mutableStateOf(false) }
+    var shuffleOn by savedStateHandle.saveable { mutableStateOf(false) }
+    var repeatMode by savedStateHandle.saveable { mutableStateOf(RepeatMode.OFF) }
 
     private var searchJob: Job? = null
-    private var isServiceRunning = false
+    private var isServiceRunning by savedStateHandle.saveable { mutableStateOf(false) }
     private val emittedDownloads = mutableListOf<String>()
 
     init {
@@ -103,6 +104,7 @@ class MainViewModel @Inject constructor(
                     var atLeastOneRunning = false
                     var atLeastOneEnqueued = false
                     var atLeastOneBlocked = false
+                    var allCancelled = true // assume all cancelled, reset if if after the loop is still true
                     workInfoList.forEach { workInfo ->
                         L(workInfo.state.name)
                         if (!atLeastOneRunning && workInfo.state == WorkInfo.State.RUNNING) {
@@ -113,6 +115,9 @@ class MainViewModel @Inject constructor(
                         }
                         if (!atLeastOneBlocked && workInfo.state == WorkInfo.State.BLOCKED) {
                             atLeastOneBlocked = true
+                        }
+                        if (allCancelled && workInfo.state != WorkInfo.State.CANCELLED) {
+                            allCancelled = false
                         }
 
                         if (workInfo.state == WorkInfo.State.SUCCEEDED) {
@@ -137,9 +142,14 @@ class MainViewModel @Inject constructor(
 //                        }
                     }
                     state = state.copy(isDownloading = atLeastOneRunning || atLeastOneEnqueued || atLeastOneBlocked)
-                    if(!atLeastOneRunning && !atLeastOneBlocked && !atLeastOneEnqueued) {
+
+                    if(workInfoList.isNotEmpty() && !atLeastOneRunning && !atLeastOneBlocked && !atLeastOneEnqueued && allCancelled) {
                         // no more work to be done
-                        // switch worker id ?
+                        L("resetDownloadWorkerId(application)")
+                        viewModelScope.launch {
+                            SongDownloadWorker.resetDownloadWorkerId(application)
+                            observeDownloads()
+                        }
                     }
                 }
         }
@@ -199,13 +209,16 @@ class MainViewModel @Inject constructor(
                 when (mediaState) {
                     is SimpleMediaState.Buffering -> {
                         isBuffering = true
+                        isPlaying = mediaState.isPlaying
                         calculateProgressValue(mediaState.progress)
                     }
                     SimpleMediaState.Initial -> { /* UI STATE Initial */ }
                     is SimpleMediaState.Playing ->
                         isPlaying = mediaState.isPlaying
-                    is SimpleMediaState.Progress ->
+                    is SimpleMediaState.Progress -> {
+                        isPlaying = mediaState.isPlaying
                         calculateProgressValue(mediaState.progress)
+                    }
                     is SimpleMediaState.Ready -> {
                         isBuffering = false
                         duration = mediaState.duration
@@ -369,7 +382,11 @@ class MainViewModel @Inject constructor(
     private fun logout() {
         L( " Logout")
         playlistManager.reset()
-
+        viewModelScope.launch {
+            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
+        }
+        stopMusicService()
+//        playlistManager.reset()
         viewModelScope.launch {
             musicRepository.logout().collect { result ->
                 when (result) {
@@ -386,6 +403,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun calculateProgressValue(currentProgress: Long) {
+        if (duration <= 0L) duration = (state.song?.time?.toLong() ?: 1) * 1000
         progress = if (currentProgress > 0) (currentProgress.toFloat() / duration) else 0f
         progressStr = formatDuration(currentProgress)
     }
@@ -434,11 +452,11 @@ class MainViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        viewModelScope.launch {
-            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
-        }
-        stopMusicService()
-        playlistManager.reset()
+//        viewModelScope.launch {
+//            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
+//        }
+//        stopMusicService()
+//        playlistManager.reset()
         L("onCleared")
         super.onCleared()
     }

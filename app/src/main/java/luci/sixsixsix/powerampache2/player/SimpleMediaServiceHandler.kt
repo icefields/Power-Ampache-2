@@ -144,7 +144,7 @@ class SimpleMediaServiceHandler @Inject constructor(
             }
             ExoPlayer.STATE_BUFFERING -> {
                 L("STATE_BUFFERING")
-                _simpleMediaState.value = SimpleMediaState.Buffering(player.currentPosition)
+                _simpleMediaState.value = SimpleMediaState.Buffering(player.currentPosition, player.isPlaying)
             }
             ExoPlayer.STATE_READY -> {
                 _simpleMediaState.value = SimpleMediaState.Ready(player.duration)
@@ -177,7 +177,7 @@ class SimpleMediaServiceHandler @Inject constructor(
     private suspend fun startProgressUpdate() = job.run {
         while(true) {
             delay(500)
-            _simpleMediaState.value = SimpleMediaState.Progress(player.currentPosition)
+            _simpleMediaState.value = SimpleMediaState.Progress(player.currentPosition, player.isPlaying)
         }
     }
 
@@ -190,8 +190,8 @@ class SimpleMediaServiceHandler @Inject constructor(
 sealed class SimpleMediaState {
     data object Initial: SimpleMediaState()
     data class Ready(val duration: Long): SimpleMediaState()
-    data class Buffering(val progress: Long): SimpleMediaState()
-    data class Progress(val progress: Long): SimpleMediaState()
+    data class Buffering(val progress: Long, val isPlaying: Boolean): SimpleMediaState()
+    data class Progress(val progress: Long, val isPlaying: Boolean): SimpleMediaState()
     data class Playing(val isPlaying: Boolean): SimpleMediaState()
     data class Loading(val isLoading: Boolean): SimpleMediaState()
     data object Idle: SimpleMediaState()
