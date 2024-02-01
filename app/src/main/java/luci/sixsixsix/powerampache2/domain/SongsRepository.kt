@@ -18,6 +18,7 @@ interface SongsRepository {
     suspend fun getRandomSongs(): Flow<Resource<List<Song>>>
     suspend fun getSongUri(song: Song): String
     suspend fun downloadSong(song: Song): Flow<Resource<Any>>
+    suspend fun downloadSongs(songs: List<Song>)
     suspend fun deleteDownloadedSong(song: Song): Flow<Resource<Any>>
     suspend fun isSongAvailableOffline(song: Song): Boolean
     suspend fun getSongShareLink(song: Song): Flow<Resource<String>>

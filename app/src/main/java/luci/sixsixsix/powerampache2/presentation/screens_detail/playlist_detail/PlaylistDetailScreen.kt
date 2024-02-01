@@ -230,6 +230,7 @@ fun PlaylistDetailScreen(
                             ),
                         playlist = playlist,
                         isPlayingPlaylist = isPlayingPlaylist,
+                        isDownloading = mainViewModel.state.isDownloading,
                         songs = viewModel.state.getSongList(),
                         eventListener = { event ->
                             when(event) {

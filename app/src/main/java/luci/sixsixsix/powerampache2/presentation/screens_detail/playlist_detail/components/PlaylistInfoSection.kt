@@ -53,6 +53,7 @@ fun PlaylistInfoSection(
     modifier: Modifier,
     playlist: Playlist,
     isPlayingPlaylist: Boolean,
+    isDownloading: Boolean,
     songs: List<Song>,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit
 ) {
@@ -116,7 +117,8 @@ fun PlaylistInfoSection(
             modifier = Modifier.fillMaxWidth(),
             isPlayingPlaylist = isPlayingPlaylist,
             playlist = playlist,
-            eventListener = eventListener
+            eventListener = eventListener,
+            isDownloading = isDownloading,
         )
         Spacer(modifier = Modifier.width(20.dp))
     }
@@ -129,6 +131,7 @@ fun PlaylistInfoSectionPreview() {
         Modifier,
         Playlist.mock(),
         isPlayingPlaylist = true,
+        isDownloading = false,
         listOf(Song.mockSong),
         eventListener = {}
     )

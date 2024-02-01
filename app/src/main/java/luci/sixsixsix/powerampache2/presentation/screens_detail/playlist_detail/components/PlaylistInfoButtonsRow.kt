@@ -44,31 +44,35 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
+import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
 
 @Composable
 fun PlaylistInfoButtonsRow(
     modifier: Modifier = Modifier,
     playlist: Playlist,
     isPlayingPlaylist: Boolean,
+    isDownloading: Boolean,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit) {
     Row(modifier = modifier
         .padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        IconButton(
-            onClick = {
-                eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST)
-            }) {
-            Icon(
-                imageVector = Icons.Outlined.DownloadForOffline,
-                contentDescription = "Download"
-            )
+        ButtonWithLoadingIndicator(
+            imageVector = Icons.Outlined.DownloadForOffline,
+            imageContentDescription= "Download",
+            background = Color.Transparent,
+            isLoading = isDownloading,
+            showBoth = true
+        ) {
+            eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST)
         }
 
         IconButton(modifier = Modifier

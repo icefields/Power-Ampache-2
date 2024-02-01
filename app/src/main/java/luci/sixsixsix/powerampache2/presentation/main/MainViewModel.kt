@@ -336,8 +336,7 @@ class MainViewModel @Inject constructor(
             when (result) {
                 is Resource.Success -> {
                     result.data?.let {
-                        // song downloaded
-
+                        // song download started successfully
                     }
                 }
                 is Resource.Error -> state = state.copy(isDownloading = false)
@@ -346,7 +345,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun downloadSongs(songs: List<Song>) = songs.forEach { song -> downloadSong(song) }
+    private fun downloadSongs(songs: List<Song>) = viewModelScope.launch {
+        songsRepository.downloadSongs(songs)
+    }
+
+    //private fun downloadSongs(songs: List<Song>) = songs.forEach { song -> downloadSong(song) }
 
     private fun deleteDownloadedSong(song: Song) = viewModelScope.launch {
         songsRepository.deleteDownloadedSong(song).collect { result ->
