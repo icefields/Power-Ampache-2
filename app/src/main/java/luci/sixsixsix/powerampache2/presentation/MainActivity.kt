@@ -116,6 +116,10 @@ class MainActivity : ComponentActivity() {
         authViewModel.verifyAndAutologin()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+    }
+
     override fun onDestroy() {
         //mainViewModel.stopMusicService()
         super.onDestroy()

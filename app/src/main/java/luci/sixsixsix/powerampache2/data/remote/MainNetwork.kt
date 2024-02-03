@@ -36,6 +36,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.ShareDto
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -44,6 +45,8 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 import retrofit2.http.Streaming
 import retrofit2.http.Url
+import java.lang.StringBuilder
+import java.net.URISyntaxException
 
 /**
  * Main network interface which will fetch a new welcome title for us
@@ -269,6 +272,26 @@ interface MainNetwork {
     companion object {
         const val API_KEY = BuildConfig.API_KEY
         const val BASE_URL = "http://localhost/"
+
+        /**
+         * get baseUrl from musicDatabase.dao.getCredentials()?.serverUrl
+         */
+        fun buildServerUrl(baseUrl: String): String {
+            val sb = StringBuilder()
+            // check if url starts with http or https, if not start the string builder with that
+            if (!baseUrl.startsWith("http://") &&
+                !baseUrl.startsWith("https://")) {
+                sb.append("https://")
+            }
+            // add the url
+            sb.append(baseUrl)
+            // check if url contains server, if not add it
+            if (!baseUrl.contains("/server")) {
+                sb.append("/server")
+            }
+
+            return sb.toString()
+        }
     }
 
     enum class Type(value: String) {

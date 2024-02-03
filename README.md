@@ -26,14 +26,23 @@
 
 <div align="center">
 <h2> 
-	Android music client for <a target="_blank" href="https://ampache.org/"> Ampache </a>
+Android music client for <a target="_blank" href="https://ampache.org/"> Ampache </a>
 </h2>
 Power Ampache 2 is an Android Music Streaming App presented in <a target="_blank" href="https://m3.material.io/">Material You</a> style.
-<br>
-<br>
- <img alt="GPLv3 badge" src="https://www.gnu.org/graphics/gplv3-88x31.png">
+<br><br>
+<a target="_blank" href="https://t.me/PowerAmpache">
+	<img width="50" height="50" hspace="20" alt="Telegram badge" src="https://static-00.iconduck.com/assets.00/telegram-icon-512x512-4sztjer8.png">
+</a>
+<a target="_blank" href="https://floss.social/@powerampache">
+	<img width="50" height="50" hspace="20" alt="Mastodon badge" src="https://github.com/icefields/Power-Ampache-2/assets/149625124/81e35dc2-d81c-46ed-9321-4461349dc8e7">
+</a>
+<a target="_blank" href="https://github.com/icefields/Power-Ampache-2/blob/main/LICENSE.md">
+	<img alt="GPLv3 badge" hspace="20" src="https://www.gnu.org/graphics/gplv3-88x31.png">
+</a>
+<br><br>
 
 *The app is currenly undergoing heavy development, a more complete README coming soon.*
+
 <br><br>
 
 </div>

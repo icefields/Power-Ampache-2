@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FF1B6B6B</color>
+    <color name="onSurfaceVariant">#FF4E5359</color>
+    <color name="placeholderBgTint">@color/onSurfaceVariant</color>
     <color name="launcherBgColour">#e9eff7</color>
 </resources>

@@ -50,18 +50,19 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
             return@runBlocking chain.proceed(request)
         }
 
-        var hostStr = musicDatabase.dao.getCredentials()?.serverUrl
+        val baseUrl = musicDatabase.dao.getCredentials()?.serverUrl
 
-        if (!hostStr.isNullOrBlank()) {
-            if (hostStr?.contains("/server") == false) {
-                hostStr += "/server"
-            }
-            if (hostStr?.contains("http://") == false &&
-                hostStr?.contains("https://") == false) {
-                hostStr = "https://$hostStr"
-            }
+        if (!baseUrl.isNullOrBlank()) {
+//            if (hostStr?.contains("/server") == false) {
+//                hostStr += "/server"
+//            }
+//            if (hostStr?.contains("http://") == false &&
+//                hostStr?.contains("https://") == false) {
+//                hostStr = "https://$hostStr"
+//            }
+            //hostStr = MainNetwork.buildServerUrl(baseUrl)
 
-            val host = hostStr?.toHttpUrlOrNull()
+            val host = MainNetwork.buildServerUrl(baseUrl)?.toHttpUrlOrNull()
             host?.let { newHost ->
                 try {
                     request.url.newBuilder()

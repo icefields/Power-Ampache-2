@@ -22,6 +22,8 @@
 package luci.sixsixsix.powerampache2.presentation.settings
 
 import android.app.Application
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
@@ -39,6 +42,7 @@ import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
 import javax.inject.Inject
+
 
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
@@ -87,6 +91,7 @@ class SettingsViewModel @Inject constructor(
 
     fun setTheme(theme: PowerAmpTheme) {
         viewModelScope.launch {
+            RandomThemeBackgroundColour.resetColours()
             settingsRepository.saveLocalSettings(
                 settingsRepository.getLocalSettings(userState?.username).copy(theme = theme)
             )
@@ -98,4 +103,14 @@ class SettingsViewModel @Inject constructor(
             serverInfoState = musicRepository.ping().data?.first
         }
     }
+
+    fun getVersionInfo() = try {
+            val pInfo: PackageInfo =
+                application.packageManager.getPackageInfo(application.packageName, 0)
+            "${pInfo.versionName} (${pInfo.longVersionCode})"
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            ""
+        }
+
 }

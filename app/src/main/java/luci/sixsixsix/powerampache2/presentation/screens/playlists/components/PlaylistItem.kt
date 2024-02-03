@@ -37,6 +37,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
 import luci.sixsixsix.powerampache2.presentation.common.SongItemMain
 import luci.sixsixsix.powerampache2.presentation.common.SwipeToDismissItem
 
@@ -68,7 +69,7 @@ fun PlaylistItemMain(
             elevation = CardDefaults.cardElevation(1.dp),
             shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
         ) {
-            val isSmartPlaylist = playlistInfo.id.lowercase().startsWith("smart_")
+            val isSmartPlaylist = playlistInfo.isSmartPlaylist()
             Box {
                 if(!isSmartPlaylist) {
                 AsyncImage(
