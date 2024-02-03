@@ -60,6 +60,10 @@ object RandomThemeBackgroundColour {
     @Composable
     operator fun invoke(obj: Any) = invoke(hash = abs(obj.hashCode()))
 
+    fun resetColours() {
+        hashColourMap.clear()
+        remainingPlaylistBgColours.clear()
+    }
 
     private val playlistBgColours
         @Composable

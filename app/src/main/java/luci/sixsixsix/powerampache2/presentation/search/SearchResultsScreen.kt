@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.search
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
+import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
@@ -72,6 +74,10 @@ fun SearchResultsScreen(
     val albumsState = albumsViewModel.state
     val artistsState = artistsViewModel.state
     val playlistsState = playlistsViewModel.state
+
+    BackHandler {
+        mainViewModel.onEvent(MainEvent.OnSearchQueryChange(""))
+    }
 
     if (songsState.isLoading &&
         albumsState.isLoading &&

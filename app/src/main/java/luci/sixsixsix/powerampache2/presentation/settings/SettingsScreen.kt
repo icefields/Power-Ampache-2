@@ -83,6 +83,7 @@ fun SettingsScreen(
     SettingsScreenContent(
         userState = settingsViewModel.userState,
         serverInfo = settingsViewModel.serverInfoState,
+        versionInfo = settingsViewModel.getVersionInfo(),
         powerAmpTheme = settingsViewModel.state.theme,
         remoteLoggingEnabled = settingsViewModel.remoteLoggingEnabled,
         onThemeSelected = {
@@ -99,6 +100,7 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     userState: User?,
     serverInfo: ServerInfo?,
+    versionInfo: String,
     remoteLoggingEnabled: Boolean = false,
     powerAmpTheme: PowerAmpTheme,
     onThemeSelected: (selected: PowerAmpTheme) -> Unit,
@@ -109,7 +111,7 @@ fun SettingsScreenContent(
     LazyColumn(modifier = Modifier
         .fillMaxSize()
         .padding(bottom = 10.dp)) {
-        items(6) { index ->
+        items(7) { index ->
             when(index) {
                 0 -> Box(modifier = Modifier
                     .fillMaxWidth()
@@ -135,6 +137,16 @@ fun SettingsScreenContent(
                 3 -> EnableRemoteLoggingCheckBox(
                     remoteLoggingEnabled = remoteLoggingEnabled,
                     onCheckedChange = onEnableLoggingChange
+                )
+                6 -> Text(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    text = versionInfo,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Thin,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    fontSize = 16.sp
                 )
                 else -> {}
             }
@@ -377,6 +389,7 @@ fun PreviewSettingsScreen() {
         userState = User.mockUser(),
         serverInfo = ServerInfo("some server", "6.78"),
         powerAmpTheme = PowerAmpTheme.DARK,
+        versionInfo = "0.11-beta (11)",
         onThemeSelected = {
         },
         onEnableLoggingChange = {}

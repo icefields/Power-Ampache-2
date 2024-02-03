@@ -46,6 +46,9 @@ open class Playlist(
     }
 }
 
+fun Playlist.isSmartPlaylist() = id.lowercase().startsWith("smart_")
+
+
 @Parcelize
 class RecentPlaylist: Playlist(id = "", name = "Recently Played Songs")
 

@@ -77,8 +77,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -201,30 +203,10 @@ fun MainContentScreen(
                     exit = fadeOut(spring(stiffness = Spring.StiffnessVeryLow)),
                     enter = fadeIn(spring(stiffness = Spring.StiffnessMedium))
                 ) {
-                    FloatingActionButton(
-                        modifier = Modifier.size(80.dp),
-                        //shape = RoundedCornerShape(40.dp),
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary,
-                        onClick = { mainViewModel.onEvent(MainEvent.OnFabPress) }
-                    ) {
-                        if (mainViewModel.state.isFabLoading) {
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.onTertiary,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(6.dp))
-                        } else {
-                            Icon(modifier = Modifier.fillMaxSize().padding(4.dp),
-                                //painter = painterResource(id = R.drawable.ic_shuffleplay),
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Quick Play",
-                                //tint = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
+                    MainFloatingButton(dimensionResource(id = R.dimen.main_floating_button_size), mainViewModel.state.isFabLoading) {
+                        mainViewModel.onEvent(MainEvent.OnFabPress)
                     }
                 }
-
             }
         ) {
                Surface(
@@ -265,6 +247,38 @@ fun MainContentScreen(
 
                }
            }
+    }
+}
+
+@Composable
+fun MainFloatingButton(
+    floatingButtonSize: Dp = dimensionResource(id = R.dimen.main_floating_button_size),
+    isFabLoading: Boolean,
+    onClick: () -> Unit
+) {
+    FloatingActionButton(
+        modifier = Modifier.size(floatingButtonSize),
+        shape = RoundedCornerShape(floatingButtonSize/2 + 5.dp),
+        containerColor = MaterialTheme.colorScheme.onPrimary,
+        contentColor = MaterialTheme.colorScheme.primary,
+        onClick = onClick
+    ) {
+        if (isFabLoading) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp))
+        } else {
+            Icon(modifier = Modifier
+                .size(floatingButtonSize)
+                .padding(4.dp),
+                painter = painterResource(id = R.drawable.ic_tune_spinner),
+                //imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Quick Play",
+                //tint = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+        }
     }
 }
 

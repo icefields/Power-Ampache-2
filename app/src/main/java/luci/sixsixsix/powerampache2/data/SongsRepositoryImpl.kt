@@ -261,7 +261,11 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun getSongsForQuickPlay() = flow {
         emit(Resource.Loading(true))
         val resultSet = HashSet<Song>()
+        // add downloaded songs
         resultSet.addAll(dao.getOfflineSongs().map { it.toSong() })
+        // add cached songs
+        resultSet.addAll(dao.searchSong("").map { it.toSong() })
+        // if not big enough start fetching from web
         if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
             // if not enough downloaded songs fetch most played songs
             val auth = getSession()!!.auth
@@ -269,18 +273,45 @@ class SongsRepositoryImpl @Inject constructor(
                 resultSet.addAll(freqSongs.map { it.toSong() })
                 if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
                     // if still not enough songs fetch random songs
-                    getSongsStatCall(auth, MainNetwork.StatFilter.random)?.let { randSongs ->
-                        resultSet.addAll(randSongs.map { it.toSong() })
+                    getSongsStatCall(auth, MainNetwork.StatFilter.flagged)?.let { flagSongs ->
+                        resultSet.addAll(flagSongs.map { it.toSong() })
+                        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                            // if still not enough songs fetch random songs
+                            getSongsStatCall(auth, MainNetwork.StatFilter.highest)?.let { highestSongs ->
+                                resultSet.addAll(highestSongs.map { it.toSong() })
+                                if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                                    // if still not enough songs fetch random songs
+                                    getSongsStatCall(auth, MainNetwork.StatFilter.random)?.let { randSongs ->
+                                        resultSet.addAll(randSongs.map { it.toSong() })
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-        emit(Resource.Success(data = resultSet.toList(), networkData = resultSet.toList()))
+        val shuffledSongList = resultSet.toList().shuffled()
+        emit(Resource.Success(data = shuffledSongList, networkData = shuffledSongList))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }
 
     override suspend fun getSongUri(song: Song) =
-        dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri ?: song.songUrl
+        dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri
+            ?: buildSongUrl(song)
+
+    /**
+     * Build Url for Ampache stream action
+     * https://tari.ddns.net/server/json.server.php?action=stream&
+     * auth=878944fc45e121977229fe8027e52187
+     * &type=song
+     * &id=8895
+     */
+    private suspend fun buildSongUrl(song: Song) = getSession()?.auth?.let { authToken ->
+        dao.getCredentials()?.serverUrl?.let {
+            "${MainNetwork.buildServerUrl(it)}/json.server.php?action=stream&auth=$authToken&type=song&id=${song.mediaId}"
+        }
+    } ?: song.songUrl
 
     suspend fun downloadSong2(song: Song) = flow {
         emit(Resource.Loading(true))

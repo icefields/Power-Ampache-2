@@ -81,7 +81,8 @@ class ErrorHandlerImpl @Inject constructor(
                         when (e.musicError.getErrorType()) {
                             ErrorType.ACCOUNT -> {
                                 // clear session and try to autologin using the saved credentials
-                                db.dao.clearCachedData()
+                                //db.dao.clearCachedData()
+                                db.dao.clearPlaylists()
                                 db.dao.clearSession()
                                 readableMessage = e.musicError.errorMessage
                             }
@@ -116,7 +117,11 @@ class ErrorHandlerImpl @Inject constructor(
                 logError(e)
                 // readable message here
                 readableMessage?.let {
-                    playlistManager.updateErrorMessage(readableMessage)
+                    // TODO find a better way to not show verbose info
+                    //  ie. session expired for timestamp
+                    if (!readableMessage.contains("timestamp") && !readableMessage.contains("expired")) {
+                        playlistManager.updateErrorMessage(readableMessage)
+                    }
                 }
                 onError(this, e)
                 L.e(readableMessage, e)
