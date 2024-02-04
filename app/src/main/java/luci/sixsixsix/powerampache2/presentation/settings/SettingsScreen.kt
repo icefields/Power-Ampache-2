@@ -144,7 +144,7 @@ fun SettingsScreenContent(
                         .fillMaxWidth(),
                     text = versionInfo,
                     textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Thin,
+                    fontWeight = FontWeight.Light,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontSize = 16.sp
                 )

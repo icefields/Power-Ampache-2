@@ -36,7 +36,7 @@ object Constants {
 
     const val CLEAR_TABLE_AFTER_FETCH = false
 
-    const val QUICK_PLAY_MIN_SONGS = 40
+    const val QUICK_PLAY_MIN_SONGS = 32
 
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
