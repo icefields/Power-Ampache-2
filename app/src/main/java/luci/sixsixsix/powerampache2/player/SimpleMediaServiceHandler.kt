@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.domain.models.toMediaItem
 import javax.inject.Inject
 
 class SimpleMediaServiceHandler @Inject constructor(
@@ -45,6 +44,7 @@ class SimpleMediaServiceHandler @Inject constructor(
     private var job: Job? = null
 
     init {
+        L("SERVICE- SimpleMediaServiceHandler init")
         player.addListener(this)
         job = Job()
     }

@@ -34,4 +34,8 @@
     <dimen name="albumDetailScreen_infoSection_padding">10dp</dimen>
     <dimen name="albumDetailScreen_infoSection_attribute_paddingHorizontal">6dp</dimen>
     <dimen name="albumDetailScreen_infoSection_chipsRow_padding">2dp</dimen>
+
+    <dimen name="button_login_text_size">16sp</dimen>
+    <dimen name="bottomDrawer_login_padding_horizontal">26dp</dimen>
+
 </resources>

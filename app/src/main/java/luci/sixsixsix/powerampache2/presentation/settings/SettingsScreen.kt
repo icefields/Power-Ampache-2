@@ -43,11 +43,10 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -69,28 +68,34 @@ import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
-import luci.sixsixsix.powerampache2.presentation.main.screens.bottomDrawerPaddingHorizontal
-
-
-// TODO WIP rename functions, finish this screen.
+import luci.sixsixsix.powerampache2.presentation.common.DonateButtonPreview
+import luci.sixsixsix.powerampache2.presentation.common.PowerAmpCheckBox
+import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
 
 @Composable
 @Destination
 fun SettingsScreen(
     navigator: DestinationsNavigator,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    modifier: Modifier = Modifier
+        .fillMaxSize()
+        .padding(bottom = 10.dp)
 ) {
     SettingsScreenContent(
-        userState = settingsViewModel.userState,
-        serverInfo = settingsViewModel.serverInfoState,
-        versionInfo = settingsViewModel.getVersionInfo(),
-        powerAmpTheme = settingsViewModel.state.theme,
-        remoteLoggingEnabled = settingsViewModel.remoteLoggingEnabled,
+        userState = settingsViewModel.state.user,
+        serverInfo = settingsViewModel.state.serverInfo,
+        versionInfo = settingsViewModel.state.appVersionInfoStr,
+        powerAmpTheme = settingsViewModel.state.localSettings.theme,
+        remoteLoggingEnabled = settingsViewModel.state.localSettings.enableRemoteLogging,
+        hideDonationButtons = settingsViewModel.state.localSettings.hideDonationButton,
         onThemeSelected = {
-            settingsViewModel.setTheme(it)
+            settingsViewModel.onEvent(SettingsEvent.OnThemeChange(it))
         },
         onEnableLoggingChange = {
-            settingsViewModel.remoteLoggingEnabled = it
+            settingsViewModel.onEvent(SettingsEvent.OnEnableRemoteLoggingSwitch(it))
+        },
+        onHideDonateButtonChange = {
+            settingsViewModel.onEvent(SettingsEvent.OnHideDonationButtonSwitch(it))
         }
     )
 }
@@ -102,57 +107,57 @@ fun SettingsScreenContent(
     serverInfo: ServerInfo?,
     versionInfo: String,
     remoteLoggingEnabled: Boolean = false,
+    hideDonationButtons: Boolean = false,
     powerAmpTheme: PowerAmpTheme,
     onThemeSelected: (selected: PowerAmpTheme) -> Unit,
-    onEnableLoggingChange: (newValue: Boolean) -> Unit
-) {
-    //val loggingEnabled = remember { mutableStateOf(remoteLoggingEnabled) }
-
-    LazyColumn(modifier = Modifier
+    onEnableLoggingChange: (newValue: Boolean) -> Unit,
+    onHideDonateButtonChange: (newValue: Boolean) -> Unit,
+    modifier: Modifier = Modifier
         .fillMaxSize()
-        .padding(bottom = 10.dp)) {
-        items(7) { index ->
+        .padding(bottom = 10.dp),
+    donateButton: @Composable () -> Unit = { DonateButton(isExpanded = true, isTransparent = false) }
+) {
+    LazyColumn(modifier = modifier) {
+        items(9) { index ->
             when(index) {
-                0 -> Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.errorContainer)) {
-                    Text(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        text = "WORK IN PROGRESS. \nMore Settings and Themes coming soon",
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        fontSize = 16.sp
-                    )
-                }
+                0 -> SettingsHeader()
                 1 -> userState?.let { user -> UserInfoSection(user = user) }
-                2 ->  SettingsThemeSelector(currentTheme = powerAmpTheme) {
+                2 -> SettingsThemeSelector(currentTheme = powerAmpTheme) {
                     onThemeSelected(it)
                 }
-                4 -> DonateButton(isExpanded = true, isTransparent = false)
-                //4 -> DonatePaypalButton(onDonatePaypalButtonClick)
-                5 -> serverInfo?.let {ServerInfoSection(it) }
-                3 -> EnableRemoteLoggingCheckBox(
-                    remoteLoggingEnabled = remoteLoggingEnabled,
-                    onCheckedChange = onEnableLoggingChange
+                5 -> donateButton
+                6 -> serverInfo?.let {ServerInfoSection(it) }
+                3 -> PowerAmpSwitch(
+                    text = "Enable Anonymous Debug Logging",
+                    checked = remoteLoggingEnabled,
+                    onCheckedChange = onEnableLoggingChange,
+                    modifier = modifier
                 )
-                6 -> Text(
+                4 -> PowerAmpCheckBox(
+                    text = "Hide Donation Buttons on Menu",
+                    checked = hideDonationButtons,
+                    onCheckedChange = onHideDonateButtonChange,
+                    modifier = modifier
+                )
+                7 -> Text(
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth(),
                     text = versionInfo,
                     textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Thin,
+                    fontWeight = FontWeight.Light,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontSize = 16.sp
                 )
+                8 -> WorkInProgressStrip()
                 else -> {}
             }
         }
     }
 }
+
+@Composable
+fun SettingsHeader() { }
 
 @Composable
 fun UserInfoSection(user: User) {
@@ -361,24 +366,20 @@ fun ThemesRadioGroup(
 }
 
 @Composable
-fun EnableRemoteLoggingCheckBox(
-    remoteLoggingEnabled: Boolean,
-    onCheckedChange: ((Boolean) -> Unit),
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.padding(horizontal = bottomDrawerPaddingHorizontal),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = remoteLoggingEnabled,
-            onCheckedChange = {
-                onCheckedChange(it)
-            },
-            enabled = true
+fun WorkInProgressStrip() {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .background(MaterialTheme.colorScheme.errorContainer)) {
+        Text(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            text = "WORK IN PROGRESS. \nMore Settings and Themes coming soon",
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            fontSize = 16.sp
         )
-        Text(text = "Enable Anonymous Debug Logging")
     }
 }
 
@@ -386,12 +387,19 @@ fun EnableRemoteLoggingCheckBox(
 @Composable
 fun PreviewSettingsScreen() {
     SettingsScreenContent(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 10.dp)
+            .background(MaterialTheme.colorScheme.background),
         userState = User.mockUser(),
         serverInfo = ServerInfo("some server", "6.78"),
         powerAmpTheme = PowerAmpTheme.DARK,
         versionInfo = "0.11-beta (11)",
+        hideDonationButtons = false,
+        onHideDonateButtonChange = {},
         onThemeSelected = {
         },
-        onEnableLoggingChange = {}
+        onEnableLoggingChange = {},
+        donateButton = { DonateButtonPreview() }
     )
 }

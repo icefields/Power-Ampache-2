@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +62,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,17 +74,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.annotation.Destination
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.data.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.SignUpBottomSheet
-
-val bottomDrawerPaddingHorizontal = 26.dp
 
 @Composable
 @Destination(start = false)
@@ -124,28 +126,30 @@ fun LoginScreenContent(
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .background(colorResource(id = R.color.surfaceDark))
     ) {
 
-        Icon(
-            tint = MaterialTheme.colorScheme.inversePrimary,
+        Image(
+            //tint = MaterialTheme.colorScheme.inversePrimary,
             modifier = Modifier
+                .fillMaxWidth(0.8f)
                 .padding(horizontal = 20.dp)
-                .padding(top = 20.dp)
+                .padding(top = 40.dp)
                 .clickable {
                     if (BuildConfig.DEBUG) {
                         isDebugButtonsSheetOpen = !isDebugButtonsSheetOpen
                     }
                 },
-            painter = painterResource(id = R.drawable.ic_power_ampache_mono),
+            painter = painterResource(id = R.drawable.img_power_ampache_logo_login),
             contentDescription = "Power Ampache Logo"
         )
 
         Icon(
-            tint = MaterialTheme.colorScheme.secondary,
+            tint = colorResource(id = R.color.onBackgroundDark),
             modifier = Modifier
-                .fillMaxWidth(0.7f)
-                //.padding(horizontal = 40.dp)
+                .fillMaxWidth(0.8f)
                 .padding(top = 1.dp, bottom = 10.dp),
             painter = painterResource(id = R.drawable.powerampache_title),
             contentDescription = "Power Ampache Title"
@@ -199,10 +203,12 @@ fun LoginScreenContent(
     if (isLoginSheetOpen) {
         ModalBottomSheet(
             sheetState = sheetState,
-            onDismissRequest = { isLoginSheetOpen = false }
+            onDismissRequest = { isLoginSheetOpen = false },
+            containerColor = colorResource(id = R.color.surfaceContainerDark)
         ) {
             Column(
-                modifier = Modifier.padding(top = 6.dp, bottom = 16.dp)
+                modifier = Modifier
+                    .padding(top = 6.dp, bottom = 16.dp)
             ) {
                 if (BuildConfig.ENABLE_TOKEN_LOGIN) {
                     AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
@@ -234,7 +240,9 @@ fun LoginScreenContent(
         ) {
             SignUpBottomSheet(
                 onEvent = onEvent,
-                modifier = Modifier.wrapContentHeight().fillMaxWidth()
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth()
             )
         }
     }
@@ -304,7 +312,7 @@ fun LoginTextFields(
 
     Column(
         modifier = modifier
-            .padding(horizontal = bottomDrawerPaddingHorizontal)
+            .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal))
     ) {
 
         OutlinedTextField(
@@ -394,22 +402,28 @@ fun LoginButton(
 ) {
     DefaultFullWidthButton(
         modifier = Modifier
-            .padding(horizontal = bottomDrawerPaddingHorizontal, vertical = 10.dp)
+            .padding(
+                horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal),
+                vertical = 10.dp
+            )
             .fillMaxWidth(),
         colours = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.primary
+            containerColor = colorResource(id = R.color.primaryDark),
+            contentColor = colorResource(id = R.color.onPrimaryDark)
         ),
         onClick = { onEvent(AuthEvent.Login) }
     ) {
-        Icon(imageVector = Icons.Default.Login, contentDescription = "Login")
+        Icon(
+            imageVector = Icons.Default.Login,
+            contentDescription = "Login"
+        )
         Text(
             modifier = Modifier
                 .padding(vertical = 9.dp, horizontal = 9.dp),
             text = stringResource(id = R.string.loginScreen_login),
             textAlign = TextAlign.Center,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp
+            //fontWeight = FontWeight.SemiBold,
+            fontSize = fontDimensionResource(id = R.dimen.button_login_text_size)
         )
     }
 }
@@ -420,11 +434,15 @@ fun SignUpButton(
 ) {
     DefaultFullWidthButton(
         modifier = Modifier
-            .padding(horizontal = bottomDrawerPaddingHorizontal, vertical = 10.dp)
+            .padding(
+                horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal),
+                vertical = 10.dp
+            )
             .fillMaxWidth(),
+        borderStrokeColour = colorResource(id = R.color.outlineDark),
         colours = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.secondary
+            containerColor = Color.Transparent,
+            contentColor = colorResource(id = R.color.primaryDark)
         ),
         onClick = onClick
     ) {
@@ -434,8 +452,8 @@ fun SignUpButton(
                 .padding(vertical = 9.dp, horizontal = 9.dp),
             text = stringResource(id = R.string.loginScreen_signup),
             textAlign = TextAlign.Center,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp
+            //fontWeight = FontWeight.SemiBold,
+            fontSize = fontDimensionResource(id = R.dimen.button_login_text_size)
         )
     }
 }
@@ -448,7 +466,10 @@ fun DebugLoginButton(
 ) {
     DefaultFullWidthButton(
         modifier = Modifier
-            .padding(horizontal = bottomDrawerPaddingHorizontal, vertical = 10.dp)
+            .padding(
+                horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal),
+                vertical = 10.dp
+            )
             .fillMaxWidth(),
         onClick = {
             onEvent(AuthEvent.OnChangeServerUrl(server.url))
@@ -457,9 +478,10 @@ fun DebugLoginButton(
             onEvent(AuthEvent.OnChangeAuthToken(server.apiKey))
             onEvent(AuthEvent.Login)
         },
+
         colours = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.tertiary
+            containerColor = colorResource(id = R.color.tertiaryDark),
+            contentColor = colorResource(id = R.color.surfaceDark)
         )
     ) {
         Icon(imageVector = Icons.Default.MusicNote, contentDescription = "Demo Server login")
@@ -468,8 +490,8 @@ fun DebugLoginButton(
                 .padding(vertical = 9.dp),
             text = stringResource(id = buttonText),
             textAlign = TextAlign.Center,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp
+            //fontWeight = FontWeight.SemiBold,
+            fontSize = fontDimensionResource(id = R.dimen.button_login_text_size)
         )
     }
 }
@@ -483,7 +505,7 @@ fun AuthTokenCheckBox(
     //var authTokenCheckBoxChecked by remember { mutableStateOf(authTokenLoginEnabled) }
 
     Row(
-        modifier = modifier.padding(horizontal = bottomDrawerPaddingHorizontal),
+        modifier = modifier.padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal)),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -516,7 +538,7 @@ fun ErrorView(
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onErrorContainer,
-            fontSize = 16.sp
+            fontSize = fontDimensionResource(id = R.dimen.button_login_text_size)
         )
     }
 }

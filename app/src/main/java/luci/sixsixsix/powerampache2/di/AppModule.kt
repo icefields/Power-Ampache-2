@@ -31,7 +31,6 @@ import luci.sixsixsix.powerampache2.common.Constants.DB_LOCAL_NAME
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_READ_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_WRITE_S
-import luci.sixsixsix.powerampache2.data.local.MIGRATION_73_74
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.mapping.AmpacheDateMapper
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -96,6 +95,6 @@ object AppModule {
             DB_LOCAL_NAME
         )
         //.fallbackToDestructiveMigration()
-        .addMigrations(MIGRATION_73_74())
+        //.addMigrations(MIGRATION_73_74())
         .build()
 }

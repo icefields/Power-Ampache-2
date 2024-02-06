@@ -22,12 +22,10 @@
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,19 +37,13 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -87,25 +79,22 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
-import luci.sixsixsix.powerampache2.presentation.common.DonateButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.main.screens.components.DrawerBody
-import luci.sixsixsix.powerampache2.presentation.main.screens.components.DrawerHeader
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainContentMenuItem
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainContentTopAppBar
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainContentTopAppBarEvent
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainDrawer
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTabRow
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTabRow.tabItems
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.TabItem
-import luci.sixsixsix.powerampache2.presentation.main.screens.components.drawerItems
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
@@ -156,22 +145,17 @@ fun MainContentScreen(
         drawerState = drawerState,
         //scrimColor = MaterialTheme.colorScheme.scrim,
         drawerContent = {
-            ModalDrawerSheet(
-                //modifier = Modifier.fillMaxWidth(0.8f)
-            ) {
-                DrawerHeader(authViewModel.state.user?.username ?: ERROR_STRING)
-                Divider()
-                DrawerBody(
-                    modifier = Modifier.weight(1f),
-                    items = drawerItems,
-                    onItemClick = {
-                        currentScreen = it.id
-                        scope.launch {
-                            drawerState.close()
-                        }
-                })
-                DonateButton(isTransparent = true)
-            }
+            L("DONATION",settingsViewModel.state.localSettings.hideDonationButton)
+            MainDrawer(
+                user = authViewModel.state.user?.username ?: ERROR_STRING,
+                hideDonationButtons = settingsViewModel.state.localSettings.hideDonationButton,
+                onItemClick = {
+                    currentScreen = it.id
+                    scope.launch {
+                        drawerState.close()
+                    }
+                }
+            )
         }
     ) {
         Scaffold(

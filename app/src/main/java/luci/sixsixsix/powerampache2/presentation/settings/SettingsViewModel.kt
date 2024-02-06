@@ -24,9 +24,7 @@ package luci.sixsixsix.powerampache2.presentation.settings
 import android.app.Application
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -37,10 +35,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
-import luci.sixsixsix.powerampache2.domain.models.ServerInfo
-import luci.sixsixsix.powerampache2.domain.models.User
 import javax.inject.Inject
 
 
@@ -54,18 +49,8 @@ class SettingsViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
     //var state by mutableStateOf(LocalSettings.defaultSettings())
     var state by savedStateHandle.saveable {
-        mutableStateOf(LocalSettings.defaultSettings())
+        mutableStateOf(SettingsState(appVersionInfoStr = getVersionInfoString()))
     }
-
-    var userState by savedStateHandle.saveable {
-        mutableStateOf<User>(User.emptyUser())
-    }
-
-    var remoteLoggingEnabled by savedStateHandle.saveable {
-        mutableStateOf(false)
-    }
-
-    var serverInfoState by mutableStateOf<ServerInfo?>(null)
 
     init {
         getServerInfo()
@@ -73,44 +58,78 @@ class SettingsViewModel @Inject constructor(
 
         viewModelScope.launch {
             musicRepository.userLiveData.observeForever {
-                it?.let { user ->
-                    userState = user
-                }
+                state = state.copy( user = it)
             }
         }
+    }
+
+    private fun getServerInfo() = viewModelScope.launch {
+        musicRepository.ping().data?.first?.let {
+            state = state.copy(serverInfo = it)
+        }
+    }
+
+    private fun getVersionInfoString() = try {
+        val pInfo: PackageInfo =
+            application.packageManager.getPackageInfo(application.packageName, 0)
+        "${pInfo.versionName} (${pInfo.longVersionCode})"
+    } catch (e: PackageManager.NameNotFoundException) {
+        e.printStackTrace()
+        ""
     }
 
     private fun observeSettings() {
         settingsRepository.settingsLiveData.observeForever { localSettings ->
             localSettings?.let { updatedSettings ->
-                if (updatedSettings != state)
-                    state = updatedSettings
+                if (updatedSettings != state.localSettings)
+                    state = state.copy( localSettings = updatedSettings)
             }
         }
     }
 
-    fun setTheme(theme: PowerAmpTheme) {
+    fun onEvent(event: SettingsEvent) {
+        when(event) {
+            is SettingsEvent.OnEnableAutoUpdatesSwitch -> viewModelScope.launch {
+                settingsRepository.saveLocalSettings(
+                    settingsRepository.getLocalSettings(state.user?.username)
+                        .copy(enableAutoUpdates = event.newValue)
+                )
+            }
+            is SettingsEvent.OnEnableRemoteLoggingSwitch -> viewModelScope.launch {
+                settingsRepository.saveLocalSettings(
+                    settingsRepository.getLocalSettings(state.user?.username)
+                        .copy(enableRemoteLogging = event.newValue)
+                )
+            }
+            is SettingsEvent.OnHideDonationButtonSwitch -> viewModelScope.launch {
+                settingsRepository.saveLocalSettings(
+                    settingsRepository.getLocalSettings(state.user?.username)
+                        .copy(hideDonationButton = event.newValue)
+                )
+            }
+            is SettingsEvent.OnSmartDownloadSwitch -> viewModelScope.launch {
+                settingsRepository.saveLocalSettings(
+                    settingsRepository.getLocalSettings(state.user?.username)
+                        .copy(smartDownloadEnabled = event.newValue)
+                )
+            }
+            is SettingsEvent.OnStreamingQualityChange -> viewModelScope.launch {
+                settingsRepository.saveLocalSettings(
+                    settingsRepository.getLocalSettings(state.user?.username)
+                        .copy(streamingQuality = event.newValue)
+                )
+            }
+            is SettingsEvent.OnThemeChange -> setTheme(event.newValue)
+        }
+    }
+
+    private fun setTheme(theme: PowerAmpTheme) {
         viewModelScope.launch {
+            // colours are static and depend on the hash of the object, reset if changing theme
             RandomThemeBackgroundColour.resetColours()
             settingsRepository.saveLocalSettings(
-                settingsRepository.getLocalSettings(userState?.username).copy(theme = theme)
+                settingsRepository.getLocalSettings(state.user?.username).copy(theme = theme)
             )
         }
     }
-
-    private fun getServerInfo() {
-        viewModelScope.launch {
-            serverInfoState = musicRepository.ping().data?.first
-        }
-    }
-
-    fun getVersionInfo() = try {
-            val pInfo: PackageInfo =
-                application.packageManager.getPackageInfo(application.packageName, 0)
-            "${pInfo.versionName} (${pInfo.longVersionCode})"
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-            ""
-        }
-
 }

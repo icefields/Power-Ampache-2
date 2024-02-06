@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
 
             var dynamicColour = true
             var isDarkTheme = true
-            when (settingsViewModel.state.theme) {
+            when (settingsViewModel.state.localSettings.theme) {
                 PowerAmpTheme.SYSTEM -> {
                     dynamicColour = false
                     isDarkTheme = isSystemInDarkTheme()

@@ -459,8 +459,9 @@ class MainViewModel @Inject constructor(
 
     @OptIn(UnstableApi::class)
     private fun startMusicServiceIfNecessary() {
-        L("startMusicServiceIfNecessary", isServiceRunning)
+        L("SERVICE- startMusicServiceIfNecessary. isServiceRunning? : ", isServiceRunning)
         if (!isServiceRunning) {
+            L("SERVICE- startMusicServiceIfNecessary")
             Intent(application, SimpleMediaService::class.java).apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(application, this)
@@ -472,7 +473,7 @@ class MainViewModel @Inject constructor(
 
     @OptIn(UnstableApi::class)
     fun stopMusicService() {
-        L("stopMusicService", isServiceRunning)
+        L("SERVICE- stopMusicService", isServiceRunning)
         if (isServiceRunning) {
             application.stopService(Intent(application, SimpleMediaService::class.java))
                 .also { isServiceRunning = false }

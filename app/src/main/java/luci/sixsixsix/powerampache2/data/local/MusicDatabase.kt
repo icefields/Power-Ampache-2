@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.data.local
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -48,15 +49,20 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         UserEntity::class,
         LocalSettingsEntity::class,
         DownloadedSongEntity::class
-    ], version = 73
+    ], version = 74, // first prod version: 73
+    autoMigrations = [
+        AutoMigration(from = 73, to = 74)
+    ],
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class MusicDatabase: RoomDatabase() {
     abstract val dao: MusicDao
 }
 
-fun MIGRATION_73_74() =
-    Migration(73, 74) { database: SupportSQLiteDatabase ->
-        // do nothing if not altering tables.
-        L.e("MIGRATING DATABASE")
-    }
+//fun MIGRATION_73_74() =
+//    Migration(73, 74) { database: SupportSQLiteDatabase ->
+//        // do nothing if not altering tables.
+//        L.e("MIGRATING DATABASE")
+//    }
+

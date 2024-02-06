@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.PersonAddAlt
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
@@ -22,25 +22,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
-import luci.sixsixsix.powerampache2.presentation.main.screens.bottomDrawerPaddingHorizontal
 
 @Composable
 fun SignUpBottomSheet(
     onEvent: (AuthEvent) -> Unit,
     modifier: Modifier
 ) {
-    val topPaddingInputFields = 8.dp
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -59,9 +58,8 @@ fun SignUpBottomSheet(
 
     Column(
         modifier = modifier
-            .padding(horizontal = bottomDrawerPaddingHorizontal)
+            .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal))
     ) {
-
         OutlinedTextField(
             value = url,
             onValueChange = {
@@ -234,11 +232,11 @@ fun SignUpBottomSheet(
 
         DefaultFullWidthButton(
             modifier = Modifier
-                .padding(horizontal = bottomDrawerPaddingHorizontal, vertical = 10.dp)
+                .padding(vertical = 10.dp)
                 .fillMaxWidth(),
             colours = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.primary
+                containerColor = colorResource(id = R.color.primaryDark),
+                contentColor = colorResource(id = R.color.onPrimaryDark)
             ),
             onClick = {
                 val isError =
@@ -261,7 +259,7 @@ fun SignUpBottomSheet(
             }
         ) {
             Icon(
-                imageVector = Icons.Default.Login,
+                imageVector = Icons.Default.PersonAddAlt,
                 contentDescription = stringResource(id = R.string.loginScreen_signup)
             )
             Text(
@@ -269,8 +267,7 @@ fun SignUpBottomSheet(
                     .padding(vertical = 9.dp, horizontal = 9.dp),
                 text = stringResource(id = R.string.loginScreen_signup),
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp
+                fontSize = fontDimensionResource(id = R.dimen.button_login_text_size)
             )
         }
         

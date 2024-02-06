@@ -26,7 +26,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,11 +37,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.presentation.common.DonateButton
+import luci.sixsixsix.powerampache2.presentation.common.DonateButtonPreview
 
 val drawerItems = listOf(
     MainContentMenuItem.Home,
@@ -50,10 +55,36 @@ val drawerItems = listOf(
 )
 
 @Composable
+fun MainDrawer(
+    user: String,
+    hideDonationButtons: Boolean,
+    items: List<MainContentMenuItem> = drawerItems,
+    onItemClick: (MainContentMenuItem) -> Unit,
+    modifier: Modifier = Modifier,
+    donateButton: @Composable () -> Unit = { DonateButton(isTransparent = true) }
+) {
+    ModalDrawerSheet(
+        modifier = modifier,
+        //modifier = Modifier.fillMaxWidth(0.8f)
+    ) {
+        DrawerHeader(user)
+        Divider()
+        DrawerBody(
+            modifier = Modifier.weight(1f),
+            items = items,
+            onItemClick = onItemClick
+        )
+        if (!hideDonationButtons) {
+            donateButton()
+        }
+    }
+}
+
+@Composable
 fun DrawerHeader(user: String) {
     Box(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
+        .fillMaxWidth()
+        .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -94,4 +125,17 @@ fun DrawerBody(
             )
         }
     }
+}
+
+@Composable @Preview
+fun PreviewDrawer() {
+    MainDrawer(
+        //modifier = Modifier.weight(1f),
+        user = "Lucifer",
+        hideDonationButtons = true,
+        donateButton = {
+            DonateButtonPreview()
+        },
+        onItemClick = { }
+    )
 }

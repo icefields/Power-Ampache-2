@@ -39,18 +39,18 @@ class SimpleMediaService: MediaSessionService() {
     lateinit var notificationManager: SimpleMediaNotificationManager
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        L("SERVICE- onStartCommand")
         notificationManager.startNotificationService(
             mediaSessionService = this,
             mediaSession = mediaSession
         )
-        L("SERVICE onStartCommand")
 
         return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        L("SERVICE DESTROY")
+        L("SERVICE- DESTROY")
         mediaSession.run {
             release()
             if (player.playbackState != Player.STATE_IDLE) {
