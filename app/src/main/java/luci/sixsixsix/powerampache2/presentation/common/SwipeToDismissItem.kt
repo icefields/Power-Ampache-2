@@ -62,18 +62,18 @@ fun <T> SwipeToDismissItem(
 //            visible = show,
 //            exit = fadeOut(spring())
 //        ) {
-            SwipeToDismiss(
-                state = dismissState,
-                modifier = Modifier,
-                background = { SwipeToDismissBackground(
+        SwipeToDismiss(
+            state = dismissState,
+            modifier = Modifier,
+            background = { SwipeToDismissBackground(
                     dismissState = dismissState,
                     iconLeft = iconLeft,
                     iconRight = iconRight
-                ) },
-                dismissContent = {
-                    foregroundView()
-                }
-            )
+            ) },
+            dismissContent = {
+                foregroundView()
+            }
+        )
         //}
         LaunchedEffect(show) {
             if (!show) {

@@ -20,7 +20,7 @@
     <string name="loginScreen_password">Password</string>
     <string name="loginScreen_password_repeat">Confirm Password</string>
     <string name="loginScreen_register_success">User Successfully Registered\nYou can now login with your credentials\nPlease confirm your email if required by the server</string>
-    <string name="loginScreen_server_url">Server Url</string>
+    <string name="loginScreen_server_url">Server URL</string>
     <string name="loginScreen_signUp_requiredField">This is a required field</string>
     <string name="loginScreen_auth_token">Auth Token</string>
     <string name="loginScreen_login">Login</string>
@@ -49,6 +49,18 @@
     <string name="error_duplicate">Duplicate Entry</string>
     <string name="crash_mail_subject">Crash Report</string>
     <string name="crash_mail_body">Crash Report Data. Thanks</string>
+
+    <!-- SETTINGS -->
+    <string name="quality_veryHigh_title">Very High Quality</string>
+    <string name="quality_veryHigh_subtitle">320kbps or flac (no transcoding)</string>
+    <string name="quality_high_title">High Quality</string>
+    <string name="quality_high_subtitle">256kbps</string>
+    <string name="quality_medium_title">Medium Quality</string>
+    <string name="quality_medium_subtitle">192kbps</string>
+    <string name="quality_mediumLow_title">Medium-Low Quality</string>
+    <string name="quality_mediumLow_subtitle">128kbps</string>
+    <string name="quality_low_title">Low Quality</string>
+    <string name="quality_low_subtitle">96kbps</string>
 
 </resources>
 

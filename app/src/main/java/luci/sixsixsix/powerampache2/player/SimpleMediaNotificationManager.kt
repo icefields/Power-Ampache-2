@@ -30,12 +30,14 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.media3.common.util.NotificationUtil.createNotificationChannel
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.ui.PlayerNotificationManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.MainActivity
 import javax.inject.Inject
@@ -52,6 +54,7 @@ class SimpleMediaNotificationManager @Inject constructor(
     private var notificationManager = NotificationManagerCompat.from(context)
 
     init {
+        L("SERVICE- SimpleMediaNotificationManager init")
         createNotificationChannel()
     }
 
@@ -59,6 +62,7 @@ class SimpleMediaNotificationManager @Inject constructor(
         mediaSessionService: MediaSessionService,
         mediaSession: MediaSession
     ) {
+        L("SERVICE- SimpleMediaNotificationManager startNotificationService")
         buildNotification(mediaSession)
         startForegroundNotification(mediaSessionService)
     }
@@ -73,6 +77,7 @@ class SimpleMediaNotificationManager @Inject constructor(
                 setUseFastForwardActionInCompactView(true)
                 setUseRewindActionInCompactView(true)
                 setUseNextActionInCompactView(true)
+                setColorized(true)
                 setPriority(NotificationCompat.PRIORITY_LOW)
                 setPlayer(player)
             }
@@ -84,16 +89,18 @@ class SimpleMediaNotificationManager @Inject constructor(
                 .Builder(context, NOTIFICATION_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 // TODO tap on notification should open the app
-//                .setContentIntent(PendingIntent.getActivity(
-//                    context.applicationContext,
-//                    3214,
-//                    Intent(context.applicationContext, MainActivity::class.java).addFlags(
-//                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
-//                                Intent.FLAG_ACTIVITY_SINGLE_TOP or
-//                                Intent.FLAG_ACTIVITY_NEW_TASK
-//                    ),
-//                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//                ))
+                .setContentIntent(
+                    PendingIntent.getActivity(
+                    context.applicationContext,
+                    3214,
+                    Intent(context.applicationContext, MainActivity::class.java)
+                        /*.addFlags(
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                                Intent.FLAG_ACTIVITY_NEW_TASK
+                    )*/,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                ))
                 .build()
         } else {
             TODO("VERSION SDK < O")
