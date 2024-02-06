@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.screens.offline
 
 import androidx.compose.foundation.background
@@ -37,6 +58,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.NavGraphs
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
@@ -51,7 +74,6 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.PlaylistDetailEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +88,7 @@ fun OfflineSongsScreen(
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
@@ -144,7 +166,7 @@ fun OfflineSongsScreen(
 @Composable
 @Destination(start = false)
 fun OfflineSongsMainContent(
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator? = Ampache2NavGraphs.navigator,
     mainViewModel: MainViewModel,
     modifier: Modifier = Modifier,
     playlistOrQueueDialogOpen: AddToPlaylistOrQueueDialogOpen = AddToPlaylistOrQueueDialogOpen(false),
@@ -207,10 +229,10 @@ fun OfflineSongsMainContent(
                             SongItemEvent.SHARE_SONG ->
                                 mainViewModel.onEvent(MainEvent.OnShareSong(song))
                             SongItemEvent.DOWNLOAD_SONG -> { } // DO NOTHING
-                            SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
+                            SongItemEvent.GO_TO_ALBUM -> navigator?.navigate(
                                 AlbumDetailScreenDestination(albumId = song.album.id, album = null)
                             )
-                            SongItemEvent.GO_TO_ARTIST -> navigator.navigate(
+                            SongItemEvent.GO_TO_ARTIST -> navigator?.navigate(
                                 ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
                             )
                             SongItemEvent.ADD_SONG_TO_QUEUE ->

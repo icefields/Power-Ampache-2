@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.queue.components
 
 import androidx.compose.foundation.background
@@ -14,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.common.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
@@ -86,7 +106,9 @@ fun QueueScreenContent(
                 subtitleString = SubtitleString.ARTIST,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (song == mainViewModel.state.song) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+                    .background(if (song.mediaId == mainViewModel.state.song?.mediaId)
+                        MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+                    )
                     .clickable {
                         // TODO BUG when tapping on a song, in the context of a playlist, do not
                         //  move the new song on top, just start playing from the selected song

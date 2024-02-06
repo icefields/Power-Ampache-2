@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -47,7 +48,8 @@ import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 fun MusicAttributeChips(
     modifier: Modifier = Modifier,
     attributes: List<MusicAttribute>,
-    containerColor: Color = Color(red = 0, blue = 0, green = 0, alpha = 180)
+    containerColor: Color = Color(red = 0, blue = 0, green = 0, alpha = 180),
+    onMusicAttributeClick: (MusicAttribute) -> Unit
 ) {
     LazyRow(modifier = modifier
         .padding(
@@ -57,6 +59,9 @@ fun MusicAttributeChips(
             if (it.name.isNotBlank()) {
                 Row {
                     Card(
+                        modifier = Modifier.clickable {
+                            onMusicAttributeClick(it)
+                        },
                         colors = CardDefaults.cardColors(
                             containerColor = containerColor
                         ),

@@ -1,14 +1,33 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.main
 
 import android.app.Application
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.OptIn
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -19,15 +38,12 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.common.Constants.RESET_QUEUE_ON_NEW_SESSION
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
@@ -43,10 +59,11 @@ import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
-import org.acra.ACRA.init
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.abs
+
+
 
 @kotlin.OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
@@ -72,13 +89,21 @@ class MainViewModel @Inject constructor(
     var isLoading by savedStateHandle.saveable { mutableStateOf(false) }
     var shuffleOn by savedStateHandle.saveable { mutableStateOf(false) }
     var repeatMode by savedStateHandle.saveable { mutableStateOf(RepeatMode.OFF) }
+    // auth token used to figure out if the media items should be refreshed
+    var authToken by savedStateHandle.saveable { mutableStateOf("") }
 
+    private var loadSongDataJob: Job? = null
     private var searchJob: Job? = null
     private var isServiceRunning by savedStateHandle.saveable { mutableStateOf(false) }
-    private val emittedDownloads = mutableListOf<String>()
+    private val emittedDownloads by savedStateHandle.saveable { mutableStateOf(mutableListOf<String>()) }
+
+    private val mainLock = Any()
 
     init {
         L()
+
+        isPlaying = simpleMediaServiceHandler.isPlaying()
+
         // restore song and queue if saved in statehandle
         if (state.queue.isNotEmpty()) {
             playlistManager.replaceCurrentQueue(state.queue)
@@ -86,6 +111,7 @@ class MainViewModel @Inject constructor(
         state.song?.let {
             playlistManager.updateCurrentSong(it)
         }
+
         observePlaylistManager()
         observePlayerEvents()
         observeSession()
@@ -100,7 +126,7 @@ class MainViewModel @Inject constructor(
                 //.getWorkInfosForUniqueWorkFlow(SongDownloadWorker.workerName)
                 //.getWorkInfoByIdFlow(requestId).mapNotNull { it.outputData.getString(KEY_RESULT_PATH) }.cancellable()
                 .observeForever { workInfoList ->
-                    L("observeForever")
+                    L("observeDownloads.observeForever")
                     var atLeastOneRunning = false
                     var atLeastOneEnqueued = false
                     var atLeastOneBlocked = false
@@ -165,12 +191,38 @@ class MainViewModel @Inject constructor(
         }
     }
 
+
     private fun observeSession() {
         musicRepository.sessionLiveData.observeForever {
-            // if sessions is null, stop service and invalidate queue and current song
-            if (it == null) {
-                if (!isPlaying) stopMusicService()
-                playlistManager.reset() // this will trigger the observables in observePlaylistManager() and reset mainviewmodel as well
+            //if (lock == null) lock = Any()
+            synchronized(mainLock) {
+                val oldToken = authToken
+                authToken = it?.auth ?: ""
+                L(oldToken, authToken)
+                if (authToken.isNotBlank()) {
+                    // refresh the playlist with new urls with the new token
+                    // only if a queue exists
+                    if (oldToken != authToken && state.queue.isNotEmpty()) {
+                        //authToken = newToken
+                        if (RESET_QUEUE_ON_NEW_SESSION && !isPlaying) {
+                            L("REFRESH AUTH !isPlaying")
+                            playlistManager.reset()
+                            stopMusicService()
+                        } else {
+                            L("REFRESH AUTH LOAD SONGS DATA")
+                            loadSongData()
+                        }
+                    }
+                    //authToken = newToken
+                } else {
+                    // if sessions is null, stop service and invalidate queue and current song
+                    if (state.song == null) {
+                        L(" && state.song == null")
+                        //if (!isPlaying)
+                        //stopMusicService()
+                        //playlistManager.reset() // this will trigger the observables in observePlaylistManager() and reset mainviewmodel as well
+                    }
+                }
             }
         }
     }
@@ -249,6 +301,12 @@ class MainViewModel @Inject constructor(
         callback(songsRepository.isSongAvailableOffline(song))
     }
 
+    private fun playSong(song: Song) = viewModelScope.launch {
+        L( "MainEvent.Play", "playing song")
+        simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.ForcePlay(song.toMediaItem(songsRepository.getSongUri(song))))
+        L( "MainEvent.Play", "play song launched. AFter")
+    }
+
     /**
      * UI ACTIONS AND EVENTS (play, stop, skip, like, download, etc ...)
      */
@@ -262,10 +320,24 @@ class MainViewModel @Inject constructor(
                     playlistManager.updateSearchQuery(event.query)
                 }
             }
-            is MainEvent.Play -> viewModelScope.launch {
-                L( "MainEvent.Play", event.song, songsRepository.getSongUri(event.song))
+            is MainEvent.Play -> {
+                L( "MainEvent.Play", event.song)
                 //delay(1000)
-                simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.ForcePlay(event.song.toMediaItem(songsRepository.getSongUri(event.song))))
+                if (loadSongDataJob?.isActive == true) {
+                    L( "MainEvent.Play", "loadSongDataJob?.isActive")
+                    loadSongDataJob?.invokeOnCompletion {
+                        //loadSongDataJob = null
+                        it?.let {
+                            L.e(it)
+                        } ?: run {
+                            L( "MainEvent.Play", "invokeOnCompletion")
+                            playSong(event.song)
+                        }
+                    }
+                } else {
+                    L( "MainEvent.Play", "play directly")
+                    playSong(event.song)
+                }
             }
             MainEvent.PlayPauseCurrent -> state.song?.let {
                 viewModelScope.launch {
@@ -443,18 +515,31 @@ class MainViewModel @Inject constructor(
     }
 
     private fun loadSongData() {
-        val mediaItemList = mutableListOf<MediaItem>()
-        for (song: Song? in state.queue) {
-            song?.let {
-                // TODO FIX runBlocking (this functions has to be executed before calling play)
-                //  run blocking makes sure the call is sequential. FIND A BETTER SOLUTION.
-                //  test: with 10000 songs in queue, thread blocked 1.4s on pixel 6a
-                runBlocking {
-                    mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it)))
+        L("Load song data ")
+        loadSongDataJob?.cancel()
+        loadSongDataJob = viewModelScope.launch {
+            L("Load song data START")
+            isLoading = true
+            isBuffering = true
+            state = state.copy(isFabLoading = true)
+            val mediaItemList = mutableListOf<MediaItem>()
+            for (song: Song? in state.queue) {
+                song?.let {
+                    // TODO FIX runBlocking (this functions has to be executed before calling play)
+                    //  run blocking makes sure the call is sequential. FIND A BETTER SOLUTION.
+                    //  test: with 10000 songs in queue, thread blocked 1.4s on pixel 6a
+                    //runBlocking {
+                        mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it)))
+                    //}
                 }
             }
+            simpleMediaServiceHandler.addMediaItemList(mediaItemList)
+            L("Load song data END")
+
+            isLoading = false
+            isBuffering = false
+            state = state.copy(isFabLoading = false)
         }
-        simpleMediaServiceHandler.addMediaItemList(mediaItemList)
     }
 
     @OptIn(UnstableApi::class)
@@ -474,10 +559,15 @@ class MainViewModel @Inject constructor(
     @OptIn(UnstableApi::class)
     fun stopMusicService() {
         L("SERVICE- stopMusicService", isServiceRunning)
-        if (isServiceRunning) {
+        //if (isServiceRunning) {
+        try {
             application.stopService(Intent(application, SimpleMediaService::class.java))
                 .also { isServiceRunning = false }
+        } catch (e: Exception) {
+            L.e(e)
         }
+
+        //}
     }
 
     override fun onCleared() {
@@ -487,6 +577,11 @@ class MainViewModel @Inject constructor(
 //        stopMusicService()
 //        playlistManager.reset()
         L("onCleared")
+        searchJob?.cancel()
+        loadSongDataJob?.cancel()
+        isLoading = false
+        isBuffering = false
+        state = state.copy(isFabLoading = false)
         super.onCleared()
     }
 

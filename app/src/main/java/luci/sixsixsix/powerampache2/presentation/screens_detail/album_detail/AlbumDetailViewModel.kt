@@ -105,7 +105,8 @@ class AlbumDetailViewModel @Inject constructor(
                 shareAlbum(state.album.id)
             AlbumDetailEvent.OnShuffleAlbum -> {
                 val shuffled = state.getSongList().shuffled()
-                playlistManager.addToCurrentQueueNext(shuffled)
+                //playlistManager.addToCurrentQueueNext(shuffled)
+                playlistManager.replaceCurrentQueue(shuffled)
                 playlistManager.moveToSongInQueue(shuffled[0])
             }
             AlbumDetailEvent.OnFavouriteAlbum ->
@@ -127,9 +128,7 @@ class AlbumDetailViewModel @Inject constructor(
                     is Resource.Success -> {
                         result.data?.let {
                             // refresh album
-                            state = state.copy(
-                                album = state.album.copy(flag = abs(state.album.flag - 1))
-                            )
+                            state = state.copy(album = state.album.copy(flag = abs(state.album.flag - 1)))
                         }
                     }
                     is Resource.Error -> state = state.copy(isLikeLoading = false)

@@ -27,6 +27,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -141,6 +142,9 @@ fun MainContentScreen(
         )
     }
 
+    val floatingActionVisible = mainViewModel.state.queue.isEmpty() &&
+            (MainContentMenuItem.toMainContentMenuItem(currentScreen) == MainContentMenuItem.Home)
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         //scrimColor = MaterialTheme.colorScheme.scrim,
@@ -164,8 +168,13 @@ fun MainContentScreen(
                 MainContentTopAppBar(
                     searchVisibility = isSearchActive,
                     scrollBehavior = scrollBehavior,
-                    viewModel = mainViewModel,
-                    title = barTitle
+                    isQueueEmpty = mainViewModel.state.queue.isEmpty(),
+                    floatingActionVisible = floatingActionVisible,
+                    isFabLoading = mainViewModel.state.isFabLoading,
+                    title = barTitle,
+                    onMagicPlayClick = {
+                        mainViewModel.onEvent(MainEvent.OnFabPress)
+                    }
                 ) { event ->
                     when(event) {
                         // OPEN-CLOSE drawer
@@ -182,8 +191,7 @@ fun MainContentScreen(
             floatingActionButtonPosition = FabPosition.End,
             floatingActionButton = {
                 AnimatedVisibility (
-                    visible = mainViewModel.state.queue.isEmpty() &&
-                            (MainContentMenuItem.toMainContentMenuItem(currentScreen) == MainContentMenuItem.Home),
+                    visible = floatingActionVisible,
                     exit = fadeOut(spring(stiffness = Spring.StiffnessVeryLow)),
                     enter = fadeIn(spring(stiffness = Spring.StiffnessMedium))
                 ) {
@@ -245,7 +253,7 @@ fun MainFloatingButton(
         shape = RoundedCornerShape(floatingButtonSize/2 + 5.dp),
         containerColor = MaterialTheme.colorScheme.onPrimary,
         contentColor = MaterialTheme.colorScheme.primary,
-        onClick = onClick
+        onClick = { }
     ) {
         if (isFabLoading) {
             CircularProgressIndicator(
@@ -256,7 +264,10 @@ fun MainFloatingButton(
         } else {
             Icon(modifier = Modifier
                 .size(floatingButtonSize)
-                .padding(4.dp),
+                .padding(4.dp)
+                .clickable {
+                    onClick()
+                },
                 painter = painterResource(id = R.drawable.ic_tune_spinner),
                 //imageVector = Icons.Default.PlayArrow,
                 contentDescription = "Quick Play",

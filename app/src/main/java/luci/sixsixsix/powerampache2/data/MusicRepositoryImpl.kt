@@ -104,8 +104,8 @@ class MusicRepositoryImpl @Inject constructor(
         if (se.auth != getSession()?.auth) {
             // albums, songs, playlists and artist have links that contain the auth token
             //dao.clearCachedData()
-            dao.clearPlaylists()
-            L("setSession CLEARING DATABASE")
+            //dao.clearPlaylists()
+            L("setSession se.auth != getSession()?.auth")
         }
         dao.updateSession(se.toSessionEntity())
     }

@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -55,7 +56,8 @@ fun PlaylistInfoSection(
     isPlayingPlaylist: Boolean,
     isDownloading: Boolean,
     songs: List<Song>,
-    eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit
+    eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit,
+    artistClickListener: (ArtistId) -> Unit
 ) {
     Column(modifier = modifier) {
 
@@ -67,7 +69,9 @@ fun PlaylistInfoSection(
                 MusicAttributeChips(
                     attributes = toList(),
                     containerColor = MaterialTheme.colorScheme.secondary
-                )
+                ) {
+                    artistClickListener(it.id)
+                }
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
@@ -80,7 +84,9 @@ fun PlaylistInfoSection(
                 MusicAttributeChips(
                     attributes = toList(),
                     containerColor = MaterialTheme.colorScheme.background
-                )
+                ) {
+                    // TODO navigate to genre screen
+                }
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
@@ -133,6 +139,7 @@ fun PlaylistInfoSectionPreview() {
         isPlayingPlaylist = true,
         isDownloading = false,
         listOf(Song.mockSong),
-        eventListener = {}
+        eventListener = { },
+        artistClickListener = { }
     )
 }
