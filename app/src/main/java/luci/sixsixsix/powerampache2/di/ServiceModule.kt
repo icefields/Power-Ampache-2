@@ -21,22 +21,30 @@
  */
 package luci.sixsixsix.powerampache2.di
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionCommand
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaNotificationManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
+import luci.sixsixsix.powerampache2.presentation.MainActivity
 import javax.inject.Singleton
 
 @Module
@@ -81,7 +89,16 @@ object ServiceModule {
     fun provideMediaSession(
         @ApplicationContext context: Context,
         player: ExoPlayer
-    ) = MediaSession.Builder(context, player).build()
+    ) = MediaSession.Builder(context, player)
+        .setSessionActivity(
+            PendingIntent.getActivity(context, 3214,
+                Intent(context.applicationContext, MainActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                                Intent.FLAG_ACTIVITY_NEW_TASK),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        ).build()
 
     //@ServiceScoped
     @Singleton

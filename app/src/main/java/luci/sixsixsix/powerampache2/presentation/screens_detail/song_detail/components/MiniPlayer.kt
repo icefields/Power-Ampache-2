@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -41,8 +42,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.outlined.Shuffle
-import androidx.compose.material.icons.outlined.ShuffleOn
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
 import androidx.compose.material3.Card
@@ -53,21 +53,28 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.RepeatMode
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
@@ -76,20 +83,36 @@ fun MiniPlayer(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel
 ) {
-    mainViewModel.state.song?.let {song ->
-        MiniPlayerContent(
-            song = song,
-            modifier = modifier,
-            shuffleOn = mainViewModel.shuffleOn,
-            repeatMode = mainViewModel.repeatMode,
-            isPlaying = mainViewModel.isPlaying,
-            isBuffering = mainViewModel.isBuffering
-        ) { event ->
-            mainViewModel.onEvent(event)
+    AnimatedVisibility(mainViewModel.state.song != null) {
+        mainViewModel.state.song?.let {song ->
+            MiniPlayerContent(
+                song = song,
+                modifier = modifier,
+                shuffleOn = mainViewModel.shuffleOn,
+                repeatMode = mainViewModel.repeatMode,
+                isPlaying = mainViewModel.isPlaying,
+                isBuffering = mainViewModel.isBuffering
+            ) { event ->
+                mainViewModel.onEvent(event)
+            }
         }
     }
+
+//    mainViewModel.state.song?.let {song ->
+//        MiniPlayerContent(
+//            song = song,
+//            modifier = modifier,
+//            shuffleOn = mainViewModel.shuffleOn,
+//            repeatMode = mainViewModel.repeatMode,
+//            isPlaying = mainViewModel.isPlaying,
+//            isBuffering = mainViewModel.isBuffering
+//        ) { event ->
+//            mainViewModel.onEvent(event)
+//        }
+//    }
 }
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MiniPlayerContent(
@@ -101,6 +124,22 @@ fun MiniPlayerContent(
     modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit
 ) {
+    var showDeleteSongDialog by remember { mutableStateOf(false) }
+
+    if(showDeleteSongDialog) {
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteSongDialog = false
+            },
+            onConfirmation = {
+                showDeleteSongDialog = false
+                onEvent(MainEvent.Reset)
+            },
+            dialogTitle = stringResource(id = R.string.miniPlayer_reset_alert_title),
+            dialogText = stringResource(id = R.string.miniPlayer_reset_alert_message)
+        )
+    }
+
     Card(
         border = BorderStroke(
             width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
@@ -228,16 +267,25 @@ fun MiniPlayerContent(
                         contentDescription = "SkipNext"
                     )
                 }
+//                IconButton(modifier = Modifier.widthIn(min = 20.dp, max = 40.dp),
+//                    onClick = {
+//                        onEvent(MainEvent.Shuffle(!shuffleOn))
+//                    }) {
+//                    Icon(
+//                        imageVector = if(!shuffleOn)
+//                            Icons.Outlined.Shuffle
+//                        else
+//                            Icons.Outlined.ShuffleOn,
+//                        contentDescription = "shuffle toggle"
+//                    )
+//                }
                 IconButton(modifier = Modifier.widthIn(min = 20.dp, max = 40.dp),
                     onClick = {
-                        onEvent(MainEvent.Shuffle(!shuffleOn))
+                        showDeleteSongDialog = true
                     }) {
                     Icon(
-                        imageVector = if(!shuffleOn)
-                            Icons.Outlined.Shuffle
-                        else
-                            Icons.Outlined.ShuffleOn,
-                        contentDescription = "shuffle toggle"
+                        imageVector = Icons.Filled.Stop,
+                        contentDescription = "stop"
                     )
                 }
             }
@@ -251,7 +299,9 @@ fun MiniPlayerContent(
 fun previewMiniPlayer() {
     MiniPlayerContent(
         song = Song.mockSong,
-        modifier = Modifier.width(400.dp).height(50.dp),
+        modifier = Modifier
+            .width(400.dp)
+            .height(50.dp),
         isPlaying = true,
         isBuffering = true,
         shuffleOn = true,

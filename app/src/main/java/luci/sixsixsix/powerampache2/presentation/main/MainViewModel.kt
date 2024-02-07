@@ -398,6 +398,15 @@ class MainViewModel @Inject constructor(
             }
             MainEvent.OnFabPress ->
                 getSongsForQuickPlay()
+
+            MainEvent.Reset -> {
+                try {
+                    playlistManager.reset()
+                    stopMusicService()
+                } catch (e: Exception) {
+                    L.e(e)
+                }
+            }
         }
     }
 

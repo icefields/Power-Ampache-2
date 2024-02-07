@@ -21,7 +21,9 @@
  */
 package luci.sixsixsix.powerampache2.presentation
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.OptIn
@@ -114,6 +116,11 @@ class MainActivity : ComponentActivity() {
         L( "onRestart")
         // refresh token or autologin every time the app resumes
         authViewModel.verifyAndAutologin()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        L( "onNewIntent")
     }
 
     override fun onBackPressed() {

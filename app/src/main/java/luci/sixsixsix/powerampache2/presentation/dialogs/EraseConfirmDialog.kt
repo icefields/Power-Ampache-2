@@ -1,10 +1,30 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.dialogs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
@@ -36,7 +56,7 @@ fun EraseConfirmDialog(
         title = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Start
             ) {
                 Icon(
                     imageVector = icon,
@@ -67,7 +87,7 @@ fun EraseConfirmDialog(
                         horizontal = 6.dp,
                         vertical = 0.dp
                     ),
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp
             )
@@ -76,12 +96,21 @@ fun EraseConfirmDialog(
             onDismissRequest()
         },
         confirmButton = {
-            RoundedCornerButton(text = "CONFIRM") {
+            RoundedCornerButton(
+                text = android.R.string.ok,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                borderEnabled = false
+            ) {
                 onConfirmation()
             }
         },
         dismissButton = {
-            RoundedCornerButton(text = "DISMISS") {
+            RoundedCornerButton(
+                text = android.R.string.cancel,
+                contentColor = MaterialTheme.colorScheme.primary,
+                borderEnabled = false
+            ) {
                 onDismissRequest()
             }
         }

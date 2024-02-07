@@ -27,6 +27,8 @@ import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -103,15 +105,15 @@ fun LoggedInScreen(
         sheetDragHandle = {
             AnimatedVisibility(
                 visible = mainViewModel.state.song != null,
-                enter = fadeIn() + expandIn(),
-                exit = shrinkOut() + fadeOut(),
+                enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn(),
+                exit = shrinkOut() + slideOutVertically(),
             ) {
                 SheetDragHandle(scaffoldState = scaffoldState, mainViewModel = mainViewModel)
             }
         },
         sheetShape = RectangleShape,
         sheetSwipeEnabled = true,
-        sheetPeekHeight = getPeakHeight(mainViewModel.state.song) // peek only when a song is pulled up
+        sheetPeekHeight = getPeakHeight(mainViewModel.state.song) // peek only when current song not null
     ) {
         Column {
             DestinationsNavHost(
@@ -134,46 +136,5 @@ fun LoggedInScreen(
 }
 
 @Composable
-fun getPeakHeight(song: Song?): Dp =
+fun getPeakHeight(song: Song?): Dp = //TODO find a way to animate this (low-priority)
     if (song == null) { 0.dp } else { dimensionResource(id = R.dimen.miniPlayer_height) }
-
-
-
-
-//DestinationsNavHost(
-//navGraph = NavGraphs.root,
-//dependenciesContainerBuilder = {
-//    // those are declared in the activity
-//    dependency(mainViewModel)
-//    dependency(authViewModel)
-    //dependency(homeScreenViewModel)
-
-//                    dependency(hiltViewModel<QueueViewModel>(LocalContext.current as MainActivity))
-//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
-//                    dependency(hiltViewModel<HomeScreenViewModel>(LocalContext.current as MainActivity))
-//                    dependency(NavGraphs.root) {
-//                        val parentEntry = remember(navBackStackEntry) {
-//                            navController.getBackStackEntry(NavGraphs.root.route)
-//                        }
-//                        hiltViewModel<HomeScreenViewModel>(parentEntry)
-//                    }
-
-
-
-
-    // To tie SettingsViewModel to "settings" nested navigation graph,
-    // making it available to all screens that belong to it
-//                    dependency(NavGraphs.root) {
-//                        val parentEntry = remember(navBackStackEntry) {
-//                            navController.getBackStackEntry(NavGraphs.root.route)
-//                        }
-//                        hiltViewModel<MainViewModel>(parentEntry)
-//                    }
-//},
-//modifier = Modifier
-//.fillMaxWidth()
-//.padding(
-//top = it.calculateTopPadding(),
-//bottom = it.calculateBottomPadding()
-//)
-//)

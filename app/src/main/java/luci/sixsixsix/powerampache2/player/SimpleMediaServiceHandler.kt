@@ -49,6 +49,8 @@ class SimpleMediaServiceHandler @Inject constructor(
         job = Job()
     }
 
+    fun isPlaying() = player.isPlaying
+
     fun addMediaItem(mediaItem: MediaItem) {
         player.setMediaItem(mediaItem)
         player.prepare()
@@ -84,8 +86,6 @@ class SimpleMediaServiceHandler @Inject constructor(
         }
         player.prepare()
     }
-
-    fun isPlaying() = player.isPlaying
 
     suspend fun onPlayerEvent(playerEvent: PlayerEvent) {
         L(playerEvent)
