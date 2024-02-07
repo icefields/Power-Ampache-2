@@ -66,6 +66,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
@@ -88,7 +89,6 @@ import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.AlbumDetailEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -232,6 +232,9 @@ fun PlaylistDetailScreen(
                         isPlayingPlaylist = isPlayingPlaylist,
                         isDownloading = mainViewModel.state.isDownloading,
                         songs = viewModel.state.getSongList(),
+                        artistClickListener = {
+                            artistId -> navigateToArtist(navigator, artistId)
+                        },
                         eventListener = { event ->
                             when(event) {
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
@@ -302,9 +305,7 @@ fun PlaylistDetailScreen(
                                                     albumId = song.album.id,
                                                     album = null))
                                             SongItemEvent.GO_TO_ARTIST ->
-                                                navigator.navigate(ArtistDetailScreenDestination(
-                                                    artistId = song.artist.id,
-                                                    artist = null))
+                                                navigateToArtist(navigator, song.artist.id)
                                             SongItemEvent.ADD_SONG_TO_QUEUE ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                                             SongItemEvent.ADD_SONG_TO_PLAYLIST ->
@@ -336,6 +337,15 @@ fun PlaylistDetailScreen(
             }
         }
     }
+}
+
+private fun navigateToArtist(navigator: DestinationsNavigator, artistId: ArtistId) {
+    navigator.navigate(
+        ArtistDetailScreenDestination(
+            artistId = artistId,
+            artist = null
+        )
+    )
 }
 
 @Composable

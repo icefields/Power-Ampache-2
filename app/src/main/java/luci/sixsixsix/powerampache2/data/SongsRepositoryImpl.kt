@@ -263,8 +263,8 @@ class SongsRepositoryImpl @Inject constructor(
         val resultSet = HashSet<Song>()
         // add downloaded songs
         resultSet.addAll(dao.getOfflineSongs().map { it.toSong() })
-        // add cached songs
-        resultSet.addAll(dao.searchSong("").map { it.toSong() })
+        // add cached songs? Too many can cause a crash when saving state
+        // resultSet.addAll(dao.searchSong("").map { it.toSong() })
         // if not big enough start fetching from web
         if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
             // if not enough downloaded songs fetch most played songs

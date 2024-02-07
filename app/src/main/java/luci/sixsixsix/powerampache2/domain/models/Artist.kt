@@ -27,6 +27,8 @@ import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.common.Constants.LOADING_STRING
 
+typealias ArtistId = String
+
 @Parcelize
 data class Artist(
     val id: String,
@@ -63,6 +65,18 @@ data class Artist(
         fun loading(): Artist = Artist(
             id = ERROR_STRING,
             name = LOADING_STRING,
+            albumCount = ERROR_INT,
+            songCount = ERROR_INT,
+            genre = listOf(),
+            artUrl = ERROR_STRING,
+            time = 0,
+            yearFormed = 0,
+            placeFormed = null
+        )
+
+        fun empty(): Artist = Artist(
+            id = ERROR_STRING,
+            name = "",
             albumCount = ERROR_INT,
             songCount = ERROR_INT,
             genre = listOf(),

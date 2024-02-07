@@ -68,6 +68,7 @@ import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
+import luci.sixsixsix.powerampache2.presentation.common.DonateButtonContent
 import luci.sixsixsix.powerampache2.presentation.common.DonateButtonPreview
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpCheckBox
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
@@ -125,7 +126,7 @@ fun SettingsScreenContent(
                 2 -> SettingsThemeSelector(currentTheme = powerAmpTheme) {
                     onThemeSelected(it)
                 }
-                5 -> donateButton
+                5 -> donateButton()
                 6 -> serverInfo?.let {ServerInfoSection(it) }
                 3 -> PowerAmpSwitch(
                     text = "Enable Anonymous Debug Logging",
@@ -400,6 +401,6 @@ fun PreviewSettingsScreen() {
         onThemeSelected = {
         },
         onEnableLoggingChange = {},
-        donateButton = { DonateButtonPreview() }
+        donateButton = { DonateButtonContent(isExpanded = true, isTransparent = false) }
     )
 }

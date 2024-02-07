@@ -63,7 +63,9 @@ fun ArtistInfoSection(
         MusicAttributeChips(
             attributes = artist.genre,
             containerColor = MaterialTheme.colorScheme.background
-        )
+        ) {
+            // TODO navigate to genre
+        }
 
         Spacer(modifier = Modifier.height(6.dp))
         if (artist.yearFormed > 0) {

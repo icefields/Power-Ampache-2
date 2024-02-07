@@ -104,7 +104,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 sharePlaylist(playlistId = state.playlist.id)
             PlaylistDetailEvent.OnShufflePlaylist -> if (state.songs.isNotEmpty()) {
                 val shuffled = state.getSongList().shuffled()
-                playlistManager.addToCurrentQueueNext(shuffled)
+                playlistManager.replaceCurrentQueue(shuffled)
                 playlistManager.moveToSongInQueue(shuffled[0])
             }
             is PlaylistDetailEvent.OnRemoveSong ->

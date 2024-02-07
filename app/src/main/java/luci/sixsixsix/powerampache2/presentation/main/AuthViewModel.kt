@@ -64,7 +64,7 @@ class AuthViewModel @Inject constructor(
             L(it)
             if (it == null) {
                 pingScheduler.cancel()
-                playlistManager.reset()
+                //playlistManager.reset()
                 // apply default settings
 
                 // setting the session to null will show the login screen, but the autologin call
@@ -112,7 +112,7 @@ class AuthViewModel @Inject constructor(
                     ping.data?.second?.let {
                         state = state.copy(session = it, isLoading = false)
                     } ?: run {
-                        playlistManager.reset()
+                        // playlistManager.reset()
                         // do not show loading screen during ping, only during autologin
                         state = state.copy(isLoading = true)
                         autologin()

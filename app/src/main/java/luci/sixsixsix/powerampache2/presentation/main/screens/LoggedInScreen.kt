@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
@@ -78,6 +80,16 @@ fun LoggedInScreen(
                     SnackbarResult.Dismissed -> mainViewModel.onEvent(MainEvent.OnDismissErrorMessage)
                     SnackbarResult.ActionPerformed -> mainViewModel.onEvent(MainEvent.OnDismissErrorMessage)
                 }
+            }
+        }
+    }
+
+    LaunchedEffect(scaffoldState.bottomSheetState, state.song) {
+        if (state.song == null && scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+            try {
+                scaffoldState.bottomSheetState.hide()
+            } catch (e: Exception) {
+                L.e(e)
             }
         }
     }

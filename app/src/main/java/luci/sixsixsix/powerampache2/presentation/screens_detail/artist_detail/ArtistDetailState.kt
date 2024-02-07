@@ -25,7 +25,7 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Artist
 
 data class ArtistDetailState (
-    val artist: Artist = Artist.loading(),
+    val artist: Artist = Artist.empty(),
     val albums: List<Album> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,

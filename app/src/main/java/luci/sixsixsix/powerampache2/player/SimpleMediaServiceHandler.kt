@@ -54,7 +54,11 @@ class SimpleMediaServiceHandler @Inject constructor(
         player.prepare()
     }
 
+    fun getMediaItemCount() = player.mediaItemCount
+
     fun addMediaItemList(mediaItems: List<MediaItem>) {
+        L("addMediaItemList",mediaItems.size,"currently in the player: ", player.mediaItemCount)
+        if(mediaItems.isNullOrEmpty() && player.mediaItemCount == 0) return
         // find current item in the list
         // split current list in 2, before and after current element
         // remove everything from mediaItems except the current
@@ -64,8 +68,8 @@ class SimpleMediaServiceHandler @Inject constructor(
             player.removeMediaItems(0, player.currentMediaItemIndex)
             player.removeMediaItems(player.currentMediaItemIndex + 1, player.mediaItemCount)
 
-            val indexInQueue = mediaItems.indexOf(player.currentMediaItem)
-
+            val indexInQueue = mediaItems.map { mediaItem ->  mediaItem.mediaId }.indexOf(player.currentMediaItem?.mediaId)
+            L("indexInQueue", indexInQueue)
             if (indexInQueue >= 0 && indexInQueue < mediaItems.size) {
                 player.addMediaItems(0, mediaItems.subList(0, indexInQueue))
                 player.addMediaItems(
@@ -80,6 +84,8 @@ class SimpleMediaServiceHandler @Inject constructor(
         }
         player.prepare()
     }
+
+    fun isPlaying() = player.isPlaying
 
     suspend fun onPlayerEvent(playerEvent: PlayerEvent) {
         L(playerEvent)
@@ -104,15 +110,24 @@ class SimpleMediaServiceHandler @Inject constructor(
                 var indexToSeekTo = -1
                 var i = 0
                 while(indexToSeekTo == -1 && i < player.mediaItemCount) {
-                    if (player.getMediaItemAt(i) == playerEvent.mediaItem) {
+                    L(player.getMediaItemAt(i).mediaId , playerEvent.mediaItem.mediaId)
+                    if (player.getMediaItemAt(i).mediaId == playerEvent.mediaItem.mediaId) {
                         indexToSeekTo = i
                     }
                     ++i
                 }
-                player.seekTo(indexToSeekTo, 0)
-                player.play()
-                _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
-                startProgressUpdate()
+
+                if (indexToSeekTo >= 0) {
+                    player.seekTo(indexToSeekTo, 0)
+                }
+
+                try {
+                    player.play()
+                    _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
+                    startProgressUpdate()
+                } catch (e: Exception) {
+                    L.e(e)
+                }
             }
             is PlayerEvent.RepeatToggle -> player.repeatMode =
                 when(playerEvent.repeatMode) {
@@ -128,9 +143,10 @@ class SimpleMediaServiceHandler @Inject constructor(
         super.onMediaItemTransition(mediaItem, reason)
         // if the media player is handling a playlist, when changing song update UI accordingly
         try {
-            playlistManager.updateCurrentSong(
-                newSong = playlistManager.currentQueueState.value.filter { it.mediaId == mediaItem?.mediaId }[0]
-            )
+            val qq = playlistManager.currentQueueState.value.filter { it.mediaId == mediaItem?.mediaId }
+            if (qq.isNotEmpty()) {
+                playlistManager.updateCurrentSong(newSong = qq[0])
+            }
         } catch (e: Exception) {
             L.e(e)
         }

@@ -65,6 +65,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.common.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.common.SongItem
@@ -76,6 +77,7 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigator
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
@@ -207,6 +209,9 @@ fun AlbumDetailScreen(
                         isLikeLoading = state.isLikeLoading,
                         isDownloading = mainViewModel.state.isDownloading,
                         isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
+                        artistClickListener = { artistId ->
+                            navigateToArtist(navigator, artistId)
+                        },
                         eventListener = { event ->
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {
@@ -273,12 +278,8 @@ fun AlbumDetailScreen(
                                                 mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                                             SongItemEvent.GO_TO_ALBUM -> { } // No ACTION, we're already in this album //navigator.navigate(AlbumDetailScreenDestination(viewModel.state.album.id, viewModel.state.album))
                                             SongItemEvent.GO_TO_ARTIST ->
-                                                navigator.navigate(
-                                                    ArtistDetailScreenDestination(
-                                                        artistId = viewModel.state.album.artist.id,
-                                                        artist = null
-                                                    )
-                                                )
+                                                navigateToArtist(navigator, viewModel.state.album.artist.id)
+
                                             SongItemEvent.ADD_SONG_TO_QUEUE ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                                             SongItemEvent.ADD_SONG_TO_PLAYLIST ->
@@ -305,6 +306,15 @@ fun AlbumDetailScreen(
             }
         }
     }
+}
+
+private fun navigateToArtist(navigator: DestinationsNavigator, artistId: ArtistId) {
+    navigator.navigate(
+        ArtistDetailScreenDestination(
+            artistId = artistId,
+            artist = null
+        )
+    )
 }
 
 private val albumBackgroundGradient

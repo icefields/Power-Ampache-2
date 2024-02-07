@@ -133,8 +133,11 @@ fun DonateButtonSingle(
     isShowDonateButtons: MutableState<Boolean>,
     isTransparent: Boolean = false
 ) {
-    DefaultFullWidthButton(
-        colours = getButtonBgColour(isTransparent = isTransparent),
+    TextButton(
+        modifier = Modifier
+            .fillMaxWidth(),
+        colors = getButtonBgColour(isTransparent = isTransparent),
+        shape = RoundedCornerShape(10.dp),
         onClick = {
             isShowDonateButtons.value = true
         }
@@ -146,7 +149,7 @@ fun DonateButtonSingle(
                 .padding(vertical = 9.dp),
             text = "Donate ",
             textAlign = TextAlign.Center,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Normal,
             fontSize = 18.sp
         )
     }

@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 
@@ -58,19 +59,24 @@ fun AlbumInfoSection(
     isDownloading: Boolean,
     isPlaylistEditLoading: Boolean,
     modifier: Modifier,
-    eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit
+    eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit,
+    artistClickListener: (ArtistId) -> Unit
 ) {
     Column(modifier = modifier) {
         MusicAttributeChips(
             attributes = album.genre,
             containerColor = MaterialTheme.colorScheme.background
-        )
+        ) {
+            // TODO go to genre page
+        }
 
         Spacer(modifier = Modifier.height(4.dp))
         MusicAttributeChips(
             attributes = album.artists,
             containerColor = MaterialTheme.colorScheme.secondary
-        )
+        ) {
+            artistClickListener(it.id)
+        }
 
         Spacer(modifier = Modifier.height(6.dp))
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -132,6 +138,7 @@ fun AlbumInfoSectionPreview() {
         isLikeLoading = false,
         isPlaylistEditLoading = false,
         isDownloading = true,
-        eventListener = {},
+        eventListener = { },
+        artistClickListener = { }
     )
 }
