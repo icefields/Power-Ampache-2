@@ -30,7 +30,6 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.media3.common.util.NotificationUtil.createNotificationChannel
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
@@ -91,17 +90,15 @@ class SimpleMediaNotificationManager @Inject constructor(
                 // TODO tap on notification should open the app
                 .setContentIntent(
                     PendingIntent.getActivity(
-                    context.applicationContext,
-                    3214,
-                    Intent(context.applicationContext, MainActivity::class.java)
-                        /*.addFlags(
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                                Intent.FLAG_ACTIVITY_NEW_TASK
-                    )*/,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                ))
-                .build()
+                        context.applicationContext,
+                        3214,
+                        Intent(context.applicationContext, MainActivity::class.java)
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                                        Intent.FLAG_ACTIVITY_NEW_TASK),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                ).build()
         } else {
             TODO("VERSION SDK < O")
         }

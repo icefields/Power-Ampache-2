@@ -1,5 +1,11 @@
 package luci.sixsixsix.powerampache2.presentation.main.screens.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -46,11 +52,25 @@ fun SheetDragHandle(
                 }
             }
         ) {
-            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+            AnimatedVisibility(visible = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded,
+                enter = slideInVertically(),
+                exit = fadeOut(spring(stiffness = Spring.StiffnessHigh))
+            ) {
                 SongDetailTopBar(mainViewModel = mainViewModel)
-            } else {
+            }
+            AnimatedVisibility(
+                visible = scaffoldState.bottomSheetState.currentValue != SheetValue.Expanded,
+                enter = slideInVertically(initialOffsetY = { it / 2 }),
+                exit = slideOutVertically()
+            ) {
                 MiniPlayer(mainViewModel = mainViewModel)
             }
+
+//            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+//                SongDetailTopBar(mainViewModel = mainViewModel)
+//            } else {
+//                MiniPlayer(mainViewModel = mainViewModel)
+//            }
         }
     }
 }
