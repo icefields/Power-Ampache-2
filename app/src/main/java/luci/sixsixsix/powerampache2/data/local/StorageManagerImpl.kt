@@ -22,24 +22,23 @@
 package luci.sixsixsix.powerampache2.data.local
 
 import android.app.Application
-import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 private const val BUFFER_SIZE = 4 * 1024
 private const val SUB_DIR = "offline_music"
 
 class StorageManagerImpl @Inject constructor(
-    private val weakContext: WeakReference<Application>,
+    private val weakContext: WeakContext,
     private val musicRepository: MusicRepository
 ): StorageManager {
     @Throws(Exception::class)

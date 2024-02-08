@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="onSurfaceVariant">#FFCBCED1</color>
-    <color name="launcherBgColour">#2d2e33</color>
+<!--    <color name="launcherBgColour">#2d2e33</color>-->
 </resources>

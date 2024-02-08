@@ -174,7 +174,9 @@ class AlbumsRepositoryImpl @Inject constructor(
         ).albums?.map { it.toAlbum() }?.let {
             emit(Resource.Success(data = it, networkData = it))
         }?:run {
-            throw Exception("error connecting or getting data")
+            // TODO throw exception, without updating the UI error message snackbar! create a MusicException that ErrorHAndler will intercept?
+            // throw Exception("error connecting or getting data")
+            L.e("error connecting or getting data")
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getAlbumsStats()", e, this) }

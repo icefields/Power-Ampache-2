@@ -38,7 +38,9 @@ import androidx.media3.session.SessionCommand
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -48,32 +50,13 @@ import luci.sixsixsix.powerampache2.presentation.MainActivity
 import javax.inject.Singleton
 
 @Module
-//@InstallIn(ServiceComponent::class) // TODO: double check if Singleton is better
-@InstallIn(SingletonComponent::class)
+@InstallIn(ServiceComponent::class) // TODO: double check if Singleton is better
+//@InstallIn(SingletonComponent::class)
 @OptIn(UnstableApi::class)
 object ServiceModule {
-    //@ServiceScoped
-    @Singleton
-    @Provides
-    fun provideAudioAttributes() = AudioAttributes.Builder()
-        .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-        .setUsage(C.USAGE_MEDIA)
-        .build()
 
-    //@ServiceScoped
-    @Singleton
-    @Provides
-    fun providePlayer(
-        @ApplicationContext context: Context,
-        audioAttributes: AudioAttributes
-    ): ExoPlayer = ExoPlayer.Builder(context)
-            .setAudioAttributes(audioAttributes, true)
-            .setHandleAudioBecomingNoisy(true)
-            .setTrackSelector(DefaultTrackSelector(context))
-            .build()
-
-    //@ServiceScoped
-    @Singleton
+    @ServiceScoped
+    //@Singleton
     @Provides
     fun provideNotificationManager(
         @ApplicationContext context: Context,
@@ -84,7 +67,7 @@ object ServiceModule {
     )
 
     //@ServiceScoped
-    @Singleton
+    //@Singleton
     @Provides
     fun provideMediaSession(
         @ApplicationContext context: Context,
@@ -101,8 +84,5 @@ object ServiceModule {
         ).build()
 
     //@ServiceScoped
-    @Singleton
-    @Provides
-    fun provideServiceHandler(player: ExoPlayer, playlistManager: MusicPlaylistManager) =
-        SimpleMediaServiceHandler(playlistManager = playlistManager, player = player)
+
 }

@@ -107,9 +107,18 @@ fun PlaylistDetailScreen(
     var infoVisibility by remember { mutableStateOf(true) }
     var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
 
-    val backgrounds = viewModel.generateBackgrounds()
-    val randomBackgroundTop = backgrounds.first
-    val randomBackgroundBottom = backgrounds.second
+    var randomBackgroundTop by remember { mutableStateOf("") }
+    var randomBackgroundBottom by remember { mutableStateOf("") }
+    if (randomBackgroundBottom.isEmpty() || randomBackgroundTop.isEmpty()) {
+        val backgrounds = viewModel.generateBackgrounds()
+        if (randomBackgroundBottom.isEmpty()) {
+            randomBackgroundBottom = backgrounds.second
+        }
+        if (randomBackgroundTop.isEmpty()) {
+            randomBackgroundTop = backgrounds.first
+        }
+    }
+
     var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
 
     val configuration = LocalConfiguration.current
