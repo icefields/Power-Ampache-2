@@ -34,10 +34,10 @@ object Constants {
     const val ERROR_STRING = "ERROR"
     const val LOADING_STRING = "LOADING"
 
-    const val RESET_QUEUE_ON_NEW_SESSION = true
+    const val RESET_QUEUE_ON_NEW_SESSION = false
     const val CLEAR_TABLE_AFTER_FETCH = false
 
-    const val QUICK_PLAY_MIN_SONGS = 32
+    const val QUICK_PLAY_MIN_SONGS = 50
 
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"

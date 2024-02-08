@@ -63,9 +63,12 @@
     <string name="quality_low_subtitle">96kbps</string>
 
     <!--- DIALOGS -->
-    <string name="miniPlayer_reset_alert_message">Stop music playback and reset the queue?</string>
+    <string name="miniPlayer_reset_alert_message">LONG PRESS To stop music playback and reset the Queue</string>
     <string name="miniPlayer_reset_alert_title">STOP/RESET</string>
     <string name="dialog_create">CREATE</string>
+
+    <!---...-->
+    <string name="version_quote">Quote of the version:\nHappiness is just an attitude</string>
 
 </resources>
 

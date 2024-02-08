@@ -39,6 +39,13 @@
         
         <receiver android:name=".data.remote.AlarmReceiver"/>
 
+<!--        <receiver android:name="androidx.media.session.MediaButtonReceiver"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MEDIA_BUTTON" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
+
         <!-- remove default worker initializer to provide custom one-->
         <provider
             android:authorities="${applicationId}.androidx-startup"

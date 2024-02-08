@@ -150,7 +150,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            result.networkData?.let { songs ->
+                            result.data?.let { songs ->
                                 val songWrapperList = mutableListOf<SongWrapper>()
                                 songs.forEach { song ->
                                     songWrapperList.add(

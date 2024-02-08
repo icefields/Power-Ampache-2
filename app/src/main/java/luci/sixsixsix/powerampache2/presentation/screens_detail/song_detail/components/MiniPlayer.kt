@@ -21,11 +21,13 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,17 +55,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,10 +69,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.RepeatMode
-import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 
@@ -97,19 +96,6 @@ fun MiniPlayer(
             }
         }
     }
-
-//    mainViewModel.state.song?.let {song ->
-//        MiniPlayerContent(
-//            song = song,
-//            modifier = modifier,
-//            shuffleOn = mainViewModel.shuffleOn,
-//            repeatMode = mainViewModel.repeatMode,
-//            isPlaying = mainViewModel.isPlaying,
-//            isBuffering = mainViewModel.isBuffering
-//        ) { event ->
-//            mainViewModel.onEvent(event)
-//        }
-//    }
 }
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -124,21 +110,22 @@ fun MiniPlayerContent(
     modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit
 ) {
-    var showDeleteSongDialog by remember { mutableStateOf(false) }
+//    var showDeleteSongDialog by remember { mutableStateOf(false) }
+    val weakContext = WeakContext(LocalContext.current.applicationContext)
 
-    if(showDeleteSongDialog) {
-        EraseConfirmDialog(
-            onDismissRequest = {
-                showDeleteSongDialog = false
-            },
-            onConfirmation = {
-                showDeleteSongDialog = false
-                onEvent(MainEvent.Reset)
-            },
-            dialogTitle = stringResource(id = R.string.miniPlayer_reset_alert_title),
-            dialogText = stringResource(id = R.string.miniPlayer_reset_alert_message)
-        )
-    }
+//    if(showDeleteSongDialog) {
+//        EraseConfirmDialog(
+//            onDismissRequest = {
+//                showDeleteSongDialog = false
+//            },
+//            onConfirmation = {
+//                showDeleteSongDialog = false
+//                onEvent(MainEvent.Reset)
+//            },
+//            dialogTitle = stringResource(id = R.string.miniPlayer_reset_alert_title),
+//            dialogText = stringResource(id = R.string.miniPlayer_reset_alert_message)
+//        )
+//    }
 
     Card(
         border = BorderStroke(
@@ -279,11 +266,27 @@ fun MiniPlayerContent(
 //                        contentDescription = "shuffle toggle"
 //                    )
 //                }
-                IconButton(modifier = Modifier.widthIn(min = 20.dp, max = 40.dp),
+                IconButton(
+                    modifier = Modifier
+                        .widthIn(min = 20.dp, max = 40.dp)
+                        ,
                     onClick = {
-                        showDeleteSongDialog = true
+                        //showDeleteSongDialog = true
                     }) {
                     Icon(
+                        modifier = Modifier
+                            .widthIn(min = 20.dp, max = 40.dp)
+                            .combinedClickable(
+                                onClick = {
+                                    L.e("CLICK")
+                                    weakContext.get()?.let { context ->
+                                        Toast.makeText(context, R.string.miniPlayer_reset_alert_message, Toast.LENGTH_LONG).show()
+                                    }
+                                },
+                                onLongClick = {
+                                    onEvent(MainEvent.Reset)
+                                }
+                            ),
                         imageVector = Icons.Filled.Stop,
                         contentDescription = "stop"
                     )
@@ -306,5 +309,5 @@ fun previewMiniPlayer() {
         isBuffering = true,
         shuffleOn = true,
         repeatMode = RepeatMode.OFF
-    ) {}
+    ) { }
 }

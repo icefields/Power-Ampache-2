@@ -591,6 +591,19 @@ class MainViewModel @Inject constructor(
         isLoading = false
         isBuffering = false
         state = state.copy(isFabLoading = false)
+
+        // attempt to stop the service
+        try {
+            if (!simpleMediaServiceHandler.isPlaying()) {
+                stopMusicService()
+            }
+        } catch (e: Exception) {
+            if (!isPlaying) {
+                stopMusicService()
+            }
+            L.e(e)
+        }
+
         super.onCleared()
     }
 

@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
@@ -51,7 +52,6 @@ import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import okhttp3.internal.http.HTTP_OK
-import java.lang.ref.WeakReference
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -70,7 +70,7 @@ class SongsRepositoryImpl @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val errorHandler: ErrorHandler,
     private val storageManagerImpl: StorageManagerImpl,
-    private val weakContext: WeakReference<Application>
+    private val weakContext: WeakContext
 ): SongsRepository {
     private val dao = db.dao
 
@@ -220,11 +220,38 @@ class SongsRepositoryImpl @Inject constructor(
         L("repo getSongsFromPlaylist playlistId: $playlistId")
 
         val auth = getSession()!!
-        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId)
-        response.error?.let { throw(MusicException(it.toError())) }
-        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
+        val songs = mutableListOf<Song>()
+        var isFinished = false
+        val limit = 100
+        var offset = 0
+        var lastException: MusicException? = null
+        do {
+            val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId, limit = limit, offset = offset)
+            // save the exception if any
+            response.error?.let { lastException = MusicException(it.toError()) }
+            // a response exists
+            response.songs?.let { songsDto ->
+                val partialResponse = songsDto.map { songDto -> songDto.toSong() }
+                if (partialResponse.isNotEmpty()) {
+                    songs.addAll(partialResponse)
+                    emit(Resource.Success(data = songs.toList(), networkData = partialResponse))
+                } else {
+                    // if no more items to fetch finish
+                    isFinished = true
+                }
+            } ?: run {
+                // a response DOES NOT exist
+                // if there's an error and so songs retrieved just finish
+                isFinished = true
+            }
+            offset += limit
+        } while (!isFinished)
 
-        emit(Resource.Success(data = songs, networkData = songs))
+//        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId, limit = 50, offset = offset)
+//        response.error?.let { throw(MusicException(it.toError())) }
+//        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
+        //emit(Resource.Success(data = songs.toList(), networkData = songs.toList()))
+
         emit(Resource.Loading(false))
 
         // cache songs after emitting success

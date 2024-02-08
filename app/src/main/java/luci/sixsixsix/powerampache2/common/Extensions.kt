@@ -29,7 +29,10 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
+import java.lang.ref.WeakReference
 import java.security.MessageDigest
+
+typealias WeakContext = WeakReference<Context>
 
 fun String.md5(): String {
     return hashString(this, "MD5")

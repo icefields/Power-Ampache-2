@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -119,7 +120,7 @@ fun SettingsScreenContent(
     donateButton: @Composable () -> Unit = { DonateButton(isExpanded = true, isTransparent = false) }
 ) {
     LazyColumn(modifier = modifier) {
-        items(9) { index ->
+        items(10) { index ->
             when(index) {
                 0 -> SettingsHeader()
                 1 -> userState?.let { user -> UserInfoSection(user = user) }
@@ -150,7 +151,17 @@ fun SettingsScreenContent(
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontSize = 16.sp
                 )
-                8 -> WorkInProgressStrip()
+                9 -> WorkInProgressStrip()
+                8 -> Text(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    text = stringResource(id = R.string.version_quote),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Light,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    fontSize = 16.sp
+                )
                 else -> {}
             }
         }
