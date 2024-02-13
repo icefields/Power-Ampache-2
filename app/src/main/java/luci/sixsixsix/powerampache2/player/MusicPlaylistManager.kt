@@ -29,15 +29,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 data class CurrentSongState(val song: Song? = null)
-data class ErrorMessageState(var errorMessage: String? = null)
+data class ErrorLogMessageState(var errorMessage: String? = null)
+data class LogMessageState(var logMessage: String? = null)
 
 @Singleton
 class MusicPlaylistManager @Inject constructor() {
     private val _currentSongState = MutableStateFlow(CurrentSongState())
     val currentSongState: StateFlow<CurrentSongState> = _currentSongState //val currentSong = _currentSong.asStateFlow()
 
-    private val _errorMessageState = MutableStateFlow(ErrorMessageState())
-    val errorMessageState: StateFlow<ErrorMessageState> = _errorMessageState
+    private val _logMessageUserReadableState = MutableStateFlow(LogMessageState())
+    val logMessageUserReadableState: StateFlow<LogMessageState> = _logMessageUserReadableState
+
+    private val _errorLogMessageState = MutableStateFlow(ErrorLogMessageState())
+    val errorLogMessageState: StateFlow<ErrorLogMessageState> = _errorLogMessageState
 
     private val _currentSearchQuery = MutableStateFlow("")
     val currentSearchQuery: StateFlow<String> = _currentSearchQuery
@@ -71,9 +75,17 @@ class MusicPlaylistManager @Inject constructor() {
         _currentSongState.value = CurrentSongState(song = newSong)
     }
 
-    fun updateErrorMessage(errorMessage: String?) {
-        L("MusicPlaylistManager updateErrorMessage", errorMessage)
-        _errorMessageState.value = ErrorMessageState(errorMessage = errorMessage)
+    fun updateUserMessage(logMessage: String?) {
+        L("MusicPlaylistManager updateUserMessage", logMessage)
+        _logMessageUserReadableState.value = LogMessageState(logMessage = logMessage)
+
+        // also log for debug reasons
+        updateErrorLogMessage(logMessage)
+    }
+
+    fun updateErrorLogMessage(logMessage: String?) {
+        L("MusicPlaylistManager updateErrorLogMessage", logMessage)
+        _errorLogMessageState.value = ErrorLogMessageState(errorMessage = logMessage)
     }
 
     fun updateDownloadedSong(song: Song?) {
@@ -164,7 +176,7 @@ class MusicPlaylistManager @Inject constructor() {
 
     fun getCurrentSong(): Song? = currentSongState.value.song
 
-    fun getErrorMessage(): String? = errorMessageState.value.errorMessage
+   // fun getErrorMessage(): String? = logMessageUserReadableState.value.errorMessage
 
     /**
      * remove all songs except the currently playing one if any
@@ -176,6 +188,7 @@ class MusicPlaylistManager @Inject constructor() {
         _currentSongState.value = CurrentSongState(song = null)
         updateSearchQuery(searchQuery= "")
         replaceCurrentQueue(listOf())
-        updateErrorMessage(errorMessage= null)
+        updateUserMessage(logMessage = null)
+        updateErrorLogMessage(logMessage = null)
     }
 }

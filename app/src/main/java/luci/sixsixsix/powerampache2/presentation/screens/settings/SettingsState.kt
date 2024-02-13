@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.settings
+package luci.sixsixsix.powerampache2.presentation.screens.settings
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -32,5 +32,5 @@ data class SettingsState (
     val localSettings: LocalSettings = LocalSettings.defaultSettings(),
     val user: User? = null,
     val serverInfo: ServerInfo? = null,
-    val appVersionInfoStr: String = ""
+    val appVersionInfoStr: String = "",
 ): Parcelable

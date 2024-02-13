@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -215,13 +216,12 @@ fun OfflineSongsMainContent(
             EmptyListView(title = "You haven't downloaded any song yet")
         }
 
-        LazyColumn(modifier = Modifier.fillMaxSize(),) {
-            items(
-                state.songs.size
-            ) { i ->
-                val song = state.songs[i]
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(state.songs) { song ->
                 SongItem(
                     song = song,
+                    isSongDownloaded = true,
+                    showDownloadedSongMarker = false,
                     songItemEventListener = { event ->
                         when(event) {
                             SongItemEvent.PLAY_NEXT ->
@@ -229,6 +229,8 @@ fun OfflineSongsMainContent(
                             SongItemEvent.SHARE_SONG ->
                                 mainViewModel.onEvent(MainEvent.OnShareSong(song))
                             SongItemEvent.DOWNLOAD_SONG -> { } // DO NOTHING
+                            SongItemEvent.EXPORT_DOWNLOADED_SONG ->
+                                mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
                             SongItemEvent.GO_TO_ALBUM -> navigator?.navigate(
                                 AlbumDetailScreenDestination(albumId = song.album.id, album = null)
                             )

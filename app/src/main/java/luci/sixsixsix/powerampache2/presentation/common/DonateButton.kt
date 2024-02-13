@@ -1,15 +1,32 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.common
 
-import android.R.attr.label
-import android.R.attr.text
 import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
@@ -20,6 +37,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CurrencyBitcoin
 import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,7 +57,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.AndroidViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,15 +66,14 @@ import luci.sixsixsix.powerampache2.common.Constants.DONATION_BITCOIN_ADDRESS
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
-
 @Composable
 fun DonateButton(
     modifier: Modifier = Modifier,
     isExpanded:Boolean = false,
     isTransparent: Boolean = false,
     donateViewModel: DonateViewModel = hiltViewModel(),
-    onDonateBtcButtonClick: () -> Unit = {},
-    onDonatePaypalButtonClick: () -> Unit = {}
+    onDonateBtcButtonClick: () -> Unit = { },
+    onDonatePaypalButtonClick: () -> Unit = { }
 ) {
     DonateButtonContent(
         modifier = modifier,
@@ -91,7 +107,7 @@ fun DonateButtonContent(
         ),
         modifier = modifier
             .wrapContentSize()
-            .padding(horizontal = 26.dp, vertical = 10.dp),
+            .padding(vertical = 10.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (!isTransparent) {
                 MaterialTheme.colorScheme.background
@@ -142,11 +158,10 @@ fun DonateButtonSingle(
             isShowDonateButtons.value = true
         }
     ) {
-        Icon(imageVector = Icons.Default.MonetizationOn, contentDescription = "Donate")
-        Icon(imageVector = Icons.Default.CurrencyBitcoin, contentDescription = "Donate")
+        Icon(imageVector = Icons.Default.VolunteerActivism, contentDescription = "Donate")
         Text(
             modifier = Modifier
-                .padding(vertical = 9.dp),
+                .padding(vertical = 9.dp, horizontal = 6.dp),
             text = "Donate ",
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Normal,
@@ -241,7 +256,7 @@ class DonateViewModel @Inject constructor(
                     DONATION_BITCOIN_ADDRESS
                 ))
             }
-            playlistManager.updateErrorMessage("No Bitcoin Wallet found on this device, BTC address copied to clipboard")
+            playlistManager.updateUserMessage("No Bitcoin Wallet found on this device, BTC address copied to clipboard")
         }
     }
 
@@ -258,7 +273,7 @@ class DonateViewModel @Inject constructor(
 fun DonateButtonPreview() {
     DonateButtonContent(
         isExpanded = false,
-        isTransparent = true,
+        isTransparent = false,
         onDonateBtcButtonClick = { },
         onDonatePaypalButtonClick = { }
     )

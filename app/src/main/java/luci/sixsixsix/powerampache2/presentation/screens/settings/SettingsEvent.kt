@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.settings
+package luci.sixsixsix.powerampache2.presentation.screens.settings
 
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
@@ -27,8 +27,12 @@ import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 sealed class SettingsEvent {
     data class OnEnableRemoteLoggingSwitch(val newValue: Boolean): SettingsEvent()
     data class OnHideDonationButtonSwitch(val newValue: Boolean): SettingsEvent()
-    data class OnSmartDownloadSwitch(val newValue: Boolean): SettingsEvent()
-    data class OnEnableAutoUpdatesSwitch(val newValue: Boolean): SettingsEvent()
+    data class OnMonoValueChange(val isMono: Boolean): SettingsEvent()
+    data class OnNormalizeValueChange(val isVolumeNormalized: Boolean): SettingsEvent()
+    data class OnSmartDownloadValueChange(val isSmartDownloadEnabled: Boolean): SettingsEvent()
+    data class OnAutomaticUpdateValueChange(val isAutoUpdate: Boolean): SettingsEvent()
+    data object UpdateNow: SettingsEvent()
+    data object DeleteDownloads: SettingsEvent()
     data class OnStreamingQualityChange(val newValue: StreamingQuality): SettingsEvent()
     data class OnThemeChange(val newValue: PowerAmpTheme): SettingsEvent()
 }

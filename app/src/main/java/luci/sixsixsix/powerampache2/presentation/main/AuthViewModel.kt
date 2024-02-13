@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.presentation.main
 
 import android.app.Application
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -91,16 +90,16 @@ class AuthViewModel @Inject constructor(
 
     private fun observeMessages() {
         viewModelScope.launch {
-            playlistManager.errorMessageState.collect { errorState ->
-                errorState.errorMessage?.let {
+            playlistManager.logMessageUserReadableState.collect { logMessageState ->
+                logMessageState.logMessage?.let {
                     state = state.copy(error = it)
                 }
-                L(errorState.errorMessage)
+                L(logMessageState.logMessage)
             }
         }
     }
 
-    fun verifyAndAutologin() {
+    fun verifyAndAutologin(completionCallback: () -> Unit = { }) {
         viewModelScope.launch {
             // try to login with saved auth token
             when (val ping = repository.ping()) {
@@ -117,10 +116,12 @@ class AuthViewModel @Inject constructor(
                         state = state.copy(isLoading = true)
                         autologin()
                     }
+                    completionCallback()
                 }
 
                 is Resource.Error -> {
                     state = state.copy(isLoading = false)
+                    completionCallback()
                 }
 
                 is Resource.Loading ->
@@ -129,24 +130,20 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun autologin() {
-        repository
-            .autoLogin()
-            .collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        result.data?.let { auth ->
-                            L("AuthViewModel", auth)
-                            state = state.copy(session = auth)
-                        }
-                    }
-
-                    is Resource.Error -> state =
-                        state.copy(isLoading = false)
-
-                    is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+    private suspend fun autologin() = repository.autoLogin().collect { result ->
+        when (result) {
+            is Resource.Success -> {
+                result.data?.let { auth ->
+                    L("AuthViewModel", auth)
+                    state = state.copy(session = auth)
                 }
             }
+
+            is Resource.Error -> state =
+                state.copy(isLoading = false)
+
+            is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+        }
     }
 
     fun onEvent(event: AuthEvent) {
@@ -184,7 +181,7 @@ class AuthViewModel @Inject constructor(
             ).collect { result ->
                 when (result) {
                     is Resource.Success -> { result.data?.let {
-                        playlistManager.updateErrorMessage(application.getString(R.string.loginScreen_register_success)) }
+                        playlistManager.updateUserMessage(application.getString(R.string.loginScreen_register_success)) }
                     }
                     is Resource.Error -> { state = state.copy(isLoading = false) }
                     is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
@@ -207,7 +204,8 @@ class AuthViewModel @Inject constructor(
                             result.data?.let { auth ->
                                 // clear credentials after login
                                 state = state.copy(session = auth, username = "", authToken = "", password = "")
-                                playlistManager.updateErrorMessage("")
+                                // clear any user facing message on the UI
+                                playlistManager.updateUserMessage("")
                             }
                         }
 

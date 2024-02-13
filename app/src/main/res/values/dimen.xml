@@ -23,7 +23,7 @@
     <dimen name="main_tab_textSize">12sp</dimen>
     <dimen name="songItem_infoTextSection_spacer">4dp</dimen>
     <dimen name="miniPlayer_height">70dp</dimen>
-    <dimen name="queue_dragHandle_height">50dp</dimen>
+    <dimen name="queue_dragHandle_height">45dp</dimen>
     <dimen name="close_handle_icon_padding">10dp</dimen>
     <dimen name="main_floating_button_size">95dp</dimen>
 
@@ -38,4 +38,14 @@
     <dimen name="button_login_text_size">16sp</dimen>
     <dimen name="bottomDrawer_login_padding_horizontal">26dp</dimen>
 
+    <dimen name="settings_padding_horizontal">20dp</dimen>
+    <dimen name="settings_padding_top">8dp</dimen>
+    <dimen name="settings_padding_horizontal_item">10dp</dimen>
+    <dimen name="settings_padding_vertical_item">10dp</dimen>
+
+    <dimen name="listItem_padding_horizontal">16dp</dimen>
+    <dimen name="listItem_padding_vertical">8dp</dimen>
+
+    <dimen name="about_item_fontSize">16sp</dimen>
+    <dimen name="songDetail_handle_arrow_width">36sp</dimen>
 </resources>

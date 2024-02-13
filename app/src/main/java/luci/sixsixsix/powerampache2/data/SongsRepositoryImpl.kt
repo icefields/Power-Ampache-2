@@ -51,6 +51,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okhttp3.internal.http.HTTP_OK
 import java.util.UUID
 import javax.inject.Inject
@@ -69,7 +70,7 @@ class SongsRepositoryImpl @Inject constructor(
     private val musicRepository: MusicRepository,
     private val settingsRepository: SettingsRepository,
     private val errorHandler: ErrorHandler,
-    private val storageManagerImpl: StorageManagerImpl,
+    private val storageManager: StorageManager,
     private val weakContext: WeakContext
 ): SongsRepository {
     private val dao = db.dao
@@ -350,7 +351,7 @@ class SongsRepositoryImpl @Inject constructor(
             if (code() == HTTP_OK) {
                 // save file to disk and register in database
                 body()?.byteStream()?.let { inputStream ->
-                    val filepath = storageManagerImpl.saveSong(song, inputStream)
+                    val filepath = storageManager.saveSong(song, inputStream)
                     dao.addDownloadedSong( // TODO fix double-bang!!
                         song.toDownloadedSongEntity(filepath, musicRepository.getUser()?.username!!)
                     )
@@ -433,7 +434,7 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun deleteDownloadedSong(song: Song) = flow {
         emit(Resource.Loading(true))
         dao.deleteDownloadedSong(songId = song.mediaId)
-        storageManagerImpl.deleteSong(song)
+        storageManager.deleteSong(song)
         emit(Resource.Success(data = Any(), networkData = Any()))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("downloadSong()", e, this) }

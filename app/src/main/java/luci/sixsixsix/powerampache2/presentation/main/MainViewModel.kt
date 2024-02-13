@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.RESET_QUEUE_ON_NEW_SESSION
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.exportSong
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.MusicRepository
@@ -59,6 +60,7 @@ import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
+import org.xml.sax.ErrorHandler
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.abs
@@ -158,7 +160,7 @@ class MainViewModel @Inject constructor(
                                         songsRepository.getDownloadedSongById(songId)?.let { finishedSong ->
                                             //if(songsRepository.isSongAvailableOffline(song)) {}
                                             playlistManager.updateDownloadedSong(finishedSong)
-                                            playlistManager.updateErrorMessage("${finishedSong.name} downloaded")
+                                            playlistManager.updateUserMessage("${finishedSong.name} downloaded")
                                             state = state.copy(isDownloading = false)
                                             //WorkManager.getInstance(application).pruneWork()
                                             L("emitting", finishedSong.name)
@@ -190,7 +192,6 @@ class MainViewModel @Inject constructor(
                 }
         }
     }
-
 
     private fun observeSession() {
         musicRepository.sessionLiveData.observeForever {
@@ -239,12 +240,12 @@ class MainViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            playlistManager.errorMessageState.collect { errorState ->
-                errorState.errorMessage?.let {
+            playlistManager.logMessageUserReadableState.collect { logMessageState ->
+                logMessageState.logMessage?.let {
                     state = state.copy(errorMessage = it)
                 }
 
-                L(errorState.errorMessage)
+                L(logMessageState.logMessage)
             }
         }
 
@@ -321,8 +322,6 @@ class MainViewModel @Inject constructor(
                 }
             }
             is MainEvent.Play -> {
-                L( "MainEvent.Play", event.song)
-                //delay(1000)
                 if (loadSongDataJob?.isActive == true) {
                     L( "MainEvent.Play", "loadSongDataJob?.isActive")
                     loadSongDataJob?.invokeOnCompletion {
@@ -345,8 +344,8 @@ class MainViewModel @Inject constructor(
                     simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
                 }
             }
-            MainEvent.OnDismissErrorMessage ->
-                playlistManager.updateErrorMessage("")
+            MainEvent.OnDismissUserMessage ->
+                playlistManager.updateUserMessage("")
             MainEvent.OnLogout ->
                 logout()
             is MainEvent.OnAddSongToQueueNext ->
@@ -406,6 +405,11 @@ class MainViewModel @Inject constructor(
                 } catch (e: Exception) {
                     L.e(e)
                 }
+            }
+            is MainEvent.OnExportDownloadedSong -> try {
+                application.exportSong(event.song)
+            } catch (e: Exception) {
+                playlistManager.updateErrorLogMessage(e.stackTraceToString())
             }
         }
     }
@@ -479,10 +483,10 @@ class MainViewModel @Inject constructor(
                 is Resource.Success -> {
                     result.data?.let {
                         // song deleted
-                        playlistManager.updateErrorMessage("${song.name} deleted from downloads")
+                        playlistManager.updateUserMessage("${song.name} deleted from downloads")
                     }
                 }
-                is Resource.Error -> playlistManager.updateErrorMessage("ERROR deleting ${song.name}")
+                is Resource.Error -> playlistManager.updateUserMessage("ERROR deleting ${song.name}")
                 is Resource.Loading -> {}
             }
         }
@@ -534,12 +538,7 @@ class MainViewModel @Inject constructor(
             val mediaItemList = mutableListOf<MediaItem>()
             for (song: Song? in state.queue) {
                 song?.let {
-                    // TODO FIX runBlocking (this functions has to be executed before calling play)
-                    //  run blocking makes sure the call is sequential. FIND A BETTER SOLUTION.
-                    //  test: with 10000 songs in queue, thread blocked 1.4s on pixel 6a
-                    //runBlocking {
-                        mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it)))
-                    //}
+                    mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it)))
                 }
             }
             simpleMediaServiceHandler.addMediaItemList(mediaItemList)
@@ -579,12 +578,31 @@ class MainViewModel @Inject constructor(
         //}
     }
 
+    fun onActivityRestart() {
+        // if the link to play the song is not valid reload all the data
+        // when the app goes in background without playing anything the token might be invalidated
+        // in this case reload the song data
+        state.song?.songUrl?.let { songUrl ->
+            L("songUrl is not null", songUrl)
+            if (songUrl.startsWith("http")) {
+                if (!songUrl.contains(authToken)) {
+                    L("songUrl does not contain the updated token LOADING SONG DATA NOW", authToken, songUrl)
+                    loadSongData()
+                }
+            } else {
+                // that's a local song, check the rest of the queue
+                state.queue.forEach { song ->
+                    if (song.songUrl.startsWith("http") && !song.songUrl.contains(authToken)) {
+                        L("song.songUrl does not contain the updated token LOADING SONG DATA NOW", authToken, songUrl)
+                        loadSongData()
+                        return
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCleared() {
-//        viewModelScope.launch {
-//            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
-//        }
-//        stopMusicService()
-//        playlistManager.reset()
         L("onCleared")
         searchJob?.cancel()
         loadSongDataJob?.cancel()

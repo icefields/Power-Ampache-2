@@ -67,11 +67,11 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
+import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistInfoViewEvents
-import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 
 private const val GRID_ITEMS_ROW = 2
 private const val GRID_ITEMS_ROW_LAND = 5
@@ -174,7 +174,7 @@ fun ArtistDetailScreen(
                         summaryOpen = summaryOpen,
                         eventListener = { event ->
                             when(event) {
-                                ArtistInfoViewEvents.SHARE_ARTIST -> TODO()
+                                ArtistInfoViewEvents.SHARE_ARTIST -> { }
                             }
                         }
                     )

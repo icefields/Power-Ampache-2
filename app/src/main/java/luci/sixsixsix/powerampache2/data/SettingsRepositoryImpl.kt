@@ -22,7 +22,12 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettings
 import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettingsEntity
@@ -31,7 +36,7 @@ import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
-import java.util.UUID
+import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,11 +44,12 @@ import javax.inject.Singleton
 class SettingsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
-    private val errorHandler: ErrorHandler
+    private val errorHandler: ErrorHandler,
+    private val storageManager: StorageManager
 ): SettingsRepository {
     private val dao = db.dao
     override val settingsLiveData: LiveData<LocalSettings?>
-        get() = dao.settingsLiveData().map {
+        get() = dao.settingsLiveData().distinctUntilChanged().map {
                 it?.toLocalSettings()
         }
 
@@ -55,4 +61,15 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun saveLocalSettings(localSettings: LocalSettings) =
         dao.writeSettings(localSettings.toLocalSettingsEntity())
+
+    override suspend fun deleteAllDownloadedSongs() = flow {
+        L("deleteAllDownloadedSongs")
+        emit(Resource.Loading(true))
+        dao.deleteAllDownloadedSong()
+        L("after deleteAllDownloadedSongs db")
+
+        storageManager.deleteAll()
+        emit(Resource.Success(data = Any(), networkData = Any()))
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("deleteAllDownloadedSongs()", e, this) }
 }

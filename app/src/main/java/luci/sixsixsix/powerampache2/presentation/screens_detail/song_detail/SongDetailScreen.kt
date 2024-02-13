@@ -21,24 +21,29 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.models.hasLyrics
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailContent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailQueueDragHandle
-import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailQueueScreenContent
+import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.TabbedSongDetailView
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SongDetailScreen(
     // navigator: DestinationsNavigator,
@@ -47,18 +52,30 @@ fun SongDetailScreen(
     viewModel: MainViewModel,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
+    val song = viewModel.state.song
     val scaffoldState = rememberBottomSheetScaffoldState()
+    val pagerState = rememberPagerState(initialPage = 0) {
+        if (song?.hasLyrics() == true) { 2 } else { 1 }
+    }
+    val selectedTabIndex = remember { mutableIntStateOf(0) }
+
     val barHeight = dimensionResource(id = R.dimen.queue_dragHandle_height)
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
-            SongDetailQueueScreenContent(
+            TabbedSongDetailView(
+                song = song,
+                pagerState = pagerState,
                 mainScaffoldState = mainScaffoldState,
                 mainViewModel = viewModel
             )
         },
         sheetDragHandle = {
-            SongDetailQueueDragHandle(scaffoldState = scaffoldState)
+            SongDetailQueueDragHandle(
+                song = viewModel.state.song,
+                scaffoldState = scaffoldState,
+                selectedTabIndex = selectedTabIndex,
+                pagerState = pagerState)
         },
         sheetShape = RectangleShape,
         sheetSwipeEnabled = true,

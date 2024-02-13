@@ -139,6 +139,7 @@ interface MusicDao {
     @Query("""SELECT * FROM playlistentity order by rating DESC, id DESC""")
     fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
 
+// --- OFFLINE SONGS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addDownloadedSong(downloadedSongEntity: DownloadedSongEntity)
 
@@ -153,6 +154,9 @@ interface MusicDao {
 
     @Query("DELETE FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId)")
     suspend fun deleteDownloadedSong(songId: String)
+
+    @Query("DELETE FROM downloadedsongentity")
+    suspend fun deleteAllDownloadedSong()
 
     @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
     suspend fun getSettings(): LocalSettingsEntity?

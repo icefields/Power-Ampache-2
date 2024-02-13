@@ -2,6 +2,7 @@
     <string name="app_name">Power Ampache 2</string>
     <string name="notification_channel_name">Music Channel</string>
     <string name="notification_channel_description">Shows the currently playing music</string>
+    <string name="coming_soon">Coming Soon</string>
 
     <string name="albumDetailScreen_infoSection_year">Year</string>
     <string name="albumDetailScreen_infoSection_songs">Songs</string>
@@ -61,6 +62,40 @@
     <string name="quality_mediumLow_subtitle">128kbps</string>
     <string name="quality_low_title">Low Quality</string>
     <string name="quality_low_subtitle">96kbps</string>
+    <string name="theme_system_title">System Theme</string>
+    <string name="theme_dark_title">Dark</string>
+    <string name="theme_light_title">Light</string>
+    <string name="theme_system_materialYou_title">MaterialYou System</string>
+    <string name="theme_dark_materialYou_title">MaterialYou Dark</string>
+    <string name="theme_light_materialYou_title">MaterialYou Light</string>
+    <string name="settings_equalizer">Equalizer</string>
+    <string name="settings_normalizeVolume_title">Normalize Volume</string>
+    <string name="settings_normalizeVolume_subtitle">Force same volume level for all tracks</string>
+    <string name="settings_monoAudio_title">Mono Audio</string>
+    <string name="settings_monoAudio_subtitle">Left and Right speakers will play the same audio</string>
+    <string name="settings_smartDownloads_title">Smart Downloads</string>
+    <string name="settings_smartDownloads_subtitle">Automatically download most played songs while the phone is idle</string>
+    <string name="settings_checkUpdatesNow_title">Check for updates now</string>
+    <string name="settings_autoCheckUpdates_title">Automatically check for updates</string>
+    <string name="settings_debugLogs_title">Debug Logs</string>
+    <string name="settings_enableDebugLogging_title">Enable anonymous debug logging</string>
+    <string name="settings_enableDebugLogging_subtitle">Will send crash and error stack-traces to the developer to fix issues with the app</string>
+    <string name="settings_deleteDownloads_title">Delete all downloads</string>
+    <string name="settings_deleteDownloads_subtitle">This will delete all the songs you downloaded</string>
+    <string name="settings_deleteDownloads_success">All your offline music has been deleted</string>
+    <string name="settings_deleteDownloads_fail">There was an issue deleting your offline music, if the problem persists please contact the developer to fix the bug</string>
+    <string name="settings_hideDonationButtonsMenu_title">Hide Donation Buttons on Menu</string>
+    <string name="settings_serverInfo_title">Server</string>
+    <string name="settings_serverInfo_version">Version</string>
+    <string name="settings_serverInfo_compatible">Compatible</string>
+    <string name="settings_userInfo_username">Username</string>
+    <string name="settings_userInfo_fullName">Full Name</string>
+    <string name="settings_userInfo_email">Email</string>
+    <string name="settings_userInfo_website">Website</string>
+    <string name="settings_userInfo_state">State</string>
+    <string name="settings_userInfo_city">City</string>
+    <string name="settings_userInfo_id">ID</string>
+
 
     <!--- DIALOGS -->
     <string name="miniPlayer_reset_alert_message">LONG PRESS To stop music playback and reset the Queue</string>
@@ -68,9 +103,10 @@
     <string name="dialog_create">CREATE</string>
 
     <!---...-->
-    <string name="version_quote">Quote of the version:\nHappiness is just an attitude</string>
+    <string name="version_quote_title">Quote of the version</string>
+    <string name="version_quote">Happiness is just an attitude</string>
+    <string name="about_appVersion_title">App Version</string>
+    <string name="about_license_title">License</string>
+    <string name="about_contact_title">Contact Me on Telegram and Mastodon</string>
 
 </resources>
-
-
-

@@ -26,6 +26,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -47,7 +49,6 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
@@ -82,8 +83,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
@@ -103,10 +103,11 @@ import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreen
 import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsMainContent
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.settings.subscreens.AboutScreen
 import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
-import luci.sixsixsix.powerampache2.presentation.settings.SettingsScreen
-import luci.sixsixsix.powerampache2.presentation.settings.SettingsViewModel
 
 @Composable
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
@@ -128,6 +129,7 @@ fun MainContentScreen(
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var currentScreen: String by rememberSaveable { mutableStateOf(MainContentMenuItem.Home.id) }
+    var currentScreenClass by rememberSaveable { mutableStateOf(MainContentMenuItem.Home::class.java.canonicalName) }
     val isSearchActive = remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val appName = stringResource(id = R.string.app_name)
@@ -151,10 +153,12 @@ fun MainContentScreen(
         drawerContent = {
             L("DONATION",settingsViewModel.state.localSettings.hideDonationButton)
             MainDrawer(
-                user = authViewModel.state.user?.username ?: ERROR_STRING,
+                user = authViewModel.state.user ?: User.emptyUser(),
+                versionInfo = settingsViewModel.state.appVersionInfoStr,
                 hideDonationButtons = settingsViewModel.state.localSettings.hideDonationButton,
                 onItemClick = {
                     currentScreen = it.id
+                    currentScreenClass = it.javaClass.canonicalName
                     scope.launch {
                         drawerState.close()
                     }
@@ -208,7 +212,10 @@ fun MainContentScreen(
                    )
                ) {
                    Column {
-                       AnimatedVisibility (mainViewModel.state.isDownloading) {
+                       AnimatedVisibility(mainViewModel.state.isDownloading,
+                           enter = slideInVertically(initialOffsetY = { dire -> dire / 2 }) + fadeIn(),
+                           exit = slideOutVertically(spring(stiffness = Spring.StiffnessVeryLow))
+                       ) {
                            DownloadProgressView {
                                mainViewModel.onEvent(MainEvent.OnStopDownloadSongs)
                            }
@@ -228,12 +235,16 @@ fun MainContentScreen(
                                navigator = navigator,
                                mainViewModel = mainViewModel
                            ).also { barTitle = menuItem.title }
-                           is MainContentMenuItem.Settings -> SettingsScreen( navigator,
-                                settingsViewModel
-                               //"Coming Soon", "Settings and customizations will be available soon"
+                           is MainContentMenuItem.Settings -> SettingsScreen(
+                               navigator = navigator,
+                               settingsViewModel = settingsViewModel
                            ).also { barTitle = menuItem.title }
                            MainContentMenuItem.Logout ->
-                               mainViewModel.onEvent(MainEvent.OnLogout) //.also { barTitle = appName }
+                               mainViewModel.onEvent(MainEvent.OnLogout)
+                           MainContentMenuItem.About -> AboutScreen(
+                               navigator = navigator,
+                               settingsViewModel = settingsViewModel
+                           ).also { barTitle = menuItem.title }
                        }
                    }
 
@@ -337,16 +348,7 @@ fun TabbedLibraryView(
                 TabItem.Artists -> ArtistsScreen(navigator = navigator)
                 TabItem.Playlists -> PlaylistsScreen(navigator = navigator)
                 TabItem.Songs -> SongsListScreen(navigator = navigator, mainViewModel = mainViewModel)
-                else -> {}
             }
         }
     }
 }
-
-
-
-@Composable
-private fun generateBarTitle(song: Song?): String =
-    stringResource(id = R.string.app_name) + (song?.title?.let {
-        "(${song.artist.name} - ${song.title})"
-    } ?: "" )

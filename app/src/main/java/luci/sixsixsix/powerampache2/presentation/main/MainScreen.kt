@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.main.screens.LoggedInScreen
 import luci.sixsixsix.powerampache2.presentation.main.screens.LoginScreen
-import luci.sixsixsix.powerampache2.presentation.settings.SettingsViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 
 @Composable
 fun MainScreen(

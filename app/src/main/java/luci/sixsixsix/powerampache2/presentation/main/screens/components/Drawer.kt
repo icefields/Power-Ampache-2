@@ -21,47 +21,72 @@
  */
 package luci.sixsixsix.powerampache2.presentation.main.screens.components
 
+import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.toHslColor
+import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
 import luci.sixsixsix.powerampache2.presentation.common.DonateButtonPreview
+import luci.sixsixsix.powerampache2.presentation.common.TextWithOverline
 
 val drawerItems = listOf(
     MainContentMenuItem.Home,
     MainContentMenuItem.Library,
     MainContentMenuItem.Offline,
     MainContentMenuItem.Settings,
+    MainContentMenuItem.About,
     MainContentMenuItem.Logout
 )
 
 @Composable
 fun MainDrawer(
-    user: String,
+    user: User,
+    versionInfo: String,
     hideDonationButtons: Boolean,
     items: List<MainContentMenuItem> = drawerItems,
     onItemClick: (MainContentMenuItem) -> Unit,
     modifier: Modifier = Modifier,
-    donateButton: @Composable () -> Unit = { DonateButton(isTransparent = true) }
+    donateButton: @Composable () -> Unit = { DonateButton(
+        isTransparent = true,
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) }
 ) {
     ModalDrawerSheet(
         modifier = modifier,
@@ -77,25 +102,88 @@ fun MainDrawer(
         if (!hideDonationButtons) {
             donateButton()
         }
+        Text(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            text = "v$versionInfo",
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Light,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            fontSize = 12.sp
+        )
     }
 }
 
 @Composable
-fun DrawerHeader(user: String) {
+fun DrawerHeader(user: User) {
     Box(modifier = Modifier
         .fillMaxWidth()
         .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = if (BuildConfig.DOGMAZIC_USER != user ||
-                (!BuildConfig.DEBUG && user != Constants.ERROR_STRING)) {
-                user
-            } else stringResource(id = R.string.app_name),
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold
-        )
+        val usernameHeaderText =
+            if (BuildConfig.DOGMAZIC_USER != user.username || (!BuildConfig.DEBUG && user.username.isNotEmpty())) {
+                user.username
+            } else {
+                stringResource(id = R.string.app_name)
+            }
 
+        val emailHeaderText =
+            if (BuildConfig.DOGMAZIC_EMAIL != user.email || (!BuildConfig.DEBUG && user.email.isNotEmpty())) {
+                user.email
+            } else {
+                ""
+            }
+
+        var showFullUserInfo by remember { mutableStateOf(false) }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .clickable {
+                    showFullUserInfo = !showFullUserInfo
+                }
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                UserHead(id = user.id, firstName = user.username, lastName = "")
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 20.dp)
+                ) {
+                    Text(
+                        text = usernameHeaderText,
+                        fontSize = 18.sp,
+                        lineHeight = 24.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                    Text(
+                        text = emailHeaderText,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Light
+                    )
+                }
+            }
+
+            AnimatedVisibility(visible = (showFullUserInfo &&
+                    BuildConfig.DOGMAZIC_EMAIL != user.email)
+            ) {
+                UserInfoSection(
+                    modifier = Modifier.fillMaxWidth().clickable{
+                        showFullUserInfo = !showFullUserInfo
+                    },
+                    user = user
+                )
+            }
+        }
     }
 }
 
@@ -127,12 +215,74 @@ fun DrawerBody(
     }
 }
 
+@Composable
+fun UserHead(
+    id: String,
+    firstName: String,
+    lastName: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp,
+    textStyle: TextStyle = MaterialTheme.typography.labelMedium,
+) {
+    Box(modifier.size(size), contentAlignment = Alignment.Center) {
+        val color = remember(id, firstName, lastName) {
+            val name = listOf(firstName, lastName)
+                .joinToString(separator = "")
+                .uppercase()
+            Color("$id / $name".toHslColor())
+        }
+        val initials = (firstName.take(1) + lastName.take(1)).uppercase()
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(SolidColor(color))
+        }
+        Text(text = initials, style = textStyle, color = Color.White)
+    }
+}
+
+@Composable
+fun UserInfoSection(
+    modifier: Modifier = Modifier,
+    user: User
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Column(modifier = Modifier
+            .wrapContentHeight()) {
+            // TODO use server to determine if we're in demo mode, right now I'm using email,
+            //  which should be cryptic enough
+            if (user.email != BuildConfig.DOGMAZIC_EMAIL) {
+                UserInfoTextWithTitle(title = R.string.settings_userInfo_username, subtitle = user.username)
+                if (user.fullNamePublic == 1) {
+                    UserInfoTextWithTitle(title = R.string.settings_userInfo_fullName, subtitle = user.fullName)
+                }
+                UserInfoTextWithTitle(title = R.string.settings_userInfo_email, subtitle = user.email)
+                UserInfoTextWithTitle(title = R.string.settings_userInfo_website, subtitle = user.website)
+                UserInfoTextWithTitle(title = R.string.settings_userInfo_city, subtitle = user.city)
+                UserInfoTextWithTitle(title = R.string.settings_userInfo_state, subtitle = user.state)
+                UserInfoTextWithTitle(title = R.string.settings_userInfo_id, subtitle = user.id)
+            }
+        }
+    }
+}
+
+@Composable
+private fun UserInfoTextWithTitle(@StringRes title: Int, subtitle: String?) {
+    subtitle?.let {
+        if (it.isNotBlank()) {
+            TextWithOverline(title = title, subtitle = it)
+        }
+    }
+}
+
 @Composable @Preview
 fun PreviewDrawer() {
     MainDrawer(
         //modifier = Modifier.weight(1f),
-        user = "Lucifer",
-        hideDonationButtons = true,
+        user = User.mockUser(),
+        versionInfo = "0.666-beta (666)",
+        hideDonationButtons = false,
         donateButton = {
             DonateButtonPreview()
         },

@@ -276,6 +276,8 @@ fun AlbumDetailScreen(
                                                 mainViewModel.onEvent(MainEvent.OnShareSong(song))
                                             SongItemEvent.DOWNLOAD_SONG ->
                                                 mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                                            SongItemEvent.EXPORT_DOWNLOADED_SONG ->
+                                                mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
                                             SongItemEvent.GO_TO_ALBUM -> { } // No ACTION, we're already in this album //navigator.navigate(AlbumDetailScreenDestination(viewModel.state.album.id, viewModel.state.album))
                                             SongItemEvent.GO_TO_ARTIST ->
                                                 navigateToArtist(navigator, viewModel.state.album.artist.id)
