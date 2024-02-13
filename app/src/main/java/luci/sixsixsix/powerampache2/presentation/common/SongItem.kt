@@ -101,7 +101,7 @@ fun SongItem(
     modifier: Modifier = Modifier,
     isLandscape: Boolean = false,
     isSongDownloaded: Boolean = false,
-    showDownloadedSongMarker: Boolean = false,
+    showDownloadedSongMarker: Boolean = true,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
     enableSwipeToRemove: Boolean = false,

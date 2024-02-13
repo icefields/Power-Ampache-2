@@ -406,10 +406,12 @@ class MainViewModel @Inject constructor(
                     L.e(e)
                 }
             }
-            is MainEvent.OnExportDownloadedSong -> try {
-                application.exportSong(event.song)
-            } catch (e: Exception) {
-                playlistManager.updateErrorLogMessage(e.stackTraceToString())
+            is MainEvent.OnExportDownloadedSong -> viewModelScope.launch {
+                try {
+                    application.exportSong(event.song, songsRepository.getSongUri(event.song))
+                } catch (e: Exception) {
+                    playlistManager.updateErrorLogMessage(e.stackTraceToString())
+                }
             }
         }
     }

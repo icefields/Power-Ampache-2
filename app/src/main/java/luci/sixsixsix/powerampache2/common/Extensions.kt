@@ -81,8 +81,8 @@ fun Context.openLinkInBrowser(link: String) =
         }
     )
 
-fun Context.exportSong(song: Song) {
-    val fileWithinAppDir = File(song.songUrl)
+fun Context.exportSong(song: Song, offlineUri: String) {
+    val fileWithinAppDir = File(offlineUri)
     val fileUri = FileProvider.getUriForFile(this,
         getString(R.string.sharing_provider_authority),
         fileWithinAppDir
