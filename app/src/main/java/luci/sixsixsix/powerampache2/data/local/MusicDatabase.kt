@@ -25,9 +25,6 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
@@ -49,9 +46,11 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         UserEntity::class,
         LocalSettingsEntity::class,
         DownloadedSongEntity::class
-    ], version = 74, // first prod version: 73
+    ], version = 75, // first prod version: 73
     autoMigrations = [
-        AutoMigration(from = 73, to = 74)
+        AutoMigration(from = 73, to = 74),
+        AutoMigration(from = 73, to = 75),
+        AutoMigration(from = 74, to = 75),
     ],
     exportSchema = true
 )

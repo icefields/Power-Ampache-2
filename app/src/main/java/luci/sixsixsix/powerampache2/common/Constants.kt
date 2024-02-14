@@ -50,4 +50,12 @@ object Constants {
     // DEBUG
     const val NETWORK_REQUEST_LIMIT_DEBUG = 20
     const val ERROR_TITLE = ERROR_STRING
+
+    // URLs
+    const val GPLV3_IMG_URL = "https://www.gnu.org/graphics/gplv3-with-text-136x68.png"
+    const val GPLV3_URL = "https://github.com/icefields/Power-Ampache-2/blob/main/LICENSE.md"
+    const val TELEGRAM_IMG_URL = "https://static-00.iconduck.com/assets.00/telegram-icon-512x512-4sztjer8.png"
+    const val TELEGRAM_URL = "https://t.me/PowerAmpache"
+    const val MASTODON_IMG_URL = "https://github.com/icefields/Power-Ampache-2/assets/149625124/81e35dc2-d81c-46ed-9321-4461349dc8e7"
+    const val MASTODON_URL = "https://floss.social/@powerampache"
 }

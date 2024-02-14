@@ -88,15 +88,19 @@ class SimpleMediaServiceHandler @Inject constructor(
     }
 
     suspend fun onPlayerEvent(playerEvent: PlayerEvent) {
-        L(playerEvent)
+        L(playerEvent, player.mediaItemCount, player.currentMediaItem?.mediaId, player.currentMediaItem?.mediaMetadata?.title)
         when (playerEvent) {
             PlayerEvent.Backward -> player.seekBack()
             PlayerEvent.Forward -> player.seekForward()
             PlayerEvent.PlayPause -> {
                 if (player.isPlaying) {
+                    L("onPlayerEvent player.isPlaying, pause now")
                     player.pause()
                     stopProgressUpdate()
                 } else {
+                    // TODO check if there is actually songs in the queue before playing
+                    //  do the same with forceplay?
+                    L("onPlayerEvent !player.isPlaying, play now")
                     player.play()
                     _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
                     startProgressUpdate()

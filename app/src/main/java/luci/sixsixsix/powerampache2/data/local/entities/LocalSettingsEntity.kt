@@ -28,8 +28,6 @@ import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 
-
-
 @Entity
 data class LocalSettingsEntity(
     @PrimaryKey
@@ -50,7 +48,13 @@ data class LocalSettingsEntity(
     val enableAutoUpdates: Boolean,
 
     @ColumnInfo(name = "streamingQuality", defaultValue = "${LocalSettings.SETTINGS_DEFAULTS_STREAMING_QUALITY}")
-    val streamingQuality: StreamingQuality
+    val streamingQuality: StreamingQuality,
+
+    @ColumnInfo(name = "isNormalizeVolumeEnabled", defaultValue = "${LocalSettings.SETTINGS_DEFAULTS_NORMALIZE_VOLUME}")
+    val isNormalizeVolumeEnabled: Boolean,
+
+    @ColumnInfo(name = "isMonoAudioEnabled", defaultValue = "${LocalSettings.SETTINGS_DEFAULTS_MONO}")
+    val isMonoAudioEnabled: Boolean
 )
 
 fun LocalSettingsEntity.toLocalSettings() = LocalSettings(
@@ -58,9 +62,11 @@ fun LocalSettingsEntity.toLocalSettings() = LocalSettings(
     theme = PowerAmpTheme.getThemeFromId(theme),
     enableRemoteLogging = enableRemoteLogging,
     hideDonationButton = hideDonationButton,
-    smartDownloadEnabled = smartDownloadEnabled,
     streamingQuality = streamingQuality,
-    enableAutoUpdates = enableAutoUpdates
+    enableAutoUpdates = enableAutoUpdates,
+    isNormalizeVolumeEnabled = isNormalizeVolumeEnabled,
+    isSmartDownloadsEnabled = smartDownloadEnabled,
+    isMonoAudioEnabled = isMonoAudioEnabled
 )
 
 fun LocalSettings.toLocalSettingsEntity() = LocalSettingsEntity(
@@ -68,7 +74,9 @@ fun LocalSettings.toLocalSettingsEntity() = LocalSettingsEntity(
     theme = theme.themeId,
     enableRemoteLogging = enableRemoteLogging,
     hideDonationButton = hideDonationButton,
-    smartDownloadEnabled = smartDownloadEnabled,
+    smartDownloadEnabled = isSmartDownloadsEnabled,
     streamingQuality = streamingQuality,
-    enableAutoUpdates = enableAutoUpdates
+    enableAutoUpdates = enableAutoUpdates,
+    isMonoAudioEnabled = isMonoAudioEnabled,
+    isNormalizeVolumeEnabled = isNormalizeVolumeEnabled
 )

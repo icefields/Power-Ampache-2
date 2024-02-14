@@ -27,6 +27,7 @@ import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings.Companion.SETTINGS_DEFAULTS_THEME
+import luci.sixsixsix.powerampache2.presentation.screens.settings.components.PowerAmpacheDropdownItem
 import java.lang.StringBuilder
 
 private const val BITRATE_VERY_HIGH = 320
@@ -54,9 +55,11 @@ data class LocalSettings(
     val theme: PowerAmpTheme,
     val enableRemoteLogging: Boolean,
     val hideDonationButton: Boolean,
-    val smartDownloadEnabled: Boolean,
     val enableAutoUpdates: Boolean,
-    val streamingQuality: StreamingQuality
+    val streamingQuality: StreamingQuality,
+    val isNormalizeVolumeEnabled: Boolean,
+    val isMonoAudioEnabled: Boolean,
+    val isSmartDownloadsEnabled: Boolean
 ): Parcelable {
     companion object {
         // defaults
@@ -65,6 +68,9 @@ data class LocalSettings(
         const val SETTINGS_DEFAULTS_HIDE_DONATION = false
         const val SETTINGS_DEFAULTS_ENABLE_SMART_DOWNLOAD = false
         const val SETTINGS_DEFAULTS_ENABLE_AUTO_UPDATE = false
+        const val SETTINGS_DEFAULTS_NORMALIZE_VOLUME = false
+        const val SETTINGS_DEFAULTS_MONO = false
+        const val SETTINGS_DEFAULTS_SMART_DOWNLOADS = false
         const val SETTINGS_DEFAULTS_STREAMING_QUALITY = BITRATE_VERY_HIGH
         const val SETTINGS_DEFAULTS_THEME = ID_DARK
 
@@ -74,9 +80,11 @@ data class LocalSettings(
                 theme = defaultTheme,
                 enableRemoteLogging = SETTINGS_DEFAULTS_ENABLE_REMOTE_LOG,
                 hideDonationButton = SETTINGS_DEFAULTS_HIDE_DONATION,
-                smartDownloadEnabled = SETTINGS_DEFAULTS_ENABLE_SMART_DOWNLOAD,
                 enableAutoUpdates = SETTINGS_DEFAULTS_ENABLE_AUTO_UPDATE,
-                streamingQuality = defaultBitrate
+                streamingQuality = defaultBitrate,
+                isNormalizeVolumeEnabled = SETTINGS_DEFAULTS_NORMALIZE_VOLUME,
+                isMonoAudioEnabled = SETTINGS_DEFAULTS_MONO,
+                isSmartDownloadsEnabled = SETTINGS_DEFAULTS_SMART_DOWNLOADS
             )
     }
 
@@ -96,14 +104,20 @@ data class LocalSettings(
         sbThis.append(this.hideDonationButton)
         sbOthe.append(othe.hideDonationButton)
 
-        sbThis.append(this.smartDownloadEnabled)
-        sbOthe.append(othe.smartDownloadEnabled)
-
         sbThis.append(this.streamingQuality.bitrate)
         sbOthe.append(othe.streamingQuality.bitrate)
 
         sbThis.append(this.enableAutoUpdates)
         sbOthe.append(othe.enableAutoUpdates)
+
+        sbThis.append(this.isNormalizeVolumeEnabled)
+        sbOthe.append(othe.isNormalizeVolumeEnabled)
+
+        sbThis.append(this.isMonoAudioEnabled)
+        sbOthe.append(othe.isMonoAudioEnabled)
+
+        sbThis.append(this.isSmartDownloadsEnabled)
+        sbOthe.append(othe.isSmartDownloadsEnabled)
 
         return sbThis.toString() == sbOthe.toString()
     }
@@ -156,23 +170,35 @@ sealed class StreamingQuality(
     }
 }
 
+val streamQualityDropdownItems = listOf(
+    StreamingQuality.VERY_HIGH.toPowerAmpacheDropdownItem(),
+    StreamingQuality.HIGH.toPowerAmpacheDropdownItem(),
+    StreamingQuality.MEDIUM.toPowerAmpacheDropdownItem(),
+    StreamingQuality.MEDIUM_LOW.toPowerAmpacheDropdownItem(),
+    StreamingQuality.LOW.toPowerAmpacheDropdownItem(),
+)
+
 /**
  * available themes
  */
 @Parcelize
-sealed class PowerAmpTheme(val themeId: String, val title: String, val isEnabled: Boolean): Parcelable {
+sealed class PowerAmpTheme(
+    val themeId: String,
+    @StringRes val title: Int,
+    val isEnabled: Boolean
+): Parcelable {
     @Parcelize data object SYSTEM:
-        PowerAmpTheme(ID_SYSTEM, "System Theme", true)
+        PowerAmpTheme(ID_SYSTEM, R.string.theme_system_title, true)
     @Parcelize data object DARK:
-        PowerAmpTheme(ID_DARK, "Dark", true)
+        PowerAmpTheme(ID_DARK, R.string.theme_dark_title, true)
     @Parcelize data object LIGHT:
-        PowerAmpTheme(ID_LIGHT, "Light", true)
+        PowerAmpTheme(ID_LIGHT, R.string.theme_light_title, true)
     @Parcelize data object MATERIAL_YOU_SYSTEM:
-        PowerAmpTheme(ID_MATERIAL_YOU_SYSTEM, "MaterialYou System", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        PowerAmpTheme(ID_MATERIAL_YOU_SYSTEM, R.string.theme_system_materialYou_title, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
     @Parcelize data object MATERIAL_YOU_DARK:
-        PowerAmpTheme(ID_MATERIAL_YOU_DARK, "MaterialYou Dark", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        PowerAmpTheme(ID_MATERIAL_YOU_DARK, R.string.theme_dark_materialYou_title, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
     @Parcelize data object MATERIAL_YOU_LIGHT:
-        PowerAmpTheme(ID_MATERIAL_YOU_LIGHT, "MaterialYou Light", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        PowerAmpTheme(ID_MATERIAL_YOU_LIGHT, R.string.theme_light_materialYou_title, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
     override fun equals(other: Any?) = try { (other as PowerAmpTheme).themeId == themeId } catch (e: Exception) { false }
     override fun hashCode() = themeId.hashCode()
@@ -191,3 +217,18 @@ sealed class PowerAmpTheme(val themeId: String, val title: String, val isEnabled
             }
     }
 }
+
+val themesDropDownItems = listOf(
+    PowerAmpTheme.MATERIAL_YOU_SYSTEM.toPowerAmpacheDropdownItem(),
+    PowerAmpTheme.MATERIAL_YOU_DARK.toPowerAmpacheDropdownItem(),
+    PowerAmpTheme.MATERIAL_YOU_LIGHT.toPowerAmpacheDropdownItem(),
+    PowerAmpTheme.SYSTEM.toPowerAmpacheDropdownItem(),
+    PowerAmpTheme.DARK.toPowerAmpacheDropdownItem(),
+    PowerAmpTheme.LIGHT.toPowerAmpacheDropdownItem(),
+)
+
+fun PowerAmpTheme.toPowerAmpacheDropdownItem() =
+    PowerAmpacheDropdownItem(title = title, value = this, isEnabled = isEnabled)
+
+fun StreamingQuality.toPowerAmpacheDropdownItem() =
+    PowerAmpacheDropdownItem(title = title, subtitle = description, value = this)

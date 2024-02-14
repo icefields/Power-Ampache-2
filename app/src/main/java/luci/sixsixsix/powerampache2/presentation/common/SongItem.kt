@@ -81,6 +81,7 @@ enum class SongItemEvent {
     PLAY_NEXT,
     SHARE_SONG,
     DOWNLOAD_SONG,
+    EXPORT_DOWNLOADED_SONG,
     GO_TO_ALBUM,
     GO_TO_ARTIST,
     ADD_SONG_TO_QUEUE,
@@ -100,6 +101,7 @@ fun SongItem(
     modifier: Modifier = Modifier,
     isLandscape: Boolean = false,
     isSongDownloaded: Boolean = false,
+    showDownloadedSongMarker: Boolean = true,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
     enableSwipeToRemove: Boolean = false,
@@ -109,7 +111,7 @@ fun SongItem(
     SwipeToDismissItem(
         item = song,
         foregroundView = {
-            SongItemMain(song, songItemEventListener, modifier, isLandscape, isSongDownloaded, subtitleString, songInfoThirdRow)
+            SongItemMain(song, songItemEventListener, modifier, isLandscape, isSongDownloaded, showDownloadedSongMarker, subtitleString, songInfoThirdRow)
         },
         enableSwipeToRemove = enableSwipeToRemove,
         onRemove = onRemove,
@@ -122,8 +124,9 @@ fun SongItemMain(
     song: Song,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
-    isLandscape: Boolean = false,
-    isSongDownloaded: Boolean = false,
+    isLandscape: Boolean,
+    isSongDownloaded: Boolean,
+    showDownloadedSongMarker: Boolean,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
 ) {
@@ -163,11 +166,8 @@ fun SongItemMain(
                         error = painterResource(id = R.drawable.placeholder_album),
                         contentDescription = song.title,
                     )
-                if(isSongDownloaded) {
-                        Card(
-                            //colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.),
-                            modifier = Modifier.size(20.dp)
-                        ) {
+                    if(isSongDownloaded && showDownloadedSongMarker) {
+                        Card(modifier = Modifier.size(20.dp)) {
                             Box(
                                 modifier = Modifier
                                     .wrapContentSize()
@@ -175,27 +175,23 @@ fun SongItemMain(
                                     .background(Color.Transparent),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.DownloadDone,
-                                    contentDescription = "download done",
-                                    //tint = MaterialTheme.colorScheme.primary
-                                )
+                                Icon(imageVector = Icons.Outlined.DownloadDone,
+                                    contentDescription = "download done")
                             }
                         }
+                    }
                 }
-}
             }
         }
-        Spacer(modifier = Modifier
-                .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
+
+        Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
 
         InfoTextSection(
             modifier = Modifier
                 .weight(5f)
                 .padding(
                     horizontal = dimensionResource(R.dimen.songItem_infoTextSection_paddingHorizontal),
-                    vertical = dimensionResource(R.dimen.songItem_infoTextSection_paddingVertical)
-                )
+                    vertical = dimensionResource(R.dimen.songItem_infoTextSection_paddingVertical))
                 .align(Alignment.CenterVertically),
             song = song,
             subtitleString = subtitleString,
@@ -230,6 +226,7 @@ fun SongItemMain(
     SongDropDownMenu(
         isContextMenuVisible = isContextMenuVisible,
         pressOffset = pressOffset,
+        isSongDownloaded = isSongDownloaded,
         songItemEventListener = {
             isContextMenuVisible = false
             songItemEventListener(it)

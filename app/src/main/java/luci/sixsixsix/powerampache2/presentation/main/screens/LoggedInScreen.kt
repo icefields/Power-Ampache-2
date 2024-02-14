@@ -56,7 +56,7 @@ import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.SheetDragHandle
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.SongDetailScreen
-import luci.sixsixsix.powerampache2.presentation.settings.SettingsViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,8 +79,8 @@ fun LoggedInScreen(
                 duration = SnackbarDuration.Indefinite
             ).apply {
                 when (this) {
-                    SnackbarResult.Dismissed -> mainViewModel.onEvent(MainEvent.OnDismissErrorMessage)
-                    SnackbarResult.ActionPerformed -> mainViewModel.onEvent(MainEvent.OnDismissErrorMessage)
+                    SnackbarResult.Dismissed -> mainViewModel.onEvent(MainEvent.OnDismissUserMessage)
+                    SnackbarResult.ActionPerformed -> mainViewModel.onEvent(MainEvent.OnDismissUserMessage)
                 }
             }
         }

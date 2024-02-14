@@ -115,12 +115,15 @@ class ErrorHandlerImpl @Inject constructor(
                 // log and report error here
                 logError(this)
                 logError(e)
+                playlistManager.updateErrorLogMessage(this)
                 // readable message here
                 readableMessage?.let {
                     // TODO find a better way to not show verbose info
                     //  ie. session expired for timestamp
-                    if (!readableMessage.contains("timestamp") && !readableMessage.contains("expired")) {
-                        playlistManager.updateErrorMessage(readableMessage)
+                    if (!readableMessage.lowercase().contains("timestamp") &&
+                        !readableMessage.lowercase().contains("expired") &&
+                        !readableMessage.lowercase().contains("session")) {
+                        playlistManager.updateUserMessage(readableMessage)
                     }
                 }
                 onError(this, e)

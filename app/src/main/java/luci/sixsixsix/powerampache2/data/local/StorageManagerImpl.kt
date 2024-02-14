@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.data.local
 
-import android.app.Application
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
@@ -74,7 +73,10 @@ class StorageManagerImpl @Inject constructor(
         val fileName = relativePath.substring(relativePath.lastIndexOf("/") + 1)
         val relativeDirectory = relativePath.replace(fileName, "")
         val pathBuilder = // TODO fix double-bang!!
-            StringBuffer(weakContext.get()!!.filesDir.absolutePath).append("/").append(SUB_DIR).append("/")
+            StringBuffer(weakContext.get()!!.filesDir.absolutePath)
+                .append("/")
+                .append(SUB_DIR)
+                .append("/")
                 .append(relativeDirectory)
         val absolutePath = pathBuilder.append("/").append(fileName).toString()
         L(absolutePath)
@@ -84,6 +86,22 @@ class StorageManagerImpl @Inject constructor(
             return@withContext true
         }
         return@withContext false
+    }
+
+    /**
+     * Deletes all downloaded files
+     *
+     * @throws NullPointerException when context is null
+     * @throws Exception when other types of exceptions are thrown
+     */
+    @Throws(Exception::class)
+    override suspend fun deleteAll() = withContext(Dispatchers.IO) {
+        File(StringBuffer(weakContext.get()!!.filesDir.absolutePath)
+            .append("/")
+            .append(SUB_DIR)
+            .append("/")
+            .toString()
+        ).deleteRecursively()
     }
 
     private suspend fun getAbsolutePathFile(song: Song): String? =

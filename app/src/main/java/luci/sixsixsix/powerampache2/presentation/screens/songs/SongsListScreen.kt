@@ -86,6 +86,8 @@ fun SongsListScreen(
                                         mainViewModel.onEvent(MainEvent.OnShareSong(song))
                                     SongItemEvent.DOWNLOAD_SONG ->
                                         mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                                    SongItemEvent.EXPORT_DOWNLOADED_SONG ->
+                                        mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
                                     SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
                                         AlbumDetailScreenDestination(albumId = song.album.id, album = null)
                                     )

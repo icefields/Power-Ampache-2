@@ -23,14 +23,24 @@ package luci.sixsixsix.powerampache2.common
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
+import androidx.core.graphics.ColorUtils
+import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
+import luci.sixsixsix.powerampache2.domain.models.Song
+import java.io.File
 import java.lang.ref.WeakReference
 import java.security.MessageDigest
+import kotlin.math.absoluteValue
+
 
 typealias WeakContext = WeakReference<Context>
 
@@ -60,6 +70,40 @@ fun Context.shareLink(link: String) =
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
         }
     )
+
+fun Context.openLinkInBrowser(link: String) =
+    startActivity(
+        Intent.createChooser(
+            Intent(Intent.ACTION_VIEW, Uri.parse(link)),
+            "Open Link In Broser"
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+        }
+    )
+
+fun Context.exportSong(song: Song, offlineUri: String) {
+    val fileWithinAppDir = File(offlineUri)
+    val fileUri = FileProvider.getUriForFile(this,
+        getString(R.string.sharing_provider_authority),
+        fileWithinAppDir
+    )
+
+    if (fileWithinAppDir.exists()) {
+        startActivity(
+            Intent.createChooser(
+                Intent(Intent.ACTION_SEND).apply {
+                    type = song.mime
+                    setDataAndType(fileUri, contentResolver.getType(fileUri))
+                    putExtra(Intent.EXTRA_STREAM, fileUri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }, "Export Song"
+            ).apply {
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+            }
+        )
+    }
+}
+
 
 /**
  * TODO DEBUG
@@ -133,3 +177,8 @@ fun processFlag(flag: Any?): Int = flag?.let {
     else if (it is Int) { it } else 0
 } ?: 0
 
+@ColorInt
+fun String.toHslColor(saturation: Float = 0.5f, lightness: Float = 0.4f): Int {
+    val hue = fold(0) { acc, char -> char.code + acc * 37 } % 360
+    return ColorUtils.HSLToColor(floatArrayOf(hue.absoluteValue.toFloat(), saturation, lightness))
+}

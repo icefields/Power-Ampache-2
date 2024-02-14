@@ -26,7 +26,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -111,6 +110,8 @@ fun SongDetailQueueScreenContent(
                         SongItemEvent.ADD_SONG_TO_QUEUE -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                         SongItemEvent.ADD_SONG_TO_PLAYLIST ->
                             playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
+                        SongItemEvent.EXPORT_DOWNLOADED_SONG ->
+                            mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
                     }
                 },
                 subtitleString = SubtitleString.ARTIST,

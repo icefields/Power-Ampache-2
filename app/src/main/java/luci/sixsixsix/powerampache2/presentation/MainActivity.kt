@@ -40,7 +40,7 @@ import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainScreen
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.settings.SettingsViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
 
 @AndroidEntryPoint
@@ -115,7 +115,9 @@ class MainActivity : ComponentActivity() {
         super.onRestart()
         L( "onRestart")
         // refresh token or autologin every time the app resumes
-        authViewModel.verifyAndAutologin()
+        authViewModel.verifyAndAutologin {
+            mainViewModel.onActivityRestart()
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {

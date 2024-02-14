@@ -39,17 +39,21 @@
         
         <receiver android:name=".data.remote.AlarmReceiver"/>
 
-<!--        <receiver android:name="androidx.media.session.MediaButtonReceiver"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MEDIA_BUTTON" />-->
-<!--            </intent-filter>-->
-<!--        </receiver>-->
-
-        <!-- remove default worker initializer to provide custom one-->
+        <!-- remove default worker initializer to provide custom one -->
         <provider
             android:authorities="${applicationId}.androidx-startup"
             android:name="androidx.startup.InitializationProvider"
             tools:node="remove"/>
+
+        <!-- FILE SHARING/EXPORTING -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="@string/sharing_provider_authority"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
     </application>
 </manifest>
