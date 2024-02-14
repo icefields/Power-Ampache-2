@@ -36,7 +36,8 @@ import luci.sixsixsix.powerampache2.data.remote.dto.ShareDto
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -46,7 +47,6 @@ import retrofit2.http.Query
 import retrofit2.http.Streaming
 import retrofit2.http.Url
 import java.lang.StringBuilder
-import java.net.URISyntaxException
 
 /**
  * Main network interface which will fetch a new welcome title for us
@@ -310,6 +310,4 @@ interface MainNetwork {
         forgotten("forgotten"),
         highest("highest")
     }
-
-    enum class PlaylistType { public, private }
 }

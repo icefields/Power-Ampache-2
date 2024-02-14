@@ -57,6 +57,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.common.toDebugMap
 import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
@@ -98,7 +99,7 @@ fun SongDetailContent(
     var infoDialogOpen by remember { mutableStateOf(false) }
     if (infoDialogOpen) {
             InfoDialog(
-                info = mainViewModel.state.song?.toDebugString() ?: ERROR_STRING,
+                info = mainViewModel.state.song?.toDebugMap() ?: mapOf(),
                 onDismissRequest = {
                     infoDialogOpen = false
                 }

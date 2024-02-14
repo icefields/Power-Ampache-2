@@ -25,16 +25,21 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_EMAIL
 import luci.sixsixsix.powerampache2.common.toHslColor
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
@@ -116,26 +122,19 @@ fun MainDrawer(
 }
 
 @Composable
-fun DrawerHeader(user: User) {
+fun DrawerHeader(currentUser: User) {
+    // if dogmazic user show custom information
+    val user = if (BuildConfig.DOGMAZIC_USER == currentUser.username && BuildConfig.DOGMAZIC_EMAIL == currentUser.email) {
+        User.demoUser()
+    } else {
+        currentUser
+    }
+
     Box(modifier = Modifier
         .fillMaxWidth()
         .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
-        val usernameHeaderText =
-            if (BuildConfig.DOGMAZIC_USER != user.username || (!BuildConfig.DEBUG && user.username.isNotEmpty())) {
-                user.username
-            } else {
-                stringResource(id = R.string.app_name)
-            }
-
-        val emailHeaderText =
-            if (BuildConfig.DOGMAZIC_EMAIL != user.email || (!BuildConfig.DEBUG && user.email.isNotEmpty())) {
-                user.email
-            } else {
-                ""
-            }
-
         var showFullUserInfo by remember { mutableStateOf(false) }
 
         Column(
@@ -155,31 +154,33 @@ fun DrawerHeader(user: User) {
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 20.dp)
+                        .padding(start = 20.dp)
                 ) {
                     Text(
-                        text = usernameHeaderText,
+                        text = user.username,
                         fontSize = 18.sp,
+                        maxLines = 1,
                         lineHeight = 24.sp,
                         fontWeight = FontWeight.Normal
                     )
                     Text(
-                        text = emailHeaderText,
+                        text = user.email,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
+                        maxLines = 1,
                         lineHeight = 20.sp,
                         fontWeight = FontWeight.Light
                     )
                 }
             }
-
-            AnimatedVisibility(visible = (showFullUserInfo &&
-                    BuildConfig.DOGMAZIC_EMAIL != user.email)
-            ) {
+            Spacer(modifier = Modifier.height(11.dp))
+            AnimatedVisibility(visible = showFullUserInfo) {
                 UserInfoSection(
-                    modifier = Modifier.fillMaxWidth().clickable{
-                        showFullUserInfo = !showFullUserInfo
-                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showFullUserInfo = !showFullUserInfo
+                        },
                     user = user
                 )
             }
@@ -244,25 +245,27 @@ fun UserInfoSection(
     modifier: Modifier = Modifier,
     user: User
 ) {
-    Box(
+    Card(
         modifier = modifier,
-        contentAlignment = Alignment.CenterStart
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
-        Column(modifier = Modifier
-            .wrapContentHeight()) {
-            // TODO use server to determine if we're in demo mode, right now I'm using email,
-            //  which should be cryptic enough
-            if (user.email != BuildConfig.DOGMAZIC_EMAIL) {
-                UserInfoTextWithTitle(title = R.string.settings_userInfo_username, subtitle = user.username)
-                if (user.fullNamePublic == 1) {
-                    UserInfoTextWithTitle(title = R.string.settings_userInfo_fullName, subtitle = user.fullName)
-                }
-                UserInfoTextWithTitle(title = R.string.settings_userInfo_email, subtitle = user.email)
-                UserInfoTextWithTitle(title = R.string.settings_userInfo_website, subtitle = user.website)
-                UserInfoTextWithTitle(title = R.string.settings_userInfo_city, subtitle = user.city)
-                UserInfoTextWithTitle(title = R.string.settings_userInfo_state, subtitle = user.state)
-                UserInfoTextWithTitle(title = R.string.settings_userInfo_id, subtitle = user.id)
+        Column(
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.wrapContentHeight()
+        ) {
+            UserInfoTextWithTitle(title = R.string.settings_userInfo_username, subtitle = user.username)
+            if (user.fullNamePublic == 1) {
+                UserInfoTextWithTitle(title = R.string.settings_userInfo_fullName, subtitle = user.fullName)
             }
+            UserInfoTextWithTitle(title = R.string.settings_userInfo_email, subtitle = user.email)
+            UserInfoTextWithTitle(title = R.string.settings_userInfo_website, subtitle = user.website)
+            UserInfoTextWithTitle(title = R.string.settings_userInfo_city, subtitle = user.city)
+            UserInfoTextWithTitle(title = R.string.settings_userInfo_state, subtitle = user.state)
+            UserInfoTextWithTitle(title = R.string.settings_userInfo_id, subtitle = user.id)
+
         }
     }
 }

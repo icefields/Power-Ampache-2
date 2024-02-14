@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.screens.home.components
 
 import androidx.compose.foundation.clickable
@@ -12,17 +33,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.screens.home.LoadingView
+
+const val HOME_LOADING_VIEW_IDENTIFIER = "luci.sixsixsix.powerampache2.presentation.screens.home.loading"
 
 @Composable
 fun HomeScreenSection(
@@ -36,8 +57,8 @@ fun HomeScreenSection(
             SectionRow(navigator = navigator, albumsRow = albumsRow)
             Spacer(modifier = Modifier.height(24.dp))
         }
-    } else if (text == "loading" && albumsRow == null) {
-        // TODO this is a hac: passing "loading" as identifier to visualize a loading progress
+    } else if (text == HOME_LOADING_VIEW_IDENTIFIER && albumsRow == null) {
+        // TODO this is a hack: passing  a const string as identifier to visualize a loading progress
         //  at the bottom while data is loading. A null list in this case means isLoading = true,
         //  and empty list means isLoading = false.
         //  Do this properly!

@@ -129,15 +129,15 @@ interface MusicDao {
     @Query("DELETE FROM playlistentity")
     suspend fun clearPlaylists()
 
-    @Query("""SELECT * FROM playlistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by rating DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by flag DESC, rating DESC, (owner == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) DESC, id DESC""")
     suspend fun searchPlaylists(query: String): List<PlaylistEntity>
+
+    @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, (owner == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) DESC, id DESC""")
+    fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
 
     // TODO get only playlists user owns
     @Query("""SELECT * FROM playlistentity WHERE owner = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') order by rating DESC, id DESC""")
     suspend fun getMyPlaylists(): List<PlaylistEntity>
-
-    @Query("""SELECT * FROM playlistentity order by rating DESC, id DESC""")
-    fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
 
 // --- OFFLINE SONGS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)

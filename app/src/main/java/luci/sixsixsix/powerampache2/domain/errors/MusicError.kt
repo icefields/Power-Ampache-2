@@ -63,6 +63,7 @@ private const val ERROR_CODE_SESSION_EXPIRED = "4701"
 private const val ERROR_CODE_EMPTY = "4704"
 private const val ERROR_CODE_DUPLICATE = "4710"
 private const val ERROR_CODE_SYSTEM = "4703"
+private const val ERROR_PLAYLIST_DELETE = "4742" // {"errorAction":"playlist_delete","errorCode":"4742","errorMessage":"Require: 100","errorType":"account"}
 
 const val ERROR_TYPE_EMPTY = "empty"
 const val ERROR_TYPE_ACCOUNT = "account"

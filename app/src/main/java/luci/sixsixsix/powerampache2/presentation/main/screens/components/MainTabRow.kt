@@ -59,7 +59,7 @@ object MainTabRow {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun MainTabRow(pagerState: PagerState) {
-        var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+        var selectedTabIndex by rememberSaveable { mutableIntStateOf(pagerState.currentPage) }
 
         LaunchedEffect(selectedTabIndex) {
             pagerState.animateScrollToPage(selectedTabIndex)

@@ -59,12 +59,16 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = ".debug"
 
+            // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "true")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
             buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
             buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
+            buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
+
+            // CONSTANTS
             buildConfigField("String", "AMPACHE_USER", ampacheUser)
             buildConfigField("String", "AMPACHE_PASSWORD", ampachePass)
             buildConfigField("String", "AMPACHE_URL", ampacheUrl)
@@ -72,6 +76,9 @@ android {
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
             buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
+
+            resValue("string", "build_type", "Debug")
+            resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.debug.provider")
 
             isMinifyEnabled = false
             proguardFiles(
@@ -81,12 +88,16 @@ android {
         }
 
         release {
+            // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "false")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
             buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
             buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
+            buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
+
+            // CONSTANTS
             buildConfigField("String", "AMPACHE_USER", "\"\"")
             buildConfigField("String", "AMPACHE_PASSWORD", "\"\"")
             buildConfigField("String", "AMPACHE_URL", "\"\"")
@@ -94,6 +105,9 @@ android {
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
             buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
+
+            resValue("string", "build_type", "Release")
+            resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.provider")
 
             isMinifyEnabled = false
 

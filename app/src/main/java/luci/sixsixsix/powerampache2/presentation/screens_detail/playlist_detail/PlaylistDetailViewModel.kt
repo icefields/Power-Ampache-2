@@ -52,7 +52,6 @@ import luci.sixsixsix.powerampache2.presentation.main.MainState
 import javax.inject.Inject
 
 @HiltViewModel
-@OptIn(SavedStateHandleSaveableApi::class)
 class PlaylistDetailViewModel @Inject constructor(
     private val application: Application,
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
@@ -109,15 +108,9 @@ class PlaylistDetailViewModel @Inject constructor(
             }
             is PlaylistDetailEvent.OnRemoveSong ->
                 removeSongFromPlaylist(playlistId = state.playlist.id, songId = event.song.mediaId)
-            PlaylistDetailEvent.OnRemoveSongDismiss -> { }
-//                viewModelScope.launch {
-//                // TODO HACK FORCE refresh of list
-//                val songs = state.songs.toMutableList()
-//                state = state.copy(songs = listOf())
-//                delay(100)
-//                state = state.copy(songs = songs)
-//            }
-
+            PlaylistDetailEvent.OnRemoveSongDismiss -> { } // TODO remove this
+            PlaylistDetailEvent.OnToggleSort ->
+                state = state.copy(songs = state.songs.reversed())
         }
     }
 

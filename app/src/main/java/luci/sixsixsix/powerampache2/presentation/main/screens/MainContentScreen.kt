@@ -151,7 +151,6 @@ fun MainContentScreen(
         drawerState = drawerState,
         //scrimColor = MaterialTheme.colorScheme.scrim,
         drawerContent = {
-            L("DONATION",settingsViewModel.state.localSettings.hideDonationButton)
             MainDrawer(
                 user = authViewModel.state.user ?: User.emptyUser(),
                 versionInfo = settingsViewModel.state.appVersionInfoStr,

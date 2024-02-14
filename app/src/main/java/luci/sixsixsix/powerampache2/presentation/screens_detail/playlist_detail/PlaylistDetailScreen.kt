@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -210,7 +211,7 @@ fun PlaylistDetailScreen(
                     playlist = playlist,
                     isLoading = state.isLoading || state.isPlaylistRemoveLoading,
                     scrollBehavior = scrollBehavior
-                ) { infoVisibility = !infoVisibility }
+                ) { viewModel.onEvent(PlaylistDetailEvent.OnToggleSort) }
             }
         ) {
             Surface(
@@ -326,7 +327,11 @@ fun PlaylistDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.onEvent(PlaylistDetailEvent.OnSongSelected(song))
+                                            viewModel.onEvent(
+                                                PlaylistDetailEvent.OnSongSelected(
+                                                    song
+                                                )
+                                            )
                                             mainViewModel.onEvent(MainEvent.Play(song))
                                         },
                                     subtitleString = SubtitleString.ARTIST,

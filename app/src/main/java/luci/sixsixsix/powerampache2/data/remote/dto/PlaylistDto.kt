@@ -4,6 +4,7 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 
 data class PlaylistDto(
     @SerializedName("id")
@@ -38,9 +39,15 @@ fun PlaylistDto.toPlaylist() = Playlist(
     owner = owner ?: "ERROR no owner",
     artUrl = art ?: "",
     items = items ?: 0,
-    type = type ?: "ERROR no type",
+    type = fromStringToPlaylistType(type),
     flag = processFlag(flag),
     preciseRating = preciserating,
     rating = rating,
     averageRating = averagerating
 )
+
+fun fromStringToPlaylistType(type: String?): PlaylistType? = try {
+    PlaylistType.valueOf(type ?: "")
+} catch (e: IllegalArgumentException ) {
+    null
+}
