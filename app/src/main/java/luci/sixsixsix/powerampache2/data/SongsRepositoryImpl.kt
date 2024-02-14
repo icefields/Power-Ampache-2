@@ -235,7 +235,7 @@ class SongsRepositoryImpl @Inject constructor(
                 val partialResponse = songsDto.map { songDto -> songDto.toSong() }
                 if (partialResponse.isNotEmpty()) {
                     songs.addAll(partialResponse)
-                    emit(Resource.Success(data = songs.reversed(), networkData = partialResponse))
+                    emit(Resource.Success(data = songs, networkData = partialResponse))
                 } else {
                     // if no more items to fetch finish
                     isFinished = true
