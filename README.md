@@ -58,7 +58,7 @@ Contribution guidelines coming soon, please make sure to read before opening a P
 | |  | |
 | ----------- | ----------- | ----------- |
 | **Home Screen** |  | **Music Player pull-up view** |
-| ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/1eaad85f-b2ce-4b56-abfc-6a6aa295fc38) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/125a3a0d-7b63-4e66-a22b-c3f266b42059) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/05fb4243-88a4-43a9-84ee-4bf9c25df740) |
+| ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/a7f97a5a-1cce-4d08-8c5e-c25323b288ac) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/125a3a0d-7b63-4e66-a22b-c3f266b42059) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/05fb4243-88a4-43a9-84ee-4bf9c25df740) |
 | | | |
 | **Artist view, with info and discography** | **Single Album view, with info and songs** | **Single Album view, with info and songs** |
 | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/de081122-23db-4ef7-810f-95fe925dcc29") | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/b435281f-8f59-4b6a-927f-9e4a43999123) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/bdd61944-930f-4509-943f-d60928f1d8b5) |
