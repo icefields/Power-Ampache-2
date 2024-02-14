@@ -48,18 +48,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.data.remote.MainNetwork
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.presentation.common.RoundedCornerButton
 
 @Composable
 fun NewPlaylistDialog(
-    onConfirm: (playlistName: String, playlistType: MainNetwork.PlaylistType) -> Unit,
+    onConfirm: (playlistName: String, playlistType: PlaylistType) -> Unit,
     onCancel: () -> Unit
 ) {
     var playlistName by remember { mutableStateOf("") }
-    val playlistType by remember { mutableStateOf(MainNetwork.PlaylistType.private) }
-    val radioOptions = listOf(MainNetwork.PlaylistType.private, MainNetwork.PlaylistType.public)
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0] ) }
+    //var playlistType by remember { mutableStateOf(PlaylistType.private) }
+    val radioOptions = listOf(PlaylistType.private, PlaylistType.public)
+    var playlistType by remember { mutableStateOf(radioOptions[0]) }
 
     Dialog(onDismissRequest = { onCancel() }) {
         Card(
@@ -99,8 +99,10 @@ fun NewPlaylistDialog(
 
                 PlaylistTypeRadioButtons(
                     radioOptions = radioOptions,
-                    selectedOption = selectedOption,
-                    onOptionSelected = onOptionSelected
+                    selectedOption = playlistType,
+                    onOptionSelected = {
+                        playlistType = it
+                    }
                 )
 
                 Spacer(modifier = Modifier.padding(top = 20.dp))
@@ -135,9 +137,9 @@ fun NewPlaylistDialog(
 
 @Composable
 fun PlaylistTypeRadioButtons(
-    radioOptions: List<MainNetwork.PlaylistType>,
-    selectedOption: MainNetwork.PlaylistType,
-    onOptionSelected: (MainNetwork.PlaylistType) -> Unit
+    radioOptions: List<PlaylistType>,
+    selectedOption: PlaylistType,
+    onOptionSelected: (PlaylistType) -> Unit
 ) {
 
     Row(

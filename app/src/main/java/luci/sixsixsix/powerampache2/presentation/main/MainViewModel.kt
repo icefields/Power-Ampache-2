@@ -43,6 +43,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants.RESET_QUEUE_ON_NEW_SESSION
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.exportSong
@@ -544,7 +545,7 @@ class MainViewModel @Inject constructor(
                 }
             }
             simpleMediaServiceHandler.addMediaItemList(mediaItemList)
-            L("Load song data END")
+            logToErrorLogs("Load song data END")
 
             isLoading = false
             isBuffering = false
@@ -556,7 +557,7 @@ class MainViewModel @Inject constructor(
     private fun startMusicServiceIfNecessary() {
         L("SERVICE- startMusicServiceIfNecessary. isServiceRunning? : ", isServiceRunning)
         if (!isServiceRunning) {
-            L("SERVICE- startMusicServiceIfNecessary")
+            logToErrorLogs("SERVICE- startMusicServiceIfNecessary")
             Intent(application, SimpleMediaService::class.java).apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(application, this)
@@ -568,7 +569,7 @@ class MainViewModel @Inject constructor(
 
     @OptIn(UnstableApi::class)
     fun stopMusicService() {
-        L("SERVICE- stopMusicService", isServiceRunning)
+        logToErrorLogs("SERVICE- stopMusicService $isServiceRunning")
         //if (isServiceRunning) {
         try {
             application.stopService(Intent(application, SimpleMediaService::class.java))
@@ -585,27 +586,37 @@ class MainViewModel @Inject constructor(
         // when the app goes in background without playing anything the token might be invalidated
         // in this case reload the song data
         state.song?.songUrl?.let { songUrl ->
-            L("songUrl is not null", songUrl)
+            logToErrorLogs("1 songUrl is not null $songUrl")
             if (songUrl.startsWith("http")) {
                 if (!songUrl.contains(authToken)) {
-                    L("songUrl does not contain the updated token LOADING SONG DATA NOW", authToken, songUrl)
+                    logToErrorLogs("2 songUrl does not contain the updated token LOADING SONG DATA NOW $authToken, $songUrl")
                     loadSongData()
-                }
+                } else
+                    logToErrorLogs("3 songUrl contains the updated token, not realoading data")
             } else {
                 // that's a local song, check the rest of the queue
                 state.queue.forEach { song ->
                     if (song.songUrl.startsWith("http") && !song.songUrl.contains(authToken)) {
-                        L("song.songUrl does not contain the updated token LOADING SONG DATA NOW", authToken, songUrl)
+                        logToErrorLogs("4 song.songUrl does not contain the updated token LOADING SONG DATA NOW $authToken, $songUrl")
                         loadSongData()
                         return
                     }
                 }
             }
+            logToErrorLogs("5 (songUrl is not null) reached the end of function")
         }
+            ?: logToErrorLogs("6 song is null? ${(state.song == null)} . songUrl: ${state.song?.songUrl}.")
+    }
+
+    // TODO remove this after bug is fixed
+    private fun logToErrorLogs(mess: String) {
+        L(mess)
+        if (BuildConfig.DEBUG)
+            playlistManager.updateErrorLogMessage(mess)
     }
 
     override fun onCleared() {
-        L("onCleared")
+        logToErrorLogs("onCleared")
         searchJob?.cancel()
         loadSongDataJob?.cancel()
         isLoading = false

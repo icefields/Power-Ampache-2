@@ -22,8 +22,10 @@
 package luci.sixsixsix.powerampache2.domain.models
 
 import android.os.Parcelable
+import com.google.gson.Gson
 import kotlinx.parcelize.Parcelize
-import java.util.UUID
+import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistDto
+import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 
 @Parcelize
 open class Playlist(
@@ -31,7 +33,7 @@ open class Playlist(
     val name: String,
     val owner: String? = null,
     val items: Int? = 0,
-    val type: String? = null,
+    val type: PlaylistType? = null,
     val artUrl: String? = null,
     val flag: Int = 0,
     val preciseRating: Float = 0.0f,
@@ -39,14 +41,26 @@ open class Playlist(
     val averageRating: Float = 0.0f,
 ): Parcelable {
     companion object {
-        fun mock(): Playlist = Playlist(
-            id = UUID.randomUUID().toString(),
-            name = "Mock playlist name"
-        )
+        fun mock(): Playlist = Gson().fromJson("{\n" +
+                "            \"id\": \"2\",\n" +
+                "            \"name\": \"2023-techdeath\",\n" +
+                "            \"owner\": \"System\",\n" +
+                "            \"items\": 67,\n" +
+                "            \"type\": \"public\",\n" +
+                "            \"art\": \"https:\\/\\/tari.ddns.net\\/image.php?object_id=2&object_type=playlist&name=art.jpg\",\n" +
+                "            \"flag\": true,\n" +
+                "            \"rating\": 4,\n" +
+                "            \"averagerating\": null\n" +
+                "        }", PlaylistDto::class.java).toPlaylist()
     }
 }
 
+enum class PlaylistType { public, private }
+
 fun Playlist.isSmartPlaylist() = id.lowercase().startsWith("smart_")
+fun Playlist.isOwnerSystem() = owner?.lowercase() == "system"
+fun Playlist.isOwnerAdmin() = owner?.lowercase() == "admin"
+fun Playlist.isFavourite() = flag == 1
 
 
 @Parcelize

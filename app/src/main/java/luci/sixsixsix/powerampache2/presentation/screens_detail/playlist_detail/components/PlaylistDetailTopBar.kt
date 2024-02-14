@@ -25,7 +25,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,7 +51,6 @@ import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.TopBarCircularProgress
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -96,10 +95,7 @@ fun PlaylistDetailTopBar(
             IconButton(onClick = {
                 onRightIconClick()
             }) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = "show hide album info"
-                )
+                Icon(imageVector = Icons.Outlined.Sort, contentDescription = "sorting")
             }
         }
     )

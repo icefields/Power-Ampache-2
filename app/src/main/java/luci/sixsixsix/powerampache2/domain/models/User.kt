@@ -25,6 +25,11 @@ import android.os.Parcelable
 import com.google.gson.Gson
 import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_CITY
+import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_NAME
+import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_STATE
+import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_USERNAME
+import luci.sixsixsix.powerampache2.common.Constants.MASTODON_URL
 
 @Parcelize
 data class User(
@@ -57,7 +62,25 @@ data class User(
             "",
             ""
         )
-        fun mockUser(): User = Gson().fromJson("{\n" +
+
+        fun demoUser(): User = User(
+            id = "demoUser",
+            username = DOGMAZIC_FAKE_USERNAME,
+            email = Constants.DOGMAZIC_FAKE_EMAIL,
+            access = Constants.ERROR_INT,
+            streamToken = null,
+            fullNamePublic = 1,
+            fullName = DOGMAZIC_FAKE_NAME,
+            disabled = false,
+            createDate = Constants.ERROR_INT,
+            lastSeen = Constants.ERROR_INT,
+            website = MASTODON_URL,
+            state = DOGMAZIC_FAKE_STATE,
+            city = DOGMAZIC_FAKE_CITY
+        )
+
+        fun mockUser(): User = Gson().fromJson(
+            "{\n" +
                 "    \"id\": \"3\",\n" +
                 "    \"username\": \"luci\",\n" +
                 "    \"auth\": null,\n" +
@@ -69,10 +92,12 @@ data class User(
                 "    \"disabled\": false,\n" +
                 "    \"create_date\": 1704516888,\n" +
                 "    \"last_seen\": 1706202621,\n" +
-                "    \"website\": null,\n" +
+                "    \"website\": \"http://somewebsite.mockd\",\n" +
                 "    \"state\": \"Mercury\",\n" +
                 "    \"city\": \"Phobos Town\",\n" +
-                "    \"fullname\": \"Lucifer\"\n" +
-                "}", User::class.java)
+                "    \"fullname\": \"Lucifer The Conqueror\"\n" +
+                "}",
+            User::class.java
+        )
     }
 }

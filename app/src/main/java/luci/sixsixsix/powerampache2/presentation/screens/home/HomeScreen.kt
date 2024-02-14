@@ -42,6 +42,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.screens.home.components.HOME_LOADING_VIEW_IDENTIFIER
 import luci.sixsixsix.powerampache2.presentation.screens.home.components.HomeScreenSection
 
 @Composable
@@ -63,11 +64,11 @@ fun HomeScreen(
         Pair(stringResource(id = R.string.home_section_title_highest), state.highestAlbums),
         Pair(stringResource(id = R.string.home_section_title_newest), state.newestAlbums),
         Pair(stringResource(id = R.string.home_section_title_moreAlbums), state.randomAlbums),
-        // TODO this is a hack, passing "loading" as identifier to visualize a loading progress
+        // TODO this is a hack, passing a const string as identifier to visualize a loading progress
         //  at the bottom while data is loading. A null list in this case means isLoading = true,
         //  and empty list means isLoading = false.
         //  Do this properly!
-        Pair("loading", if(isLoadingData(state)) null else listOf()),
+        Pair(HOME_LOADING_VIEW_IDENTIFIER, if(isLoadingData(state)) null else listOf()),
     )
 
     Box(

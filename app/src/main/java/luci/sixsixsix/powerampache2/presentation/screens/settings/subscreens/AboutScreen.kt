@@ -21,11 +21,14 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.settings.subscreens
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,15 +38,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,6 +58,8 @@ import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.GITHUB_IMG_URL
+import luci.sixsixsix.powerampache2.common.Constants.GITHUB_URL
 import luci.sixsixsix.powerampache2.common.Constants.GPLV3_IMG_URL
 import luci.sixsixsix.powerampache2.common.Constants.GPLV3_URL
 import luci.sixsixsix.powerampache2.common.Constants.MASTODON_IMG_URL
@@ -107,10 +116,10 @@ fun AboutScreenContent(
                     subtitle = versionInfo,
                     subtitleTextSize = fontDimensionResource(id = R.dimen.about_item_fontSize)
                 )
-                3 -> Divider(modifier = Modifier.padding(vertical = 6.dp))
+                3 -> DividerSeparator()
                 4 -> TextWithOverline(title = R.string.about_license_title, subtitle = "")
-                5 -> AboutImageWithLink(GPLV3_IMG_URL, GPLV3_URL, "gplv3 license")
-                6 -> Divider(modifier = Modifier.padding(top = 16.dp, bottom = 6.dp))
+                5 -> AboutImageWithLink(GPLV3_IMG_URL, GPLV3_URL, stringResource(id = R.string.about_license_title))
+                6 -> DividerSeparator(modifier = Modifier.padding(top = 16.dp, bottom = 6.dp))
                 7 -> TextWithOverline(title = R.string.about_contact_title, subtitle = "")
                 8 -> Row(
                     Modifier.fillMaxWidth(),
@@ -125,7 +134,15 @@ fun AboutScreenContent(
                             .width(66.dp)
                             .height(66.dp))
                 }
-                9 -> Divider(modifier = Modifier.padding(vertical = 6.dp))
+                9 -> DividerSeparator(modifier = Modifier.padding(vertical = 6.dp))
+                10 -> TextWithOverline(title = R.string.about_sourceCode_title, subtitle = "")
+                11 -> AboutImageWithLink(
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(86.dp),
+                    imgId = R.drawable.ic_github,
+                    pageUrl = GITHUB_URL,
+                    contentDescription = stringResource(id = R.string.about_sourceCode_title)
+                )
                 20 -> TextWithOverline(
                     title = R.string.version_quote_title,
                     subtitle = stringResource(id = R.string.version_quote),
@@ -137,6 +154,13 @@ fun AboutScreenContent(
         }
     }
 }
+
+@Composable
+fun DividerSeparator(
+    modifier: Modifier = Modifier.padding(vertical = 6.dp),
+    useDivider: Boolean = false
+) = if (useDivider) Divider(modifier = modifier) else Spacer(modifier = modifier)
+
 
 @Composable
 fun AboutTitleText(
@@ -168,11 +192,51 @@ fun AboutImageWithLink(
 )}
 
 @Composable
+fun AboutImageWithLink(
+    @DrawableRes imgId: Int,
+    pageUrl: String,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    tint: Color? = null
+) {
+    val applicationContext = LocalContext.current.applicationContext
+    if (tint == null) {
+        Image(
+            painter = painterResource(id = imgId),
+            modifier = modifier
+                .padding(horizontal = 11.dp)
+                .clickable { applicationContext.openLinkInBrowser(pageUrl) },
+            contentScale = ContentScale.Fit,
+            contentDescription = contentDescription
+        )
+    } else {
+        Icon(
+            tint = tint,
+            painter = painterResource(id = imgId),
+            modifier = modifier
+                .padding(horizontal = 11.dp)
+                .clickable { applicationContext.openLinkInBrowser(pageUrl) },
+            contentDescription = contentDescription
+        )
+    }
+}
+
+@Composable
 fun AboutHeader() { }
 
 @Composable
-fun ServerInfoSection(serverInfo: ServerInfo) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+fun ServerInfoSection(
+    serverInfo: ServerInfo,
+    containerColor: Color = Color.Transparent,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        )
+    ) {
         Column(modifier = Modifier
             .wrapContentHeight()) {
             serverInfo.server?.let {

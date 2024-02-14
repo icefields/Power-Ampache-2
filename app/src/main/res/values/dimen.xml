@@ -48,4 +48,5 @@
 
     <dimen name="about_item_fontSize">16sp</dimen>
     <dimen name="songDetail_handle_arrow_width">36sp</dimen>
+    <dimen name="playlistItem_icon_size">24dp</dimen>
 </resources>

@@ -104,9 +104,10 @@
 
     <!---...-->
     <string name="version_quote_title">Quote of the version</string>
-    <string name="version_quote">This version is powered by calico cats!</string>
+    <string name="version_quote">This version is powered by calico cats! Debug1</string>
     <string name="about_appVersion_title">App Version</string>
     <string name="about_license_title">License</string>
     <string name="about_contact_title">Contact Me on Telegram and Mastodon</string>
+    <string name="about_sourceCode_title">Source Code</string>
 
 </resources>

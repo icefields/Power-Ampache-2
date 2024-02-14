@@ -28,11 +28,13 @@ import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -51,6 +53,10 @@ fun String.md5(): String {
 fun String.sha256(): String {
     return hashString(this, "SHA-256")
 }
+
+val Int.dpTextUnit: TextUnit
+    @Composable
+    get() = with(LocalDensity.current) { this@dpTextUnit.dp.toSp() }
 
 private fun hashString(input: String, algorithm: String): String {
     return MessageDigest
@@ -110,13 +116,18 @@ fun Context.exportSong(song: Song, offlineUri: String) {
  * this function uses reflection to quickly turn any of the music object into a String to quickly
  * print and visualize data
  */
-fun Any.toDebugString(): String {
-    val album = this
+fun Any.toDebugString(
+    excludeErrorValues: Boolean = false,
+    excludeLyrics: Boolean = false,
+    excludeLists: Boolean = false,
+    separator: String = "\n"
+): String {
+    val obj = this
     val sb = StringBuilder()
-    for (field in album.javaClass.declaredFields) {
+    for (field in obj.javaClass.declaredFields) {
         field.isAccessible = true
 
-        field.get(album)?.let {
+        field.get(obj)?.let {
             if(
                 !field.name.lowercase().contains("url") &&
                 !field.name.lowercase().contains("artist") &&
@@ -126,7 +137,9 @@ fun Any.toDebugString(): String {
                 "$it" != "0" &&
                 !"$it".contains("CREATOR") &&
                 !"$it".contains("\$stable") &&
-                "$it" != "[]"
+                "$it" != "[]" &&
+                (!excludeLyrics || !field.name.lowercase().contains("lyrics")) &&
+                (!excludeLists || it !is List<*>)
             ) {
                 if (it is List<*>) {
                     if (field.name != "genre") {
@@ -144,20 +157,26 @@ fun Any.toDebugString(): String {
                             }
                         }
                     }
-                    sb.append("\n")
-
-
-                }
-                else if (it is MusicAttribute) {
+                    sb.append(separator)
+                } else if (it is MusicAttribute) {
                     sb.append(field.name)
                         .append(": ")
                         .append("${it.name}")
-                        .append("\n")
+                        .append(separator)
                 } else {
-                    sb.append(field.name)
-                        .append(": ")
-                        .append("${field.get(album)}")
-                        .append("\n")
+                    val valueStr = "${field.get(obj)}"
+                    if (!excludeErrorValues ||
+                            (!valueStr.startsWith(Constants.ERROR_STRING) &&
+                             !valueStr.startsWith(Constants.ERROR_TITLE) &&
+                             !valueStr.startsWith(Constants.ERROR_INT.toString()) &&
+                             !valueStr.startsWith(Constants.ERROR_FLOAT.toString())
+                            )
+                    ) {
+                        sb.append(field.name)
+                            .append(": ")
+                            .append(valueStr)
+                            .append(separator)
+                    }
                 }
             }
         }
@@ -165,6 +184,20 @@ fun Any.toDebugString(): String {
     // remove variables that are auto generate by the parcelable
     return sb.toString().split("CREATOR")[0]
 }
+
+fun Any.toDebugMap() = LinkedHashMap<String, String>().also { map ->
+    val separator = "---666---"
+    val debugStr = toDebugString(excludeLists = true, excludeLyrics = true, excludeErrorValues = true, separator = separator)
+    debugStr.split(separator).forEach {
+        if (!it.startsWith("Companion")) {
+            val keyValue = it.split(": ")
+            if (keyValue.size == 2) {
+                map[keyValue[0]] = keyValue[1]
+            }
+        }
+    }
+}
+
 
 @Composable
 @ReadOnlyComposable

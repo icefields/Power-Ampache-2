@@ -30,10 +30,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import java.util.UUID
@@ -66,7 +66,6 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private suspend fun filterPlaylists(playlists: List<Playlist>) =
         ArrayList<Playlist>().apply {
             playlists.forEach { playlist: Playlist ->
-                L(musicRepository.getUser()?.username, playlist.owner)
                 if (playlist.owner == musicRepository.getUser()?.username) {
                     add(playlist)
                 }
@@ -126,7 +125,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
 
     private fun createPlaylistAddSong(
         playlistName: String,
-        playlistType: MainNetwork.PlaylistType = MainNetwork.PlaylistType.private,
+        playlistType: PlaylistType = PlaylistType.private,
         songId: String
     ) = viewModelScope.launch {
         playlistsRepository
@@ -146,7 +145,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
 
     private fun createPlaylistAndAddSongs(
         playlistName: String,
-        playlistType: MainNetwork.PlaylistType = MainNetwork.PlaylistType.private,
+        playlistType: PlaylistType,
         songsToAdd: List<Song>
     ) = viewModelScope.launch {
         playlistsRepository
@@ -212,7 +211,7 @@ data class AddToPlaylistOrQueueDialogState (
 sealed class AddToPlaylistOrQueueDialogEvent {
     data class OnAddAlbumToQueue(val songs: List<Song>): AddToPlaylistOrQueueDialogEvent()
     data class AddSongsToPlaylist(val songs: List<Song>, val playlist: Playlist): AddToPlaylistOrQueueDialogEvent()
-    data class CreatePlaylistAndAddSongs(val songs: List<Song>, val playlistName: String, val playlistType: MainNetwork.PlaylistType): AddToPlaylistOrQueueDialogEvent()
+    data class CreatePlaylistAndAddSongs(val songs: List<Song>, val playlistName: String, val playlistType: PlaylistType): AddToPlaylistOrQueueDialogEvent()
     data class AddSongToPlaylist(val song: Song, val playlistId: String): AddToPlaylistOrQueueDialogEvent()
-    data class CreatePlaylistAndAddSong(val song: Song, val playlistName: String, val playlistType: MainNetwork.PlaylistType): AddToPlaylistOrQueueDialogEvent()
+    data class CreatePlaylistAndAddSong(val song: Song, val playlistName: String, val playlistType: PlaylistType): AddToPlaylistOrQueueDialogEvent()
 }

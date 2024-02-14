@@ -91,8 +91,6 @@ fun PlaylistInfoSection(
             }
         }
 
-
-
         Spacer(modifier = Modifier.height(6.dp))
         playlist.items?.let { itemCount ->
             if (itemCount > 0) {
@@ -111,11 +109,11 @@ fun PlaylistInfoSection(
                 name = "${playlist.averageRating}"
             )
         }
-        if (!playlist.type.isNullOrBlank()) {
+        if (playlist.type?.name?.isNotBlank() == true) {
             AttributeText(
                 modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
                 title = "",
-                name = playlist.type
+                name = playlist.type.name
             )
         }
         Spacer(modifier = Modifier.height(4.dp))

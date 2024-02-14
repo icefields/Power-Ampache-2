@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
@@ -39,6 +40,7 @@ import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
@@ -86,9 +88,18 @@ class PlaylistsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!
+        val user = dao.getCredentials()?.username
         val response = api.getPlaylists(auth.auth, filter = query, offset = offset)
         response.error?.let { throw(MusicException(it.toError())) }
-        val playlists = response.playlist!!.map { it.toPlaylist() } // will throw exception if playlist null
+        val playlists = (if (BuildConfig.SHOW_EMPTY_PLAYLISTS) {
+            response.playlist!! // will throw exception if playlist null
+        } else {
+            response.playlist!!.filter { dtoToFilter -> // will throw exception if playlist null
+                dtoToFilter.items?.let { itemsCount ->
+                    itemsCount > 0 || dtoToFilter.owner == user // edge-case default behaviour, user==null and owner==null will show the playlist
+                } ?: (dtoToFilter.owner == user) // if the count is null fallback to show the playlist if the user is the owner
+            }
+        }).map { it.toPlaylist() }
 
         if ( // Playlists change too often, clear every time
             query.isNullOrBlank() &&
@@ -205,7 +216,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
     override suspend fun createNewPlaylist(
         name: String,
-        playlistType: MainNetwork.PlaylistType
+        playlistType: PlaylistType
     ) = flow {
         emit(Resource.Loading(true))
         val auth = getSession()!!
@@ -254,7 +265,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         items: List<Song>,
         owner: String?,
         tracks: String?,
-        playlistType: MainNetwork.PlaylistType
+        playlistType: PlaylistType
     ) = flow {
         emit(Resource.Loading(true))
         val commaSeparatedIds = when(items.size) {
@@ -311,7 +322,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
     override suspend fun createNewPlaylistAddSongs(
         name: String,
-        playlistType: MainNetwork.PlaylistType,
+        playlistType: PlaylistType,
         songsToAdd: List<Song>
     ) = flow {
         emit(Resource.Loading(true))
@@ -338,7 +349,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
      */
     suspend fun createNewPlaylistAddSongsNOTWorking(
         name: String,
-        playlistType: MainNetwork.PlaylistType,
+        playlistType: PlaylistType,
         songsToAdd: List<Song>
     ) = flow {
         emit(Resource.Loading(true))
@@ -360,10 +371,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
             playlistId = playlist.id,
             items = commaSeparatedIds,
             owner = playlist.owner,
-            playlistType = MainNetwork.PlaylistType.valueOf(
-                playlist.type ?:
+            playlistType = playlist.type ?:
                 throw Exception("addSongsToPlaylist problem with playlist type")
-            )
         ).apply {
             error?.let { throw(MusicException(it.toError())) }
             if (success != null) {
@@ -405,10 +414,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
             items = commaSeparatedIds,
             tracks = trackPositionsCommaSeparated(songList),
             owner = playlist.owner,
-            playlistType = MainNetwork.PlaylistType.valueOf(
-                playlist.type ?:
-                throw Exception("addSongsToPlaylist problem with playlist type")
-            )
+            playlistType = playlist.type ?: throw Exception("addSongsToPlaylist problem with playlist type")
         ).apply {
             error?.let { throw(MusicException(it.toError())) }
             if (success != null) {

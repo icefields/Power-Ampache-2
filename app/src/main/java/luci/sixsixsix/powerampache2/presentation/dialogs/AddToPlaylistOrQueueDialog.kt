@@ -53,11 +53,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
-import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
@@ -177,7 +176,11 @@ fun AddToPlaylistOrQueueDialog(
     }
 }
 
-private fun addToPlaylist(viewModel: AddToPlaylistOrQueueDialogViewModel, songs: List<Song>, playlist: Playlist) {
+private fun addToPlaylist(
+    viewModel: AddToPlaylistOrQueueDialogViewModel,
+    songs: List<Song>,
+    playlist: Playlist
+) {
     when (songs.size) {
         1 -> viewModel.onEvent(
             AddToPlaylistOrQueueDialogEvent.AddSongToPlaylist(
@@ -209,7 +212,7 @@ private fun addToQueue(mainViewModel: MainViewModel, viewModel: AddToPlaylistOrQ
 private fun CreateAddToPlaylist(
     viewModel: AddToPlaylistOrQueueDialogViewModel,
     songs: List<Song>,
-    onConfirm: (playlistName: String, playlistType: MainNetwork.PlaylistType) -> Unit,
+    onConfirm: (playlistName: String, playlistType: PlaylistType) -> Unit,
     onCancel: () -> Unit
 ) {
     NewPlaylistDialog(
@@ -245,7 +248,7 @@ fun PlaylistDialogItem(
     iconContentDescription: String = title,
     backgroundColour: Color = RandomThemeBackgroundColour()
 ) {
-    var backgroundColourState by remember { mutableStateOf(backgroundColour) }
+    val backgroundColourState by remember { mutableStateOf(backgroundColour) }
 
     Card(
         // border = BorderStroke((0.0).dp, MaterialTheme.colorScheme.background),
