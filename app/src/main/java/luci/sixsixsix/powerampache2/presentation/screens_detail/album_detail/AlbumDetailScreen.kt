@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -75,12 +76,14 @@ import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigator
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
+import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.PlaylistDetailEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -178,6 +181,7 @@ fun AlbumDetailScreen(
                     navigator = navigator,
                     album = viewModel.state.album,
                     isLoading = mainViewModel.isLoading,
+                    isEditingPlaylist = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
                     scrollBehavior = scrollBehavior
                 ) { infoVisibility = !infoVisibility }
             }
@@ -207,8 +211,10 @@ fun AlbumDetailScreen(
                         album = viewModel.state.album,
                         isPlayingAlbum = isPlayingAlbum,
                         isLikeLoading = state.isLikeLoading,
+                        isAlbumDownloaded = state.isAlbumDownloaded,
                         isDownloading = mainViewModel.state.isDownloading,
                         isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
+                        isGlobalShuffleOn = state.isGlobalShuffleOn ,
                         artistClickListener = { artistId ->
                             navigateToArtist(navigator, artistId)
                         },
@@ -216,13 +222,29 @@ fun AlbumDetailScreen(
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {
                                     if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@AlbumInfoSection
-                                    if (!isPlayingAlbum) {
-                                        // add next to the list and skip to the top of the album (which is next)
-                                        viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
-                                        mainViewModel.onEvent(MainEvent.Play(songs[0]))
+
+                                    if (!state.isGlobalShuffleOn) {
+                                        if (!isPlayingAlbum) {
+                                            // add next to the list and skip to the top of the album (which is next)
+                                            viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
+                                            mainViewModel.onEvent(MainEvent.Play(songs[0]))
+                                        } else {
+                                            // will pause if playing
+                                            mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                        }
                                     } else {
-                                        // will pause if playing
-                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                        // this will add the shuffled playlist next and update the current song
+                                        // in main view model (which is listening to playlist manager)
+                                        val oldCurrentSong = mainViewModel.state.song
+                                        viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
+                                        // after updating queue and current song, play
+                                        if (!mainViewModel.isPlaying) {
+                                            mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                        }
+                                        // no need to skip if the queue was empty previously
+                                        if (oldCurrentSong != null) {
+                                            mainViewModel.onEvent(MainEvent.SkipNext)
+                                        }
                                     }
                                 }
                                 AlbumInfoViewEvents.SHARE_ALBUM ->
@@ -230,18 +252,7 @@ fun AlbumDetailScreen(
                                 AlbumInfoViewEvents.DOWNLOAD_ALBUM ->
                                     mainViewModel.onEvent(MainEvent.OnDownloadSongs(songs))
                                 AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM -> {
-                                    // this will add the shuffled playlist next and update the current song
-                                    // in main view model (which is listening to playlist manager)
-                                    val oldCurrentSong = mainViewModel.state.song
-                                    viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
-                                    // after updating queue and current song, play
-                                    if (!mainViewModel.isPlaying) {
-                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-                                    }
-                                    // no need to skip if the queue was empty previously
-                                    if (oldCurrentSong != null) {
-                                        mainViewModel.onEvent(MainEvent.SkipNext)
-                                    }
+                                    viewModel.onEvent(AlbumDetailEvent.OnShufflePlaylistToggle)
                                 }
                                 AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST ->
                                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(
@@ -250,6 +261,8 @@ fun AlbumDetailScreen(
                                     )
                                 AlbumInfoViewEvents.FAVOURITE_ALBUM ->
                                     viewModel.onEvent(AlbumDetailEvent.OnFavouriteAlbum)
+                                AlbumInfoViewEvents.STOP_DOWNLOAD_ALBUM ->
+                                    mainViewModel.onEvent(MainEvent.OnStopDownloadSongs)
                             }
                         }
                     )

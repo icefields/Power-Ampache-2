@@ -23,8 +23,11 @@ package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.SortMode
+import luci.sixsixsix.powerampache2.domain.models.defaultPlaylistSort
 import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
 
 @Parcelize
@@ -36,7 +39,9 @@ data class PlaylistDetailState (
     val isPlaylistRemoveLoading: Boolean = false,
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false,
-    val isUserOwner: Boolean = false
+    val sortMode: SortMode = defaultPlaylistSort,
+    val isUserOwner: Boolean = false,
+    val isGlobalShuffleOn: Boolean = LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE
 ): Parcelable {
     fun getSongList(): List<Song> = songs.map { it.song }
 }

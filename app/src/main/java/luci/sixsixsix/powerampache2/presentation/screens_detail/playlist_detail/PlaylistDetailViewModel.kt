@@ -27,28 +27,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
-import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
-import luci.sixsixsix.powerampache2.presentation.main.MainState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -60,12 +59,29 @@ class PlaylistDetailViewModel @Inject constructor(
     private val songsRepository: SongsRepository,
     private val musicRepository: MusicRepository,
     private val playlistsRepository: PlaylistsRepository,
+    private val settingsRepository: SettingsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : AndroidViewModel(application = application) {
     var state by mutableStateOf(PlaylistDetailState())
     //var state by savedStateHandle.saveable { mutableStateOf(PlaylistDetailState()) }
 
     init {
+        viewModelScope.launch {
+            settingsRepository.settingsLiveData.asFlow().collectLatest {
+                it?.let { settings ->
+                    if (settings.playlistSongsSorting != state.sortMode) {
+                        L("found a different sort mode", settings.playlistSongsSorting)
+                        // when getting a different sort mode, invert the list
+                        state = state.copy(sortMode = settings.playlistSongsSorting, songs = state.songs.reversed())
+                    }
+
+                    if (settings.isGlobalShuffleEnabled != state.isGlobalShuffleOn) {
+                        state = state.copy(isGlobalShuffleOn = settings.isGlobalShuffleEnabled)
+                    }
+                }
+            }
+        }
+
         savedStateHandle.get<Playlist>("playlist")?.let { playlist ->
             state = state.copy(playlist = playlist)
             onEvent(PlaylistDetailEvent.Fetch(playlist))
@@ -109,8 +125,22 @@ class PlaylistDetailViewModel @Inject constructor(
             is PlaylistDetailEvent.OnRemoveSong ->
                 removeSongFromPlaylist(playlistId = state.playlist.id, songId = event.song.mediaId)
             PlaylistDetailEvent.OnRemoveSongDismiss -> { } // TODO remove this
-            PlaylistDetailEvent.OnToggleSort ->
-                state = state.copy(songs = state.songs.reversed())
+            PlaylistDetailEvent.OnToggleSort -> viewModelScope.launch {
+                if ((state.playlist !is HighestPlaylist) && (state.playlist !is RecentPlaylist) &&(state.playlist !is FlaggedPlaylist) &&(state.playlist !is FrequentPlaylist) ) {
+                    // if not a stat playlist change global sort
+                    settingsRepository.changeSortMode( if (state.sortMode == SortMode.ASC) SortMode.DESC else SortMode.ASC )
+                } else {
+                    // otherwise just reverse
+                    state = state.copy(songs = state.songs.reversed())
+                }
+            }
+            PlaylistDetailEvent.OnShufflePlaylistToggle -> viewModelScope.launch {
+                try {
+                    state = state.copy(isGlobalShuffleOn = settingsRepository.toggleGlobalShuffle())
+                } catch (e: Exception) {
+                    playlistManager.updateErrorLogMessage(e.stackTraceToString())
+                }
+            }
         }
     }
 
@@ -152,7 +182,7 @@ class PlaylistDetailViewModel @Inject constructor(
                                         isOffline = songsRepository.isSongAvailableOffline(song)
                                     ))
                                 }
-                                state = state.copy(songs = songWrapperList)
+                                state = state.copy(songs = songWrapperList.apply { if (state.sortMode == SortMode.DESC) { reverse() } })
                                 L("PlaylistDetailViewModel.getSongsFromPlaylist size ${result.data?.size} network: ${result.networkData?.size}")
                             }
                         }

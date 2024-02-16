@@ -35,7 +35,7 @@ interface PlaylistsRepository {
     suspend fun getPlaylists(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Playlist>>>
     suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun addSongToPlaylist(playlistId: String, songId: String): Flow<Resource<Any>>
-    suspend fun addSongsToPlaylist(playlist: Playlist, songsToAdd: List<Song>): Flow<Resource<Any>>
+    suspend fun addSongsToPlaylist(playlist: Playlist, songsToAdd: List<Song>): Flow<Resource<Playlist>>
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String): Flow<Resource<Any>>
     suspend fun createNewPlaylist(name: String, playlistType: PlaylistType): Flow<Resource<Playlist>>
     suspend fun createNewPlaylistAddSongs(name: String, playlistType: PlaylistType, songsToAdd: List<Song>): Flow<Resource<Playlist>>

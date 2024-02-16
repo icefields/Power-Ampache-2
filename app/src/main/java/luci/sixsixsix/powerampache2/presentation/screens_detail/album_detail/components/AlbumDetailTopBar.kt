@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -37,6 +38,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -53,6 +58,7 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.TopBarCircularProgress
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -61,9 +67,21 @@ fun AlbumDetailTopBar(
     navigator: DestinationsNavigator,
     album: Album,
     isLoading: Boolean,
+    isEditingPlaylist: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
     onRightIconClick: () -> Unit
 ) {
+
+    var exitWarningVisible by remember { mutableStateOf(false) }
+    AnimatedVisibility(visible = exitWarningVisible) {
+        EraseConfirmDialog(
+            onDismissRequest = { exitWarningVisible = false },
+            onConfirmation = { navigator.navigateUp() },
+            dialogTitle = "Leave Screen?",
+            dialogText = "Songs are being added to your playlist.\nLeaving this screen now will interrupt the operation"
+        )
+    }
+
     LargeTopAppBar(
         modifier = Modifier.background(Color.Transparent),
         colors = TopAppBarDefaults.largeTopAppBarColors(
@@ -92,7 +110,11 @@ fun AlbumDetailTopBar(
         },
         navigationIcon = {
             CircleBackButton {
-                navigator.navigateUp()
+                if (!isEditingPlaylist) {
+                    navigator.navigateUp()
+                } else {
+                    exitWarningVisible = true
+                }
             }
         },
         scrollBehavior = scrollBehavior,
@@ -136,6 +158,7 @@ fun AlbumDetailTopBarPreview() {
             year = 1986),
         scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState()),
         onRightIconClick = {},
-        isLoading = true
+        isLoading = true,
+        isEditingPlaylist = true,
     )
 }

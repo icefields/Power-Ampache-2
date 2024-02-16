@@ -33,5 +33,6 @@ sealed class PlaylistDetailEvent {
     data object OnPlayPlaylist: PlaylistDetailEvent()
     data object OnSharePlaylist: PlaylistDetailEvent()
     data object OnShufflePlaylist: PlaylistDetailEvent()
+    data object OnShufflePlaylistToggle: PlaylistDetailEvent()
     data object OnToggleSort: PlaylistDetailEvent()
 }

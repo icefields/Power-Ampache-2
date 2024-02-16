@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data.local
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
+import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 import java.time.LocalDateTime
 
@@ -71,6 +72,12 @@ object Converters {
 
     @TypeConverter
     fun streamingQualityToBitrate(streamingQuality: StreamingQuality) = streamingQuality.bitrate
+
+    @TypeConverter
+    fun stringToSortMode(mode: String) = SortMode.valueOf(mode)
+
+    @TypeConverter
+    fun sortModeToString(sortMode: SortMode) = sortMode.name
 }
 
 data class MusicAttributesContainer(

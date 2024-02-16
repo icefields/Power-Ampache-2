@@ -31,10 +31,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.AddBox
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,14 +47,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.presentation.common.ButtonDownload
 import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
 
 @Composable
 fun AlbumInfoButtonsRow(
     album: Album,
     isPlayingAlbum: Boolean,
+    isAlbumDownloaded: Boolean,
     isPlaylistEditLoading: Boolean,
     isDownloading: Boolean,
+    isGlobalShuffleOn: Boolean,
     modifier: Modifier = Modifier,
     eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit
 ) {
@@ -71,15 +76,23 @@ fun AlbumInfoButtonsRow(
             eventListener(AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST)
         }
 
-        ButtonWithLoadingIndicator(
-            imageVector = Icons.Outlined.DownloadForOffline,
-            imageContentDescription= "Download",
-            background = Color.Transparent,
-            isLoading = isDownloading,
-            showBoth = true
-        ) {
-            eventListener(AlbumInfoViewEvents.DOWNLOAD_ALBUM)
-        }
+//        val dlIc = if (!isDownloading) Icons.Outlined.DownloadForOffline else Icons.Outlined.Close
+//        val dlCallback = if (!isDownloading) eventListener(AlbumInfoViewEvents.DOWNLOAD_ALBUM) else eventListener(AlbumInfoViewEvents.STOP_DOWNLOAD_ALBUM)
+//        ButtonWithLoadingIndicator(
+//            imageVector = dlIc,
+//            imageContentDescription= "Download",
+//            background = Color.Transparent,
+//            isLoading = isDownloading,
+//            showBoth = true,
+//            onClick = { dlCallback }
+//        )
+
+        ButtonDownload(
+            isDownloaded = isAlbumDownloaded,
+            isDownloading = isDownloading,
+            onStartDownloadClick = { eventListener(AlbumInfoViewEvents.DOWNLOAD_ALBUM) },
+            onStopDownloadClick = { eventListener(AlbumInfoViewEvents.STOP_DOWNLOAD_ALBUM) }
+        )
 
         IconButton(modifier = Modifier
             .height(80.dp)
@@ -100,7 +113,8 @@ fun AlbumInfoButtonsRow(
             }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_shuffleplay),
-                contentDescription = "Share"
+                contentDescription = "Share",
+                tint = if (isGlobalShuffleOn) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface
             )
         }
 
@@ -118,5 +132,5 @@ fun AlbumInfoButtonsRow(
 
 @Composable @Preview
 fun AlbumInfoButtonsRowPreview() {
-    AlbumInfoButtonsRow(Album.mock(), isPlayingAlbum = true, false, isDownloading = false){}
+    AlbumInfoButtonsRow(Album.mock(), isPlayingAlbum = true, false, isDownloading = false, isGlobalShuffleOn = true, isPlaylistEditLoading = true){}
 }

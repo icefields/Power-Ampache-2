@@ -47,6 +47,7 @@ enum class AlbumInfoViewEvents {
     PLAY_ALBUM,
     SHARE_ALBUM,
     DOWNLOAD_ALBUM,
+    STOP_DOWNLOAD_ALBUM,
     SHUFFLE_PLAY_ALBUM,
     ADD_ALBUM_TO_PLAYLIST,
     FAVOURITE_ALBUM
@@ -58,7 +59,9 @@ fun AlbumInfoSection(
     isPlayingAlbum: Boolean,
     isLikeLoading: Boolean,
     isDownloading: Boolean,
+    isAlbumDownloaded: Boolean,
     isPlaylistEditLoading: Boolean,
+    isGlobalShuffleOn: Boolean,
     modifier: Modifier,
     eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit,
     artistClickListener: (ArtistId) -> Unit
@@ -121,10 +124,12 @@ fun AlbumInfoSection(
         AlbumInfoButtonsRow(
             modifier = Modifier.fillMaxWidth(),
             album = album,
+            isAlbumDownloaded = isAlbumDownloaded,
             isPlayingAlbum = isPlayingAlbum,
             isPlaylistEditLoading = isPlaylistEditLoading,
             isDownloading = isDownloading,
-            eventListener = eventListener
+            eventListener = eventListener,
+            isGlobalShuffleOn = isGlobalShuffleOn
         )
         Spacer(modifier = Modifier.width(20.dp))
     }
@@ -139,8 +144,10 @@ fun AlbumInfoSectionPreview() {
         isPlayingAlbum = false,
         isLikeLoading = false,
         isPlaylistEditLoading = false,
-        isDownloading = true,
+        isDownloading = false,
         eventListener = { },
+        isGlobalShuffleOn = true,
+        isAlbumDownloaded = true,
         artistClickListener = { }
     )
 }
