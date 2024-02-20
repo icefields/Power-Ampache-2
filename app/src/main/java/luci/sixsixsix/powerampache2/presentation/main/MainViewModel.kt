@@ -98,7 +98,7 @@ class MainViewModel @Inject constructor(
     private var loadSongDataJob: Job? = null
     private var searchJob: Job? = null
     private var isServiceRunning by savedStateHandle.saveable { mutableStateOf(false) }
-    private val emittedDownloads by savedStateHandle.saveable { mutableStateOf(mutableListOf<String>()) }
+    private var emittedDownloads by savedStateHandle.saveable { mutableStateOf(listOf<String>()) }
 
     private val mainLock = Any()
 
@@ -157,7 +157,7 @@ class MainViewModel @Inject constructor(
                             workInfo?.outputData?.getString(SongDownloadWorker.KEY_RESULT_SONG)?.let { songId ->
                                 viewModelScope.launch {
                                     if (!emittedDownloads.contains(songId)) {
-                                        emittedDownloads.add(songId)
+                                        emittedDownloads = emittedDownloads.toMutableList().apply { add(songId) }
                                         songsRepository.getDownloadedSongById(songId)?.let { finishedSong ->
                                             //if(songsRepository.isSongAvailableOffline(song)) {}
                                             playlistManager.updateDownloadedSong(finishedSong)
@@ -340,9 +340,24 @@ class MainViewModel @Inject constructor(
                 }
             }
             MainEvent.PlayPauseCurrent -> state.song?.let {
-                viewModelScope.launch {
-                    L( "MainEvent.PlayCurrent", it)
-                    simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
+                if (loadSongDataJob?.isActive == true) {
+                    L( "MainEvent.PlayPauseCurrent", "loadSongDataJob?.isActive")
+                    loadSongDataJob?.invokeOnCompletion {
+                        //loadSongDataJob = null
+                        it?.let {
+                            L.e(it)
+                        } ?: run {
+                            L( "MainEvent.PlayPauseCurrent", "invokeOnCompletion", it)
+                            viewModelScope.launch {
+                                simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
+                            }
+                        }
+                    }
+                } else {
+                    L( "MainEvent.PlayPauseCurrent", "play directly", it)
+                    viewModelScope.launch {
+                        simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
+                    }
                 }
             }
             MainEvent.OnDismissUserMessage ->
@@ -531,13 +546,16 @@ class MainViewModel @Inject constructor(
     }
 
     private fun loadSongData() {
-        L("Load song data ")
+        logToErrorLogs("Load song data ")
         loadSongDataJob?.cancel()
         loadSongDataJob = viewModelScope.launch {
-            L("Load song data START")
             isLoading = true
             isBuffering = true
             state = state.copy(isFabLoading = true)
+
+            logToErrorLogs("Load song data START")
+            logToErrorLogs("Load song data START post-delay")
+
             val mediaItemList = mutableListOf<MediaItem>()
             for (song: Song? in state.queue) {
                 song?.let {
@@ -555,9 +573,8 @@ class MainViewModel @Inject constructor(
 
     @OptIn(UnstableApi::class)
     private fun startMusicServiceIfNecessary() {
-        L("SERVICE- startMusicServiceIfNecessary. isServiceRunning? : ", isServiceRunning)
+        logToErrorLogs("SERVICE- startMusicServiceIfNecessary. isServiceRunning? : $isServiceRunning")
         if (!isServiceRunning) {
-            logToErrorLogs("SERVICE- startMusicServiceIfNecessary")
             Intent(application, SimpleMediaService::class.java).apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(application, this)
@@ -586,19 +603,26 @@ class MainViewModel @Inject constructor(
         // when the app goes in background without playing anything the token might be invalidated
         // in this case reload the song data
         state.song?.songUrl?.let { songUrl ->
-            logToErrorLogs("1 songUrl is not null $songUrl")
+            logToErrorLogs("1.a songUrl is not null $songUrl")
             if (songUrl.startsWith("http")) {
                 if (!songUrl.contains(authToken)) {
                     logToErrorLogs("2 songUrl does not contain the updated token LOADING SONG DATA NOW $authToken, $songUrl")
-                    loadSongData()
+                    viewModelScope.launch {
+                        delay(1000)
+                        loadSongData()
+                    }
                 } else
                     logToErrorLogs("3 songUrl contains the updated token, not realoading data")
             } else {
+                logToErrorLogs("1.b songUrl NULL, looping queue, size: ${state.queue.size}")
                 // that's a local song, check the rest of the queue
                 state.queue.forEach { song ->
                     if (song.songUrl.startsWith("http") && !song.songUrl.contains(authToken)) {
                         logToErrorLogs("4 song.songUrl does not contain the updated token LOADING SONG DATA NOW $authToken, $songUrl")
-                        loadSongData()
+                        viewModelScope.launch {
+                            delay(1000)
+                            loadSongData()
+                        }
                         return
                     }
                 }
@@ -609,7 +633,7 @@ class MainViewModel @Inject constructor(
     }
 
     // TODO remove this after bug is fixed
-    private fun logToErrorLogs(mess: String) {
+    fun logToErrorLogs(mess: String) {
         L(mess)
         if (BuildConfig.DEBUG)
             playlistManager.updateErrorLogMessage(mess)

@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.Song
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -85,7 +87,9 @@ class MusicPlaylistManager @Inject constructor() {
 
     fun updateErrorLogMessage(logMessage: String?) {
         L("MusicPlaylistManager updateErrorLogMessage", logMessage)
-        _errorLogMessageState.value = ErrorLogMessageState(errorMessage = logMessage)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val current = LocalDateTime.now().format(formatter)
+        _errorLogMessageState.value = ErrorLogMessageState(errorMessage = "$current\n$logMessage")
     }
 
     fun updateDownloadedSong(song: Song?) {
