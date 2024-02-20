@@ -26,6 +26,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
+import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 
 @Entity
@@ -54,7 +55,13 @@ data class LocalSettingsEntity(
     val isNormalizeVolumeEnabled: Boolean,
 
     @ColumnInfo(name = "isMonoAudioEnabled", defaultValue = "${LocalSettings.SETTINGS_DEFAULTS_MONO}")
-    val isMonoAudioEnabled: Boolean
+    val isMonoAudioEnabled: Boolean,
+
+    @ColumnInfo(name = "isGlobalShuffleEnabled", defaultValue = "${LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE}")
+    val isGlobalShuffleEnabled: Boolean,
+
+    @ColumnInfo(name = "playlistSongsSorting", defaultValue = LocalSettings.SETTINGS_DEFAULTS_PLAYLIST_SORT)
+    val playlistSongsSorting: SortMode
 )
 
 fun LocalSettingsEntity.toLocalSettings() = LocalSettings(
@@ -66,7 +73,9 @@ fun LocalSettingsEntity.toLocalSettings() = LocalSettings(
     enableAutoUpdates = enableAutoUpdates,
     isNormalizeVolumeEnabled = isNormalizeVolumeEnabled,
     isSmartDownloadsEnabled = smartDownloadEnabled,
-    isMonoAudioEnabled = isMonoAudioEnabled
+    isMonoAudioEnabled = isMonoAudioEnabled,
+    isGlobalShuffleEnabled = isGlobalShuffleEnabled,
+    playlistSongsSorting = playlistSongsSorting
 )
 
 fun LocalSettings.toLocalSettingsEntity() = LocalSettingsEntity(
@@ -78,5 +87,7 @@ fun LocalSettings.toLocalSettingsEntity() = LocalSettingsEntity(
     streamingQuality = streamingQuality,
     enableAutoUpdates = enableAutoUpdates,
     isMonoAudioEnabled = isMonoAudioEnabled,
-    isNormalizeVolumeEnabled = isNormalizeVolumeEnabled
+    isNormalizeVolumeEnabled = isNormalizeVolumeEnabled,
+    isGlobalShuffleEnabled = isGlobalShuffleEnabled,
+    playlistSongsSorting = playlistSongsSorting
 )

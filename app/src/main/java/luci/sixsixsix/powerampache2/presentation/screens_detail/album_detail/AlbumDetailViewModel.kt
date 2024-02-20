@@ -27,17 +27,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
-import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -55,10 +57,10 @@ class AlbumDetailViewModel @Inject constructor(
     private val songsRepository: SongsRepository,
     private val albumsRepository: AlbumsRepository,
     private val playlistsRepository: PlaylistsRepository,
+    private val settingsRepository: SettingsRepository,
     private val playlistManager: MusicPlaylistManager,
 ) : AndroidViewModel(application) {
     var state by mutableStateOf(AlbumDetailState())
-    //var state by savedStateHandle.saveable { mutableStateOf(AlbumDetailState()) }
 
     init {
         val album = savedStateHandle.get<Album>("album")?.also {
@@ -72,6 +74,16 @@ class AlbumDetailViewModel @Inject constructor(
             }
             if (album == null) {
                 getAlbumInfo(it)
+            }
+        }
+
+        viewModelScope.launch {
+            settingsRepository.settingsLiveData.distinctUntilChanged().asFlow().collectLatest {
+                it?.let { settings ->
+                    if (settings.isGlobalShuffleEnabled != state.isGlobalShuffleOn) {
+                        state = state.copy(isGlobalShuffleOn = settings.isGlobalShuffleEnabled)
+                    }
+                }
             }
         }
 
@@ -105,17 +117,22 @@ class AlbumDetailViewModel @Inject constructor(
                 shareAlbum(state.album.id)
             AlbumDetailEvent.OnShuffleAlbum -> {
                 val shuffled = state.getSongList().shuffled()
-                //playlistManager.addToCurrentQueueNext(shuffled)
                 playlistManager.replaceCurrentQueue(shuffled)
                 playlistManager.moveToSongInQueue(shuffled[0])
             }
             AlbumDetailEvent.OnFavouriteAlbum ->
                 favouriteAlbum()
-
             AlbumDetailEvent.RefreshFromCache -> {
                 L("AlbumDetailEvent.RefreshFromCache", state.album.id)
                 if (!state.album.id.isNullOrBlank()) {
                     getSongsFromAlbum(albumId = state.album.id, fetchRemote = false)
+                }
+            }
+            AlbumDetailEvent.OnShufflePlaylistToggle -> viewModelScope.launch {
+                try {
+                    state = state.copy(isGlobalShuffleOn = settingsRepository.toggleGlobalShuffle())
+                } catch (e: Exception) {
+                    playlistManager.updateErrorLogMessage(e.stackTraceToString())
                 }
             }
         }
@@ -158,6 +175,13 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 
+    fun isAlbumDownloaded(songs: List<SongWrapper>): Boolean {
+        songs.forEach {
+            if (!it.isOffline) return false
+        }
+        return true
+    }
+
     private fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             songsRepository
@@ -173,7 +197,7 @@ class AlbumDetailViewModel @Inject constructor(
                                         isOffline = songsRepository.isSongAvailableOffline(song)
                                     ))
                                 }
-                                state = state.copy(songs = songWrapperList)
+                                state = state.copy(songs = songWrapperList, isAlbumDownloaded = isAlbumDownloaded(songWrapperList))
                                 L("AlbumDetailViewModel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)
                             }
                         }

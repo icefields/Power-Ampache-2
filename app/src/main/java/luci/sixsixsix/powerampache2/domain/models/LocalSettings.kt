@@ -24,8 +24,10 @@ package luci.sixsixsix.powerampache2.domain.models
 import android.os.Build
 import android.os.Parcelable
 import androidx.annotation.StringRes
+import androidx.room.ColumnInfo
 import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.models.LocalSettings.Companion.SETTINGS_DEFAULTS_PLAYLIST_SORT
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings.Companion.SETTINGS_DEFAULTS_THEME
 import luci.sixsixsix.powerampache2.presentation.screens.settings.components.PowerAmpacheDropdownItem
 import java.lang.StringBuilder
@@ -46,6 +48,10 @@ private const val ID_MATERIAL_YOU_DARK = "MATERIAL_YOU_DARK"
 private const val ID_MATERIAL_YOU_LIGHT = "MATERIAL_YOU_LIGHT"
 private val defaultTheme = PowerAmpTheme.getThemeFromId(SETTINGS_DEFAULTS_THEME)
 
+private const val SORT_MODE_ASC = "ASC"
+private const val SORT_MODE_DESC = "DESC"
+val defaultPlaylistSort = SortMode.valueOf(SETTINGS_DEFAULTS_PLAYLIST_SORT)
+
 /**
  * interfaces local settings and remote settings from server
  */
@@ -59,7 +65,9 @@ data class LocalSettings(
     val streamingQuality: StreamingQuality,
     val isNormalizeVolumeEnabled: Boolean,
     val isMonoAudioEnabled: Boolean,
-    val isSmartDownloadsEnabled: Boolean
+    val isSmartDownloadsEnabled: Boolean,
+    val isGlobalShuffleEnabled: Boolean,
+    val playlistSongsSorting: SortMode
 ): Parcelable {
     companion object {
         // defaults
@@ -70,9 +78,11 @@ data class LocalSettings(
         const val SETTINGS_DEFAULTS_ENABLE_AUTO_UPDATE = false
         const val SETTINGS_DEFAULTS_NORMALIZE_VOLUME = false
         const val SETTINGS_DEFAULTS_MONO = false
+        const val SETTINGS_DEFAULTS_GLOBAL_SHUFFLE = false
         const val SETTINGS_DEFAULTS_SMART_DOWNLOADS = false
         const val SETTINGS_DEFAULTS_STREAMING_QUALITY = BITRATE_VERY_HIGH
         const val SETTINGS_DEFAULTS_THEME = ID_DARK
+        const val SETTINGS_DEFAULTS_PLAYLIST_SORT = SORT_MODE_ASC // ascending is the default. if ascending do not change the list
 
         fun defaultSettings(username: String? = null) =
             LocalSettings(
@@ -84,7 +94,9 @@ data class LocalSettings(
                 streamingQuality = defaultBitrate,
                 isNormalizeVolumeEnabled = SETTINGS_DEFAULTS_NORMALIZE_VOLUME,
                 isMonoAudioEnabled = SETTINGS_DEFAULTS_MONO,
-                isSmartDownloadsEnabled = SETTINGS_DEFAULTS_SMART_DOWNLOADS
+                isSmartDownloadsEnabled = SETTINGS_DEFAULTS_SMART_DOWNLOADS,
+                isGlobalShuffleEnabled = SETTINGS_DEFAULTS_GLOBAL_SHUFFLE,
+                playlistSongsSorting = defaultPlaylistSort
             )
     }
 
@@ -118,6 +130,12 @@ data class LocalSettings(
 
         sbThis.append(this.isSmartDownloadsEnabled)
         sbOthe.append(othe.isSmartDownloadsEnabled)
+
+        sbThis.append(this.isGlobalShuffleEnabled)
+        sbOthe.append(othe.isGlobalShuffleEnabled)
+
+        sbThis.append(this.playlistSongsSorting)
+        sbOthe.append(othe.playlistSongsSorting)
 
         return sbThis.toString() == sbOthe.toString()
     }
@@ -232,3 +250,8 @@ fun PowerAmpTheme.toPowerAmpacheDropdownItem() =
 
 fun StreamingQuality.toPowerAmpacheDropdownItem() =
     PowerAmpacheDropdownItem(title = title, subtitle = description, value = this)
+
+enum class SortMode(mode: String) {
+    ASC(SORT_MODE_ASC),
+    DESC(SORT_MODE_DESC)
+}

@@ -50,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.presentation.common.ButtonDownload
 import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
 
@@ -59,21 +60,28 @@ fun PlaylistInfoButtonsRow(
     playlist: Playlist,
     isPlayingPlaylist: Boolean,
     isDownloading: Boolean,
-    eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit) {
+    isGlobalShuffleOn: Boolean,
+    eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit
+) {
     Row(modifier = modifier
         .padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        ButtonWithLoadingIndicator(
-            imageVector = Icons.Outlined.DownloadForOffline,
-            imageContentDescription= "Download",
-            background = Color.Transparent,
-            isLoading = isDownloading,
-            showBoth = true
-        ) {
-            eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST)
-        }
+//        ButtonWithLoadingIndicator(
+//            imageVector = Icons.Outlined.DownloadForOffline,
+//            imageContentDescription= "Download",
+//            background = Color.Transparent,
+//            isLoading = isDownloading,
+//            showBoth = true
+//        ) {
+//            eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST)
+//        }
+
+        ButtonDownload(isDownloading = isDownloading,
+            onStartDownloadClick = { eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST) },
+            onStopDownloadClick = { eventListener(PlaylistInfoViewEvents.STOP_DOWNLOAD_PLAYLIST) }
+        )
 
         IconButton(modifier = Modifier
             .height(80.dp)
@@ -95,7 +103,8 @@ fun PlaylistInfoButtonsRow(
 
             Icon(
                 painterResource(id = R.drawable.ic_shuffleplay),
-                contentDescription = "Shuffle Play"
+                contentDescription = "Shuffle Play",
+                tint = if (isGlobalShuffleOn) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface
             )
         }
 

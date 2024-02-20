@@ -36,6 +36,7 @@ import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -61,6 +62,20 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun saveLocalSettings(localSettings: LocalSettings) =
         dao.writeSettings(localSettings.toLocalSettingsEntity())
+
+    override suspend fun changeSortMode(sortMode: SortMode) {
+        dao.getUser()?.toUser()?.username?.let { username ->
+            saveLocalSettings(getLocalSettings(username).copy(playlistSongsSorting = sortMode))
+        }
+    }
+
+    override suspend fun toggleGlobalShuffle() =
+        dao.getUser()?.toUser()?.username?.let { username ->
+            getLocalSettings(username).apply {
+                val newValue = !isGlobalShuffleEnabled
+                saveLocalSettings(copy(isGlobalShuffleEnabled = newValue))
+            }.isGlobalShuffleEnabled
+        } ?: throw Exception("toggleGlobalShuffle, error saving global shuffle")
 
     override suspend fun deleteAllDownloadedSongs() = flow {
         L("deleteAllDownloadedSongs")

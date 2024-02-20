@@ -36,7 +36,6 @@ import luci.sixsixsix.powerampache2.data.remote.dto.ShareDto
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
-import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -131,6 +130,12 @@ interface MainNetwork {
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
         @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true if true ignore 'api_hide_dupe_searches' setting)
     ): PlaylistsResponse // TODO remove default values
+
+    @GET("json.server.php?action=playlist")
+    suspend fun getPlaylist(
+        @Query("auth") authKey: String,
+        @Query("filter") filter: String,
+    ): PlaylistDto
 
     @GET("json.server.php?action=artist")
     suspend fun getArtistInfo(

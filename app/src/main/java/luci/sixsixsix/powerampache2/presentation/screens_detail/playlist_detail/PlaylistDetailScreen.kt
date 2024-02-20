@@ -90,6 +90,8 @@ import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
+import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,6 +102,7 @@ fun PlaylistDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: PlaylistDetailViewModel = hiltViewModel(),
     mainViewModel: MainViewModel,
+    settingsViewModel: SettingsViewModel,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -211,7 +214,9 @@ fun PlaylistDetailScreen(
                     playlist = playlist,
                     isLoading = state.isLoading || state.isPlaylistRemoveLoading,
                     scrollBehavior = scrollBehavior
-                ) { viewModel.onEvent(PlaylistDetailEvent.OnToggleSort) }
+                ) {
+                    viewModel.onEvent(PlaylistDetailEvent.OnToggleSort)
+                }
             }
         ) {
             Surface(
@@ -241,6 +246,7 @@ fun PlaylistDetailScreen(
                         playlist = playlist,
                         isPlayingPlaylist = isPlayingPlaylist,
                         isDownloading = mainViewModel.state.isDownloading,
+                        isGlobalShuffleOn = state.isGlobalShuffleOn,
                         songs = viewModel.state.getSongList(),
                         artistClickListener = {
                             artistId -> navigateToArtist(navigator, artistId)
@@ -249,13 +255,28 @@ fun PlaylistDetailScreen(
                             when(event) {
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
                                     if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@PlaylistInfoSection
-                                    if (!isPlayingPlaylist) {
-                                        // add next to the list and skip to the top of the album (which is next)
-                                        viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
-                                        mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
+                                    if (!state.isGlobalShuffleOn) {
+                                        if (!isPlayingPlaylist) {
+                                            // add next to the list and skip to the top of the album (which is next)
+                                            viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
+                                            mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
+                                        } else {
+                                            // will pause if playing
+                                            mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                        }
                                     } else {
-                                        // will pause if playing
-                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                        // this will add the shuffled playlist next and update the current song
+                                        // in main view model (which is listening to playlist manager)
+                                        val oldCurrentSong = mainViewModel.state.song
+                                        viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
+                                        // after updating queue and current song, play
+                                        if (!mainViewModel.isPlaying) {
+                                            mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                        }
+                                        // no need to skip if the queue was empty previously
+                                        if (oldCurrentSong != null) {
+                                            mainViewModel.onEvent(MainEvent.SkipNext)
+                                        }
                                     }
                                 }
                                 PlaylistInfoViewEvents.SHARE_PLAYLIST ->
@@ -265,19 +286,10 @@ fun PlaylistDetailScreen(
                                         viewModel.state.getSongList())
                                     )
                                 PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST -> {
-                                    // this will add the shuffled playlist next and update the current song
-                                    // in main view model (which is listening to playlist manager)
-                                    val oldCurrentSong = mainViewModel.state.song
-                                    viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
-                                    // after updating queue and current song, play
-                                    if (!mainViewModel.isPlaying) {
-                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-                                    }
-                                    // no need to skip if the queue was empty previously
-                                    if (oldCurrentSong != null) {
-                                        mainViewModel.onEvent(MainEvent.SkipNext)
-                                    }
+                                    viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylistToggle)
                                 }
+                                PlaylistInfoViewEvents.STOP_DOWNLOAD_PLAYLIST ->
+                                    mainViewModel.onEvent(MainEvent.OnStopDownloadSongs)
                             }
                         }
                     )
