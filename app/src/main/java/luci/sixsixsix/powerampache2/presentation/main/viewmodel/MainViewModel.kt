@@ -97,6 +97,8 @@ class MainViewModel @Inject constructor(
     var restoredSong: Song? = null
     var restoredQueue = listOf<Song>()
 
+    val mainLock = Any()
+
     init {
         L()
 
@@ -208,7 +210,7 @@ class MainViewModel @Inject constructor(
                         }
                     }
                     is Resource.Error ->
-                        L("MainViewModel", result.exception)
+                        L.e("MainViewModel", result.exception)
                     is Resource.Loading -> {}
                 }
             }

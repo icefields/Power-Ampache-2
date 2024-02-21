@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.player
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -32,8 +31,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import javax.inject.Inject
@@ -167,10 +164,11 @@ class SimpleMediaServiceHandler @Inject constructor(
         try {
             val qq = playlistManager.currentQueueState.value.filter { it.mediaId == mediaItem?.mediaId }
             if (qq.isNotEmpty()) {
+                L("onMediaItemTransition.updateCurrentSong(it)")
                 playlistManager.updateCurrentSong(newSong = qq[0])
             }
         } catch (e: Exception) {
-            L.e(e)
+            L.e("onMediaItemTransition", e)
         }
     }
 
