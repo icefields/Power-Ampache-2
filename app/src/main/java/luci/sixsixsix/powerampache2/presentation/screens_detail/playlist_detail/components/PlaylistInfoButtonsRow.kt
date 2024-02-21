@@ -53,6 +53,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.common.ButtonDownload
 import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
+import luci.sixsixsix.powerampache2.presentation.common.ShuffleToggleButton
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
 
 @Composable
@@ -69,16 +70,6 @@ fun PlaylistInfoButtonsRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-//        ButtonWithLoadingIndicator(
-//            imageVector = Icons.Outlined.DownloadForOffline,
-//            imageContentDescription= "Download",
-//            background = Color.Transparent,
-//            isLoading = isDownloading,
-//            showBoth = true
-//        ) {
-//            eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST)
-//        }
-
         ButtonDownload(isDownloading = isDownloading,
             onStartDownloadClick = { eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST) },
             onStopDownloadClick = { eventListener(PlaylistInfoViewEvents.STOP_DOWNLOAD_PLAYLIST) }
@@ -97,17 +88,8 @@ fun PlaylistInfoButtonsRow(
             )
         }
 
-        IconButton(
-            onClick = {
-                eventListener(PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST)
-            }) {
-
-            Icon(
-//                modifier = Modifier.size(30.dp),
-                painter = painterResource(id = R.drawable.ic_shuffleplay),
-                contentDescription = "Shuffle Play",
-                tint = if (isGlobalShuffleOn) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        ShuffleToggleButton(isGlobalShuffleOn = isGlobalShuffleOn) {
+            eventListener(PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST)
         }
 
         /*

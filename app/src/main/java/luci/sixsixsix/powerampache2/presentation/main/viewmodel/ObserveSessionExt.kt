@@ -61,6 +61,7 @@ fun MainViewModel.observeSession() {
                         restoreQueueState()
                     }
                 } else {
+                    // TODO should restore state here? can not-restoring lead to bugs?
                     //restoreQueueState()
                 }
                 //authToken = newToken
