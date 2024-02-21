@@ -201,4 +201,24 @@ class AlbumsRepositoryImpl @Inject constructor(
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylistShareLink()", e, this) }
+
+    private suspend fun rate(itemId: String, rating: Int, type: MainNetwork.Type): Flow<Resource<Any>> = flow {
+        emit(Resource.Loading(true))
+        val auth = getSession()!!
+        api.rate(
+            authKey = auth.auth,
+            itemId = itemId,
+            rating = rating,
+            type = type).apply {
+            error?.let { throw(MusicException(it.toError())) }
+            if (success != null) {
+                emit(Resource.Success(data = Any(), networkData = Any()))
+            } else {
+                throw Exception("error getting a response from FLAG/LIKE call")
+            }
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("likeSong()", e, this) }
+
+    override suspend fun rateAlbum(albumId: String, rate: Int): Flow<Resource<Any>> = rate(albumId, rate, MainNetwork.Type.album)
 }

@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.main
+package luci.sixsixsix.powerampache2.presentation.main.viewmodel
 
 import luci.sixsixsix.powerampache2.domain.models.Song
 

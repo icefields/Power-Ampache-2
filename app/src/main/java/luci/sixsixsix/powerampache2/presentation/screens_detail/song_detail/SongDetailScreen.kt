@@ -38,7 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.hasLyrics
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
-import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailContent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailQueueDragHandle
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.TabbedSongDetailView

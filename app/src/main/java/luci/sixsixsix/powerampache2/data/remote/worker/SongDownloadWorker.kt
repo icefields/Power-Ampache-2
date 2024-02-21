@@ -125,6 +125,7 @@ class SongDownloadWorker @AssistedInject constructor(
             .getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
             .getString(KEY_WORKER_PREFERENCE_ID, null) ?: run {
                 // if not existent create one now
+                L("resetting worker id")
                 resetDownloadWorkerId(context)
             }
 

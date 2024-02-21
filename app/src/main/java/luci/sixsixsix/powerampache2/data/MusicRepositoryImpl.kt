@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -74,7 +75,8 @@ class MusicRepositoryImpl @Inject constructor(
     private val db: MusicDatabase,
     private val errorHandler: ErrorHandler
 ): MusicRepository {
-    private var serverInfo: ServerInfo? = null
+    private val _serverInfoLiveData = MutableLiveData(ServerInfo())
+    override val serverInfoLiveData = _serverInfoLiveData
     private val dao = db.dao
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
     override val userLiveData: LiveData<User?>
@@ -126,18 +128,18 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUser(): User? = withContext(Dispatchers.IO) {
-        dao.getUser()?.let {
-            it.toUser()
-        }
+        dao.getUser()?.toUser()
     }
 
     /**
      * updating the user in the database will trigger the user live data, observe that
      * to get updates on the user
      */
-    private suspend fun setUser(user: User) = dao.updateUser(user.toUserEntity())
+    private suspend fun setUser(user: User) =
+        dao.updateUser(user.toUserEntity())
 
-    private suspend fun setCredentials(se: CredentialsEntity) = dao.updateCredentials(se)
+    private suspend fun setCredentials(se: CredentialsEntity) =
+        dao.updateCredentials(se)
 
     override suspend fun logout(): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading(true))
@@ -169,16 +171,17 @@ class MusicRepositoryImpl @Inject constructor(
             val pingResponse = api.ping(dbSession?.auth ?: "")
 
             // Updated session only valid of previous session exists, authorize otherwise
-            dbSession?.let {
+            dbSession?.let { cachedSession ->
                 try {
                     // add credentials to the new session
                     pingResponse.toSession(dateMapper)
                     // TODO Check connection error before making this call crash into the try-catch
                 } catch (e: Exception) {
+                    L("clear session, set the session to null")
                     dao.clearSession()
                     null
-                }?.let { se ->
-                    se.auth?.let {
+                } ?.let { se ->
+                    if (se.auth != null) {
                         // save new session if auth is not null
                         setSession(se)
                     }
@@ -186,8 +189,9 @@ class MusicRepositoryImpl @Inject constructor(
             }
 
             // server info always available
-            serverInfo = pingResponse.toServerInfo()
-            Resource.Success(Pair(serverInfo!!, getSession()))
+            val servInfo = pingResponse.toServerInfo()
+            _serverInfoLiveData.value = servInfo
+            Resource.Success(Pair(servInfo, getSession()))
         } catch (e: IOException) {
             Resource.Error(message = "cannot load data", exception = e)
         } catch (e: HttpException) {
@@ -198,7 +202,7 @@ class MusicRepositoryImpl @Inject constructor(
             Resource.Error(message = "cannot load data", exception = e)
         }
 
-    override suspend fun autoLogin(): Flow<Resource<Session>> {
+    suspend fun autoLoginOld(): Flow<Resource<Session>> {
         val credentials = getCredentials()
         // authorization with empty string will fail
         return authorize(
@@ -209,6 +213,17 @@ class MusicRepositoryImpl @Inject constructor(
             true
         )
     }
+
+    override suspend fun autoLogin() = getCredentials()?.let {
+        authorize(
+            it.username,
+            it.password,
+            it.serverUrl,
+            it.authToken,
+            true
+        )
+    } ?: authorize("", "", "", "", true)
+
 
     override suspend fun authorize(
         username: String,

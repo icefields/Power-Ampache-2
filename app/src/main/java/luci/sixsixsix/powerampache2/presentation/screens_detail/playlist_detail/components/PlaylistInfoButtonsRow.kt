@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
@@ -102,9 +103,10 @@ fun PlaylistInfoButtonsRow(
             }) {
 
             Icon(
-                painterResource(id = R.drawable.ic_shuffleplay),
+//                modifier = Modifier.size(30.dp),
+                painter = painterResource(id = R.drawable.ic_shuffleplay),
                 contentDescription = "Shuffle Play",
-                tint = if (isGlobalShuffleOn) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface
+                tint = if (isGlobalShuffleOn) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 

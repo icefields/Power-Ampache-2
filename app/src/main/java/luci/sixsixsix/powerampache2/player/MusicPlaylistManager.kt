@@ -54,6 +54,9 @@ class MusicPlaylistManager @Inject constructor() {
     private val _downloadedSongFlow = MutableStateFlow<Song?>(null)
     val downloadedSongFlow: StateFlow<Song?> = _downloadedSongFlow
 
+    /**
+     * assign the new song state, remove the song from the queue if exists and re-add it on top
+     */
     fun updateTopSong(newSong: Song?) = newSong?.let {
         L( "MusicPlaylistManager updateTopSong", newSong)
         _currentSongState.value = CurrentSongState(song = newSong)
@@ -62,6 +65,28 @@ class MusicPlaylistManager @Inject constructor() {
             remove(newSong)
             add(0, newSong)
         }
+    }
+
+    /**
+     * assign the new song state, remove the song from the queue if exists and re-add it on top
+     * add a list of song to the queue state
+     * if no song is currently set as state, automatically set the first song of the queue
+     */
+    fun addToCurrentQueueUpdateTopSong(newSong: Song?, newQueue: List<Song>) {
+        L( "MusicPlaylistManager addToCurrentQueueUpdateTopSong", newQueue.size)
+
+        _currentSongState.value = CurrentSongState(song = newSong)
+        // add the current song on top of the queue
+       val updatedQueue = ArrayList(_currentQueueState.value).apply {
+            remove(newSong)
+            add(0, newSong)
+        }
+
+
+        _currentQueueState.value = LinkedHashSet(updatedQueue)
+            .apply { addAll(newQueue) }
+            .toList()
+        checkCurrentSong()
     }
 
     /**
@@ -107,6 +132,10 @@ class MusicPlaylistManager @Inject constructor() {
         checkCurrentSong()
     }
 
+    /**
+     * add a list of song to the queue state
+     * if no song is currently set as state, automatically set the first song of the queue
+     */
     fun addToCurrentQueue(newQueue: List<Song>) {
         L( "MusicPlaylistManager addToCurrentQueue", newQueue.size)
         _currentQueueState.value = LinkedHashSet(_currentQueueState.value)
@@ -163,6 +192,9 @@ class MusicPlaylistManager @Inject constructor() {
         replaceCurrentQueue(queue)
     }
 
+    /**
+     * if no song is currently set as state, automatically set the first song of the queue
+     */
     private fun checkCurrentSong() {
         if (currentQueueState.value.isNotEmpty() && getCurrentSong() == null) {
             updateTopSong(currentQueueState.value[0])

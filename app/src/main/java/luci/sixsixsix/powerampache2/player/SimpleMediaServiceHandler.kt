@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.player
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -31,6 +32,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import javax.inject.Inject
@@ -61,12 +64,14 @@ class SimpleMediaServiceHandler @Inject constructor(
     fun addMediaItemList(mediaItems: List<MediaItem>) {
         L("addMediaItemList",mediaItems.size,"currently in the player: ", player.mediaItemCount)
         if(mediaItems.isNullOrEmpty() && player.mediaItemCount == 0) return
-        // find current item in the list
-        // split current list in 2, before and after current element
-        // remove everything from mediaItems except the current
-        if (
-            player.mediaItemCount > 0 && playlistManager.getCurrentSong()?.mediaId == player.currentMediaItem?.mediaId
-        ) {
+
+        if (player.mediaItemCount > 0 &&
+            playlistManager.getCurrentSong()?.mediaId == player.currentMediaItem?.mediaId) {
+            // if the current song of the playlist (if playlist is not empty) corresponds to the current
+            // player song, ie. there is a song playing or paused and that song is inside both lists:
+            // find current item in the list
+            // split current list in 2, before and after current element
+            // remove everything from mediaItems except the current
             player.removeMediaItems(0, player.currentMediaItemIndex)
             player.removeMediaItems(player.currentMediaItemIndex + 1, player.mediaItemCount)
 
@@ -82,9 +87,31 @@ class SimpleMediaServiceHandler @Inject constructor(
                 player.setMediaItems(mediaItems)
             }
         } else {
+//            playlistManager.getCurrentSong()?.mediaId?.let { mediaId ->
+//                val indexToSeekTo = mediaItems.map { mediaItem ->  mediaItem.mediaId }.indexOf(player.currentMediaItem?.mediaId)
+//                L("addMediaItemList getCurrentSong: ", indexToSeekTo, mediaId, mediaItems.size)
+//                if (indexToSeekTo >= 0) {
+//                    player.setMediaItems(mediaItems, indexToSeekTo, 0)
+//                } else {
+//                    player.setMediaItems(mediaItems)
+//                }
+//            } ?:
             player.setMediaItems(mediaItems)
         }
         player.prepare()
+    }
+
+    private fun indexOfSong(mediaId: String): Int {
+        var indexToSeekTo = -1
+        var i = 0
+        while(indexToSeekTo == -1 && i < player.mediaItemCount) {
+            L(player.getMediaItemAt(i).mediaId , mediaId)
+            if (player.getMediaItemAt(i).mediaId == mediaId) {
+                indexToSeekTo = i
+            }
+            ++i
+        }
+        return indexToSeekTo
     }
 
     suspend fun onPlayerEvent(playerEvent: PlayerEvent) {
@@ -111,16 +138,7 @@ class SimpleMediaServiceHandler @Inject constructor(
             PlayerEvent.SkipBack -> player.seekToPreviousMediaItem()
             PlayerEvent.SkipForward -> player.seekToNextMediaItem()
             is PlayerEvent.ForcePlay -> {
-                var indexToSeekTo = -1
-                var i = 0
-                while(indexToSeekTo == -1 && i < player.mediaItemCount) {
-                    L(player.getMediaItemAt(i).mediaId , playerEvent.mediaItem.mediaId)
-                    if (player.getMediaItemAt(i).mediaId == playerEvent.mediaItem.mediaId) {
-                        indexToSeekTo = i
-                    }
-                    ++i
-                }
-
+                val indexToSeekTo = indexOfSong(playerEvent.mediaItem.mediaId)
                 if (indexToSeekTo >= 0) {
                     player.seekTo(indexToSeekTo, 0)
                 }
