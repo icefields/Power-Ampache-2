@@ -21,6 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.common
 
+import luci.sixsixsix.powerampache2.BuildConfig
+
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
@@ -40,7 +42,7 @@ object Constants {
     const val LOADING_STRING = "LOADING"
 
     // FLAGS
-    const val RESET_QUEUE_ON_NEW_SESSION = false
+    const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
     const val CLEAR_TABLE_AFTER_FETCH = false
 
     // DEBUG VALUES

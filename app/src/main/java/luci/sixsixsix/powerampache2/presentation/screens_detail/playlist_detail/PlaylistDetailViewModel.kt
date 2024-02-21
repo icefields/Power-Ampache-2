@@ -108,8 +108,10 @@ class PlaylistDetailViewModel @Inject constructor(
                 }
             }
             is PlaylistDetailEvent.OnSongSelected -> {
-                playlistManager.updateTopSong(state.songs[0].song)
-                playlistManager.addToCurrentQueue(state.getSongList())
+                playlistManager.addToCurrentQueueUpdateTopSong(state.songs[0].song, state.getSongList())
+
+//                playlistManager.updateTopSong(state.songs[0].song)
+//                playlistManager.addToCurrentQueue(state.getSongList())
             }
             PlaylistDetailEvent.OnPlayPlaylist -> if (state.songs.isNotEmpty()) {
                 playlistManager.updateCurrentSong(state.songs[0].song)

@@ -74,8 +74,8 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.RepeatMode
-import luci.sixsixsix.powerampache2.presentation.main.MainEvent
-import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 
 @Composable
 fun MiniPlayer(

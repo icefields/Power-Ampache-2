@@ -45,12 +45,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
-import luci.sixsixsix.powerampache2.presentation.main.MainEvent
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsViewModel
-import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen

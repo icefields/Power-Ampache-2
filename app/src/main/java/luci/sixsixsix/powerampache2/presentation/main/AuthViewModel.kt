@@ -71,6 +71,7 @@ class AuthViewModel @Inject constructor(
                 state = state.copy(session = null, isLoading = true)
                 // autologin will log back in if credentials are correct
                 viewModelScope.launch {
+                    L("autologin from init AuthVM")
                     autologin()
                 }
             } else {
@@ -100,6 +101,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun verifyAndAutologin(completionCallback: () -> Unit = { }) {
+        L("verifyAndAutologin")
         viewModelScope.launch {
             // try to login with saved auth token
             when (val ping = repository.ping()) {
@@ -111,10 +113,12 @@ class AuthViewModel @Inject constructor(
                     ping.data?.second?.let {
                         state = state.copy(session = it, isLoading = false)
                     } ?: run {
-                        // playlistManager.reset()
+                        // --- UNNECESSARY run BLOCK ---
+                        // NO NEED TO CALL AUTOLOGIN HERE, a null token from the ping call will
+                        // trigger autologin in the init block from the session observable
                         // do not show loading screen during ping, only during autologin
-                        state = state.copy(isLoading = true)
-                        autologin()
+                        // state = state.copy(isLoading = true)
+                        // autologin()
                     }
                     completionCallback()
                 }

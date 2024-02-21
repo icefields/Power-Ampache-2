@@ -23,9 +23,7 @@ package luci.sixsixsix.powerampache2.presentation.main.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -52,8 +50,8 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
-import luci.sixsixsix.powerampache2.presentation.main.MainEvent
-import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.SheetDragHandle
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.SongDetailScreen
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel

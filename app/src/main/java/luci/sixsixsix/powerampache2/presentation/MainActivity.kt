@@ -23,7 +23,6 @@ package luci.sixsixsix.powerampache2.presentation
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.OptIn
@@ -39,7 +38,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainScreen
-import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
 
@@ -116,7 +115,7 @@ class MainActivity : ComponentActivity() {
         L( "onRestart")
         // refresh token or autologin every time the app resumes
         authViewModel.verifyAndAutologin {
-            mainViewModel.onActivityRestart()
+            // mainViewModel.onActivityRestart()
         }
     }
 

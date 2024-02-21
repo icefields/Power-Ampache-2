@@ -26,13 +26,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.AddBox
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -76,17 +75,6 @@ fun AlbumInfoButtonsRow(
             eventListener(AlbumInfoViewEvents.ADD_ALBUM_TO_PLAYLIST)
         }
 
-//        val dlIc = if (!isDownloading) Icons.Outlined.DownloadForOffline else Icons.Outlined.Close
-//        val dlCallback = if (!isDownloading) eventListener(AlbumInfoViewEvents.DOWNLOAD_ALBUM) else eventListener(AlbumInfoViewEvents.STOP_DOWNLOAD_ALBUM)
-//        ButtonWithLoadingIndicator(
-//            imageVector = dlIc,
-//            imageContentDescription= "Download",
-//            background = Color.Transparent,
-//            isLoading = isDownloading,
-//            showBoth = true,
-//            onClick = { dlCallback }
-//        )
-
         ButtonDownload(
             isDownloaded = isAlbumDownloaded,
             isDownloading = isDownloading,
@@ -112,9 +100,10 @@ fun AlbumInfoButtonsRow(
                 eventListener(AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM)
             }) {
             Icon(
+                //modifier = Modifier.size(30.dp),
                 painter = painterResource(id = R.drawable.ic_shuffleplay),
                 contentDescription = "Share",
-                tint = if (isGlobalShuffleOn) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface
+                tint = if (isGlobalShuffleOn) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 

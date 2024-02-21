@@ -40,8 +40,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 18
-        versionName = "0.18-beta"
+        versionCode = 19
+        versionName = "0.19-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -67,6 +67,7 @@ android {
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
+            buildConfigField("boolean", "RESET_QUEUE_ON_NEW_SESSION", "true")
 
             // CONSTANTS
             buildConfigField("String", "AMPACHE_USER", ampacheUser)
@@ -96,6 +97,7 @@ android {
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
+            buildConfigField("boolean", "RESET_QUEUE_ON_NEW_SESSION", "true")
 
             // CONSTANTS
             buildConfigField("String", "AMPACHE_USER", "\"\"")

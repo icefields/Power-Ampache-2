@@ -47,7 +47,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -78,8 +77,8 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.main.MainEvent
-import luci.sixsixsix.powerampache2.presentation.main.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
@@ -91,7 +90,6 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -255,27 +253,28 @@ fun PlaylistDetailScreen(
                             when(event) {
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
                                     if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@PlaylistInfoSection
-                                    if (!state.isGlobalShuffleOn) {
-                                        if (!isPlayingPlaylist) {
+
+                                    if (isPlayingPlaylist){
+                                        // will pause if playing
+                                        mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                    } else {
+                                        if (!state.isGlobalShuffleOn) {
                                             // add next to the list and skip to the top of the album (which is next)
                                             viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
                                             mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
                                         } else {
-                                            // will pause if playing
-                                            mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-                                        }
-                                    } else {
-                                        // this will add the shuffled playlist next and update the current song
-                                        // in main view model (which is listening to playlist manager)
-                                        val oldCurrentSong = mainViewModel.state.song
-                                        viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
-                                        // after updating queue and current song, play
-                                        if (!mainViewModel.isPlaying) {
-                                            mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-                                        }
-                                        // no need to skip if the queue was empty previously
-                                        if (oldCurrentSong != null) {
-                                            mainViewModel.onEvent(MainEvent.SkipNext)
+                                            // this will add the shuffled playlist next and update the current song
+                                            // in main view model (which is listening to playlist manager)
+                                            val oldCurrentSong = mainViewModel.state.song
+                                            viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
+                                            // after updating queue and current song, play
+                                            if (!mainViewModel.isPlaying) {
+                                                mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                            }
+                                            // no need to skip if the queue was empty previously
+                                            if (oldCurrentSong != null) {
+                                                mainViewModel.onEvent(MainEvent.SkipNext)
+                                            }
                                         }
                                     }
                                 }
@@ -339,11 +338,7 @@ fun PlaylistDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.onEvent(
-                                                PlaylistDetailEvent.OnSongSelected(
-                                                    song
-                                                )
-                                            )
+                                            viewModel.onEvent(PlaylistDetailEvent.OnSongSelected(song))
                                             mainViewModel.onEvent(MainEvent.Play(song))
                                         },
                                     subtitleString = SubtitleString.ARTIST,
