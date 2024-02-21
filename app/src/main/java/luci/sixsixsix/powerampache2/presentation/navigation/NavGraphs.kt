@@ -1,6 +1,9 @@
 package luci.sixsixsix.powerampache2.presentation.navigation
 
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 
 //import luci.sixsixsix.powerampache2.presentation.NavGraph
 //import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
@@ -20,7 +23,22 @@ object Ampache2NavGraphs {
     //  is declared inside LoggedInScreen and MainContent
     var navigator: DestinationsNavigator? = null
 
+    fun navigateToAlbum(albumId: String) = try {
+        navigator?.navigate(AlbumDetailScreenDestination(albumId = albumId))
+        true
+    } catch (e: Exception) {
+        L.e(e)
+        false
+    }
 
+
+    fun navigateToArtist(artistId: String) = try {
+        navigator?.navigate(ArtistDetailScreenDestination(artistId = artistId))
+        true
+    } catch (e: Exception) {
+        L.e(e)
+        false
+    }
 //
 //    val albums: NavGraph = NavGraph(
 //        route = "albums",

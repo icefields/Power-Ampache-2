@@ -1,8 +1,10 @@
 package luci.sixsixsix.powerampache2.data.local.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 
@@ -39,7 +41,9 @@ data class DownloadedSongEntity(
     val comment: String = "",
     val language: String = "",
     val relativePath: String,
-    val owner: String
+    val owner: String,
+    @ColumnInfo(name = "flag", defaultValue = "false")
+    val flag: Boolean,
 )
 
 fun Song.toDownloadedSongEntity(localUri: String, owner: String) = DownloadedSongEntity(
@@ -69,7 +73,8 @@ fun Song.toDownloadedSongEntity(localUri: String, owner: String) = DownloadedSon
     preciseRating = preciseRating,
     rating = rating,
     relativePath = filename,
-    owner = owner
+    owner = owner,
+    flag = flag == 1
 )
 
 fun DownloadedSongEntity.toSong() = Song(
@@ -101,5 +106,6 @@ fun DownloadedSongEntity.toSong() = Song(
     preciseRating = preciseRating,
     averageRating = averageRating,
     rating = rating,
-    filename = relativePath
+    filename = relativePath,
+    flag = processFlag(flag)
 )

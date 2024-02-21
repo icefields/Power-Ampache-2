@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.totalTime
@@ -183,14 +184,14 @@ fun SongDetailContent(
                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                     SongDetailButtonEvents.GO_TO_ALBUM ->
                         mainViewModel.state.song?.album?.id?.let { albumId ->
-                            Ampache2NavGraphs.navigator?.navigate(AlbumDetailScreenDestination(albumId = albumId))
+                            Ampache2NavGraphs.navigateToAlbum(albumId = albumId)
                             scope.launch {
                                 mainScaffoldState.bottomSheetState.partialExpand()
                             }
                         }
                     SongDetailButtonEvents.GO_TO_ARTIST ->
                         mainViewModel.state.song?.artist?.id?.let { artistId ->
-                            Ampache2NavGraphs.navigator?.navigate(ArtistDetailScreenDestination(artistId = artistId))
+                            Ampache2NavGraphs.navigateToArtist(artistId = artistId)
                             scope.launch {
                                 mainScaffoldState.bottomSheetState.partialExpand()
                             }

@@ -63,6 +63,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.ArtistId
@@ -233,15 +234,18 @@ fun AlbumDetailScreen(
                                         } else {
                                             // this will add the shuffled playlist next and update the current song
                                             // in main view model (which is listening to playlist manager)
-                                            val oldCurrentSong = mainViewModel.state.song
+                                            //val oldCurrentSong = mainViewModel.state.song
                                             viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
-                                            // after updating queue and current song, play
+                                            //mainViewModel.onEvent(MainEvent.Play(mainViewModel.state.queue[0]))
+
+//                                            // no need to skip if the queue was empty previously
+//                                            if (oldCurrentSong != null) {
+//                                                mainViewModel.onEvent(MainEvent.SkipNext)
+//                                            }
+//
+//                                            // after updating queue and current song, play
                                             if (!mainViewModel.isPlaying) {
                                                 mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-                                            }
-                                            // no need to skip if the queue was empty previously
-                                            if (oldCurrentSong != null) {
-                                                mainViewModel.onEvent(MainEvent.SkipNext)
                                             }
                                         }
                                     }

@@ -198,16 +198,15 @@ fun Any.toDebugMap() = LinkedHashMap<String, String>().also { map ->
     }
 }
 
-
 @Composable
 @ReadOnlyComposable
 fun fontDimensionResource(@DimenRes id: Int) = dimensionResource(id = id).value.sp
 
 fun processFlag(flag: Any?): Int = flag?.let {
     if (it is Boolean) {
-        if (it == true) { 1 } else { 0 }
-        }
-    else if (it is Int) { it } else 0
+        if (it == true) 1 else 0
+    } else if (it is Int) it
+    else 0
 } ?: 0
 
 @ColorInt
