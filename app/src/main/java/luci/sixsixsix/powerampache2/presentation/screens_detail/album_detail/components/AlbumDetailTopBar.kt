@@ -57,6 +57,7 @@ import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
+import luci.sixsixsix.powerampache2.presentation.common.StarRatingButton
 import luci.sixsixsix.powerampache2.presentation.common.TopBarCircularProgress
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import java.util.UUID
@@ -69,6 +70,7 @@ fun AlbumDetailTopBar(
     isLoading: Boolean,
     isEditingPlaylist: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
+    onRate: (Int) -> Unit,
     onRightIconClick: () -> Unit
 ) {
 
@@ -119,6 +121,8 @@ fun AlbumDetailTopBar(
         },
         scrollBehavior = scrollBehavior,
         actions = {
+            StarRatingButton(currentRating = album.rating, onRate = onRate)
+
             TopBarCircularProgress(isLoading)
 
             IconButton(onClick = {
@@ -129,6 +133,7 @@ fun AlbumDetailTopBar(
                     contentDescription = "show hide album info"
                 )
             }
+
         }
     )
 }
@@ -158,6 +163,7 @@ fun AlbumDetailTopBarPreview() {
             year = 1986),
         scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState()),
         onRightIconClick = {},
+        onRate = {},
         isLoading = true,
         isEditingPlaylist = true,
     )

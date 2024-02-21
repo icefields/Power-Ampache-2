@@ -65,12 +65,17 @@ class SettingsViewModel @Inject constructor(
     val logs by mutableStateOf(mutableListOf<String>())
 
     init {
-        getServerInfo()
         observeSettings()
 
         viewModelScope.launch {
             musicRepository.userLiveData.observeForever {
                 state = state.copy( user = it)
+            }
+        }
+
+        viewModelScope.launch {
+            musicRepository.serverInfoLiveData.observeForever {
+                state = state.copy(serverInfo = it)
             }
         }
 
@@ -83,12 +88,6 @@ class SettingsViewModel @Inject constructor(
                     logs.add(0, it)
                 }
             }
-        }
-    }
-
-    private fun getServerInfo() = viewModelScope.launch {
-        musicRepository.ping().data?.first?.let {
-            state = state.copy(serverInfo = it)
         }
     }
 

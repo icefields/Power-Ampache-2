@@ -48,10 +48,9 @@ class OfflineSongsViewModel @Inject constructor(
     fun onEvent(event: OfflineSongsEvent) {
         when(event) {
             is OfflineSongsEvent.OnSongSelected -> {
-                //if (playlistManager.currentQueueState.value.isEmpty()) {
-                    playlistManager.addToCurrentQueue(state.songs)
-                //}
-                playlistManager.updateTopSong(event.song) }
+                playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.songs) }
+//                playlistManager.addToCurrentQueue(state.songs)
+//                playlistManager.updateTopSong(event.song) }
         }
     }
 }

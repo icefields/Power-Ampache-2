@@ -77,5 +77,6 @@ fun AlbumDto.toAlbum() = Album(
     songCount = songcount ?: 0,
     flag = processFlag(flag),
     time = time ?: 0,
+    rating = rating ?: 0,
     year = year ?: 0,
 )

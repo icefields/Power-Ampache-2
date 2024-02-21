@@ -105,8 +105,9 @@ class AlbumDetailViewModel @Inject constructor(
             }
             is AlbumDetailEvent.OnSongSelected -> {
                 // play the selected song and add the rest of the album to the queue
-                playlistManager.updateTopSong(event.song)
-                playlistManager.addToCurrentQueue(state.getSongList())
+//                playlistManager.updateTopSong(event.song)
+//                playlistManager.addToCurrentQueue(state.getSongList())
+                playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.getSongList())
             }
             is AlbumDetailEvent.OnPlayAlbum -> {
                 L("AlbumDetailViewModel.AlbumDetailEvent.OnPlayAlbum")
@@ -135,8 +136,27 @@ class AlbumDetailViewModel @Inject constructor(
                     playlistManager.updateErrorLogMessage(e.stackTraceToString())
                 }
             }
+
+            is AlbumDetailEvent.OnNewRating -> rateAlbum(rating = event.rating)
         }
     }
+
+    private fun rateAlbum(albumId: String = state.album.id, rating: Int) = viewModelScope.launch {
+        albumsRepository.rateAlbum(albumId, rating)
+            .collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            // refresh album
+                            state = state.copy(album = state.album.copy(rating = rating))
+                        }
+                    }
+                    is Resource.Error -> state = state.copy( isLoading = false)
+                    is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                }
+            }
+    }
+
 
     private fun favouriteAlbum(albumId: String = state.album.id) = viewModelScope.launch {
         playlistsRepository.likeAlbum(albumId, (state.album.flag != 1))

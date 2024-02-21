@@ -240,6 +240,23 @@ interface MainNetwork {
     ): SuccessResponse
 
     /**
+     * rate
+     * Rates a library item
+     *
+     *  Input   Type        Description	                                    Optional
+     * 'type'	string	    song, album, artist, playlist, podcast, ...     NO
+     * 'id'	    integer	    library item id	                                NO
+     * 'rating'	integer	    rating between 0-5	                            NO
+     */
+    @GET("json.server.php?action=rate")
+    suspend fun rate(
+        @Query("auth") authKey: String,
+        @Query("id") itemId: String,
+        @Query("rating") rating: Int,
+        @Query("type") type: Type
+    ): SuccessResponse
+
+    /**
      * Create a public url that can be used by anyone to stream media.
      * Takes the file id with optional description and expires parameters.
      *
