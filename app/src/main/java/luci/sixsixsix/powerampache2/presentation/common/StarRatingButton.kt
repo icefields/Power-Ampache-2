@@ -73,11 +73,7 @@ fun StarRatingButton(
         ) {
             IconButton(
                 onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
-                        isExpanded = !isExpanded
-                    }
-
+                    isExpanded = !isExpanded
                     onRate(1)
                 },
                 modifier = Modifier.size(24.dp)
@@ -90,10 +86,7 @@ fun StarRatingButton(
             }
             IconButton(
                 onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
-                        isExpanded = !isExpanded
-                    }
+                    isExpanded = !isExpanded
                     onRate(2)
                 },
                 modifier = Modifier.size(24.dp)) {
@@ -104,10 +97,7 @@ fun StarRatingButton(
             }
             IconButton(
                 onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
-                        isExpanded = !isExpanded
-                    }
+                    isExpanded = !isExpanded
                     onRate(3)
                 },
                 modifier = Modifier.size(24.dp)) {
@@ -118,10 +108,7 @@ fun StarRatingButton(
             }
             IconButton(
                 onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
-                        isExpanded = !isExpanded
-                    }
+                    isExpanded = !isExpanded
                     onRate(4)
                 },
                 modifier = Modifier.size(24.dp)) {
@@ -132,10 +119,7 @@ fun StarRatingButton(
             }
             IconButton(
                 onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
-                        isExpanded = !isExpanded
-                    }
+                    isExpanded = !isExpanded
                     onRate(5)
                 },
                 modifier = Modifier.size(24.dp)) {
