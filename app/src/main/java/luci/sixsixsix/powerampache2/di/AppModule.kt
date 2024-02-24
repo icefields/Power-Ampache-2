@@ -110,31 +110,7 @@ object AppModule {
         .build()
 
 
-    @Singleton
-    @Provides
-    fun provideServiceHandler(player: ExoPlayer, playlistManager: MusicPlaylistManager) =
-        SimpleMediaServiceHandler(playlistManager = playlistManager, player = player)
 
-    //@ServiceScoped
-    @OptIn(UnstableApi::class)
-    @Singleton
-    @Provides
-    fun providePlayer(
-        @ApplicationContext context: Context,
-        audioAttributes: AudioAttributes
-    ): ExoPlayer = ExoPlayer.Builder(context)
-        .setAudioAttributes(audioAttributes, true)
-        .setHandleAudioBecomingNoisy(true)
-        .setTrackSelector(DefaultTrackSelector(context))
-        .build()
-
-    //@ServiceScoped
-    @Singleton
-    @Provides
-    fun provideAudioAttributes() = AudioAttributes.Builder()
-        .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-        .setUsage(C.USAGE_MEDIA)
-        .build()
 
 
 }

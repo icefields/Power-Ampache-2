@@ -22,8 +22,12 @@
 package luci.sixsixsix.powerampache2.presentation.main.viewmodel
 
 import android.app.Application
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
+import android.os.IBinder
 import androidx.annotation.OptIn
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -69,7 +73,7 @@ class MainViewModel @Inject constructor(
     val musicRepository: MusicRepository,
     val songsRepository: SongsRepository,
     private val settingsRepository: SettingsRepository,
-    val simpleMediaServiceHandler: SimpleMediaServiceHandler,
+    //val simpleMediaServiceHandler: SimpleMediaServiceHandler,
     private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) /*, MainQueueManager*/ {
 //    var state by mutableStateOf(MainState())
@@ -99,13 +103,43 @@ class MainViewModel @Inject constructor(
 
     val mainLock = Any()
 
+
+
+
+    var binder: IBinder? = null
+
+    val serviceConnection = object:ServiceConnection {
+        @OptIn(UnstableApi::class)
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            binder = service as SimpleMediaService.MediaServiceBinder
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            binder = null
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    fun bindMusicService() {
+        logToErrorLogs("SERVICE- bindMusicService.")
+        weakContext.get()?.applicationContext?.let { applicationContext ->
+            Intent(applicationContext, SimpleMediaService::class.java).apply {
+                applicationContext.bindService(this, serviceConnection, Context.BIND_AUTO_CREATE)
+            }
+        }
+    }
+
+
+
+
+
     init {
         L()
 
         restoredSong = state.song
         restoredQueue = state.queue
 
-        isPlaying = simpleMediaServiceHandler.isPlaying()
+        //isPlaying = playlistManager.simpleMediaServiceHandler.isPlaying()
         observePlaylistManager()
         observePlayerEvents()
         observeSession()
@@ -198,6 +232,7 @@ class MainViewModel @Inject constructor(
         L( " Logout")
         playlistManager.reset()
         viewModelScope.launch {
+            binder?.
             simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
         }
         stopMusicService()

@@ -39,8 +39,10 @@ class SimpleMediaServiceHandler @Inject constructor(
     private val player: ExoPlayer,
     private val playlistManager: MusicPlaylistManager
 ): Player.Listener {
-    private val _simpleMediaState = MutableStateFlow<SimpleMediaState>(SimpleMediaState.Initial)
-    val simpleMediaState = _simpleMediaState.asStateFlow()
+//    private val _simpleMediaState = MutableStateFlow<SimpleMediaState>(SimpleMediaState.Initial)
+//    val simpleMediaState = _simpleMediaState.asStateFlow()
+    private val _simpleMediaState = playlistManager._simpleMediaState
+    val simpleMediaState = playlistManager.simpleMediaState
     private var job: Job? = null
 
     init {

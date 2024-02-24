@@ -22,6 +22,8 @@
 package luci.sixsixsix.powerampache2.player
 
 import android.content.Intent
+import android.os.Binder
+import android.os.IBinder
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
@@ -38,9 +40,16 @@ class SimpleMediaService: MediaSessionService() {
     @Inject
     lateinit var notificationManager: SimpleMediaNotificationManager
 
+    private val binder: IBinder = MediaServiceBinder()
+
     override fun onCreate() {
         super.onCreate()
         L("SERVICE- onCreate")
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        super.onBind(intent)
+        return binder
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -67,4 +76,8 @@ class SimpleMediaService: MediaSessionService() {
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
+
+    class MediaServiceBinder: Binder() {
+        fun getService() = SimpleMediaService@this
+    }
 }

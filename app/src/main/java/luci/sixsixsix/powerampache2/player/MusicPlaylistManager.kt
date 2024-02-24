@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.player
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.time.LocalDateTime
@@ -53,6 +54,15 @@ class MusicPlaylistManager @Inject constructor() {
 
     private val _downloadedSongFlow = MutableStateFlow<Song?>(null)
     val downloadedSongFlow: StateFlow<Song?> = _downloadedSongFlow
+
+    val _simpleMediaState = MutableStateFlow<SimpleMediaState>(SimpleMediaState.Initial)
+    val simpleMediaState = _simpleMediaState.asStateFlow()
+
+
+
+
+
+
 
     /**
      * assign the new song state, remove the song from the queue if exists and re-add it on top

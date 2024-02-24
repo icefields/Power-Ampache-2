@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
 
 fun MainViewModel.observePlayerEvents() {
     viewModelScope.launch {
-        simpleMediaServiceHandler.simpleMediaState.collect { mediaState ->
+        playlistManager.simpleMediaState.collect { mediaState ->
             when (mediaState) {
                 SimpleMediaState.Initial -> {
                     /* UI STATE Initial */
