@@ -22,7 +22,15 @@
 package luci.sixsixsix.powerampache2.data
 
 import android.app.Application
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
@@ -39,6 +47,7 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@OptIn(DelicateCoroutinesApi::class)
 @Singleton
 class ErrorHandlerImpl @Inject constructor(
     private val playlistManager: MusicPlaylistManager,
@@ -46,6 +55,24 @@ class ErrorHandlerImpl @Inject constructor(
     private val api: MainNetwork,
     private val applicationContext: Application
 ): ErrorHandler {
+
+    private var isErrorHandlingEnabled = BuildConfig.ENABLE_ERROR_LOG
+
+    init {
+        GlobalScope.launch {
+            db.dao.settingsLiveData()
+                .map { it?.enableRemoteLogging }
+                .distinctUntilChanged()
+                .asFlow()
+                .filterNotNull().collectLatest {
+                    if (it != isErrorHandlingEnabled) {
+                        isErrorHandlingEnabled = it
+                        L.e("ERROR hand enabled? $isErrorHandlingEnabled")
+                    }
+                }
+        }
+    }
+
     override suspend fun <T> invoke(
         label: String,
         e: Throwable,
@@ -135,7 +162,7 @@ class ErrorHandlerImpl @Inject constructor(
 
     override suspend fun logError(message: String) {
         try {
-            if (BuildConfig.ENABLE_ERROR_LOG && !BuildConfig.URL_ERROR_LOG.isNullOrBlank()) {
+            if (isErrorHandlingEnabled && !BuildConfig.URL_ERROR_LOG.isNullOrBlank()) {
                 api.sendErrorReport(body = message)
             }
         } catch (e: Exception) {

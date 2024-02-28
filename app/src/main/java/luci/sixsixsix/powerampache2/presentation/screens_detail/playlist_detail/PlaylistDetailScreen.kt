@@ -265,16 +265,16 @@ fun PlaylistDetailScreen(
                                         } else {
                                             // this will add the shuffled playlist next and update the current song
                                             // in main view model (which is listening to playlist manager)
-                                            val oldCurrentSong = mainViewModel.state.song
+                                            //val oldCurrentSong = mainViewModel.state.song
                                             viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
                                             // after updating queue and current song, play
                                             if (!mainViewModel.isPlaying) {
                                                 mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
                                             }
                                             // no need to skip if the queue was empty previously
-                                            if (oldCurrentSong != null) {
-                                                mainViewModel.onEvent(MainEvent.SkipNext)
-                                            }
+//                                            if (oldCurrentSong != null) {
+//                                                mainViewModel.onEvent(MainEvent.SkipNext)
+//                                            }
                                         }
                                     }
                                 }

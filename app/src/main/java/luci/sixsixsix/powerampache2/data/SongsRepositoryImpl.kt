@@ -51,6 +51,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okhttp3.internal.http.HTTP_OK
 import java.util.UUID
@@ -171,9 +172,16 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongs()", e, this) }
 
-    private suspend fun cacheSongs(songs: List<Song>) =
+    private suspend fun cacheSongs(songs: List<Song>) {
         dao.insertSongs(songs.map { it.toSongEntity() })
-
+        songs.forEach { song ->
+            dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.let { downloadedSong ->
+                dao.addDownloadedSong(
+                    song.toDownloadedSongEntity(downloadedSong.songUri, owner = downloadedSong.owner)
+                )
+            }
+        }
+    }
 
     /**
      * TODO BREAKING_RULE: inconsistent data in the response, must use network response.
@@ -336,8 +344,13 @@ class SongsRepositoryImpl @Inject constructor(
      * &id=8895
      */
     private suspend fun buildSongUrl(song: Song) = getSession()?.auth?.let { authToken ->
-        dao.getCredentials()?.serverUrl?.let {
-            "${MainNetwork.buildServerUrl(it)}/json.server.php?action=stream&auth=$authToken&type=song&id=${song.mediaId}"
+        dao.getCredentials()?.serverUrl?.let { serverUrl ->
+            val sb = StringBuffer("${MainNetwork.buildServerUrl(serverUrl)}/json.server.php?action=stream&auth=$authToken&type=song&id=${song.mediaId}")
+            dao.getSettings()?.streamingQuality?.bitrate?.let { bitrate ->
+                if (bitrate < StreamingQuality.VERY_HIGH.bitrate)
+                    sb.append("&bitrate=$bitrate")
+            }
+            sb.toString()
         }
     } ?: song.songUrl
 

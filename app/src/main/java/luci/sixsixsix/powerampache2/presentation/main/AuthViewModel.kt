@@ -201,7 +201,12 @@ class AuthViewModel @Inject constructor(
         authToken: String = state.authToken
     ) {
         viewModelScope.launch {
-            repository.authorize(username, password.sha256(), serverUrl, authToken)
+            repository.authorize(
+                username = username.trim(),
+                password = password.sha256(),
+                serverUrl = serverUrl.trim(),
+                authToken = authToken
+            )
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {

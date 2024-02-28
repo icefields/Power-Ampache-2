@@ -12,4 +12,5 @@
     <color name="placeholderBgTint">@color/onSurfaceVariant</color>
     <color name="launcherBgColour">#e9eff7</color>
 
+    <color name="surfaceContainer">#E9F0ED</color>
 </resources>

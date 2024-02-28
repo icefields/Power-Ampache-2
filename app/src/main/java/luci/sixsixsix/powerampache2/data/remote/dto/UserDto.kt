@@ -26,7 +26,7 @@ data class UserDto(
     @SerializedName("validation")
     val validation: Any? = null,
     @SerializedName("disabled")
-    val disabled: Boolean? = null,
+    val disabled: Any? = null,
     @SerializedName("create_date")
     val createDate: Int? = null,
     @SerializedName("last_seen")
@@ -46,7 +46,7 @@ fun UserDto.toUser() = User(
     access = access ?: ERROR_INT,
     streamToken = streamToken,
     fullNamePublic = processFlag(fullNamePublic),
-    disabled = disabled ?: false,
+    disabled = processFlag(disabled) == 1,
     createDate = createDate ?: ERROR_INT,
     lastSeen = lastSeen ?: ERROR_INT,
     website = website ?: "",

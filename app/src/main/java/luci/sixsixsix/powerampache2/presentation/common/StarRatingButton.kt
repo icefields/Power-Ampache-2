@@ -26,13 +26,11 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Star
@@ -48,9 +46,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun StarRatingButton(
@@ -63,99 +58,84 @@ fun StarRatingButton(
     }
 
     val iconTint = MaterialTheme.colorScheme.tertiary
-
-    AnimatedVisibility(enter = slideInHorizontally(initialOffsetX = { it / 2 }),
-        exit = slideOutVertically(spring(stiffness = Spring.StiffnessHigh)) ,//fadeOut(spring(stiffness = Spring.StiffnessHigh)),
-        visible = isExpanded) {
-        Row(
-            modifier = modifier.wrapContentWidth(),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            IconButton(
-                onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
-                        isExpanded = !isExpanded
-                    }
-
-                    onRate(1)
-                },
-                modifier = Modifier.size(24.dp)
+    //Box {
+        AnimatedVisibility(enter = slideInHorizontally(spring(stiffness = Spring.StiffnessHigh)),
+            exit = fadeOut(spring(stiffness = Spring.StiffnessHigh)) ,//fadeOut(spring(stiffness = Spring.StiffnessHigh)),
+            visible = isExpanded) {
+            Row(
+                modifier = modifier.wrapContentWidth(),
+                horizontalArrangement = Arrangement.Start
             ) {
-                Icon(
-                    tint = iconTint,
-                    imageVector = if(currentRating >= 1) Icons.Outlined.Star
-                    else Icons.Outlined.StarOutline,
-                    contentDescription = "1 star rating")
-            }
-            IconButton(
-                onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
+                IconButton(
+                    onClick = {
                         isExpanded = !isExpanded
-                    }
-                    onRate(2)
-                },
-                modifier = Modifier.size(24.dp)) {
-                Icon(tint = iconTint,
-                    imageVector = if(currentRating >= 2) Icons.Outlined.Star
-                else Icons.Outlined.StarOutline,
-                    contentDescription = "2 star rating")
-            }
-            IconButton(
-                onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
+                        onRate(1)
+                    },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        tint = iconTint,
+                        imageVector = if(currentRating >= 1) Icons.Outlined.Star
+                        else Icons.Outlined.StarOutline,
+                        contentDescription = "1 star rating")
+                }
+                IconButton(
+                    onClick = {
                         isExpanded = !isExpanded
-                    }
-                    onRate(3)
-                },
-                modifier = Modifier.size(24.dp)) {
-                Icon(tint = iconTint,
-                    imageVector = if(currentRating >= 3) Icons.Outlined.Star
-                else Icons.Outlined.StarOutline,
-                    contentDescription = "3 star rating")
-            }
-            IconButton(
-                onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
+                        onRate(2)
+                    },
+                    modifier = Modifier.size(24.dp)) {
+                    Icon(tint = iconTint,
+                        imageVector = if(currentRating >= 2) Icons.Outlined.Star
+                        else Icons.Outlined.StarOutline,
+                        contentDescription = "2 star rating")
+                }
+                IconButton(
+                    onClick = {
                         isExpanded = !isExpanded
-                    }
-                    onRate(4)
-                },
-                modifier = Modifier.size(24.dp)) {
-                Icon(tint = iconTint,
-                    imageVector = if(currentRating >= 4) Icons.Outlined.Star
-                    else Icons.Outlined.StarOutline,
-                    contentDescription = "4 star rating")
-            }
-            IconButton(
-                onClick = {
-                    GlobalScope.launch {
-                        delay(1000)
+                        onRate(3)
+                    },
+                    modifier = Modifier.size(24.dp)) {
+                    Icon(tint = iconTint,
+                        imageVector = if(currentRating >= 3) Icons.Outlined.Star
+                        else Icons.Outlined.StarOutline,
+                        contentDescription = "3 star rating")
+                }
+                IconButton(
+                    onClick = {
                         isExpanded = !isExpanded
-                    }
-                    onRate(5)
-                },
-                modifier = Modifier.size(24.dp)) {
-                Icon(
-                    tint = iconTint,
-                    imageVector = if(currentRating == 5) Icons.Outlined.Star
-                else Icons.Outlined.StarOutline,
-                    contentDescription = "5 star rating")
+                        onRate(4)
+                    },
+                    modifier = Modifier.size(24.dp)) {
+                    Icon(tint = iconTint,
+                        imageVector = if(currentRating >= 4) Icons.Outlined.Star
+                        else Icons.Outlined.StarOutline,
+                        contentDescription = "4 star rating")
+                }
+                IconButton(
+                    onClick = {
+                        isExpanded = !isExpanded
+                        onRate(5)
+                    },
+                    modifier = Modifier.size(24.dp)) {
+                    Icon(
+                        tint = iconTint,
+                        imageVector = if(currentRating == 5) Icons.Outlined.Star
+                        else Icons.Outlined.StarOutline,
+                        contentDescription = "5 star rating")
+                }
             }
         }
-    }
 
-    AnimatedVisibility(visible = !isExpanded,
-        exit = fadeOut(),
-        enter = slideInHorizontally(initialOffsetX = { it / 2 })) {
-        IconButton(onClick = { isExpanded = !isExpanded }) {
-            StarRatingIcon(rating = currentRating, padding = 2.dp)
+        AnimatedVisibility(visible = !isExpanded,
+            exit = slideOutHorizontally(spring(stiffness = Spring.StiffnessHigh), targetOffsetX = { it / 2 }),
+            enter = slideInHorizontally(spring(stiffness = Spring.StiffnessHigh), initialOffsetX = { it / 2 })) {
+            IconButton(onClick = { isExpanded = !isExpanded }) {
+                StarRatingIcon(rating = currentRating, padding = 2.dp)
+            }
         }
+    //}
 
-    }
 }
 
 @Composable @Preview

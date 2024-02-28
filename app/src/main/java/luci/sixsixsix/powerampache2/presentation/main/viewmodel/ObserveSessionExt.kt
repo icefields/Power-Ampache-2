@@ -35,7 +35,7 @@ fun MainViewModel.observeSession() {
 
     musicRepository.sessionLiveData.distinctUntilChanged().observeForever {
         //if (lock == null) lock = Any()
-        //synchronized(mainLock) {
+        synchronized(mainLock) {
             val oldToken = authToken
             authToken = it?.auth ?: ""
             logToErrorLogs(" old toke $oldToken, new one: $authToken")
@@ -61,7 +61,8 @@ fun MainViewModel.observeSession() {
                         restoreQueueState()
                     }
                 } else {
-                    restoreQueueState()
+                    // TODO should restore state here? can not-restoring lead to bugs?
+                    //restoreQueueState()
                 }
                 //authToken = newToken
             } else {
@@ -76,7 +77,7 @@ fun MainViewModel.observeSession() {
                     //playlistManager.reset() // this will trigger the observables in observePlaylistManager() and reset mainviewmodel as well
                 }
             }
-        //}
+        }
     }
 }
 
@@ -86,7 +87,9 @@ private fun MainViewModel.restoreQueueState() {
     // the observed lived data might call loadSongData()
     //    state.song?.let { playlistManager.updateCurrentSong(it) }
     //    if (state.queue.isNotEmpty()) { playlistManager.replaceCurrentQueue(state.queue) }
-    restoredSong?.let { playlistManager.updateCurrentSong(it) }
+    restoredSong?.let {
+        logToErrorLogs("restoreQueueState.updateCurrentSong(it)")
+        playlistManager.updateCurrentSong(it) }
     if (restoredQueue.isNotEmpty()) { playlistManager.replaceCurrentQueue(restoredQueue) }
     resetCachedQueueState()
 

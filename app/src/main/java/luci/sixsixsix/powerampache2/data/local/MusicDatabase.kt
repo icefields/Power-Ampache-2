@@ -46,14 +46,18 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         UserEntity::class,
         LocalSettingsEntity::class,
         DownloadedSongEntity::class
-    ], version = 76, // first prod version: 73
+    ], version = 77, // first prod version: 73
     autoMigrations = [
         AutoMigration(from = 73, to = 74),
         AutoMigration(from = 73, to = 75),
         AutoMigration(from = 73, to = 76),
+        AutoMigration(from = 73, to = 77),
         AutoMigration(from = 74, to = 75),
         AutoMigration(from = 74, to = 76),
-        AutoMigration(from = 75, to = 76)
+        AutoMigration(from = 74, to = 77),
+        AutoMigration(from = 75, to = 76),
+        AutoMigration(from = 75, to = 77),
+        AutoMigration(from = 76, to = 77)
     ],
     exportSchema = true
 )

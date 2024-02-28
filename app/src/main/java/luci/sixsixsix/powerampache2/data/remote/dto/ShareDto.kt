@@ -11,9 +11,9 @@ data class ShareDto(
     @SerializedName("owner")
     val owner: String? = null,
     @SerializedName("allow_stream")
-    val allowStream: Boolean? = null,
+    val allowStream: Any? = null,
     @SerializedName("allow_download")
-    val allowDownload: Boolean? = null,
+    val allowDownload: Any? = null,
     @SerializedName("creation_date")
     val creationDate: Int? = null,
     @SerializedName("lastvisit_date")

@@ -96,13 +96,13 @@ fun SongDetailQueueScreenContent(
                         SongItemEvent.SHARE_SONG -> mainViewModel.onEvent(MainEvent.OnShareSong(song))
                         SongItemEvent.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                         SongItemEvent.GO_TO_ALBUM -> {
-                            Ampache2NavGraphs.navigator?.navigate(AlbumDetailScreenDestination(albumId = song.album.id))
+                            Ampache2NavGraphs.navigateToAlbum(albumId = song.album.id)
                             scope.launch {
                                 mainScaffoldState.bottomSheetState.partialExpand()
                             }
                         }
                         SongItemEvent.GO_TO_ARTIST -> {
-                            Ampache2NavGraphs.navigator?.navigate(ArtistDetailScreenDestination(artistId = song.artist.id))
+                            Ampache2NavGraphs.navigateToArtist(artistId = song.artist.id)
                             scope.launch {
                                 mainScaffoldState.bottomSheetState.partialExpand()
                             }

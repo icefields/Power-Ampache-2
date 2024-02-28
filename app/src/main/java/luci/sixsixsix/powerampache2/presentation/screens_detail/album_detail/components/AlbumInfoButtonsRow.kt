@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
@@ -35,19 +34,18 @@ import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.presentation.common.ButtonDownload
 import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
+import luci.sixsixsix.powerampache2.presentation.common.ShuffleToggleButton
 
 @Composable
 fun AlbumInfoButtonsRow(
@@ -95,16 +93,9 @@ fun AlbumInfoButtonsRow(
             )
         }
 
-        IconButton(
-            onClick = {
-                eventListener(AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM)
-            }) {
-            Icon(
-                //modifier = Modifier.size(30.dp),
-                painter = painterResource(id = R.drawable.ic_shuffleplay),
-                contentDescription = "Share",
-                tint = if (isGlobalShuffleOn) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        //Spacer(modifier = Modifier.width(0.dp))
+        ShuffleToggleButton(isGlobalShuffleOn = isGlobalShuffleOn) {
+            eventListener(AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM)
         }
 
         IconButton(
@@ -121,5 +112,10 @@ fun AlbumInfoButtonsRow(
 
 @Composable @Preview
 fun AlbumInfoButtonsRowPreview() {
-    AlbumInfoButtonsRow(Album.mock(), isPlayingAlbum = true, false, isDownloading = false, isGlobalShuffleOn = true, isPlaylistEditLoading = true){}
+    AlbumInfoButtonsRow(Album.mock(),
+        isPlayingAlbum = true,
+        false,
+        isDownloading = false,
+        isGlobalShuffleOn = true,
+        isPlaylistEditLoading = true) { }
 }
