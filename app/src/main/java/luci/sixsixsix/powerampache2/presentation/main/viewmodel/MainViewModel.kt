@@ -38,6 +38,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
@@ -259,18 +260,18 @@ class MainViewModel @Inject constructor(
     }
 
     @OptIn(UnstableApi::class)
-    fun stopMusicService() {
+    fun stopMusicService() = viewModelScope.launch {
+        delay(2000) // safety net, delay stopping the service in case the application just got restored from background
         logToErrorLogs("SERVICE- stopMusicService $isServiceRunning")
-        //if (isServiceRunning) {
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
                 applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
                     .also { isServiceRunning = false }
             } catch (e: Exception) {
                 L.e(e)
+                isServiceRunning = false
             }
         }
-        //}
     }
 
     // TODO remove this after bug is fixed

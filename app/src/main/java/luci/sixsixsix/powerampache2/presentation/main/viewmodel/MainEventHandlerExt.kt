@@ -153,11 +153,28 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
 
 private fun MainViewModel.playSongForce(song: Song) = viewModelScope.launch {
     L( "MainEvent.Play", "playing song")
-    simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.ForcePlay(song.toMediaItem(songsRepository.getSongUri(song))))
-    L( "MainEvent.Play", "play song launched. AFter")
+    try {
+        simpleMediaServiceHandler.onPlayerEvent(
+            PlayerEvent.ForcePlay(
+                song.toMediaItem(songsRepository.getSongUri(song)))
+        )
+    } catch (e: Exception) {
+        logToErrorLogs("fun MainViewModel.playSongForce EXCEPTION, loading song data now")
+        logToErrorLogs(e.stackTraceToString())
+        // TODO this might go into an infinite loop if no connection or all urls are invalid
+        loadSongData()
+    }
+    L( "MainEvent.Play", "play song launched. After")
 }
 
 private fun MainViewModel.playPauseSong() = viewModelScope.launch {
     startMusicServiceIfNecessary()
-    simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
+    L( "MainEvent.Play", "playing song")
+    try {
+        simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
+    } catch (e: Exception) {
+        // TODO this might go into an infinite loop if no connection or all urls are invalid
+        //  do a retry timeout that increases every time and resets on successful song playback
+        loadSongData()
+    }
 }

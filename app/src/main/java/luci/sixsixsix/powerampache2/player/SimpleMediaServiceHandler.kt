@@ -56,6 +56,11 @@ class SimpleMediaServiceHandler @Inject constructor(
         player.prepare()
     }
 
+    fun addMediaItem(index: Int, mediaItem: MediaItem) {
+        player.addMediaItem(index, mediaItem)
+        player.prepare()
+    }
+
     fun getMediaItemCount() = player.mediaItemCount
 
     fun addMediaItemList(mediaItems: List<MediaItem>) {
@@ -102,7 +107,6 @@ class SimpleMediaServiceHandler @Inject constructor(
         var indexToSeekTo = -1
         var i = 0
         while(indexToSeekTo == -1 && i < player.mediaItemCount) {
-            L(player.getMediaItemAt(i).mediaId , mediaId)
             if (player.getMediaItemAt(i).mediaId == mediaId) {
                 indexToSeekTo = i
             }
@@ -137,16 +141,22 @@ class SimpleMediaServiceHandler @Inject constructor(
             is PlayerEvent.ForcePlay -> {
                 val indexToSeekTo = indexOfSong(playerEvent.mediaItem.mediaId)
                 if (indexToSeekTo >= 0) {
+                    // check if the url is the same
+                    val media = player.getMediaItemAt(indexToSeekTo)
+                    if (media.localConfiguration?.uri != playerEvent.mediaItem.localConfiguration?.uri) {
+                        L("not equals!! ${media.localConfiguration?.uri} ${playerEvent.mediaItem.localConfiguration?.uri}")
+                        player.replaceMediaItem(indexToSeekTo, media)
+                    }
+
                     player.seekTo(indexToSeekTo, 0)
+                } else {
+                    addMediaItem(0, playerEvent.mediaItem)
+                    player.seekTo(0, 0)
                 }
 
-                try {
-                    player.play()
-                    _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
-                    startProgressUpdate()
-                } catch (e: Exception) {
-                    L.e(e)
-                }
+                player.play()
+                _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
+                startProgressUpdate()
             }
             is PlayerEvent.RepeatToggle -> player.repeatMode =
                 when(playerEvent.repeatMode) {
@@ -164,8 +174,16 @@ class SimpleMediaServiceHandler @Inject constructor(
         try {
             val qq = playlistManager.currentQueueState.value.filter { it.mediaId == mediaItem?.mediaId }
             if (qq.isNotEmpty()) {
+                val song = qq[0]
                 L("onMediaItemTransition.updateCurrentSong(it)")
-                playlistManager.updateCurrentSong(newSong = qq[0])
+                playlistManager.updateCurrentSong(newSong = song)
+
+                // update media item if url is invalid
+                // TODO generate url from repository and compare here, replace if necessary
+//                if (mediaItem?.localConfiguration?.uri != song.songUrl) {
+//                    L("equals!! ${media.localConfiguration?.uri} ${playerEvent.mediaItem.localConfiguration?.uri}")
+//                    player.replaceMediaItem(indexToSeekTo, media)
+//                }
             }
         } catch (e: Exception) {
             L.e("onMediaItemTransition", e)

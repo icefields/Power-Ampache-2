@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,7 +51,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -82,6 +82,7 @@ import luci.sixsixsix.powerampache2.data.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.LoginTextField
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.SignUpBottomSheet
 
 @Composable
@@ -225,6 +226,9 @@ fun LoginScreenContent(
                         .wrapContentHeight()
                         .fillMaxWidth()
                 )
+                
+                Spacer(modifier = Modifier.height(10.dp))
+                
                 LoginButton(onEvent = {
                     isLoginSheetOpen = false
                     onEvent(it)
@@ -314,54 +318,23 @@ fun LoginTextFields(
         modifier = modifier
             .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal))
     ) {
-
-        OutlinedTextField(
+        LoginTextField(
             value = url,
-            onValueChange = {
-                onEvent(AuthEvent.OnChangeServerUrl(it))
-            },
-            modifier = Modifier
-                .padding(top = topPaddingInputFields)
-                .fillMaxWidth(),
-            placeholder = {
-                Text(text = stringResource(id = R.string.loginScreen_server_url))
-            },
-            maxLines = 1,
-            singleLine = true
-        )
+            label = R.string.loginScreen_server_url
+        ) { onEvent(AuthEvent.OnChangeServerUrl(it)) }
 
         AnimatedVisibility(visible = !authTokenLoginEnabled) {
             Column {
-                OutlinedTextField(
+                LoginTextField(
                     value = username,
-                    onValueChange = {
-                        onEvent(AuthEvent.OnChangeUsername(it))
-                    },
-                    modifier = Modifier
-                        .padding(top = topPaddingInputFields)
-                        .fillMaxWidth(),
-                    placeholder = {
-                        Text(text = stringResource(id = R.string.loginScreen_username))
-                    },
-                    maxLines = 1,
-                    singleLine = true
-                )
+                    label = R.string.loginScreen_username
+                ) { onEvent(AuthEvent.OnChangeUsername(it)) }
 
-                OutlinedTextField(
+                LoginTextField(
                     value = password,
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    onValueChange = {
-                        onEvent(AuthEvent.OnChangePassword(it))
-                    },
-                    modifier = Modifier
-                        .padding(top = topPaddingInputFields)
-                        .fillMaxWidth(),
-                    placeholder = {
-                        Text(text = stringResource(id = R.string.loginScreen_password))
-                    },
-                    maxLines = 1,
-                    singleLine = true,
+                    label = R.string.loginScreen_password,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image = if (passwordVisible) {
                             Icons.Filled.Visibility
@@ -373,25 +346,15 @@ fun LoginTextFields(
                             Icon(imageVector  = image, description)
                         }
                     }
-                )
+                ) { onEvent(AuthEvent.OnChangePassword(it)) }
             }
         }
 
         AnimatedVisibility(visible = authTokenLoginEnabled) {
-            OutlinedTextField(
+            LoginTextField(
                 value = authToken,
-                onValueChange = {
-                    onEvent(AuthEvent.OnChangeAuthToken(it))
-                },
-                modifier = Modifier
-                    .padding(top = topPaddingInputFields, bottom = topPaddingInputFields)
-                    .fillMaxWidth(),
-                placeholder = {
-                    Text(text = stringResource(id = R.string.loginScreen_auth_token))
-                },
-                maxLines = 1,
-                singleLine = true
-            )
+                label = R.string.loginScreen_auth_token
+            ) { onEvent(AuthEvent.OnChangeAuthToken(it)) }
         }
     }
 }
