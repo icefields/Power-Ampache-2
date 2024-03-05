@@ -32,6 +32,7 @@ import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.domain.models.defaultPlaylistSort
+import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
 import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
 
 @Parcelize
@@ -53,6 +54,6 @@ data class PlaylistDetailState (
         is RecentPlaylist -> true
         is FlaggedPlaylist -> true
         is FrequentPlaylist -> true
-        else -> false
+        else -> playlist.isSmartPlaylist()
     }
 }
