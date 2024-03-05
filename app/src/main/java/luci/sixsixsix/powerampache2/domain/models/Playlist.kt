@@ -37,7 +37,7 @@ open class Playlist(
     val artUrl: String? = null,
     val flag: Int = 0,
     val preciseRating: Float = 0.0f,
-    val rating: Int = 0,
+    var rating: Int = 0,
     val averageRating: Float = 0.0f,
 ): Parcelable {
     companion object {

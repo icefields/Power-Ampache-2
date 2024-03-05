@@ -25,13 +25,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Resource
@@ -72,12 +70,11 @@ import javax.inject.Singleton
 class MusicRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val dateMapper: DateMapper,
-    private val db: MusicDatabase,
+    db: MusicDatabase,
     private val errorHandler: ErrorHandler
-): MusicRepository {
+): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
     private val _serverInfoLiveData = MutableLiveData(ServerInfo())
     override val serverInfoLiveData = _serverInfoLiveData
-    private val dao = db.dao
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
     override val userLiveData: LiveData<User?>
         get() = userLiveData()
@@ -100,8 +97,6 @@ class MusicRepositoryImpl @Inject constructor(
 
     private fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
 
-    private suspend fun getSession(): Session? = dao.getSession()?.toSession()
-
     private suspend fun setSession(se: Session) {
         if (se.auth != getSession()?.auth) {
             // albums, songs, playlists and artist have links that contain the auth token
@@ -111,8 +106,6 @@ class MusicRepositoryImpl @Inject constructor(
         }
         dao.updateSession(se.toSessionEntity())
     }
-
-    private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
 
     private suspend fun getUserNetwork() {
         getCredentials()?.username?.let { username ->
@@ -127,9 +120,7 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getUser(): User? = withContext(Dispatchers.IO) {
-        dao.getUser()?.toUser()
-    }
+
 
     /**
      * updating the user in the database will trigger the user live data, observe that

@@ -26,11 +26,13 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
@@ -46,7 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.presentation.common.StarRatingButton
 import luci.sixsixsix.powerampache2.presentation.common.TopBarCircularProgress
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -74,6 +78,7 @@ fun SongDetailTopBar(
         )
 
 
+
         Column(modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -98,9 +103,25 @@ fun SongDetailTopBar(
             )
         }
 
-        TopBarCircularProgress(
-            isLoading = mainViewModel.isLoading || mainViewModel.state.isDownloading,
-            modifier = Modifier.align(Alignment.CenterEnd)
-        )
+        Row(
+            modifier = Modifier
+                .wrapContentSize()
+                .align(Alignment.CenterEnd),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TopBarCircularProgress(
+                isLoading = mainViewModel.isLoading || mainViewModel.state.isDownloading,
+            )
+            mainViewModel.state.song?.let { song ->
+                StarRatingButton(
+                    currentRating = song.rating.toInt(),
+                    onRate = {
+                        mainViewModel.onEvent(MainEvent.OnRateSong(song, it))
+                    }
+                )
+            }
+
+        }
     }
 }

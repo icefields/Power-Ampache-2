@@ -148,6 +148,10 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
                 playlistManager.updateErrorLogMessage(e.stackTraceToString())
             }
         }
+
+        is MainEvent.OnRateSong -> viewModelScope.launch {
+            rateSong(event.song, event.rate)
+        }
     }
 }
 

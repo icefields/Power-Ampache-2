@@ -47,8 +47,7 @@ class SettingsRepositoryImpl @Inject constructor(
     private val db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager
-): SettingsRepository {
-    private val dao = db.dao
+): BaseAmpacheRepository(api, db, errorHandler), SettingsRepository {
     override val settingsLiveData: LiveData<LocalSettings?>
         get() = dao.settingsLiveData().distinctUntilChanged().map {
                 it?.toLocalSettings()

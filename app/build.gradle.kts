@@ -40,8 +40,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 20
-        versionName = "0.20-beta"
+        versionCode = 21
+        versionName = "0.21-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

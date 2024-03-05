@@ -151,6 +151,21 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun rateSong(song: Song, rate: Int) = viewModelScope.launch {
+        songsRepository.rateSong(song.mediaId, rate).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let {
+                        // refresh song
+                        state = state.copy(song = song.copy(rating = rate.toFloat()))
+                    }
+                }
+                is Resource.Error -> state = state.copy(isLikeLoading = false)
+                is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+            }
+        }
+    }
+
     fun shareSong(song: Song) = viewModelScope.launch {
         songsRepository.getSongShareLink(song).collect { result ->
             when (result) {
