@@ -24,14 +24,12 @@ package luci.sixsixsix.powerampache2.data
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
-import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
@@ -39,7 +37,6 @@ import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.Session
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -54,12 +51,7 @@ class AlbumsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
     private val errorHandler: ErrorHandler
-): AlbumsRepository {
-    private val dao = db.dao
-
-    private suspend fun getSession(): Session? = dao.getSession()?.toSession()
-    private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
-
+): BaseAmpacheRepository(api, db, errorHandler), AlbumsRepository {
     override suspend fun getAlbums(
         fetchRemote: Boolean,
         query: String,
@@ -202,23 +194,6 @@ class AlbumsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylistShareLink()", e, this) }
 
-    private suspend fun rate(itemId: String, rating: Int, type: MainNetwork.Type): Flow<Resource<Any>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.rate(
-            authKey = auth.auth,
-            itemId = itemId,
-            rating = rating,
-            type = type).apply {
-            error?.let { throw(MusicException(it.toError())) }
-            if (success != null) {
-                emit(Resource.Success(data = Any(), networkData = Any()))
-            } else {
-                throw Exception("error getting a response from FLAG/LIKE call")
-            }
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("likeSong()", e, this) }
-
-    override suspend fun rateAlbum(albumId: String, rate: Int): Flow<Resource<Any>> = rate(albumId, rate, MainNetwork.Type.album)
+    override suspend fun rateAlbum(albumId: String, rate: Int): Flow<Resource<Any>> =
+        rate(albumId, rate, MainNetwork.Type.album)
 }

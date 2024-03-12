@@ -32,17 +32,14 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
-import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
-import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -58,11 +55,8 @@ import kotlin.jvm.Throws
 class PlaylistsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
-    private val musicRepository: MusicRepository,
     private val errorHandler: ErrorHandler
-): PlaylistsRepository {
-    private val dao = db.dao
-    private fun getSession(): Session? = musicRepository.sessionLiveData.value
+): BaseAmpacheRepository(api, db, errorHandler), PlaylistsRepository {
     override val playlistsLiveData = dao.playlistsLiveData().map { entities ->
         entities.map {
             it.toPlaylist()
@@ -134,6 +128,9 @@ class PlaylistsRepositoryImpl @Inject constructor(
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("likeSong()", e, this) }
+
+    override suspend fun ratePlaylist(playlistId: String, rate: Int): Flow<Resource<Any>> =
+        rate(playlistId, rate, MainNetwork.Type.playlist)
 
     override suspend fun likeSong(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.song)
 

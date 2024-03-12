@@ -38,6 +38,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
@@ -142,6 +143,21 @@ class MainViewModel @Inject constructor(
                     result.data?.let {
                         // refresh song
                         state = state.copy(song = song.copy(flag = abs(song.flag - 1)))
+                    }
+                }
+                is Resource.Error -> state = state.copy(isLikeLoading = false)
+                is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+            }
+        }
+    }
+
+    fun rateSong(song: Song, rate: Int) = viewModelScope.launch {
+        songsRepository.rateSong(song.mediaId, rate).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let {
+                        // refresh song
+                        state = state.copy(song = song.copy(rating = rate.toFloat()))
                     }
                 }
                 is Resource.Error -> state = state.copy(isLikeLoading = false)
@@ -259,18 +275,18 @@ class MainViewModel @Inject constructor(
     }
 
     @OptIn(UnstableApi::class)
-    fun stopMusicService() {
+    fun stopMusicService() = viewModelScope.launch {
+        delay(2000) // safety net, delay stopping the service in case the application just got restored from background
         logToErrorLogs("SERVICE- stopMusicService $isServiceRunning")
-        //if (isServiceRunning) {
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
                 applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
                     .also { isServiceRunning = false }
             } catch (e: Exception) {
                 L.e(e)
+                isServiceRunning = false
             }
         }
-        //}
     }
 
     // TODO remove this after bug is fixed

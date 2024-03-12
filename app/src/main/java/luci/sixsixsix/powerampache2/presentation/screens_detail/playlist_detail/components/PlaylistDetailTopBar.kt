@@ -50,6 +50,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
+import luci.sixsixsix.powerampache2.presentation.common.StarRatingButton
 import luci.sixsixsix.powerampache2.presentation.common.TopBarCircularProgress
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -58,8 +59,10 @@ fun PlaylistDetailTopBar(
     navigator: DestinationsNavigator,
     playlist: Playlist,
     isLoading: Boolean,
+    isRatingVisible: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior,
-    onRightIconClick: () -> Unit
+    onRating: (Playlist, Int) -> Unit,
+    onToggleSort: () -> Unit
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.largeTopAppBarColors(
@@ -92,9 +95,15 @@ fun PlaylistDetailTopBar(
         scrollBehavior = scrollBehavior,
         actions = {
             TopBarCircularProgress(isLoading)
-            IconButton(onClick = {
-                onRightIconClick()
-            }) {
+            if (isRatingVisible) {
+                StarRatingButton(
+                    currentRating = playlist.rating,
+                    onRate = {
+                        onRating(playlist, it)
+                    }
+                )
+            }
+            IconButton(onClick = onToggleSort) {
                 Icon(imageVector = Icons.Outlined.Sort, contentDescription = "sorting")
             }
         }
@@ -109,7 +118,8 @@ fun PlaylistDetailTopBarTopBarPreview() {
         navigator = EmptyDestinationsNavigator,
         playlist = Playlist.mock(),
         scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState()),
-        onRightIconClick = {},
+        onRating = { _, _ -> },
+        onToggleSort = {},
         isLoading = true
     )
 }

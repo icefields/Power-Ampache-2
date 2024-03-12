@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.data
 
-import android.app.Application
 import androidx.lifecycle.map
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
@@ -34,22 +33,16 @@ import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
-import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
-import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
-import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
-import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
@@ -68,22 +61,16 @@ import javax.inject.Singleton
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     db: MusicDatabase,
-    private val musicRepository: MusicRepository,
-    private val settingsRepository: SettingsRepository,
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager,
     private val weakContext: WeakContext
-): SongsRepository {
-    private val dao = db.dao
+): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
     override val offlineSongsLiveData = dao.getDownloadedSongsLiveData().map { entities ->
         entities.map {
             it.toSong()
         }
     }
-
-    private suspend fun getSession(): Session? = dao.getSession()?.toSession()
-    private suspend fun getCredentials(): CredentialsEntity? = dao.getCredentials()
 
     /**
      * TODO BREAKING_RULE single source of truth
@@ -294,6 +281,10 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun getFlaggedSongs() = getSongsStats(MainNetwork.StatFilter.flagged)
     override suspend fun getRandomSongs() = getSongsStats(MainNetwork.StatFilter.random)
 
+    override suspend fun rateSong(albumId: String, rate: Int): Flow<Resource<Any>> =
+        rate(albumId, rate, MainNetwork.Type.song)
+
+
     override suspend fun getSongsForQuickPlay() = flow {
         emit(Resource.Loading(true))
         val resultSet = HashSet<Song>()
@@ -366,7 +357,7 @@ class SongsRepositoryImpl @Inject constructor(
                 body()?.byteStream()?.let { inputStream ->
                     val filepath = storageManager.saveSong(song, inputStream)
                     dao.addDownloadedSong( // TODO fix double-bang!!
-                        song.toDownloadedSongEntity(filepath, musicRepository.getUser()?.username!!)
+                        song.toDownloadedSongEntity(filepath, getUser()?.username!!)
                     )
                     emit(Resource.Success(data = Any(), networkData = Any()))
                 } ?: throw Exception("cannot download/save file, body or input stream NULL response code: ${code()}")
@@ -411,7 +402,7 @@ class SongsRepositoryImpl @Inject constructor(
             val requestId = startSongDownloadWorker(
                 context = context,
                 authToken = auth.auth,
-                username = musicRepository.getUser()?.username!!,
+                username = getUser()?.username!!,
                 song = song
             )
             L(requestId)
@@ -466,7 +457,8 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongShareLink()", e, this) }
 
-    override suspend fun getDownloadedSongById(songId: String): Song? = dao.getSongById(songId)?.toSong()
+    override suspend fun getDownloadedSongById(songId: String): Song? =
+        dao.getSongById(songId)?.toSong()
 
     /**
      * returns false if Network data is not required, true otherwise

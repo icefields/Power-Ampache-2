@@ -33,11 +33,9 @@ import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.domain.models.Session
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -51,13 +49,8 @@ import javax.inject.Singleton
 class ArtistsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val db: MusicDatabase,
-    private val musicRepository: MusicRepository,
     private val errorHandler: ErrorHandler
-): ArtistsRepository {
-    private val dao = db.dao
-
-    private fun getSession(): Session? = musicRepository.sessionLiveData.value
-
+): BaseAmpacheRepository(api, db, errorHandler), ArtistsRepository {
     override suspend fun getArtist(
         artistId: String,
         fetchRemote: Boolean,

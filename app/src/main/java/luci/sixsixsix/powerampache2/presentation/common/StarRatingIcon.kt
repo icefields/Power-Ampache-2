@@ -69,5 +69,5 @@ fun StarRatingIcon(
 
 @Composable @Preview
 fun PreviewStarRatingIcon() {
-    StarRatingIcon(rating = 0)
+    StarRatingIcon(rating = 4)
 }

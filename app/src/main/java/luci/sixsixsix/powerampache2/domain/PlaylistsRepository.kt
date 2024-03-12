@@ -52,4 +52,6 @@ interface PlaylistsRepository {
     suspend fun likeSong(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun getPlaylistShareLink(playlistId: String): Flow<Resource<String>>
+
+    suspend fun ratePlaylist(playlistId: String, rate: Int): Flow<Resource<Any>>
 }

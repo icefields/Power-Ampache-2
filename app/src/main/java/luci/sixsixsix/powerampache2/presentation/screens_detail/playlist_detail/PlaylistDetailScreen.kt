@@ -100,7 +100,6 @@ fun PlaylistDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: PlaylistDetailViewModel = hiltViewModel(),
     mainViewModel: MainViewModel,
-    settingsViewModel: SettingsViewModel,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -211,7 +210,11 @@ fun PlaylistDetailScreen(
                     navigator = navigator,
                     playlist = playlist,
                     isLoading = state.isLoading || state.isPlaylistRemoveLoading,
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
+                    isRatingVisible = !state.isGeneratedPlaylist(),
+                    onRating = { playlist, rating ->
+                        viewModel.onEvent(PlaylistDetailEvent.OnRatePlaylist(playlist, rating))
+                    }
                 ) {
                     viewModel.onEvent(PlaylistDetailEvent.OnToggleSort)
                 }

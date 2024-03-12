@@ -36,6 +36,8 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
@@ -45,9 +47,11 @@ import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -142,6 +146,24 @@ class PlaylistDetailViewModel @Inject constructor(
                 } catch (e: Exception) {
                     playlistManager.updateErrorLogMessage(e.stackTraceToString())
                 }
+            }
+            is PlaylistDetailEvent.OnRatePlaylist -> viewModelScope.launch {
+                ratePlaylist(event.playlist, event.rating)
+            }
+        }
+    }
+
+    private fun ratePlaylist(playlist: Playlist, rate: Int) = viewModelScope.launch {
+        playlistsRepository.ratePlaylist(playlist.id, rate).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let {
+                        // refresh playlist
+                        state = state.copy(playlist = playlist.apply { rating = rate })
+                    }
+                }
+                is Resource.Error -> state = state.copy(isLoading = false)
+                is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
             }
         }
     }

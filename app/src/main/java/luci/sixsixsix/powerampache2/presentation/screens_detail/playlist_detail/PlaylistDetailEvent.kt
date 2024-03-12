@@ -35,4 +35,6 @@ sealed class PlaylistDetailEvent {
     data object OnShufflePlaylist: PlaylistDetailEvent()
     data object OnShufflePlaylistToggle: PlaylistDetailEvent()
     data object OnToggleSort: PlaylistDetailEvent()
+    data class OnRatePlaylist(val playlist: Playlist, val rating: Int): PlaylistDetailEvent()
+
 }
