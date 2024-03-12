@@ -22,39 +22,37 @@
 package luci.sixsixsix.powerampache2.presentation.search
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
+import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
-import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
-import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsViewModel
-import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
-import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsViewModel
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
-import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsViewModel
-import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
-import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsViewModel
+import luci.sixsixsix.powerampache2.presentation.search.screens.GenresScreen
+import luci.sixsixsix.powerampache2.presentation.search.screens.ResultsListView
+
+const val GRID_ITEMS_ROW = 2
+const val GRID_ITEMS_ROW_LAND = 5
+const val GRID_ITEMS_ROW_MIN = 2
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -62,124 +60,95 @@ fun SearchResultsScreen(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
-    songsViewModel: SongsViewModel = hiltViewModel(),
-    albumsViewModel: AlbumsViewModel = hiltViewModel(),
-    artistsViewModel: ArtistsViewModel = hiltViewModel(),
-    playlistsViewModel: PlaylistsViewModel = hiltViewModel()
+    searchViewModel: SearchViewModel,
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
+    val searchState = searchViewModel.state
     val controller = LocalSoftwareKeyboardController.current
-    val localFocusManager = LocalFocusManager.current
-
-    val songsState = songsViewModel.state
-    val albumsState = albumsViewModel.state
-    val artistsState = artistsViewModel.state
-    val playlistsState = playlistsViewModel.state
 
     BackHandler {
         mainViewModel.onEvent(MainEvent.OnSearchQueryChange(""))
+        searchViewModel.onEvent(SearchViewEvent.Clear)
+        controller?.hide()
     }
 
-    if (songsState.isLoading &&
-        albumsState.isLoading &&
-        artistsState.isLoading &&
-        playlistsState.isLoading
-    ) {
-        LoadingScreen()
-    }
-
-    Column(modifier = modifier.pointerInput(Unit) {
-        detectTapGestures(onTap = {
-            localFocusManager.clearFocus()
-        })
-    }) {
-        if (!songsState.isLoading &&
-            !albumsState.isLoading &&
-            !artistsState.isLoading &&
-            !playlistsState.isLoading &&
-            songsState.songs.isEmpty() &&
-            albumsState.albums.isEmpty() &&
-            artistsState.artists.isEmpty() &&
-            playlistsState.playlists.isEmpty()
-        ) {
-            SearchSectionTitleText(text = "Nothing seems to match your search query")
-        }
-
-        if (songsState.songs.isNotEmpty()) {
-            SearchSectionTitleText(text = "Songs")
-            SongsListScreen(
-                modifier = Modifier.weight(1f),
-                navigator = navigator,
+    var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
+    if (playlistsDialogOpen.isOpen) {
+        if (playlistsDialogOpen.songs.isNotEmpty()) {
+            AddToPlaylistOrQueueDialog(
+                songs = playlistsDialogOpen.songs,
+                onDismissRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                },
                 mainViewModel = mainViewModel,
-                viewModel = songsViewModel
+                viewModel = addToPlaylistOrQueueDialogViewModel,
+                onCreatePlaylistRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                }
+            )
+        }
+    }
+
+    if (searchState.isNoSearch) {
+        AnimatedVisibility(visible = searchState.selectedGenre == null) {
+            GenresScreen(
+                genres = searchState.genres,
+                isLoading = searchState.isLoading,
+                isFetchingMore = searchState.isFetchingMore,
+                searchQuery = searchState.searchQuery,
+                modifier = modifier,
+                onEvent = searchViewModel::onEvent
             )
         }
 
-        if (albumsState.albums.isNotEmpty()) {
-            SearchSectionTitleText(text = "Albums")
-            AlbumsScreen(
-                modifier = Modifier.weight(1f),
-                navigator = navigator,
-                viewModel = albumsViewModel,
-                gridItemsRow = 4,
-                minGridItemsRow = 3
-            )
-        }
-
-        if (playlistsState.playlists.isNotEmpty()) {
-            SearchSectionTitleText(text = "Playlists")
-            PlaylistsScreen(
-                modifier = Modifier.weight(1f),
-                navigator = navigator,
-                viewModel = playlistsViewModel,
-            )
-        }
-
-        if (artistsState.artists.isNotEmpty()) {
-            SearchSectionTitleText(text = "Artists")
-            ArtistsScreen(
-                modifier = Modifier.weight(1f),
-                navigator = navigator,
-                viewModel = artistsViewModel,
-                gridPerRow = 4
-            )
-        }
-
-        // add spacing below if empty results
-        val atLeastOneEmpty = songsState.songs.isEmpty()||albumsState.albums.isEmpty()||
-                artistsState.artists.isEmpty() ||playlistsState.playlists.isEmpty()
-        val totalItems = songsState.songs.size + albumsState.albums.size +
-                artistsState.artists.size + playlistsState.playlists.size
-        if (atLeastOneEmpty && totalItems < 5) {
-            Box(modifier = Modifier.weight(2.0f))
-        } else if (totalItems < 11) {
-            Box(modifier = Modifier.weight(1.0f))
-        }
+    } else if (searchState.isNoResults) {
+        // show no results screen (search query present but no results)
+        showHideEmptyResultsView(searchState.isLoading, searchState.isFetchingMore, searchState.isNoResults)
+    } else {
+        // show search results
+        ResultsListView(
+            songs = searchState.songs,
+            albums = searchState.albums,
+            artists = searchState.artists,
+            playlists = searchState.playlists,
+            swipeToRefreshEnabled = false,
+            isLoading = searchState.isLoading,
+            isRefreshing = searchState.isFetchingMore,
+            onEvent = searchViewModel::onEvent,
+            onSongEvent = mainViewModel::onEvent,
+            onSongSelected = { song ->
+                searchViewModel.onEvent(SearchViewEvent.OnSongSelected(song))
+                mainViewModel.onEvent(MainEvent.Play(song))
+            },
+            onAlbumSelected = { albumId, album ->
+                navigator.navigate(
+                    AlbumDetailScreenDestination(albumId = albumId, album = album))
+            },
+            onArtistSelected = { artistId, artist ->
+                navigator.navigate(
+                    ArtistDetailScreenDestination(artistId = artistId, artist = artist))
+            },
+            onPlaylistSelected = {
+                navigator.navigate(PlaylistDetailScreenDestination(playlist = it))
+            },
+            onOpenPlaylistDialog = {
+                playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, it)
+            }
+        )
     }
 }
 
-
 @Composable
-fun SearchSectionTitleText(text: String, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
-    ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                modifier = Modifier.padding(horizontal = 11.dp).padding(top = 5.dp, bottom = 4.dp),
-                text = text,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Medium,
-            )
+private fun showHideEmptyResultsView(isLoading: Boolean, isRefreshing: Boolean, isNoResults: Boolean) {
+    if (!isLoading && !isRefreshing && isNoResults){
+        Card(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "No results from your search query")
+            }
         }
     }
-
-
 }

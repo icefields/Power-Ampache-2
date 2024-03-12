@@ -219,36 +219,6 @@ private fun InfoTextSection(modifier: Modifier, playlistInfo: Playlist) {
             }
             if (playlistInfo.rating > 0) {
                 StarRatingIcon(playlistInfo.rating)
-//                Card(
-//                    colors = CardDefaults.cardColors(
-//                        containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
-//                        contentColor = MaterialTheme.colorScheme.surface
-//                    )
-//                ) {
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        modifier = Modifier
-//                            .wrapContentSize()
-//                            .padding(vertical = 0.dp)
-//                            .padding(start = 4.dp, end = 0.dp)
-//                    ) {
-//                        Spacer(modifier = Modifier.width(0.dp))
-//                        Text(
-//                            modifier = Modifier.basicMarquee(),
-//                            text = "${playlistInfo.rating}",
-//                            fontWeight = FontWeight.SemiBold,
-//                            fontSize = 16.dpTextUnit,
-//                            maxLines = 1,
-//                            textAlign = TextAlign.Start
-//                        )
-//
-//                        Icon(
-//                            modifier = Modifier.size(dimensionResource(id = R.dimen.playlistItem_icon_size)),
-//                            tint = MaterialTheme.colorScheme.surface,
-//                            imageVector = Icons.Rounded.StarRate,
-//                            contentDescription = "favorite playlist")
-//                    }
-//                }
                 Spacer(modifier = Modifier.width(6.dp))
             }
             if (playlistInfo.isSmartPlaylist()) {

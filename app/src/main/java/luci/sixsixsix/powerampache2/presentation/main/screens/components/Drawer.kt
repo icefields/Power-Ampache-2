@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -55,7 +56,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,7 +65,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_EMAIL
 import luci.sixsixsix.powerampache2.common.toHslColor
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
@@ -86,6 +85,7 @@ fun MainDrawer(
     user: User,
     versionInfo: String,
     hideDonationButtons: Boolean,
+    currentItem: MainContentMenuItem,
     items: List<MainContentMenuItem> = drawerItems,
     onItemClick: (MainContentMenuItem) -> Unit,
     modifier: Modifier = Modifier,
@@ -101,6 +101,7 @@ fun MainDrawer(
         DrawerHeader(user)
         Divider()
         DrawerBody(
+            currentItem = currentItem,
             modifier = Modifier.weight(1f),
             items = items,
             onItemClick = onItemClick
@@ -190,6 +191,7 @@ fun DrawerHeader(currentUser: User) {
 
 @Composable
 fun DrawerBody(
+    currentItem: MainContentMenuItem,
     items: List<MainContentMenuItem>,
     modifier: Modifier = Modifier,
     itemTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
@@ -198,6 +200,8 @@ fun DrawerBody(
     LazyColumn(modifier) {
         items(items) { item ->
             NavigationDrawerItem(
+                shape = RoundedCornerShape(1.dp),
+                selected = currentItem == item,
                 label = {
                     Text(text = item.title, style = itemTextStyle)
                 },
@@ -207,7 +211,6 @@ fun DrawerBody(
                         contentDescription = item.contentDescription
                     )
                 },
-                selected = false,
                 onClick = {
                     onItemClick(item)
                 },
@@ -286,6 +289,7 @@ fun PreviewDrawer() {
         user = User.mockUser(),
         versionInfo = "0.666-beta (666)",
         hideDonationButtons = false,
+        currentItem = drawerItems[1],
         donateButton = {
             DonateButtonPreview()
         },

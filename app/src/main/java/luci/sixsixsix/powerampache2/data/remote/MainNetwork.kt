@@ -29,6 +29,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.AuthDto
+import luci.sixsixsix.powerampache2.data.remote.dto.GenresResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.GoodbyeDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
@@ -191,7 +192,8 @@ interface MainNetwork {
         @Query("username") username: String? = null,
         @Query("type") _type: Type = Type.album,
         @Query("filter") filter: StatFilter,
-        @Query("offset") offset: Int = 0, ): AlbumsResponse
+        @Query("offset") offset: Int = 0
+    ): AlbumsResponse
 
     @GET("json.server.php?action=flag")
     suspend fun flag( // flagged = favourites
@@ -255,6 +257,43 @@ interface MainNetwork {
         @Query("rating") rating: Int,
         @Query("type") type: Type
     ): SuccessResponse
+
+    /**
+     * genres
+     * This returns the genres (Tags) based on the specified filter
+     *
+     * Input	Type	Description	Optional
+     * 'filter'	string	Filter results to match this string	YES
+     * 'exact'	boolean	0, 1 (if true filter is exact = rather than fuzzy LIKE)	YES
+     * 'offset'	integer	Return results starting from this index position	YES
+     * 'limit'	integer	Maximum number of results to return	YES
+     */
+    @GET("json.server.php?action=genres")
+    suspend fun getGenres(
+        @Query("auth") authKey: String,
+        @Query("filter") filter: String = "",
+        @Query("exact") exact: Int = 0,
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = 0
+    ): GenresResponse
+
+    /**
+     * genre_artists
+     * This returns the artists associated with the genre in question as defined by the UID
+     *
+     * Input	Type	Description	Optional
+     * 'filter'	string	UID of genre, returns artist JSON	YES
+     * 'offset'	integer	Return results starting from this index position	YES
+     * 'limit'	integer	Maximum number of results to return	YES
+     */
+    @GET("json.server.php?action=genre_artists")
+    suspend fun getArtistsByGenre(
+        @Query("auth") authKey: String,
+        @Query("filter") filter: String = "",
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = 0
+    ): ArtistsResponse
+
 
     /**
      * Create a public url that can be used by anyone to stream media.

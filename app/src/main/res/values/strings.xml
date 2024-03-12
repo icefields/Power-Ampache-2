@@ -104,7 +104,7 @@
 
     <!---...-->
     <string name="version_quote_title">Quote of the version</string>
-    <string name="version_quote">This version is an experimental Tessy!</string>
+    <string name="version_quote">This version is powered by spicy Calico Cats</string>
     <string name="about_appVersion_title">App Version</string>
     <string name="about_license_title">License</string>
     <string name="about_contact_title">Contact Me on Telegram and Mastodon</string>

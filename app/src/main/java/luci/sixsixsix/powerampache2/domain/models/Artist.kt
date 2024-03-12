@@ -23,9 +23,11 @@ package luci.sixsixsix.powerampache2.domain.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.common.Constants.LOADING_STRING
+import java.lang.StringBuilder
 
 typealias ArtistId = String
 
@@ -42,7 +44,7 @@ data class Artist(
     val time: Int = 0,
     val yearFormed: Int = 0,
     val placeFormed: String? = null
-): Parcelable {
+): Parcelable, AmpacheModel {
     companion object {
         fun mockArtist(): Artist = Artist(
             id = "883",
@@ -87,3 +89,6 @@ data class Artist(
         )
     }
 }
+
+val Artist.genresString
+    get() = genre.mapNotNull { it.name }.joinToString(", ")

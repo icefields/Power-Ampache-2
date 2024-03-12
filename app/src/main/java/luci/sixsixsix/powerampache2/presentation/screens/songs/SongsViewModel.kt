@@ -26,10 +26,10 @@ class SongsViewModel @Inject constructor(
         L("SongsListScreen")
         getSongs()
         viewModelScope.launch {
-            playlistManager.currentSearchQuery.collect { query ->
-                L(query)
-                onEvent(SongsEvent.OnSearchQueryChange(query))
-            }
+//            playlistManager.currentSearchQuery.collect { query ->
+//                L(query)
+//                onEvent(SongsEvent.OnSearchQueryChange(query))
+//            }
         }
     }
 

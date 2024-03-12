@@ -31,6 +31,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CREDENTIALS_PRIMARY_KEY
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.DownloadedSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.GenreEntity
 import luci.sixsixsix.powerampache2.data.local.entities.LocalSettingsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SESSION_PRIMARY_KEY
@@ -119,6 +120,9 @@ interface MusicDao {
     @Query("""SELECT * FROM artistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by name""")
     suspend fun searchArtist(query: String): List<ArtistEntity>
 
+    @Query("""SELECT * FROM artistentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == genre order by name""")
+    suspend fun searchArtistByGenre(genre: String): List<ArtistEntity>
+
     @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time""")
     suspend fun getArtist(artistId: String): ArtistEntity?
 
@@ -167,11 +171,29 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun writeSettings(localSettingsEntity: LocalSettingsEntity)
 
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertGenres(genres: List<GenreEntity>)
+
+    @Query("""SELECT * FROM genreentity""")
+    suspend fun getGenres(): List<GenreEntity>
+
+    @Query("""SELECT * FROM genreentity WHERE LOWER(id) == LOWER(:genreId)""")
+    suspend fun getGenreById(genreId: String): GenreEntity?
+
+    @Query("""SELECT * FROM genreentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
+    suspend fun searchGenres(query: String): List<GenreEntity>
+
+    @Query("DELETE FROM genreentity")
+    suspend fun clearGenres()
+
     //@Query("""DELETE FROM playlistentity artistentity, songentity, albumentity""")
     suspend fun clearCachedData() {
         clearAlbums()
         clearArtists()
         clearSongs()
         clearPlaylists()
+        clearGenres()
     }
 }

@@ -27,12 +27,12 @@ class AlbumsViewModel @Inject constructor(
 
     init {
         getAlbums()
-        viewModelScope.launch {
-            playlistManager.currentSearchQuery.collect { query ->
-                L("AlbumsViewModel collect", query)
-                onEvent(AlbumsEvent.OnSearchQueryChange(query))
-            }
-        }
+//        viewModelScope.launch {
+//            playlistManager.currentSearchQuery.collect { query ->
+//                L("AlbumsViewModel collect", query)
+//                onEvent(AlbumsEvent.OnSearchQueryChange(query))
+//            }
+//        }
     }
 
     fun onEvent(event: AlbumsEvent) {

@@ -32,10 +32,15 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toGenre
+import luci.sixsixsix.powerampache2.data.local.entities.toGenreEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toUser
@@ -43,6 +48,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.toUserEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toBoolean
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
+import luci.sixsixsix.powerampache2.data.remote.dto.toGenre
 import luci.sixsixsix.powerampache2.data.remote.dto.toServerInfo
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
 import luci.sixsixsix.powerampache2.data.remote.dto.toUser
@@ -297,4 +303,32 @@ class MusicRepositoryImpl @Inject constructor(
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("register()", e, this) }
+
+    override suspend fun getGenres(fetchRemote: Boolean) = flow {
+        emit(Resource.Loading(true))
+
+        val localGenres = dao.getGenres()
+        val isDbEmpty = localGenres.isEmpty()
+        if (!isDbEmpty) {
+            emit(Resource.Success(data = localGenres.map { it.toGenre() }))
+        }
+        val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+        if(shouldLoadCacheOnly) {
+            emit(Resource.Loading(false))
+            return@flow
+        }
+
+        val auth = getSession()!!
+        val response = api.getGenres(authKey = auth.auth).genres!!.map { it.toGenre() }
+
+
+        if (Constants.CLEAR_TABLE_AFTER_FETCH) {
+            dao.clearGenres()
+        }
+        dao.insertGenres(response.map { it.toGenreEntity() })
+        // stick to the single source of truth pattern despite performance deterioration
+        emit(Resource.Success(data = dao.getGenres().map { it.toGenre() }, networkData = response))
+
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getGenres()", e, this) }
 }

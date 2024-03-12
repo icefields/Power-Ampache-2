@@ -48,6 +48,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.screens.artists.components.ArtistItem
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
@@ -63,8 +64,30 @@ fun ArtistsScreen(
     viewModel: ArtistsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
-    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
-    val state = viewModel.state
+    ArtistsScreenContent(
+        artists = viewModel.state.artists,
+        isLoading = viewModel.state.isLoading,
+        isRefreshing = viewModel.state.isRefreshing,
+        onEvent = viewModel::onEvent,
+        navigateToArtist = { id, artist ->
+            navigator.navigate(ArtistDetailScreenDestination(artistId = id, artist = artist))
+        }
+    )
+}
+
+@Destination
+@Composable
+fun ArtistsScreenContent(
+    artists: List<Artist>,
+    isLoading: Boolean,
+    isRefreshing: Boolean,
+    gridPerRow: Int = GRID_ITEMS_ROW,
+    modifier: Modifier = Modifier,
+    swipeToRefreshEnabled: Boolean = true,
+    onEvent: (ArtistEvent) -> Unit,
+    navigateToArtist: (artistId: String, artist: Artist) -> Unit
+) {
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
     var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
     val configuration = LocalConfiguration.current
     // If our configuration changes then this will launch a new coroutine scope for it
@@ -80,7 +103,7 @@ fun ArtistsScreen(
         else -> gridPerRow
     }
 
-    if (state.isLoading && state.artists.isEmpty()) {
+    if (isLoading && artists.isEmpty()) {
         LoadingScreen()
     }
 
@@ -88,42 +111,41 @@ fun ArtistsScreen(
         modifier = modifier
     ) {
         SwipeRefresh(
+            swipeEnabled = swipeToRefreshEnabled,
             state = swipeRefreshState,
-            onRefresh = { viewModel.onEvent(ArtistEvent.Refresh) }
+            onRefresh = { onEvent(ArtistEvent.Refresh) }
         ) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridItemsRow),
                 modifier = Modifier.fillMaxSize()) {
-                items(state.artists.size) { i ->
-                    val artist = state.artists[i]
+                items(artists.size) { i ->
+                    val artist = artists[i]
                     ArtistItem(
                         artist = artist,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                navigator.navigate(ArtistDetailScreenDestination(artistId = artist.id, artist = artist))
+                                navigateToArtist(artist.id, artist)
                             }
                             .padding(12.dp)
                     )
 
-                    if(i < state.artists.size - 1) {
+                    if(i < artists.size - 1) {
                         // if not last item add a divider
                         //Divider(modifier = Modifier.padding(horizontal = 16.dp))
-                    } else if(i == state.artists.size - 1) {
+                    } else if(i == artists.size - 1) {
 
                     }
 
                     // search queries are limited, do not fetch more in case of a search string
-                    if(i == (state.artists.size - 1) && state.searchQuery.isNullOrBlank()) {
+                    if(i == (artists.size - 1)/* && searchQuery.isNullOrBlank()*/) {
                         // if last item, fetch more
-                        viewModel.onEvent(ArtistEvent.OnBottomListReached(i))
+                        onEvent(ArtistEvent.OnBottomListReached(i))
                     }
                 }
             }
         }
-        if(viewModel.state.isLoading) {
-            L( "ArtistsScreen isLoading ")
-
+        if(isLoading) {
             Column(modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)) {

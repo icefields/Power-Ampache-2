@@ -36,6 +36,7 @@ import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Artist
+import luci.sixsixsix.powerampache2.domain.models.Genre
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -112,6 +113,42 @@ class ArtistsRepositoryImpl @Inject constructor(
         dao.insertArtists(artists.map { it.toArtistEntity() })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchArtist(query).map { it.toArtist() }, networkData = artists))
+
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getArtists()", e, this) }
+
+    override suspend fun getArtistsByGenre(
+        genre: Genre,
+        fetchRemote: Boolean,
+        offset: Int
+    ): Flow<Resource<List<Artist>>> = flow {
+        emit(Resource.Loading(true))
+
+        if (offset == 0) {
+            val localArtists = dao.searchArtistByGenre(genre.name)
+            val isDbEmpty = localArtists.isEmpty()
+            if (!isDbEmpty) {
+                emit(Resource.Success(data = localArtists.map { it.toArtist() }))
+            }
+            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+            if(shouldLoadCacheOnly) {
+                emit(Resource.Loading(false))
+                return@flow
+            }
+        }
+
+        val auth = getSession()!!
+        val response = api.getArtistsByGenre(auth.auth, filter = genre.id, offset = offset)
+        response.error?.let { throw(MusicException(it.toError())) }
+        val artists = response.artists!!.map { it.toArtist() } //will throw exception if artist null
+
+        if (Constants.CLEAR_TABLE_AFTER_FETCH) {
+            // if it's just a search do not clear cache
+            dao.clearArtists()
+        }
+        dao.insertArtists(artists.map { it.toArtistEntity() })
+        // stick to the single source of truth pattern despite performance deterioration
+        emit(Resource.Success(data = dao.searchArtistByGenre(genre.name).map { it.toArtist() }, networkData = artists))
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getArtists()", e, this) }

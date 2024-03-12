@@ -31,15 +31,19 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
@@ -48,6 +52,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -69,6 +74,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
@@ -81,8 +87,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.User
+import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
@@ -107,6 +115,8 @@ import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewMo
 import luci.sixsixsix.powerampache2.presentation.screens.settings.subscreens.AboutScreen
 import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
+import luci.sixsixsix.powerampache2.presentation.search.SearchViewEvent
+import luci.sixsixsix.powerampache2.presentation.search.SearchViewModel
 
 @Composable
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
@@ -117,7 +127,8 @@ fun MainContentScreen(
     mainViewModel: MainViewModel,
     authViewModel: AuthViewModel,
     settingsViewModel: SettingsViewModel,
-    homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
+    homeScreenViewModel: HomeScreenViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel = hiltViewModel()
 ) {
     // IMPORTANT : set the main navigator right away here in MainScreen
     Ampache2NavGraphs.navigator = navigator
@@ -138,6 +149,7 @@ fun MainContentScreen(
         MainSearchBar(
             modifier = Modifier.focusRequester(focusRequester),
             mainViewModel = mainViewModel,
+            searchViewModel = searchViewModel,
             isActive = isSearchActive,
             navigator = navigator
         )
@@ -151,6 +163,7 @@ fun MainContentScreen(
         //scrimColor = MaterialTheme.colorScheme.scrim,
         drawerContent = {
             MainDrawer(
+                currentItem = MainContentMenuItem.toMainContentMenuItem(currentScreen),
                 user = authViewModel.state.user ?: User.emptyUser(),
                 versionInfo = settingsViewModel.state.appVersionInfoStr,
                 hideDonationButtons = settingsViewModel.state.localSettings.hideDonationButton,
@@ -289,17 +302,36 @@ fun MainFloatingButton(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MainSearchBar(
-    modifier: Modifier = Modifier,
+    searchViewModel: SearchViewModel,
     mainViewModel: MainViewModel,
     isActive: MutableState<Boolean>,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier
 ) {
     val state = mainViewModel.state
     val controller = LocalSoftwareKeyboardController.current
 
     SearchBar(
         leadingIcon = {
-            Icon(imageVector = Icons.Default.Search, contentDescription = "search")
+            Row(
+                modifier = Modifier.wrapContentSize()
+            ) {
+                //if (searchViewModel.state.searchQuery.isNotBlank()
+                 //   || searchViewModel.state.selectedGenre != null) {
+                    CircleBackButton(
+                        background = Color.Transparent
+                    ) {
+                        if (searchViewModel.state.isNoSearch) {
+                            isActive.value = false
+                        }
+                        searchViewModel.onEvent(SearchViewEvent.Clear)
+                        mainViewModel.onEvent(MainEvent.OnSearchQueryChange(""))
+                        controller?.hide()
+                    }
+//                } else {
+//                    Icon(imageVector = Icons.Default.Search, contentDescription = "search")
+//                }
+            }
         },
         query = state.searchQuery,
         onQueryChange = {
@@ -319,7 +351,12 @@ fun MainSearchBar(
             if (!it) { mainViewModel.onEvent(MainEvent.OnSearchQueryChange("")) }
         }, //the callback to be invoked when this search bar's active state is changed
     ) {
-        SearchResultsScreen(navigator = navigator, mainViewModel = mainViewModel)
+        SearchResultsScreen(
+            modifier = modifier,
+            navigator = navigator,
+            mainViewModel = mainViewModel,
+            searchViewModel = searchViewModel
+        )
     }
 }
 
