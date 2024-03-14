@@ -44,10 +44,10 @@ fun ResultsListView(
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
 
-    val megaList = ArrayList<AmpacheModel>(songs).apply {
-        addAll(albums)
+    val megaList = ArrayList<AmpacheModel>(playlists).apply {
         addAll(artists)
-        addAll(playlists)
+        addAll(albums)
+        addAll(songs)
     }
 
     Column(

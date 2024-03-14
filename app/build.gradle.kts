@@ -40,9 +40,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 23
-        versionName = "0.23-beta"
-        val versionQuote = "This version is enhanced by mild foxes"
+        versionCode = 25
+        versionName = "0.25-beta"
+        val versionQuote = "This version is enhanced by generic sea otters"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

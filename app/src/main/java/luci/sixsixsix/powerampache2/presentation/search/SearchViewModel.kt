@@ -32,6 +32,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -68,7 +69,9 @@ class SearchViewModel @Inject constructor(
     private val offlineModeFlow = settingsRepository.settingsLiveData
         .distinctUntilChanged()
         .asFlow()
-        .map { it?.isOfflineModeEnabled == true }
+        .filterNotNull()
+        .map { it.isOfflineModeEnabled }
+        //.map { it?.isOfflineModeEnabled == true }
 
     init {
         fetchGenres()
@@ -209,11 +212,11 @@ class SearchViewModel @Inject constructor(
 
         searchSongsDeferred = async { searchSongs() }
         if (!offlineModeState) {
-            searchAlbumsDeferred = async { searchAlbums() }
             searchPlaylistsDeferred = async { searchPlaylists() }
             searchArtistsDeferred = async { searchArtists() }
-            searchAlbumsDeferred?.await()
+            searchAlbumsDeferred = async { searchAlbums() }
             searchPlaylistsDeferred?.await()
+            searchAlbumsDeferred?.await()
             searchArtistsDeferred?.await()
         }
         searchSongsDeferred?.await()
