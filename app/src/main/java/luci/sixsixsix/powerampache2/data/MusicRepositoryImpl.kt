@@ -246,7 +246,7 @@ class MusicRepositoryImpl @Inject constructor(
         authToken: String,
         force: Boolean,
     ): Session {
-        var session = getSession()
+        val session = getSession()
         if (session == null || session.isTokenExpired() || force) {
             val auth = if (authToken.isBlank()) {
                     val timestamp = Instant.now().epochSecond

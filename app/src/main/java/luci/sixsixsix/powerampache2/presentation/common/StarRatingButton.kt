@@ -73,7 +73,7 @@ fun StarRatingButton(
                 )
             ) {
                 Row(
-                    modifier = modifier.wrapContentWidth().padding(3.dp),
+                    modifier = modifier.wrapContentWidth().padding(3.dp).padding(bottom = 1.dp),
                     horizontalArrangement = Arrangement.Start
                 ) {
                     IconButton(

@@ -147,7 +147,9 @@ class ErrorHandlerImpl @Inject constructor(
                 readableMessage?.let {
                     // TODO find a better way to not show verbose info
                     //  ie. session expired for timestamp
-                    if (!readableMessage.lowercase().contains("timestamp") &&
+                    if (e is HttpException || e is IOException) {
+                        playlistManager.updateUserMessage(applicationContext.getString(R.string.error_offline))
+                    } else if (!readableMessage.lowercase().contains("timestamp") &&
                         !readableMessage.lowercase().contains("expired") &&
                         !readableMessage.lowercase().contains("session")) {
                         playlistManager.updateUserMessage(readableMessage)

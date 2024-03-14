@@ -152,5 +152,4 @@ class ArtistsRepositoryImpl @Inject constructor(
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getArtists()", e, this) }
-
 }

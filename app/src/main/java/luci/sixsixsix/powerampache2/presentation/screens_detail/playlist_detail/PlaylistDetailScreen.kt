@@ -73,23 +73,22 @@ import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
+import luci.sixsixsix.powerampache2.presentation.common.SongInfoThirdRow
+import luci.sixsixsix.powerampache2.presentation.common.SongItem
+import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
-import luci.sixsixsix.powerampache2.presentation.common.SongInfoThirdRow
-import luci.sixsixsix.powerampache2.presentation.common.SongItem
-import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
-import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
-import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
-import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
-import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
-import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -252,6 +251,7 @@ fun PlaylistDetailScreen(
                         artistClickListener = {
                             artistId -> navigateToArtist(navigator, artistId)
                         },
+                        isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
                         eventListener = { event ->
                             when(event) {
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
@@ -292,6 +292,12 @@ fun PlaylistDetailScreen(
                                 }
                                 PlaylistInfoViewEvents.STOP_DOWNLOAD_PLAYLIST ->
                                     mainViewModel.onEvent(MainEvent.OnStopDownloadSongs)
+
+                                PlaylistInfoViewEvents.ADD_PLAYLIST_TO_PLAYLIST ->
+                                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(
+                                        isOpen = true,
+                                        songs = viewModel.state.getSongList()
+                                    )
                             }
                         }
                     )

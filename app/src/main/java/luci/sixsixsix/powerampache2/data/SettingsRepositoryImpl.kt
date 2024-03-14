@@ -76,6 +76,14 @@ class SettingsRepositoryImpl @Inject constructor(
             }.isGlobalShuffleEnabled
         } ?: throw Exception("toggleGlobalShuffle, error saving global shuffle")
 
+    override suspend fun toggleOfflineMode() =
+        dao.getUser()?.toUser()?.username?.let { username ->
+            getLocalSettings(username).apply {
+                val newValue = !isOfflineModeEnabled
+                saveLocalSettings(copy(isOfflineModeEnabled = newValue))
+            }.isOfflineModeEnabled
+        } ?: throw Exception("toggleOfflineMode, error ")
+
     override suspend fun deleteAllDownloadedSongs() = flow {
         L("deleteAllDownloadedSongs")
         emit(Resource.Loading(true))

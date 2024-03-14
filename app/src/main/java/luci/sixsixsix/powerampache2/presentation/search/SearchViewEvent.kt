@@ -26,6 +26,7 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 
 sealed class SearchViewEvent {
     data object Refresh: SearchViewEvent()
+    data object FetchGenres: SearchViewEvent()
     data object Clear: SearchViewEvent()
     data class OnSearchQueryChange(val query: String): SearchViewEvent()
     data class OnGenreSelected(val genre: Genre?): SearchViewEvent()

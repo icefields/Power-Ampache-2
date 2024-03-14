@@ -51,6 +51,9 @@
     <string name="crash_mail_subject">Crash Report</string>
     <string name="crash_mail_body">Crash Report Data. Thanks</string>
 
+    <string name="error_offline">Cannot connect to the internet</string>
+    <string name="offlineMode_switch_title">Offline Mode</string>
+
     <!-- SETTINGS -->
     <string name="quality_veryHigh_title">Very High Quality</string>
     <string name="quality_veryHigh_subtitle">320kbps or flac (no transcoding)</string>
@@ -70,6 +73,8 @@
     <string name="theme_light_materialYou_title">MaterialYou Light</string>
     <string name="settings_equalizer">Equalizer</string>
     <string name="settings_normalizeVolume_title">Normalize Volume</string>
+    <string name="settings_offlineMode_title">Offline Mode</string>
+    <string name="settings_offlineMode_subtitle">Enable Offline Mode</string>
     <string name="settings_normalizeVolume_subtitle">Force same volume level for all tracks</string>
     <string name="settings_monoAudio_title">Mono Audio</string>
     <string name="settings_monoAudio_subtitle">Left and Right speakers will play the same audio</string>
@@ -104,7 +109,6 @@
 
     <!---...-->
     <string name="version_quote_title">Quote of the version</string>
-    <string name="version_quote">This version is powered by spicy Calico Cats</string>
     <string name="about_appVersion_title">App Version</string>
     <string name="about_license_title">License</string>
     <string name="about_contact_title">Contact Me on Telegram and Mastodon</string>

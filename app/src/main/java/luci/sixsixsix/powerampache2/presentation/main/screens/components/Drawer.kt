@@ -75,6 +75,15 @@ val drawerItems = listOf(
     MainContentMenuItem.Home,
     MainContentMenuItem.Library,
     MainContentMenuItem.Offline,
+    MainContentMenuItem.Genres,
+    MainContentMenuItem.Settings,
+    MainContentMenuItem.About,
+    MainContentMenuItem.Logout
+)
+
+val drawerItemsOffline = listOf(
+    MainContentMenuItem.Offline,
+    MainContentMenuItem.Genres,
     MainContentMenuItem.Settings,
     MainContentMenuItem.About,
     MainContentMenuItem.Logout

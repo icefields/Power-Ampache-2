@@ -152,6 +152,10 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         is MainEvent.OnRateSong -> viewModelScope.launch {
             rateSong(event.song, event.rate)
         }
+
+        MainEvent.OnEnableOfflineMode -> viewModelScope.launch {
+            settingsRepository.toggleOfflineMode()
+        }
     }
 }
 

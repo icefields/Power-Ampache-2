@@ -92,7 +92,7 @@ fun ColourPlaylistHomeItem(
     onPlaylistClick: (playlist: Playlist) -> Unit
 ) {
     Card(
-        border = BorderStroke((0.5).dp, MaterialTheme.colorScheme.background),
+        //border = BorderStroke((0.5).dp, MaterialTheme.colorScheme.background),
         modifier = modifier
             .width(width)
             .height(height)
@@ -103,7 +103,7 @@ fun ColourPlaylistHomeItem(
         colors = CardDefaults.cardColors(
             containerColor = colour
         ),
-        elevation = CardDefaults.cardElevation(1.dp),
+        elevation = CardDefaults.cardElevation(0.dp),
         shape = RoundedCornerShape(5.dp)
     ) {
         Box(
@@ -127,6 +127,7 @@ fun ColourPlaylistHomeItem(
                 contentAlignment = Alignment.TopEnd
             ) {
                 Text(
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .padding(horizontal = 8.dp, vertical = 10.dp),
                     text = playlist.name,

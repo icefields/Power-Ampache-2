@@ -1,16 +1,14 @@
 package luci.sixsixsix.powerampache2.presentation.search.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -52,7 +50,9 @@ fun ResultsListView(
         addAll(playlists)
     }
 
-    Column {
+    Column(
+        modifier = modifier.background(MaterialTheme.colorScheme.background)
+    ) {
         SwipeRefresh(
             swipeEnabled = swipeToRefreshEnabled,
             state = swipeRefreshState,
@@ -67,12 +67,19 @@ fun ResultsListView(
                         item = item,
                         isSongDownloaded = false,
                         songItemEventListener = {
-                            onSongItemEvent((item as Song), it, onSongEvent, onAlbumSelected, onArtistSelected, onOpenPlaylistDialog)
+                            onSongItemEvent(
+                                song = (item as Song),
+                                event = it,
+                                onSongEvent,
+                                onAlbumSelected,
+                                onArtistSelected,
+                                onOpenPlaylistDialog
+                            )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                when(item) {
+                                when (item) {
                                     is Song -> onSongSelected(item)
                                     is Album -> onAlbumSelected(item.id, item)
                                     is Artist -> onArtistSelected(item.id, item)
@@ -86,6 +93,7 @@ fun ResultsListView(
             }
         }
     }
+
 }
 
 private fun onSongItemEvent(

@@ -47,7 +47,8 @@ enum class PlaylistInfoViewEvents {
     SHARE_PLAYLIST,
     DOWNLOAD_PLAYLIST,
     STOP_DOWNLOAD_PLAYLIST,
-    SHUFFLE_PLAY_PLAYLIST
+    SHUFFLE_PLAY_PLAYLIST,
+    ADD_PLAYLIST_TO_PLAYLIST
 }
 
 @Composable
@@ -57,6 +58,7 @@ fun PlaylistInfoSection(
     isPlayingPlaylist: Boolean,
     isDownloading: Boolean,
     isGlobalShuffleOn: Boolean,
+    isPlaylistEditLoading: Boolean,
     songs: List<Song>,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit,
     artistClickListener: (ArtistId) -> Unit
@@ -125,6 +127,7 @@ fun PlaylistInfoSection(
             playlist = playlist,
             eventListener = eventListener,
             isDownloading = isDownloading,
+            isPlaylistEditLoading = isPlaylistEditLoading,
             isGlobalShuffleOn = isGlobalShuffleOn
         )
         Spacer(modifier = Modifier.width(20.dp))
@@ -140,7 +143,8 @@ fun PlaylistInfoSectionPreview() {
         isPlayingPlaylist = true,
         isDownloading = false,
         isGlobalShuffleOn = true,
-        listOf(Song.mockSong),
+        songs = listOf(Song.mockSong),
+        isPlaylistEditLoading = true,
         eventListener = { },
         artistClickListener = { }
     )

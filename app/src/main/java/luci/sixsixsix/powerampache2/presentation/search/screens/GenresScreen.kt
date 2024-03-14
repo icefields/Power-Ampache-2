@@ -1,12 +1,37 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.search.screens
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,7 +57,24 @@ import luci.sixsixsix.powerampache2.presentation.search.GRID_ITEMS_ROW
 import luci.sixsixsix.powerampache2.presentation.search.GRID_ITEMS_ROW_LAND
 import luci.sixsixsix.powerampache2.presentation.search.GRID_ITEMS_ROW_MIN
 import luci.sixsixsix.powerampache2.presentation.search.SearchViewEvent
+import luci.sixsixsix.powerampache2.presentation.search.SearchViewModel
 import luci.sixsixsix.powerampache2.presentation.search.components.GenreListItem
+
+@Composable
+fun GenresScreen(
+    searchViewModel: SearchViewModel,
+    modifier: Modifier = Modifier
+) {
+    val searchState = searchViewModel.state
+    GenresScreen(
+        genres = searchState.genres,
+        isLoading = searchState.isLoading,
+        isFetchingMore = searchState.isFetchingMore,
+        searchQuery = searchState.searchQuery,
+        modifier = modifier,
+        onEvent = searchViewModel::onEvent
+    )
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -63,13 +105,18 @@ fun GenresScreen(
         else -> if (genres.size < 5) { minGridItemsRow } else { gridItemsRow }
     }
 
-    if (isLoading) {
+    if (isLoading && genres.isEmpty()) {
         LoadingScreen()
     }
 
-    Column(modifier = modifier.pointerInput(Unit) {
-        detectTapGestures(onTap = { localFocusManager.clearFocus() })
-    }) {
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.background)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { localFocusManager.clearFocus() })
+            }
+    ) {
         Spacer(modifier = Modifier.height(8.dp))
         SwipeRefresh(
             state = swipeRefreshState,
@@ -78,6 +125,7 @@ fun GenresScreen(
             }
         ) {
             LazyVerticalGrid(
+                modifier = Modifier.padding(horizontal = 10.dp),
                 columns = GridCells.Fixed(cardsPerRow)
             ) {
                 items(
@@ -85,7 +133,12 @@ fun GenresScreen(
                     key = { i -> genres[i] })
                 { i ->
                     val genre = genres[i]
-                    GenreListItem(genre = genre) {
+                    GenreListItem(
+                        modifier = Modifier
+                            .heightIn(max = 100.dp)
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                        genre = genre
+                    ) {
                         controller?.hide()
                         onEvent(SearchViewEvent.OnGenreSelected(it))
                     }

@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import dagger.hilt.android.AndroidEntryPoint
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.MainScreen
@@ -88,6 +89,8 @@ class MainActivity : ComponentActivity() {
                     isDarkTheme = false
                 }
             }
+            RandomThemeBackgroundColour.reset()
+            RandomThemeBackgroundColour.isDarkTheme = isDarkTheme
 
             PowerAmpache2Theme(
                 darkTheme = isDarkTheme,

@@ -21,21 +21,24 @@
  */
 package luci.sixsixsix.powerampache2.common
 
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import luci.sixsixsix.powerampache2.R
 import kotlin.math.abs
 import kotlin.random.Random
 
 object RandomThemeBackgroundColour {
-
+    var isDarkTheme = true
     private val hashColourMap = HashMap<Int, Color>()
     private var remainingPlaylistBgColours = mutableListOf<Color>()
 
     @Composable
     operator fun invoke(): Color {
         if (remainingPlaylistBgColours.isEmpty()) {
-            remainingPlaylistBgColours = ArrayList(playlistBgColours)
+            println("aaa resetting colours 1")
+            remainingPlaylistBgColours = ArrayList(playlistBgColours())
         }
         val randomIndex = Random.nextInt(remainingPlaylistBgColours.size)
         val randomColour = remainingPlaylistBgColours[randomIndex]
@@ -44,41 +47,68 @@ object RandomThemeBackgroundColour {
     }
 
     @Composable
-    operator fun invoke(hash: Int): Color {
-        return hashColourMap[hash] ?: run {
-            if (remainingPlaylistBgColours.isEmpty()) {
-                remainingPlaylistBgColours = ArrayList(playlistBgColours)
-            }
-            val randomIndex = abs(hash) % remainingPlaylistBgColours.size
-            val randomColour = remainingPlaylistBgColours[randomIndex]
-            hashColourMap[hash] = randomColour
-            remainingPlaylistBgColours.removeAt(randomIndex)
-            randomColour
+    operator fun invoke(hash: Int): Color = hashColourMap[hash] ?: run {
+        if (remainingPlaylistBgColours.isEmpty()) {
+            println("aaa resetting colours 2 ${isSystemInDarkTheme()}")
+            remainingPlaylistBgColours = ArrayList(playlistBgColours())
         }
+        val randomIndex = abs(hash) % remainingPlaylistBgColours.size
+        val randomColour = remainingPlaylistBgColours[randomIndex]
+        hashColourMap[hash] = randomColour
+        remainingPlaylistBgColours.removeAt(randomIndex)
+        randomColour
+    }
+
+    fun reset() {
+        hashColourMap.clear()
+        remainingPlaylistBgColours.clear()
     }
 
     @Composable
     operator fun invoke(obj: Any) = invoke(hash = abs(obj.hashCode()))
+
+    @Composable
+    fun getBgEqImage(obj: Any) = abs(obj.hashCode()).let {
+        val i = it % equalizerCardBgs.size
+        equalizerCardBgs[i]
+    }
 
     fun resetColours() {
         hashColourMap.clear()
         remainingPlaylistBgColours.clear()
     }
 
-    private val playlistBgColours
+    private val equalizerCardBgs
         @Composable
-        get() =
-            listOf(
-                MaterialTheme.colorScheme.primary,
-                MaterialTheme.colorScheme.primaryContainer,
-                MaterialTheme.colorScheme.secondary,
-                MaterialTheme.colorScheme.secondaryContainer,
-                MaterialTheme.colorScheme.tertiary,
-                MaterialTheme.colorScheme.tertiaryContainer,
-                MaterialTheme.colorScheme.error,
-                MaterialTheme.colorScheme.errorContainer,
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.surface,
-                MaterialTheme.colorScheme.surfaceVariant
-            )
+        get() = listOf(
+            painterResource(id = R.drawable.bg_equalizer_1),
+            painterResource(id = R.drawable.bg_equalizer_2),
+            painterResource(id = R.drawable.bg_equalizer_3),
+            painterResource(id = R.drawable.bg_equalizer_4)
+        )
+
+    @Composable
+    private fun playlistBgColours() =
+        if (isDarkTheme) darkThemeColours else lightThemeColours
+
+    private val lightThemeColours = listOf(
+        Color(0xFFCBD4DD),
+        Color(0xFFC5E5DB),
+        Color(0xFFDDEBD2),
+        Color(0xFFFDEEC8),
+        Color(0xFFFDDEB9),
+        Color(0xFFFBD3BE),
+        Color(0xFFFDC4C5)
+    )
+
+
+    private val darkThemeColours = listOf(
+        Color(0xFF3E5366),
+        Color(0xFF307963),
+        Color(0xFF66874D),
+        Color(0xFFB18D38),
+        Color(0xFFB06B15),
+        Color(0xFFAD511F),
+        Color(0xFFB12E30)
+    )
 }
