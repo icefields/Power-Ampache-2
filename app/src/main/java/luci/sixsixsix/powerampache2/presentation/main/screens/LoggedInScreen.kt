@@ -38,6 +38,8 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
@@ -47,10 +49,8 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
@@ -69,6 +69,7 @@ fun LoggedInScreen(
     //homeScreenViewModel: HomeScreenViewModel
 ) {
     val state = mainViewModel.state
+    val songState by mainViewModel.currentSongStateFlow().collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState()
     val errorMessageOffline = stringResource(id = R.string.error_offline)
 
@@ -96,8 +97,8 @@ fun LoggedInScreen(
         }
     }
 
-    LaunchedEffect(scaffoldState.bottomSheetState, state.song) {
-        if (state.song == null && scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+    LaunchedEffect(scaffoldState.bottomSheetState, songState) {
+        if (songState == null && scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
             try {
                 scaffoldState.bottomSheetState.hide()
             } catch (e: Exception) {
@@ -114,7 +115,7 @@ fun LoggedInScreen(
         },
         sheetDragHandle = {
             AnimatedVisibility(
-                visible = mainViewModel.state.song != null,
+                visible = songState != null,
                 enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn(),
                 exit = shrinkOut() + slideOutVertically(),
             ) {
@@ -123,7 +124,7 @@ fun LoggedInScreen(
         },
         sheetShape = RectangleShape,
         sheetSwipeEnabled = true,
-        sheetPeekHeight = getPeakHeight(mainViewModel.state.song) // peek only when current song not null
+        sheetPeekHeight = getPeakHeight(songState) // peek only when current song not null
     ) {
         Column {
             DestinationsNavHost(

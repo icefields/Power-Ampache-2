@@ -43,6 +43,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -102,6 +103,9 @@ fun PlaylistDetailScreen(
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+    val currentPlaylistState by viewModel.playlistStateFlow.collectAsState()
+
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
@@ -150,7 +154,7 @@ fun PlaylistDetailScreen(
                 viewModel.onEvent(PlaylistDetailEvent.OnRemoveSong(songToRemove))
             },
             dialogTitle = "REMOVE SONG",
-            dialogText = "Delete ${songToRemove.name} from playlist \n${state.playlist.name}?"
+            dialogText = "Delete ${songToRemove.name} from playlist \n${currentPlaylistState.name}?"
         )
     }
 
@@ -207,10 +211,10 @@ fun PlaylistDetailScreen(
             topBar = {
                 PlaylistDetailTopBar(
                     navigator = navigator,
-                    playlist = playlist,
+                    playlist = currentPlaylistState,
                     isLoading = state.isLoading || state.isPlaylistRemoveLoading,
                     scrollBehavior = scrollBehavior,
-                    isRatingVisible = !state.isGeneratedPlaylist(),
+                    isRatingVisible = !state.isGeneratedOrSmartPlaylist,
                     onRating = { playlist, rating ->
                         viewModel.onEvent(PlaylistDetailEvent.OnRatePlaylist(playlist, rating))
                     }
@@ -227,7 +231,7 @@ fun PlaylistDetailScreen(
                 color = Color.Transparent
             ) {
                 val isPlayingPlaylist = mainViewModel.isPlaying
-                        && state.getSongList().contains(mainViewModel.state.song)
+                        && state.getSongList().contains(currentSongState)
 
                 Column {
                     PlaylistInfoSection(
@@ -243,8 +247,10 @@ fun PlaylistDetailScreen(
                             .padding(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
-                        playlist = playlist,
+                        playlist = currentPlaylistState,
                         isPlayingPlaylist = isPlayingPlaylist,
+                        isLikeAvailable = !state.isGeneratedOrSmartPlaylist,
+                        isLikeLoading = state.isLikeLoading ,
                         isDownloading = mainViewModel.state.isDownloading,
                         isGlobalShuffleOn = state.isGlobalShuffleOn,
                         songs = viewModel.state.getSongList(),
@@ -298,15 +304,18 @@ fun PlaylistDetailScreen(
                                         isOpen = true,
                                         songs = viewModel.state.getSongList()
                                     )
+
+                                PlaylistInfoViewEvents.LIKE_PLAYLIST ->
+                                    viewModel.onEvent(PlaylistDetailEvent.OnLikePlaylist)
                             }
                         }
                     )
 
-                    showHideEmptyPlaylistView(playlist = playlist, state = state)
+                    showHideEmptyPlaylistView(playlist = currentPlaylistState, state = state)
 
                     SwipeRefresh(
                         state = swipeRefreshState,
-                        onRefresh = { viewModel.onEvent(PlaylistDetailEvent.Fetch(playlist)) }
+                        onRefresh = { viewModel.onEvent(PlaylistDetailEvent.Fetch(currentPlaylistState)) }
                     ) {
                         LazyColumn(
                             modifier = Modifier

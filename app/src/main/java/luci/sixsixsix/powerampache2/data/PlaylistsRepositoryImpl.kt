@@ -21,13 +21,18 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
@@ -43,7 +48,6 @@ import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.jvm.Throws
 
 /**
  * the source of truth is the database, stick to the single source of truth pattern, only return
@@ -111,34 +115,14 @@ class PlaylistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylists()", e, this) }
 
-    private suspend fun like(id: String, like: Boolean, type: MainNetwork.Type): Flow<Resource<Any>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.flag(
-            authKey = auth.auth,
-            id = id,
-            flag = if (like) { 1 } else { 0 },
-            type = type).apply {
-            error?.let { throw(MusicException(it.toError())) }
-            if (success != null) {
-                emit(Resource.Success(data = Any(), networkData = Any()))
-            } else {
-                throw Exception("error getting a response from FLAG/LIKE call")
-            }
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("likeSong()", e, this) }
+    override suspend fun getPlaylist(id: String) =
+        dao.playlistLiveData(id).distinctUntilChanged().asFlow().filterNotNull().mapNotNull { it.toPlaylist() }
 
     override suspend fun ratePlaylist(playlistId: String, rate: Int): Flow<Resource<Any>> =
         rate(playlistId, rate, MainNetwork.Type.playlist)
 
-    override suspend fun likeSong(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.song)
-
-    override suspend fun likeAlbum(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.album)
-
-    override suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.artist)
-
-    override suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.playlist)
+    override suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>> =
+        like(id, like, MainNetwork.Type.playlist)
 
     override suspend fun getPlaylistShareLink(playlistId: String) = flow {
         emit(Resource.Loading(true))

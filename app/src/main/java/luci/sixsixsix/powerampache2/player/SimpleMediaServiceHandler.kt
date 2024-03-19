@@ -68,7 +68,7 @@ class SimpleMediaServiceHandler @Inject constructor(
         if(mediaItems.isNullOrEmpty() && player.mediaItemCount == 0) return
 
         if (player.mediaItemCount > 0 &&
-            playlistManager.getCurrentSong()?.mediaId == player.currentMediaItem?.mediaId) {
+            playlistManager.currentSongState.value?.mediaId == player.currentMediaItem?.mediaId) {
             // if the current song of the playlist (if playlist is not empty) corresponds to the current
             // player song, ie. there is a song playing or paused and that song is inside both lists:
             // find current item in the list

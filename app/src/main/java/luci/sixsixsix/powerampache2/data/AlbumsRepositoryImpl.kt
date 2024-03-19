@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
@@ -196,4 +197,7 @@ class AlbumsRepositoryImpl @Inject constructor(
 
     override suspend fun rateAlbum(albumId: String, rate: Int): Flow<Resource<Any>> =
         rate(albumId, rate, MainNetwork.Type.album)
+
+    override suspend fun likeAlbum(id: String, like: Boolean) =
+        like(id, like, MainNetwork.Type.album)
 }

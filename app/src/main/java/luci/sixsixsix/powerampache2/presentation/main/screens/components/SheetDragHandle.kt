@@ -51,15 +51,17 @@ fun SheetDragHandle(
             }
         ) {
             AnimatedVisibility(visible = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded,
-                enter = slideInVertically(),
+                enter = slideInVertically(initialOffsetY = { it / 2 }),
                 exit = fadeOut(spring(stiffness = Spring.StiffnessHigh))
             ) {
                 SongDetailTopBar(mainViewModel = mainViewModel)
             }
             AnimatedVisibility(
                 visible = scaffoldState.bottomSheetState.currentValue != SheetValue.Expanded,
-                enter = slideInVertically(initialOffsetY = { it / 2 }),
-                exit = slideOutVertically()
+                enter = slideInVertically(initialOffsetY = { it / 2 },
+                    animationSpec = spring(stiffness = Spring.StiffnessHigh)
+                ),
+                exit = fadeOut(spring(stiffness = Spring.StiffnessHigh)) + slideOutVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium))
             ) {
                 MiniPlayer(mainViewModel = mainViewModel)
             }

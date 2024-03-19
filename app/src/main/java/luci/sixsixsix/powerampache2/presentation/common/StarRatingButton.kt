@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
@@ -47,8 +48,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import luci.sixsixsix.powerampache2.R
 
 @Composable
 fun StarRatingButton(
@@ -70,7 +73,7 @@ fun StarRatingButton(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     contentColor = MaterialTheme.colorScheme.surface
-                )
+                ),
             ) {
                 Row(
                     modifier = modifier.wrapContentWidth().padding(3.dp).padding(bottom = 1.dp),
@@ -171,5 +174,5 @@ fun StarRatingButton(
 
 @Composable @Preview
 fun PreviewStarRatingButton() {
-    StarRatingButton(currentRating = 4,onRate = {})
+    StarRatingButton(currentRating = 0,onRate = {})
 }

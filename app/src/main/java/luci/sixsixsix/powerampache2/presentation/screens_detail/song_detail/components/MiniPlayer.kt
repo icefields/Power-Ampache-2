@@ -55,6 +55,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -82,8 +84,10 @@ fun MiniPlayer(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel
 ) {
-    AnimatedVisibility(mainViewModel.state.song != null) {
-        mainViewModel.state.song?.let {song ->
+    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+
+    AnimatedVisibility(currentSongState != null) {
+        currentSongState?.let {song ->
             MiniPlayerContent(
                 song = song,
                 modifier = modifier,
@@ -132,8 +136,6 @@ fun MiniPlayerContent(
             width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
-        modifier = Modifier
-            .background(Color.Transparent),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -141,7 +143,7 @@ fun MiniPlayerContent(
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
     ) {
         Row(
-            modifier = modifier
+            modifier = modifier.background(MaterialTheme.colorScheme.surface)
                 .padding(vertical = 5.dp, horizontal = 5.dp)
         ) {
             Card(

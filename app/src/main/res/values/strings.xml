@@ -100,7 +100,13 @@
     <string name="settings_userInfo_state">State</string>
     <string name="settings_userInfo_city">City</string>
     <string name="settings_userInfo_id">ID</string>
-
+    <string name="player_buttonText_artist">Artist</string>
+    <string name="player_buttonText_album">Album</string>
+    <string name="player_buttonText_add">Add</string>
+    <string name="player_buttonText_download">Download</string>
+    <string name="player_buttonText_share">Share</string>
+    <string name="player_buttonText_info">Info</string>
+    <string name="player_queue_upNext">Up Next</string>
 
     <!--- DIALOGS -->
     <string name="miniPlayer_reset_alert_message">LONG PRESS To stop music playback and reset the Queue</string>

@@ -62,7 +62,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
                 playSongForce(event.song)
             }
         }
-        MainEvent.PlayPauseCurrent -> state.song?.let { song ->
+        MainEvent.PlayPauseCurrent -> currentSong()?.let { song ->
             if (loadSongDataJob?.isActive == true) {
                 L( "MainEvent.PlayPauseCurrent", "loadSongDataJob?.isActive")
                 loadSongDataJob?.invokeOnCompletion { thr ->
@@ -118,7 +118,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         MainEvent.Forward -> viewModelScope.launch {
             simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Forward)
         }
-        MainEvent.FavouriteSong -> state.song?.let {
+        MainEvent.FavouriteSong -> currentSong()?.let {
             favouriteSong(it)
         }
         is MainEvent.OnDownloadedSongDelete ->

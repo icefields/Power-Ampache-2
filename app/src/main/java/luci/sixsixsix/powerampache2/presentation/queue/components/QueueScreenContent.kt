@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +58,9 @@ fun QueueScreenContent(
     modifier: Modifier = Modifier,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
-    val queue = queueViewModel.queueState
+    val queue by queueViewModel.queueFlow.collectAsState()
+    val songState by mainViewModel.currentSongStateFlow().collectAsState()
+
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
     if (playlistsDialogOpen.isOpen) {
         if (playlistsDialogOpen.songs.isNotEmpty()) {
@@ -108,14 +111,15 @@ fun QueueScreenContent(
                 subtitleString = SubtitleString.ARTIST,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (song.mediaId == mainViewModel.state.song?.mediaId)
-                        MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+                    .background(
+                        if (song.mediaId == songState?.mediaId)
+                            MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
                     )
                     .clickable {
                         // TODO BUG when tapping on a song, in the context of a playlist, do not
                         //  move the new song on top, just start playing from the selected song
-                        queueViewModel.onEvent(QueueEvent.OnSongSelected(song))
                         mainViewModel.onEvent(MainEvent.Play(song))
+                        queueViewModel.onEvent(QueueEvent.OnSongSelected(song))
                     },
                 enableSwipeToRemove = true,
                 onRemove = { queueViewModel.onEvent(QueueEvent.OnSongRemove(it)) },

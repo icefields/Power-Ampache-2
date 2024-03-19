@@ -30,6 +30,7 @@ sealed class PlaylistDetailEvent {
     data class OnSongSelected(val song: Song): PlaylistDetailEvent()
     data class OnRemoveSong(val song: Song): PlaylistDetailEvent()
     data object OnRemoveSongDismiss: PlaylistDetailEvent()
+    data object OnLikePlaylist: PlaylistDetailEvent()
     data object OnPlayPlaylist: PlaylistDetailEvent()
     data object OnSharePlaylist: PlaylistDetailEvent()
     data object OnShufflePlaylist: PlaylistDetailEvent()

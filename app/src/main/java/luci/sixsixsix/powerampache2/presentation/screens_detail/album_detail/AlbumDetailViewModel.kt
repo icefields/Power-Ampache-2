@@ -119,7 +119,7 @@ class AlbumDetailViewModel @Inject constructor(
             AlbumDetailEvent.OnShuffleAlbum -> {
                 val shuffled = state.getSongList().shuffled()
                 playlistManager.replaceCurrentQueue(shuffled)
-                playlistManager.moveToSongInQueue(shuffled[0])
+                playlistManager.updateCurrentSong(shuffled[0])
             }
             AlbumDetailEvent.OnFavouriteAlbum ->
                 favouriteAlbum()
@@ -159,7 +159,7 @@ class AlbumDetailViewModel @Inject constructor(
 
 
     private fun favouriteAlbum(albumId: String = state.album.id) = viewModelScope.launch {
-        playlistsRepository.likeAlbum(albumId, (state.album.flag != 1))
+        albumsRepository.likeAlbum(albumId, (state.album.flag != 1))
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {

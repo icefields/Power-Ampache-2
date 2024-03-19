@@ -31,6 +31,7 @@ import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,8 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
@@ -63,7 +62,8 @@ fun SongDetailQueueScreenContent(
     viewModel: QueueViewModel = hiltViewModel(),
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
-    val queue = viewModel.queueState
+    val queue by viewModel.queueFlow.collectAsState()
+    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
     val scope = rememberCoroutineScope()
 
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
@@ -117,7 +117,7 @@ fun SongDetailQueueScreenContent(
                 subtitleString = SubtitleString.ARTIST,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (song == mainViewModel.state.song) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+                    .background(if (song == currentSongState) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
                     .clickable {
                         mainViewModel.onEvent(MainEvent.Play(song))
                         viewModel.onEvent(QueueEvent.OnSongSelected(song))

@@ -137,6 +137,7 @@ fun MainContentScreen(
 ) {
     // IMPORTANT : set the main navigator right away here in MainScreen
     Ampache2NavGraphs.navigator = navigator
+    val queueState by mainViewModel.currentQueue().collectAsState()
     val offlineModeState = settingsViewModel.offlineModeState// by settingsViewModel.offlineModeFlow.collectAsState(initial = false)
     val tabsCount = tabItems.size
     val pagerState = rememberPagerState { tabsCount }
@@ -181,7 +182,7 @@ fun MainContentScreen(
         drawerItems
     }
 
-    val floatingActionVisible = mainViewModel.state.queue.isEmpty() &&
+    val floatingActionVisible = queueState.isEmpty() &&
             (MainContentMenuItem.toMainContentMenuItem(currentScreen) == MainContentMenuItem.Home)
 
     val offlineSwitchVisible =
@@ -219,7 +220,7 @@ fun MainContentScreen(
                     showOfflineSwitch = offlineSwitchVisible,
                     searchVisibility = isSearchActive,
                     scrollBehavior = scrollBehavior,
-                    isQueueEmpty = mainViewModel.state.queue.isEmpty(),
+                    isQueueEmpty = queueState.isEmpty(),
                     floatingActionVisible = floatingActionVisible,
                     isFabLoading = mainViewModel.state.isFabLoading,
                     title = barTitle,

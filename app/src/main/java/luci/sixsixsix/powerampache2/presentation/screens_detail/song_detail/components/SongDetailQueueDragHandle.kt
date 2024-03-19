@@ -58,6 +58,7 @@ import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,6 +70,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.hasLyrics
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
+import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -119,8 +121,6 @@ fun SongDetailQueueDragHandle(
     }
 }
 
-
-
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SongDetailQueueTopBar(
@@ -136,10 +136,9 @@ fun SongDetailQueueTopBar(
         elevation = CardDefaults.cardElevation(0.dp),
         shape = RoundedCornerShape(0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.additionalColours.queueHandle
         ),
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             //contentAlignment = Alignment.CenterStart,
@@ -251,7 +250,7 @@ fun SongHandleTabRow(
         modifier = modifier,
         selectedTabIndex = selectedTabIndex.value,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        containerColor = MaterialTheme.colorScheme.primaryContainer
+        containerColor = MaterialTheme.colorScheme.additionalColours.queueHandle
     ) {
         Tab(
             unselectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.66f),
@@ -270,12 +269,12 @@ fun SongHandleTabRow(
             },
             text = {
                 Text(
-                    text = "UP NEXT",
+                    text = stringResource(id = R.string.player_queue_upNext),
                     //color = MaterialTheme.colorScheme.onSecondary,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
                     maxLines = 1,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Start
                 )
             }
         )

@@ -21,9 +21,12 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
@@ -43,11 +46,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 enum class SongDetailButtonEvents {
@@ -63,134 +69,125 @@ enum class SongDetailButtonEvents {
 @Composable
 fun SongDetailButtonRow(
     modifier: Modifier = Modifier,
-    tint: Color = MaterialTheme.colorScheme.secondary,
-    song: Song,
+    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     isOffline: Boolean,
     eventListener: (albumInfoViewEvents: SongDetailButtonEvents) -> Unit
 ) {
-    val fontSize = 11.sp
-    LazyRow(
+    Row(
         modifier = modifier
             .padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding))
             .padding(bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.Absolute.SpaceBetween
     ) {
-        items(7) {
-            when(it) {
-                // TODO do not hardcode array of ui elements
-                0 -> Spacer(modifier = Modifier.height(1.dp))
-
-                1 -> Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    IconButton(
-                        onClick = {
-                            eventListener(SongDetailButtonEvents.ADD_SONG_TO_PLAYLIST_OR_QUEUE)
-                        }) {
-                        Icon(
-                            tint = tint,
-                            imageVector = Icons.Outlined.AddBox,
-                            contentDescription = "Add to playlist"
-                        )
-                    }
-
-                    Text(text = "Add", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
-                }
-
-                2 -> Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    IconButton(
-                        onClick = {
-                            if (!isOffline) {
-                                eventListener(SongDetailButtonEvents.DOWNLOAD_SONG)
-                            } else {
-                                eventListener(SongDetailButtonEvents.DELETE_DOWNLOADED_SONG)
-                            }
-                        }) {
-                        Icon(
-                            tint = tint,
-                            imageVector = if (!isOffline) Icons.Outlined.DownloadForOffline else Icons.Outlined.OfflinePin,
-                            contentDescription = "Download"
-                        )
-                    }
-                    Text(text = if (!isOffline) "Download" else "Downloaded", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
-                }
-
-                3 -> Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    IconButton(
-                        onClick = {
-                            eventListener(SongDetailButtonEvents.SHARE_SONG)
-                        }) {
-                        Icon(
-                            tint = tint,
-                            imageVector = Icons.Outlined.Share,
-                            contentDescription = "Share"
-                        )
-                    }
-                    Text(text = "Share", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
-                }
-
-                4 -> Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    IconButton(
-                        onClick = {
-                            eventListener(SongDetailButtonEvents.SHOW_INFO)
-                        }) {
-                        Icon(
-                            tint = tint,
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = "Info"
-                        )
-                    }
-                    Text(text = "Info", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
-                }
-
-                5 -> Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    IconButton(
-                        onClick = {
-                            eventListener(SongDetailButtonEvents.GO_TO_ALBUM)
-                        }) {
-                        Icon(
-                            tint = tint,
-                            imageVector = Icons.Outlined.Album,
-                            contentDescription = "Go to Album"
-                        )
-                    }
-                    Text(text = "Album", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
-                }
-
-                6 -> Column(
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    IconButton(
-                        onClick = {
-                            eventListener(SongDetailButtonEvents.GO_TO_ARTIST)
-                        }) {
-                        Icon(
-                            tint = tint,
-                            imageVector = Icons.Outlined.Audiotrack,
-                            contentDescription = "Go to Artist"
-                        )
-                    }
-                    Text(text = "Artist", fontSize = fontSize, fontWeight = FontWeight.Medium, color = tint)
-                }
+        PlayerButton(
+            text = R.string.player_buttonText_add,
+            icon = Icons.Outlined.AddBox,
+            tint = tint
+        ) {
+            eventListener(SongDetailButtonEvents.ADD_SONG_TO_PLAYLIST_OR_QUEUE)
+        }
+        PlayerButton(
+            text = R.string.player_buttonText_download,
+            icon = if (!isOffline)
+                Icons.Outlined.DownloadForOffline
+            else
+                Icons.Outlined.OfflinePin,
+            tint = tint
+        ) {
+            if (!isOffline) {
+                eventListener(SongDetailButtonEvents.DOWNLOAD_SONG)
+            } else {
+                eventListener(SongDetailButtonEvents.DELETE_DOWNLOADED_SONG)
             }
         }
+        PlayerButton(
+            text = R.string.player_buttonText_share,
+            icon = Icons.Outlined.Share,
+            tint = tint
+        ) {
+            eventListener(SongDetailButtonEvents.SHARE_SONG)
+        }
+        PlayerButton(
+            text = R.string.player_buttonText_info,
+            icon = Icons.Outlined.Info,
+            tint = tint
+        ) {
+            eventListener(SongDetailButtonEvents.SHOW_INFO)
+        }
+        PlayerButton(
+            text = R.string.player_buttonText_album,
+            icon = Icons.Outlined.Album,
+            tint = tint
+        ) {
+            eventListener(SongDetailButtonEvents.GO_TO_ALBUM)
+        }
+        PlayerButton(
+            text = R.string.player_buttonText_artist,
+            icon = Icons.Outlined.Audiotrack,
+            tint = tint
+        ) {
+            eventListener(SongDetailButtonEvents.GO_TO_ARTIST)
+        }
     }
+}
+
+@Composable
+fun PlayerButton(
+    @StringRes text: Int,
+    icon: ImageVector,
+    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    @StringRes contentDescription: Int = text,
+    onClick: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        PlayerButtonIcon(
+            icon = icon,
+            contentDescription = contentDescription,
+            tint = tint,
+            onClick = onClick
+        )
+        PlayerButtonText(text = text, tint = tint)
+    }
+}
+
+@Composable
+fun PlayerButtonText(
+    @StringRes text: Int,
+    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant
+) {
+    Text(
+        text = stringResource(id = text),
+        fontSize = fontDimensionResource(id = R.dimen.player_buttonTitle_fontSize),
+        fontWeight = FontWeight.Medium,
+        color = tint
+    )
+}
+
+@Composable
+fun PlayerButtonIcon(
+    icon: ImageVector,
+    @StringRes contentDescription: Int,
+    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    onClick: () -> Unit
+) {
+    IconButton(onClick = onClick) {
+        Icon(
+            tint = tint,
+            imageVector = icon,
+            contentDescription = stringResource(id = contentDescription)
+        )
+    }
+}
+
+@Composable
+@Preview
+fun PreviewSongDetailButtonRow() {
+    SongDetailButtonRow(
+        modifier = Modifier.fillMaxWidth(),
+        isOffline = false
+    ) { }
 }

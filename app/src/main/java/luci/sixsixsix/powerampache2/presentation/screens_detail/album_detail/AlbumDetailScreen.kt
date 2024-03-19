@@ -39,6 +39,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,7 +64,6 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.ArtistId
@@ -96,6 +96,8 @@ fun AlbumDetailScreen(
 ) {
     val state = viewModel.state
     val songs = viewModel.state.getSongList()
+    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
@@ -193,7 +195,7 @@ fun AlbumDetailScreen(
                     .background(brush = albumBackgroundGradient),
                 color = Color.Transparent
             ) {
-                val isPlayingAlbum = mainViewModel.isPlaying && songs.contains(mainViewModel.state.song)
+                val isPlayingAlbum = mainViewModel.isPlaying && songs.contains(currentSongState)
                 Column {
                     AlbumInfoSection(
                         modifier = Modifier

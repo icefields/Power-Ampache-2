@@ -29,6 +29,8 @@ import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -52,7 +54,7 @@ fun SongDetailScreen(
     viewModel: MainViewModel,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
-    val song = viewModel.state.song
+    val song by viewModel.currentSongStateFlow().collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState()
     val pagerState = rememberPagerState(initialPage = 0) {
         if (song?.hasLyrics() == true) { 2 } else { 1 }
@@ -72,7 +74,7 @@ fun SongDetailScreen(
         },
         sheetDragHandle = {
             SongDetailQueueDragHandle(
-                song = viewModel.state.song,
+                song = song,
                 scaffoldState = scaffoldState,
                 selectedTabIndex = selectedTabIndex,
                 pagerState = pagerState)

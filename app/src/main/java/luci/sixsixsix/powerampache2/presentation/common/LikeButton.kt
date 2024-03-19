@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -39,6 +40,7 @@ fun LikeButton(
     isFavourite: Boolean,
     background: Color = MaterialTheme.colorScheme.background,
     iconTint: Color = MaterialTheme.colorScheme.onBackground,
+    borderStroke: Dp = 1.dp,
     onClick: () -> Unit
 ) = ButtonWithLoadingIndicator(
     imageVector = if (isFavourite)
@@ -49,7 +51,23 @@ fun LikeButton(
     modifier = modifier.size(29.dp),
     background = background,
     iconTint = iconTint,
-    borderStroke = 1.dp,
+    borderStroke = borderStroke,
+    onClick = onClick
+)
+
+@Composable
+fun LikeButton(
+    isLikeLoading: Boolean,
+    modifier: Modifier = Modifier,
+    isFavourite: Boolean,
+    onClick: () -> Unit
+) = LikeButton(
+    modifier = modifier,
+    isLikeLoading = isLikeLoading,
+    isFavourite = isFavourite,
+    iconTint = MaterialTheme.colorScheme.primary,
+    background = Color.Transparent,
+    borderStroke = 0.dp,
     onClick = onClick
 )
 

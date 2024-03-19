@@ -302,6 +302,9 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun rateSong(albumId: String, rate: Int): Flow<Resource<Any>> =
         rate(albumId, rate, MainNetwork.Type.song)
 
+    override suspend fun likeSong(id: String, like: Boolean): Flow<Resource<Any>> =
+        like(id, like, MainNetwork.Type.song)
+
     override suspend fun getSongsByGenre(
         genre: Genre,
         fetchRemote: Boolean,
@@ -542,10 +545,10 @@ class SongsRepositoryImpl @Inject constructor(
     /**
      * returns false if Network data is not required, true otherwise
      */
-    private suspend fun <T> checkEmitCacheData
-                (localData: List<T>,
-                 fetchRemote: Boolean,
-                 fc: FlowCollector<Resource<List<T>>>
+    private suspend fun <T> checkEmitCacheData(
+        localData: List<T>,
+        fetchRemote: Boolean,
+        fc: FlowCollector<Resource<List<T>>>
     ): Boolean {
         val isDbEmpty = localData.isEmpty()
         if (!isDbEmpty) {
