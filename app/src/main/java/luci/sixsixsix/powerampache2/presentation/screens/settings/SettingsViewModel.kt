@@ -25,10 +25,13 @@ import android.app.Application
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
@@ -36,9 +39,14 @@ import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
@@ -61,11 +69,29 @@ class SettingsViewModel @Inject constructor(
     var state by savedStateHandle.saveable {
         mutableStateOf(SettingsState(appVersionInfoStr = getVersionInfoString()))
     }
+    var offlineModeState by mutableStateOf(false)
+
+    private val offlineModeFlow = settingsRepository.settingsLiveData
+        .distinctUntilChanged()
+        .asFlow()
+        .map { it?.isOfflineModeEnabled == true }
 
     val logs by mutableStateOf(mutableListOf<String>())
 
     init {
         observeSettings()
+
+        viewModelScope.launch {
+            offlineModeFlow.collect {
+                if (it != offlineModeState) {
+                    offlineModeState = it
+                }
+                if (it) {
+                    // reset errors when switching offline
+                    playlistManager.updateUserMessage("")
+                }
+            }
+        }
 
         viewModelScope.launch {
             musicRepository.userLiveData.observeForever {
@@ -98,7 +124,7 @@ class SettingsViewModel @Inject constructor(
     } catch (e: PackageManager.NameNotFoundException) {
         e.printStackTrace()
         ""
-    }
+    } + " - DB: ${Constants.DATABASE_VERSION}"
 
     private fun observeSettings() {
         settingsRepository.settingsLiveData.distinctUntilChanged().observeForever { localSettings ->
@@ -153,6 +179,10 @@ class SettingsViewModel @Inject constructor(
                     settingsRepository.getLocalSettings(state.user?.username)
                         .copy(enableAutoUpdates = event.isAutoUpdate)
                 )
+            }
+
+            SettingsEvent.OnOfflineToggle ->  viewModelScope.launch {
+                settingsRepository.toggleOfflineMode()
             }
         }
     }

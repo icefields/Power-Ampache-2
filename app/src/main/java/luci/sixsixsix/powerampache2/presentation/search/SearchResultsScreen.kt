@@ -100,7 +100,6 @@ fun SearchResultsScreen(
                 onEvent = searchViewModel::onEvent
             )
         }
-
     } else if (searchState.isNoResults) {
         // show no results screen (search query present but no results)
         showHideEmptyResultsView(searchState.isLoading, searchState.isFetchingMore, searchState.isNoResults)
@@ -117,8 +116,8 @@ fun SearchResultsScreen(
             onEvent = searchViewModel::onEvent,
             onSongEvent = mainViewModel::onEvent,
             onSongSelected = { song ->
-                searchViewModel.onEvent(SearchViewEvent.OnSongSelected(song))
                 mainViewModel.onEvent(MainEvent.Play(song))
+                searchViewModel.onEvent(SearchViewEvent.OnSongSelected(song))
             },
             onAlbumSelected = { albumId, album ->
                 navigator.navigate(

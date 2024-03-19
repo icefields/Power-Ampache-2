@@ -90,5 +90,6 @@ data class Artist(
     }
 }
 
+
 val Artist.genresString
     get() = genre.mapNotNull { it.name }.joinToString(", ")

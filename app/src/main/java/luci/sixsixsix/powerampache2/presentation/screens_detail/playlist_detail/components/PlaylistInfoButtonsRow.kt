@@ -26,35 +26,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.Shuffle
-import androidx.compose.material.icons.filled.ShuffleOn
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.DownloadForOffline
-import androidx.compose.material.icons.outlined.OfflinePin
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.Shuffle
-import androidx.compose.material.icons.outlined.ShuffleOn
+import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.common.ButtonDownload
 import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
 import luci.sixsixsix.powerampache2.presentation.common.ShuffleToggleButton
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
 
 @Composable
 fun PlaylistInfoButtonsRow(
@@ -62,6 +51,7 @@ fun PlaylistInfoButtonsRow(
     playlist: Playlist,
     isPlayingPlaylist: Boolean,
     isDownloading: Boolean,
+    isPlaylistEditLoading: Boolean,
     isGlobalShuffleOn: Boolean,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit
 ) {
@@ -70,6 +60,17 @@ fun PlaylistInfoButtonsRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
+
+        ButtonWithLoadingIndicator(
+            imageVector = Icons.Outlined.AddBox,
+            imageContentDescription = "Add to playlist",
+            background = Color.Transparent,
+            isLoading = isPlaylistEditLoading,
+            showBoth = true
+        ) {
+            eventListener(PlaylistInfoViewEvents.ADD_PLAYLIST_TO_PLAYLIST)
+        }
+
         ButtonDownload(isDownloading = isDownloading,
             onStartDownloadClick = { eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST) },
             onStopDownloadClick = { eventListener(PlaylistInfoViewEvents.STOP_DOWNLOAD_PLAYLIST) }

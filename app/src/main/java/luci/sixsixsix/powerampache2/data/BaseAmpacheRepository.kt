@@ -1,11 +1,14 @@
 package luci.sixsixsix.powerampache2.data
 
+import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettings
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toUser
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -21,6 +24,10 @@ abstract class BaseAmpacheRepository(
     private val errHandler: ErrorHandler
 ) {
     protected val dao = db.dao
+    //protected var offlineModeEnabledLiveData = dao.offlineModeEnabled().distinctUntilChanged().map { it == true }
+
+    suspend fun isOfflineModeEnabled(): Boolean =
+        dao.getSettings()?.toLocalSettings()?.isOfflineModeEnabled == true
 
     protected suspend fun getSession(): Session? =
         dao.getSession()?.toSession()

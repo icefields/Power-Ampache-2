@@ -24,6 +24,8 @@ package luci.sixsixsix.powerampache2.domain
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.models.Artist
+import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface SongsRepository {
@@ -47,4 +49,5 @@ interface SongsRepository {
     suspend fun isSongAvailableOffline(song: Song): Boolean
     suspend fun getSongShareLink(song: Song): Flow<Resource<String>>
     suspend fun rateSong(songId: String, rate: Int): Flow<Resource<Any>>
+    suspend fun getSongsByGenre(genreId: Genre, fetchRemote: Boolean = true, offset: Int = 0): Flow<Resource<List<Song>>>
 }

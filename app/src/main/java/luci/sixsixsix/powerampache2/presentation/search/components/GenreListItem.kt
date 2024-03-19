@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.presentation.search.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,12 +36,14 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,15 +59,12 @@ fun GenreListItem(
     modifier: Modifier = Modifier,
     onGenreSelected: (playlist: Genre) -> Unit
 ) {
-    Column {
-        ColourGenreListItem(
-            genre = genre,
-            modifier = modifier,
-            colour = RandomThemeBackgroundColour("${genre.id}${genre.name}"), // random bg colour based on hashcode
-            onGenreSelected = onGenreSelected
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-    }
+    ColourGenreListItem(
+        genre = genre,
+        modifier = modifier,
+        colour = RandomThemeBackgroundColour("${genre.id}${genre.name}"), // random bg colour based on hashcode
+        onGenreSelected = onGenreSelected
+    )
 }
 
 @Composable
@@ -75,9 +75,8 @@ fun ColourGenreListItem(
     onGenreSelected: (playlist: Genre) -> Unit
 ) {
     Card(
-        border = BorderStroke((0.0).dp, MaterialTheme.colorScheme.background),
+        //border = BorderStroke((0.0).dp, MaterialTheme.colorScheme.background),
         modifier = modifier
-            .padding(horizontal = 6.dp)
             .wrapContentHeight()
             .clickable {
                 onGenreSelected(genre)
@@ -85,49 +84,61 @@ fun ColourGenreListItem(
         colors = CardDefaults.cardColors(
             containerColor = colour
         ),
-        elevation = CardDefaults.cardElevation(1.dp),
-        shape = RoundedCornerShape(5.dp)
+        elevation = CardDefaults.cardElevation(0.dp),
+        shape = RoundedCornerShape(10.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(),
             contentAlignment = Alignment.BottomStart
         ) {
+            Icon(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .padding(horizontal = 20.dp)
+                    .align(Alignment.BottomEnd),
+                painter = RandomThemeBackgroundColour.getBgEqImage(obj = genre),
+                tint = Color(0x77ffffff),//MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                contentDescription = "background eq image"
+            )
+
             Column(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 8.dp, top = 20.dp, bottom = 4.dp),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Top
                 ) {
                     Text(
+                        color = MaterialTheme.colorScheme.onSurface,
                         text = genre.name,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Start,
                         fontWeight = FontWeight.Medium,
-                        maxLines = 2,
-                        minLines = 2,
+                        maxLines = 4,
+                        minLines = 4,
                         lineHeight = (16).sp
                     )
 
-                Text(
-                    //text = if (genre.songs > 0) {"Songs: ${genre.songs} " } else " ",
-                    text =  " ",
-                            fontSize = 14.sp,
-                            textAlign = TextAlign.Start,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Normal,
-                            maxLines = 2,
-                            lineHeight = (16).sp
-                )
-
-                Text(text = if (genre.artists > 0) { "Artists: ${genre.artists} " } else " ",
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Start,
-                    fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    lineHeight = (16).sp
-                )
+//                Text(
+//                    //text = if (genre.songs > 0) {"Songs: ${genre.songs} " } else " ",
+//                    text =  " ",
+//                            fontSize = 14.sp,
+//                            textAlign = TextAlign.Start,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                    fontWeight = FontWeight.Normal,
+//                            maxLines = 2,
+//                            lineHeight = (16).sp
+//                )
+//
+//                Text(text = " ", //if (genre.artists > 0) { "Artists: ${genre.artists} " } else " ",
+//                    fontSize = 14.sp,
+//                    textAlign = TextAlign.Start,
+//                    fontWeight = FontWeight.Normal,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                    maxLines = 2,
+//                    lineHeight = (16).sp
+//                )
             }
 
 

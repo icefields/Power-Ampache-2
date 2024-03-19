@@ -40,8 +40,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 22
-        versionName = "0.22-beta"
+        versionCode = 25
+        versionName = "0.25-beta"
+        val versionQuote = "This version is enhanced by generic sea otters"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -52,6 +53,8 @@ android {
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
+
+        buildConfigField("String", "VERSION_QUOTE", "\"$versionQuote\"")
     }
 
     buildTypes {

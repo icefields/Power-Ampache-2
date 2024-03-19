@@ -28,6 +28,7 @@ sealed class SettingsEvent {
     data class OnEnableRemoteLoggingSwitch(val newValue: Boolean): SettingsEvent()
     data class OnHideDonationButtonSwitch(val newValue: Boolean): SettingsEvent()
     data class OnMonoValueChange(val isMono: Boolean): SettingsEvent()
+    data object OnOfflineToggle: SettingsEvent()
     data class OnNormalizeValueChange(val isVolumeNormalized: Boolean): SettingsEvent()
     data class OnSmartDownloadValueChange(val isSmartDownloadEnabled: Boolean): SettingsEvent()
     data class OnAutomaticUpdateValueChange(val isAutoUpdate: Boolean): SettingsEvent()

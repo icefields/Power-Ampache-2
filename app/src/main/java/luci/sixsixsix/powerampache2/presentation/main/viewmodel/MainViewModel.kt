@@ -69,7 +69,7 @@ class MainViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
     val musicRepository: MusicRepository,
     val songsRepository: SongsRepository,
-    private val settingsRepository: SettingsRepository,
+    val settingsRepository: SettingsRepository,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
     private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) /*, MainQueueManager*/ {
@@ -125,9 +125,11 @@ class MainViewModel @Inject constructor(
             when (result) {
                 is Resource.Success -> {
                     result.data?.let { songs ->
-                        playlistManager.updateCurrentSong(songs[0])
-                        playlistManager.addToCurrentQueueTop(songs)
-                        onEvent(MainEvent.Play(songs[0]))
+                        if (songs.isNotEmpty()) {
+                            playlistManager.updateCurrentSong(songs[0])
+                            playlistManager.addToCurrentQueueTop(songs)
+                            onEvent(MainEvent.Play(songs[0]))
+                        }
                     }
                 }
                 is Resource.Error -> state = state.copy(isFabLoading = false)

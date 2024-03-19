@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data.remote
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
+import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumDto
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistDto
@@ -294,6 +295,23 @@ interface MainNetwork {
         @Query("limit") limit: Int = 0
     ): ArtistsResponse
 
+    /**
+     *
+     * genre_songs
+     * returns the songs for this genre
+     *
+     * Input	Type	Description	Optional
+     * 'filter'	string	UID of genre, returns song JSON	YES
+     * 'offset'	integer	Return results starting from this index position	YES
+     * 'limit'	integer	Maximum number of results to return	YES
+     * */
+    @GET("json.server.php?action=genre_songs")
+    suspend fun getSongsByGenre(
+        @Query("auth") authKey: String,
+        @Query("filter") genreId: String = "",
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
+    ): SongsResponse
 
     /**
      * Create a public url that can be used by anyone to stream media.

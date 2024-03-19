@@ -87,7 +87,7 @@ fun PlaylistsScreen(
                                 }
                             )
 
-                            if (i == state.playlists.size - 1) {
+                            if (i == state.playlists.size - 1 && state.isLoading) {
                                 Column(modifier = Modifier.fillMaxWidth()) {
                                     CircularProgressIndicator(
                                         modifier = Modifier

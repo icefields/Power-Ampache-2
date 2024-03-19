@@ -46,10 +46,13 @@
     <!-- ERROR messages-->
     <string name="error_io_exception">Cannot load data, are you connected to the internet?\nIf the problem persist try to kill and reopen the app</string>
     <string name="error_http_exception">Cannot load data, are you connected to the internet?\nIf the problem persist try to kill and reopen the app</string>
-    <string name="error_empty_result">No results</string>
+    <string name="error_empty_result">No results to display, or you are trying to add or remove something not found on the server</string>
     <string name="error_duplicate">Duplicate Entry</string>
     <string name="crash_mail_subject">Crash Report</string>
     <string name="crash_mail_body">Crash Report Data. Thanks</string>
+
+    <string name="error_offline">Cannot connect to the internet</string>
+    <string name="offlineMode_switch_title">Offline Mode</string>
 
     <!-- SETTINGS -->
     <string name="quality_veryHigh_title">Very High Quality</string>
@@ -70,6 +73,8 @@
     <string name="theme_light_materialYou_title">MaterialYou Light</string>
     <string name="settings_equalizer">Equalizer</string>
     <string name="settings_normalizeVolume_title">Normalize Volume</string>
+    <string name="settings_offlineMode_title">Offline Mode</string>
+    <string name="settings_offlineMode_subtitle">Enable Offline Mode</string>
     <string name="settings_normalizeVolume_subtitle">Force same volume level for all tracks</string>
     <string name="settings_monoAudio_title">Mono Audio</string>
     <string name="settings_monoAudio_subtitle">Left and Right speakers will play the same audio</string>
@@ -104,7 +109,6 @@
 
     <!---...-->
     <string name="version_quote_title">Quote of the version</string>
-    <string name="version_quote">This version is powered by spicy Calico Cats</string>
     <string name="about_appVersion_title">App Version</string>
     <string name="about_license_title">License</string>
     <string name="about_contact_title">Contact Me on Telegram and Mastodon</string>

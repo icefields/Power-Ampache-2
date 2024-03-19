@@ -33,20 +33,27 @@ import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.toArtist
+import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
+import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
+import luci.sixsixsix.powerampache2.domain.models.Artist
+import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okhttp3.internal.http.HTTP_OK
+import okio.IOException
+import retrofit2.HttpException
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -72,11 +79,22 @@ class SongsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getSongs(
+        fetchRemote: Boolean,
+        query: String,
+        offset: Int
+    ) = if (!isOfflineModeEnabled()) {
+            getSongsNetwork(fetchRemote = fetchRemote, query = query, offset = offset)
+        } else {
+            searchOfflineSongs(query)
+        }
+
+
     /**
      * TODO BREAKING_RULE single source of truth
      *  the code here is very dirty, CLEAN SOON!!
      */
-    override suspend fun getSongs(
+    suspend fun getSongsNetwork(
         fetchRemote: Boolean,
         query: String,
         offset: Int
@@ -284,6 +302,49 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun rateSong(albumId: String, rate: Int): Flow<Resource<Any>> =
         rate(albumId, rate, MainNetwork.Type.song)
 
+    override suspend fun getSongsByGenre(
+        genre: Genre,
+        fetchRemote: Boolean,
+        offset: Int
+    ): Flow<Resource<List<Song>>> = flow {
+        emit(Resource.Loading(true))
+
+        if (offset == 0) {
+            val localSongs = dao.searchSongByGenre(genre.name)
+            val isDbEmpty = localSongs.isEmpty()
+            if (!isDbEmpty) {
+                emit(Resource.Success(data = localSongs.map { it.toSong() }))
+            }
+            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+            if(shouldLoadCacheOnly) {
+                emit(Resource.Loading(false))
+                return@flow
+            }
+        }
+
+        val auth = getSession()!!
+        val response = api.getSongsByGenre(auth.auth, genreId = genre.id, offset = offset)
+        response.error?.let { throw(MusicException(it.toError())) }
+        val songs = response.songs!!.map { it.toSong() } //will throw exception if artist null
+
+        if (Constants.CLEAR_TABLE_AFTER_FETCH) {
+            // if it's just a search do not clear cache
+            dao.clearSongs()
+        }
+        dao.insertSongs(songs.map { it.toSongEntity() })
+        // stick to the single source of truth pattern despite performance deterioration
+        emit(Resource.Success(data = dao.searchSongByGenre(genre.name).map { it.toSong() }, networkData = songs))
+
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getArtists()", e, this) }
+
+    suspend fun searchOfflineSongs(query: String) = flow {
+        emit(Resource.Loading(true))
+        val songs = dao.searchOfflineSongs(query).map { it.toSong() }
+        emit(Resource.Success(songs))
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getSongsStats()", e, this) }
+
 
     override suspend fun getSongsForQuickPlay() = flow {
         emit(Resource.Loading(true))
@@ -293,29 +354,47 @@ class SongsRepositoryImpl @Inject constructor(
         // add cached songs? Too many can cause a crash when saving state
         // resultSet.addAll(dao.searchSong("").map { it.toSong() })
         // if not big enough start fetching from web
-        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
-            // if not enough downloaded songs fetch most played songs
-            val auth = getSession()!!.auth
-            getSongsStatCall(auth, MainNetwork.StatFilter.frequent)?.let { freqSongs ->
-                resultSet.addAll(freqSongs.map { it.toSong() })
+        if (!isOfflineModeEnabled()) {
+            try {
                 if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
-                    // if still not enough songs fetch random songs
-                    getSongsStatCall(auth, MainNetwork.StatFilter.flagged)?.let { flagSongs ->
-                        resultSet.addAll(flagSongs.map { it.toSong() })
+                    // if not enough downloaded songs fetch most played songs
+                    val auth = getSession()!!.auth
+                    getSongsStatCall(auth, MainNetwork.StatFilter.frequent)?.let { freqSongs ->
+                        resultSet.addAll(freqSongs.map { it.toSong() })
                         if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
                             // if still not enough songs fetch random songs
-                            getSongsStatCall(auth, MainNetwork.StatFilter.highest)?.let { highestSongs ->
-                                resultSet.addAll(highestSongs.map { it.toSong() })
+                            getSongsStatCall(
+                                auth,
+                                MainNetwork.StatFilter.flagged
+                            )?.let { flagSongs ->
+                                resultSet.addAll(flagSongs.map { it.toSong() })
                                 if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
                                     // if still not enough songs fetch random songs
-                                    getSongsStatCall(auth, MainNetwork.StatFilter.random)?.let { randSongs ->
-                                        resultSet.addAll(randSongs.map { it.toSong() })
+                                    getSongsStatCall(
+                                        auth,
+                                        MainNetwork.StatFilter.highest
+                                    )?.let { highestSongs ->
+                                        resultSet.addAll(highestSongs.map { it.toSong() })
+                                        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                                            // if still not enough songs fetch random songs
+                                            getSongsStatCall(
+                                                auth,
+                                                MainNetwork.StatFilter.random
+                                            )?.let { randSongs ->
+                                                resultSet.addAll(randSongs.map { it.toSong() })
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+            } catch (e: HttpException) {
+                // do not fail in case of http exception, just return offline songs
+                // TODO emit error anyway at the end?
+            } catch (e: IOException) {
+                // do not fail in case of IOException, just return offline songs
             }
         }
         val shuffledSongList = resultSet.toList().shuffled()

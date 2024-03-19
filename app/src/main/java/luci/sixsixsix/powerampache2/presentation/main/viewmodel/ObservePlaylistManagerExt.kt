@@ -40,8 +40,13 @@ fun MainViewModel.observePlaylistManager() {
 
     viewModelScope.launch {
         playlistManager.logMessageUserReadableState.collectLatest { logMessageState ->
-            logMessageState.logMessage?.let {
-                state = state.copy(errorMessage = it)
+            // do not show errors in offline mode
+            if (!settingsRepository.isOfflineModeEnabled()) {
+                logMessageState.logMessage?.let {
+                    state = state.copy(errorMessage = it)
+                }
+            } else if (state.errorMessage.isNotBlank()) {
+                state = state.copy(errorMessage = "")
             }
             L(logMessageState.logMessage)
         }
