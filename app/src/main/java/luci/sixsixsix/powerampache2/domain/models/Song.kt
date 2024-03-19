@@ -75,7 +75,7 @@ data class Song(
     val averageRating: Float,
     val preciseRating: Float,
     val rating: Float,
-): Comparable<Song>, Parcelable {
+): Comparable<Song>, Parcelable, AmpacheModel {
     override fun compareTo(other: Song): Int = mediaId.compareTo(other.mediaId)
 
     companion object {

@@ -25,12 +25,12 @@ class ArtistsViewModel @Inject constructor(
 
     init {
         getArtists()
-        viewModelScope.launch {
-            playlistManager.currentSearchQuery.collect { query ->
-                L("ArtistsViewModel collect ${query}")
-                onEvent(ArtistEvent.OnSearchQueryChange(query))
-            }
-        }
+//        viewModelScope.launch {
+//            playlistManager.currentSearchQuery.collect { query ->
+//                L("ArtistsViewModel collect ${query}")
+//                onEvent(ArtistEvent.OnSearchQueryChange(query))
+//            }
+//        }
     }
 
     fun onEvent(event: ArtistEvent) {

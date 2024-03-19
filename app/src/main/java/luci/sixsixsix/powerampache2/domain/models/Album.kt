@@ -42,7 +42,7 @@ data class Album(
     val flag: Int = 0,
     val rating: Int = 0,
     val averageRating: Float = 0.0f
-): Comparable<Album>, Parcelable {
+): Comparable<Album>, AmpacheModel, Parcelable {
     override fun compareTo(other: Album): Int = id.compareTo(other.id)
 
     companion object {

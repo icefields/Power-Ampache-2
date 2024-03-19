@@ -57,8 +57,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.GITHUB_IMG_URL
 import luci.sixsixsix.powerampache2.common.Constants.GITHUB_URL
 import luci.sixsixsix.powerampache2.common.Constants.GPLV3_IMG_URL
 import luci.sixsixsix.powerampache2.common.Constants.GPLV3_URL
@@ -68,7 +68,6 @@ import luci.sixsixsix.powerampache2.common.Constants.TELEGRAM_IMG_URL
 import luci.sixsixsix.powerampache2.common.Constants.TELEGRAM_URL
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.common.openLinkInBrowser
-import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
@@ -145,7 +144,7 @@ fun AboutScreenContent(
                 )
                 20 -> TextWithOverline(
                     title = R.string.version_quote_title,
-                    subtitle = stringResource(id = R.string.version_quote),
+                    subtitle = BuildConfig.VERSION_QUOTE,
                     subtitleTextSize = fontDimensionResource(id = R.dimen.about_item_fontSize)
                 )
                 //10 -> userState?.let { user -> UserInfoSection(user = user) }

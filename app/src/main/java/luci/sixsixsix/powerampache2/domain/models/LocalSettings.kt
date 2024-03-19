@@ -67,6 +67,7 @@ data class LocalSettings(
     val isMonoAudioEnabled: Boolean,
     val isSmartDownloadsEnabled: Boolean,
     val isGlobalShuffleEnabled: Boolean,
+    val isOfflineModeEnabled: Boolean,
     val playlistSongsSorting: SortMode
 ): Parcelable {
     companion object {
@@ -79,6 +80,7 @@ data class LocalSettings(
         const val SETTINGS_DEFAULTS_NORMALIZE_VOLUME = false
         const val SETTINGS_DEFAULTS_MONO = false
         const val SETTINGS_DEFAULTS_GLOBAL_SHUFFLE = false
+        const val SETTINGS_DEFAULTS_OFFLINE_MODE = false
         const val SETTINGS_DEFAULTS_SMART_DOWNLOADS = false
         const val SETTINGS_DEFAULTS_STREAMING_QUALITY = BITRATE_VERY_HIGH
         const val SETTINGS_DEFAULTS_THEME = ID_DARK
@@ -96,6 +98,7 @@ data class LocalSettings(
                 isMonoAudioEnabled = SETTINGS_DEFAULTS_MONO,
                 isSmartDownloadsEnabled = SETTINGS_DEFAULTS_SMART_DOWNLOADS,
                 isGlobalShuffleEnabled = SETTINGS_DEFAULTS_GLOBAL_SHUFFLE,
+                isOfflineModeEnabled = SETTINGS_DEFAULTS_OFFLINE_MODE,
                 playlistSongsSorting = defaultPlaylistSort
             )
     }
@@ -136,6 +139,9 @@ data class LocalSettings(
 
         sbThis.append(this.playlistSongsSorting)
         sbOthe.append(othe.playlistSongsSorting)
+
+        sbThis.append(this.isOfflineModeEnabled)
+        sbOthe.append(othe.isOfflineModeEnabled)
 
         return sbThis.toString() == sbOthe.toString()
     }

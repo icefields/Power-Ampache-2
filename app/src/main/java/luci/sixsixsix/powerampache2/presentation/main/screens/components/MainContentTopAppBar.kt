@@ -26,8 +26,13 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.QueueMusic
@@ -37,16 +42,22 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -55,10 +66,15 @@ fun MainContentTopAppBar(
     searchVisibility: MutableState<Boolean>,
     title: String,
     modifier: Modifier = Modifier,
+    isOfflineMode: Boolean,
+    showOfflineSwitch: Boolean,
     isQueueEmpty: Boolean,
     isFabLoading: Boolean,
+    isGenreSubScreen: Boolean,
     floatingActionVisible: Boolean,
+    onGenreScreenBackClick: () -> Unit,
     onMagicPlayClick: () -> Unit,
+    onOfflineModeSwitch: () -> Unit,
     onNavigationIconClick: (MainContentTopAppBarEvent) -> Unit
 ) {
     // val interactionSource = remember { MutableInteractionSource() }
@@ -72,13 +88,48 @@ fun MainContentTopAppBar(
     TopAppBar(
         modifier = modifier,
         title = {
-            AnimatedVisibility(visibleState = transitionState) {
-                Text(
+            if (!showOfflineSwitch || !isOfflineMode) {
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if(isGenreSubScreen) {
+                        CircleBackButton(
+                            background = Color.Transparent,
+                            onClick =  onGenreScreenBackClick)
+                    }
+                    AnimatedVisibility(visibleState = transitionState) {
+                        Text(
+                            modifier = Modifier
+                                .basicMarquee(),
+                            text = title,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+            AnimatedVisibility(visible = (isOfflineMode && showOfflineSwitch)) {
+                Row(
                     modifier = Modifier
-                        .basicMarquee(),
-                    text = title,
-                    maxLines = 1
-                )
+                        .padding(horizontal = 8.dp)
+                        .wrapContentSize(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.offlineMode_switch_title),
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Switch(
+                        modifier = Modifier.padding(start = 4.dp),
+                        checked = true,
+                        onCheckedChange = {
+                            onOfflineModeSwitch()
+                        },
+                        enabled = true
+                    )
+                }
             }
         },
         navigationIcon = {
@@ -121,10 +172,13 @@ fun MainContentTopAppBar(
                 if (isFabLoading) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(46.dp)
+                        modifier = Modifier
+                            .size(46.dp)
                             .padding(6.dp))
                 } else {
-                    Icon(modifier = Modifier.size(46.dp).padding(horizontal = 6.dp)
+                    Icon(modifier = Modifier
+                        .size(46.dp)
+                        .padding(horizontal = 6.dp)
                         .clickable {
                             onMagicPlayClick()
                         },

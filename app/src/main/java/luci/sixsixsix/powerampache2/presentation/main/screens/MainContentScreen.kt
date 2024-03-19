@@ -31,15 +31,19 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
@@ -48,6 +52,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -59,6 +64,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +75,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
@@ -81,8 +88,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.User
+import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
@@ -95,6 +104,8 @@ import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainDra
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTabRow
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.MainTabRow.tabItems
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.TabItem
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.drawerItems
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.drawerItemsOffline
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
@@ -102,11 +113,15 @@ import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreen
 import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsMainContent
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsEvent
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.settings.subscreens.AboutScreen
 import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
+import luci.sixsixsix.powerampache2.presentation.search.SearchViewEvent
+import luci.sixsixsix.powerampache2.presentation.search.SearchViewModel
+import luci.sixsixsix.powerampache2.presentation.search.screens.GenresScreen
 
 @Composable
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
@@ -117,11 +132,12 @@ fun MainContentScreen(
     mainViewModel: MainViewModel,
     authViewModel: AuthViewModel,
     settingsViewModel: SettingsViewModel,
-    homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
+    homeScreenViewModel: HomeScreenViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel = hiltViewModel()
 ) {
     // IMPORTANT : set the main navigator right away here in MainScreen
     Ampache2NavGraphs.navigator = navigator
-
+    val offlineModeState = settingsViewModel.offlineModeState// by settingsViewModel.offlineModeFlow.collectAsState(initial = false)
     val tabsCount = tabItems.size
     val pagerState = rememberPagerState { tabsCount }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -129,6 +145,21 @@ fun MainContentScreen(
     val scope = rememberCoroutineScope()
     var currentScreen: String by rememberSaveable { mutableStateOf(MainContentMenuItem.Home.id) }
     var currentScreenClass by rememberSaveable { mutableStateOf(MainContentMenuItem.Home::class.java.canonicalName) }
+    if (offlineModeState &&
+        (currentScreen == MainContentMenuItem.Home.id || currentScreen == MainContentMenuItem.Library.id)) {
+        // TODO is this causing too many redraws? does setting a remember variable to the same value
+        //  not good for performance?
+        L("enable offline aaaa isOfflineModeEnabled $offlineModeState")
+        currentScreen = MainContentMenuItem.Offline.id
+        currentScreenClass = MainContentMenuItem.Offline::class.java.canonicalName
+    }
+    else {
+
+        L("enable offline aaaa isOfflineModeEnabled=false")
+//        currentScreen = MainContentMenuItem.Home.id
+//        currentScreenClass = MainContentMenuItem.Home::class.java.canonicalName
+    }
+
     val isSearchActive = remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val appName = stringResource(id = R.string.app_name)
@@ -138,19 +169,31 @@ fun MainContentScreen(
         MainSearchBar(
             modifier = Modifier.focusRequester(focusRequester),
             mainViewModel = mainViewModel,
+            searchViewModel = searchViewModel,
             isActive = isSearchActive,
             navigator = navigator
         )
     }
 
+    val menuItems = if (offlineModeState) {
+        drawerItemsOffline
+    } else {
+        drawerItems
+    }
+
     val floatingActionVisible = mainViewModel.state.queue.isEmpty() &&
             (MainContentMenuItem.toMainContentMenuItem(currentScreen) == MainContentMenuItem.Home)
+
+    val offlineSwitchVisible =
+        (MainContentMenuItem.toMainContentMenuItem(currentScreen) != MainContentMenuItem.Settings)
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         //scrimColor = MaterialTheme.colorScheme.scrim,
         drawerContent = {
             MainDrawer(
+                items = menuItems,
+                currentItem = MainContentMenuItem.toMainContentMenuItem(currentScreen),
                 user = authViewModel.state.user ?: User.emptyUser(),
                 versionInfo = settingsViewModel.state.appVersionInfoStr,
                 hideDonationButtons = settingsViewModel.state.localSettings.hideDonationButton,
@@ -164,18 +207,31 @@ fun MainContentScreen(
             )
         }
     ) {
+        // we're in the genre screen and there are some results on screen
+        val isGenreSubScreen = (currentScreen == MainContentMenuItem.Genres.id
+                && !searchViewModel.state.isNoResults)
+
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 MainContentTopAppBar(
+                    isOfflineMode = offlineModeState,
+                    showOfflineSwitch = offlineSwitchVisible,
                     searchVisibility = isSearchActive,
                     scrollBehavior = scrollBehavior,
                     isQueueEmpty = mainViewModel.state.queue.isEmpty(),
                     floatingActionVisible = floatingActionVisible,
                     isFabLoading = mainViewModel.state.isFabLoading,
                     title = barTitle,
+                    isGenreSubScreen = isGenreSubScreen,
+                    onOfflineModeSwitch = {
+                        settingsViewModel.onEvent(SettingsEvent.OnOfflineToggle)
+                    },
                     onMagicPlayClick = {
                         mainViewModel.onEvent(MainEvent.OnFabPress)
+                    },
+                    onGenreScreenBackClick = {
+                        searchViewModel.onEvent(SearchViewEvent.Clear)
                     }
                 ) { event ->
                     when(event) {
@@ -243,9 +299,14 @@ fun MainContentScreen(
                                navigator = navigator,
                                settingsViewModel = settingsViewModel
                            ).also { barTitle = menuItem.title }
+                           MainContentMenuItem.Genres -> SearchResultsScreen(
+                               navigator = navigator,
+                               mainViewModel = mainViewModel,
+                               searchViewModel = searchViewModel).also {
+                               barTitle = menuItem.title
+                           }
                        }
                    }
-
                }
            }
     }
@@ -289,17 +350,36 @@ fun MainFloatingButton(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MainSearchBar(
-    modifier: Modifier = Modifier,
+    searchViewModel: SearchViewModel,
     mainViewModel: MainViewModel,
     isActive: MutableState<Boolean>,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier
 ) {
     val state = mainViewModel.state
     val controller = LocalSoftwareKeyboardController.current
 
     SearchBar(
         leadingIcon = {
-            Icon(imageVector = Icons.Default.Search, contentDescription = "search")
+            Row(
+                modifier = Modifier.wrapContentSize()
+            ) {
+                //if (searchViewModel.state.searchQuery.isNotBlank()
+                 //   || searchViewModel.state.selectedGenre != null) {
+                    CircleBackButton(
+                        background = Color.Transparent
+                    ) {
+                        if (searchViewModel.state.isNoSearch) {
+                            isActive.value = false
+                        }
+                        searchViewModel.onEvent(SearchViewEvent.Clear)
+                        mainViewModel.onEvent(MainEvent.OnSearchQueryChange(""))
+                        controller?.hide()
+                    }
+//                } else {
+//                    Icon(imageVector = Icons.Default.Search, contentDescription = "search")
+//                }
+            }
         },
         query = state.searchQuery,
         onQueryChange = {
@@ -319,7 +399,12 @@ fun MainSearchBar(
             if (!it) { mainViewModel.onEvent(MainEvent.OnSearchQueryChange("")) }
         }, //the callback to be invoked when this search bar's active state is changed
     ) {
-        SearchResultsScreen(navigator = navigator, mainViewModel = mainViewModel)
+        SearchResultsScreen(
+            modifier = modifier,
+            navigator = navigator,
+            mainViewModel = mainViewModel,
+            searchViewModel = searchViewModel
+        )
     }
 }
 

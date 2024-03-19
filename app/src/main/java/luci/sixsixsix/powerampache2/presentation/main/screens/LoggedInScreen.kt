@@ -41,13 +41,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
@@ -67,18 +70,27 @@ fun LoggedInScreen(
 ) {
     val state = mainViewModel.state
     val scaffoldState = rememberBottomSheetScaffoldState()
+    val errorMessageOffline = stringResource(id = R.string.error_offline)
 
-    // TODO DEBUG snackbar errors
-    if (state.errorMessage != "") {
+    // if offline show fixed snackbar to allow user time to tap on the button
+    val showSnackBarShowDuration = if (settingsViewModel.offlineModeState) {
+        SnackbarDuration.Indefinite
+    } else SnackbarDuration.Long
+
+    // disable snackbar errors in offline mode
+    if (state.errorMessage != "" && !settingsViewModel.offlineModeState) {
         LaunchedEffect(scaffoldState.snackbarHostState, state.errorMessage) {
             scaffoldState.snackbarHostState.showSnackbar(
                 message = state.errorMessage,
+                actionLabel = if (state.errorMessage == errorMessageOffline) "OFFLINE MODE" else null,
                 withDismissAction = true,
-                duration = SnackbarDuration.Indefinite
+                duration = showSnackBarShowDuration
             ).apply {
                 when (this) {
-                    SnackbarResult.Dismissed -> mainViewModel.onEvent(MainEvent.OnDismissUserMessage)
-                    SnackbarResult.ActionPerformed -> mainViewModel.onEvent(MainEvent.OnDismissUserMessage)
+                    SnackbarResult.Dismissed ->
+                        mainViewModel.onEvent(MainEvent.OnDismissUserMessage)
+                    SnackbarResult.ActionPerformed ->
+                        mainViewModel.onEvent(MainEvent.OnEnableOfflineMode)
                 }
             }
         }

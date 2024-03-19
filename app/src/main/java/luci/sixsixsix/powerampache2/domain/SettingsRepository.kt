@@ -34,4 +34,6 @@ interface SettingsRepository {
     suspend fun deleteAllDownloadedSongs(): Flow<Resource<Any>>
     suspend fun changeSortMode(sortMode: SortMode)
     suspend fun toggleGlobalShuffle(): Boolean
+    suspend fun toggleOfflineMode(): Boolean
+    suspend fun isOfflineModeEnabled(): Boolean
 }

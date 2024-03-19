@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
@@ -82,6 +83,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.settings.components.Set
 
 private const val IS_MONO_SWITCH_ENABLED = false
 private const val IS_NORMALIZE_SWITCH_ENABLED = false
+private const val IS_OFFLINE_MODE_SWITCH_ENABLED = true
 private const val IS_SMART_DOWNLOADS_SWITCH_ENABLED = false
 private const val IS_AUTO_UPDATE_ENABLED = true
 private const val IS_EQUALIZER_BTN_ENABLED = true
@@ -105,6 +107,7 @@ fun SettingsScreen(
         isMonoAudioEnabled = settingsViewModel.state.localSettings.isMonoAudioEnabled,
         isSmartDownloadsEnabled = settingsViewModel.state.localSettings.isSmartDownloadsEnabled,
         isAutoCheckUpdatesEnabled = settingsViewModel.state.localSettings.enableAutoUpdates,
+        isOfflineModeEnabled = settingsViewModel.offlineModeState,
         onThemeSelected = {
             settingsViewModel.onEvent(SettingsEvent.OnThemeChange(it))
         },
@@ -140,6 +143,9 @@ fun SettingsScreen(
         },
         onSmartDownloadValueChange = {
             settingsViewModel.onEvent(SettingsEvent.OnSmartDownloadValueChange(it))
+        },
+        onOfflineModeValueChange = {
+            settingsViewModel.onEvent(SettingsEvent.OnOfflineToggle)
         }
     )
 }
@@ -156,6 +162,7 @@ fun SettingsScreenContent(
     isMonoAudioEnabled: Boolean,
     isSmartDownloadsEnabled: Boolean,
     isAutoCheckUpdatesEnabled: Boolean,
+    isOfflineModeEnabled: Boolean,
     powerAmpTheme: PowerAmpTheme,
     streamingQuality: StreamingQuality,
     onThemeSelected: (selected: PowerAmpTheme) -> Unit,
@@ -166,6 +173,7 @@ fun SettingsScreenContent(
     onMonoValueChange: (newValue: Boolean) -> Unit,
     onSmartDownloadValueChange: (newValue: Boolean) -> Unit,
     onAutoCheckUpdatesValueChange: (newValue: Boolean) -> Unit,
+    onOfflineModeValueChange: (newValue: Boolean) -> Unit,
     onEqualizerPress: () -> Unit,
     onCheckUpdatesNowPress: () -> Unit,
     onDeleteDownloadsPress: () -> Unit,
@@ -227,8 +235,17 @@ fun SettingsScreenContent(
                     trailingIcon = Icons.Default.KeyboardArrowRight,
                     onClick = onEqualizerPress
                 )
-                // NORMALIZE VOLUME SWITCH
+                // OFFLINE MODE VOLUME SWITCH
                 4 -> PowerAmpSwitch(
+                    enabled = IS_OFFLINE_MODE_SWITCH_ENABLED,
+                    title = R.string.settings_offlineMode_title,
+                    subtitle = R.string.settings_offlineMode_subtitle,
+                    checked = isOfflineModeEnabled,
+                    onCheckedChange = onOfflineModeValueChange,
+                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
+                )
+                // NORMALIZE VOLUME SWITCH
+                5 -> PowerAmpSwitch(
                     enabled = IS_NORMALIZE_SWITCH_ENABLED,
                     title = R.string.settings_normalizeVolume_title,
                     subtitle = R.string.settings_normalizeVolume_subtitle,
@@ -237,7 +254,7 @@ fun SettingsScreenContent(
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
                 // MONO SWITCH
-                5 -> PowerAmpSwitch(
+                6 -> PowerAmpSwitch(
                     enabled = IS_MONO_SWITCH_ENABLED,
                     title = R.string.settings_monoAudio_title,
                     subtitle = R.string.settings_monoAudio_subtitle,
@@ -246,7 +263,7 @@ fun SettingsScreenContent(
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
                 // SMART DOWNLOADS SWITCH
-                6 -> PowerAmpSwitch(
+                7 -> PowerAmpSwitch(
                     enabled = IS_SMART_DOWNLOADS_SWITCH_ENABLED,
                     title = R.string.settings_smartDownloads_title,
                     subtitle = R.string.settings_smartDownloads_subtitle,
@@ -255,7 +272,7 @@ fun SettingsScreenContent(
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
                 // CHECK UPDATES NOW BUTTON
-                8 -> TextWithSubtitle(
+                9 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = paddingHorizontalItem)
@@ -265,7 +282,7 @@ fun SettingsScreenContent(
                     onClick = onCheckUpdatesNowPress
                 )
                 // AUTO UPDATE CHECKBOX
-                9 -> PowerAmpCheckBox(
+                10 -> PowerAmpCheckBox(
                     enabled = IS_AUTO_UPDATE_ENABLED,
                     modifier = Modifier.padding(vertical = paddingVerticalItem).padding(start = paddingHorizontalItem),
                     checked = isAutoCheckUpdatesEnabled,
@@ -273,7 +290,7 @@ fun SettingsScreenContent(
                     title = R.string.settings_autoCheckUpdates_title,
                     subtitle = R.string.coming_soon,
                 )
-                10 -> TextWithSubtitle(
+                11 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem),
@@ -281,14 +298,14 @@ fun SettingsScreenContent(
                     trailingIcon = Icons.Outlined.OpenInNew,
                     onClick = onDebugLogsButtonPress
                 )
-                11 -> PowerAmpSwitch(
+                12 -> PowerAmpSwitch(
                     title = R.string.settings_enableDebugLogging_title,
                     subtitle = R.string.settings_enableDebugLogging_subtitle,
                     checked = remoteLoggingEnabled,
                     onCheckedChange = onEnableLoggingValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
-                7 -> TextWithSubtitle(
+                8 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = paddingVerticalItem * 2, horizontal = paddingHorizontalItem),
@@ -298,7 +315,7 @@ fun SettingsScreenContent(
                         showDeleteDownloadsDialog = true
                     }
                 )
-                12 -> donateButton()
+                13 -> donateButton()
                 // 16 -> serverInfo?.let { ServerInfoSection(it) }
 
                 14 -> PowerAmpCheckBox(
@@ -321,14 +338,14 @@ fun SettingsScreenContent(
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth(),
-                    text = stringResource(id = R.string.version_quote),
+                    text = BuildConfig.VERSION_QUOTE,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Light,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontSize = 16.sp
                 )
                 //10 -> userState?.let { user -> UserInfoSection(user = user) }
-                11 -> WorkInProgressStrip()
+                //11 -> WorkInProgressStrip()
                 else -> { }
             }
         }
@@ -484,6 +501,7 @@ fun PreviewSettingsScreen() {
         isMonoAudioEnabled = false,
         isSmartDownloadsEnabled = false,
         isAutoCheckUpdatesEnabled = false,
+        isOfflineModeEnabled = true,
         onHideDonateValueChange = { },
         onThemeSelected = { },
         onStreamingQualitySelected = { },
@@ -496,6 +514,7 @@ fun PreviewSettingsScreen() {
         onEqualizerPress = {},
         onMonoValueChange = {},
         onNormalizeValueChange = {},
-        onSmartDownloadValueChange = {}
+        onSmartDownloadValueChange = {},
+        onOfflineModeValueChange = {}
     )
 }

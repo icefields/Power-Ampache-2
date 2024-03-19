@@ -26,6 +26,7 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 sealed class MainEvent {
     data class OnSearchQueryChange(val query: String): MainEvent()
     data object OnDismissUserMessage: MainEvent()
+    data object OnEnableOfflineMode: MainEvent()
     data object OnLogout: MainEvent() // TODO move this to AuthViewModel
     data class Play(val song: Song): MainEvent()
     data object PlayPauseCurrent: MainEvent()

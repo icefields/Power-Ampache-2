@@ -13,10 +13,14 @@
     <color name="onBackgroundDark">#FFDFE5E3</color>
     <color name="errorDark">#FFF593AB</color>
     <color name="outlineDark">#FFA5A9AD</color>
+    <color name="surfaceContainerHighLight">#FFE4EBE8</color>
+    <color name="surfaceContainerHighDark">#FF282E2C</color>
+
 
     <!-- theme colours, dark version must be provided -->
     <color name="surfaceContainer">@color/surfaceContainerLight</color>
     <color name="onSurfaceVariant">@color/onSurfaceVariantLight</color>
+    <color name="surfaceContainerHigh">@color/surfaceContainerHighLight</color>
 
     <!-- Other, non-theme colours -->
     <color name="placeholderBgTint">@color/onSurfaceVariant</color>

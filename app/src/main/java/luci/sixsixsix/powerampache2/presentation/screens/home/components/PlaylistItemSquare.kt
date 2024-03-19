@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.screens.home.components
 
 import androidx.compose.foundation.BorderStroke
@@ -12,7 +33,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.StarOutline
@@ -23,15 +43,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,7 +61,6 @@ import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
-import kotlin.random.Random
 
 private val width = 150.dp
 private val height = 75.dp
@@ -78,7 +92,7 @@ fun ColourPlaylistHomeItem(
     onPlaylistClick: (playlist: Playlist) -> Unit
 ) {
     Card(
-        border = BorderStroke((0.5).dp, MaterialTheme.colorScheme.background),
+        //border = BorderStroke((0.5).dp, MaterialTheme.colorScheme.background),
         modifier = modifier
             .width(width)
             .height(height)
@@ -89,7 +103,7 @@ fun ColourPlaylistHomeItem(
         colors = CardDefaults.cardColors(
             containerColor = colour
         ),
-        elevation = CardDefaults.cardElevation(1.dp),
+        elevation = CardDefaults.cardElevation(0.dp),
         shape = RoundedCornerShape(5.dp)
     ) {
         Box(
@@ -113,6 +127,7 @@ fun ColourPlaylistHomeItem(
                 contentAlignment = Alignment.TopEnd
             ) {
                 Text(
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .padding(horizontal = 8.dp, vertical = 10.dp),
                     text = playlist.name,

@@ -31,6 +31,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CREDENTIALS_PRIMARY_KEY
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.DownloadedSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.GenreEntity
 import luci.sixsixsix.powerampache2.data.local.entities.LocalSettingsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SESSION_PRIMARY_KEY
@@ -84,7 +85,7 @@ interface MusicDao {
     @Query("DELETE FROM albumentity")
     suspend fun clearAlbums()
 
-    @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
+    @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName""")
     suspend fun searchAlbum(query: String): List<AlbumEntity>
 
     @Query("""SELECT * FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId) order by year DESC""")
@@ -100,8 +101,11 @@ interface MusicDao {
     @Query("DELETE FROM songentity")
     suspend fun clearSongs()
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by playCount""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName order by playCount""")
     suspend fun searchSong(query: String): List<SongEntity>
+
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName AND LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    suspend fun searchOfflineSongs(query: String): List<DownloadedSongEntity>
 
     @Query("""SELECT * FROM songentity WHERE LOWER(:songId) == LOWER(mediaId)""")
     suspend fun getSongById(songId: String): SongEntity?
@@ -118,6 +122,12 @@ interface MusicDao {
 
     @Query("""SELECT * FROM artistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by name""")
     suspend fun searchArtist(query: String): List<ArtistEntity>
+
+    @Query("""SELECT * FROM artistentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == genre order by name""")
+    suspend fun searchArtistByGenre(genre: String): List<ArtistEntity>
+
+    @Query("""SELECT * FROM songentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == genre""")
+    suspend fun searchSongByGenre(genre: String): List<SongEntity>
 
     @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time""")
     suspend fun getArtist(artistId: String): ArtistEntity?
@@ -167,11 +177,33 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun writeSettings(localSettingsEntity: LocalSettingsEntity)
 
+    @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    fun offlineModeEnabled(): LiveData<Boolean?>
+
+    @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    fun isOfflineModeEnabled(): Boolean?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertGenres(genres: List<GenreEntity>)
+
+    @Query("""SELECT * FROM genreentity""")
+    suspend fun getGenres(): List<GenreEntity>
+
+    @Query("""SELECT * FROM genreentity WHERE LOWER(id) == LOWER(:genreId)""")
+    suspend fun getGenreById(genreId: String): GenreEntity?
+
+    @Query("""SELECT * FROM genreentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
+    suspend fun searchGenres(query: String): List<GenreEntity>
+
+    @Query("DELETE FROM genreentity")
+    suspend fun clearGenres()
+
     //@Query("""DELETE FROM playlistentity artistentity, songentity, albumentity""")
     suspend fun clearCachedData() {
         clearAlbums()
         clearArtists()
         clearSongs()
         clearPlaylists()
+        clearGenres()
     }
 }

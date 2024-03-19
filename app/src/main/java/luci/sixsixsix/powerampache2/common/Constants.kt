@@ -26,6 +26,7 @@ import luci.sixsixsix.powerampache2.BuildConfig
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
+    const val DATABASE_VERSION = 79
 
     // NETWORK
     const val TIMEOUT_CONNECTION_S = 20L
@@ -33,6 +34,7 @@ object Constants {
     const val TIMEOUT_WRITE_S = 120L
 
     const val NETWORK_REQUEST_LIMIT_HOME = 40
+    const val NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE = 40
     const val QUICK_PLAY_MIN_SONGS = 50
 
     // ERROR CONSTANTS

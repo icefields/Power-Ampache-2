@@ -43,12 +43,11 @@ fun StarRatingIcon(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .wrapContentSize()
-                .padding(vertical = 0.dp)
+                .padding(bottom = 1.dp)
                 .padding(start = if (rating > 0) 4.dp else 0.dp, end = 0.dp)
                 .padding(padding)
         ) {
             if (rating > 0) {
-                Spacer(modifier = Modifier.width(0.dp))
                 Text(
                     modifier = Modifier.basicMarquee(),
                     text = "$rating",

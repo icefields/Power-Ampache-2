@@ -39,7 +39,7 @@ open class Playlist(
     val preciseRating: Float = 0.0f,
     var rating: Int = 0,
     val averageRating: Float = 0.0f,
-): Parcelable {
+): Parcelable, AmpacheModel {
     companion object {
         fun mock(): Playlist = Gson().fromJson("{\n" +
                 "            \"id\": \"2\",\n" +

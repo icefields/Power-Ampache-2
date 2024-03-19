@@ -198,7 +198,6 @@ fun TabbedSongDetailView(
                 .fillMaxWidth()
                 .weight(1.0f)
         ) { index ->
-            L(index)
             when(index) {
                 1 -> {
                     song?.lyrics?.let { lyrics ->

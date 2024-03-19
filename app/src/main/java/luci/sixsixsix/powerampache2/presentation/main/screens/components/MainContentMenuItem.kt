@@ -26,6 +26,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Logout
+import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.OfflineBolt
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -46,6 +47,7 @@ sealed class MainContentMenuItem(
                 "home" -> Home
                 "settings" -> Settings
                 "library" -> Library
+                "genres" -> Genres
                 "logout" -> Logout
                 "about" -> About
                 "offline" -> Offline
@@ -57,6 +59,7 @@ sealed class MainContentMenuItem(
     data object Home: MainContentMenuItem(id = "home", title = "Home", icon = Icons.Outlined.Home, contentDescription = "home")
     data object Settings: MainContentMenuItem(id = "settings", title = "Settings", icon = Icons.Outlined.Settings, contentDescription = "Settings")
     data object Library: MainContentMenuItem(id = "library", title = "Library", icon = Icons.Outlined.LibraryMusic, contentDescription = "Library")
+    data object Genres: MainContentMenuItem(id = "genres", title = "Genres", icon = Icons.Outlined.MusicNote, contentDescription = "Genres")
     data object Offline: MainContentMenuItem(id = "offline", title = "Offline Songs", icon = Icons.Outlined.OfflineBolt, contentDescription = "Offline Songs")
     data object About: MainContentMenuItem(id = "about", title = "About", icon = Icons.Outlined.Info, contentDescription = "About")
     data object Logout: MainContentMenuItem(id = "logout", title = "Logout", icon = Icons.Outlined.Logout, contentDescription = "Logout")

@@ -61,7 +61,10 @@ data class LocalSettingsEntity(
     val isGlobalShuffleEnabled: Boolean,
 
     @ColumnInfo(name = "playlistSongsSorting", defaultValue = LocalSettings.SETTINGS_DEFAULTS_PLAYLIST_SORT)
-    val playlistSongsSorting: SortMode
+    val playlistSongsSorting: SortMode,
+
+    @ColumnInfo(name = "isOfflineModeEnabled", defaultValue = "${LocalSettings.SETTINGS_DEFAULTS_OFFLINE_MODE}")
+    val isOfflineModeEnabled: Boolean,
 )
 
 fun LocalSettingsEntity.toLocalSettings() = LocalSettings(
@@ -75,6 +78,7 @@ fun LocalSettingsEntity.toLocalSettings() = LocalSettings(
     isSmartDownloadsEnabled = smartDownloadEnabled,
     isMonoAudioEnabled = isMonoAudioEnabled,
     isGlobalShuffleEnabled = isGlobalShuffleEnabled,
+    isOfflineModeEnabled = isOfflineModeEnabled,
     playlistSongsSorting = playlistSongsSorting
 )
 
@@ -89,5 +93,6 @@ fun LocalSettings.toLocalSettingsEntity() = LocalSettingsEntity(
     isMonoAudioEnabled = isMonoAudioEnabled,
     isNormalizeVolumeEnabled = isNormalizeVolumeEnabled,
     isGlobalShuffleEnabled = isGlobalShuffleEnabled,
+    isOfflineModeEnabled = isOfflineModeEnabled,
     playlistSongsSorting = playlistSongsSorting
 )
