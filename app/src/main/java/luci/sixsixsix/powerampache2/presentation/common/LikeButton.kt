@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.presentation.common
 
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -48,7 +47,7 @@ fun LikeButton(
         Icons.Default.FavoriteBorder,
     imageContentDescription = "favourite",
     isLoading = isLikeLoading,
-    modifier = modifier.size(29.dp),
+    modifier = modifier,
     background = background,
     iconTint = iconTint,
     borderStroke = borderStroke,

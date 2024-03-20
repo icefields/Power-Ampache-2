@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -62,26 +63,27 @@ fun AlbumItem(album: Album, modifier: Modifier = Modifier) {
                 error = painterResource(id = R.drawable.placeholder_album),
                 contentDescription = album.name,
             )
-//            Box(modifier = Modifier
-//                .fillMaxSize()
-//                .background(brush = albumBackgroundGradient))
 
+            // Text Section
             Column(
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.Start,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .background(brush = albumBackgroundGradient)
                     //.background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
                     .padding(
                         start = dimensionResource(R.dimen.albumItem_infoText_paddingHorizontal),
                         end = dimensionResource(R.dimen.albumItem_infoText_paddingHorizontal),
-                        top = 10.dp,
+                        top = 0.dp,
                         bottom = dimensionResource(R.dimen.albumItem_infoText_paddingVertical)
                     )
             ) {
                 Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = album.name,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_title),
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 2,
@@ -91,23 +93,23 @@ fun AlbumItem(album: Album, modifier: Modifier = Modifier) {
                             shadow = Shadow(
                                 color = MaterialTheme.colorScheme.background,
                                 offset = Offset(0.0f, 0.0f),
-                                blurRadius = 18f
+                                blurRadius = 9f
                             )
                         )
                     )
 
-
                     Text(
                         modifier = Modifier.basicMarquee(),
+                        color = MaterialTheme.colorScheme.onBackground,
                         text = album.artist.name,
                         fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_artist),
-                        fontWeight = FontWeight.Light,
+                        fontWeight = FontWeight.Normal,
                         style = TextStyle(
-                            fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_title),
+                            fontSize = fontDimensionResource(R.dimen.albumItem_infoTextSection_textSize_artist),
                             shadow = Shadow(
                                 color = MaterialTheme.colorScheme.background,
                                 offset = Offset(0.0f, 0.0f),
-                                blurRadius = 18f
+                                blurRadius = 9f
                             )
                         )
                     )
@@ -122,9 +124,14 @@ private val albumBackgroundGradient
         Brush.verticalGradient(
             colors = listOf(
                 Color.Transparent,
-                MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
-                MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
-                MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                Color.Transparent,
+                Color.Transparent,
+                MaterialTheme.colorScheme.background.copy(alpha = 0.1f),
+                MaterialTheme.colorScheme.background.copy(alpha = 0.3f),
+//                MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+//                MaterialTheme.colorScheme.background.copy(alpha = 0.6f),
+                MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+                MaterialTheme.colorScheme.background
             )
         )
 

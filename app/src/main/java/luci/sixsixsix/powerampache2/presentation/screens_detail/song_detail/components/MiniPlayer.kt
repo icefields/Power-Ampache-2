@@ -136,6 +136,8 @@ fun MiniPlayerContent(
             width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
+        modifier = Modifier
+            .background(Color.Transparent),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -143,7 +145,7 @@ fun MiniPlayerContent(
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
     ) {
         Row(
-            modifier = modifier.background(MaterialTheme.colorScheme.surface)
+            modifier = modifier//.background(MaterialTheme.colorScheme.surface)
                 .padding(vertical = 5.dp, horizontal = 5.dp)
         ) {
             Card(
@@ -196,7 +198,7 @@ fun MiniPlayerContent(
                 Text(
                     modifier = Modifier.basicMarquee(),
                     text = song.artist.name,
-                    fontWeight = FontWeight.Light,
+                    fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,
                     maxLines = 1,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

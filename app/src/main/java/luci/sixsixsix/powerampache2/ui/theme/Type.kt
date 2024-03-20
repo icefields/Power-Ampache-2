@@ -30,11 +30,13 @@ import luci.sixsixsix.powerampache2.R
 
 object AppFont {
     val LatoFont = FontFamily(
-        Font(R.font.lato_regular, weight = FontWeight.Normal, style = FontStyle.Normal),
-        Font(R.font.lato_bold, weight = FontWeight.Bold, style = FontStyle.Normal),
-        Font(R.font.lato_bold, weight = FontWeight.SemiBold, style = FontStyle.Normal),
-        Font(R.font.lato_regular, FontWeight.Light),
-        Font(R.font.lato_black, FontWeight.Black)
+        Font(R.font.nunito_regular, weight = FontWeight.Normal, style = FontStyle.Normal),
+        Font(R.font.nunito_bold, weight = FontWeight.Bold, style = FontStyle.Normal),
+        Font(R.font.nunito_semibold, weight = FontWeight.SemiBold, style = FontStyle.Normal),
+        Font(R.font.nunito_light, FontWeight.Light),
+        Font(R.font.nunito_black, FontWeight.Black),
+        Font(R.font.nunito_medium, FontWeight.Medium),
+        Font(R.font.nunito_condensed_italic, FontWeight.Normal, style = FontStyle.Italic)
     )
 }
 

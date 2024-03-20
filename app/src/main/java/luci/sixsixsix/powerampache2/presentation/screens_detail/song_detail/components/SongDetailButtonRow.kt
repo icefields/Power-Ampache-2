@@ -162,7 +162,7 @@ fun PlayerButtonText(
     Text(
         text = stringResource(id = text),
         fontSize = fontDimensionResource(id = R.dimen.player_buttonTitle_fontSize),
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         color = tint
     )
 }

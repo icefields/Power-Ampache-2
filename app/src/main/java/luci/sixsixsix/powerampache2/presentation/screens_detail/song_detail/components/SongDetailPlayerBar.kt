@@ -158,6 +158,7 @@ fun PlayerControls(
         }
         Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.player_controls_spacing)))
 
+        // PLAY
         PlayButton(
             modifier = Modifier
                 .height(80.dp)
@@ -169,6 +170,7 @@ fun PlayerControls(
         ) { onEvent(MainEvent.PlayPauseCurrent) }
         Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.player_controls_spacing)))
 
+        // SKIP NEXT
         IconButton(modifier = Modifier.weight(1f),
             onClick = {
                 onEvent(MainEvent.SkipNext)

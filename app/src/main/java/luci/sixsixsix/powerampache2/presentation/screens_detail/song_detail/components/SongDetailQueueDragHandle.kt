@@ -242,18 +242,18 @@ fun SongHandleTabRow(
     }
 
     val scope = rememberCoroutineScope()
-
+    val textColour = MaterialTheme.colorScheme.onSurface
     TabRow(
         indicator = {
 
         },
         modifier = modifier,
         selectedTabIndex = selectedTabIndex.value,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        contentColor = textColour,
         containerColor = MaterialTheme.colorScheme.additionalColours.queueHandle
     ) {
         Tab(
-            unselectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.66f),
+            unselectedContentColor = textColour.copy(alpha = 0.66f),
             selected = selectedTabIndex.value == 0,
             onClick = {
                 scope.launch {
@@ -280,7 +280,7 @@ fun SongHandleTabRow(
         )
         if (song?.hasLyrics() == true) {
             Tab(
-                unselectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.66f),
+                unselectedContentColor = textColour.copy(alpha = 0.66f),
                 selected = selectedTabIndex.value == 1,
                 onClick = {
                     scope.launch {
@@ -297,7 +297,7 @@ fun SongHandleTabRow(
                 },
                 text = {
                     Text(
-                        text = "LYRICS",
+                        text = stringResource(id = R.string.player_queue_lyrics),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp,
                         maxLines = 1,

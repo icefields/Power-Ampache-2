@@ -22,16 +22,23 @@
 package luci.sixsixsix.powerampache2.presentation.screens.settings.components
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,11 +47,17 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import luci.sixsixsix.powerampache2.presentation.common.TextWithSubtitle
 
@@ -64,30 +77,57 @@ fun <T> SettingsDropDownMenu(
     Column(
         modifier.clickable { isExpanded = !isExpanded }
     ) {
-        OutlinedTextField(
-            value = stringResource(id = selectedTextId),
-            readOnly = true,
-            singleLine = true,
-            onValueChange = { },
-            modifier = Modifier
-                .clickable { isExpanded = !isExpanded }
-                .fillMaxWidth()
-                .onGloballyPositioned { coordinates ->
-                    // This value is used to assign to the DropDown the same width
-                    textFieldSize = coordinates.size.toSize()
+
+        Box(
+            contentAlignment = Alignment.CenterStart
+        ) {
+
+            OutlinedTextField(
+                value = stringResource(id = selectedTextId),
+                readOnly = true,
+                singleLine = true,
+                onValueChange = { },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isExpanded = !isExpanded }
+                    .onGloballyPositioned { coordinates ->
+                        // This value is used to assign to the DropDown the same width
+                        textFieldSize = coordinates.size.toSize()
+                    },
+                label = {
+                    Text(label,
+                        modifier =
+                        Modifier.clickable { isExpanded = !isExpanded }
+                    )
                 },
-            label = {
-                Text(label,
-                    modifier =
-                    Modifier.clickable { isExpanded = !isExpanded }
+                trailingIcon = {
+                    Icon(imageVector = icon,
+                        contentDescription = "expand menu",
+                        modifier = Modifier.clickable { isExpanded = !isExpanded } )
+                }
+            )
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        // This value is used to assign to the DropDown the same width
+                        textFieldSize = coordinates.size.toSize()
+                    },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.Transparent//MaterialTheme.colorScheme.onSurface
+                ),
+                shape = RectangleShape,
+                onClick = { isExpanded = !isExpanded }) {
+                Text(
+                    text = stringResource(id = selectedTextId),
+                    modifier = Modifier.fillMaxWidth().padding(top = 7.dp),
+                    textAlign = TextAlign.Start,
+                    fontSize = 18.sp,
+                    color = Color.Transparent
                 )
-            },
-            trailingIcon = {
-                Icon(imageVector = icon,
-                    contentDescription = "expand menu",
-                    modifier = Modifier.clickable { isExpanded = !isExpanded } )
             }
-        )
+        }
 
         DropdownMenu(
             expanded = isExpanded,

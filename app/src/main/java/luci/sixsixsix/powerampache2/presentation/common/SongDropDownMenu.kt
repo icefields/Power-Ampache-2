@@ -21,6 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.presentation.common
 
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -37,13 +39,17 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.fontDimensionResource
 
 @Composable
 fun SongDropDownMenu(
@@ -55,7 +61,7 @@ fun SongDropDownMenu(
     onDismissRequest:() -> Unit
 ) {
     DropdownMenu(
-        modifier = Modifier.padding(4.dp),
+        modifier = modifier.padding(dimensionResource(id = R.dimen.songDropdown_padding)),
         expanded = isContextMenuVisible,
         offset = pressOffset.copy(
             y = pressOffset.y,
@@ -63,139 +69,109 @@ fun SongDropDownMenu(
         ),
         onDismissRequest = onDismissRequest
     ) {
-
-        DropdownMenuItem(
-            text = {
-                Row {
-                    Icon(
-                        imageVector = Icons.Default.PlaylistPlay,
-                        contentDescription = stringResource(id = R.string.back_content_description)
-                    )
-                    Text(
-                        modifier = Modifier.padding(horizontal = 10.dp),
-                        text = "Play next"
-                    )
-                } },
-            onClick = {
-                songItemEventListener(SongItemEvent.PLAY_NEXT)
-            }
-        )
-        DropdownMenuItem(
-            text = {
-                Row {
-                    Icon(
-                        imageVector = Icons.Default.QueueMusic,
-                        contentDescription = stringResource(id = R.string.back_content_description)
-                    )
-                    Text(
-                        modifier = Modifier.padding(horizontal = 10.dp),
-                        text = "Add to queue"
-                    )
-                } },
-            onClick = {
-                songItemEventListener(SongItemEvent.ADD_SONG_TO_QUEUE)
-            }
-        )
-        DropdownMenuItem(
-            text = {
-                Row {
-                    Icon(
-                        imageVector = Icons.Default.PlaylistAdd,
-                        contentDescription = stringResource(id = R.string.back_content_description)
-                    )
-                    Text(
-                        modifier = Modifier.padding(horizontal = 10.dp),
-                        text = "Add to playlist"
-                    )
-                } },
-            onClick = {
-                songItemEventListener(SongItemEvent.ADD_SONG_TO_PLAYLIST)
-            }
-        )
-        DropdownMenuItem(
-            text = {
-                Row {
-                    Icon(
-                        imageVector = Icons.Default.Album,
-                        contentDescription = stringResource(id = R.string.back_content_description)
-                    )
-                    Text(
-                        modifier = Modifier.padding(horizontal = 10.dp),
-                        text = "Go to Album"
-                    )
-                } },
-            onClick = {
-                songItemEventListener(SongItemEvent.GO_TO_ALBUM)
-            }
-        )
-        DropdownMenuItem(
-            text = {
-                Row {
-                    Icon(
-                        imageVector = Icons.Default.Audiotrack,
-                        contentDescription = stringResource(id = R.string.back_content_description)
-                    )
-                    Text(
-                        modifier = Modifier.padding(horizontal = 10.dp),
-                        text = "Go to Artist"
-                    )
-                } },
-            onClick = {
-                songItemEventListener(SongItemEvent.GO_TO_ARTIST)
-            }
-        )
-        DropdownMenuItem(
-            text = {
-                Row {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = stringResource(id = R.string.back_content_description)
-                    )
-                    Text(
-                        modifier = Modifier.padding(horizontal = 10.dp),
-                        text = "Share"
-                    )
-                } },
-            onClick = {
-                songItemEventListener(SongItemEvent.SHARE_SONG)
-            }
-        )
-        if (isSongDownloaded) {
-            DropdownMenuItem(
-                text = {
-                    Row {
-                        Icon(
-                            imageVector = Icons.Default.SaveAlt,
-                            contentDescription = "Export Downloaded Song"
-                        )
-                        Text(
-                            modifier = Modifier.padding(horizontal = 10.dp),
-                            text = "Export Downloaded Song"
-                        )
-                    }
-                },
-                onClick = {
-                    songItemEventListener(SongItemEvent.EXPORT_DOWNLOADED_SONG)
-                }
-            )
-        } else {
-            DropdownMenuItem(
-                text = {
-                    Row {
-                        Icon(
-                            imageVector = Icons.Default.Download,
-                            contentDescription = stringResource(id = R.string.back_content_description)
-                        )
-                        Text(
-                            modifier = Modifier.padding(horizontal = 10.dp),
-                            text = "Download"
-                        )
-                    }
-                },
-                onClick = {
-                    songItemEventListener(SongItemEvent.DOWNLOAD_SONG)
-                }
-            )
+        SongDropDownMenuItem(
+            text = R.string.dropdownMenu_item_playNext,
+            iconImageVector = Icons.Default.PlaylistPlay
+        ) {
+            songItemEventListener(SongItemEvent.PLAY_NEXT)
         }
+        SongDropDownMenuItem(
+            text = R.string.dropdownMenu_item_addToQueue,
+            iconImageVector = Icons.Default.QueueMusic
+        ) {
+            songItemEventListener(SongItemEvent.ADD_SONG_TO_QUEUE)
+        }
+        SongDropDownMenuItem(
+            text = R.string.dropdownMenu_item_addToPlaylist,
+            iconImageVector = Icons.Default.PlaylistAdd
+        ) {
+            songItemEventListener(SongItemEvent.ADD_SONG_TO_PLAYLIST)
+        }
+        SongDropDownMenuItem(
+            text = R.string.dropdownMenu_item_goToAlbum,
+            iconImageVector = Icons.Default.Album
+        ) {
+            songItemEventListener(SongItemEvent.GO_TO_ALBUM)
+        }
+        SongDropDownMenuItem(
+            text = R.string.dropdownMenu_item_goToArtist,
+            iconImageVector = Icons.Default.Audiotrack
+        ) {
+            songItemEventListener(SongItemEvent.GO_TO_ARTIST)
+        }
+        SongDropDownMenuItem(
+            text = R.string.dropdownMenu_item_share,
+            iconImageVector = Icons.Default.Share
+        ) {
+            songItemEventListener(SongItemEvent.SHARE_SONG)
+        }
+        if (isSongDownloaded) {
+            SongDropDownMenuItem(
+                text = R.string.dropdownMenu_item_export,
+                iconImageVector = Icons.Default.SaveAlt
+            ) {
+                songItemEventListener(SongItemEvent.EXPORT_DOWNLOADED_SONG)
+            }
+        } else {
+            SongDropDownMenuItem(
+                text = R.string.dropdownMenu_item_download,
+                iconImageVector = Icons.Default.Download
+            ) {
+                songItemEventListener(SongItemEvent.DOWNLOAD_SONG)
+            }
+        }
+    }
+}
+
+@Composable
+fun SongDropDownMenuItem(
+    text: String,
+    iconImageVector: ImageVector,
+    contentDescription: String = text,
+    onClick: () -> Unit
+) {
+    DropdownMenuItem(
+        text = {
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = iconImageVector,
+                    contentDescription = contentDescription
+                )
+                Text(
+                    modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.songDropdown_item_padding_horizontal)),
+                    text = text,
+                    fontSize = fontDimensionResource(id = R.dimen.songDropdown_textSize)
+                )
+            }
+        },
+        onClick = onClick
+    )
+}
+
+@Composable
+fun SongDropDownMenuItem(
+    @StringRes text: Int,
+    iconImageVector: ImageVector,
+    onClick: () -> Unit
+) {
+    val title = stringResource(id = text)
+    SongDropDownMenuItem(
+        text = title,
+        iconImageVector = iconImageVector,
+        contentDescription = title,
+        onClick = onClick
+    )
+}
+
+@Composable
+@Preview
+fun SongDropDownMenuItemPreview() {
+    SongDropDownMenuItem(
+        text = R.string.dropdownMenu_item_export,
+        iconImageVector = Icons.Default.SaveAlt
+    ) {
     }
 }

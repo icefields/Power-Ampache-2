@@ -170,7 +170,7 @@ private fun MainViewModel.playSongForce(song: Song) = viewModelScope.launch {
         logToErrorLogs("fun MainViewModel.playSongForce EXCEPTION, loading song data now")
         logToErrorLogs(e.stackTraceToString())
         // TODO this might go into an infinite loop if no connection or all urls are invalid
-        loadSongData()
+        //loadSongData()
     }
     L( "MainEvent.Play", "play song launched. After")
 }
@@ -183,6 +183,6 @@ private fun MainViewModel.playPauseSong() = viewModelScope.launch {
     } catch (e: Exception) {
         // TODO this might go into an infinite loop if no connection or all urls are invalid
         //  do a retry timeout that increases every time and resets on successful song playback
-        loadSongData()
+        //loadSongData()
     }
 }

@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
+import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
@@ -109,11 +110,12 @@ fun ColourPlaylistHomeItem(
         Box(
             modifier = Modifier
                 .fillMaxSize(),
-            contentAlignment = Alignment.BottomStart
+            contentAlignment = Alignment.BottomEnd
         ) {
             getIconForPlaylist(playlist)?.let { icon ->
                 Icon(
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier
+                        .size(30.dp)
                         .padding(4.dp),
                     imageVector = icon,
                     contentDescription = null,
@@ -124,18 +126,18 @@ fun ColourPlaylistHomeItem(
             Box(
                 modifier = Modifier
                     .fillMaxSize(),
-                contentAlignment = Alignment.TopEnd
+                contentAlignment = Alignment.TopStart
             ) {
                 Text(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .padding(horizontal = 8.dp, vertical = 10.dp),
                     text = playlist.name,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.End,
+                    fontSize = fontDimensionResource(id = R.dimen.home_playlist_title_fontSize),
+                    textAlign = TextAlign.Start,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 2,
-                    lineHeight = (16).sp
+                    lineHeight = fontDimensionResource(id = R.dimen.home_playlist_title_lineHeight)
                 )
             }
         }

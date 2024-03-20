@@ -102,7 +102,7 @@ fun SongDetailTopBar(
             Text(
                 modifier = Modifier.basicMarquee(),
                 text = currentSongState?.artist?.name ?: Constants.ERROR_TITLE,
-                fontWeight = FontWeight.Light,
+                fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
                 maxLines = 1,
                 textAlign = TextAlign.Center

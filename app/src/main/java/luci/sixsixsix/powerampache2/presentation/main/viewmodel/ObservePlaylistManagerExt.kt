@@ -32,6 +32,9 @@ fun MainViewModel.observePlaylistManager() {
         playlistManager.currentSongState.collectLatest { songState ->
             songState?.let {
                 startMusicServiceIfNecessary()
+//                if (!isPlaying) {
+//                    loadSongData()
+//                }
             } ?: stopMusicService()
             // this is used to update the UI
             //state = state.copy(song = songState)

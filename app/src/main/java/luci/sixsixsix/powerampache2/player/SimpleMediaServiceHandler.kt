@@ -21,8 +21,12 @@
  */
 package luci.sixsixsix.powerampache2.player
 
+import android.media.session.PlaybackState
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.datasource.HttpDataSource.HttpDataSourceException
+import androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -33,11 +37,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import javax.inject.Inject
 
+
+@OptIn(DelicateCoroutinesApi::class)
 class SimpleMediaServiceHandler @Inject constructor(
     private val player: ExoPlayer,
-    private val playlistManager: MusicPlaylistManager
+    private val playlistManager: MusicPlaylistManager,
+    private val errorHandler: ErrorHandler
 ): Player.Listener {
     private val _simpleMediaState = MutableStateFlow<SimpleMediaState>(SimpleMediaState.Initial)
     val simpleMediaState = _simpleMediaState.asStateFlow()
@@ -79,6 +87,9 @@ class SimpleMediaServiceHandler @Inject constructor(
 
             val indexInQueue = mediaItems.map { mediaItem ->  mediaItem.mediaId }.indexOf(player.currentMediaItem?.mediaId)
             L("indexInQueue", indexInQueue)
+            if (!isPlaying()) {
+                player.addMediaItem(indexInQueue, mediaItems[indexInQueue])
+            }
             if (indexInQueue >= 0 && indexInQueue < mediaItems.size) {
                 player.addMediaItems(0, mediaItems.subList(0, indexInQueue))
                 player.addMediaItems(
@@ -115,6 +126,25 @@ class SimpleMediaServiceHandler @Inject constructor(
         return indexToSeekTo
     }
 
+    private suspend fun play() {
+        // TODO check if there is actually songs in the queue before playing
+        //  do the same with forceplay?
+        if (simpleMediaState.value == SimpleMediaState.Idle ||
+            simpleMediaState.value == SimpleMediaState.Ended ||
+            player.playbackState == PlaybackState.STATE_STOPPED ||
+            player.playbackState == PlaybackState.STATE_ERROR ||
+            player.playbackState == PlaybackState.STATE_NONE) {
+            L("onPlayerEvent !player.isPlaying, PrEPARE")
+
+            player.prepare()
+        }
+        L("onPlayerEvent !player.isPlaying, play now")
+        player.play()
+        L("onPlayerEvent !player.isPlaying, play now -after called play")
+        _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
+        startProgressUpdate()
+    }
+
     suspend fun onPlayerEvent(playerEvent: PlayerEvent) {
         L(playerEvent, player.mediaItemCount, player.currentMediaItem?.mediaId, player.currentMediaItem?.mediaMetadata?.title)
         when (playerEvent) {
@@ -126,12 +156,7 @@ class SimpleMediaServiceHandler @Inject constructor(
                     player.pause()
                     stopProgressUpdate()
                 } else {
-                    // TODO check if there is actually songs in the queue before playing
-                    //  do the same with forceplay?
-                    L("onPlayerEvent !player.isPlaying, play now")
-                    player.play()
-                    _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
-                    startProgressUpdate()
+                    play()
                 }
             }
             is PlayerEvent.Stop -> stopProgressUpdate()
@@ -154,9 +179,7 @@ class SimpleMediaServiceHandler @Inject constructor(
                     player.seekTo(0, 0)
                 }
 
-                player.play()
-                _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
-                startProgressUpdate()
+                play()
             }
             is PlayerEvent.RepeatToggle -> player.repeatMode =
                 when(playerEvent.repeatMode) {
@@ -238,6 +261,29 @@ class SimpleMediaServiceHandler @Inject constructor(
     private fun stopProgressUpdate() {
         job?.cancel()
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = false)
+    }
+
+    override fun onPlayerError(error: PlaybackException) {
+        GlobalScope.launch {
+            when (val cause = error.cause) {
+                is HttpDataSourceException -> {
+                    // An HTTP error occurred.
+                    // It's possible to find out more about the error both by casting and by
+                    // querying the cause.
+                    if (cause is InvalidResponseCodeException) {
+                        //(cause as InvalidResponseCodeException).headerFields
+                        errorHandler<InvalidResponseCodeException>(label = "onPlayerError Invalid response code ${cause.responseCode} - ${cause.responseMessage}", error)
+                    } else {
+                        // Try calling httpError.getCause() to retrieve the underlying cause,
+                        // although note that it may be null.
+                        errorHandler<HttpDataSourceException>(label = "onPlayerError HttpDataSourceException", error)
+                    }
+                }
+                else -> {
+                    errorHandler<PlaybackException>(label = "onPlayerError PlaybackException", error)
+                }
+            }
+        }
     }
 }
 

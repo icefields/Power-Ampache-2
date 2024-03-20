@@ -57,8 +57,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
@@ -122,6 +124,7 @@ import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchViewEvent
 import luci.sixsixsix.powerampache2.presentation.search.SearchViewModel
 import luci.sixsixsix.powerampache2.presentation.search.screens.GenresScreen
+import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
 @Composable
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
@@ -382,6 +385,17 @@ fun MainSearchBar(
 //                }
             }
         },
+        colors = SearchBarDefaults.colors(
+            dividerColor = Color.Transparent,
+            containerColor = MaterialTheme.colorScheme.additionalColours.surfaceContainerHigh,
+            inputFieldColors = SearchBarDefaults.inputFieldColors(
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            )
+        ),
+        //shape = RoundedCornerShape(10.dp),
         query = state.searchQuery,
         onQueryChange = {
             mainViewModel.onEvent(MainEvent.OnSearchQueryChange(it))

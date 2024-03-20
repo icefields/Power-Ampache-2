@@ -28,7 +28,7 @@ interface ErrorHandler {
     suspend operator fun <T> invoke(
         label:String = "",
         e: Throwable,
-        fc: FlowCollector<Resource<T>>,
+        fc: FlowCollector<Resource<T>>? = null,
         onError: (message: String, e: Throwable) -> Unit = { _, _ -> { } }
     )
 

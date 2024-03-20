@@ -33,15 +33,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.screens.home.LoadingView
+
+typealias PlaylistColumn = ArrayList<Playlist>
 
 const val HOME_LOADING_VIEW_IDENTIFIER = "luci.sixsixsix.powerampache2.presentation.screens.home.loading"
 
@@ -55,7 +59,7 @@ fun HomeScreenSection(
         Column {
             SectionTitle(text = text)
             SectionRow(navigator = navigator, albumsRow = albumsRow)
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.home_row_spacing)))
         }
     } else if (text == HOME_LOADING_VIEW_IDENTIFIER && albumsRow == null) {
         // TODO this is a hack: passing  a const string as identifier to visualize a loading progress
@@ -76,8 +80,6 @@ fun SectionTitle(text: String) {
         maxLines = 1,
     )
 }
-
-typealias PlaylistColumn = ArrayList<Playlist>
 
 @Composable
 fun SectionRow(navigator: DestinationsNavigator, albumsRow: List<Any>) {
@@ -114,9 +116,16 @@ fun SectionRow(navigator: DestinationsNavigator, albumsRow: List<Any>) {
                 items(albumsRow) { album: Any ->
                     when(album) {
                         is Album -> AlbumItemSquare(
-                            modifier = Modifier.heightIn(max = 260.dp).clickable {
-                                navigator.navigate(AlbumDetailScreenDestination(album.id, album))
-                            },
+                            modifier = Modifier
+                                .heightIn(max = 260.dp)
+                                .clickable {
+                                    navigator.navigate(
+                                        AlbumDetailScreenDestination(
+                                            album.id,
+                                            album
+                                        )
+                                    )
+                                },
                             album = album
                         )
                     }
