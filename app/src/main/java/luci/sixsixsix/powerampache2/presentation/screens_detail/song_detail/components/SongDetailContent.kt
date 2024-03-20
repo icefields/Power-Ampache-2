@@ -126,7 +126,7 @@ fun SongDetailContent(
         Box() {
             Column {
                 Text(
-                    text = currentSongState?.title ?: "",
+                    text = currentSongState?.artist?.name ?: "",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = fontDimensionResource(id = R.dimen.player_artistName_size),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -139,7 +139,7 @@ fun SongDetailContent(
                 Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
-                    text = currentSongState?.artist?.name ?: "",
+                    text = currentSongState?.title ?: "",
                     fontWeight = FontWeight.Normal,
                     fontSize = fontDimensionResource(id = R.dimen.player_songTitle_size),
                     color = MaterialTheme.colorScheme.onSurface,

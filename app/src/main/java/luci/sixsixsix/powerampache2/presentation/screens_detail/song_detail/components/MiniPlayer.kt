@@ -114,22 +114,7 @@ fun MiniPlayerContent(
     modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit
 ) {
-//    var showDeleteSongDialog by remember { mutableStateOf(false) }
     val weakContext = WeakContext(LocalContext.current.applicationContext)
-
-//    if(showDeleteSongDialog) {
-//        EraseConfirmDialog(
-//            onDismissRequest = {
-//                showDeleteSongDialog = false
-//            },
-//            onConfirmation = {
-//                showDeleteSongDialog = false
-//                onEvent(MainEvent.Reset)
-//            },
-//            dialogTitle = stringResource(id = R.string.miniPlayer_reset_alert_title),
-//            dialogText = stringResource(id = R.string.miniPlayer_reset_alert_message)
-//        )
-//    }
 
     Card(
         border = BorderStroke(
@@ -180,21 +165,8 @@ fun MiniPlayerContent(
                     .weight(1.0f)
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.Start
             ) {
-                Text(
-                    modifier = Modifier.basicMarquee(),
-                    text = song.title,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 16.sp,
-                    maxLines = 1,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(
-                    modifier = Modifier
-                        .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer))
-                )
                 Text(
                     modifier = Modifier.basicMarquee(),
                     text = song.artist.name,
@@ -202,7 +174,17 @@ fun MiniPlayerContent(
                     fontSize = 14.sp,
                     maxLines = 1,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Start
+                )
+                Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
+                Text(
+                    modifier = Modifier.basicMarquee(),
+                    text = song.title,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                    maxLines = 1,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Start
                 )
             }
 
