@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
@@ -52,6 +53,7 @@ import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +84,22 @@ fun SongDetailQueueScreenContent(
             )
         }
     }
+
+    var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
+    showDeleteSongDialog?.let { songToRemove ->
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteSongDialog = null
+            },
+            onConfirmation = {
+                showDeleteSongDialog = null
+                viewModel.onEvent(QueueEvent.OnSongRemove(songToRemove))
+            },
+            dialogTitle = "REMOVE SONG",
+            dialogText = "Delete ${songToRemove.name} from your queue?"
+        )
+    }
+
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
         itemsIndexed(
@@ -123,7 +141,9 @@ fun SongDetailQueueScreenContent(
                         viewModel.onEvent(QueueEvent.OnSongSelected(song))
                     },
                 enableSwipeToRemove = true,
-                onRemove = { viewModel.onEvent(QueueEvent.OnSongRemove(it)) },
+                onRemove = { songToRemove ->
+                    showDeleteSongDialog = songToRemove
+                },
                 onRightToLeftSwipe = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                 }

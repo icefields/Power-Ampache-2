@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
@@ -45,6 +46,7 @@ import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.QueueEvent
@@ -76,6 +78,21 @@ fun QueueScreenContent(
                 }
             )
         }
+    }
+
+    var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
+    showDeleteSongDialog?.let { songToRemove ->
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteSongDialog = null
+            },
+            onConfirmation = {
+                showDeleteSongDialog = null
+                queueViewModel.onEvent(QueueEvent.OnSongRemove(songToRemove))
+            },
+            dialogTitle = "REMOVE SONG",
+            dialogText = "Delete ${songToRemove.name} from your queue?"
+        )
     }
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
@@ -122,7 +139,9 @@ fun QueueScreenContent(
                         mainViewModel.onEvent(MainEvent.Play(song))
                     },
                 enableSwipeToRemove = true,
-                onRemove = { queueViewModel.onEvent(QueueEvent.OnSongRemove(it)) },
+                onRemove = { songToRemove ->
+                    showDeleteSongDialog = songToRemove
+                },
                 onRightToLeftSwipe = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                 }
