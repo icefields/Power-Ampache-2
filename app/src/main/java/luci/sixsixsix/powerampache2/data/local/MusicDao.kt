@@ -116,10 +116,10 @@ interface MusicDao {
     @Query("DELETE FROM songentity")
     suspend fun clearSongs()
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName order by playCount""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName order by flag DESC, rating DESC, playCount DESC""")
     suspend fun searchSong(query: String): List<SongEntity>
 
-    @Query("""SELECT * FROM songentity WHERE playCount > 0 order by playCount DESC""")
+    @Query("""SELECT * FROM songentity WHERE playCount > 0 order by playCount DESC, flag DESC, rating DESC""")
     suspend fun getMostPlayedSongs(): List<SongEntity>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName AND LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
@@ -128,7 +128,7 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity WHERE LOWER(:songId) == LOWER(mediaId)""")
     suspend fun getSongById(songId: String): SongEntity?
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by trackNumber, playCount""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by trackNumber, flag DESC, rating DESC, playCount DESC""")
     suspend fun getSongFromAlbum(albumId: String): List<SongEntity>
 
 // --- ARTISTS ---
@@ -147,7 +147,7 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == genre""")
     suspend fun searchSongByGenre(genre: String): List<SongEntity>
 
-    @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time""")
+    @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time DESC""")
     suspend fun getArtist(artistId: String): ArtistEntity?
 
 // --- PLAYLISTS ---

@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AttributeText
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.MusicAttributeChips
+import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
 
 enum class ArtistInfoViewEvents {
     SHARE_ARTIST

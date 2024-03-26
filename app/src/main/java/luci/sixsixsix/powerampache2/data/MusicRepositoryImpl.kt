@@ -92,17 +92,18 @@ class MusicRepositoryImpl @Inject constructor(
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
         sessionLiveData.distinctUntilChanged().observeForever { session ->
-            session?.auth?.let {
+            session?.auth?.let { newToken ->
                 // if token has changed or user is null, get user from network
-                if (it != currentAuthToken || currentUser == null)
-                    currentAuthToken = it
+                if (newToken != currentAuthToken || currentUser == null) {
+                    currentAuthToken = newToken
                     GlobalScope.launch {
                         try {
-                            getUserNetwork()
+                            currentUser = getUserNetwork()
                         } catch (e: Exception) {
                             errorHandler.logError(e)
                         }
                     }
+                }
             }
         }
     }
@@ -119,21 +120,19 @@ class MusicRepositoryImpl @Inject constructor(
         dao.updateSession(se.toSessionEntity())
     }
 
-    private suspend fun getUserNetwork() {
+    private suspend fun getUserNetwork(): User? =
         getCredentials()?.username?.let { username ->
             getSession()?.let { session ->
                 api.getUser(authKey = session.auth, username = username)
-                    .also { userDto ->
+                    .let { userDto ->
                         userDto.id?.let {
-                            userDto.toUser().let { us ->
-                                currentUser = us
+                            userDto.toUser().also { us ->
                                 setUser(us)
                             }
                         }
                     }
             }
         }
-    }
 
     /**
      * updating the user in the database will trigger the user live data, observe that

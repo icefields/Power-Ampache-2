@@ -40,7 +40,7 @@ import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AttributeText
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.MusicAttributeChips
+import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
 
 enum class PlaylistInfoViewEvents {
     PLAY_PLAYLIST,

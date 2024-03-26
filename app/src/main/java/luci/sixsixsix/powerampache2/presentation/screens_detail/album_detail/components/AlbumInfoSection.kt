@@ -43,6 +43,7 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
+import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
 
 enum class AlbumInfoViewEvents {
     PLAY_ALBUM,

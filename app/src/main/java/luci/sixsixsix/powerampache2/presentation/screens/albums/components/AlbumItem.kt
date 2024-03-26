@@ -37,7 +37,6 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoSection
 import java.util.UUID
 
 @OptIn(ExperimentalFoundationApi::class)
