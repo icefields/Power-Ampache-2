@@ -40,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,6 +81,8 @@ fun AddToPlaylistOrQueueDialog(
     mainViewModel: MainViewModel,
     viewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
+    val playlistsState by viewModel.playlistsStateFlow.collectAsState()
+
     var headerBgColour by remember { mutableStateOf(Color.Transparent) }
     // workaround, not allowed to call RandomThemeBackgroundColour() inside remember block
     if (headerBgColour == Color.Transparent)
@@ -163,7 +166,7 @@ fun AddToPlaylistOrQueueDialog(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    items(viewModel.state.playlists) { playlist ->
+                    items(playlistsState) { playlist ->
                         PlaylistDialogItem(
                             title = playlist.name,
                             backgroundColour = listBgColour,

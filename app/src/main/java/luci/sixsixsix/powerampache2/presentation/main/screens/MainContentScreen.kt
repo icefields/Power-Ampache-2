@@ -37,14 +37,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -52,7 +48,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -60,7 +55,6 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
@@ -123,7 +117,6 @@ import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.search.SearchViewEvent
 import luci.sixsixsix.powerampache2.presentation.search.SearchViewModel
-import luci.sixsixsix.powerampache2.presentation.search.screens.GenresScreen
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
 @Composable
@@ -141,7 +134,9 @@ fun MainContentScreen(
     // IMPORTANT : set the main navigator right away here in MainScreen
     Ampache2NavGraphs.navigator = navigator
     val queueState by mainViewModel.currentQueue().collectAsState()
-    val offlineModeState = settingsViewModel.offlineModeState// by settingsViewModel.offlineModeFlow.collectAsState(initial = false)
+    val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
+    val localSettingsState by settingsViewModel.localSettingsStateFlow.collectAsState()
+
     val tabsCount = tabItems.size
     val pagerState = rememberPagerState { tabsCount }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -200,7 +195,7 @@ fun MainContentScreen(
                 currentItem = MainContentMenuItem.toMainContentMenuItem(currentScreen),
                 user = authViewModel.state.user ?: User.emptyUser(),
                 versionInfo = settingsViewModel.state.appVersionInfoStr,
-                hideDonationButtons = settingsViewModel.state.localSettings.hideDonationButton,
+                hideDonationButtons = localSettingsState.hideDonationButton,
                 onItemClick = {
                     currentScreen = it.id
                     currentScreenClass = it.javaClass.canonicalName

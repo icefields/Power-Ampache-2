@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -89,17 +90,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
         val auth = getSession()!!
         val user = dao.getCredentials()?.username
-        val response = api.getPlaylists(auth.auth, filter = query, offset = offset)
-        response.error?.let { throw(MusicException(it.toError())) }
-        val playlists = (if (BuildConfig.SHOW_EMPTY_PLAYLISTS) {
-            response.playlist!! // will throw exception if playlist null
-        } else {
-            response.playlist!!.filter { dtoToFilter -> // will throw exception if playlist null
-                dtoToFilter.items?.let { itemsCount ->
-                    itemsCount > 0 || dtoToFilter.owner == user // edge-case default behaviour, user==null and owner==null will show the playlist
-                } ?: (dtoToFilter.owner == user) // if the count is null fallback to show the playlist if the user is the owner
-            }
-        }).map { it.toPlaylist() }
+        val playlists = getPlaylistsNetwork(auth.auth, user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
 
         if ( // Playlists change too often, clear every time
             query.isNullOrBlank() &&
@@ -114,6 +105,48 @@ class PlaylistsRepositoryImpl @Inject constructor(
         emit(Resource.Success(data = dao.searchPlaylists(query).map { it.toPlaylist() }, networkData = playlists))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylists()", e, this) }
+
+    private suspend fun getPlaylistsNetwork(
+        auth: String,
+        username: String?,
+        offset: Int,
+        query: String,
+        fetchAll: Boolean = false
+    ) = mutableListOf<Playlist>().apply {
+        var off = if (offset == 0 && fetchAll) 0 else offset
+        val maxIterations = 100
+        var counter = 0
+        var isMoreAvailable = false
+        do {
+            val response = api.getPlaylists(auth, filter = query, offset = off)
+            response.error?.let { throw (MusicException(it.toError())) }
+            val responseSize = response.playlist?.size ?: 0
+            val totalCount = response.totalCount?.let { tot ->
+                // if this field is null or empty in the response, return max possible value
+                if (tot > 0) {
+                    tot
+                } else {
+                    Int.MAX_VALUE
+                }
+            } ?: Int.MAX_VALUE
+            off += responseSize
+
+            val playlists = (if (BuildConfig.SHOW_EMPTY_PLAYLISTS) {
+                response.playlist!! // will throw exception if playlist null
+            } else {
+                response.playlist!!.filter { dtoToFilter -> // will throw exception if playlist null
+                    dtoToFilter.items?.let { itemsCount ->
+                        itemsCount > 0 || dtoToFilter.owner == username // edge-case default behaviour, user==null and owner==null will show the playlist
+                    }
+                        ?: (dtoToFilter.owner == username) // if the count is null fallback to show the playlist if the user is the owner
+                }
+            }).map { it.toPlaylist() }
+            addAll(playlists)
+            // if the current response is not empty there might be more
+            // check if the total count data is less than then current offset
+            isMoreAvailable = responseSize != 0 && totalCount > off
+        } while (fetchAll && isMoreAvailable && ++counter < maxIterations)
+    }.toList()
 
     override suspend fun getPlaylist(id: String) =
         dao.playlistLiveData(id).distinctUntilChanged().asFlow().filterNotNull().mapNotNull { it.toPlaylist() }

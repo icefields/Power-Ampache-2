@@ -100,10 +100,10 @@ fun SignUpDialog(
         onDismissRequest = { isSignUpSheetOpen.value = false }
     )  {
         Card(
-            border = BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface
-            ),
+//            border = BorderStroke(
+//                width = 0.dp,
+//                color = MaterialTheme.colorScheme.onSurface
+//            ),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),

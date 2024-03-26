@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
@@ -157,29 +156,83 @@ class AlbumsRepositoryImpl @Inject constructor(
 
     // --- HOME PAGE data ---
 
-    private suspend fun getAlbumsStats(statFilter: MainNetwork.StatFilter): Flow<Resource<List<Album>>> = flow {
+    private suspend fun getAlbumsStatsDb(statFilter: MainNetwork.StatFilter) = when (statFilter) {
+        MainNetwork.StatFilter.random -> dao.getRandomAlbums()
+        MainNetwork.StatFilter.recent -> listOf()
+        MainNetwork.StatFilter.newest -> dao.getRecentlyReleasedAlbums()
+        MainNetwork.StatFilter.frequent -> dao.getMostPlayedAlbums()
+        MainNetwork.StatFilter.flagged -> dao.getLikedAlbums()
+        MainNetwork.StatFilter.forgotten -> listOf()
+        MainNetwork.StatFilter.highest -> dao.getHighestRatedAlbums()
+    }
+
+    private suspend fun parseStatData(
+        preNetworkDbAlbums: List<Album>,
+        albumsNetwork: List<Album>,
+        statFilter: MainNetwork.StatFilter
+    ) = if (statFilter == MainNetwork.StatFilter.flagged || statFilter == MainNetwork.StatFilter.highest) {
+        val dbAlbumsNew = getAlbumsStatsDb(statFilter)
+        if (dbAlbumsNew.isNotEmpty()) {
+            dbAlbumsNew.map { it.toAlbum() }
+        } else {
+            albumsNetwork
+        }
+    } else if  (statFilter == MainNetwork.StatFilter.frequent) {
+        // frequent is locally calculate using a query that counts the number of plays
+        // for each song of each album, since the backend calculates it differently,
+        // append the 2 results
+        LinkedHashSet(preNetworkDbAlbums).apply {
+            addAll(albumsNetwork)
+        }.toList()
+    } else {
+        albumsNetwork
+    }
+
+    private suspend fun getAlbumsStats(
+        statFilter: MainNetwork.StatFilter,
+        fetchRemote: Boolean = true
+    ) = flow {
         emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.getAlbumsStats(
-            auth.auth,
-            username = getCredentials()?.username,
-            filter = statFilter
-        ).albums?.map { it.toAlbum() }?.let {
-            emit(Resource.Success(data = it, networkData = it))
-        }?:run {
-            // TODO throw exception, without updating the UI error message snackbar! create a MusicException that ErrorHAndler will intercept?
-            // throw Exception("error connecting or getting data")
-            L.e("error connecting or getting data")
+        val dbAlbums = getAlbumsStatsDb(statFilter).map { it.toAlbum() }
+        emit(Resource.Success(data = dbAlbums, networkData = null))
+
+        if (fetchRemote) {
+            val auth = getSession()!!
+            api.getAlbumsStats(
+                auth.auth,
+                username = getCredentials()?.username,
+                filter = statFilter
+            ).albums?.let { albumsDto ->
+                val albumsNetwork = albumsDto.map { it.toAlbum() }
+                dao.insertAlbums(albumsNetwork.map { it.toAlbumEntity() })
+                // if getting highest rated and flagged return data from database for consistency
+                val data = parseStatData(
+                    preNetworkDbAlbums = dbAlbums,
+                    albumsNetwork = albumsNetwork,
+                    statFilter = statFilter
+                )
+                emit(Resource.Success(data = data, networkData = albumsNetwork))
+            } ?: run {
+                // TODO throw exception, without updating the UI error message snackbar! create a MusicException that ErrorHAndler will intercept?
+                // throw Exception("error connecting or getting data")
+                L.e("getAlbumsStats() error connecting or getting data")
+            }
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getAlbumsStats()", e, this) }
 
-    override suspend fun getRecentAlbums() = getAlbumsStats(MainNetwork.StatFilter.recent)
-    override suspend fun getNewestAlbums() = getAlbumsStats(MainNetwork.StatFilter.newest)
-    override suspend fun getHighestAlbums() = getAlbumsStats(MainNetwork.StatFilter.highest)
-    override suspend fun getFrequentAlbums() = getAlbumsStats(MainNetwork.StatFilter.frequent)
-    override suspend fun getFlaggedAlbums() = getAlbumsStats(MainNetwork.StatFilter.flagged)
-    override suspend fun getRandomAlbums() = getAlbumsStats(MainNetwork.StatFilter.random)
+    override suspend fun getRecentAlbums() =
+        getAlbumsStats(MainNetwork.StatFilter.recent)
+    override suspend fun getNewestAlbums() =
+        getAlbumsStats(MainNetwork.StatFilter.newest)
+    override suspend fun getHighestAlbums() =
+        getAlbumsStats(MainNetwork.StatFilter.highest)
+    override suspend fun getFrequentAlbums() =
+        getAlbumsStats(MainNetwork.StatFilter.frequent)
+    override suspend fun getFlaggedAlbums() =
+        getAlbumsStats(MainNetwork.StatFilter.flagged)
+    override suspend fun getRandomAlbums(fetchRemote: Boolean) =
+        getAlbumsStats(MainNetwork.StatFilter.random, fetchRemote)
 
     override suspend fun getAlbumShareLink(albumId: String) = flow {
         emit(Resource.Loading(true))

@@ -27,17 +27,13 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 
 fun MainViewModel.observePlaylistManager() {
+
     // listen to current-song changes
     viewModelScope.launch {
         playlistManager.currentSongState.collectLatest { songState ->
             songState?.let {
                 startMusicServiceIfNecessary()
-//                if (!isPlaying) {
-//                    loadSongData()
-//                }
             } ?: stopMusicService()
-            // this is used to update the UI
-            //state = state.copy(song = songState)
         }
     }
 
@@ -65,7 +61,7 @@ fun MainViewModel.observePlaylistManager() {
                 stopMusicService()
             }
 
-            L("observing playlist change queue:", queue.size)
+            L("**** observing playlist change queue (before Load song data) :", queue.size)
             // this is used to update the UI
             // state = state.copy(queue = queue)
             loadSongData()

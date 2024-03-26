@@ -69,17 +69,19 @@ fun LoggedInScreen(
     //homeScreenViewModel: HomeScreenViewModel
 ) {
     val state = mainViewModel.state
+    val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState(initial = false)
+
     val songState by mainViewModel.currentSongStateFlow().collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState()
     val errorMessageOffline = stringResource(id = R.string.error_offline)
 
     // if offline show fixed snackbar to allow user time to tap on the button
-    val showSnackBarShowDuration = if (settingsViewModel.offlineModeState) {
+    val showSnackBarShowDuration = if (offlineModeState) {
         SnackbarDuration.Indefinite
     } else SnackbarDuration.Long
 
     // disable snackbar errors in offline mode
-    if (state.errorMessage != "" && !settingsViewModel.offlineModeState) {
+    if (state.errorMessage != "" && !offlineModeState) {
         LaunchedEffect(scaffoldState.snackbarHostState, state.errorMessage) {
             scaffoldState.snackbarHostState.showSnackbar(
                 message = state.errorMessage,

@@ -45,23 +45,6 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
                 playlistManager.updateSearchQuery(event.query)
             }
         }
-        is MainEvent.Play -> {
-            if (loadSongDataJob?.isActive == true) {
-                L( "MainEvent.Play", "loadSongDataJob?.isActive")
-                loadSongDataJob?.invokeOnCompletion {
-                    //loadSongDataJob = null
-                    it?.let {
-                        L.e(it)
-                    } ?: run {
-                        L( "MainEvent.Play", "invokeOnCompletion")
-                        playSongForce(event.song)
-                    }
-                }
-            } else {
-                L( "MainEvent.Play", "play directly")
-                playSongForce(event.song)
-            }
-        }
         MainEvent.PlayPauseCurrent -> currentSong()?.let { song ->
             if (loadSongDataJob?.isActive == true) {
                 L( "MainEvent.PlayPauseCurrent", "loadSongDataJob?.isActive")
@@ -79,6 +62,15 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
                 playPauseSong()
             }
         }
+        is MainEvent.AddSongsToQueueAndPlay ->
+            addSongsToQueueAndPlay(event.song, event.songList)
+        is MainEvent.PlaySong ->
+            playSong(event.song)
+        is MainEvent.PlaySongAddToQueueTop ->
+            playSongAddToQueueTop(event.song, event.songList)
+        is MainEvent.AddSongsToQueueAndPlayShuffled ->
+            addSongsToQueueAndPlayShuffled(event.songList)
+
         MainEvent.OnDismissUserMessage ->
             playlistManager.updateUserMessage("")
         MainEvent.OnLogout ->
@@ -156,6 +148,60 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         MainEvent.OnEnableOfflineMode -> viewModelScope.launch {
             settingsRepository.toggleOfflineMode()
         }
+    }
+}
+
+/**
+ * to play albums and playlists
+ */
+fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
+    playlistManager.updateCurrentSong(song)
+    playlistManager.addToCurrentQueueTop(songList)
+    play(song)
+}
+
+/**
+ * select a single song, play, and put it on the top of the queue
+ * the song list is just for verification (TODO: should that be optional?)
+ */
+private fun MainViewModel.playSongAddToQueueTop(song: Song, songList: List<Song>) {
+    playlistManager.addToCurrentQueueUpdateTopSong(song, songList)
+    play(song)
+}
+
+/**
+ * select song from current queue and play
+ */
+private fun MainViewModel.playSong(song: Song) {
+    playlistManager.updateCurrentSong(song)
+    play(song)
+}
+
+private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<Song>) {
+    val shuffled = songList.shuffled()
+    playlistManager.replaceCurrentQueue(shuffled)
+    playlistManager.updateCurrentSong(shuffled[0])
+
+    if (!isPlaying) {
+        onEvent(MainEvent.PlayPauseCurrent)
+    }
+}
+
+private fun MainViewModel.play(song: Song) {
+    if (loadSongDataJob?.isActive == true) {
+        L( "MainEvent.Play", "loadSongDataJob?.isActive")
+        loadSongDataJob?.invokeOnCompletion {
+            //loadSongDataJob = null
+            it?.let {
+                L.e(it)
+            } ?: run {
+                L( "MainEvent.Play", "invokeOnCompletion")
+                playSongForce(song)
+            }
+        }
+    } else {
+        L( "MainEvent.Play", "play directly")
+        playSongForce(song)
     }
 }
 

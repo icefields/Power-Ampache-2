@@ -105,8 +105,9 @@ fun SongsListScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    viewModel.onEvent(SongsEvent.OnSongSelected(song))
-                                    mainViewModel.onEvent(MainEvent.Play(song))
+                                    mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.getSongList()))
+//                                    viewModel.onEvent(SongsEvent.OnSongSelected(song))
+//                                    mainViewModel.onEvent(MainEvent.Play(song))
                                 }
                         )
                         // TODO decide to include or not this

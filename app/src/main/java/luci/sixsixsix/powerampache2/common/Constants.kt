@@ -35,6 +35,7 @@ object Constants {
 
     const val NETWORK_REQUEST_LIMIT_HOME = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE = 40
+    const val DATABASE_LIMIT_ELEMENTS = 66
     const val QUICK_PLAY_MIN_SONGS = 50
 
     // ERROR CONSTANTS
@@ -46,6 +47,7 @@ object Constants {
     // FLAGS
     const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
     const val CLEAR_TABLE_AFTER_FETCH = false
+    const val ALWAYS_FETCH_ALL_PLAYLISTS = true
 
     // DEBUG VALUES
     const val NETWORK_REQUEST_LIMIT_DEBUG = 20

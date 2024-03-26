@@ -25,8 +25,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
@@ -48,29 +55,11 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     var state by mutableStateOf(AddToPlaylistOrQueueDialogState())
     private var isEndOfDataReached: Boolean = false
 
-    init {
-        getPlaylists()
-        // playlists can change or be edited, make sure to always listen to the latest version
-        playlistsRepository.playlistsLiveData.observeForever {
-            viewModelScope.launch {
-                L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
-                val playlists = filterPlaylists(it)
-                if (playlists.isNotEmpty() && state.playlists != playlists) {
-                    L("viewmodel.getPlaylists playlists are different, update")
-                    state = state.copy(playlists = playlists)
-                }
-            }
-        }
-    }
-
-    private suspend fun filterPlaylists(playlists: List<Playlist>) =
-        ArrayList<Playlist>().apply {
-            playlists.forEach { playlist: Playlist ->
-                if (playlist.owner == musicRepository.getUser()?.username) {
-                    add(playlist)
-                }
-            }
-        }
+    val playlistsStateFlow: StateFlow<List<Playlist>> =
+        playlistsRepository.playlistsLiveData.distinctUntilChanged().asFlow().filterNotNull()
+            .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlists, user ->
+                playlists.filter { it.owner == user.username }
+            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     fun onEvent(event: AddToPlaylistOrQueueDialogEvent) {
         when (event) {
@@ -102,12 +91,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let {
-                                val playlists = filterPlaylists(it)
-                                if (state.playlists != playlists) {
-                                    L("viewmodel.getPlaylists playlists are different, update")
-                                    state = state.copy(playlists = playlists)
-                                }
-                                L("viewmodel.getPlaylists size", state.playlists.size)
+                                L("viewmodel.getPlaylists playlists:", it.size)
                             }
                             isEndOfDataReached = (result.networkData?.isEmpty() == true && offset > 0)
                             L("viewmodel.getPlaylists is bottom reached?", isEndOfDataReached, "offset", offset, "size of new array", result.networkData?.size)
@@ -203,7 +187,6 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
 }
 
 data class AddToPlaylistOrQueueDialogState (
-    val playlists: List<Playlist> = emptyList(),
     val isLoading: Boolean = false,
     val isPlaylistEditLoading: Boolean = false,
 )

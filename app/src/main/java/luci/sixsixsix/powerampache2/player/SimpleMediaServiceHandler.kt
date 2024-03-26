@@ -87,7 +87,7 @@ class SimpleMediaServiceHandler @Inject constructor(
 
             val indexInQueue = mediaItems.map { mediaItem ->  mediaItem.mediaId }.indexOf(player.currentMediaItem?.mediaId)
             L("indexInQueue", indexInQueue)
-            if (!isPlaying()) {
+            if (!isPlaying() && indexInQueue > -1) {
                 player.addMediaItem(indexInQueue, mediaItems[indexInQueue])
             }
             if (indexInQueue >= 0 && indexInQueue < mediaItems.size) {

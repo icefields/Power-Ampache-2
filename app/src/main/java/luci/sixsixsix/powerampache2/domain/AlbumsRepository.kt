@@ -33,7 +33,7 @@ interface AlbumsRepository {
     suspend fun getHighestAlbums(): Flow<Resource<List<Album>>>
     suspend fun getFrequentAlbums(): Flow<Resource<List<Album>>>
     suspend fun getFlaggedAlbums(): Flow<Resource<List<Album>>>
-    suspend fun getRandomAlbums(): Flow<Resource<List<Album>>>
+    suspend fun getRandomAlbums(fetchRemote: Boolean = true): Flow<Resource<List<Album>>>
     suspend fun getAlbum(albumId: String, fetchRemote: Boolean, ): Flow<Resource<Album>>
     suspend fun getAlbumShareLink(albumId: String): Flow<Resource<String>>
     suspend fun rateAlbum(albumId: String, rate: Int): Flow<Resource<Any>>

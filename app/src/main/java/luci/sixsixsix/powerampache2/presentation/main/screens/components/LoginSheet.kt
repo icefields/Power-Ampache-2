@@ -110,10 +110,10 @@ fun LoginDialog(
         onDismissRequest = { isLoginSheetOpen.value = false }
     )  {
         Card(
-            border = BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface
-            ),
+//            border = BorderStroke(
+//                width = 0.dp,
+//                color = MaterialTheme.colorScheme.onSurface
+//            ),
             modifier = Modifier,
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface

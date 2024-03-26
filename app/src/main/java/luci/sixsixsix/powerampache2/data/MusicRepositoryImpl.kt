@@ -22,11 +22,13 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -39,8 +41,6 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toGenre
 import luci.sixsixsix.powerampache2.data.local.entities.toGenreEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
-import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toUser
@@ -79,24 +79,30 @@ class MusicRepositoryImpl @Inject constructor(
     db: MusicDatabase,
     private val errorHandler: ErrorHandler
 ): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
-    private val _serverInfoLiveData = MutableLiveData(ServerInfo())
-    override val serverInfoLiveData = _serverInfoLiveData
+    private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
+    override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
     override val userLiveData: LiveData<User?>
         get() = userLiveData()
 
+    // used to check if a call to getUserNetwork() is necessary
+    private var currentAuthToken: String? = null
+    private var currentUser: User? = null
     init {
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
-        sessionLiveData.observeForever { session ->
+        sessionLiveData.distinctUntilChanged().observeForever { session ->
             session?.auth?.let {
-                GlobalScope.launch {
-                    try {
-                        getUserNetwork()
-                    } catch (e: Exception) {
-                        errorHandler.logError(e)
+                // if token has changed or user is null, get user from network
+                if (it != currentAuthToken || currentUser == null)
+                    currentAuthToken = it
+                    GlobalScope.launch {
+                        try {
+                            getUserNetwork()
+                        } catch (e: Exception) {
+                            errorHandler.logError(e)
+                        }
                     }
-                }
             }
         }
     }
@@ -119,14 +125,15 @@ class MusicRepositoryImpl @Inject constructor(
                 api.getUser(authKey = session.auth, username = username)
                     .also { userDto ->
                         userDto.id?.let {
-                            setUser(userDto.toUser())
+                            userDto.toUser().let { us ->
+                                currentUser = us
+                                setUser(us)
+                            }
                         }
                     }
             }
         }
     }
-
-
 
     /**
      * updating the user in the database will trigger the user live data, observe that
@@ -187,7 +194,8 @@ class MusicRepositoryImpl @Inject constructor(
 
             // server info always available
             val servInfo = pingResponse.toServerInfo()
-            _serverInfoLiveData.value = servInfo
+            L("aaa setting live data for server info $servInfo")
+            _serverInfoStateFlow.value = servInfo
             Resource.Success(Pair(servInfo, getSession()))
         } catch (e: IOException) {
             Resource.Error(message = "cannot load data", exception = e)

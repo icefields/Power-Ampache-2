@@ -84,17 +84,21 @@ class SongsRepositoryImpl @Inject constructor(
         query: String,
         offset: Int
     ) = if (!isOfflineModeEnabled()) {
+        // get songs from db, if the result is less than Constants.NETWORK_REQUEST_LIMIT_DEBUG
+        // also get songs from network
+        val songsDb = if (query.isNullOrBlank()) dao.searchSong("") else listOf()
+        if (songsDb.size < Constants.NETWORK_REQUEST_LIMIT_DEBUG) {
             getSongsNetwork(fetchRemote = fetchRemote, query = query, offset = offset)
         } else {
-            searchOfflineSongs(query)
+            flow {
+                emit(Resource.Success(data = songsDb.map { it.toSong()}))
+            }
         }
+    } else {
+        searchOfflineSongs(query)
+    }
 
-
-    /**
-     * TODO BREAKING_RULE single source of truth
-     *  the code here is very dirty, CLEAN SOON!!
-     */
-    suspend fun getSongsNetwork(
+    private suspend fun getSongsNetwork(
         fetchRemote: Boolean,
         query: String,
         offset: Int
@@ -123,7 +127,7 @@ class SongsRepositoryImpl @Inject constructor(
 //        }
 
         // network TODO WHAT IS THIS!!?? FIX !!!
-        val auth = getSession()!!//authorize2(false)
+        val auth = getSession()!!
         val hashSet = LinkedHashSet<Song>()
         val songs = if (query.isNullOrBlank()) {
             // not a search
@@ -148,8 +152,6 @@ class SongsRepositoryImpl @Inject constructor(
             response.error?.let { throw(MusicException(it.toError())) }
             response.songs!!.map { it.toSong() } // will throw exception if songs null
         }
-
-        L("getsongs - songs from web ${songs.size}")
 
         // db
         if (query.isNullOrBlank() && offset == 0 && Constants.CLEAR_TABLE_AFTER_FETCH) {

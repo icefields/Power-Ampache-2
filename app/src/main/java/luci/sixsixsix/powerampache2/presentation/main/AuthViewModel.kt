@@ -136,16 +136,14 @@ class AuthViewModel @Inject constructor(
 
     private suspend fun autologin() = repository.autoLogin().collect { result ->
         when (result) {
-            is Resource.Success -> {
-                result.data?.let { auth ->
+            is Resource.Success -> result.data?.let { auth ->
                     L("AuthViewModel", auth)
+                    // remove error messages after login
+                    playlistManager.updateErrorLogMessage("")
                     state = state.copy(session = auth)
                 }
-            }
-
             is Resource.Error -> state =
                 state.copy(isLoading = false)
-
             is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
         }
     }

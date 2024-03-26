@@ -124,7 +124,7 @@ class PlaylistDetailViewModel @Inject constructor(
             }
         }
 
-        // TODO rewrite using flows
+        // rewritten using flows
 //        savedStateHandle.get<Playlist>("playlist")?.let { playlist ->
 //            //playlistId.value = playlist.id
 //            state = state.copy(
@@ -155,22 +155,21 @@ class PlaylistDetailViewModel @Inject constructor(
                 }
             }
             is PlaylistDetailEvent.OnSongSelected -> {
-                playlistManager.addToCurrentQueueUpdateTopSong(state.songs[0].song, state.getSongList())
-
-//                playlistManager.updateTopSong(state.songs[0].song)
-//                playlistManager.addToCurrentQueue(state.getSongList())
+//                playlistManager.addToCurrentQueueUpdateTopSong(state.songs[0].song, state.getSongList())
             }
-            PlaylistDetailEvent.OnPlayPlaylist -> if (state.songs.isNotEmpty()) {
-                playlistManager.updateCurrentSong(state.songs[0].song)
-                playlistManager.addToCurrentQueueTop(state.getSongList())
-            }
+            PlaylistDetailEvent.OnPlayPlaylist -> { }
+//                if (state.songs.isNotEmpty()) {
+//                playlistManager.updateCurrentSong(state.songs[0].song)
+//                playlistManager.addToCurrentQueueTop(state.getSongList())
+//            }
             PlaylistDetailEvent.OnSharePlaylist ->
                 sharePlaylist(playlistId = playlistStateFlow.value.id)
-            PlaylistDetailEvent.OnShufflePlaylist -> if (state.songs.isNotEmpty()) {
-                val shuffled = state.getSongList().shuffled()
-                playlistManager.replaceCurrentQueue(shuffled)
-                playlistManager.updateCurrentSong(shuffled[0])
-            }
+            PlaylistDetailEvent.OnShufflePlaylist -> { }
+//                if (state.songs.isNotEmpty()) {
+//                val shuffled = state.getSongList().shuffled()
+//                playlistManager.replaceCurrentQueue(shuffled)
+//                playlistManager.updateCurrentSong(shuffled[0])
+//            }
             is PlaylistDetailEvent.OnRemoveSong ->
                 removeSongFromPlaylist(playlistId = playlistStateFlow.value.id, songId = event.song.mediaId)
             PlaylistDetailEvent.OnRemoveSongDismiss -> { } // TODO remove this

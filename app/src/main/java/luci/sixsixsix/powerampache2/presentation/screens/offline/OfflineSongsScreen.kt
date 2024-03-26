@@ -246,8 +246,9 @@ fun OfflineSongsMainContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            viewModel.onEvent(OfflineSongsEvent.OnSongSelected(song))
-                            mainViewModel.onEvent(MainEvent.Play(song))
+                            mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.songs))
+//                            viewModel.onEvent(OfflineSongsEvent.OnSongSelected(song))
+//                            mainViewModel.onEvent(MainEvent.Play(song))
                         },
                     enableSwipeToRemove = true,
                     onRemove = { songToRemove ->

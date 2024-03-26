@@ -53,12 +53,7 @@ class SongsViewModel @Inject constructor(
 
             is SongsEvent.OnSongSelected -> {
                 L("SongsEvent.OnSongSelected", event.song)
-                playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.getSongList())
-
-//                playlistManager.updateTopSong(event.song)
-//                if (playlistManager.currentQueueState.value.isEmpty()) {
-//                    playlistManager.addToCurrentQueue(state.getSongList())
-//                }
+                //playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.getSongList())
             }
         }
     }

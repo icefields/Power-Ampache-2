@@ -25,11 +25,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import javax.inject.Inject
 
 @HiltViewModel
 class QueueViewModel  @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
+    private val simpleMediaServiceHandler: SimpleMediaServiceHandler,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     //var queueState by savedStateHandle.saveable { mutableStateOf(listOf<Song>()) }
@@ -37,12 +39,11 @@ class QueueViewModel  @Inject constructor(
 
     fun onEvent(event: QueueEvent) {
         when(event) {
-            is QueueEvent.OnSongSelected ->
-                playlistManager.updateCurrentSong(event.song)
+            is QueueEvent.OnSongSelected -> { } //playlistManager.updateCurrentSong(event.song)
             QueueEvent.OnPlayQueue ->
                 playlistManager.startRestartQueue()
             QueueEvent.OnClearQueue ->
-                playlistManager.clearQueue()
+                playlistManager.clearQueue(simpleMediaServiceHandler.isPlaying())
             is QueueEvent.OnSongRemove ->
                 playlistManager.removeFromCurrentQueue(event.song)
         }

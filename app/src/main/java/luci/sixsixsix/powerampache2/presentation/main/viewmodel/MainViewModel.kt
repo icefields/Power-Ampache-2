@@ -65,12 +65,11 @@ class MainViewModel @Inject constructor(
     application: Application,
     private val weakContext: WeakContext,
     val playlistManager: MusicPlaylistManager,
-    private val playlistsRepository: PlaylistsRepository,
     val musicRepository: MusicRepository,
     val songsRepository: SongsRepository,
     val settingsRepository: SettingsRepository,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
-    private val savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) /*, MainQueueManager*/ {
 //    var state by mutableStateOf(MainState())
 //        private set
@@ -130,9 +129,10 @@ class MainViewModel @Inject constructor(
                 is Resource.Success -> {
                     result.data?.let { songs ->
                         if (songs.isNotEmpty()) {
-                            playlistManager.updateCurrentSong(songs[0])
-                            playlistManager.addToCurrentQueueTop(songs)
-                            onEvent(MainEvent.Play(songs[0]))
+                            addSongsToQueueAndPlay(songs[0], songs)
+//                            playlistManager.updateCurrentSong(songs[0])
+//                            playlistManager.addToCurrentQueueTop(songs)
+//                            onEvent(MainEvent.Play(songs[0]))
                         }
                     }
                 }
@@ -336,6 +336,7 @@ class MainViewModel @Inject constructor(
         super.onCleared()
     }
 
+    @Deprecated("completely rewrite before use, those cases might not exist anymore")
     fun onActivityRestart() {
         // if the link to play the song is not valid reload all the data
         // when the app goes in background without playing anything the token might be invalidated

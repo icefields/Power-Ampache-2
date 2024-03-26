@@ -32,6 +32,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -59,7 +60,7 @@ class SearchViewModel @Inject constructor(
 ) : ViewModel() {
     var state by mutableStateOf(SearchScreenState())
 
-    var offlineModeState by mutableStateOf(false)
+    private var offlineModeState by mutableStateOf(false)
     private var searchSongsDeferred: Deferred<Job>? = null
     private var searchAlbumsDeferred: Deferred<Job>? = null
     private var searchPlaylistsDeferred: Deferred<Job>? = null
@@ -77,7 +78,7 @@ class SearchViewModel @Inject constructor(
         fetchGenres()
         // TODO this code is a repetition of SettingsViewModel
         viewModelScope.launch {
-            offlineModeFlow.collect {
+            offlineModeFlow.distinctUntilChanged().collect {
                 if (it != offlineModeState) {
                     offlineModeState = it
                 }
@@ -309,7 +310,7 @@ class SearchViewModel @Inject constructor(
             SearchViewEvent.Clear ->
                 clearData()
             is SearchViewEvent.OnSongSelected -> {
-                playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.songs)
+                //playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.songs)
             }
 
             SearchViewEvent.FetchGenres ->

@@ -137,8 +137,9 @@ fun SongDetailQueueScreenContent(
                     .fillMaxWidth()
                     .background(if (song == currentSongState) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
                     .clickable {
-                        mainViewModel.onEvent(MainEvent.Play(song))
-                        viewModel.onEvent(QueueEvent.OnSongSelected(song))
+                        mainViewModel.onEvent(MainEvent.PlaySong(song))
+//                        mainViewModel.onEvent(MainEvent.Play(song))
+//                        viewModel.onEvent(QueueEvent.OnSongSelected(song))
                     },
                 enableSwipeToRemove = true,
                 onRemove = { songToRemove ->

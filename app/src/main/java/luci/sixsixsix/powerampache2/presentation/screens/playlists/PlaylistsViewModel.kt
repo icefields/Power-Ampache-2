@@ -25,51 +25,65 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.models.Playlist
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistsViewModel @Inject constructor(
     private val repository: PlaylistsRepository,
-    private val musicRepository: MusicRepository,
-    private val playlistManager: MusicPlaylistManager
+    private val musicRepository: MusicRepository
 ) : ViewModel() {
     var state by mutableStateOf(PlaylistsState())
     private var isEndOfDataReached: Boolean = false
     private lateinit var currentUsername: String
 
-    init {
-        musicRepository.userLiveData.observeForever {
-            it?.let {
-                currentUsername = it.username
-                getPlaylists()
-//                viewModelScope.launch {
-//                    playlistManager.currentSearchQuery.collect { query ->
-//                        L("PlaylistsViewModel collect" , query)
-//                        onEvent(PlaylistEvent.OnSearchQueryChange(query))
+    val playlistsStateFlow: StateFlow<List<Playlist>> =
+        repository.playlistsLiveData.distinctUntilChanged().asFlow().filterNotNull()
+            .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlists, user ->
+                currentUsername = user.username
+                playlists
+            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
+
+//    init {
+//        musicRepository.userLiveData.observeForever {
+//            it?.let {
+//                currentUsername = it.username
+//                getPlaylists()
+////                viewModelScope.launch {
+////                    playlistManager.currentSearchQuery.collect { query ->
+////                        L("PlaylistsViewModel collect" , query)
+////                        onEvent(PlaylistEvent.OnSearchQueryChange(query))
+////                    }
+////                }
+//                // playlists can change or be edited, make sure to always listen to the latest version
+//                repository.playlistsLiveData.observeForever { playlists ->
+//                    L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
+//                    if (playlists.isNotEmpty() && state.searchQuery.isBlank() && state.playlists != playlists) {
+//                        L("viewmodel.getPlaylists playlists are different, update", playlists.size, state.playlists.size)
+//                        state = state.copy(playlists = playlists)
 //                    }
 //                }
-                // playlists can change or be edited, make sure to always listen to the latest version
-                repository.playlistsLiveData.observeForever { playlists ->
-                    L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
-                    if (playlists.isNotEmpty() && state.searchQuery.isBlank() && state.playlists != playlists) {
-                        L("viewmodel.getPlaylists playlists are different, update", playlists.size, state.playlists.size)
-                        state = state.copy(playlists = playlists)
-                    }
-                }
-            }
-        }
-    }
+//            }
+//        }
+//    }
 
-    fun isCurrentUserOwner(playlist: Playlist) = currentUsername == playlist.owner
+    fun isCurrentUserOwner(playlist: Playlist) =
+        currentUsername == playlist.owner
 
     fun onEvent(event: PlaylistEvent) {
         when (event) {
@@ -81,10 +95,12 @@ class PlaylistsViewModel @Inject constructor(
                     getPlaylists()
                 }
 
-            is PlaylistEvent.OnBottomListReached -> if (!state.isFetchingMore && !isEndOfDataReached) {
+            is PlaylistEvent.OnBottomListReached ->
+                // right now we are fetching all the playlists available on the server
+                if (!Constants.ALWAYS_FETCH_ALL_PLAYLISTS && !state.isFetchingMore && !isEndOfDataReached) {
                     L("PlaylistEvent.OnBottomListReached")
                     state = state.copy(isFetchingMore = true)
-                    getPlaylists(fetchRemote = true, offset = state.playlists.size)
+                    getPlaylists(fetchRemote = true, offset = playlistsStateFlow.value.size)
                 }
             is PlaylistEvent.OnPlaylistDelete -> deletePlaylist(event.playlist.id)
             PlaylistEvent.OnRemovePlaylistDismiss -> viewModelScope.launch {
@@ -109,8 +125,9 @@ class PlaylistsViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { playlists ->
-                                state = state.copy(playlists = playlists)
-                                L("viewmodel.getPlaylists size", state.playlists.size)
+                                // playlist updated automatically through live data from database
+//                                state = state.copy(playlists = playlists)
+//                                L("viewmodel.getPlaylists size", state.playlists.size)
                             }
                             isEndOfDataReached =
                                 (result.networkData?.isEmpty() == true && offset > 0)

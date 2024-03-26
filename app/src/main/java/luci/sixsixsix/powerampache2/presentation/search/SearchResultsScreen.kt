@@ -116,8 +116,9 @@ fun SearchResultsScreen(
             onEvent = searchViewModel::onEvent,
             onSongEvent = mainViewModel::onEvent,
             onSongSelected = { song ->
-                mainViewModel.onEvent(MainEvent.Play(song))
-                searchViewModel.onEvent(SearchViewEvent.OnSongSelected(song))
+                mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, searchViewModel.state.songs))
+//                mainViewModel.onEvent(MainEvent.Play(song))
+//                searchViewModel.onEvent(SearchViewEvent.OnSongSelected(song))
             },
             onAlbumSelected = { albumId, album ->
                 navigator.navigate(

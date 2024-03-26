@@ -135,8 +135,10 @@ fun QueueScreenContent(
                     .clickable {
                         // TODO BUG when tapping on a song, in the context of a playlist, do not
                         //  move the new song on top, just start playing from the selected song
-                        queueViewModel.onEvent(QueueEvent.OnSongSelected(song))
-                        mainViewModel.onEvent(MainEvent.Play(song))
+                        mainViewModel.onEvent(MainEvent.PlaySong(song))
+
+                        //queueViewModel.onEvent(QueueEvent.OnSongSelected(song))
+                        //mainViewModel.onEvent(MainEvent.Play(song))
                     },
                 enableSwipeToRemove = true,
                 onRemove = { songToRemove ->

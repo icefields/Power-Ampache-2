@@ -87,6 +87,7 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigateToArtist
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
@@ -269,20 +270,22 @@ fun PlaylistDetailScreen(
                                     } else {
                                         if (!state.isGlobalShuffleOn) {
                                             // add next to the list and skip to the top of the album (which is next)
-                                            viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
-                                            mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
-                                        } else {
-                                            // this will add the shuffled playlist next and update the current song
-                                            // in main view model (which is listening to playlist manager)
-                                            //val oldCurrentSong = mainViewModel.state.song
-                                            viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
-                                            // after updating queue and current song, play
-                                            if (!mainViewModel.isPlaying) {
-                                                mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                            if (state.songs.isNotEmpty()) {
+                                                mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlay(state.songs[0].song, state.getSongList()))
+                                                // viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
+//                                                playlistManager.updateCurrentSong(state.songs[0].song)
+//                                                playlistManager.addToCurrentQueueTop(state.getSongList())
+//                                                mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
                                             }
-                                            // no need to skip if the queue was empty previously
-//                                            if (oldCurrentSong != null) {
-//                                                mainViewModel.onEvent(MainEvent.SkipNext)
+                                        } else {
+                                            if (state.songs.isNotEmpty()) {
+                                                mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(state.getSongList()))
+                                            }
+
+//                                            viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
+//                                            // after updating queue and current song, play
+//                                            if (!mainViewModel.isPlaying) {
+//                                                mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
 //                                            }
                                         }
                                     }
@@ -356,8 +359,9 @@ fun PlaylistDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.onEvent(PlaylistDetailEvent.OnSongSelected(song))
-                                            mainViewModel.onEvent(MainEvent.Play(song))
+                                            mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.getSongList()))
+//                                            viewModel.onEvent(PlaylistDetailEvent.OnSongSelected(song))
+//                                            mainViewModel.onEvent(MainEvent.Play(song))
                                         },
                                     subtitleString = SubtitleString.ARTIST,
                                     songInfoThirdRow = SongInfoThirdRow.Time,
