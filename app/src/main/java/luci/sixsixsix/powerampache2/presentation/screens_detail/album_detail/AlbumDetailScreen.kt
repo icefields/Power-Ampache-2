@@ -95,6 +95,7 @@ fun AlbumDetailScreen(
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val isGlobalShuffleOn by viewModel.globalShuffleStateFlow.collectAsState()
     val songs = viewModel.state.getSongList()
     val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
 
@@ -216,7 +217,7 @@ fun AlbumDetailScreen(
                         isAlbumDownloaded = state.isAlbumDownloaded,
                         isDownloading = mainViewModel.state.isDownloading,
                         isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
-                        isGlobalShuffleOn = state.isGlobalShuffleOn ,
+                        isGlobalShuffleOn = isGlobalShuffleOn ,
                         artistClickListener = { artistId ->
                             navigateToArtist(navigator, artistId)
                         },
@@ -229,7 +230,7 @@ fun AlbumDetailScreen(
                                         // will pause if playing
                                         mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
                                     } else {
-                                        if (!state.isGlobalShuffleOn) {
+                                        if (!isGlobalShuffleOn) {
                                             // add next to the list and skip to the top of the album (which is next)
                                             mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlay(songs[0], state.getSongList()))
 //                                            viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
@@ -303,7 +304,12 @@ fun AlbumDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.getSongList()))
+                                            mainViewModel.onEvent(
+                                                MainEvent.PlaySongAddToQueueTop(
+                                                    song,
+                                                    state.getSongList()
+                                                )
+                                            )
 //                                            viewModel.onEvent(AlbumDetailEvent.OnSongSelected(song))
 //                                            mainViewModel.onEvent(MainEvent.Play(song))
                                         },

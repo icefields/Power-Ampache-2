@@ -22,10 +22,10 @@
 package luci.sixsixsix.powerampache2.data
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
@@ -61,6 +61,12 @@ class AlbumsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
         L("getAlbums - repo getSongs offset $offset")
 
+        if (isOfflineModeEnabled()) {
+            emit(Resource.Success(data = dao.getOfflineAlbums().map { it.toAlbum() }))
+            emit(Resource.Loading(false))
+            return@flow
+        }
+
         if (offset == 0) {
             val localAlbums = dao.searchAlbum(query)
             val isDbEmpty = localAlbums.isEmpty() && query.isEmpty()
@@ -78,12 +84,6 @@ class AlbumsRepositoryImpl @Inject constructor(
         val response = api.getAlbums(auth.auth, filter = query, offset = offset, limit = limit)
         response.error?.let { throw(MusicException(it.toError())) }
         val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
-        L("albums from web ${albums.size}")
-
-        if (query.isNullOrBlank() && offset == 0 && Constants.CLEAR_TABLE_AFTER_FETCH) {
-            // if it's just a search do not clear cache
-            dao.clearAlbums()
-        }
         dao.insertAlbums(albums.map { it.toAlbumEntity() })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchAlbum(query).map { it.toAlbum() }, networkData = albums))
@@ -95,9 +95,15 @@ class AlbumsRepositoryImpl @Inject constructor(
         fetchRemote: Boolean
     ): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
-        L("repo getAlbumsFromArtist $artistId")
 
         val localAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
+        // get all local album and filter the ones that have offline songs if offline mode enabled
+        if (isOfflineModeEnabled()) {
+            emit(Resource.Success(data = localAlbums.filter { isAlbumOffline(it) }))
+            emit(Resource.Loading(false))
+            return@flow
+        }
+
         val isDbEmpty = localAlbums.isEmpty()
         if (!isDbEmpty) {
             emit(Resource.Success(data = localAlbums))
@@ -118,6 +124,8 @@ class AlbumsRepositoryImpl @Inject constructor(
 
         L("albums from web ${albums.size}")
 
+        // REFRESH ALBUMS BY ARTIST, delete first then reinsert
+        albums.forEach { dao.deleteAlbumsFromArtist(it.artist.id) }
         dao.insertAlbums(albums.map { it.toAlbumEntity() })
         // stick to the single source of truth pattern despite performance deterioration
         val dbUpdatedAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
@@ -131,6 +139,14 @@ class AlbumsRepositoryImpl @Inject constructor(
     ): Flow<Resource<Album>> = flow {
         emit(Resource.Loading(true))
 
+        if (isOfflineModeEnabled()) {
+            dao.generateOfflineAlbum(albumId)?.let { albumEntity ->
+                emit(Resource.Success(data = albumEntity.toAlbum(), networkData = albumEntity.toAlbum()))
+                emit(Resource.Loading(false))
+                return@flow
+            } ?: throw Exception("OFFLINE ALBUM does not exist")
+        }
+
         dao.getAlbum(albumId)?.let { albumEntity ->
             emit(Resource.Success(data = albumEntity.toAlbum() ))
             if(!fetchRemote) {  // load cache only?
@@ -142,8 +158,6 @@ class AlbumsRepositoryImpl @Inject constructor(
         val auth = getSession()!!
         val response = api.getAlbumInfo(authKey = auth.auth, albumId = albumId)
         val album = response.toAlbum()  //will throw exception if artist null
-
-//        if (CLEAR_TABLE_AFTER_FETCH) { dao.clearArtists() }
 
         dao.insertAlbums(listOf(album.toAlbumEntity()))
         // stick to the single source of truth pattern despite performance deterioration
@@ -188,12 +202,45 @@ class AlbumsRepositoryImpl @Inject constructor(
         albumsNetwork
     }
 
+    private suspend fun isAlbumOffline(album: Album) =
+        dao.getOfflineSongsFromAlbum(album.id).isNotEmpty()
+
+    /**
+     * checks if offline mode is enabled, if enabled return only albums that are available offline
+     * @return true if offline mode enabled and operation successful
+     */
+    private suspend fun checkFilterOfflineSongs(
+        albums: List<Album>,
+        fc: FlowCollector<Resource<List<Album>>>?
+    ): Boolean {
+        if (isOfflineModeEnabled()) {
+//            val newAlbums = ArrayList<Album>().apply {
+//                albums.forEach { album: Album ->
+//                    if (isAlbumOffline(album)) {
+//                        add(album)
+//                    }
+//                }
+//            }
+            fc?.emit(Resource.Success(
+                data = albums.filter { album -> isAlbumOffline(album) },
+                networkData = null)
+            )
+            fc?.emit(Resource.Loading(false))
+            return true
+        }
+        return false
+    }
+
     private suspend fun getAlbumsStats(
         statFilter: MainNetwork.StatFilter,
         fetchRemote: Boolean = true
     ) = flow {
         emit(Resource.Loading(true))
         val dbAlbums = getAlbumsStatsDb(statFilter).map { it.toAlbum() }
+        if (checkFilterOfflineSongs(dbAlbums, this)) {
+            return@flow
+        }
+        //else
         emit(Resource.Success(data = dbAlbums, networkData = null))
 
         if (fetchRemote) {

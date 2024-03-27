@@ -145,12 +145,13 @@ fun MainContentScreen(
     var currentScreen: String by rememberSaveable { mutableStateOf(MainContentMenuItem.Home.id) }
     var currentScreenClass by rememberSaveable { mutableStateOf(MainContentMenuItem.Home::class.java.canonicalName) }
     if (offlineModeState &&
-        (currentScreen == MainContentMenuItem.Home.id || currentScreen == MainContentMenuItem.Library.id)) {
+        (currentScreen == MainContentMenuItem.Home.id ||
+                currentScreen == MainContentMenuItem.Library.id)) {
         // TODO is this causing too many redraws? does setting a remember variable to the same value
         //  not good for performance?
         L("enable offline aaaa isOfflineModeEnabled $offlineModeState")
-        currentScreen = MainContentMenuItem.Offline.id
-        currentScreenClass = MainContentMenuItem.Offline::class.java.canonicalName
+        //currentScreen = MainContentMenuItem.Offline.id
+        //currentScreenClass = MainContentMenuItem.Offline::class.java.canonicalName
     }
     else {
 

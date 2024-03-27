@@ -69,7 +69,7 @@ fun LoggedInScreen(
     //homeScreenViewModel: HomeScreenViewModel
 ) {
     val state = mainViewModel.state
-    val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState(initial = false)
+    val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
 
     val songState by mainViewModel.currentSongStateFlow().collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState()

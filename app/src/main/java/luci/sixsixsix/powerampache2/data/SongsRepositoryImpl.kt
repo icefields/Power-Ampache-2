@@ -24,7 +24,6 @@ package luci.sixsixsix.powerampache2.data
 import androidx.lifecycle.map
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
@@ -33,20 +32,16 @@ import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
-import luci.sixsixsix.powerampache2.data.local.entities.toArtist
-import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
-import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
-import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
@@ -84,10 +79,11 @@ class SongsRepositoryImpl @Inject constructor(
         query: String,
         offset: Int
     ) = if (!isOfflineModeEnabled()) {
-        // get songs from db, if the result is less than Constants.NETWORK_REQUEST_LIMIT_DEBUG
+        val minDbSongs = 200
+        // get songs from db, if the result is less than minDbSongs
         // also get songs from network
         val songsDb = if (query.isNullOrBlank()) dao.searchSong("") else listOf()
-        if (songsDb.size < Constants.NETWORK_REQUEST_LIMIT_DEBUG) {
+        if (songsDb.size < minDbSongs) {
             getSongsNetwork(fetchRemote = fetchRemote, query = query, offset = offset)
         } else {
             flow {
@@ -104,27 +100,6 @@ class SongsRepositoryImpl @Inject constructor(
         offset: Int
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-        L( "getSongs - repo getSongs")
-
-        // TODO songs view is not loading cached data at the beginning
-        //      to avoid weird behaviour due to the mix of random songs from api
-        //      and the overall .shuffled() called when emitting at the end
-        // db
-        // the offset is meant to be use to fetch more data from the web,
-        // return cache only if the offset is zero
-//        if (offset == 0) {
-//            val localSongs = dao.searchSong(query)
-//            L("getSongs - songs from cache ${localSongs.size}")
-//            val isDbEmpty = localSongs.isEmpty() && query.isEmpty()
-//            if (!isDbEmpty) {
-//                emit(Resource.Success(data = localSongs.map { it.toSong() }))
-//            }
-//            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
-//            if (shouldLoadCacheOnly) {
-//                emit(Resource.Loading(false))
-//                return@flow
-//            }
-//        }
 
         // network TODO WHAT IS THIS!!?? FIX !!!
         val auth = getSession()!!
@@ -179,16 +154,12 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongs()", e, this) }
 
-    private suspend fun cacheSongs(songs: List<Song>) {
-        dao.insertSongs(songs.map { it.toSongEntity() })
-        songs.forEach { song ->
-            dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.let { downloadedSong ->
-                dao.addDownloadedSong(
-                    song.toDownloadedSongEntity(downloadedSong.songUri, owner = downloadedSong.owner)
-                )
-            }
+    private suspend fun getDbSongs(albumId: String, isOfflineModeEnabled: Boolean ): List<Song> =
+        if (isOfflineModeEnabled) {
+            dao.getOfflineSongsFromAlbum(albumId).map { it.toSong() }
+        } else {
+            dao.getSongFromAlbum(albumId).map { it.toSong() }
         }
-    }
 
     /**
      * TODO BREAKING_RULE: inconsistent data in the response, must use network response.
@@ -202,8 +173,10 @@ class SongsRepositoryImpl @Inject constructor(
         fetchRemote: Boolean
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-        val localSongs = dao.getSongFromAlbum(albumId).map { it.toSong() }
-        if (!checkEmitCacheData(localSongs, fetchRemote, this)) {
+        val isOfflineMode = isOfflineModeEnabled()
+        val localSongs = getDbSongs(albumId, isOfflineMode)
+        //val localSongs = dao.getSongFromAlbum(albumId).map { it.toSong() }
+        if (!checkEmitCacheData(localSongs, fetchRemote, this) || isOfflineMode) {
             return@flow
         }
 
@@ -221,70 +194,34 @@ class SongsRepositoryImpl @Inject constructor(
         cacheSongs(songs)
     }.catch { e -> errorHandler("getSongsFromAlbum()", e, this) }
 
-    /**
-     * TODO BREAKING_RULE: Implement cache for playlist songs
-     *  There is currently no way to get songs given the playlistId
-     *  Songs are cached regardless for quick access from SongsScreen and Albums
-     * This method only fetches from the network, breaking one of the rules defined in the
-     * documentation of this class.
-     */
-    override suspend fun getSongsFromPlaylist(
-        playlistId: String,
-        fetchRemote: Boolean
-    ): Flow<Resource<List<Song>>> = flow {
-        emit(Resource.Loading(true))
-        L("repo getSongsFromPlaylist playlistId: $playlistId")
-
-        val auth = getSession()!!
-        val songs = mutableListOf<Song>()
-        var isFinished = false
-        val limit = 100
-        var offset = 0
-        var lastException: MusicException? = null
-        do {
-            val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId, limit = limit, offset = offset)
-            // save the exception if any
-            response.error?.let { lastException = MusicException(it.toError()) }
-            // a response exists
-            response.songs?.let { songsDto ->
-                val partialResponse = songsDto.map { songDto -> songDto.toSong() }
-                if (partialResponse.isNotEmpty()) {
-                    songs.addAll(partialResponse)
-                    emit(Resource.Success(data = songs, networkData = partialResponse))
-                } else {
-                    // if no more items to fetch finish
-                    isFinished = true
-                }
-            } ?: run {
-                // a response DOES NOT exist
-                // if there's an error and so songs retrieved just finish
-                isFinished = true
+    private suspend fun getSongsStats(statFilter: MainNetwork.StatFilter) =
+        if (!isOfflineModeEnabled()) flow {
+            emit(Resource.Loading(true))
+            val auth = getSession()!!
+            getSongsStatCall(auth.auth, statFilter)?.map { it.toSong() }?.let { songs ->
+                emit(Resource.Success(data = songs, networkData = songs))
+                // cache songs after emitting success because the result of this is not used right now
+                cacheSongs(songs)
+            }?:run {
+                throw Exception("error connecting or getting data in getSongsStats")
             }
-            offset += limit
-        } while (!isFinished)
+            emit(Resource.Loading(false))
+        }.catch { e -> errorHandler("getSongsStats()", e, this) }
+    else
+        getSongsStatsDb(statFilter)
 
-//        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId, limit = 50, offset = offset)
-//        response.error?.let { throw(MusicException(it.toError())) }
-//        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
-        //emit(Resource.Success(data = songs.toList(), networkData = songs.toList()))
-
-        emit(Resource.Loading(false))
-
-        // cache songs after emitting success
-        // Songs are cached regardless for quick access from SongsScreen and Albums
-        cacheSongs(songs)
-    }.catch { e -> errorHandler("getSongsFromPlaylist()", e, this) }
-
-    private suspend fun getSongsStats(statFilter: MainNetwork.StatFilter): Flow<Resource<List<Song>>> = flow {
+    private suspend fun getSongsStatsDb(statFilter: MainNetwork.StatFilter) = flow {
         emit(Resource.Loading(true))
-        val auth = getSession()!!
-        getSongsStatCall(auth.auth, statFilter)?.map { it.toSong() }?.let { songs ->
-            emit(Resource.Success(data = songs, networkData = songs))
-            // cache songs after emitting success because the result of this is not used right now
-            cacheSongs(songs)
-        }?:run {
-            throw Exception("error connecting or getting data in getSongsStats")
-        }
+        val songs = when(statFilter) {
+            MainNetwork.StatFilter.random -> dao.getRandomOfflineSongs()
+            MainNetwork.StatFilter.recent -> dao.getRecentlyReleasedOfflineSongs()
+            MainNetwork.StatFilter.newest -> dao.getRecentlyReleasedOfflineSongs()
+            MainNetwork.StatFilter.frequent -> dao.getMostPlayedOfflineSongs()
+            MainNetwork.StatFilter.flagged -> dao.getLikedOfflineSongs()
+            MainNetwork.StatFilter.forgotten -> listOf()
+            MainNetwork.StatFilter.highest -> dao.getHighestRatedOfflineSongs()
+        }.map { it.toSong() }
+        emit(Resource.Success(data = songs, networkData = songs))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsStats()", e, this) }
 
@@ -360,6 +297,8 @@ class SongsRepositoryImpl @Inject constructor(
         // resultSet.addAll(dao.searchSong("").map { it.toSong() })
         // if not big enough start fetching from web
         if (!isOfflineModeEnabled()) {
+            // try add cached songs first
+            try { resultSet.addAll(dao.searchSong("").map { it.toSong() }) } catch (e: Exception) { }
             try {
                 if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
                     // if not enough downloaded songs fetch most played songs
@@ -543,39 +482,4 @@ class SongsRepositoryImpl @Inject constructor(
 
     override suspend fun getDownloadedSongById(songId: String): Song? =
         dao.getSongById(songId)?.toSong()
-
-    /**
-     * returns false if Network data is not required, true otherwise
-     */
-    private suspend fun <T> checkEmitCacheData(
-        localData: List<T>,
-        fetchRemote: Boolean,
-        fc: FlowCollector<Resource<List<T>>>
-    ): Boolean {
-        val isDbEmpty = localData.isEmpty()
-        if (!isDbEmpty) {
-            L("checkCachedData ${localData.size}")
-            fc.emit(Resource.Success(data = localData))
-        }
-        val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
-        if(shouldLoadCacheOnly) {
-            fc.emit(Resource.Loading(false))
-            return false
-        }
-        return true
-    }
 }
-
-// NOTES FOR ERROR CATCHING TODO REMOVE_COMMENTS
-//        .catch { e ->
-//        when(e) {
-//            is IOException ->
-//                emit(Resource.Error(message = "getSongs cannot load data IOException $e", exception = e))
-//            is HttpException ->
-//                emit(Resource.Error(message = "getSongs cannot load data HttpException $e", exception = e))
-//            is MusicException ->
-//                emit(Resource.Error(message = e.musicError.toString(), exception = e))
-//            else ->
-//                emit(Resource.Error(message = "getSongs generic exception $e", exception = e))
-//        }
-//   }

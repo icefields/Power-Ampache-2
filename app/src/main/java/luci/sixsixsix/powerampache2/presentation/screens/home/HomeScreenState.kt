@@ -35,6 +35,13 @@ data class HomeScreenState (
     val frequentAlbums: List<Album> = emptyList(),
     val flaggedAlbums: List<Album> = emptyList(),
     val randomAlbums: List<Album> = emptyList(),
+    val isPlaylistsLoading: Boolean = false,
+    val isRecentAlbumsLoading: Boolean = false,
+    val isNewestAlbumsLoading: Boolean = false,
+    val isHighestAlbumsLoading: Boolean = false,
+    val isFrequentAlbumsLoading: Boolean = false,
+    val isFlaggedAlbumsLoading: Boolean = false,
+    val isRandomAlbumsLoading: Boolean = false,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false
 ): Parcelable

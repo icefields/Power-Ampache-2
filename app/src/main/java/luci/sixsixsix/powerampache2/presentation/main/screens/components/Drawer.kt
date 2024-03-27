@@ -81,13 +81,14 @@ val drawerItems = listOf(
     MainContentMenuItem.Logout
 )
 
-val drawerItemsOffline = listOf(
-    MainContentMenuItem.Offline,
-    MainContentMenuItem.Genres,
-    MainContentMenuItem.Settings,
-    MainContentMenuItem.About,
-    MainContentMenuItem.Logout
-)
+val drawerItemsOffline = drawerItems
+//    listOf(
+//    MainContentMenuItem.Offline,
+//    MainContentMenuItem.Genres,
+//    MainContentMenuItem.Settings,
+//    MainContentMenuItem.About,
+//    MainContentMenuItem.Logout
+//)
 
 @Composable
 fun MainDrawer(

@@ -254,7 +254,7 @@ class PlaylistDetailViewModel @Inject constructor(
 
     private fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
-            songsRepository
+            playlistsRepository
                 .getSongsFromPlaylist(playlistId)
                 .collect { result ->
                     when(result) {

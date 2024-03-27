@@ -92,13 +92,21 @@ fun HomeScreen(
     }
 }
 
-fun isLoadingData(state: HomeScreenState) = (state.isLoading ||
-        (state.recentAlbums.isNullOrEmpty() ||
-                state.randomAlbums.isNullOrEmpty() ||
-                state.newestAlbums.isNullOrEmpty() ||
-                state.frequentAlbums.isNullOrEmpty()
-                )
+fun isLoadingData(state: HomeScreenState) = (
+        state.isLoading ||
+        (
+            state.isRecentAlbumsLoading ||
+            state.isRandomAlbumsLoading ||
+            state.isNewestAlbumsLoading||
+            state.isFrequentAlbumsLoading
+        ) ||
+        (   state.frequentAlbums.isNullOrEmpty() &&
+            state.recentAlbums.isNullOrEmpty() &&
+            state.randomAlbums.isNullOrEmpty() &&
+            state.newestAlbums.isNullOrEmpty() &&
+            state.playlists.isNullOrEmpty()
         )
+)
 
 @Composable
 fun LoadingView() {

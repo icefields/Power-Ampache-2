@@ -59,7 +59,7 @@ fun MainScreen(
     mainViewModel: MainViewModel,
     settingsViewModel: SettingsViewModel
 ) {
-    val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState(initial = false)
+    val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
     var offlineModeSwitchVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(offlineModeSwitchVisible) {

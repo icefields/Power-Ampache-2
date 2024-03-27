@@ -26,7 +26,9 @@ import luci.sixsixsix.powerampache2.BuildConfig
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
-    const val DATABASE_VERSION = 79
+    const val DATABASE_VERSION = 80
+
+    const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 
     // NETWORK
     const val TIMEOUT_CONNECTION_S = 20L

@@ -32,6 +32,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -56,7 +57,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private var isEndOfDataReached: Boolean = false
 
     val playlistsStateFlow: StateFlow<List<Playlist>> =
-        playlistsRepository.playlistsLiveData.distinctUntilChanged().asFlow().filterNotNull()
+        playlistsRepository.playlistsFlow.distinctUntilChanged().filterNotNull()
             .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlists, user ->
                 playlists.filter { it.owner == user.username }
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())

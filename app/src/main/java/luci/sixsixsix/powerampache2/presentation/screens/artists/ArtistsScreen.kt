@@ -130,13 +130,6 @@ fun ArtistsScreenContent(
                             .padding(12.dp)
                     )
 
-                    if(i < artists.size - 1) {
-                        // if not last item add a divider
-                        //Divider(modifier = Modifier.padding(horizontal = 16.dp))
-                    } else if(i == artists.size - 1) {
-
-                    }
-
                     // search queries are limited, do not fetch more in case of a search string
                     if(i == (artists.size - 1)/* && searchQuery.isNullOrBlank()*/) {
                         // if last item, fetch more
