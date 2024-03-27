@@ -59,7 +59,6 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
@@ -72,8 +71,9 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -233,9 +233,9 @@ fun OfflineSongsMainContent(
                             SongItemEvent.GO_TO_ALBUM -> navigator?.navigate(
                                 AlbumDetailScreenDestination(albumId = song.album.id, album = null)
                             )
-                            SongItemEvent.GO_TO_ARTIST -> navigator?.navigate(
-                                ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
-                            )
+                            SongItemEvent.GO_TO_ARTIST ->
+                                Ampache2NavGraphs.navigateToArtist(navigator, artistId = song.artist.id, artist = null)
+
                             SongItemEvent.ADD_SONG_TO_QUEUE ->
                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                             SongItemEvent.ADD_SONG_TO_PLAYLIST ->

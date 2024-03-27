@@ -39,9 +39,15 @@ import luci.sixsixsix.powerampache2.data.local.entities.SESSION_PRIMARY_KEY
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
+import luci.sixsixsix.powerampache2.data.local.models.SongUrl
 
 @Dao
 interface MusicDao {
+    @Query("""SELECT session.auth AS authToken, credentials.serverUrl, settings.streamingQuality as bitrate, credentials.username as user FROM
+        (SELECT * FROM sessionentity WHERE primaryKey == '$SESSION_PRIMARY_KEY') AS session, 
+        (SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') AS credentials,
+        (SELECT * FROM localsettingsentity WHERE (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') == username) AS settings""")
+    suspend fun getSongUrlData(): SongUrl?
 
 // --- SESSION ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)

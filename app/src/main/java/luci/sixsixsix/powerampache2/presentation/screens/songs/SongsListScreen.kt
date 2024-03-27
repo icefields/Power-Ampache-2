@@ -21,16 +21,17 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
-import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.common.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
 @Composable
 @Destination(start = false)
@@ -91,9 +92,8 @@ fun SongsListScreen(
                                     SongItemEvent.GO_TO_ALBUM -> navigator.navigate(
                                         AlbumDetailScreenDestination(albumId = song.album.id, album = null)
                                     )
-                                    SongItemEvent.GO_TO_ARTIST -> navigator.navigate(
-                                        ArtistDetailScreenDestination(artistId = song.artist.id, artist = null)
-                                    )
+                                    SongItemEvent.GO_TO_ARTIST ->
+                                        Ampache2NavGraphs.navigateToArtist(navigator, artistId = song.artist.id)
                                     SongItemEvent.ADD_SONG_TO_QUEUE ->
                                         mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                                     SongItemEvent.ADD_SONG_TO_PLAYLIST ->

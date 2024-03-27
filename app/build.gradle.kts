@@ -15,8 +15,8 @@ val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
 val exoplayerVersion = "2.19.1"
 val composeNavVersion = "1.8.42-beta"
-val media3Version = "1.2.1"
-val hiltVersion = "1.1.0"
+val media3Version = "1.3.0"
+val hiltVersion = "1.2.0"
 
 val localProperties = Properties()
 localProperties.load(project.rootProject.file("local.properties").inputStream())
@@ -40,9 +40,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 29
-        versionName = "0.29-rc1"
-        val versionQuote = "This version is powered by small velociraptors"
+        versionCode = 30
+        versionName = "0.30-rc1"
+        val versionQuote = "This version is powered by huge velociraptors"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -165,7 +165,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:0.17.0")
-    implementation("androidx.paging:paging-compose:3.3.0-alpha02")
+    implementation("androidx.paging:paging-compose:3.3.0-alpha05")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")

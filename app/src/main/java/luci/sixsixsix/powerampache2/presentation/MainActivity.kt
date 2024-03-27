@@ -39,9 +39,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
-import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
-import luci.sixsixsix.powerampache2.presentation.main.MainScreen
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
+
+import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.main.MainScreen
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
 

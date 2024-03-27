@@ -69,7 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.player.RepeatMode
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
 @Composable

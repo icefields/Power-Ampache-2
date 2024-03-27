@@ -52,6 +52,7 @@ import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.screens.artists.components.ArtistItem
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 
 const val GRID_ITEMS_ROW = 3
 const val GRID_ITEMS_ROW_LAND = 6
@@ -70,7 +71,7 @@ fun ArtistsScreen(
         isRefreshing = viewModel.state.isRefreshing,
         onEvent = viewModel::onEvent,
         navigateToArtist = { id, artist ->
-            navigator.navigate(ArtistDetailScreenDestination(artistId = id, artist = artist))
+            Ampache2NavGraphs.navigateToArtist(navigator, artistId = id, artist = artist)
         }
     )
 }
