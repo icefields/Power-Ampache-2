@@ -55,6 +55,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -82,8 +84,10 @@ fun MiniPlayer(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel
 ) {
-    AnimatedVisibility(mainViewModel.state.song != null) {
-        mainViewModel.state.song?.let {song ->
+    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+
+    AnimatedVisibility(currentSongState != null) {
+        currentSongState?.let {song ->
             MiniPlayerContent(
                 song = song,
                 modifier = modifier,
@@ -110,22 +114,7 @@ fun MiniPlayerContent(
     modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit
 ) {
-//    var showDeleteSongDialog by remember { mutableStateOf(false) }
     val weakContext = WeakContext(LocalContext.current.applicationContext)
-
-//    if(showDeleteSongDialog) {
-//        EraseConfirmDialog(
-//            onDismissRequest = {
-//                showDeleteSongDialog = false
-//            },
-//            onConfirmation = {
-//                showDeleteSongDialog = false
-//                onEvent(MainEvent.Reset)
-//            },
-//            dialogTitle = stringResource(id = R.string.miniPlayer_reset_alert_title),
-//            dialogText = stringResource(id = R.string.miniPlayer_reset_alert_message)
-//        )
-//    }
 
     Card(
         border = BorderStroke(
@@ -141,7 +130,7 @@ fun MiniPlayerContent(
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
     ) {
         Row(
-            modifier = modifier
+            modifier = modifier//.background(MaterialTheme.colorScheme.surface)
                 .padding(vertical = 5.dp, horizontal = 5.dp)
         ) {
             Card(
@@ -176,8 +165,18 @@ fun MiniPlayerContent(
                     .weight(1.0f)
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.Start
             ) {
+                Text(
+                    modifier = Modifier.basicMarquee(),
+                    text = song.artist.name,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Start
+                )
+                Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
                 Text(
                     modifier = Modifier.basicMarquee(),
                     text = song.title,
@@ -185,20 +184,7 @@ fun MiniPlayerContent(
                     fontSize = 16.sp,
                     maxLines = 1,
                     color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(
-                    modifier = Modifier
-                        .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer))
-                )
-                Text(
-                    modifier = Modifier.basicMarquee(),
-                    text = song.artist.name,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 14.sp,
-                    maxLines = 1,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Start
                 )
             }
 

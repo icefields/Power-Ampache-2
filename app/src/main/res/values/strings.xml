@@ -9,7 +9,7 @@
     <string name="albumDetailScreen_infoSection_time">Total Time</string>
     <string name="playlistDetailScreen_infoSection_avgRating">Average Rating</string>
     <string name="playlistItem_songCount">%s Songs</string>
-    <string name="topBar_search_hint">Search …</string>
+    <string name="topBar_search_hint">Search Songs, Albums, Artists, Playlists</string>
     <string name="main_tab_title_albums">Albums</string>
     <string name="main_tab_title_home">Home</string>
     <string name="main_tab_title_songs">Songs</string>
@@ -30,11 +30,11 @@
     <string name="loginScreen_local_server">Local Development Server</string>
     <string name="loginScreen_remote_server">Remote Debug Server</string>
     <string name="loginScreen_dogmazic_server">Demo (Dogmazic Server)</string>
-    <string name="home_section_title_recent">Recent</string>
-    <string name="home_section_title_flagged">Favourite</string>
-    <string name="home_section_title_frequent">Frequent</string>
-    <string name="home_section_title_highest">Highest</string>
-    <string name="home_section_title_newest">Newest</string>
+    <string name="home_section_title_recent">Recently Played</string>
+    <string name="home_section_title_flagged">Favourites</string>
+    <string name="home_section_title_frequent">Frequently Played</string>
+    <string name="home_section_title_highest">Highest Rated</string>
+    <string name="home_section_title_newest">Newly Added</string>
     <string name="home_section_title_playlists">Playlists</string>
     <string name="home_section_title_moreAlbums">More Albums</string>
 
@@ -100,12 +100,29 @@
     <string name="settings_userInfo_state">State</string>
     <string name="settings_userInfo_city">City</string>
     <string name="settings_userInfo_id">ID</string>
-
+    <string name="player_buttonText_artist">Artist</string>
+    <string name="player_buttonText_album">Album</string>
+    <string name="player_buttonText_add">Add</string>
+    <string name="player_buttonText_download">Download</string>
+    <string name="player_buttonText_share">Share</string>
+    <string name="player_buttonText_info">Info</string>
+    <string name="player_queue_upNext">Up Next</string>
+    <string name="player_queue_lyrics">Lyrics</string>
 
     <!--- DIALOGS -->
     <string name="miniPlayer_reset_alert_message">LONG PRESS To stop music playback and reset the Queue</string>
     <string name="miniPlayer_reset_alert_title">STOP/RESET</string>
     <string name="dialog_create">CREATE</string>
+
+    <!-- Song Dropdown Menu -->
+    <string name="dropdownMenu_item_download">Download</string>
+    <string name="dropdownMenu_item_export">Export Downloaded Song</string>
+    <string name="dropdownMenu_item_playNext">Play Next</string>
+    <string name="dropdownMenu_item_addToQueue">Add to Queue</string>
+    <string name="dropdownMenu_item_addToPlaylist">Add to Playlist</string>
+    <string name="dropdownMenu_item_goToAlbum">Go to Album</string>
+    <string name="dropdownMenu_item_goToArtist">Go to Artist</string>
+    <string name="dropdownMenu_item_share">Share</string>
 
     <!---...-->
     <string name="version_quote_title">Quote of the version</string>

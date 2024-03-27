@@ -30,7 +30,7 @@ data class SessionEntity(
     val songs: Int,
     val update: LocalDateTime,
     val users: Int,
-    val videos: Int,
+    val videos: Int
 )
 
 fun SessionEntity.toSession(): Session = Session(

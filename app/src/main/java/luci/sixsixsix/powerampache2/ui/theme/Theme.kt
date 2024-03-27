@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.ui.theme
 
 import android.app.Activity
-import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
@@ -73,7 +72,9 @@ private val DarkColorScheme: ColorScheme
         outline = colorResource(R.color.outlineDark), //Color(0xFFA5A9AD),
         outlineVariant = Color(0xFF4E5359),
         scrim = Color(0xFF0B0D0C)
-    )
+    ).apply {
+        additionalColours = AdditionalDarkColours
+    }
 
 private val LightColorScheme
     @Composable
@@ -107,17 +108,14 @@ private val LightColorScheme
         outline = Color(0xFF879099),
         outlineVariant = Color(0xFFCBCED1),
         scrim = Color(0xFF0B0D0C)
-    )
-
-val ColorScheme.surfaceContainer: Color
-    @Composable
-    get() = colorResource(R.color.surfaceContainer)
+    ).apply {
+        additionalColours = AdditionalLightColours
+    }
 
 @Composable
 fun PowerAmpache2Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = true, // Dynamic color is available on Android 12+
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

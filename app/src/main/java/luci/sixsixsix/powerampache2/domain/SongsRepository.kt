@@ -49,5 +49,6 @@ interface SongsRepository {
     suspend fun isSongAvailableOffline(song: Song): Boolean
     suspend fun getSongShareLink(song: Song): Flow<Resource<String>>
     suspend fun rateSong(songId: String, rate: Int): Flow<Resource<Any>>
+    suspend fun likeSong(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun getSongsByGenre(genreId: Genre, fetchRemote: Boolean = true, offset: Int = 0): Flow<Resource<List<Song>>>
 }

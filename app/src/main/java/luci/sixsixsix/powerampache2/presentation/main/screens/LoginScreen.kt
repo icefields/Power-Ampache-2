@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.main.screens
 
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -82,8 +83,13 @@ import luci.sixsixsix.powerampache2.data.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.main.AuthViewModel
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.LoginBottomDrawer
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.LoginButton
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.LoginDialog
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.LoginTextField
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.SignUpBottomDrawer
 import luci.sixsixsix.powerampache2.presentation.main.screens.components.SignUpBottomSheet
+import luci.sixsixsix.powerampache2.presentation.main.screens.components.SignUpDialog
 
 @Composable
 @Destination(start = false)
@@ -119,8 +125,8 @@ fun LoginScreenContent(
     isSignUpSheetOpen:Boolean = false
 ) {
     val sheetState = rememberModalBottomSheetState()
-    var isLoginSheetOpen by rememberSaveable { mutableStateOf(isLoginSheetOpen) }
-    var isSignUpSheetOpen by rememberSaveable { mutableStateOf(isSignUpSheetOpen) }
+    var isLoginSheetOpen = rememberSaveable { mutableStateOf(isLoginSheetOpen) }
+    var isSignUpSheetOpen = rememberSaveable { mutableStateOf(isSignUpSheetOpen) }
     var isDebugButtonsSheetOpen by rememberSaveable { mutableStateOf(false) }
     val authTokenLoginEnabled = remember { mutableStateOf(false) }
 
@@ -171,12 +177,12 @@ fun LoginScreenContent(
                 when(it) {
                     1 -> { }
                     2 -> LoginButton {
-                        isLoginSheetOpen = true
+                        isLoginSheetOpen.value = true
                         // DO NOT call onEvent(AuthEvent.Login), This is just
                         // for opening the drawer
                     }
                     3 -> SignUpButton {
-                        isSignUpSheetOpen = !isSignUpSheetOpen
+                        isSignUpSheetOpen.value = !isSignUpSheetOpen.value
                         // DO NOT call onEvent(AuthEvent.SignUp), This is just
                         // for opening the drawer
                     }
@@ -201,53 +207,40 @@ fun LoginScreenContent(
         }
     }
 
-    if (isLoginSheetOpen) {
-        ModalBottomSheet(
-            sheetState = sheetState,
-            onDismissRequest = { isLoginSheetOpen = false },
-            containerColor = colorResource(id = R.color.surfaceContainerDark)
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(top = 6.dp, bottom = 16.dp)
-            ) {
-                if (BuildConfig.ENABLE_TOKEN_LOGIN) {
-                    AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
-                }
-
-                LoginTextFields(
-                    username = username,
-                    password = password,
-                    url = url,
-                    authToken = authToken,
-                    authTokenLoginEnabled = authTokenLoginEnabled.value,
-                    onEvent = onEvent,
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .fillMaxWidth()
-                )
-                
-                Spacer(modifier = Modifier.height(10.dp))
-                
-                LoginButton(onEvent = {
-                    isLoginSheetOpen = false
-                    onEvent(it)
-                })
-            }
+    if (isLoginSheetOpen.value) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            LoginBottomDrawer(
+                username = username,
+                password = password,
+                url = url,
+                authToken = authToken,
+                sheetState = sheetState,
+                isLoginSheetOpen = isLoginSheetOpen,
+                authTokenLoginEnabled = authTokenLoginEnabled,
+                onEvent = onEvent
+            )
+        } else {
+            LoginDialog(
+                username = username,
+                password = password,
+                url = url,
+                authToken = authToken,
+                isLoginSheetOpen = isLoginSheetOpen,
+                authTokenLoginEnabled = authTokenLoginEnabled,
+                onEvent = onEvent
+            )
         }
     }
 
-    if (isSignUpSheetOpen) {
-        ModalBottomSheet(
-            sheetState = sheetState,
-            onDismissRequest = { isSignUpSheetOpen = false }
-        ) {
-            SignUpBottomSheet(
-                onEvent = onEvent,
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .fillMaxWidth()
+    if (isSignUpSheetOpen.value) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            SignUpBottomDrawer(
+                sheetState = sheetState,
+                isSignUpSheetOpen = isSignUpSheetOpen,
+                onEvent = onEvent
             )
+        } else {
+            SignUpDialog(isSignUpSheetOpen = isSignUpSheetOpen, onEvent = onEvent)
         }
     }
 
@@ -297,96 +290,6 @@ fun DebugLoginButtons(
             server = Servers.LocalDev,
             buttonText = R.string.loginScreen_local_server,
             onEvent = onEvent
-        )
-    }
-}
-
-@Composable
-fun LoginTextFields(
-    username: String,
-    password: String,
-    url: String,
-    authToken: String,
-    authTokenLoginEnabled: Boolean,
-    onEvent: (AuthEvent) -> Unit,
-    modifier: Modifier
-) {
-    val topPaddingInputFields = 8.dp
-    var passwordVisible by rememberSaveable { mutableStateOf(false) }
-
-    Column(
-        modifier = modifier
-            .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal))
-    ) {
-        LoginTextField(
-            value = url,
-            label = R.string.loginScreen_server_url
-        ) { onEvent(AuthEvent.OnChangeServerUrl(it)) }
-
-        AnimatedVisibility(visible = !authTokenLoginEnabled) {
-            Column {
-                LoginTextField(
-                    value = username,
-                    label = R.string.loginScreen_username
-                ) { onEvent(AuthEvent.OnChangeUsername(it)) }
-
-                LoginTextField(
-                    value = password,
-                    label = R.string.loginScreen_password,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        val image = if (passwordVisible) {
-                            Icons.Filled.Visibility
-                        } else {
-                            Icons.Filled.VisibilityOff
-                        }
-                        val description = if (passwordVisible) "Hide password" else "Show password"
-                        IconButton(onClick = {passwordVisible = !passwordVisible}){
-                            Icon(imageVector  = image, description)
-                        }
-                    }
-                ) { onEvent(AuthEvent.OnChangePassword(it)) }
-            }
-        }
-
-        AnimatedVisibility(visible = authTokenLoginEnabled) {
-            LoginTextField(
-                value = authToken,
-                label = R.string.loginScreen_auth_token
-            ) { onEvent(AuthEvent.OnChangeAuthToken(it)) }
-        }
-    }
-}
-
-@Composable
-fun LoginButton(
-    onEvent: (AuthEvent) -> Unit
-) {
-    DefaultFullWidthButton(
-        modifier = Modifier
-            .padding(
-                horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal),
-                vertical = 10.dp
-            )
-            .fillMaxWidth(),
-        colours = ButtonDefaults.buttonColors(
-            containerColor = colorResource(id = R.color.primaryDark),
-            contentColor = colorResource(id = R.color.onPrimaryDark)
-        ),
-        onClick = { onEvent(AuthEvent.Login) }
-    ) {
-        Icon(
-            imageVector = Icons.Default.Login,
-            contentDescription = "Login"
-        )
-        Text(
-            modifier = Modifier
-                .padding(vertical = 9.dp, horizontal = 9.dp),
-            text = stringResource(id = R.string.loginScreen_login),
-            textAlign = TextAlign.Center,
-            //fontWeight = FontWeight.SemiBold,
-            fontSize = fontDimensionResource(id = R.dimen.button_login_text_size)
         )
     }
 }

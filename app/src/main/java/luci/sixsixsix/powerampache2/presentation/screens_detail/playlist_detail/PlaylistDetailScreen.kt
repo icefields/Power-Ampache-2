@@ -43,6 +43,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -86,6 +87,7 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigateToArtist
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
@@ -102,6 +104,9 @@ fun PlaylistDetailScreen(
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+    val currentPlaylistState by viewModel.playlistStateFlow.collectAsState()
+
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
@@ -150,7 +155,7 @@ fun PlaylistDetailScreen(
                 viewModel.onEvent(PlaylistDetailEvent.OnRemoveSong(songToRemove))
             },
             dialogTitle = "REMOVE SONG",
-            dialogText = "Delete ${songToRemove.name} from playlist \n${state.playlist.name}?"
+            dialogText = "Delete ${songToRemove.name} from playlist \n${currentPlaylistState.name}?"
         )
     }
 
@@ -207,10 +212,10 @@ fun PlaylistDetailScreen(
             topBar = {
                 PlaylistDetailTopBar(
                     navigator = navigator,
-                    playlist = playlist,
+                    playlist = currentPlaylistState,
                     isLoading = state.isLoading || state.isPlaylistRemoveLoading,
                     scrollBehavior = scrollBehavior,
-                    isRatingVisible = !state.isGeneratedPlaylist(),
+                    isRatingVisible = !state.isGeneratedOrSmartPlaylist,
                     onRating = { playlist, rating ->
                         viewModel.onEvent(PlaylistDetailEvent.OnRatePlaylist(playlist, rating))
                     }
@@ -227,7 +232,7 @@ fun PlaylistDetailScreen(
                 color = Color.Transparent
             ) {
                 val isPlayingPlaylist = mainViewModel.isPlaying
-                        && state.getSongList().contains(mainViewModel.state.song)
+                        && state.getSongList().contains(currentSongState)
 
                 Column {
                     PlaylistInfoSection(
@@ -243,8 +248,10 @@ fun PlaylistDetailScreen(
                             .padding(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
-                        playlist = playlist,
+                        playlist = currentPlaylistState,
                         isPlayingPlaylist = isPlayingPlaylist,
+                        isLikeAvailable = !state.isGeneratedOrSmartPlaylist,
+                        isLikeLoading = state.isLikeLoading ,
                         isDownloading = mainViewModel.state.isDownloading,
                         isGlobalShuffleOn = state.isGlobalShuffleOn,
                         songs = viewModel.state.getSongList(),
@@ -263,20 +270,22 @@ fun PlaylistDetailScreen(
                                     } else {
                                         if (!state.isGlobalShuffleOn) {
                                             // add next to the list and skip to the top of the album (which is next)
-                                            viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
-                                            mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
-                                        } else {
-                                            // this will add the shuffled playlist next and update the current song
-                                            // in main view model (which is listening to playlist manager)
-                                            //val oldCurrentSong = mainViewModel.state.song
-                                            viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
-                                            // after updating queue and current song, play
-                                            if (!mainViewModel.isPlaying) {
-                                                mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
+                                            if (state.songs.isNotEmpty()) {
+                                                mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlay(state.songs[0].song, state.getSongList()))
+                                                // viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
+//                                                playlistManager.updateCurrentSong(state.songs[0].song)
+//                                                playlistManager.addToCurrentQueueTop(state.getSongList())
+//                                                mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
                                             }
-                                            // no need to skip if the queue was empty previously
-//                                            if (oldCurrentSong != null) {
-//                                                mainViewModel.onEvent(MainEvent.SkipNext)
+                                        } else {
+                                            if (state.songs.isNotEmpty()) {
+                                                mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(state.getSongList()))
+                                            }
+
+//                                            viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
+//                                            // after updating queue and current song, play
+//                                            if (!mainViewModel.isPlaying) {
+//                                                mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
 //                                            }
                                         }
                                     }
@@ -298,15 +307,18 @@ fun PlaylistDetailScreen(
                                         isOpen = true,
                                         songs = viewModel.state.getSongList()
                                     )
+
+                                PlaylistInfoViewEvents.LIKE_PLAYLIST ->
+                                    viewModel.onEvent(PlaylistDetailEvent.OnLikePlaylist)
                             }
                         }
                     )
 
-                    showHideEmptyPlaylistView(playlist = playlist, state = state)
+                    showHideEmptyPlaylistView(playlist = currentPlaylistState, state = state)
 
                     SwipeRefresh(
                         state = swipeRefreshState,
-                        onRefresh = { viewModel.onEvent(PlaylistDetailEvent.Fetch(playlist)) }
+                        onRefresh = { viewModel.onEvent(PlaylistDetailEvent.Fetch(currentPlaylistState)) }
                     ) {
                         LazyColumn(
                             modifier = Modifier
@@ -347,8 +359,9 @@ fun PlaylistDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.onEvent(PlaylistDetailEvent.OnSongSelected(song))
-                                            mainViewModel.onEvent(MainEvent.Play(song))
+                                            mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.getSongList()))
+//                                            viewModel.onEvent(PlaylistDetailEvent.OnSongSelected(song))
+//                                            mainViewModel.onEvent(MainEvent.Play(song))
                                         },
                                     subtitleString = SubtitleString.ARTIST,
                                     songInfoThirdRow = SongInfoThirdRow.Time,

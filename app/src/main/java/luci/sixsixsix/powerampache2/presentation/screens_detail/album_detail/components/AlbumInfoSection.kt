@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -42,6 +43,7 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
+import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
 
 enum class AlbumInfoViewEvents {
     PLAY_ALBUM,
@@ -111,7 +113,7 @@ fun AlbumInfoSection(
             }
 
             LikeButton(
-                modifier = Modifier.align(Alignment.BottomEnd),
+                modifier = Modifier.align(Alignment.BottomEnd).size(29.dp),
                 isLikeLoading = isLikeLoading,
                 background = Color.Transparent,
                 isFavourite = album.flag == 1

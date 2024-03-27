@@ -21,13 +21,19 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
@@ -43,7 +49,6 @@ import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.jvm.Throws
 
 /**
  * the source of truth is the database, stick to the single source of truth pattern, only return
@@ -85,17 +90,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
         val auth = getSession()!!
         val user = dao.getCredentials()?.username
-        val response = api.getPlaylists(auth.auth, filter = query, offset = offset)
-        response.error?.let { throw(MusicException(it.toError())) }
-        val playlists = (if (BuildConfig.SHOW_EMPTY_PLAYLISTS) {
-            response.playlist!! // will throw exception if playlist null
-        } else {
-            response.playlist!!.filter { dtoToFilter -> // will throw exception if playlist null
-                dtoToFilter.items?.let { itemsCount ->
-                    itemsCount > 0 || dtoToFilter.owner == user // edge-case default behaviour, user==null and owner==null will show the playlist
-                } ?: (dtoToFilter.owner == user) // if the count is null fallback to show the playlist if the user is the owner
-            }
-        }).map { it.toPlaylist() }
+        val playlists = getPlaylistsNetwork(auth.auth, user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
 
         if ( // Playlists change too often, clear every time
             query.isNullOrBlank() &&
@@ -111,34 +106,56 @@ class PlaylistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylists()", e, this) }
 
-    private suspend fun like(id: String, like: Boolean, type: MainNetwork.Type): Flow<Resource<Any>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.flag(
-            authKey = auth.auth,
-            id = id,
-            flag = if (like) { 1 } else { 0 },
-            type = type).apply {
-            error?.let { throw(MusicException(it.toError())) }
-            if (success != null) {
-                emit(Resource.Success(data = Any(), networkData = Any()))
+    private suspend fun getPlaylistsNetwork(
+        auth: String,
+        username: String?,
+        offset: Int,
+        query: String,
+        fetchAll: Boolean = false
+    ) = mutableListOf<Playlist>().apply {
+        var off = if (offset == 0 && fetchAll) 0 else offset
+        val maxIterations = 100
+        var counter = 0
+        var isMoreAvailable = false
+        do {
+            val response = api.getPlaylists(auth, filter = query, offset = off)
+            response.error?.let { throw (MusicException(it.toError())) }
+            val responseSize = response.playlist?.size ?: 0
+            val totalCount = response.totalCount?.let { tot ->
+                // if this field is null or empty in the response, return max possible value
+                if (tot > 0) {
+                    tot
+                } else {
+                    Int.MAX_VALUE
+                }
+            } ?: Int.MAX_VALUE
+            off += responseSize
+
+            val playlists = (if (BuildConfig.SHOW_EMPTY_PLAYLISTS) {
+                response.playlist!! // will throw exception if playlist null
             } else {
-                throw Exception("error getting a response from FLAG/LIKE call")
-            }
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("likeSong()", e, this) }
+                response.playlist!!.filter { dtoToFilter -> // will throw exception if playlist null
+                    dtoToFilter.items?.let { itemsCount ->
+                        itemsCount > 0 || dtoToFilter.owner == username // edge-case default behaviour, user==null and owner==null will show the playlist
+                    }
+                        ?: (dtoToFilter.owner == username) // if the count is null fallback to show the playlist if the user is the owner
+                }
+            }).map { it.toPlaylist() }
+            addAll(playlists)
+            // if the current response is not empty there might be more
+            // check if the total count data is less than then current offset
+            isMoreAvailable = responseSize != 0 && totalCount > off
+        } while (fetchAll && isMoreAvailable && ++counter < maxIterations)
+    }.toList()
+
+    override suspend fun getPlaylist(id: String) =
+        dao.playlistLiveData(id).distinctUntilChanged().asFlow().filterNotNull().mapNotNull { it.toPlaylist() }
 
     override suspend fun ratePlaylist(playlistId: String, rate: Int): Flow<Resource<Any>> =
         rate(playlistId, rate, MainNetwork.Type.playlist)
 
-    override suspend fun likeSong(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.song)
-
-    override suspend fun likeAlbum(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.album)
-
-    override suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.artist)
-
-    override suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.playlist)
+    override suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>> =
+        like(id, like, MainNetwork.Type.playlist)
 
     override suspend fun getPlaylistShareLink(playlistId: String) = flow {
         emit(Resource.Loading(true))

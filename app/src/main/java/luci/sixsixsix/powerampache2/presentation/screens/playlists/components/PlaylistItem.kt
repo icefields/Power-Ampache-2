@@ -202,7 +202,7 @@ private fun InfoTextSection(modifier: Modifier, playlistInfo: Playlist) {
                     text = playlistInfo.items?.let {
                         if (it > 0) stringResource(id = R.string.playlistItem_songCount, it) else " "
                     } ?: run { " " } ,
-                    fontWeight = FontWeight.Light,
+                    fontWeight = FontWeight.Normal,
                     fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_artist),
                     maxLines = 1,
                     textAlign = TextAlign.Start

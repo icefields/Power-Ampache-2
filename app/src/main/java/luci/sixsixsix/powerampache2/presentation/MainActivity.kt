@@ -30,6 +30,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
@@ -60,10 +62,10 @@ class MainActivity : ComponentActivity() {
             mainViewModel = hiltViewModel<MainViewModel>(this)
             settingsViewModel = hiltViewModel<SettingsViewModel>(this)
             // homeScreenViewModel = hiltViewModel<HomeScreenViewModel>(this)
-
+            val localSettingsState by settingsViewModel.localSettingsStateFlow.collectAsState()
             var dynamicColour = true
             var isDarkTheme = true
-            when (settingsViewModel.state.localSettings.theme) {
+            when (localSettingsState.theme) {
                 PowerAmpTheme.SYSTEM -> {
                     dynamicColour = false
                     isDarkTheme = isSystemInDarkTheme()

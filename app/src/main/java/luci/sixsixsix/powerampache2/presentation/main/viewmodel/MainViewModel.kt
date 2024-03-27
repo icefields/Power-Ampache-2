@@ -56,7 +56,6 @@ import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -66,12 +65,11 @@ class MainViewModel @Inject constructor(
     application: Application,
     private val weakContext: WeakContext,
     val playlistManager: MusicPlaylistManager,
-    private val playlistsRepository: PlaylistsRepository,
     val musicRepository: MusicRepository,
     val songsRepository: SongsRepository,
     val settingsRepository: SettingsRepository,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
-    private val savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) /*, MainQueueManager*/ {
 //    var state by mutableStateOf(MainState())
 //        private set
@@ -95,6 +93,7 @@ class MainViewModel @Inject constructor(
     private var isServiceRunning = false
     var emittedDownloads by savedStateHandle.saveable { mutableStateOf(listOf<String>()) }
 
+    // TODO: there is no queue to restore! because the queue is in MusicPlaylistManager
     var restoredSong: Song? = null
     var restoredQueue = listOf<Song>()
 
@@ -102,9 +101,9 @@ class MainViewModel @Inject constructor(
 
     init {
         L()
-
-        restoredSong = state.song
-        restoredQueue = state.queue
+        // TODO: there is no queue or song to restore! because the queue is in MusicPlaylistManager
+        // restoredSong = state.song
+        //restoredQueue = state.queue
 
         isPlaying = simpleMediaServiceHandler.isPlaying()
         observePlaylistManager()
@@ -112,6 +111,10 @@ class MainViewModel @Inject constructor(
         observeSession()
         observeDownloads(application)
     }
+
+    fun currentQueue() = playlistManager.currentQueueState
+    fun currentSongStateFlow() = playlistManager.currentSongState
+    fun currentSong() = playlistManager.currentSongState.value
 
     fun onEvent(event: MainEvent) =
         weakContext.get()?.applicationContext?.let { handleEvent(event, it) }
@@ -126,9 +129,10 @@ class MainViewModel @Inject constructor(
                 is Resource.Success -> {
                     result.data?.let { songs ->
                         if (songs.isNotEmpty()) {
-                            playlistManager.updateCurrentSong(songs[0])
-                            playlistManager.addToCurrentQueueTop(songs)
-                            onEvent(MainEvent.Play(songs[0]))
+                            addSongsToQueueAndPlay(songs[0], songs)
+//                            playlistManager.updateCurrentSong(songs[0])
+//                            playlistManager.addToCurrentQueueTop(songs)
+//                            onEvent(MainEvent.Play(songs[0]))
                         }
                     }
                 }
@@ -139,12 +143,13 @@ class MainViewModel @Inject constructor(
     }
 
     fun favouriteSong(song: Song) = viewModelScope.launch {
-        playlistsRepository.likeSong(song.mediaId, (song.flag != 1)).collect { result ->
+        songsRepository.likeSong(song.mediaId, (song.flag != 1)).collect { result ->
             when (result) {
                 is Resource.Success -> {
                     result.data?.let {
                         // refresh song
-                        state = state.copy(song = song.copy(flag = abs(song.flag - 1)))
+                        playlistManager.updateCurrentSong(song.copy(flag = abs(song.flag - 1)))
+                        //state = state.copy(song = song.copy(flag = abs(song.flag - 1)))
                     }
                 }
                 is Resource.Error -> state = state.copy(isLikeLoading = false)
@@ -159,7 +164,8 @@ class MainViewModel @Inject constructor(
                 is Resource.Success -> {
                     result.data?.let {
                         // refresh song
-                        state = state.copy(song = song.copy(rating = rate.toFloat()))
+                        playlistManager.updateCurrentSong(song.copy(rating = rate.toFloat()))
+                        // state = state.copy(song = song.copy(rating = rate.toFloat()))
                     }
                 }
                 is Resource.Error -> state = state.copy(isLikeLoading = false)
@@ -246,7 +252,7 @@ class MainViewModel @Inject constructor(
             logToErrorLogs("Load song data START")
 
             val mediaItemList = mutableListOf<MediaItem>()
-            for (song: Song? in state.queue) {
+            for (song: Song? in playlistManager.currentQueueState.value) {
                 song?.let {
                     mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it)))
                 }
@@ -313,7 +319,7 @@ class MainViewModel @Inject constructor(
         loadSongDataJob = null
         isLoading = false
         isBuffering = false
-        state = state.copy(isFabLoading = false)
+        state = state.copy(isFabLoading = false, isDownloading = false, isLikeLoading = false)
 
         // attempt to stop the service
         try {
@@ -330,11 +336,12 @@ class MainViewModel @Inject constructor(
         super.onCleared()
     }
 
+    @Deprecated("completely rewrite before use, those cases might not exist anymore")
     fun onActivityRestart() {
         // if the link to play the song is not valid reload all the data
         // when the app goes in background without playing anything the token might be invalidated
         // in this case reload the song data
-        state.song?.songUrl?.let { songUrl ->
+        currentSong()?.songUrl?.let { songUrl ->
             logToErrorLogs("1.a songUrl is not null $songUrl")
             if (songUrl.startsWith("http")) {
                 if (!songUrl.contains(authToken)) {
@@ -343,9 +350,9 @@ class MainViewModel @Inject constructor(
                 } else
                     logToErrorLogs("3 songUrl contains the updated token, not realoading data")
             } else {
-                logToErrorLogs("1.b songUrl NULL, looping queue, size: ${state.queue.size}")
+                logToErrorLogs("1.b songUrl NULL, looping queue, size: ${playlistManager.currentQueueState.value.size}")
                 // that's a local song, check the rest of the queue
-                state.queue.forEach { song ->
+                playlistManager.currentQueueState.value.forEach { song ->
                     if (song.songUrl.startsWith("http") && !song.songUrl.contains(authToken)) {
                         logToErrorLogs("4 song.songUrl does not contain the updated token LOADING SONG DATA NOW $authToken, $songUrl")
                         loadSongData()
@@ -355,6 +362,6 @@ class MainViewModel @Inject constructor(
             }
             logToErrorLogs("5 (songUrl is not null) reached the end of function")
         }
-            ?: logToErrorLogs("6 song is null? ${(state.song == null)} . songUrl: ${state.song?.songUrl}.")
+            ?: logToErrorLogs("6 song is null? ${(currentSong() == null)} . songUrl: ${currentSong()?.songUrl}.")
     }
 }

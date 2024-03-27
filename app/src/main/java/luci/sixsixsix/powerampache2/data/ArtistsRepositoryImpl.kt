@@ -152,4 +152,6 @@ class ArtistsRepositoryImpl @Inject constructor(
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getArtists()", e, this) }
+
+    override suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.artist)
 }

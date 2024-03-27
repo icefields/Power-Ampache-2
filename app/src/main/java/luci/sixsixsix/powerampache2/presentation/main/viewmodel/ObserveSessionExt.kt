@@ -42,7 +42,7 @@ fun MainViewModel.observeSession() {
             if (authToken.isNotBlank()) {
                 // refresh the playlist with new urls with the new token
                 // only if a queue exists
-                if (oldToken != authToken && state.queue.isNotEmpty()) {
+                if (oldToken != authToken && playlistManager.currentQueueState.value.isNotEmpty()) {
                     // TODO EXPERIMENT remove?
 //                    if (!isPlaying) {
 //                        logToErrorLogs("nothing playing, new token present, stop service")
@@ -67,7 +67,7 @@ fun MainViewModel.observeSession() {
                 //authToken = newToken
             } else {
                 // if sessions is null, stop service and invalidate queue and current song
-                if (state.song == null) {
+                if (currentSong() == null) {
                     logToErrorLogs(" && state.song == null")
                     if (!isPlaying) {
                         logToErrorLogs("nothing playing, tate.song == null, stop service")
@@ -82,6 +82,9 @@ fun MainViewModel.observeSession() {
 }
 
 private fun MainViewModel.restoreQueueState() {
+    // TODO this is not working, there is no queue state to restore because the queue is in
+    //  PlaylistManager
+
     logToErrorLogs("restoreQueueState")
     // restore song and queue if saved in state handle
     // the observed lived data might call loadSongData()

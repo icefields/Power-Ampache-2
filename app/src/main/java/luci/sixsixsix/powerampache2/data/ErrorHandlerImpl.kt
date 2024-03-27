@@ -25,6 +25,9 @@ import android.app.Application
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
+import androidx.media3.common.PlaybackException
+import androidx.media3.datasource.HttpDataSource
+import com.google.gson.Gson
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.FlowCollector
@@ -76,33 +79,50 @@ class ErrorHandlerImpl @Inject constructor(
     override suspend fun <T> invoke(
         label: String,
         e: Throwable,
-        fc: FlowCollector<Resource<T>>,
+        fc: FlowCollector<Resource<T>>?,
         onError: (message: String, e: Throwable) -> Unit
     ) {
         // Blocking errors for server url not initialized
         if (e is MusicException && e.musicError.isServerUrlNotInitialized()) {
             L("ServerUrlNotInitializedException")
-            fc.emit(Resource.Loading(false))
+            fc?.emit(Resource.Loading(false))
             return
         }
+
+        val exceptionString = try { Gson().toJson(e) } catch (jsonException: Exception) { "$e" }
 
         var readableMessage: String? = null
         StringBuilder(label)
             .append(if (label.isBlank()) "" else " - ")
             .append(
                 when (e) {
+                    is HttpDataSource.InvalidResponseCodeException -> {
+                        readableMessage = "Problem connecting to the server or data source. \nPlay a different track or check your connection\nResponse code: ${e.responseCode}"
+                        "HttpDataSource.InvalidResponseCodeException \n$label\n $exceptionString"
+                    }
+
+                    is HttpDataSource.HttpDataSourceException -> {
+                        readableMessage = "Problem connecting to the server or data source. \nPlay a different track or check your connection"
+                        "HttpDataSource.HttpDataSourceException \n$readableMessage\n $exceptionString"
+                    }
+
+                    is PlaybackException -> {
+                        readableMessage = "Problem playing this track. Check your connection"
+                        "PlaybackException \n$readableMessage\n $exceptionString"
+                    }
+
                     is IOException -> {
                         readableMessage = applicationContext.getString(R.string.error_io_exception)
-                        "cannot load data IOException $e"
+                        "cannot load data IOException $exceptionString"
                     }
 
                     is HttpException -> {
                         readableMessage = e.localizedMessage
-                        "cannot load data HttpException $e"
+                        "cannot load data HttpException $exceptionString"
                     }
 
                     is ServerUrlNotInitializedException ->
-                        "ServerUrlNotInitializedException $e"
+                        "ServerUrlNotInitializedException $exceptionString"
 
                     is MusicException -> {
                         when (e.musicError.getErrorType()) {
@@ -133,12 +153,12 @@ class ErrorHandlerImpl @Inject constructor(
 
                     else -> {
                         readableMessage = e.localizedMessage
-                        "generic exception $e"
+                        "generic exception $exceptionString"
                     }
                 }
             ).toString().apply {
                 // check on error on the emitted data for detailed logging
-                fc.emit(Resource.Error<T>(message = this, exception = e))
+                fc?.emit(Resource.Error(message = this, exception = e))
                 // log and report error here
                 logError(this)
                 logError(e)

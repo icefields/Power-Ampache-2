@@ -269,7 +269,7 @@ private fun InfoTextSection(
             SubtitleString.ARTIST -> Text(
                 modifier = Modifier.basicMarquee(),
                 text = song.artist.name,
-                fontWeight = FontWeight.Light,
+                fontWeight = FontWeight.Normal,
                 fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_artist),
                 maxLines = 1,
                 textAlign = TextAlign.Start
@@ -277,7 +277,7 @@ private fun InfoTextSection(
             SubtitleString.ALBUM -> Text(
                 modifier = Modifier.basicMarquee(),
                 text = song.album.name,
-                fontWeight = FontWeight.Light,
+                fontWeight = FontWeight.Normal,
                 fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_artist),
                 maxLines = 1,
                 textAlign = TextAlign.Start

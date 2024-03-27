@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.domain
 
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
@@ -33,6 +34,7 @@ interface PlaylistsRepository {
     val playlistsLiveData: LiveData<List<Playlist>>
 
     suspend fun getPlaylists(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Playlist>>>
+    suspend fun getPlaylist(id: String): Flow<Playlist>
     suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun addSongToPlaylist(playlistId: String, songId: String): Flow<Resource<Any>>
     suspend fun addSongsToPlaylist(playlist: Playlist, songsToAdd: List<Song>): Flow<Resource<Playlist>>
@@ -48,10 +50,6 @@ interface PlaylistsRepository {
         tracks: String? = null,
         playlistType: PlaylistType = PlaylistType.private
     ): Flow<Resource<Any>>
-    suspend fun likeAlbum(id: String, like: Boolean): Flow<Resource<Any>>
-    suspend fun likeSong(id: String, like: Boolean): Flow<Resource<Any>>
-    suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun getPlaylistShareLink(playlistId: String): Flow<Resource<String>>
-
     suspend fun ratePlaylist(playlistId: String, rate: Int): Flow<Resource<Any>>
 }

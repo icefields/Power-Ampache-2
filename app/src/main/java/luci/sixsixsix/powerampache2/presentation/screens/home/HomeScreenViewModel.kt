@@ -114,10 +114,11 @@ class HomeScreenViewModel @Inject constructor(
 
     private suspend fun replaceWithRandomIfEmpty(
         albums: List<Album>,
+        fetchRemote: Boolean = false,
         callback: (albums: List<Album>) -> Unit
     ) {
         if (albums.isNullOrEmpty()) {
-            getRandom(fetchRemote = true) { albums ->
+            getRandom(fetchRemote = fetchRemote) { albums ->
                 callback(albums)
             }
         }
@@ -129,15 +130,16 @@ class HomeScreenViewModel @Inject constructor(
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
-                        result.data?.let { albums ->
+                        // TODO use network data for recent right now, add lastPlayed field to
+                        //  every entity to start using db in conjunction
+                        result.networkData?.let { albums ->
                             state = state.copy(recentAlbums = albums)
-                            L("size", state.playlists.size)
-                        }
-                        replaceWithRandomIfEmpty(state.recentAlbums) {
-                            state = state.copy(recentAlbums = it)
+
+                            replaceWithRandomIfEmpty(state.recentAlbums, fetchRemote = true) {
+                                state = state.copy(recentAlbums = it)
+                            }
                         }
                     }
-
                     is Resource.Error -> {
                         state = state.copy(isLoading = false)
                         replaceWithRandomIfEmpty(state.recentAlbums) {
@@ -145,7 +147,6 @@ class HomeScreenViewModel @Inject constructor(
                         }
                         L("ERROR HomeScreenViewModel.getRecent ${result.exception}")
                     }
-
                     is Resource.Loading -> {
                         state = state.copy(isLoading = result.isLoading)
                     }
@@ -235,7 +236,6 @@ class HomeScreenViewModel @Inject constructor(
             }
     }
 
-
     private suspend fun getFrequent(fetchRemote: Boolean = true) {
         albumsRepository
             .getFrequentAlbums()
@@ -279,7 +279,7 @@ class HomeScreenViewModel @Inject constructor(
         callback: (albums: List<Album>) -> Unit
     ) {
         albumsRepository
-            .getRandomAlbums()
+            .getRandomAlbums(fetchRemote = fetchRemote)
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {

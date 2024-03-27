@@ -46,6 +46,7 @@ import luci.sixsixsix.powerampache2.data.mapping.AmpacheDateMapper
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork.Companion.BASE_URL
 import luci.sixsixsix.powerampache2.data.remote.PingScheduler
+import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -112,8 +113,12 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideServiceHandler(player: ExoPlayer, playlistManager: MusicPlaylistManager) =
-        SimpleMediaServiceHandler(playlistManager = playlistManager, player = player)
+    fun provideServiceHandler(player: ExoPlayer, playlistManager: MusicPlaylistManager, errorHandler: ErrorHandler) =
+        SimpleMediaServiceHandler(
+            playlistManager = playlistManager,
+            player = player,
+            errorHandler = errorHandler
+        )
 
     //@ServiceScoped
     @OptIn(UnstableApi::class)

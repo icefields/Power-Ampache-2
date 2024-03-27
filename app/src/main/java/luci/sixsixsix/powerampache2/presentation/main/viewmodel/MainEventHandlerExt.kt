@@ -45,24 +45,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
                 playlistManager.updateSearchQuery(event.query)
             }
         }
-        is MainEvent.Play -> {
-            if (loadSongDataJob?.isActive == true) {
-                L( "MainEvent.Play", "loadSongDataJob?.isActive")
-                loadSongDataJob?.invokeOnCompletion {
-                    //loadSongDataJob = null
-                    it?.let {
-                        L.e(it)
-                    } ?: run {
-                        L( "MainEvent.Play", "invokeOnCompletion")
-                        playSongForce(event.song)
-                    }
-                }
-            } else {
-                L( "MainEvent.Play", "play directly")
-                playSongForce(event.song)
-            }
-        }
-        MainEvent.PlayPauseCurrent -> state.song?.let { song ->
+        MainEvent.PlayPauseCurrent -> currentSong()?.let { song ->
             if (loadSongDataJob?.isActive == true) {
                 L( "MainEvent.PlayPauseCurrent", "loadSongDataJob?.isActive")
                 loadSongDataJob?.invokeOnCompletion { thr ->
@@ -79,6 +62,15 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
                 playPauseSong()
             }
         }
+        is MainEvent.AddSongsToQueueAndPlay ->
+            addSongsToQueueAndPlay(event.song, event.songList)
+        is MainEvent.PlaySong ->
+            playSong(event.song)
+        is MainEvent.PlaySongAddToQueueTop ->
+            playSongAddToQueueTop(event.song, event.songList)
+        is MainEvent.AddSongsToQueueAndPlayShuffled ->
+            addSongsToQueueAndPlayShuffled(event.songList)
+
         MainEvent.OnDismissUserMessage ->
             playlistManager.updateUserMessage("")
         MainEvent.OnLogout ->
@@ -118,7 +110,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         MainEvent.Forward -> viewModelScope.launch {
             simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Forward)
         }
-        MainEvent.FavouriteSong -> state.song?.let {
+        MainEvent.FavouriteSong -> currentSong()?.let {
             favouriteSong(it)
         }
         is MainEvent.OnDownloadedSongDelete ->
@@ -159,6 +151,60 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
     }
 }
 
+/**
+ * to play albums and playlists
+ */
+fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
+    playlistManager.updateCurrentSong(song)
+    playlistManager.addToCurrentQueueTop(songList)
+    play(song)
+}
+
+/**
+ * select a single song, play, and put it on the top of the queue
+ * the song list is just for verification (TODO: should that be optional?)
+ */
+private fun MainViewModel.playSongAddToQueueTop(song: Song, songList: List<Song>) {
+    playlistManager.addToCurrentQueueUpdateTopSong(song, songList)
+    play(song)
+}
+
+/**
+ * select song from current queue and play
+ */
+private fun MainViewModel.playSong(song: Song) {
+    playlistManager.updateCurrentSong(song)
+    play(song)
+}
+
+private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<Song>) {
+    val shuffled = songList.shuffled()
+    playlistManager.replaceCurrentQueue(shuffled)
+    playlistManager.updateCurrentSong(shuffled[0])
+
+    if (!isPlaying) {
+        onEvent(MainEvent.PlayPauseCurrent)
+    }
+}
+
+private fun MainViewModel.play(song: Song) {
+    if (loadSongDataJob?.isActive == true) {
+        L( "MainEvent.Play", "loadSongDataJob?.isActive")
+        loadSongDataJob?.invokeOnCompletion {
+            //loadSongDataJob = null
+            it?.let {
+                L.e(it)
+            } ?: run {
+                L( "MainEvent.Play", "invokeOnCompletion")
+                playSongForce(song)
+            }
+        }
+    } else {
+        L( "MainEvent.Play", "play directly")
+        playSongForce(song)
+    }
+}
+
 private fun MainViewModel.playSongForce(song: Song) = viewModelScope.launch {
     L( "MainEvent.Play", "playing song")
     try {
@@ -170,7 +216,7 @@ private fun MainViewModel.playSongForce(song: Song) = viewModelScope.launch {
         logToErrorLogs("fun MainViewModel.playSongForce EXCEPTION, loading song data now")
         logToErrorLogs(e.stackTraceToString())
         // TODO this might go into an infinite loop if no connection or all urls are invalid
-        loadSongData()
+        //loadSongData()
     }
     L( "MainEvent.Play", "play song launched. After")
 }
@@ -183,6 +229,6 @@ private fun MainViewModel.playPauseSong() = viewModelScope.launch {
     } catch (e: Exception) {
         // TODO this might go into an infinite loop if no connection or all urls are invalid
         //  do a retry timeout that increases every time and resets on successful song playback
-        loadSongData()
+        //loadSongData()
     }
 }
