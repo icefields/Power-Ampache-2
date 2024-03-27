@@ -8,8 +8,8 @@
     <dimen name="albumItem_paddingVertical">5dp</dimen>
     <dimen name="albumItem_infoText_paddingVertical">5dp</dimen>
     <dimen name="albumItem_infoText_paddingHorizontal">8dp</dimen>
-    <dimen name="albumItem_infoTextSection_textSize_title">15sp</dimen>
-    <dimen name="albumItem_infoTextSection_lineHeight_title">16sp</dimen>
+    <dimen name="albumItem_infoTextSection_textSize_title">16sp</dimen>
+    <dimen name="albumItem_infoTextSection_lineHeight_title">17sp</dimen>
     <dimen name="albumItem_infoTextSection_textSize_artist">14sp</dimen>
     <dimen name="songItem_card_borderStroke">0.5dp</dimen>
     <dimen name="albumItem_card_border">0.5dp</dimen>
@@ -20,6 +20,9 @@
     <dimen name="songItem_infoTextSection_textSize_title">17sp</dimen>
     <dimen name="songItem_infoTextSection_textSize_artist">14sp</dimen>
     <dimen name="songItem_infoTextSection_textSize_album">14sp</dimen>
+    <dimen name="songDropdown_textSize">16sp</dimen>
+    <dimen name="songDropdown_item_padding_horizontal">10dp</dimen>
+    <dimen name="songDropdown_padding">4dp</dimen>
     <dimen name="main_tab_textSize">12sp</dimen>
     <dimen name="songItem_infoTextSection_spacer">4dp</dimen>
     <dimen name="miniPlayer_height">70dp</dimen>
@@ -27,7 +30,7 @@
     <dimen name="close_handle_icon_padding">10dp</dimen>
     <dimen name="main_floating_button_size">95dp</dimen>
 
-    <dimen name="albumDetail_chip_radius">20dp</dimen>
+    <dimen name="albumDetail_chip_radius">10dp</dimen>
     <dimen name="albumDetail_chip_elevation">2dp</dimen>
     <dimen name="albumDetail_title_fontSize">24sp</dimen>
     <dimen name="albumDetailScreen_top_padding">5dp</dimen>
@@ -49,4 +52,20 @@
     <dimen name="about_item_fontSize">16sp</dimen>
     <dimen name="songDetail_handle_arrow_width">36sp</dimen>
     <dimen name="playlistItem_icon_size">24dp</dimen>
+
+    <dimen name="player_artistName_size">14sp</dimen>
+    <dimen name="player_screen_padding">24dp</dimen>
+    <dimen name="player_songTitle_size">18sp</dimen>
+    <dimen name="starRating_button_cornerRadius">66dp</dimen>
+    <dimen name="player_buttonTitle_fontSize">11sp</dimen>
+    <dimen name="player_controls_spacing">16dp</dimen>
+
+    <dimen name="home_playlist_title_fontSize">14sp</dimen>
+    <dimen name="home_playlist_title_lineHeight">16sp</dimen>
+    <dimen name="home_album_title_fontSize">14sp</dimen>
+    <dimen name="home_album_title_lineHeight">15sp</dimen>
+    <dimen name="home_album_artist_fontSize">13sp</dimen>
+    <dimen name="home_row_spacing">16dp</dimen>
+    <dimen name="genre_title_fontSize">16sp</dimen>
+    <dimen name="genre_title_lineHeight">16sp</dimen>
 </resources>

@@ -28,16 +28,21 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
-import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
-import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
@@ -47,14 +52,13 @@ import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class PlaylistDetailViewModel @Inject constructor(
     private val application: Application,
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
@@ -68,6 +72,40 @@ class PlaylistDetailViewModel @Inject constructor(
 ) : AndroidViewModel(application = application) {
     var state by mutableStateOf(PlaylistDetailState())
     //var state by savedStateHandle.saveable { mutableStateOf(PlaylistDetailState()) }
+    //var playlistState = playlistsRepository.getPlaylist()
+    //private val playlistId = MutableStateFlow<String>("")
+
+    val playlistStateFlow: StateFlow<Playlist> =
+        savedStateHandle.getStateFlow<Playlist?>("playlist", null)
+            .filterNotNull()
+            .map { playlist ->
+                onEvent(PlaylistDetailEvent.Fetch(playlist))
+                playlist
+            }
+            .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlist, user ->
+                state = state.copy(
+                    isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
+                    isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),
+                    isUserOwner = user.username == playlist.owner
+                )
+                playlist
+            }
+            .map { it.id }
+            .flatMapConcat { id ->
+                playlistsRepository.getPlaylist(id).filterNotNull()
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Playlist.empty())
+
+
+//    private val mainState = combine(playlistStateFlow, musicRepository.userLiveData.asFlow().filterNotNull()) { playlist, user ->
+//        onEvent(PlaylistDetailEvent.Fetch(playlist))
+//
+//        state = state.copy(
+//            isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
+//            isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),
+//            isUserOwner = user.username == playlist.owner
+//        )
+//    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     init {
         viewModelScope.launch {
@@ -86,16 +124,21 @@ class PlaylistDetailViewModel @Inject constructor(
             }
         }
 
-        savedStateHandle.get<Playlist>("playlist")?.let { playlist ->
-            state = state.copy(playlist = playlist)
-            onEvent(PlaylistDetailEvent.Fetch(playlist))
-
-            musicRepository.userLiveData.observeForever {
-                it?.let { user ->
-                    state = state.copy(isUserOwner = user.username == playlist.owner)
-                }
-            }
-        }
+        // rewritten using flows
+//        savedStateHandle.get<Playlist>("playlist")?.let { playlist ->
+//            //playlistId.value = playlist.id
+//            state = state.copy(
+//                isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
+//                isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist)
+//            )
+//            onEvent(PlaylistDetailEvent.Fetch(playlist))
+//
+//            viewModelScope.launch {
+//                musicRepository.userLiveData.asFlow().filterNotNull().collectLatest { user ->
+//                    state = state.copy(isUserOwner = user.username == playlist.owner)
+//                }
+//            }
+//        }
     }
 
     fun onEvent(event: PlaylistDetailEvent) {
@@ -112,27 +155,26 @@ class PlaylistDetailViewModel @Inject constructor(
                 }
             }
             is PlaylistDetailEvent.OnSongSelected -> {
-                playlistManager.addToCurrentQueueUpdateTopSong(state.songs[0].song, state.getSongList())
-
-//                playlistManager.updateTopSong(state.songs[0].song)
-//                playlistManager.addToCurrentQueue(state.getSongList())
+//                playlistManager.addToCurrentQueueUpdateTopSong(state.songs[0].song, state.getSongList())
             }
-            PlaylistDetailEvent.OnPlayPlaylist -> if (state.songs.isNotEmpty()) {
-                playlistManager.updateCurrentSong(state.songs[0].song)
-                playlistManager.addToCurrentQueueTop(state.getSongList())
-            }
+            PlaylistDetailEvent.OnPlayPlaylist -> { }
+//                if (state.songs.isNotEmpty()) {
+//                playlistManager.updateCurrentSong(state.songs[0].song)
+//                playlistManager.addToCurrentQueueTop(state.getSongList())
+//            }
             PlaylistDetailEvent.OnSharePlaylist ->
-                sharePlaylist(playlistId = state.playlist.id)
-            PlaylistDetailEvent.OnShufflePlaylist -> if (state.songs.isNotEmpty()) {
-                val shuffled = state.getSongList().shuffled()
-                playlistManager.replaceCurrentQueue(shuffled)
-                playlistManager.moveToSongInQueue(shuffled[0])
-            }
+                sharePlaylist(playlistId = playlistStateFlow.value.id)
+            PlaylistDetailEvent.OnShufflePlaylist -> { }
+//                if (state.songs.isNotEmpty()) {
+//                val shuffled = state.getSongList().shuffled()
+//                playlistManager.replaceCurrentQueue(shuffled)
+//                playlistManager.updateCurrentSong(shuffled[0])
+//            }
             is PlaylistDetailEvent.OnRemoveSong ->
-                removeSongFromPlaylist(playlistId = state.playlist.id, songId = event.song.mediaId)
+                removeSongFromPlaylist(playlistId = playlistStateFlow.value.id, songId = event.song.mediaId)
             PlaylistDetailEvent.OnRemoveSongDismiss -> { } // TODO remove this
             PlaylistDetailEvent.OnToggleSort -> viewModelScope.launch {
-                if ((state.playlist !is HighestPlaylist) && (state.playlist !is RecentPlaylist) &&(state.playlist !is FlaggedPlaylist) &&(state.playlist !is FrequentPlaylist) ) {
+                if (state.isNotStatPlaylist) {
                     // if not a stat playlist change global sort
                     settingsRepository.changeSortMode( if (state.sortMode == SortMode.ASC) SortMode.DESC else SortMode.ASC )
                 } else {
@@ -150,6 +192,9 @@ class PlaylistDetailViewModel @Inject constructor(
             is PlaylistDetailEvent.OnRatePlaylist -> viewModelScope.launch {
                 ratePlaylist(event.playlist, event.rating)
             }
+
+            PlaylistDetailEvent.OnLikePlaylist ->
+                likePlaylist()
         }
     }
 
@@ -159,13 +204,30 @@ class PlaylistDetailViewModel @Inject constructor(
                 is Resource.Success -> {
                     result.data?.let {
                         // refresh playlist
-                        state = state.copy(playlist = playlist.apply { rating = rate })
+                        //state = state.copy(playlist = playlist.apply { rating = rate })
                     }
                 }
                 is Resource.Error -> state = state.copy(isLoading = false)
                 is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
             }
         }
+    }
+
+    private fun likePlaylist(playlistId: String = playlistStateFlow.value.id) = viewModelScope.launch {
+        playlistsRepository.likePlaylist(playlistId, (playlistStateFlow.value.flag != 1))
+            .collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            // refresh
+
+                            //state = state.copy(playlist = state.playlist.copy(flag = abs(state.album.flag - 1)))
+                        }
+                    }
+                    is Resource.Error -> state = state.copy(isLikeLoading = false)
+                    is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+                }
+            }
     }
 
     private fun sharePlaylist(playlistId: String) = viewModelScope.launch {

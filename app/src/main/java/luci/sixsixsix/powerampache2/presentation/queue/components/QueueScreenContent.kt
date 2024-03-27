@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
@@ -44,6 +46,7 @@ import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.queue.QueueEvent
@@ -57,7 +60,9 @@ fun QueueScreenContent(
     modifier: Modifier = Modifier,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
-    val queue = queueViewModel.queueState
+    val queue by queueViewModel.queueFlow.collectAsState()
+    val songState by mainViewModel.currentSongStateFlow().collectAsState()
+
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
     if (playlistsDialogOpen.isOpen) {
         if (playlistsDialogOpen.songs.isNotEmpty()) {
@@ -73,6 +78,21 @@ fun QueueScreenContent(
                 }
             )
         }
+    }
+
+    var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
+    showDeleteSongDialog?.let { songToRemove ->
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteSongDialog = null
+            },
+            onConfirmation = {
+                showDeleteSongDialog = null
+                queueViewModel.onEvent(QueueEvent.OnSongRemove(songToRemove))
+            },
+            dialogTitle = "REMOVE SONG",
+            dialogText = "Delete ${songToRemove.name} from your queue?"
+        )
     }
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
@@ -108,17 +128,22 @@ fun QueueScreenContent(
                 subtitleString = SubtitleString.ARTIST,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (song.mediaId == mainViewModel.state.song?.mediaId)
-                        MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+                    .background(
+                        if (song.mediaId == songState?.mediaId)
+                            MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
                     )
                     .clickable {
                         // TODO BUG when tapping on a song, in the context of a playlist, do not
                         //  move the new song on top, just start playing from the selected song
-                        queueViewModel.onEvent(QueueEvent.OnSongSelected(song))
-                        mainViewModel.onEvent(MainEvent.Play(song))
+                        mainViewModel.onEvent(MainEvent.PlaySong(song))
+
+                        //queueViewModel.onEvent(QueueEvent.OnSongSelected(song))
+                        //mainViewModel.onEvent(MainEvent.Play(song))
                     },
                 enableSwipeToRemove = true,
-                onRemove = { queueViewModel.onEvent(QueueEvent.OnSongRemove(it)) },
+                onRemove = { songToRemove ->
+                    showDeleteSongDialog = songToRemove
+                },
                 onRightToLeftSwipe = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                 }

@@ -49,7 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
+import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import java.util.UUID
 
@@ -112,12 +114,12 @@ fun ColourGenreListItem(
                     Text(
                         color = MaterialTheme.colorScheme.onSurface,
                         text = genre.name,
-                        fontSize = 16.sp,
+                        fontSize = fontDimensionResource(id = R.dimen.genre_title_fontSize),
                         textAlign = TextAlign.Start,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Bold,
                         maxLines = 4,
                         minLines = 4,
-                        lineHeight = (16).sp
+                        lineHeight = fontDimensionResource(id = R.dimen.genre_title_lineHeight)
                     )
 
 //                Text(

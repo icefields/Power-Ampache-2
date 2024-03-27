@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="onSurfaceVariant">@color/onSurfaceVariantDark</color>
-    <color name="surfaceContainer">@color/surfaceContainerDark</color>
-    <color name="surfaceContainerHigh">@color/surfaceContainerHighDark</color>
-
 </resources>

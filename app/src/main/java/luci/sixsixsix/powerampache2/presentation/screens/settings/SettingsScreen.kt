@@ -45,6 +45,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,20 +95,25 @@ fun SettingsScreen(
     navigator: DestinationsNavigator,
     settingsViewModel: SettingsViewModel
 ) {
+    val localSettingsState by settingsViewModel.localSettingsStateFlow.collectAsState()
+    val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
+    val user by settingsViewModel.userStateFlow.collectAsState()
+    val serverInfo by settingsViewModel.serverInfoStateFlow.collectAsState(ServerInfo())
+
     SettingsScreenContent(
         modifier = Modifier.fillMaxSize().padding(bottom = 10.dp),
-        userState = settingsViewModel.state.user,
-        serverInfo = settingsViewModel.state.serverInfo,
+        userState = user,
+        serverInfo = serverInfo,
         versionInfo = settingsViewModel.state.appVersionInfoStr,
-        powerAmpTheme = settingsViewModel.state.localSettings.theme,
-        streamingQuality = settingsViewModel.state.localSettings.streamingQuality,
-        remoteLoggingEnabled = settingsViewModel.state.localSettings.enableRemoteLogging,
-        hideDonationButtons = settingsViewModel.state.localSettings.hideDonationButton,
-        isNormalizeVolumeEnabled = settingsViewModel.state.localSettings.isNormalizeVolumeEnabled,
-        isMonoAudioEnabled = settingsViewModel.state.localSettings.isMonoAudioEnabled,
-        isSmartDownloadsEnabled = settingsViewModel.state.localSettings.isSmartDownloadsEnabled,
-        isAutoCheckUpdatesEnabled = settingsViewModel.state.localSettings.enableAutoUpdates,
-        isOfflineModeEnabled = settingsViewModel.offlineModeState,
+        powerAmpTheme = localSettingsState.theme,
+        streamingQuality = localSettingsState.streamingQuality,
+        remoteLoggingEnabled = localSettingsState.enableRemoteLogging,
+        hideDonationButtons = localSettingsState.hideDonationButton,
+        isNormalizeVolumeEnabled = localSettingsState.isNormalizeVolumeEnabled,
+        isMonoAudioEnabled = localSettingsState.isMonoAudioEnabled,
+        isSmartDownloadsEnabled = localSettingsState.isSmartDownloadsEnabled,
+        isAutoCheckUpdatesEnabled = localSettingsState.enableAutoUpdates,
+        isOfflineModeEnabled = offlineModeState,
         onThemeSelected = {
             settingsViewModel.onEvent(SettingsEvent.OnThemeChange(it))
         },

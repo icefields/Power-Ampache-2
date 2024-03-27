@@ -37,9 +37,12 @@ import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
 
 @Parcelize
 data class PlaylistDetailState (
-    val playlist: Playlist = Playlist("", ""),
+    //val playlist: Playlist = Playlist("", ""),
+    val isNotStatPlaylist: Boolean = false,
+    val isGeneratedOrSmartPlaylist: Boolean = false,
     val songs: List<SongWrapper> = emptyList(),
     val isLoading: Boolean = false,
+    val isLikeLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val isPlaylistRemoveLoading: Boolean = false,
     val searchQuery: String = "",
@@ -49,11 +52,17 @@ data class PlaylistDetailState (
     val isGlobalShuffleOn: Boolean = LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE
 ): Parcelable {
     fun getSongList(): List<Song> = songs.map { it.song }
-    fun isGeneratedPlaylist() = when(playlist) {
-        is HighestPlaylist -> true
-        is RecentPlaylist -> true
-        is FlaggedPlaylist -> true
-        is FrequentPlaylist -> true
-        else -> playlist.isSmartPlaylist()
+
+    companion object {
+        fun isGeneratedOrSmartPlaylist(playlist: Playlist) = when (playlist) {
+            is HighestPlaylist -> true
+            is RecentPlaylist -> true
+            is FlaggedPlaylist -> true
+            is FrequentPlaylist -> true
+            else -> playlist.isSmartPlaylist()
+        }
+
+        fun isNotStatPlaylist(playlist: Playlist): Boolean =
+            (playlist !is HighestPlaylist) && (playlist !is RecentPlaylist) && (playlist !is FlaggedPlaylist) && (playlist !is FrequentPlaylist)
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.StarRate
 import androidx.compose.material3.Card
@@ -37,7 +38,8 @@ fun StarRatingIcon(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
             contentColor = MaterialTheme.colorScheme.surface
-        )
+        ),
+        shape = RoundedCornerShape(dimensionResource(id = R.dimen.starRating_button_cornerRadius))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -68,5 +70,5 @@ fun StarRatingIcon(
 
 @Composable @Preview
 fun PreviewStarRatingIcon() {
-    StarRatingIcon(rating = 4)
+    StarRatingIcon(rating = 0)
 }

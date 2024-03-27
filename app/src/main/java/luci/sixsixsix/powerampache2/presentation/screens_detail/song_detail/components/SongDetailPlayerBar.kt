@@ -26,8 +26,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -50,6 +50,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,11 +63,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
 @Composable
 fun SongDetailPlayerBar(
@@ -86,18 +90,18 @@ fun SongDetailPlayerBar(
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
+        PlayerTimeSlider(
+            progress = progress,
+            durationStr = durationStr,
+            progressStr = progressStr,
+            onEvent = onEvent
+        )
         PlayerControls(
             isPlaying = isPlaying,
             isBuffering = isBuffering,
             shuffleOn = shuffleOn,
             repeatMode = repeatMode,
             modifier = Modifier.fillMaxWidth(),
-            onEvent = onEvent
-        )
-        PlayerTimeSlider(
-            progress = progress,
-            durationStr = durationStr,
-            progressStr = progressStr,
             onEvent = onEvent
         )
     }
@@ -112,12 +116,11 @@ fun PlayerControls(
     modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit
 ) {
-    val tint = MaterialTheme.colorScheme.primary
+    val tint = MaterialTheme.colorScheme.inverseSurface
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
-
     ) {
         IconButton(modifier = Modifier.weight(1f),
             onClick = {
@@ -133,6 +136,7 @@ fun PlayerControls(
                 contentDescription = "Repeat"
             )
         }
+        Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.player_controls_spacing)))
         IconButton(
             modifier = Modifier.weight(1f),
             onClick = {
@@ -140,7 +144,7 @@ fun PlayerControls(
             Icon(
                 tint = tint,
                 modifier = Modifier
-                    .fillMaxSize()
+                    //.fillMaxSize()
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onLongPress = { onEvent(MainEvent.Backwards) },
@@ -152,7 +156,9 @@ fun PlayerControls(
                 contentDescription = "SkipPrevious"
             )
         }
+        Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.player_controls_spacing)))
 
+        // PLAY
         PlayButton(
             modifier = Modifier
                 .height(80.dp)
@@ -162,18 +168,21 @@ fun PlayerControls(
             isBuffering = isBuffering,
             isPlaying = isPlaying
         ) { onEvent(MainEvent.PlayPauseCurrent) }
+        Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.player_controls_spacing)))
 
+        // SKIP NEXT
         IconButton(modifier = Modifier.weight(1f),
             onClick = {
                 onEvent(MainEvent.SkipNext)
             }) {
             Icon(
                 tint = tint,
-                modifier = Modifier.fillMaxSize(),
+                //modifier = Modifier.fillMaxSize(),
                 imageVector = Icons.Outlined.SkipNext,
                 contentDescription = "SkipNext"
             )
         }
+        Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.player_controls_spacing)))
 
         IconButton(modifier = Modifier.weight(1f),
             onClick = {
@@ -197,7 +206,7 @@ fun PlayButton(
     isBuffering: Boolean,
     isPlaying: Boolean,
     background: Color = MaterialTheme.colorScheme.background,
-    iconTint: Color = MaterialTheme.colorScheme.onBackground,
+    iconTint: Color = MaterialTheme.colorScheme.inverseSurface,
     onEvent: () -> Unit
 ) {
     IconButton(
@@ -247,7 +256,11 @@ fun PlayerTimeSlider(
             onValueChangeFinished = {
                 useNewProgressiveValue = false
             },
-            modifier = Modifier.padding(horizontal = 8.dp)
+            modifier = Modifier.padding(horizontal = 0.dp),
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = MaterialTheme.colorScheme.additionalColours.surfaceContainerHighest
+            )
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -255,8 +268,16 @@ fun PlayerTimeSlider(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            Text(text = progressStr, fontSize = 11.sp)
-            Text(text = durationStr, fontSize = 11.sp)
+            Text(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                text = progressStr,
+                fontSize = 11.sp
+            )
+            Text(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                text = durationStr,
+                fontSize = 11.sp
+            )
         }
     }
 }
@@ -265,11 +286,11 @@ fun PlayerTimeSlider(
 @Preview
 fun PreviewSongDetailPlayerBar() {
     SongDetailPlayerBar(
-        isPlaying = false,
-        isBuffering = true,
+        isPlaying = true,
+        isBuffering = false,
         progress = 12f,
         durationStr = "3:40",
-        progressStr = "5:32",
+        progressStr = "2:32",
         repeatMode = RepeatMode.ONE,
         shuffleOn = true
     ) {}

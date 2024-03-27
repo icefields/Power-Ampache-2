@@ -12,6 +12,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -54,6 +56,7 @@ fun SearchResultsScreenOld(
     val albumsState = albumsViewModel.state
     val artistsState = artistsViewModel.state
     val playlistsState = playlistsViewModel.state
+    val playlistsStateFlow by playlistsViewModel.playlistsStateFlow.collectAsState()
 
     BackHandler {
         mainViewModel.onEvent(MainEvent.OnSearchQueryChange(""))
@@ -79,7 +82,7 @@ fun SearchResultsScreenOld(
             songsState.songs.isEmpty() &&
             albumsState.albums.isEmpty() &&
             artistsState.artists.isEmpty() &&
-            playlistsState.playlists.isEmpty()
+            playlistsStateFlow.isEmpty()
         ) {
             SearchSectionTitleText(text = "Nothing seems to match your search query")
         }
@@ -105,7 +108,7 @@ fun SearchResultsScreenOld(
             )
         }
 
-        if (playlistsState.playlists.isNotEmpty()) {
+        if (playlistsStateFlow.isNotEmpty()) {
             SearchSectionTitleText(text = "Playlists")
             PlaylistsScreen(
                 modifier = Modifier.weight(1f),
@@ -126,9 +129,9 @@ fun SearchResultsScreenOld(
 
         // add spacing below if empty results
         val atLeastOneEmpty = songsState.songs.isEmpty()||albumsState.albums.isEmpty()||
-                artistsState.artists.isEmpty() ||playlistsState.playlists.isEmpty()
+                artistsState.artists.isEmpty() ||playlistsStateFlow.isEmpty()
         val totalItems = songsState.songs.size + albumsState.albums.size +
-                artistsState.artists.size + playlistsState.playlists.size
+                artistsState.artists.size + playlistsStateFlow.size
         if (atLeastOneEmpty && totalItems < 5) {
             Box(modifier = Modifier.weight(2.0f))
         } else if (totalItems < 11) {

@@ -50,6 +50,7 @@ data class PlaylistDto(
 ) : AmpacheBaseResponse()
 
 data class PlaylistsResponse(
+    @SerializedName("total_count") val totalCount: Int? = 0,
     @SerializedName("playlist") val playlist: List<PlaylistDto>?,
 ) : AmpacheBaseResponse()
 

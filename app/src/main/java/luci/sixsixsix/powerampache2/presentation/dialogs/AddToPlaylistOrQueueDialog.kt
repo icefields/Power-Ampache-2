@@ -37,8 +37,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,6 +81,8 @@ fun AddToPlaylistOrQueueDialog(
     mainViewModel: MainViewModel,
     viewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
+    val playlistsState by viewModel.playlistsStateFlow.collectAsState()
+
     var headerBgColour by remember { mutableStateOf(Color.Transparent) }
     // workaround, not allowed to call RandomThemeBackgroundColour() inside remember block
     if (headerBgColour == Color.Transparent)
@@ -90,6 +94,8 @@ fun AddToPlaylistOrQueueDialog(
         listBgColour = RandomThemeBackgroundColour()
 
     var createPlaylistDialogOpen by remember { mutableStateOf(false) }
+
+    val textColor = MaterialTheme.colorScheme.onSurface
 
     if (createPlaylistDialogOpen) {
         L("createPlaylistDialogOpen")
@@ -125,13 +131,15 @@ fun AddToPlaylistOrQueueDialog(
                         .wrapContentSize(Alignment.Center)
                         .padding(vertical = textPaddingVertical),
                     textAlign = TextAlign.Center,
+                    color = textColor,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp
+                    fontSize = 20.sp
                 )
                 Divider()
                 PlaylistDialogItem(
                     title = "Create New",
                     icon = Icons.Default.Add,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
@@ -144,6 +152,7 @@ fun AddToPlaylistOrQueueDialog(
                 Divider()
                 PlaylistDialogItem(
                     title = "Add to Current Queue",
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
@@ -157,7 +166,7 @@ fun AddToPlaylistOrQueueDialog(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    items(viewModel.state.playlists) { playlist ->
+                    items(playlistsState) { playlist ->
                         PlaylistDialogItem(
                             title = playlist.name,
                             backgroundColour = listBgColour,
@@ -246,7 +255,8 @@ fun PlaylistDialogItem(
     title: String,
     icon: ImageVector? = null,
     iconContentDescription: String = title,
-    backgroundColour: Color = RandomThemeBackgroundColour()
+    backgroundColour: Color = RandomThemeBackgroundColour(),
+    fontWeight: FontWeight = FontWeight.Normal
 ) {
     val backgroundColourState by remember { mutableStateOf(backgroundColour) }
 
@@ -264,21 +274,32 @@ fun PlaylistDialogItem(
             icon?.let {
                 Icon(imageVector = it, contentDescription = iconContentDescription)
                 PlaylistDialogItemQueueText(
-                    modifier = Modifier.wrapContentSize(),title = title)
-            } ?: PlaylistDialogItemQueueText(title = title)
+                    modifier = Modifier.wrapContentSize(),
+                    title = title,
+                    fontWeight = fontWeight
+                )
+            } ?: PlaylistDialogItemQueueText(
+                title = title,
+                fontWeight = fontWeight
+            )
         }
 
     }
 }
 
 @Composable
-fun PlaylistDialogItemQueueText( modifier:Modifier = Modifier.fillMaxWidth(), title: String) {
+fun PlaylistDialogItemQueueText(
+    modifier:Modifier = Modifier.fillMaxWidth(),
+    title: String,
+    fontWeight: FontWeight = FontWeight.Normal
+) {
     Text(
         modifier = modifier
             .padding(horizontal = 8.dp, vertical = textPaddingVertical),
         text = title,
-        fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
+        fontWeight = fontWeight,
+        fontSize = 17.sp,
+        color = MaterialTheme.colorScheme.onSurface,
         textAlign = TextAlign.Center
     )
 }

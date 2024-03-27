@@ -25,10 +25,8 @@ import android.app.Application
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
@@ -37,24 +35,21 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
-
 
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
@@ -69,41 +64,59 @@ class SettingsViewModel @Inject constructor(
     var state by savedStateHandle.saveable {
         mutableStateOf(SettingsState(appVersionInfoStr = getVersionInfoString()))
     }
-    var offlineModeState by mutableStateOf(false)
-
-    private val offlineModeFlow = settingsRepository.settingsLiveData
-        .distinctUntilChanged()
-        .asFlow()
-        .map { it?.isOfflineModeEnabled == true }
-
     val logs by mutableStateOf(mutableListOf<String>())
 
+    val offlineModeStateFlow = settingsRepository.settingsLiveData
+        .distinctUntilChanged()
+        .asFlow()
+        .filterNotNull()
+        .map {
+            playlistManager.updateUserMessage("")
+            it.isOfflineModeEnabled
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
+    val localSettingsStateFlow = settingsRepository.settingsLiveData
+        .distinctUntilChanged()
+        .asFlow()
+        .filterNotNull()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.defaultSettings())
+
+    val userStateFlow = musicRepository.userLiveData.distinctUntilChanged().asFlow().filterNotNull()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+
+    val serverInfoStateFlow = musicRepository.serverInfoStateFlow.filterNotNull()
+
     init {
-        observeSettings()
+//        settingsRepository.settingsLiveData.distinctUntilChanged().observeForever { localSettings ->
+//            localSettings?.let { updatedSettings ->
+//                if (updatedSettings != state.localSettings)
+//                    state = state.copy( localSettings = updatedSettings)
+//            }
+//        }
 
-        viewModelScope.launch {
-            offlineModeFlow.collect {
-                if (it != offlineModeState) {
-                    offlineModeState = it
-                }
-                if (it) {
-                    // reset errors when switching offline
-                    playlistManager.updateUserMessage("")
-                }
-            }
-        }
+//        viewModelScope.launch {
+//            offlineModeFlow.collect {
+//                if (it != offlineModeState) {
+//                    offlineModeState = it
+//                }
+//                if (it) {
+//                    // reset errors when switching offline
+//                    playlistManager.updateUserMessage("")
+//                }
+//            }
+//        }
 
-        viewModelScope.launch {
-            musicRepository.userLiveData.observeForever {
-                state = state.copy( user = it)
-            }
-        }
+//        viewModelScope.launch {
+//            musicRepository.userLiveData.observeForever {
+//                state = state.copy( user = it)
+//            }
+//        }
 
-        viewModelScope.launch {
-            musicRepository.serverInfoLiveData.observeForever {
-                state = state.copy(serverInfo = it)
-            }
-        }
+//        viewModelScope.launch {
+//            musicRepository.serverInfoLiveData.observeForever {
+//                state = state.copy(serverInfo = it)
+//            }
+//        }
 
         // collect all the logs
         viewModelScope.launch {
@@ -126,32 +139,23 @@ class SettingsViewModel @Inject constructor(
         ""
     } + " - DB: ${Constants.DATABASE_VERSION}"
 
-    private fun observeSettings() {
-        settingsRepository.settingsLiveData.distinctUntilChanged().observeForever { localSettings ->
-            localSettings?.let { updatedSettings ->
-                if (updatedSettings != state.localSettings)
-                    state = state.copy( localSettings = updatedSettings)
-            }
-        }
-    }
-
     fun onEvent(event: SettingsEvent) {
         when(event) {
             is SettingsEvent.OnEnableRemoteLoggingSwitch -> viewModelScope.launch {
                 settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(state.user?.username)
+                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
                         .copy(enableRemoteLogging = event.newValue)
                 )
             }
             is SettingsEvent.OnHideDonationButtonSwitch -> viewModelScope.launch {
                 settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(state.user?.username)
+                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
                         .copy(hideDonationButton = event.newValue)
                 )
             }
             is SettingsEvent.OnStreamingQualityChange -> viewModelScope.launch {
                 settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(state.user?.username)
+                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
                         .copy(streamingQuality = event.newValue)
                 )
             }
@@ -159,24 +163,24 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.DeleteDownloads -> deleteAllDownloads()
             is SettingsEvent.OnMonoValueChange -> viewModelScope.launch {
                 settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(state.user?.username)
+                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
                         .copy(isMonoAudioEnabled = event.isMono))
             }
             is SettingsEvent.OnNormalizeValueChange -> viewModelScope.launch {
                 settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(state.user?.username)
+                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
                         .copy(isNormalizeVolumeEnabled = event.isVolumeNormalized))
             }
             is SettingsEvent.OnSmartDownloadValueChange -> viewModelScope.launch {
                 settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(state.user?.username)
+                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
                         .copy(isSmartDownloadsEnabled = event.isSmartDownloadEnabled)
                 )
             }
             SettingsEvent.UpdateNow -> { }
             is SettingsEvent.OnAutomaticUpdateValueChange -> viewModelScope.launch {
                 settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(state.user?.username)
+                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
                         .copy(enableAutoUpdates = event.isAutoUpdate)
                 )
             }
@@ -202,7 +206,7 @@ class SettingsViewModel @Inject constructor(
             // colours are static and depend on the hash of the object, reset if changing theme
             RandomThemeBackgroundColour.resetColours()
             settingsRepository.saveLocalSettings(
-                settingsRepository.getLocalSettings(state.user?.username).copy(theme = theme)
+                settingsRepository.getLocalSettings(userStateFlow.value?.username).copy(theme = theme)
             )
         }
     }

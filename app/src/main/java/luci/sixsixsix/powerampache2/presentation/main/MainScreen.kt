@@ -33,6 +33,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +59,7 @@ fun MainScreen(
     mainViewModel: MainViewModel,
     settingsViewModel: SettingsViewModel
 ) {
+    val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState(initial = false)
     var offlineModeSwitchVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(offlineModeSwitchVisible) {
@@ -66,7 +68,7 @@ fun MainScreen(
         offlineModeSwitchVisible = true
     }
 
-    if(authViewModel.state.isLoading && !settingsViewModel.offlineModeState) {
+    if(authViewModel.state.isLoading && !offlineModeState) {
         Box(
             contentAlignment = Alignment.TopEnd
         ) {
@@ -75,7 +77,7 @@ fun MainScreen(
                     modifier = Modifier
                         .padding(16.dp)
                         .wrapContentSize(),
-                    offlineModeEnabled = settingsViewModel.offlineModeState,
+                    offlineModeEnabled = offlineModeState,
                     onSwitchToggle = {
                         settingsViewModel.onEvent(SettingsEvent.OnOfflineToggle)
                     }
@@ -85,7 +87,7 @@ fun MainScreen(
         }
     } else {
         offlineModeSwitchVisible = false
-        if (authViewModel.state.session != null || settingsViewModel.offlineModeState) {
+        if (authViewModel.state.session != null || offlineModeState) {
             LoggedInScreen(mainViewModel, authViewModel, settingsViewModel)
         } else {
             LoginScreen(viewModel = authViewModel)

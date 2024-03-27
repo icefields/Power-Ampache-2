@@ -23,14 +23,8 @@ package luci.sixsixsix.powerampache2.presentation.screens.settings
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
-import luci.sixsixsix.powerampache2.domain.models.ServerInfo
-import luci.sixsixsix.powerampache2.domain.models.User
 
 @Parcelize
 data class SettingsState (
-    val localSettings: LocalSettings = LocalSettings.defaultSettings(),
-    val user: User? = null,
-    val serverInfo: ServerInfo? = null,
     val appVersionInfoStr: String = "",
 ): Parcelable

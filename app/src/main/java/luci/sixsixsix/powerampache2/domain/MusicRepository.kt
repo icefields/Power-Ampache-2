@@ -23,6 +23,8 @@ package luci.sixsixsix.powerampache2.domain
 
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
@@ -32,7 +34,7 @@ import luci.sixsixsix.powerampache2.domain.models.User
 interface MusicRepository {
     val sessionLiveData: LiveData<Session?>
     val userLiveData: LiveData<User?>
-    val serverInfoLiveData: LiveData<ServerInfo>
+    val serverInfoStateFlow: StateFlow<ServerInfo>
 
     suspend fun ping(): Resource<Pair<ServerInfo, Session?>>
     suspend fun autoLogin(): Flow<Resource<Session>>

@@ -80,7 +80,7 @@ interface MusicDao {
 
 // --- ALBUMS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAlbums(companyListingEntities: List<AlbumEntity>)
+    suspend fun insertAlbums(albums: List<AlbumEntity>)
 
     @Query("DELETE FROM albumentity")
     suspend fun clearAlbums()
@@ -94,6 +94,21 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE LOWER(id) == LOWER(:albumId) order by time""")
     suspend fun getAlbum(albumId: String): AlbumEntity?
 
+    @Query("""SELECT * FROM albumentity WHERE year > 1000 order by year DESC LIMIT 66""")
+    suspend fun getRecentlyReleasedAlbums(): List<AlbumEntity>
+
+    @Query("""SELECT * FROM albumentity WHERE flag == 1 LIMIT 222""")
+    suspend fun getLikedAlbums(): List<AlbumEntity>
+
+    @Query("""SELECT * FROM albumentity WHERE rating > 0 order by rating DESC""")
+    suspend fun getHighestRatedAlbums(): List<AlbumEntity>
+
+    @Query("""SELECT * FROM albumentity ORDER BY RANDOM() LIMIT 66""")
+    suspend fun getRandomAlbums(): List<AlbumEntity>
+
+    @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, albumentity AS a WHERE a.id == s.albumId GROUP BY s.albumId ORDER BY acount DESC LIMIT 122""")
+    suspend fun getMostPlayedAlbums(): List<AlbumEntity>
+
 // --- SONGS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSongs(companyListingEntities: List<SongEntity>)
@@ -101,8 +116,11 @@ interface MusicDao {
     @Query("DELETE FROM songentity")
     suspend fun clearSongs()
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName order by playCount""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName order by flag DESC, rating DESC, playCount DESC""")
     suspend fun searchSong(query: String): List<SongEntity>
+
+    @Query("""SELECT * FROM songentity WHERE playCount > 0 order by playCount DESC, flag DESC, rating DESC""")
+    suspend fun getMostPlayedSongs(): List<SongEntity>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName AND LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
     suspend fun searchOfflineSongs(query: String): List<DownloadedSongEntity>
@@ -110,7 +128,7 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity WHERE LOWER(:songId) == LOWER(mediaId)""")
     suspend fun getSongById(songId: String): SongEntity?
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by trackNumber, playCount""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by trackNumber, flag DESC, rating DESC, playCount DESC""")
     suspend fun getSongFromAlbum(albumId: String): List<SongEntity>
 
 // --- ARTISTS ---
@@ -129,7 +147,7 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == genre""")
     suspend fun searchSongByGenre(genre: String): List<SongEntity>
 
-    @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time""")
+    @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time DESC""")
     suspend fun getArtist(artistId: String): ArtistEntity?
 
 // --- PLAYLISTS ---
@@ -145,7 +163,13 @@ interface MusicDao {
     @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, (owner == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) DESC, id DESC""")
     fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
 
-    // TODO get only playlists user owns
+    @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, id DESC""")
+    suspend fun getAllPlaylists(): List<PlaylistEntity>
+
+    @Query("""SELECT * FROM playlistentity WHERE id == :playlistId""")
+    fun playlistLiveData(playlistId: String): LiveData<PlaylistEntity?>
+
+    // get only playlists user owns
     @Query("""SELECT * FROM playlistentity WHERE owner = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') order by rating DESC, id DESC""")
     suspend fun getMyPlaylists(): List<PlaylistEntity>
 

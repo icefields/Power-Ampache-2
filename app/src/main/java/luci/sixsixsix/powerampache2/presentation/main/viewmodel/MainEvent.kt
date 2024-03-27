@@ -28,7 +28,10 @@ sealed class MainEvent {
     data object OnDismissUserMessage: MainEvent()
     data object OnEnableOfflineMode: MainEvent()
     data object OnLogout: MainEvent() // TODO move this to AuthViewModel
-    data class Play(val song: Song): MainEvent()
+    data class AddSongsToQueueAndPlay(val song: Song, val songList: List<Song>): MainEvent()
+    data class AddSongsToQueueAndPlayShuffled(val songList: List<Song>): MainEvent()
+    data class PlaySongAddToQueueTop(val song: Song, val songList: List<Song>): MainEvent()
+    data class PlaySong(val song: Song): MainEvent()
     data object PlayPauseCurrent: MainEvent()
     data object SkipNext: MainEvent()
     data object SkipPrevious: MainEvent()

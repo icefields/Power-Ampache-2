@@ -67,6 +67,7 @@ fun <T> SwipeToDismissItem(
         var show by remember { mutableStateOf(true) }
         var rightShow by remember { mutableStateOf(true) }
         val dismissState = rememberDismissState(
+            initialValue = DismissValue.Default,
             confirmValueChange = {
                 if (it == DismissValue.DismissedToEnd) {
                     show = false
@@ -74,7 +75,11 @@ fun <T> SwipeToDismissItem(
                 } else if (it == DismissValue.DismissedToStart) {
                     rightShow = false
                     false
-                } else false
+                } else {
+                    show = true
+                    rightShow = true
+                    false
+                }
             },
             positionalThreshold = { 250.dp.toPx() }
         )
@@ -86,11 +91,13 @@ fun <T> SwipeToDismissItem(
         SwipeToDismiss(
             state = dismissState,
             modifier = Modifier,
-            background = { SwipeToDismissBackground(
+            background = {
+                SwipeToDismissBackground(
                     dismissState = dismissState,
                     iconLeft = iconLeft,
                     iconRight = iconRight
-            ) },
+                )
+            },
             dismissContent = {
                 foregroundView()
             }
@@ -109,7 +116,6 @@ fun <T> SwipeToDismissItem(
                 rightShow = true
             }
         }
-
     } else {
         foregroundView()
     }
