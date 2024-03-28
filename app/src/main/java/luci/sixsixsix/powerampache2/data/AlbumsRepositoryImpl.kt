@@ -62,7 +62,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         L("getAlbums - repo getSongs offset $offset")
 
         if (isOfflineModeEnabled()) {
-            emit(Resource.Success(data = dao.getOfflineAlbums().map { it.toAlbum() }))
+            emit(Resource.Success(data = dao.generateOfflineAlbums().map { it.toAlbum() }))
             emit(Resource.Loading(false))
             return@flow
         }
@@ -96,14 +96,15 @@ class AlbumsRepositoryImpl @Inject constructor(
     ): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
 
-        val localAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
         // get all local album and filter the ones that have offline songs if offline mode enabled
         if (isOfflineModeEnabled()) {
-            emit(Resource.Success(data = localAlbums.filter { isAlbumOffline(it) }))
+            val offlineAlbums = dao.getOfflineAlbumsByArtist(artistId).map { it.toAlbum() }
+            emit(Resource.Success(data = offlineAlbums, networkData = offlineAlbums))
             emit(Resource.Loading(false))
             return@flow
         }
 
+        val localAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
         val isDbEmpty = localAlbums.isEmpty()
         if (!isDbEmpty) {
             emit(Resource.Success(data = localAlbums))

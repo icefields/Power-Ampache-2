@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.domain.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
 @Parcelize
 data class MusicAttribute(
@@ -31,5 +32,8 @@ data class MusicAttribute(
 ): Parcelable {
     companion object {
         fun emptyInstance(): MusicAttribute = MusicAttribute("","")
+        fun randomInstance(): MusicAttribute =
+            MusicAttribute(UUID.randomUUID().toString(), UUID.randomUUID().toString().drop(24))
+
     }
 }

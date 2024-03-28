@@ -82,7 +82,7 @@ fun LoggedInScreen(
     } else SnackbarDuration.Long
 
     // disable snackbar errors in offline mode
-    if (state.errorMessage != "" && !offlineModeState) {
+    if (state.errorMessage != "") {
         LaunchedEffect(scaffoldState.snackbarHostState, state.errorMessage) {
             scaffoldState.snackbarHostState.showSnackbar(
                 message = state.errorMessage,

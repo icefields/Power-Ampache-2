@@ -151,8 +151,9 @@ fun MainContentScreen(
     var barTitle by remember { mutableStateOf(appName) }
 
     if (offlineModeState &&
-        (currentScreen == MainContentMenuItem.Home.id ||
-                currentScreen == MainContentMenuItem.Library.id)) {
+        (currentScreen == MainContentMenuItem.Logout.id)) {
+        // user cannot logout if offline mode disabled
+        //currentScreen = MainContentMenuItem.Home.id
         //currentScreen = MainContentMenuItem.Offline.id
         //currentScreenClass = MainContentMenuItem.Offline::class.java.canonicalName
     } else {
@@ -288,6 +289,7 @@ fun MainContentScreen(
                            ).also { barTitle = menuItem.title }
                            MainContentMenuItem.Logout ->
                                mainViewModel.onEvent(MainEvent.OnLogout)
+                                   .also { currentScreen = MainContentMenuItem.Home.id }
                            MainContentMenuItem.About -> AboutScreen(
                                navigator = navigator,
                                settingsViewModel = settingsViewModel

@@ -229,7 +229,7 @@ interface MusicDao {
     // TODO missing playCount field in offline table
     suspend fun getMostPlayedOfflineSongs(): List<DownloadedSongEntity> = getRandomOfflineSongs()
 
-    @Query("""SELECT  album.* FROM DownloadedSongEntity as song, (SELECT * FROM AlbumEntity ) as album WHERE song.albumId == album.id GROUP BY album.id ORDER BY album.name""")
+    @Query("""SELECT album.* FROM DownloadedSongEntity as song, (SELECT * FROM AlbumEntity) as album WHERE song.albumId == album.id GROUP BY album.id ORDER BY album.name""")
     suspend fun getOfflineAlbums(): List<AlbumEntity>
 
     @Query("""SELECT  artist.* FROM DownloadedSongEntity as song, (SELECT * FROM ArtistEntity ) as artist WHERE song.artistId == artist.id GROUP BY artist.id ORDER BY artist.name""")
@@ -244,8 +244,11 @@ interface MusicDao {
     /**
      * generates album entities using only the info available in DownloadedSongEntity
      */
-    @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, albumName as basename, artistId, artistName, albumArtist as artists, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song GROUP BY albumId ORDER BY albumName""")
+    @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, albumName as basename, artistId, '{"attr":[' || albumArtist ||']}' as artists, artistName, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song GROUP BY albumId ORDER BY albumName""")
     suspend fun generateOfflineAlbums(): List<AlbumEntity>
+
+    @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, albumName as basename, artistId, '{"attr":[' || albumArtist ||']}' as artists, artistName, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE artistId = LOWER(:artistId) GROUP BY albumId ORDER BY albumName""")
+    suspend fun getOfflineAlbumsByArtist(artistId: String): List<AlbumEntity>
 
     @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, albumName as basename, artistId, artistName, '{"attr":[' || albumArtist ||']}' as artists, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE :albumId == id GROUP BY albumId""")
     suspend fun generateOfflineAlbum(albumId: String): AlbumEntity?

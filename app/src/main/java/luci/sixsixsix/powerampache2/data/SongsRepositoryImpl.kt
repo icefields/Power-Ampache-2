@@ -177,6 +177,7 @@ class SongsRepositoryImpl @Inject constructor(
         val localSongs = getDbSongs(albumId, isOfflineMode)
         //val localSongs = dao.getSongFromAlbum(albumId).map { it.toSong() }
         if (!checkEmitCacheData(localSongs, fetchRemote, this) || isOfflineMode) {
+            emit(Resource.Loading(false))
             return@flow
         }
 

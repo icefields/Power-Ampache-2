@@ -64,6 +64,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.ArtistId
@@ -227,6 +228,8 @@ fun AlbumDetailScreen(
                         eventListener = { event ->
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {
+                                    L( "AlbumInfoViewEvents.PLAY_ALBUM", state.isLoading, viewModel.state.songs.isNullOrEmpty())
+
                                     if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@AlbumInfoSection
 
                                     if (isPlayingAlbum) {
@@ -241,6 +244,8 @@ fun AlbumDetailScreen(
 //                                            playlistManager.addToCurrentQueueTop(state.getSongList())
 //                                            mainViewModel.onEvent(MainEvent.Play(songs[0]))
                                         } else {
+                                            L( "isGlobalShuffleOn")
+
                                             mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(state.getSongList()))
 //                                            viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
 //                                            // after updating queue and current song, play

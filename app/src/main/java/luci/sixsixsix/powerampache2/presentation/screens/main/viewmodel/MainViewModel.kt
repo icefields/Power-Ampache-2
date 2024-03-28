@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.common.shareLink
@@ -67,7 +68,7 @@ import kotlin.math.abs
 @HiltViewModel
 class MainViewModel @Inject constructor(
     application: Application,
-    private val weakContext: WeakContext,
+    val weakContext: WeakContext,
     val playlistManager: MusicPlaylistManager,
     val musicRepository: MusicRepository,
     val songsRepository: SongsRepository,
@@ -231,23 +232,26 @@ class MainViewModel @Inject constructor(
     }
 
     fun logout() {
-        L( " Logout")
-        playlistManager.reset()
         viewModelScope.launch {
-            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
-        }
-        stopMusicService()
-        viewModelScope.launch {
-            musicRepository.logout().collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        result.data?.let { auth ->
-                            L(auth)
+            if (settingsRepository.isOfflineModeEnabled()) {
+                L( " isOfflineModeEnabled")
+                playlistManager.updateUserMessage(weakContext.get()?.resources?.getString(R.string.logout_offline_warning))
+            } else {
+                L( " Logout")
+                playlistManager.reset()
+                simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
+                stopMusicService()
+                musicRepository.logout().collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            result.data?.let { auth ->
+                                L(auth)
+                            }
                         }
+                        is Resource.Error ->
+                            L.e("MainViewModel", result.exception)
+                        is Resource.Loading -> {}
                     }
-                    is Resource.Error ->
-                        L.e("MainViewModel", result.exception)
-                    is Resource.Loading -> {}
                 }
             }
         }

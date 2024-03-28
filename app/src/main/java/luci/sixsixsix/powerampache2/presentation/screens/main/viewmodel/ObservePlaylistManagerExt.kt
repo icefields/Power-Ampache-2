@@ -25,6 +25,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.R
 
 fun MainViewModel.observePlaylistManager() {
 
@@ -39,15 +40,20 @@ fun MainViewModel.observePlaylistManager() {
 
     viewModelScope.launch {
         playlistManager.logMessageUserReadableState.collectLatest { logMessageState ->
-            // do not show errors in offline mode
-            if (!settingsRepository.isOfflineModeEnabled()) {
-                logMessageState.logMessage?.let {
-                    state = state.copy(errorMessage = it)
+            logMessageState.logMessage?.let { logMessage ->
+                // do not show errors in offline mode unless in cases specified above
+                val isOfflineModeEnabled = settingsRepository.isOfflineModeEnabled()
+                if (!isOfflineModeEnabled) {
+                    state = state.copy(errorMessage = logMessage)
+                } else if (logMessage == weakContext.get()?.resources?.getString(R.string.logout_offline_warning)) {
+                    L(logMessage)
+
+                    state = state.copy(errorMessage = logMessage)
+                } else if (state.errorMessage.isNotBlank()) {
+                    state = state.copy(errorMessage = "")
                 }
-            } else if (state.errorMessage.isNotBlank()) {
-                state = state.copy(errorMessage = "")
+                L(logMessage)
             }
-            L(logMessageState.logMessage)
         }
     }
 
