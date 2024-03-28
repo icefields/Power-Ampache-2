@@ -345,6 +345,33 @@ interface MainNetwork {
         @Query("format") format: String = "raw", // mp3, ogg, raw, etc (raw returns the original format)
     ): Response<ResponseBody>
 
+    /**
+     * scrobble
+     * Search for a song using text info and then record a play if found.
+     * This allows other sources to record play history to ampache
+     *
+     * Input        Type	Description	            Optional
+     * 'song'       string  HTML encoded string	    NO
+     * 'artist'     string	HTML encoded string	    NO
+     * 'album'      string	HTML encoded string	    NO
+     * 'songmbid'   string  song_mbid	            YES
+     * 'artistmbid' string  artist_mbid             YES
+     * 'albummbid'  string  album_mbid              YES
+     * 'date'       integer	UNIXTIME()              YES
+     * 'client'     string  $agent                  YES
+     */
+    @GET("json.server.php?action=scrobble")
+    suspend fun scrobble(
+        @Query("auth") authKey: String,
+        @Query("song") song: String,
+        @Query("artist") artist: String,
+        @Query("album") album: String,
+        @Query("songmbid") songMbid: String = "",
+        @Query("artistmbid") artistMbid: String = "",
+        @Query("albummbid") albumMbid: String = "",
+        //@Query("date") date: Int = 0
+    ): SuccessResponse
+
     @POST
     suspend fun sendErrorReport(@Url url: String = BuildConfig.URL_ERROR_LOG, @Body body: String)
 

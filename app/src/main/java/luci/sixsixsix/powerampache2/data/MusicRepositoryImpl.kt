@@ -112,34 +112,10 @@ class MusicRepositoryImpl @Inject constructor(
 
     private suspend fun setSession(se: Session) {
         if (se.auth != getSession()?.auth) {
-            // albums, songs, playlists and artist have links that contain the auth token
-            //dao.clearCachedData()
-            //dao.clearPlaylists()
             L("setSession se.auth != getSession()?.auth")
         }
         dao.updateSession(se.toSessionEntity())
     }
-
-    private suspend fun getUserNetwork(): User? =
-        getCredentials()?.username?.let { username ->
-            getSession()?.let { session ->
-                api.getUser(authKey = session.auth, username = username)
-                    .let { userDto ->
-                        userDto.id?.let {
-                            userDto.toUser().also { us ->
-                                setUser(us)
-                            }
-                        }
-                    }
-            }
-        }
-
-    /**
-     * updating the user in the database will trigger the user live data, observe that
-     * to get updates on the user
-     */
-    private suspend fun setUser(user: User) =
-        dao.updateUser(user.toUserEntity())
 
     private suspend fun setCredentials(se: CredentialsEntity) =
         dao.updateCredentials(se)

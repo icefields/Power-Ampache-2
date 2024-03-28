@@ -21,28 +21,42 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.Stack
 import luci.sixsixsix.powerampache2.common.WeakContext
+import luci.sixsixsix.powerampache2.common.hasMore
+import luci.sixsixsix.powerampache2.common.pop
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
+import luci.sixsixsix.powerampache2.data.remote.OfflineData.likedOffline
+import luci.sixsixsix.powerampache2.data.remote.OfflineData.ratedOffline
+import luci.sixsixsix.powerampache2.data.remote.OfflineData.songsToScrobble
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
+import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
+import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
@@ -71,6 +85,44 @@ class SongsRepositoryImpl @Inject constructor(
     override val offlineSongsLiveData = dao.getDownloadedSongsLiveData().map { entities ->
         entities.map {
             it.toSong()
+        }
+    }
+
+    init {
+        dao.offlineModeEnabled().distinctUntilChanged().observeForever {
+            if (it != null && it == false) {
+                GlobalScope.launch {
+                    try {
+                        backOnlineActions()
+                    } catch (e: Exception) {
+                        errorHandler.logError(e)
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun backOnlineActions() {
+        scrobbleEverything()
+
+        while(likedOffline.hasMore()) {
+            likedOffline.pop()?.let { likedItem ->
+                try {
+                    likeApiCall(likedItem.id, likedItem.like, likedItem.type)
+                } catch (e: Exception) {
+                    errorHandler.logError(e)
+                }
+            }
+        }
+
+        while(ratedOffline.hasMore()) {
+            ratedOffline.pop()?.let { ratedItem ->
+                try {
+                    rateApiCall(ratedItem.id, ratedItem.rating, ratedItem.type)
+                } catch (e: Exception) {
+                    errorHandler.logError(e)
+                }
+            }
         }
     }
 
@@ -400,7 +452,10 @@ class SongsRepositoryImpl @Inject constructor(
 
 
     override suspend fun isSongAvailableOffline(song: Song): Boolean =
-        dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
+        isSongAvailableOffline(song.mediaId, song.artist.id, song.album.id)
+
+    private suspend fun isSongAvailableOffline(songId: String, artistId: String, albumId: String): Boolean =
+        dao.getDownloadedSong(songId, artistId, albumId) != null
 
     // TODO FIX maybe should not be a flow since it only launches the worker,
     //  I don't need any result from this function
@@ -421,23 +476,26 @@ class SongsRepositoryImpl @Inject constructor(
      */
     @Throws(Exception::class)
     private suspend fun startDownloadingSong(song: Song): UUID? {
-        val isSongDownloadedAlready = dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
+        val isSongDownloadedAlready =
+            dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
         if (isSongDownloadedAlready) {
             return null
         }
-
-        val auth = getSession()!!
         return weakContext.get()?.let { context ->
+            val auth = getSession()!!.auth
+            val username = (getUser()?.username
+                ?: getCredentials()?.username)!!
+
             val requestId = startSongDownloadWorker(
                 context = context,
-                authToken = auth.auth,
-                username = getUser()?.username!!,
+                authToken = auth,
+                username = username,
                 song = song
             )
             L(requestId)
             requestId
         } ?: run {
-            throw NullPointerException("context was null")
+            throw NullPointerException("startDownloadingSong(), context was null")
         }
     }
 
@@ -488,4 +546,49 @@ class SongsRepositoryImpl @Inject constructor(
 
     override suspend fun getDownloadedSongById(songId: String): Song? =
         dao.getSongById(songId)?.toSong()
+
+
+    /**
+     * Note: Only scrobble offline songs
+     */
+    override suspend fun scrobble(song: Song) = flow {
+        emit(Resource.Loading(true))
+        if (isSongAvailableOffline(song)) {
+            songsToScrobble.add(song)
+            L("scrobble song available offline", songsToScrobble.size)
+            scrobbleEverything()
+            emit(Resource.Success(data = Any(), networkData = Any()))
+        }
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("scrobble()", e, this) }
+
+    private suspend fun scrobbleEverything() {
+        if (!isOfflineModeEnabled()) {
+            val auth = getSession()!!.auth
+            L("scrobble offline mode not enabled", songsToScrobble.size)
+            while(songsToScrobble.hasMore()) {
+                delay(21000)
+                songsToScrobble.pop()?.let { sts ->
+                    if (scrobbleApiCall(auth, sts)) {
+                        L("scrobble success!", songsToScrobble.size, sts.name)
+                    } else {
+                        L("scrobble failed", songsToScrobble.size, sts.name)
+                        // throw Exception("error getting a response from scrobble call")
+                    }
+                }
+            }
+        }
+    }
+
+    @Throws(Exception::class)
+    private suspend fun scrobbleApiCall(auth: String, song: Song) =
+        api.scrobble(
+            authKey = auth,
+            song = song.name,
+            artist = song.artist.name,
+            album = song.album.name
+        ).run {
+            error?.let { throw (ScrobbleException(it.toError())) }
+            (success != null)
+        }
 }

@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -62,7 +63,22 @@ class AlbumsRepositoryImpl @Inject constructor(
         L("getAlbums - repo getSongs offset $offset")
 
         if (isOfflineModeEnabled()) {
-            emit(Resource.Success(data = dao.generateOfflineAlbums().map { it.toAlbum() }))
+            // TRY using cached data instead of downloaded song info if available
+            val albumsList = mutableListOf<Album>()
+            val dbAlbumsHash = HashMap<String, AlbumEntity>().apply {
+                dao.getOfflineAlbums().forEach { ae ->
+                    put(ae.id, ae)
+                }
+            }
+            dao.generateOfflineAlbums().forEach { dae ->
+                albumsList.add(
+                    if (dbAlbumsHash.containsKey(dae.id)) {
+                        (dbAlbumsHash[dae.id] ?: dae)
+                    } else { dae }.toAlbum()
+                )
+            }
+
+            emit(Resource.Success(data = albumsList.toList()))
             emit(Resource.Loading(false))
             return@flow
         }

@@ -91,7 +91,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 } else it != null
             }
             val isDbEmpty = localPlaylists.isEmpty() && query.isEmpty()
-            if (!isDbEmpty) {
+            if (!isDbEmpty || isOfflineModeEnabled) {
+                // show empty list if offline mode enabled because this will be the actual result, there won't be an api call
                 emit(Resource.Success(data = localPlaylists.map { it.toPlaylist() }))
             }
             val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote

@@ -43,6 +43,7 @@ import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.ErrorType
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
+import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import retrofit2.HttpException
@@ -123,7 +124,10 @@ class ErrorHandlerImpl @Inject constructor(
 
                     is ServerUrlNotInitializedException ->
                         "ServerUrlNotInitializedException $exceptionString"
-
+                    is ScrobbleException -> {
+                        readableMessage = ""
+                        ""
+                    }
                     is MusicException -> {
                         when (e.musicError.getErrorType()) {
                             ErrorType.ACCOUNT -> {

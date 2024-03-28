@@ -356,6 +356,16 @@ class MainViewModel @Inject constructor(
         super.onCleared()
     }
 
+    suspend fun scrobble(song: Song) {
+        songsRepository.scrobble(song).collect { response ->
+            when(response) {
+                is Resource.Error -> {}
+                is Resource.Loading -> {}
+                is Resource.Success -> {}
+            }
+        }
+    }
+
     @Deprecated("completely rewrite before use, those cases might not exist anymore")
     fun onActivityRestart() {
         // if the link to play the song is not valid reload all the data

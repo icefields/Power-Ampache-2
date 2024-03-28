@@ -32,8 +32,9 @@ fun MainViewModel.observePlaylistManager() {
     // listen to current-song changes
     viewModelScope.launch {
         playlistManager.currentSongState.collectLatest { songState ->
-            songState?.let {
+            songState?.let { songState ->
                 startMusicServiceIfNecessary()
+                scrobble(songState)
             } ?: stopMusicService()
         }
     }

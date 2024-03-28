@@ -40,7 +40,7 @@ class HomeScreenViewModel @Inject constructor(
     var state by mutableStateOf(HomeScreenState())
     //var state by savedStateHandle.saveable { mutableStateOf(HomeScreenState()) }
 
-    val offlineModeStateFlow = settingsRepository.offlineModeFlow
+    val offlineModeStateFlow = settingsRepository.offlineModeFlow.distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     init {
@@ -48,7 +48,7 @@ class HomeScreenViewModel @Inject constructor(
 
         viewModelScope.launch {
             // playlists can change or be edited, make sure to always listen to the latest version
-            playlistsRepository.playlistsFlow.collect { playlists ->
+            playlistsRepository.playlistsFlow.distinctUntilChanged().collect { playlists ->
                 L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
                 updatePlaylistsState(playlists)
             }
@@ -104,7 +104,7 @@ class HomeScreenViewModel @Inject constructor(
             FlaggedPlaylist()
         )
         playlistList.addAll(playlists)
-        if (playlists.isNotEmpty() && state.playlists != playlistList) {
+        if (/*playlists.isNotEmpty() && */ state.playlists != playlistList) {
             state = state.copy(playlists = playlistList)
         }
     }
@@ -115,9 +115,7 @@ class HomeScreenViewModel @Inject constructor(
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
-                        result.data?.let { playlists ->
-                            updatePlaylistsState(playlists)
-                        }
+                        updatePlaylistsState(result.data ?: listOf())
                         L("HomeScreenViewModel.getPlaylists size of network array ${result.networkData?.size}")
                     }
                     is Resource.Error -> {

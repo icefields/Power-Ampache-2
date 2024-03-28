@@ -67,8 +67,6 @@ class SettingsRepositoryImpl @Inject constructor(
         it.isOfflineModeEnabled
     }.distinctUntilChanged()
 
-    private fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
-
     override suspend fun getLocalSettings(username: String?) =
         dao.getSettings()?.toLocalSettings()
             ?: LocalSettings.defaultSettings(username)

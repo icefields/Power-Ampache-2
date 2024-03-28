@@ -199,6 +199,9 @@ interface MusicDao {
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND LOWER(artistId) == LOWER(:artistId) AND LOWER(albumId) == LOWER(:albumId)""")
     suspend fun getDownloadedSong(songId: String, artistId: String, albumId: String): DownloadedSongEntity?
 
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    suspend fun getDownloadedSongById(songId: String): DownloadedSongEntity?
+
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
     fun getDownloadedSongsLiveData(): LiveData<List<DownloadedSongEntity>>
 
