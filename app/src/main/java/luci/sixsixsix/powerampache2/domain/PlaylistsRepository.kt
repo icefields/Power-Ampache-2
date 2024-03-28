@@ -21,20 +21,18 @@
  */
 package luci.sixsixsix.powerampache2.domain
 
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface PlaylistsRepository {
-
-    val playlistsLiveData: LiveData<List<Playlist>>
+    val playlistsFlow: Flow<List<Playlist>>
 
     suspend fun getPlaylists(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Playlist>>>
     suspend fun getPlaylist(id: String): Flow<Playlist>
+    suspend fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
     suspend fun likePlaylist(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun addSongToPlaylist(playlistId: String, songId: String): Flow<Resource<Any>>
     suspend fun addSongsToPlaylist(playlist: Playlist, songsToAdd: List<Song>): Flow<Resource<Playlist>>

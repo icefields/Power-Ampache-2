@@ -22,11 +22,17 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -38,6 +44,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AttributeText
 import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
@@ -66,8 +73,9 @@ fun PlaylistInfoSection(
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit,
     artistClickListener: (ArtistId) -> Unit
 ) {
-    Column(modifier = modifier) {
+    val iconTint = MaterialTheme.colorScheme.onSurfaceVariant
 
+    Column(modifier = modifier) {
         HashSet<MusicAttribute>().apply {
             songs.forEach { song ->
                 add(song.artist)
@@ -90,7 +98,7 @@ fun PlaylistInfoSection(
             if (isNotEmpty()) {
                 MusicAttributeChips(
                     attributes = toList(),
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     // TODO navigate to genre screen
                 }
@@ -98,17 +106,31 @@ fun PlaylistInfoSection(
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
-        playlist.items?.let { itemCount ->
-            if (itemCount > 0) {
-                AttributeText(
-                    modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
-                    title = stringResource(id = R.string.albumDetailScreen_infoSection_songs),
-                    name = "$itemCount"
-                )
+        Spacer(modifier = Modifier.height(12.dp))
+        Row {
+            Icon(
+                imageVector = when(playlist.type) {
+                    PlaylistType.private ->
+                        Icons.Outlined.Lock
+                    PlaylistType.public ->
+                        Icons.Outlined.Public
+                    else -> Icons.Outlined.LockOpen
+                },
+                contentDescription = "playlist private or public",
+                tint = iconTint
+            )
+
+            playlist.items?.let { itemCount ->
+                if (itemCount > 0) {
+                    AttributeText(
+                        modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
+                        title = stringResource(id = R.string.albumDetailScreen_infoSection_songs),
+                        name = "$itemCount"
+                    )
+                }
             }
+
         }
-        Spacer(modifier = Modifier.height(2.dp))
         if (playlist.averageRating > 0) {
             AttributeText(
                 modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
@@ -116,18 +138,13 @@ fun PlaylistInfoSection(
                 name = "${playlist.averageRating}"
             )
         }
-        if (playlist.type?.name?.isNotBlank() == true) {
-            AttributeText(
-                modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
-                title = "",
-                name = playlist.type.name
-            )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
+
+        Spacer(modifier = Modifier.height(12.dp))
         PlaylistInfoButtonsRow(
             modifier = Modifier.fillMaxWidth(),
             isPlayingPlaylist = isPlayingPlaylist,
             playlist = playlist,
+            iconTint = iconTint,
             eventListener = eventListener,
             isDownloading = isDownloading,
             isPlaylistEditLoading = isPlaylistEditLoading,

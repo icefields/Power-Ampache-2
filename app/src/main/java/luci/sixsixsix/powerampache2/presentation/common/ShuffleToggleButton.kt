@@ -43,12 +43,12 @@ fun ShuffleToggleButton(
     onClick: () -> Unit
 ) {
     val contentColor = if (isGlobalShuffleOn) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant
-    val containerColor = if (isGlobalShuffleOn) MaterialTheme.colorScheme.secondary else Color.Transparent
+    val containerColor = if (isGlobalShuffleOn) MaterialTheme.colorScheme.onSurfaceVariant else Color.Transparent
     val strokeColor = if (!showStroke) {
         Color.Transparent
     } else {
         if (isGlobalShuffleOn) Color.Transparent
-        else MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.outline
     }
 
     OutlinedIconButton(

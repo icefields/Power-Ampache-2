@@ -26,13 +26,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -40,24 +42,31 @@ import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistsViewModel @Inject constructor(
     private val repository: PlaylistsRepository,
-    private val musicRepository: MusicRepository
+    settingsRepository: SettingsRepository,
+    musicRepository: MusicRepository
 ) : ViewModel() {
     var state by mutableStateOf(PlaylistsState())
     private var isEndOfDataReached: Boolean = false
     private lateinit var currentUsername: String
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val playlistsStateFlow: StateFlow<List<Playlist>> =
-        repository.playlistsLiveData.distinctUntilChanged().asFlow().filterNotNull()
+        settingsRepository.offlineModeFlow
+            .flatMapLatest { repository.playlistsFlow }
+            .distinctUntilChanged()
+            .filterNotNull()
             .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlists, user ->
                 currentUsername = user.username
                 playlists
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
+
 
 //    init {
 //        musicRepository.userLiveData.observeForever {

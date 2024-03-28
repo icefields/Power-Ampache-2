@@ -34,6 +34,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.DownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.GenreEntity
 import luci.sixsixsix.powerampache2.data.local.entities.LocalSettingsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.PlaylistSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
@@ -50,6 +51,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         LocalSettingsEntity::class,
         DownloadedSongEntity::class,
         GenreEntity::class,
+        PlaylistSongEntity::class
     ], version = Constants.DATABASE_VERSION, // first prod version: 73
     autoMigrations = [
         AutoMigration(from = 73, to = 74),
@@ -70,11 +72,16 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         AutoMigration(from = 76, to = 77),
         AutoMigration(from = 76, to = 78),
         AutoMigration(from = 76, to = 79),
+        AutoMigration(from = 76, to = 80),
 
         AutoMigration(from = 77, to = 78),
         AutoMigration(from = 77, to = 79),
+        AutoMigration(from = 77, to = 80),
 
         AutoMigration(from = 78, to = 79),
+        AutoMigration(from = 78, to = 80),
+
+        AutoMigration(from = 79, to = 80),
 ],
     exportSchema = true
 )

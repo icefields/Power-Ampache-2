@@ -6,9 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -18,19 +22,21 @@ import javax.inject.Inject
 @HiltViewModel
 class SongsViewModel @Inject constructor(
     private val repository: SongsRepository,
-    private val playlistManager: MusicPlaylistManager
+    settingsRepository: SettingsRepository
 ) : ViewModel() {
     var state by mutableStateOf(SongsState())
+
+    val offlineModeStateFlow = settingsRepository.offlineModeFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     init {
         L("SongsListScreen")
         getSongs()
-//        viewModelScope.launch {
-//            playlistManager.currentSearchQuery.collect { query ->
-//                L(query)
-//                onEvent(SongsEvent.OnSearchQueryChange(query))
-//            }
-//        }
+        viewModelScope.launch {
+            offlineModeStateFlow.collectLatest {
+                getSongs()
+            }
+        }
     }
 
     fun onEvent(event: SongsEvent) {

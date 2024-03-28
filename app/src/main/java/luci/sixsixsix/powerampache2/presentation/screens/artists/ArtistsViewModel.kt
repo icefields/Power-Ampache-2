@@ -6,31 +6,35 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class ArtistsViewModel @Inject constructor(
     private val artistsRepository: ArtistsRepository,
-    private val playlistManager: MusicPlaylistManager
+    settingsRepository: SettingsRepository
 ) : ViewModel() {
-
     var state by mutableStateOf(ArtistsState())
     private var isEndOfDataReached: Boolean = false
 
+    val offlineModeStateFlow = settingsRepository.offlineModeFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
     init {
-        getArtists()
-//        viewModelScope.launch {
-//            playlistManager.currentSearchQuery.collect { query ->
-//                L("ArtistsViewModel collect ${query}")
-//                onEvent(ArtistEvent.OnSearchQueryChange(query))
-//            }
-//        }
+        viewModelScope.launch {
+            offlineModeStateFlow.collectLatest {
+                getArtists()
+            }
+        }
     }
 
     fun onEvent(event: ArtistEvent) {
@@ -71,7 +75,7 @@ class ArtistsViewModel @Inject constructor(
                                 state = state.copy(artists = artists)
                                 L( "viewmodel.getArtists size ${state.artists.size}")
                             }
-                            isEndOfDataReached = ( result.networkData?.isEmpty() == true && offset > 0 )
+                            isEndOfDataReached = (result.networkData.isNullOrEmpty() && offset > 0) || offlineModeStateFlow.value
                             L("viewmodel.getArtists is bottom reached? $isEndOfDataReached size of new network array ${result.networkData?.size}")
                         }
                         is Resource.Error -> {

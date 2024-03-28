@@ -4,29 +4,47 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class AlbumsViewModel @Inject constructor(
     private val repository: AlbumsRepository,
+    settingsRepository: SettingsRepository,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     private var fetchMoreJob: Job? = null
     var state by mutableStateOf(AlbumsState())
     private var isEndOfDataList: Boolean = false
 
+    val offlineModeStateFlow = settingsRepository.offlineModeFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
     init {
-        getAlbums()
+        viewModelScope.launch {
+            // playlists can change or be edited, make sure to always listen to the latest version
+            offlineModeStateFlow.collectLatest { isOfflineMode ->
+                getAlbums()
+            }
+        }
+
 //        viewModelScope.launch {
 //            playlistManager.currentSearchQuery.collect { query ->
 //                L("AlbumsViewModel collect", query)

@@ -52,6 +52,7 @@ import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.screens.artists.components.ArtistItem
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 
 const val GRID_ITEMS_ROW = 3
 const val GRID_ITEMS_ROW_LAND = 6
@@ -70,7 +71,7 @@ fun ArtistsScreen(
         isRefreshing = viewModel.state.isRefreshing,
         onEvent = viewModel::onEvent,
         navigateToArtist = { id, artist ->
-            navigator.navigate(ArtistDetailScreenDestination(artistId = id, artist = artist))
+            Ampache2NavGraphs.navigateToArtist(navigator, artistId = id, artist = artist)
         }
     )
 }
@@ -129,13 +130,6 @@ fun ArtistsScreenContent(
                             }
                             .padding(12.dp)
                     )
-
-                    if(i < artists.size - 1) {
-                        // if not last item add a divider
-                        //Divider(modifier = Modifier.padding(horizontal = 16.dp))
-                    } else if(i == artists.size - 1) {
-
-                    }
 
                     // search queries are limited, do not fetch more in case of a search string
                     if(i == (artists.size - 1)/* && searchQuery.isNullOrBlank()*/) {

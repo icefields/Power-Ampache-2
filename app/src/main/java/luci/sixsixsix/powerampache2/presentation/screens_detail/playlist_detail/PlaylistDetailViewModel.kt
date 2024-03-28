@@ -90,10 +90,10 @@ class PlaylistDetailViewModel @Inject constructor(
                 )
                 playlist
             }
-            .map { it.id }
-            .flatMapConcat { id ->
-                playlistsRepository.getPlaylist(id).filterNotNull()
-            }
+//            .map { it.id }
+//            .flatMapConcat { id ->
+//                playlistsRepository.getPlaylist(id).filterNotNull()
+//            }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Playlist.empty())
 
 
@@ -254,7 +254,7 @@ class PlaylistDetailViewModel @Inject constructor(
 
     private fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
-            songsRepository
+            playlistsRepository
                 .getSongsFromPlaylist(playlistId)
                 .collect { result ->
                     when(result) {

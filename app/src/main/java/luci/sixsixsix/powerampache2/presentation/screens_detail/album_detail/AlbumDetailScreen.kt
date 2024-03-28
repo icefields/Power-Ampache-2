@@ -64,6 +64,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.ArtistId
@@ -76,8 +77,11 @@ import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigateToArtist
+
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
@@ -95,6 +99,7 @@ fun AlbumDetailScreen(
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val isGlobalShuffleOn by viewModel.globalShuffleStateFlow.collectAsState()
     val songs = viewModel.state.getSongList()
     val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
 
@@ -216,20 +221,22 @@ fun AlbumDetailScreen(
                         isAlbumDownloaded = state.isAlbumDownloaded,
                         isDownloading = mainViewModel.state.isDownloading,
                         isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
-                        isGlobalShuffleOn = state.isGlobalShuffleOn ,
+                        isGlobalShuffleOn = isGlobalShuffleOn ,
                         artistClickListener = { artistId ->
-                            navigateToArtist(navigator, artistId)
+                            Ampache2NavGraphs.navigateToArtist(navigator, artistId = artistId)
                         },
                         eventListener = { event ->
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {
+                                    L( "AlbumInfoViewEvents.PLAY_ALBUM", state.isLoading, viewModel.state.songs.isNullOrEmpty())
+
                                     if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@AlbumInfoSection
 
                                     if (isPlayingAlbum) {
                                         // will pause if playing
                                         mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
                                     } else {
-                                        if (!state.isGlobalShuffleOn) {
+                                        if (!isGlobalShuffleOn) {
                                             // add next to the list and skip to the top of the album (which is next)
                                             mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlay(songs[0], state.getSongList()))
 //                                            viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
@@ -237,6 +244,8 @@ fun AlbumDetailScreen(
 //                                            playlistManager.addToCurrentQueueTop(state.getSongList())
 //                                            mainViewModel.onEvent(MainEvent.Play(songs[0]))
                                         } else {
+                                            L( "isGlobalShuffleOn")
+
                                             mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(state.getSongList()))
 //                                            viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
 //                                            // after updating queue and current song, play
@@ -292,8 +301,9 @@ fun AlbumDetailScreen(
                                                 mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
                                             SongItemEvent.GO_TO_ALBUM -> { } // No ACTION, we're already in this album //navigator.navigate(AlbumDetailScreenDestination(viewModel.state.album.id, viewModel.state.album))
                                             SongItemEvent.GO_TO_ARTIST ->
-                                                navigateToArtist(navigator, viewModel.state.album.artist.id)
-
+                                                Ampache2NavGraphs.navigateToArtist(navigator,
+                                                    artistId = viewModel.state.album.artist.id
+                                                )
                                             SongItemEvent.ADD_SONG_TO_QUEUE ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                                             SongItemEvent.ADD_SONG_TO_PLAYLIST ->
@@ -303,7 +313,12 @@ fun AlbumDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.getSongList()))
+                                            mainViewModel.onEvent(
+                                                MainEvent.PlaySongAddToQueueTop(
+                                                    song,
+                                                    state.getSongList()
+                                                )
+                                            )
 //                                            viewModel.onEvent(AlbumDetailEvent.OnSongSelected(song))
 //                                            mainViewModel.onEvent(MainEvent.Play(song))
                                         },
@@ -321,15 +336,6 @@ fun AlbumDetailScreen(
             }
         }
     }
-}
-
-private fun navigateToArtist(navigator: DestinationsNavigator, artistId: ArtistId) {
-    navigator.navigate(
-        ArtistDetailScreenDestination(
-            artistId = artistId,
-            artist = null
-        )
-    )
 }
 
 private val albumBackgroundGradient

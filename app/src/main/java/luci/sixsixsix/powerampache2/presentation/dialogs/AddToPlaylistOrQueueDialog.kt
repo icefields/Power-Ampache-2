@@ -60,8 +60,9 @@ import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
+
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
 val textPaddingVertical = 10.dp
 

@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -58,6 +59,16 @@ class ArtistsRepositoryImpl @Inject constructor(
     ): Flow<Resource<Artist>> = flow {
         emit(Resource.Loading(true))
 
+        if (isOfflineModeEnabled()) {
+            dao.generateOfflineArtist(artistId)?.let { artistEntity ->
+                L(artistEntity.name)
+                val data = artistEntity.toArtist()
+                emit(Resource.Success(data = data, networkData = data))
+                emit(Resource.Loading(false))
+                return@flow
+            } ?: throw Exception("OFFLINE ARTIST does not exist")
+        }
+
         dao.getArtist(artistId)?.let { artistEntity ->
             emit(Resource.Success(data = artistEntity.toArtist() ))
             if(!fetchRemote) {  // load cache only?
@@ -87,6 +98,14 @@ class ArtistsRepositoryImpl @Inject constructor(
         offset: Int
     ): Flow<Resource<List<Artist>>> = flow {
         emit(Resource.Loading(true))
+
+        if (isOfflineModeEnabled()) {
+            val generatedArtists = dao.generateOfflineArtists()
+            //val offlineAlbums = dao.getOfflineAlbums()
+            emit(Resource.Success(data = generatedArtists.map { it.toArtist() }))
+            emit(Resource.Loading(false))
+            return@flow
+        }
 
         if (offset == 0) {
             val localArtists = dao.searchArtist(query)

@@ -51,7 +51,7 @@ open class Playlist(
                 "            \"art\": \"https:\\/\\/tari.ddns.net\\/image.php?object_id=2&object_type=playlist&name=art.jpg\",\n" +
                 "            \"flag\": true,\n" +
                 "            \"rating\": 4,\n" +
-                "            \"averagerating\": null\n" +
+                "            \"averagerating\": 3\n" +
                 "        }", PlaylistDto::class.java).toPlaylist()
     }
 }

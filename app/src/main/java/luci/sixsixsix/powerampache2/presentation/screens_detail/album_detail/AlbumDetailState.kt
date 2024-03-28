@@ -37,7 +37,7 @@ data class AlbumDetailState (
     val isRefreshing: Boolean = false,
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false,
-    val isGlobalShuffleOn: Boolean = LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE
+    //val isGlobalShuffleOn: Boolean = LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE
 ): Parcelable {
     fun getSongList() = songs.map { it.song }
 }

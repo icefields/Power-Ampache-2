@@ -1,20 +1,25 @@
 package luci.sixsixsix.powerampache2.data
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettings
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
+import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toUser
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Session
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.User
 
 abstract class BaseAmpacheRepository(
@@ -37,23 +42,21 @@ abstract class BaseAmpacheRepository(
     suspend fun getUser(): User? =
         dao.getUser()?.toUser()
 
-    protected suspend fun like(id: String, like: Boolean, type: MainNetwork.Type): Flow<Resource<Any>> = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.flag(
-            authKey = auth.auth,
-            id = id,
-            flag = if (like) { 1 } else { 0 },
-            type = type).apply {
-            error?.let { throw(MusicException(it.toError())) }
-            if (success != null) {
-                emit(Resource.Success(data = Any(), networkData = Any()))
-            } else {
-                throw Exception("error getting a response from FLAG/LIKE call")
+    protected suspend fun cacheSongs(songs: List<Song>) {
+        dao.insertSongs(songs.map { it.toSongEntity() })
+        songs.forEach { song ->
+            dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.let { downloadedSong ->
+                dao.addDownloadedSong(
+                    song.toDownloadedSongEntity(downloadedSong.songUri, owner = downloadedSong.owner)
+                )
             }
         }
+    }
 
-        // update the cache
+    protected suspend fun like(id: String, like: Boolean, type: MainNetwork.Type): Flow<Resource<Any>> = flow {
+        emit(Resource.Loading(true))
+
+        // update the database
         val flag  = processFlag(like)
         when(type) {
             MainNetwork.Type.song ->
@@ -71,26 +74,31 @@ abstract class BaseAmpacheRepository(
                     dao.insertPlaylists(listOf(dbPlaylist))
                 }
         }
+        if (!isOfflineModeEnabled()) {
+            val auth = getSession()!!
+            api.flag(
+                authKey = auth.auth,
+                id = id,
+                flag = if (like) { 1 } else { 0 },
+                type = type).apply {
+                error?.let { throw(MusicException(it.toError())) }
+                if (success != null) {
+                    emit(Resource.Success(data = Any(), networkData = Any()))
+                } else {
+                    throw Exception("error getting a response from FLAG/LIKE call")
+                }
+            }
+        } else {
+            emit(Resource.Success(data = Any(), networkData = Any()))
+        }
+
         emit(Resource.Loading(false))
     }.catch { e -> errHandler("likeSong()", e, this) }
 
     protected suspend fun rate(itemId: String, rating: Int, type: MainNetwork.Type): Flow<Resource<Any>> = flow {
         emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.rate(
-            authKey = auth.auth,
-            itemId = itemId,
-            rating = rating,
-            type = type).apply {
-            error?.let { throw(MusicException(it.toError())) }
-            if (success != null) {
-                emit(Resource.Success(data = Any(), networkData = Any()))
-            } else {
-                throw Exception("error getting a response from FLAG/LIKE call")
-            }
-        }
 
-        // update the cache
+        // update the database
         when(type) {
             MainNetwork.Type.song ->
                 dao.getSongById(itemId)?.copy(rating = rating.toFloat())?.let { dbSong ->
@@ -106,6 +114,46 @@ abstract class BaseAmpacheRepository(
                     dao.insertPlaylists(listOf(dbPlaylist))
                 }
         }
+
+        if (!isOfflineModeEnabled()) {
+            val auth = getSession()!!
+            api.rate(
+                authKey = auth.auth,
+                itemId = itemId,
+                rating = rating,
+                type = type
+            ).apply {
+                error?.let { throw (MusicException(it.toError())) }
+                if (success != null) {
+                    emit(Resource.Success(data = Any(), networkData = Any()))
+                } else {
+                    throw Exception("error getting a response from FLAG/LIKE call")
+                }
+            }
+        } else {
+            emit(Resource.Success(data = Any(), networkData = Any()))
+        }
         emit(Resource.Loading(false))
     }.catch { e -> errHandler("likeSong()", e, this) }
+
+    /**
+     * returns false if Network data is not required, true otherwise
+     */
+    protected suspend fun <T> checkEmitCacheData(
+        localData: List<T>,
+        fetchRemote: Boolean,
+        fc: FlowCollector<Resource<List<T>>>
+    ): Boolean {
+        val isDbEmpty = localData.isEmpty()
+        if (!isDbEmpty) {
+            L("checkCachedData ${localData.size}")
+            fc.emit(Resource.Success(data = localData))
+        }
+        val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+        if(shouldLoadCacheOnly) {
+            fc.emit(Resource.Loading(false))
+            return false
+        }
+        return true
+    }
 }
