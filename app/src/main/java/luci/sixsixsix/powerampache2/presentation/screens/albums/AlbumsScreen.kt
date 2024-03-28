@@ -12,6 +12,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -29,6 +31,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.key
+import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
@@ -48,6 +51,7 @@ fun AlbumsScreen(
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state
+    val offlineModeState by viewModel.offlineModeStateFlow.collectAsState()
 
     var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
     val configuration = LocalConfiguration.current
@@ -69,8 +73,10 @@ fun AlbumsScreen(
     //val cardsPerRow = if (state.albums.size < 5) { minGridItemsRow } else { gridItemsRow }
     val albumCardSize = (LocalConfiguration.current.screenWidthDp / cardsPerRow).dp
 
-    if (state.isLoading && state.albums.isEmpty()) {
+    if (!offlineModeState && state.isLoading && state.albums.isEmpty()) {
         LoadingScreen()
+    } else if (offlineModeState && state.albums.isEmpty() && !state.isLoading) {
+        EmptyListView(title = stringResource(id = R.string.offline_noData_warning))
     }
 
     Box(
@@ -123,7 +129,9 @@ fun LoadingView(modifier: Modifier = Modifier) {
             .wrapContentSize()
     ) {
         Box(modifier = Modifier.wrapContentSize()) {
-            CircularProgressIndicator(modifier = Modifier.size(22.dp).align(Alignment.Center))
+            CircularProgressIndicator(modifier = Modifier
+                .size(22.dp)
+                .align(Alignment.Center))
         }
     }
 }

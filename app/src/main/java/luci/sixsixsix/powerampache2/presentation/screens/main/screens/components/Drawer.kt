@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.presentation.screens.main.screens.component
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -113,11 +114,15 @@ fun MainDrawer(
         Text(
             modifier = Modifier
                 .padding(8.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .background(
+                    if (BuildConfig.DEBUG) MaterialTheme.colorScheme.tertiaryContainer else Color.Transparent
+                )
+            ,
             text = "v$versionInfo",
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Light,
-            color = MaterialTheme.colorScheme.onErrorContainer,
+            color = if (BuildConfig.DEBUG) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 12.sp
         )
     }

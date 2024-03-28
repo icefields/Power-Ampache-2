@@ -90,10 +90,10 @@ class PlaylistDetailViewModel @Inject constructor(
                 )
                 playlist
             }
-            .map { it.id }
-            .flatMapConcat { id ->
-                playlistsRepository.getPlaylist(id).filterNotNull()
-            }
+//            .map { it.id }
+//            .flatMapConcat { id ->
+//                playlistsRepository.getPlaylist(id).filterNotNull()
+//            }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Playlist.empty())
 
 

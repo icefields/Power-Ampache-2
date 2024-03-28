@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -212,7 +213,7 @@ fun OfflineSongsMainContent(
         if (state.isLoading && state.songs.isEmpty()) {
             LoadingScreen()
         } else if(state.songs.isEmpty()) {
-            EmptyListView(title = "You haven't downloaded any song yet")
+            EmptyListView(title = stringResource(id = R.string.offline_noData_warning))
         }
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -246,7 +247,12 @@ fun OfflineSongsMainContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.songs))
+                            mainViewModel.onEvent(
+                                MainEvent.PlaySongAddToQueueTop(
+                                    song,
+                                    state.songs
+                                )
+                            )
 //                            viewModel.onEvent(OfflineSongsEvent.OnSongSelected(song))
 //                            mainViewModel.onEvent(MainEvent.Play(song))
                         },
