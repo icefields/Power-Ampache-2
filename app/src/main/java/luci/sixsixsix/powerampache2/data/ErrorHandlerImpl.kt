@@ -108,7 +108,7 @@ class ErrorHandlerImpl @Inject constructor(
                     }
 
                     is PlaybackException -> {
-                        readableMessage = "Problem playing this track. Check your connection"
+                        readableMessage = "This track cannot be played. The issue could be related to your connection, the file might be corrupt, or issues with your server.\nIf it's an offline track please try delete and re-download"
                         "PlaybackException \n$readableMessage\n $exceptionString"
                     }
 
