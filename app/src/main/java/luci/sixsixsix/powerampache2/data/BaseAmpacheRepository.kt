@@ -14,7 +14,6 @@ import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettings
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toUser
 import luci.sixsixsix.powerampache2.data.local.entities.toUserEntity
 import luci.sixsixsix.powerampache2.data.remote.LikeData
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -45,10 +44,14 @@ abstract class BaseAmpacheRepository(
     protected suspend fun getCredentials(): CredentialsEntity? =
         dao.getCredentials()
 
-    suspend fun getUser(): User? =
-        dao.getUser()?.let {
-            it.toUser()
-        } ?: getUserNetwork()
+    suspend fun getUsername(): String? =
+        dao.getUser()?.username ?: getCredentials()?.username
+            .also {
+                // if user doesn't exist, retrieve the object from network
+                if (it == null && !isOfflineModeEnabled()) {
+                    getUserNetwork()
+                }
+            }
 
     /**
      * updating the user in the database will trigger the user live data.
@@ -60,14 +63,14 @@ abstract class BaseAmpacheRepository(
     protected suspend fun getUserNetwork(): User? =
         getCredentials()?.username?.let { username ->
             getSession()?.let { session ->
-                api.getUser(authKey = session.auth, username = username)
-                    .let { userDto ->
-                        userDto.id?.let {
-                            userDto.toUser().also { us ->
-                                setUser(us)
-                            }
-                        }
-                    }
+                try {
+                    val user = api.getUser(authKey = session.auth, username = username).toUser()
+                    setUser(user)
+                    user
+                } catch (e: Exception) {
+                    errHandler.logError(e)
+                    null
+                }
             }
         }
 

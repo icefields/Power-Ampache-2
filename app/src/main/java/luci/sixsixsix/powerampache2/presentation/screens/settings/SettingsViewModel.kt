@@ -80,7 +80,7 @@ class SettingsViewModel @Inject constructor(
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.defaultSettings())
 
-    val userStateFlow = musicRepository.userLiveData.distinctUntilChanged().asFlow()
+    val userStateFlow = musicRepository.userLiveData
         .filterNotNull().distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 

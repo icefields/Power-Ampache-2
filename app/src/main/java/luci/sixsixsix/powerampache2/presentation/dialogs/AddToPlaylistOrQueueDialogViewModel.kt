@@ -57,8 +57,8 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private var isEndOfDataReached: Boolean = false
 
     val playlistsStateFlow: StateFlow<List<Playlist>> =
-        playlistsRepository.playlistsFlow.distinctUntilChanged().filterNotNull()
-            .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlists, user ->
+        playlistsRepository.playlistsFlow.filterNotNull().distinctUntilChanged()
+            .combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlists, user ->
                 playlists.filter { it.owner == user.username }
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 

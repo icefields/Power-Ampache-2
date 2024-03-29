@@ -438,7 +438,7 @@ class SongsRepositoryImpl @Inject constructor(
                 body()?.byteStream()?.let { inputStream ->
                     val filepath = storageManager.saveSong(song, inputStream)
                     dao.addDownloadedSong( // TODO fix double-bang!!
-                        song.toDownloadedSongEntity(filepath, getUser()?.username!!)
+                        song.toDownloadedSongEntity(filepath, getUsername()!!)
                     )
                     emit(Resource.Success(data = Any(), networkData = Any()))
                 } ?: throw Exception("cannot download/save file, body or input stream NULL response code: ${code()}")
@@ -483,8 +483,7 @@ class SongsRepositoryImpl @Inject constructor(
         }
         return weakContext.get()?.let { context ->
             val auth = getSession()!!.auth
-            val username = (getUser()?.username
-                ?: getCredentials()?.username)!!
+            val username = getUsername()!!
 
             val requestId = startSongDownloadWorker(
                 context = context,

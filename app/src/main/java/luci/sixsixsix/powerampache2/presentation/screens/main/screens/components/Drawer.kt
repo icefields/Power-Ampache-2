@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.USER_ERROR_MESSAGE
 import luci.sixsixsix.powerampache2.common.toHslColor
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
@@ -273,8 +274,8 @@ fun UserInfoSection(
             UserInfoTextWithTitle(title = R.string.settings_userInfo_website, subtitle = user.website)
             UserInfoTextWithTitle(title = R.string.settings_userInfo_city, subtitle = user.city)
             UserInfoTextWithTitle(title = R.string.settings_userInfo_state, subtitle = user.state)
-            UserInfoTextWithTitle(title = R.string.settings_userInfo_id, subtitle = user.id)
-
+            UserInfoTextWithTitle(title = R.string.settings_userInfo_id,
+                subtitle = if (!user.isError()) user.id else USER_ERROR_MESSAGE)
         }
     }
 }

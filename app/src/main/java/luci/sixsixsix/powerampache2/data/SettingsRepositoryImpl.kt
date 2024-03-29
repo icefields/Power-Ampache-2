@@ -75,13 +75,13 @@ class SettingsRepositoryImpl @Inject constructor(
         dao.writeSettings(localSettings.toLocalSettingsEntity())
 
     override suspend fun changeSortMode(sortMode: SortMode) {
-        dao.getUser()?.toUser()?.username?.let { username ->
+        getUsername()?.let { username ->
             saveLocalSettings(getLocalSettings(username).copy(playlistSongsSorting = sortMode))
         }
     }
 
     override suspend fun toggleGlobalShuffle() =
-        dao.getUser()?.toUser()?.username?.let { username ->
+        getUsername()?.let { username ->
             getLocalSettings(username).apply {
                 val newValue = !isGlobalShuffleEnabled
                 saveLocalSettings(copy(isGlobalShuffleEnabled = newValue))
@@ -89,7 +89,7 @@ class SettingsRepositoryImpl @Inject constructor(
         } ?: throw Exception("toggleGlobalShuffle, error saving global shuffle")
 
     override suspend fun toggleOfflineMode() =
-        dao.getUser()?.toUser()?.username?.let { username ->
+        getUsername()?.let { username ->
             getLocalSettings(username).apply {
                 val newValue = !isOfflineModeEnabled
                 saveLocalSettings(copy(isOfflineModeEnabled = newValue))

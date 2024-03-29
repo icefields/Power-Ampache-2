@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
@@ -82,7 +83,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 onEvent(PlaylistDetailEvent.Fetch(playlist))
                 playlist
             }
-            .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlist, user ->
+            .combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlist, user ->
                 state = state.copy(
                     isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
                     isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),

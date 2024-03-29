@@ -29,6 +29,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
@@ -49,9 +52,8 @@ class AuthViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
     //var stateSaved = savedStateHandle.getStateFlow("keyauth", AuthState())
-
     // var state by mutableStateOf(AuthState())
-    var state by savedStateHandle.saveable { mutableStateOf(luci.sixsixsix.powerampache2.presentation.screens.main.AuthState()) }
+    var state by savedStateHandle.saveable { mutableStateOf(AuthState()) }
 
     init {
         observeMessages()
@@ -80,11 +82,9 @@ class AuthViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            repository.userLiveData.observeForever {
-                L(it)
-                it?.let { user ->
-                    state = state.copy(user = user)
-                }
+            repository.userLiveData.filterNotNull().distinctUntilChanged().collect { user ->
+                L(user)
+                state = state.copy(user = user)
             }
         }
     }

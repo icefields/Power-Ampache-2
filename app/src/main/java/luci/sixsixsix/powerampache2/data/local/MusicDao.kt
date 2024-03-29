@@ -26,6 +26,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CREDENTIALS_PRIMARY_KEY
@@ -40,6 +41,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
 import luci.sixsixsix.powerampache2.data.local.models.SongUrl
+import luci.sixsixsix.powerampache2.data.local.models.UserWithCredentials
 
 @Dao
 interface MusicDao {
@@ -72,6 +74,9 @@ interface MusicDao {
     @Query("""SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'""")
     suspend fun getCredentials(): CredentialsEntity?
 
+//    @Query("""SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'""")
+//    fun getCredentialsLiveData(): LiveData<CredentialsEntity?>
+
 // --- USER ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateUser(userEntity: UserEntity)
@@ -82,8 +87,16 @@ interface MusicDao {
     @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
     suspend fun getUser(): UserEntity?
 
-    @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
-    fun getUserLiveData(): LiveData<UserEntity?>
+    @Query("""SELECT * FROM userentity WHERE username = :username""")
+    suspend fun getUser(username: String): UserEntity?
+
+    @Query("""SELECT credentials.username as credentialsUsername, user.* FROM
+        (SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') AS credentials,
+        (SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) AS user""")
+    fun getUserLiveData(): Flow<UserWithCredentials?>
+
+    //    @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
+    //    fun getUserLiveDataOld(): LiveData<UserEntity?>
 
 // --- ALBUMS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)

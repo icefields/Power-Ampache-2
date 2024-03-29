@@ -62,7 +62,7 @@ class PlaylistsViewModel @Inject constructor(
             .flatMapLatest { repository.playlistsFlow }
             .distinctUntilChanged()
             .filterNotNull()
-            .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlists, user ->
+            .combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlists, user ->
                 currentUsername = user.username
                 playlists
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
