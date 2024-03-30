@@ -26,7 +26,9 @@ import luci.sixsixsix.powerampache2.BuildConfig
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
-    const val DATABASE_VERSION = 79
+    const val DATABASE_VERSION = 80
+
+    const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 
     // NETWORK
     const val TIMEOUT_CONNECTION_S = 20L
@@ -38,11 +40,17 @@ object Constants {
     const val DATABASE_LIMIT_ELEMENTS = 66
     const val QUICK_PLAY_MIN_SONGS = 50
 
+    const val USER_ACCESS_DEFAULT = 25
+    const val USER_EMAIL_DEFAULT = "" //""No@Email.Present"
+    const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
+
     // ERROR CONSTANTS
     const val ERROR_INT = -1
     const val ERROR_FLOAT = -1f
     const val ERROR_STRING = "ERROR"
     const val LOADING_STRING = "LOADING"
+    const val USER_ID_ERROR = ERROR_INT
+    const val USER_ERROR_MESSAGE = "There was a problem retrieving your User from the server"
 
     // FLAGS
     const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION

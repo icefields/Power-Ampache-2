@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -66,22 +67,21 @@ class SettingsViewModel @Inject constructor(
     }
     val logs by mutableStateOf(mutableListOf<String>())
 
-    val offlineModeStateFlow = settingsRepository.settingsLiveData
-        .distinctUntilChanged()
-        .asFlow()
-        .filterNotNull()
+    val offlineModeStateFlow = settingsRepository.offlineModeFlow
         .map {
             playlistManager.updateUserMessage("")
-            it.isOfflineModeEnabled
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+            it
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     val localSettingsStateFlow = settingsRepository.settingsLiveData
-        .distinctUntilChanged()
         .asFlow()
         .filterNotNull()
+        .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.defaultSettings())
 
-    val userStateFlow = musicRepository.userLiveData.distinctUntilChanged().asFlow().filterNotNull()
+    val userStateFlow = musicRepository.userLiveData
+        .filterNotNull().distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     val serverInfoStateFlow = musicRepository.serverInfoStateFlow.filterNotNull()

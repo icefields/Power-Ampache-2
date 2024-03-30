@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
@@ -43,15 +45,14 @@ import luci.sixsixsix.powerampache2.data.local.entities.toGenre
 import luci.sixsixsix.powerampache2.data.local.entities.toGenreEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toUser
-import luci.sixsixsix.powerampache2.data.local.entities.toUserEntity
+import luci.sixsixsix.powerampache2.data.local.models.UserWithCredentials
+import luci.sixsixsix.powerampache2.data.local.models.toUser
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toBoolean
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toGenre
 import luci.sixsixsix.powerampache2.data.remote.dto.toServerInfo
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
-import luci.sixsixsix.powerampache2.data.remote.dto.toUser
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -82,8 +83,9 @@ class MusicRepositoryImpl @Inject constructor(
     private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
-    override val userLiveData: LiveData<User?>
-        get() = userLiveData()
+    override val userLiveData: Flow<User?> = dao.getUserLiveData().map {
+        (it ?: UserWithCredentials(username = dao.getCredentials()?.username)).toUser()
+    }
 
     // used to check if a call to getUserNetwork() is necessary
     private var currentAuthToken: String? = null
@@ -108,38 +110,12 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
-
     private suspend fun setSession(se: Session) {
         if (se.auth != getSession()?.auth) {
-            // albums, songs, playlists and artist have links that contain the auth token
-            //dao.clearCachedData()
-            //dao.clearPlaylists()
             L("setSession se.auth != getSession()?.auth")
         }
         dao.updateSession(se.toSessionEntity())
     }
-
-    private suspend fun getUserNetwork(): User? =
-        getCredentials()?.username?.let { username ->
-            getSession()?.let { session ->
-                api.getUser(authKey = session.auth, username = username)
-                    .let { userDto ->
-                        userDto.id?.let {
-                            userDto.toUser().also { us ->
-                                setUser(us)
-                            }
-                        }
-                    }
-            }
-        }
-
-    /**
-     * updating the user in the database will trigger the user live data, observe that
-     * to get updates on the user
-     */
-    private suspend fun setUser(user: User) =
-        dao.updateUser(user.toUserEntity())
 
     private suspend fun setCredentials(se: CredentialsEntity) =
         dao.updateCredentials(se)
@@ -205,18 +181,6 @@ class MusicRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Resource.Error(message = "cannot load data", exception = e)
         }
-
-    suspend fun autoLoginOld(): Flow<Resource<Session>> {
-        val credentials = getCredentials()
-        // authorization with empty string will fail
-        return authorize(
-            credentials?.username ?: "",
-            credentials?.password ?: "",
-            credentials?.serverUrl ?: "",
-            credentials?.authToken ?: "",
-            true
-        )
-    }
 
     override suspend fun autoLogin() = getCredentials()?.let {
         authorize(

@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.data.remote.dto
 
 
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.processFlag
@@ -37,7 +38,31 @@ data class UserDto(
     val state: String? = null,
     @SerializedName("city")
     val city: String? = null,
-)
+) {
+    companion object {
+        fun getMockUserDto(): UserDto {
+            val userDtoString = "{\n" +
+                    "    \"id\": \"7\",\n" +
+                    "    \"username\": \"Iodlwpa\",\n" +
+                    "    \"auth\": null,\n" +
+                    "    \"email\": \"I@p.l\",\n" +
+                    "    \"access\": 25,\n" +
+                    "    \"streamtoken\": null,\n" +
+                    "    \"fullname_public\": false,\n" +
+                    "    \"validation\": null,\n" +
+                    "    \"disabled\": false,\n" +
+                    "    \"create_date\": 1711597870,\n" +
+                    "    \"last_seen\": 1711681811,\n" +
+                    "    \"website\": null,\n" +
+                    "    \"state\": null,\n" +
+                    "    \"city\": null,\n" +
+                    "    \"art\": \"http:\\/\\/192.168.14.77\\/ampache-dev\\/image.php?object_id=7&object_type=user\",\n" +
+                    "    \"has_art\": false\n" +
+                    "}"
+            return Gson().fromJson(userDtoString, UserDto::class.java)
+        }
+    }
+}
 
 fun UserDto.toUser() = User(
     id = id,

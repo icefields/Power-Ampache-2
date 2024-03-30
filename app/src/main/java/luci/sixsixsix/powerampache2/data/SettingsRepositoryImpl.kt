@@ -22,10 +22,16 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -52,8 +58,14 @@ class SettingsRepositoryImpl @Inject constructor(
         get() = dao.settingsLiveData().distinctUntilChanged().map {
                 it?.toLocalSettings()
         }
-
-    private fun userLiveData() = dao.getUserLiveData().map { it?.toUser() }
+    override val offlineModeFlow: Flow<Boolean>
+        get() =  settingsLiveData
+    .distinctUntilChanged()
+    .asFlow()
+    .filterNotNull()
+    .map {
+        it.isOfflineModeEnabled
+    }.distinctUntilChanged()
 
     override suspend fun getLocalSettings(username: String?) =
         dao.getSettings()?.toLocalSettings()
@@ -63,13 +75,13 @@ class SettingsRepositoryImpl @Inject constructor(
         dao.writeSettings(localSettings.toLocalSettingsEntity())
 
     override suspend fun changeSortMode(sortMode: SortMode) {
-        dao.getUser()?.toUser()?.username?.let { username ->
+        getUsername()?.let { username ->
             saveLocalSettings(getLocalSettings(username).copy(playlistSongsSorting = sortMode))
         }
     }
 
     override suspend fun toggleGlobalShuffle() =
-        dao.getUser()?.toUser()?.username?.let { username ->
+        getUsername()?.let { username ->
             getLocalSettings(username).apply {
                 val newValue = !isGlobalShuffleEnabled
                 saveLocalSettings(copy(isGlobalShuffleEnabled = newValue))
@@ -77,7 +89,7 @@ class SettingsRepositoryImpl @Inject constructor(
         } ?: throw Exception("toggleGlobalShuffle, error saving global shuffle")
 
     override suspend fun toggleOfflineMode() =
-        dao.getUser()?.toUser()?.username?.let { username ->
+        getUsername()?.let { username ->
             getLocalSettings(username).apply {
                 val newValue = !isOfflineModeEnabled
                 saveLocalSettings(copy(isOfflineModeEnabled = newValue))

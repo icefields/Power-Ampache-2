@@ -65,11 +65,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
 import kotlinx.coroutines.launch
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.hasLyrics
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
 @Composable

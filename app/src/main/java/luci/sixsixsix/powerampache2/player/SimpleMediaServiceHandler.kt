@@ -284,6 +284,10 @@ class SimpleMediaServiceHandler @Inject constructor(
                 }
             }
         }
+        if (!player.isPlaying && !player.isLoading) {
+            player.seekToNextMediaItem()
+            player.prepare()
+        }
     }
 }
 

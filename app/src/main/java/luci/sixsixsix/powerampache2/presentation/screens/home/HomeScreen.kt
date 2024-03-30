@@ -21,6 +21,11 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +37,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,7 +52,9 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.delay
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.screens.home.components.HOME_LOADING_VIEW_IDENTIFIER
 import luci.sixsixsix.powerampache2.presentation.screens.home.components.HomeScreenSection
 
@@ -53,7 +66,9 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val state = viewModel.state
+    val offlineModeState by viewModel.offlineModeStateFlow.collectAsState()
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
+    var emptyViewVisible by remember { mutableStateOf(false) }
 
     // to add sections to the home screen just add Title and Array of Albums, Playlists or Songs
     val homeScreenItems = mapOf(
@@ -71,6 +86,13 @@ fun HomeScreen(
         Pair(HOME_LOADING_VIEW_IDENTIFIER, if(isLoadingData(state)) null else listOf()),
     )
 
+    val showEmptyView = isNoData(state) && offlineModeState
+    LaunchedEffect(showEmptyView) {
+        // wait 1.2 seconds before showing the switch
+        delay(1200)
+        emptyViewVisible = showEmptyView
+    }
+
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
@@ -79,26 +101,50 @@ fun HomeScreen(
             state = swipeRefreshState,
             onRefresh = { viewModel.onEvent(HomeScreenEvent.Refresh) }
         ) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(homeScreenItems.keys.toList()) { title ->
-                    HomeScreenSection(
-                        navigator = navigator,
-                        albumsRow = homeScreenItems[title],
-                        text = title
-                    )
+            if (showEmptyView) {
+                AnimatedVisibility(emptyViewVisible,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessHigh)),
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessHigh))
+                ) {
+                    EmptyListView(title = stringResource(id = R.string.offline_noData_warning))
+                }
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(homeScreenItems.keys.toList()) { title ->
+                        HomeScreenSection(
+                            navigator = navigator,
+                            albumsRow = homeScreenItems[title],
+                            text = title
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-fun isLoadingData(state: HomeScreenState) = (state.isLoading ||
-        (state.recentAlbums.isNullOrEmpty() ||
-                state.randomAlbums.isNullOrEmpty() ||
-                state.newestAlbums.isNullOrEmpty() ||
-                state.frequentAlbums.isNullOrEmpty()
-                )
+fun isLoadingData(state: HomeScreenState) = (
+        state.isLoading ||
+        (
+            state.isRecentAlbumsLoading ||
+            state.isRandomAlbumsLoading ||
+            state.isNewestAlbumsLoading||
+            state.isFrequentAlbumsLoading
+        ) ||
+        (   state.frequentAlbums.isNullOrEmpty() &&
+            state.recentAlbums.isNullOrEmpty() &&
+            state.randomAlbums.isNullOrEmpty() &&
+            state.newestAlbums.isNullOrEmpty() &&
+            state.playlists.isNullOrEmpty()
         )
+)
+
+fun isNoData(state: HomeScreenState) =
+    state.frequentAlbums.isNullOrEmpty() &&
+    state.recentAlbums.isNullOrEmpty() &&
+    state.randomAlbums.isNullOrEmpty() &&
+    state.newestAlbums.isNullOrEmpty() &&
+    state.playlists.isNullOrEmpty()
 
 @Composable
 fun LoadingView() {
@@ -111,7 +157,9 @@ fun LoadingView() {
             .wrapContentHeight()
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(modifier = Modifier.size(44.dp).align(Alignment.Center))
+            CircularProgressIndicator(modifier = Modifier
+                .size(44.dp)
+                .align(Alignment.Center))
         }
     }
 }

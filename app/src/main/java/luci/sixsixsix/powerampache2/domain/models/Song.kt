@@ -85,6 +85,7 @@ data class Song(
             artist = MusicAttribute("468", "Trivium"),
             album = MusicAttribute("1986", "The Sin And The Sentence"),
             albumArtist = MusicAttribute.emptyInstance(),
+            genre = listOf(MusicAttribute.randomInstance(), MusicAttribute.randomInstance(), MusicAttribute.randomInstance()),
             songUrl = "http://192.168.1.100/ampache/public/play/index.php?ssid=bd15d8f22785f5176aa2f783f88616f3&type=song&oid=21863&uid=2&player=api&name=Trivium%20-%20Beauty%20In%20The%20Sorrow.mp3",
             imageUrl = "http://192.168.1.100/ampache/public/image.php?object_id=1986&object_type=album&auth=bd15d8f22785f5176aa2f783f88616f3&name=art.jpg",
             averageRating = Constants.ERROR_FLOAT,
