@@ -59,6 +59,7 @@ fun PlaylistInfoButtonsRow(
     isLikeAvailable: Boolean,
     isLiked: Boolean,
     isLikeLoading: Boolean,
+    iconTint: Color,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit
 ) {
     Row(modifier = modifier
@@ -68,6 +69,7 @@ fun PlaylistInfoButtonsRow(
     ) {
 
         ButtonWithLoadingIndicator(
+            iconTint = iconTint,
             imageVector = Icons.Outlined.AddBox,
             imageContentDescription = "Add to playlist",
             background = Color.Transparent,
@@ -77,7 +79,9 @@ fun PlaylistInfoButtonsRow(
             eventListener(PlaylistInfoViewEvents.ADD_PLAYLIST_TO_PLAYLIST)
         }
 
-        ButtonDownload(isDownloading = isDownloading,
+        ButtonDownload(
+            isDownloading = isDownloading,
+            iconTint = iconTint,
             onStartDownloadClick = { eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST) },
             onStopDownloadClick = { eventListener(PlaylistInfoViewEvents.STOP_DOWNLOAD_PLAYLIST) }
         )
@@ -91,7 +95,8 @@ fun PlaylistInfoButtonsRow(
             Icon(
                 modifier = Modifier.aspectRatio(1f/1f),
                 imageVector = if (!isPlayingPlaylist) Icons.Default.PlayCircle else Icons.Default.PauseCircle,
-                contentDescription = "Play Pause"
+                contentDescription = "Play Pause",
+                tint = iconTint
             )
         }
 

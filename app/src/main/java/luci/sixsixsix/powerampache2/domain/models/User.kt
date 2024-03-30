@@ -30,24 +30,30 @@ import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_NAME
 import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_STATE
 import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_USERNAME
 import luci.sixsixsix.powerampache2.common.Constants.MASTODON_URL
+import luci.sixsixsix.powerampache2.common.Constants.USER_ERROR_MESSAGE
+import luci.sixsixsix.powerampache2.common.Constants.USER_ID_ERROR
 
 @Parcelize
 data class User(
     val id: String,
     val username: String,
-    val email: String,
-    val access: Int,
+    val email: String = Constants.USER_EMAIL_DEFAULT,
+    val access: Int = Constants.USER_ACCESS_DEFAULT,
     val streamToken: String? = null,
-    val fullNamePublic: Int,
+    val fullNamePublic: Int = Constants.USER_FULL_NAME_PUBLIC_DEFAULT,
     val fullName: String? = null,
     //val validation: Any? = null,
-    val disabled: Boolean,
+    val disabled: Boolean = false,
     val createDate: Int = Constants.ERROR_INT,
     val lastSeen: Int = Constants.ERROR_INT,
-    val website: String,
-    val state: String,
-    val city: String
+    val website: String = "",
+    val state: String = "",
+    val city: String = ""
 ): Parcelable {
+
+    fun isError() =
+        id == USER_ID_ERROR.toString()
+
     companion object {
         fun emptyUser(): User = User(
             "", "", "",

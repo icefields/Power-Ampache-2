@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
@@ -82,7 +83,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 onEvent(PlaylistDetailEvent.Fetch(playlist))
                 playlist
             }
-            .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlist, user ->
+            .combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlist, user ->
                 state = state.copy(
                     isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
                     isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),
@@ -90,10 +91,10 @@ class PlaylistDetailViewModel @Inject constructor(
                 )
                 playlist
             }
-            .map { it.id }
-            .flatMapConcat { id ->
-                playlistsRepository.getPlaylist(id).filterNotNull()
-            }
+//            .map { it.id }
+//            .flatMapConcat { id ->
+//                playlistsRepository.getPlaylist(id).filterNotNull()
+//            }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Playlist.empty())
 
 
@@ -254,7 +255,7 @@ class PlaylistDetailViewModel @Inject constructor(
 
     private fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
-            songsRepository
+            playlistsRepository
                 .getSongsFromPlaylist(playlistId)
                 .collect { result ->
                     when(result) {

@@ -23,20 +23,22 @@ package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.map
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.PlaylistSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
@@ -62,8 +64,14 @@ class PlaylistsRepositoryImpl @Inject constructor(
     private val db: MusicDatabase,
     private val errorHandler: ErrorHandler
 ): BaseAmpacheRepository(api, db, errorHandler), PlaylistsRepository {
-    override val playlistsLiveData = dao.playlistsLiveData().map { entities ->
-        entities.map {
+
+    override val playlistsFlow = dao.playlistsLiveData().asFlow().map { entities ->
+        val isOfflineModeEnabled = isOfflineModeEnabled()
+        entities.filter {
+            if (isOfflineModeEnabled) {
+                isPlaylistOffline(it.id)
+            } else it != null
+        }.map {
             it.toPlaylist()
         }
     }
@@ -76,13 +84,19 @@ class PlaylistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
 
         if (offset == 0) {
-            val localPlaylists = dao.searchPlaylists(query)
+            val isOfflineModeEnabled = isOfflineModeEnabled()
+            val localPlaylists = dao.searchPlaylists(query).filter {
+                if (isOfflineModeEnabled) {
+                    isPlaylistOffline(it.id)
+                } else it != null
+            }
             val isDbEmpty = localPlaylists.isEmpty() && query.isEmpty()
-            if (!isDbEmpty) {
+            if (!isDbEmpty || isOfflineModeEnabled) {
+                // show empty list if offline mode enabled because this will be the actual result, there won't be an api call
                 emit(Resource.Success(data = localPlaylists.map { it.toPlaylist() }))
             }
             val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
-            if(shouldLoadCacheOnly) {
+            if(shouldLoadCacheOnly || isOfflineModeEnabled) {
                 emit(Resource.Loading(false))
                 return@flow
             }
@@ -151,6 +165,84 @@ class PlaylistsRepositoryImpl @Inject constructor(
     override suspend fun getPlaylist(id: String) =
         dao.playlistLiveData(id).distinctUntilChanged().asFlow().filterNotNull().mapNotNull { it.toPlaylist() }
 
+    private suspend fun isPlaylistOffline(playlistId: String) =
+        dao.getOfflineSongsFromPlaylist(playlistId).isNotEmpty()
+
+    /**
+     * checks if offline mode is enabled, if enabled return only albums that are available offline
+     * @return true if offline mode enabled and operation successful
+     */
+    private suspend fun checkFilterOfflineSongs(
+        playlistId: String,
+        fc: FlowCollector<Resource<List<Song>>>?
+    ): Boolean = isOfflineModeEnabled().also { isOfflineModeEnabled ->
+        fc?.emit(Resource.Success(data = if (isOfflineModeEnabled) {
+            dao.getOfflineSongsFromPlaylist(playlistId).map { it.toSong() }
+        } else {
+            dao.getSongsFromPlaylist(playlistId).map { it.toSong() }
+        }, networkData = null))
+    }
+
+    /**
+     * TODO BREAKING_RULE: Implement cache for playlist songs
+     *  There is currently no way to get songs given the playlistId
+     *  Songs are cached regardless for quick access from SongsScreen and Albums
+     * This method only fetches from the network, breaking one of the rules defined in the
+     * documentation of this class.
+     */
+    override suspend fun getSongsFromPlaylist(
+        playlistId: String,
+        fetchRemote: Boolean
+    ): Flow<Resource<List<Song>>> = flow {
+        emit(Resource.Loading(true))
+        if (checkFilterOfflineSongs(playlistId, this)) {
+            emit(Resource.Loading(false))
+            return@flow
+        }
+        //else
+        val auth = getSession()!!
+        val songs = mutableListOf<Song>()
+        var isFinished = false
+        val limit = 100
+        var offset = 0
+        var lastException: MusicException? = null
+        do {
+            val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId, limit = limit, offset = offset)
+            // save the exception if any
+            response.error?.let { lastException = MusicException(it.toError()) }
+            // a response exists
+            response.songs?.let { songsDto ->
+                val partialResponse = songsDto.map { songDto -> songDto.toSong() }
+                if (partialResponse.isNotEmpty()) {
+                    songs.addAll(partialResponse)
+                    emit(Resource.Success(data = songs, networkData = partialResponse))
+                } else {
+                    // if no more items to fetch finish
+                    isFinished = true
+                }
+            } ?: run {
+                // a response DOES NOT exist
+                // if there's an error and so songs retrieved just finish
+                isFinished = true
+            }
+            offset += limit
+        } while (!isFinished)
+
+        dao.clearPlaylistSongs(playlistId)
+        dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId))
+
+//        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId, limit = 50, offset = offset)
+//        response.error?.let { throw(MusicException(it.toError())) }
+//        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
+        //emit(Resource.Success(data = songs.toList(), networkData = songs.toList()))
+
+        emit(Resource.Loading(false))
+
+        // cache songs after emitting success
+        // Songs are cached regardless for quick access from SongsScreen and Albums
+        cacheSongs(songs)
+    }.catch { e -> errorHandler("getSongsFromPlaylist()", e, this) }
+
     override suspend fun ratePlaylist(playlistId: String, rate: Int): Flow<Resource<Any>> =
         rate(playlistId, rate, MainNetwork.Type.playlist)
 
@@ -176,19 +268,6 @@ class PlaylistsRepositoryImpl @Inject constructor(
         songId: String
     ) = flow {
         emit(Resource.Loading(true))
-//        val auth = getSession()!!
-//        api.addSongToPlaylist(
-//            authKey = auth.auth,
-//            playlistId = playlistId,
-//            songId = songId
-//        ).apply {
-//            error?.let { throw(MusicException(it.toError())) }
-//            if (success != null) {
-//                emit(Resource.Success(data = Any(), networkData = Any()))
-//            } else {
-//                throw Exception("error getting a response from addSongToPlaylist call")
-//            }
-//        }
         if (addSingleSongToPlaylist(playlistId = playlistId, songId = songId)) {
             emit(Resource.Success(data = Any(), networkData = Any()))
         } else {

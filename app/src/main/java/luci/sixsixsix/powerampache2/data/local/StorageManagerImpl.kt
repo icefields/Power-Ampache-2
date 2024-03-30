@@ -112,7 +112,7 @@ class StorageManagerImpl @Inject constructor(
         }
 
     private suspend fun getAbsolutePathDir(song: Song): String? =
-        musicRepository.getUser()?.username?.let { owner ->
+        musicRepository.getUsername()?.let { owner ->
             val relativePath = song.filename
             val fileName = relativePath.substring(relativePath.lastIndexOf("/") + 1)
             val relativeDirectory = relativePath.replace(fileName, "")

@@ -32,7 +32,16 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
@@ -42,8 +51,12 @@ import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.PlaylistDetailEvent
+import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.PlaylistDetailState
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -62,6 +75,45 @@ class AlbumDetailViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
     var state by mutableStateOf(AlbumDetailState())
 
+    val offlineModeStateFlow = settingsRepository.offlineModeFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
+    val globalShuffleStateFlow = settingsRepository.settingsLiveData
+        .distinctUntilChanged()
+        .asFlow()
+        .filterNotNull()
+        .map {
+            it.isGlobalShuffleEnabled
+        }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE)
+
+//    @OptIn(ExperimentalCoroutinesApi::class)
+//    val albumStateFlow: StateFlow<Album> =
+//        savedStateHandle.getStateFlow<String?>("albumId", null)
+//            .filterNotNull()
+//            .flatMapConcat { albumId ->
+//                albumsRepository
+//                    .getAlbum(albumId, true)
+//            }
+//            .map { playlist ->
+//                onEvent(PlaylistDetailEvent.Fetch(playlist))
+//                playlist
+//            }
+//            .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlist, user ->
+//                state = state.copy(
+//                    isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
+//                    isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),
+//                    isUserOwner = user.username == playlist.owner
+//                )
+//                playlist
+//            }
+//            .map { it.id }
+//            .flatMapConcat { id ->
+//                playlistsRepository.getPlaylist(id).filterNotNull()
+//            }
+//            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Playlist.empty())
+
     init {
         val album = savedStateHandle.get<Album>("album")?.also {
             state = state.copy(album = it)
@@ -73,17 +125,7 @@ class AlbumDetailViewModel @Inject constructor(
                 getSongsFromAlbum(it)
             }
             if (album == null) {
-                getAlbumInfo(it)
-            }
-        }
-
-        viewModelScope.launch {
-            settingsRepository.settingsLiveData.distinctUntilChanged().asFlow().collectLatest {
-                it?.let { settings ->
-                    if (settings.isGlobalShuffleEnabled != state.isGlobalShuffleOn) {
-                        state = state.copy(isGlobalShuffleOn = settings.isGlobalShuffleEnabled)
-                    }
-                }
+                getAlbumInfo(it, true)
             }
         }
 
@@ -125,7 +167,7 @@ class AlbumDetailViewModel @Inject constructor(
             }
             AlbumDetailEvent.OnShufflePlaylistToggle -> viewModelScope.launch {
                 try {
-                    state = state.copy(isGlobalShuffleOn = settingsRepository.toggleGlobalShuffle())
+                    settingsRepository.toggleGlobalShuffle()
                 } catch (e: Exception) {
                     playlistManager.updateErrorLogMessage(e.stackTraceToString())
                 }
@@ -167,7 +209,6 @@ class AlbumDetailViewModel @Inject constructor(
                 }
             }
     }
-
 
     private fun getAlbumInfo(albumId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {

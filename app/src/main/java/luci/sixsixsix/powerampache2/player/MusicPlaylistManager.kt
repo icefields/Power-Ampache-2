@@ -40,6 +40,8 @@ class MusicPlaylistManager @Inject constructor() {
 
     private val _logMessageUserReadableState = MutableStateFlow(LogMessageState())
     val logMessageUserReadableState: StateFlow<LogMessageState> = _logMessageUserReadableState
+    var notificationsListStateFlow: MutableStateFlow<List<String>> = MutableStateFlow(listOf())
+        private set
 
     private val _errorLogMessageState = MutableStateFlow(ErrorLogMessageState())
     val errorLogMessageState: StateFlow<ErrorLogMessageState> = _errorLogMessageState
@@ -56,6 +58,13 @@ class MusicPlaylistManager @Inject constructor() {
     fun updateUserMessage(logMessage: String?) {
         L("MusicPlaylistManager updateUserMessage", logMessage)
         _logMessageUserReadableState.value = LogMessageState(logMessage = logMessage)
+
+        // add to the list of notifications
+        logMessage?.let {
+            if (it.isNotBlank())
+                notificationsListStateFlow.value =
+                    ArrayList(notificationsListStateFlow.value).apply { add(0, logMessage) }
+        }
 
         // also log for debug reasons
         updateErrorLogMessage(logMessage)

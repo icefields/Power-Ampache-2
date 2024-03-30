@@ -67,7 +67,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
@@ -80,14 +79,14 @@ import luci.sixsixsix.powerampache2.presentation.common.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
-import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainEvent
-import luci.sixsixsix.powerampache2.presentation.main.viewmodel.MainViewModel
+import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigateToArtist
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
@@ -256,7 +255,7 @@ fun PlaylistDetailScreen(
                         isGlobalShuffleOn = state.isGlobalShuffleOn,
                         songs = viewModel.state.getSongList(),
                         artistClickListener = {
-                            artistId -> navigateToArtist(navigator, artistId)
+                            artistId -> Ampache2NavGraphs.navigateToArtist(navigator, artistId)
                         },
                         isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
                         eventListener = { event ->
@@ -293,7 +292,8 @@ fun PlaylistDetailScreen(
                                 PlaylistInfoViewEvents.SHARE_PLAYLIST ->
                                     viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)
                                 PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST ->
-                                    mainViewModel.onEvent(MainEvent.OnDownloadSongs(
+                                    mainViewModel.onEvent(
+                                        MainEvent.OnDownloadSongs(
                                         viewModel.state.getSongList())
                                     )
                                 PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST -> {
@@ -382,15 +382,6 @@ fun PlaylistDetailScreen(
             }
         }
     }
-}
-
-private fun navigateToArtist(navigator: DestinationsNavigator, artistId: ArtistId) {
-    navigator.navigate(
-        ArtistDetailScreenDestination(
-            artistId = artistId,
-            artist = null
-        )
-    )
 }
 
 @Composable
