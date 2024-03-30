@@ -3,7 +3,9 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.common.Constants.USER_ACCESS_DEFAULT
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.User
 
@@ -68,8 +70,8 @@ fun UserDto.toUser() = User(
     id = id,
     username = username,
     email = email ?: "",
-    access = access ?: ERROR_INT,
-    streamToken = streamToken,
+    access = access ?: USER_ACCESS_DEFAULT,
+    streamToken = streamToken ?: "",
     fullNamePublic = processFlag(fullNamePublic),
     disabled = processFlag(disabled) == 1,
     createDate = createDate ?: ERROR_INT,
@@ -77,5 +79,25 @@ fun UserDto.toUser() = User(
     website = website ?: "",
     state = state ?: "",
     city = city ?: "",
-    fullName = fullName
+    fullName = fullName ?: ""
+)
+
+fun UserDto.toUserMinimalInfo() = User(
+    id = id,
+    username = username,
+    email = email ?: "",
+    access = USER_ACCESS_DEFAULT,
+    streamToken = "",
+    fullNamePublic = try {
+        processFlag(fullNamePublic)
+    } catch (e: Exception) { 0 },
+    disabled = try {
+        processFlag(disabled) == 1
+    } catch (e: Exception) { false },
+    createDate = ERROR_INT,
+    lastSeen = ERROR_INT,
+    website = website ?: "",
+    state = state ?: "",
+    city = city ?: "",
+    fullName = fullName ?: ""
 )

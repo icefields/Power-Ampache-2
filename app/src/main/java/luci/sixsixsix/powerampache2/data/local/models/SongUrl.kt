@@ -6,7 +6,7 @@ import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 data class SongUrl(
     val authToken: String,
     val serverUrl: String,
-    val bitrate: Int
+    val bitrate: Int = StreamingQuality.VERY_HIGH.bitrate
 ) {
     companion object {
         const val songUrl = "%s/json.server.php?action=stream&auth=%s&type=song&id=%s%s"

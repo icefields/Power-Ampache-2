@@ -45,6 +45,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.toGenre
 import luci.sixsixsix.powerampache2.data.local.entities.toGenreEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toUser
 import luci.sixsixsix.powerampache2.data.local.models.UserWithCredentials
 import luci.sixsixsix.powerampache2.data.local.models.toUser
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -84,7 +85,13 @@ class MusicRepositoryImpl @Inject constructor(
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
     override val userLiveData: Flow<User?> = dao.getUserLiveData().map {
-        (it ?: UserWithCredentials(username = dao.getCredentials()?.username)).toUser()
+        val usernameCredentials = dao.getCredentials()?.username ?: ""
+        val userEntity = it ?: dao.getUser(usernameCredentials)
+//        errorHandler.logError("USER ENTITY RECEIVED:\n${it}\n\nUSER ENTITY AFTER:\n" +
+//                "${userEntity}\n" +
+//                "\nTO USER\n${userEntity?.toUser()}\n\nUserWithCredentials.toUser\n${UserWithCredentials(username = usernameCredentials).toUser()}")
+        userEntity?.toUser() ?: UserWithCredentials(username = usernameCredentials).toUser()
+        //(it ?: UserWithCredentials(username = dao.getCredentials()?.username)).toUser()
     }
 
     // used to check if a call to getUserNetwork() is necessary
@@ -201,11 +208,12 @@ class MusicRepositoryImpl @Inject constructor(
         force: Boolean
     ): Flow<Resource<Session>> = flow {
         emit(Resource.Loading(true))
+        val usernameLow = username.lowercase()
         //   Save current credentials, so they can be picked up by the interceptor,
         // and for future autologin, this has to be first line of code before any network call
-        setCredentials(CredentialsEntity(username = username, password = sha256password, serverUrl = serverUrl, authToken = authToken))
+        setCredentials(CredentialsEntity(username = usernameLow, password = sha256password, serverUrl = serverUrl, authToken = authToken))
         L("authorize CREDENTIALS ${getCredentials()}")
-        val auth = tryAuthorize(username, sha256password, authToken, force)
+        val auth = tryAuthorize(usernameLow, sha256password, authToken, force)
         emit(Resource.Success(auth))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("authorize()", e, this) }
