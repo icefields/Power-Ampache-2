@@ -45,6 +45,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
@@ -63,7 +64,7 @@ class SettingsViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
     //var state by mutableStateOf(LocalSettings.defaultSettings())
     var state by savedStateHandle.saveable {
-        mutableStateOf(SettingsState(appVersionInfoStr = getVersionInfoString()))
+        mutableStateOf(SettingsState(appVersionInfoStr = getVersionInfoString(application)))
     }
     val logs by mutableStateOf(mutableListOf<String>())
 
@@ -129,15 +130,6 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
-
-    private fun getVersionInfoString() = try {
-        val pInfo: PackageInfo =
-            application.packageManager.getPackageInfo(application.packageName, 0)
-        "${pInfo.versionName} (${pInfo.longVersionCode})"
-    } catch (e: PackageManager.NameNotFoundException) {
-        e.printStackTrace()
-        ""
-    } + " - DB: ${Constants.DATABASE_VERSION}"
 
     fun onEvent(event: SettingsEvent) {
         when(event) {

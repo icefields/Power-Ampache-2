@@ -40,9 +40,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 34
-        versionName = "0.34-rc1"
-        val versionQuote = "This version is powered by ground birds"
+        versionCode = 40
+        versionName = "0.40-rc1"
+        val versionQuote = "This version is powered by pinned pigs"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

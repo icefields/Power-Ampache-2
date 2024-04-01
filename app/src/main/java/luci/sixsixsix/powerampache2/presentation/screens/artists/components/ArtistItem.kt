@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Artist
+import java.lang.StringBuilder
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -80,7 +81,7 @@ fun ArtistItem(
             if (artist.songCount > 0) {
                 Text(
                     modifier = Modifier.basicMarquee(),
-                    text = ("Songs ${artist.songCount} | Albums ${artist.albumCount}"),
+                    text = artistSubtitle(artist.songCount, artist.albumCount),
                     fontStyle = FontStyle.Italic,
                     fontSize = 9.sp,
                     maxLines = 1,
@@ -88,6 +89,21 @@ fun ArtistItem(
             }
         }
     }
+}
+
+private fun artistSubtitle(songCount: Int, albumCount: Int) = StringBuilder().run {
+    if (songCount > 0) {
+        append("Songs ")
+        append(songCount)
+    }
+    if (songCount > 0 && albumCount > 0) {
+        append(" | ")
+    }
+    if (albumCount > 0) {
+        append("Albums ")
+        append(albumCount)
+    }
+    toString()
 }
 
 @Composable
