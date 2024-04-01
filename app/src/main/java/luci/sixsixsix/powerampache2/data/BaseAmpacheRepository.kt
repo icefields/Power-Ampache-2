@@ -5,11 +5,13 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.common.push
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettings
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
@@ -26,6 +28,7 @@ import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.User
+import org.acra.ACRA.log
 
 abstract class BaseAmpacheRepository(
     private val api: MainNetwork,
@@ -57,8 +60,40 @@ abstract class BaseAmpacheRepository(
      * updating the user in the database will trigger the user live data.
      * observe livedata to get updates on the user
      */
-    private suspend fun setUser(user: User) =
-        dao.updateUser(user.toUserEntity())
+    private suspend fun setUser(user: User) {
+
+        val userEmail = user.email ?: ""
+        val userAccess = user.access ?: 0
+        val userStreamToken = user.streamToken ?: ""
+        val userFullNamePublic = user.fullNamePublic ?: ""
+        val userFullName = user.fullName ?: ""
+        val userDisabled = user.disabled ?: false
+        val userCreateDate = user.createDate ?: ERROR_INT
+        val userLastSeen = user.lastSeen ?: ERROR_INT
+        val userWebsite = user.website ?: ""
+        val userState = user.state ?: ""
+        val userCity = user.city ?: ""
+        //val log = "$userEmail $userAccess $userStreamToken $userFullNamePublic $userFullName $userDisabled $userCreateDate $userLastSeen $userWebsite $userState $userCity"
+
+        val entity = UserEntity(
+            id = user.id,
+            username = user.username.lowercase(), // lowercase to facilitate queries
+            email = userEmail,
+            access = userAccess,
+            streamToken = userStreamToken,
+            fullNamePublic = 0,
+            fullName = "",
+            disabled = userDisabled,
+            createDate = userCreateDate,
+            lastSeen = userLastSeen,
+            website = userWebsite,
+            state = userState,
+            city = userCity
+        )
+        //errHandler.logError("$log\n\nUSER ENTITY\n$entity")
+        dao.updateUser(entity)//user.toUserEntity())
+        //errHandler.logError("$log\n\nUSER ENTITY\n$entity \n\nAFTER DB:\n${dao.getUser(user.username)}")
+    }
 
     protected suspend fun getUserNetwork(): User? =
         getCredentials()?.username?.let { username ->

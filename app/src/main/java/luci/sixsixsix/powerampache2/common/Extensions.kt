@@ -23,6 +23,8 @@ package luci.sixsixsix.powerampache2.common
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
@@ -184,6 +186,15 @@ fun Any.toDebugString(
     // remove variables that are auto generate by the parcelable
     return sb.toString().split("CREATOR")[0]
 }
+
+fun getVersionInfoString(context: Context) = try {
+    val pInfo: PackageInfo =
+        context.packageManager.getPackageInfo(context.packageName, 0)
+    "${pInfo.versionName} (${pInfo.longVersionCode})"
+} catch (e: PackageManager.NameNotFoundException) {
+    e.printStackTrace()
+    ""
+} + " - DB: ${Constants.DATABASE_VERSION}"
 
 fun Any.toDebugMap() = LinkedHashMap<String, String>().also { map ->
     val separator = "---666---"

@@ -38,6 +38,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
@@ -189,7 +190,7 @@ class ErrorHandlerImpl @Inject constructor(
     override suspend fun logError(message: String) {
         try {
             if (isErrorHandlingEnabled && !BuildConfig.URL_ERROR_LOG.isNullOrBlank()) {
-                api.sendErrorReport(body = message)
+                api.sendErrorReport(body = "${getVersionInfoString(applicationContext)}\n$message")
             }
         } catch (e: Exception) {
             L.e(e)

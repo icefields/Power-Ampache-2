@@ -41,14 +41,13 @@ import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
 import luci.sixsixsix.powerampache2.data.local.models.SongUrl
-import luci.sixsixsix.powerampache2.data.local.models.UserWithCredentials
 
 @Dao
 interface MusicDao {
     @Query("""SELECT session.auth AS authToken, credentials.serverUrl, settings.streamingQuality as bitrate, credentials.username as user FROM
         (SELECT * FROM sessionentity WHERE primaryKey == '$SESSION_PRIMARY_KEY') AS session, 
         (SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') AS credentials,
-        (SELECT * FROM localsettingsentity WHERE (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') == username) AS settings""")
+        (SELECT * FROM localsettingsentity WHERE LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) == LOWER(username)) AS settings""")
     suspend fun getSongUrlData(): SongUrl?
 
 // --- SESSION ---
@@ -84,16 +83,17 @@ interface MusicDao {
     @Query("DELETE FROM userentity")
     suspend fun clearUser()
 
-    @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
+    @Query("""SELECT * FROM userentity WHERE LOWER(username) = LOWER((SELECT username FROM credentialsentity WHERE primaryKey = '$CREDENTIALS_PRIMARY_KEY')) """)
     suspend fun getUser(): UserEntity?
 
-    @Query("""SELECT * FROM userentity WHERE username = :username""")
+    @Query("""SELECT * FROM userentity WHERE LOWER(username) = LOWER(:username)""")
     suspend fun getUser(username: String): UserEntity?
 
-    @Query("""SELECT credentials.username as credentialsUsername, user.* FROM
-        (SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') AS credentials,
-        (SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) AS user""")
-    fun getUserLiveData(): Flow<UserWithCredentials?>
+    //@Query("""SELECT credentials.username as credentialsUsername, user.* FROM
+    //    (SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') AS credentials,
+    //    (SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) AS user""")
+    @Query("""SELECT * FROM userentity WHERE LOWER(username) = LOWER((SELECT username FROM credentialsentity WHERE primaryKey = '$CREDENTIALS_PRIMARY_KEY')) """)
+    fun getUserLiveData(): Flow<UserEntity?>
 
     //    @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
     //    fun getUserLiveDataOld(): LiveData<UserEntity?>
@@ -108,7 +108,7 @@ interface MusicDao {
     @Query("DELETE FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId)")
     suspend fun deleteAlbumsFromArtist(artistId: String)
 
-    @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName""")
+    @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == LOWER(artistName)""")
     suspend fun searchAlbum(query: String): List<AlbumEntity>
 
     @Query("""SELECT * FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId) order by year DESC""")
@@ -189,10 +189,10 @@ interface MusicDao {
     @Query("DELETE FROM playlistsongentity WHERE LOWER(playlistId) == LOWER(:playlistId)")
     suspend fun clearPlaylistSongs(playlistId: String)
 
-    @Query("""SELECT * FROM playlistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by flag DESC, rating DESC, (owner == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by flag DESC, rating DESC, (LOWER(owner) == LOWER( (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
     suspend fun searchPlaylists(query: String): List<PlaylistEntity>
 
-    @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, (owner == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
     fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
 
     @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, id DESC""")
@@ -202,7 +202,7 @@ interface MusicDao {
     fun playlistLiveData(playlistId: String): LiveData<PlaylistEntity?>
 
     // get only playlists user owns
-    @Query("""SELECT * FROM playlistentity WHERE owner = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') order by rating DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE LOWER(owner) = LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) order by rating DESC, id DESC""")
     suspend fun getMyPlaylists(): List<PlaylistEntity>
 
 // --- OFFLINE SONGS ---
@@ -212,13 +212,13 @@ interface MusicDao {
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND LOWER(artistId) == LOWER(:artistId) AND LOWER(albumId) == LOWER(:albumId)""")
     suspend fun getDownloadedSong(songId: String, artistId: String, albumId: String): DownloadedSongEntity?
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     suspend fun getDownloadedSongById(songId: String): DownloadedSongEntity?
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     fun getDownloadedSongsLiveData(): LiveData<List<DownloadedSongEntity>>
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     suspend fun getOfflineSongs(): List<DownloadedSongEntity>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:albumId) == LOWER(albumId)""")
@@ -227,7 +227,7 @@ interface MusicDao {
     @Query("""SELECT  song.*,  songIds.position FROM downloadedsongentity as song, (SELECT * FROM playlistsongentity WHERE :playlistId == playlistId  ) as songIds WHERE song.mediaId == songIds.songId""")
     suspend fun getOfflineSongsFromPlaylist(playlistId: String): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName AND LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName AND LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     suspend fun searchOfflineSongs(query: String): List<DownloadedSongEntity>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE year > 1000 order by year DESC LIMIT 66""")
@@ -278,19 +278,19 @@ interface MusicDao {
     @Query("DELETE FROM downloadedsongentity")
     suspend fun deleteAllDownloadedSong()
 
-    @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     suspend fun getSettings(): LocalSettingsEntity?
 
-    @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     fun settingsLiveData(): LiveData<LocalSettingsEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun writeSettings(localSettingsEntity: LocalSettingsEntity)
 
-    @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     fun offlineModeEnabled(): LiveData<Boolean?>
 
-    @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')""")
+    @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     fun isOfflineModeEnabled(): Boolean?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -302,7 +302,7 @@ interface MusicDao {
     @Query("""SELECT * FROM genreentity WHERE LOWER(id) == LOWER(:genreId)""")
     suspend fun getGenreById(genreId: String): GenreEntity?
 
-    @Query("""SELECT * FROM genreentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name""")
+    @Query("""SELECT * FROM genreentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == LOWER(name)""")
     suspend fun searchGenres(query: String): List<GenreEntity>
 
     @Query("DELETE FROM genreentity")

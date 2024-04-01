@@ -62,9 +62,9 @@ class SettingsRepositoryImpl @Inject constructor(
         get() =  settingsLiveData
     .distinctUntilChanged()
     .asFlow()
-    .filterNotNull()
+    //.filterNotNull()
     .map {
-        it.isOfflineModeEnabled
+        it?.isOfflineModeEnabled ?: false
     }.distinctUntilChanged()
 
     override suspend fun getLocalSettings(username: String?) =

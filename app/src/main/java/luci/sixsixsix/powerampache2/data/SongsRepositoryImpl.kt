@@ -42,6 +42,7 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
+import luci.sixsixsix.powerampache2.data.local.models.SongUrl
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.OfflineData.likedOffline
 import luci.sixsixsix.powerampache2.data.remote.OfflineData.ratedOffline
@@ -424,6 +425,11 @@ class SongsRepositoryImpl @Inject constructor(
      */
     private suspend fun buildSongUrl(song: Song) = dao.getSongUrlData()?.run {
         getUrl(song.mediaId)
+    } ?: getSession()?.auth ?.let { auth ->
+        SongUrl(
+            authToken = auth,
+            serverUrl = getCredentials()!!.serverUrl
+        ).getUrl(song.mediaId)
     } ?: song.songUrl
 
     suspend fun downloadSong2(song: Song) = flow {
