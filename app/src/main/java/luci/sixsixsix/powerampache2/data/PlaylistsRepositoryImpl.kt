@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
+import luci.sixsixsix.powerampache2.common.Constants.PLAYLIST_FETCH_LIMIT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistSongEntity
@@ -195,15 +196,31 @@ class PlaylistsRepositoryImpl @Inject constructor(
         fetchRemote: Boolean
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-        if (checkFilterOfflineSongs(playlistId, this)) {
+        //        if (checkFilterOfflineSongs(playlistId, this)) {
+//            emit(Resource.Loading(false))
+//            return@flow
+//        }
+
+        val isOfflineMode = isOfflineModeEnabled()
+        if (isOfflineMode) {
+            // if offline mode enabled, grab all the offline data and emit, then return
+            emit(Resource.Success(
+                data = dao.getOfflineSongsFromPlaylist(playlistId).map { it.toSong() },
+                networkData = null))
             emit(Resource.Loading(false))
             return@flow
         }
+
+        // emit saved data first
+        val dbData = dao.getSongsFromPlaylist(playlistId).map { it.toSong() }
+        emit(Resource.Success(data = dbData, networkData = null))
+        val shouldEmitSteps = dbData.size < PLAYLIST_FETCH_LIMIT
+
         //else
         val auth = getSession()!!
         val songs = mutableListOf<Song>()
         var isFinished = false
-        val limit = 100
+        val limit = PLAYLIST_FETCH_LIMIT
         var offset = 0
         var lastException: MusicException? = null
         do {
@@ -215,7 +232,9 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 val partialResponse = songsDto.map { songDto -> songDto.toSong() }
                 if (partialResponse.isNotEmpty()) {
                     songs.addAll(partialResponse)
-                    emit(Resource.Success(data = songs, networkData = partialResponse))
+                    if (shouldEmitSteps) {
+                        emit(Resource.Success(data = songs, networkData = partialResponse))
+                    }
                 } else {
                     // if no more items to fetch finish
                     isFinished = true
@@ -230,6 +249,12 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
         dao.clearPlaylistSongs(playlistId)
         dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId))
+        if (!shouldEmitSteps) {
+            emit(Resource.Success(
+                data = dao.getSongsFromPlaylist(playlistId).map { it.toSong() },
+                networkData = songs)
+            )
+        }
 
 //        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId, limit = 50, offset = offset)
 //        response.error?.let { throw(MusicException(it.toError())) }

@@ -1,9 +1,31 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
+import java.time.LocalDateTime
 
 data class AuthDto(
     @SerializedName("add")
@@ -17,39 +39,39 @@ data class AuthDto(
     @SerializedName("auth")
     val auth: String?,
     @SerializedName("catalogs")
-    val catalogs: Int,
+    val catalogs: Int?,
     @SerializedName("clean")
-    val clean: String,
+    val clean: String?,
     @SerializedName("genres")
-    val genres: Int,
+    val genres: Int?,
     @SerializedName("labels")
-    val labels: Int,
+    val labels: Int?,
     @SerializedName("licenses")
-    val licenses: Int,
+    val licenses: Int?,
     @SerializedName("live_streams")
-    val liveStreams: Int,
+    val liveStreams: Int?,
     @SerializedName("playlists")
-    val playlists: Int,
+    val playlists: Int?,
     @SerializedName("playlists_searches")
-    val playlistsSearches: Int,
+    val playlistsSearches: Int?,
     @SerializedName("podcast_episodes")
-    val podcastEpisodes: Int,
+    val podcastEpisodes: Int?,
     @SerializedName("podcasts")
-    val podcasts: Int,
+    val podcasts: Int?,
     @SerializedName("searches")
-    val searches: Int,
+    val searches: Int?,
     @SerializedName("session_expire")
-    val sessionExpire: String,
+    val sessionExpire: String?,
     @SerializedName("shares")
-    val shares: Int,
+    val shares: Int?,
     @SerializedName("songs")
-    val songs: Int,
+    val songs: Int?,
     @SerializedName("update")
-    val update: String,
+    val update: String?,
     @SerializedName("users")
-    val users: Int,
+    val users: Int?,
     @SerializedName("videos")
-    val videos: Int,
+    val videos: Int?,
     @SerializedName("server")
     var server: String? = null,
     @SerializedName("version")
@@ -71,21 +93,21 @@ fun AuthDto.toSession(dateMapper: DateMapper): Session = Session(
     api = api ?: "",
     artists = artists ?: 0,
     auth = auth ?: "",
-    catalogs = catalogs,
-    clean = dateMapper(clean),
-    genres = genres,
-    labels = labels,
-    licenses = licenses,
-    liveStreams = liveStreams,
-    playlists = playlists,
-    playlistsSearches = playlistsSearches,
-    podcastEpisodes = podcastEpisodes,
-    podcasts = podcasts,
-    searches = searches,
-    sessionExpire = dateMapper(sessionExpire),
-    shares = shares,
-    songs = songs,
-    update = dateMapper(update),
-    users = users,
-    videos = videos,
+    catalogs = catalogs ?: 0,
+    clean = if (clean != null) dateMapper(clean) else LocalDateTime.MIN,
+    genres = genres ?: 0,
+    labels = labels ?: 0,
+    licenses = licenses ?: 0,
+    liveStreams = liveStreams ?: 0,
+    playlists = playlists ?: 0,
+    playlistsSearches = playlistsSearches ?: 0,
+    podcastEpisodes = podcastEpisodes ?: 0,
+    podcasts = podcasts ?: 0,
+    searches = searches ?: 0,
+    sessionExpire = if (sessionExpire != null) dateMapper(sessionExpire) else LocalDateTime.MIN,
+    shares = shares ?: 0,
+    songs = songs ?: 0,
+    update = if (update != null) dateMapper(update) else LocalDateTime.MIN,
+    users = users ?: 0,
+    videos = videos ?: 0,
 )

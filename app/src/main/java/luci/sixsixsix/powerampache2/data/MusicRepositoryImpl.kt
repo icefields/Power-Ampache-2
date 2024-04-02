@@ -151,6 +151,11 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("logout()", e, this) }
 
+    /**
+     * ping the server and returns 2 objects:
+     *  - in case of a valid session a new Session object is return along with a server info object
+     *  - in case the session is not valid, only the server info object will be returned
+     */
     override suspend fun ping(): Resource<Pair<ServerInfo, Session?>> =
         try {
             val dbSession = getSession()
@@ -176,7 +181,7 @@ class MusicRepositoryImpl @Inject constructor(
 
             // server info always available
             val servInfo = pingResponse.toServerInfo()
-            L("aaa setting live data for server info $servInfo")
+            L("aaa setting live data for server info ${servInfo.version}")
             _serverInfoStateFlow.value = servInfo
             Resource.Success(Pair(servInfo, getSession()))
         } catch (e: IOException) {
@@ -245,7 +250,10 @@ class MusicRepositoryImpl @Inject constructor(
                 }
             }
         }
-        return getSession()!! // will throw exception if session null
+
+        // try to get server info from ping and return the session from ping, otherwise return the
+        // already saved session, as a safety net return the already saved session
+        return try { ping().data?.second ?: getSession()!! } catch (e: Exception) { getSession()!! }
     }
 
     override suspend fun register(

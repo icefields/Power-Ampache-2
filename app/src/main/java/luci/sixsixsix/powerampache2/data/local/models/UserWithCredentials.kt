@@ -39,5 +39,6 @@ fun UserWithCredentials.toUser() = User(
     lastSeen = lastSeen ?: Constants.ERROR_INT,
     website = website ?: "",
     state = state ?: "",
-    city = city ?: ""
+    city = city ?: "",
+    art = ""
 )

@@ -35,6 +35,8 @@ android {
     val dogmazicUser = properties.getProperty("DOGMAZIC_USER")
     val dogmazicEmail = properties.getProperty("DOGMAZIC_EMAIL")
     val errorLogUrl = properties.getProperty("URL_ERROR_LOG")
+    val localDevUser = properties.getProperty("LOCAL_DEV_USER")
+    val localDevPass = properties.getProperty("LOCAL_DEV_PASSWORD")
 
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
@@ -80,6 +82,8 @@ android {
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
             buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
+            buildConfigField("String", "LOCAL_DEV_USER", localDevUser)
+            buildConfigField("String", "LOCAL_DEV_PASSWORD", localDevPass)
 
             resValue("string", "build_type", "Debug")
             resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.debug.provider")
@@ -110,6 +114,8 @@ android {
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
             buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
+            buildConfigField("String", "LOCAL_DEV_USER", "\"\"")
+            buildConfigField("String", "LOCAL_DEV_PASSWORD", "\"\"")
 
             resValue("string", "build_type", "Release")
             resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.provider")

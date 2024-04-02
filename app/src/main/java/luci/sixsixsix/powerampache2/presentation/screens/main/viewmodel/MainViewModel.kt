@@ -264,18 +264,14 @@ class MainViewModel @Inject constructor(
             isLoading = true
             isBuffering = true
             state = state.copy(isFabLoading = true)
-
             logToErrorLogs("Load song data START")
 
             val mediaItemList = mutableListOf<MediaItem>()
-            val time1 = System.currentTimeMillis()
-
             for (song: Song? in playlistManager.currentQueueState.value) {
                 song?.let {
                     mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it)))
                 }
             }
-            L(System.currentTimeMillis() - time1, "aaaa")
 
             logToErrorLogs("Load song data before addMediaItemList")
             simpleMediaServiceHandler.addMediaItemList(mediaItemList)

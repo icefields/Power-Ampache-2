@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.MusicRepository
@@ -255,6 +256,7 @@ class PlaylistDetailViewModel @Inject constructor(
 
     private fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
+            state = state.copy(isPlaybackEnabled = false)
             playlistsRepository
                 .getSongsFromPlaylist(playlistId)
                 .collect { result ->
@@ -270,11 +272,18 @@ class PlaylistDetailViewModel @Inject constructor(
                                     ))
                                 }
                                 state = state.copy(songs = songWrapperList.apply { if (state.sortMode == SortMode.DESC) { reverse() } })
+                                if (songs.size > Constants.PLAYLIST_FETCH_LIMIT) {
+                                    // stop loading if some data present, to allow playback
+                                    state = state.copy(isPlaybackEnabled = true)
+                                }
+
                                 L("PlaylistDetailViewModel.getSongsFromPlaylist size ${result.data?.size} network: ${result.networkData?.size}")
                             }
                         }
-                        is Resource.Error -> state = state.copy(isLoading = false)
-                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                        is Resource.Error ->
+                            state = state.copy(isLoading = false, isPlaybackEnabled = true)
+                        is Resource.Loading ->
+                            state = state.copy(isLoading = result.isLoading)
                     }
                 }
         }

@@ -220,6 +220,15 @@ fun processFlag(flag: Any?): Int = flag?.let {
     else 0
 } ?: 0
 
+/**
+ * if hasArt flag is present (not null), check if there's any art with it.
+ */
+fun processArtUrl(hasArt: Any?, artUrl: String?) = hasArt?.let { hasArtAny ->
+    if (artUrl != null && processFlag(hasArtAny) == 1) { artUrl } else { "" }
+} ?: run {
+    artUrl ?: ""
+}
+
 @ColorInt
 fun String.toHslColor(saturation: Float = 0.5f, lightness: Float = 0.4f): Int {
     val hue = fold(0) { acc, char -> char.code + acc * 37 } % 360
