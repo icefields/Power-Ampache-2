@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
+import luci.sixsixsix.powerampache2.common.processArtUrl
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
@@ -59,7 +60,10 @@ data class AlbumDto(
     val averagerating: Float = 0.0f,
 
     @SerializedName("mbid")
-    val mbid: Any? = Any()
+    val mbid: Any? = Any(),
+
+    @SerializedName("has_art")
+    val hasArt: Any? = null
 )
 
 data class AlbumsResponse(
@@ -73,7 +77,7 @@ fun AlbumDto.toAlbum() = Album(
     artist = artist?.toMusicAttribute() ?: MusicAttribute.emptyInstance(),
     artists = artists?.map { it.toMusicAttribute() } ?: listOf(),
     genre = genre?.map { it.toMusicAttribute() } ?: listOf(),
-    artUrl = art ?: "",
+    artUrl = processArtUrl(hasArt, art),
     songCount = songcount ?: 0,
     flag = processFlag(flag),
     time = time ?: 0,

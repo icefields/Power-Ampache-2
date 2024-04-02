@@ -48,7 +48,8 @@ data class User(
     val lastSeen: Int = Constants.ERROR_INT,
     val website: String = "",
     val state: String = "",
-    val city: String = ""
+    val city: String = "",
+    val art: String = ""
 ): Parcelable {
 
     fun isError() =
@@ -66,7 +67,8 @@ data class User(
             Constants.ERROR_INT,
             "",
             "",
-            ""
+            "",
+            art = ""
         )
 
         fun demoUser(): User = User(
@@ -82,7 +84,8 @@ data class User(
             lastSeen = Constants.ERROR_INT,
             website = MASTODON_URL,
             state = DOGMAZIC_FAKE_STATE,
-            city = DOGMAZIC_FAKE_CITY
+            city = DOGMAZIC_FAKE_CITY,
+            art = "https://retroscroll.cat/wp-content/uploads/2014/10/shyguy.png"
         )
 
         fun mockUser(): User = Gson().fromJson(

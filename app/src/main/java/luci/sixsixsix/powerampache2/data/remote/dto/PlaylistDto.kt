@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
+import luci.sixsixsix.powerampache2.common.processArtUrl
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
@@ -47,6 +48,8 @@ data class PlaylistDto(
     val rating: Int = 0,
     @SerializedName("averagerating")
     val averagerating: Float = 0.0f,
+    @SerializedName("has_art")
+    val hasArt: Any? = null
 ) : AmpacheBaseResponse()
 
 data class PlaylistsResponse(
@@ -58,7 +61,7 @@ fun PlaylistDto.toPlaylist() = Playlist(
     id = id,
     name = name ?: "ERROR no name",
     owner = owner ?: "ERROR no owner",
-    artUrl = art ?: "",
+    artUrl = processArtUrl(hasArt, art),
     items = items ?: 0,
     type = fromStringToPlaylistType(type),
     flag = processFlag(flag),

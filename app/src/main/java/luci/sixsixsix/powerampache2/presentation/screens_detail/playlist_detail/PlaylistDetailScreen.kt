@@ -261,7 +261,7 @@ fun PlaylistDetailScreen(
                         eventListener = { event ->
                             when(event) {
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
-                                    if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@PlaylistInfoSection
+                                    if (!state.isPlaybackEnabled || viewModel.state.songs.isNullOrEmpty()) return@PlaylistInfoSection
 
                                     if (isPlayingPlaylist){
                                         // will pause if playing

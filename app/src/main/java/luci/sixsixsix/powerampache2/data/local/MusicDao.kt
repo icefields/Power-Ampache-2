@@ -174,7 +174,7 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylists(companyListingEntities: List<PlaylistEntity>)
 
-    @Query("""SELECT  song.*, songIds.position FROM songentity as song, (SELECT * FROM playlistsongentity WHERE :playlistId == playlistId  ) as songIds WHERE song.mediaId == songIds.songId""")
+    @Query("""SELECT song.*, songIds.position FROM songentity as song, (SELECT * FROM playlistsongentity WHERE LOWER(:playlistId) == LOWER(playlistId)) as songIds WHERE LOWER(song.mediaId) == LOWER(songIds.songId) ORDER BY songIds.position""")
     suspend fun getSongsFromPlaylist(playlistId: String): List<SongEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
