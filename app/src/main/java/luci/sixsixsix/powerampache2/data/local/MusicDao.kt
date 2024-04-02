@@ -161,10 +161,10 @@ interface MusicDao {
     @Query("""SELECT * FROM artistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by name""")
     suspend fun searchArtist(query: String): List<ArtistEntity>
 
-    @Query("""SELECT * FROM artistentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == genre order by name""")
+    @Query("""SELECT * FROM artistentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == LOWER(genre) order by name""")
     suspend fun searchArtistByGenre(genre: String): List<ArtistEntity>
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == genre""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == LOWER(genre)""")
     suspend fun searchSongByGenre(genre: String): List<SongEntity>
 
     @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time DESC""")
