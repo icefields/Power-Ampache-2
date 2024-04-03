@@ -100,7 +100,7 @@ class ArtistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
 
         if (isOfflineModeEnabled()) {
-            val generatedArtists = dao.generateOfflineArtists()
+            val generatedArtists = dao.generateOfflineArtists(getUsername()!!) //let it go to exception if no username
             //val offlineAlbums = dao.getOfflineAlbums()
             emit(Resource.Success(data = generatedArtists.map { it.toArtist() }))
             emit(Resource.Loading(false))

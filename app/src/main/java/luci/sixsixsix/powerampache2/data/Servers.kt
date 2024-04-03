@@ -25,18 +25,24 @@ import luci.sixsixsix.powerampache2.BuildConfig
 
 const val DEBUG_USER = BuildConfig.AMPACHE_USER
 const val DEBUG_PASSWORD = BuildConfig.AMPACHE_PASSWORD
-const val DEBUG_LOCAL_DEVELOPMENT_URL = "http://192.168.50.244/"
 
-const val DEBUG_REMOTE_USER = BuildConfig.AMPACHE_USER
-const val DEBUG_REMOTE_PASSWORD = BuildConfig.AMPACHE_PASSWORD
-const val DEBUG_REMOTE_DEMO_URL = BuildConfig.AMPACHE_URL
+const val DEBUG_DEV_USER = BuildConfig.LOCAL_DEV_USER
+const val DEBUG_DEV_PASSWORD = BuildConfig.LOCAL_DEV_PASSWORD
 
-const val AMPACHE_DEMO_APIKEY = "demodemo"
-const val AMPACHE_DEMO_URL = "demo.ampache.dev"
+// right now this is the exact same user, just accessed from local url
+const val DEBUG_REMOTE_USER = DEBUG_USER
+const val DEBUG_REMOTE_PASSWORD = DEBUG_PASSWORD
 
 const val DOGMAZIC_USER = BuildConfig.DOGMAZIC_USER
 const val DOGMAZIC_PASSWORD = BuildConfig.DOGMAZIC_PASSWORD
+
+const val DEBUG_LOCAL_STABLE_URL = "http://192.168.1.229/"
+const val DEBUG_LOCAL_DEVELOPMENT_URL = "http://192.168.50.244/"
+const val DEBUG_REMOTE_DEMO_URL = BuildConfig.AMPACHE_URL
+const val AMPACHE_DEMO_URL = "demo.ampache.dev"
 const val DOGMAZIC_URL = "play.dogmazic.net"
+
+const val AMPACHE_DEMO_APIKEY = "demodemo"
 
 sealed class Servers(
     val url: String,
@@ -44,26 +50,47 @@ sealed class Servers(
     val password: String = "",
     val apiKey: String = ""
 ) {
+    /**
+     * local-ip server for testing 6.2
+     */
     data object LocalDev: Servers(
         url = DEBUG_LOCAL_DEVELOPMENT_URL,
-        user = DEBUG_USER,
-        password = DEBUG_REMOTE_PASSWORD
+        user = DEBUG_DEV_USER,
+        password = DEBUG_DEV_PASSWORD
     )
 
+    /**
+     * remote ip server for testing 6.2
+     */
     data object RemoteDebug: Servers(
         url = DEBUG_REMOTE_DEMO_URL,
         user = DEBUG_REMOTE_USER,
         password = DEBUG_PASSWORD
     )
 
+    /**
+     * official ampache demo server
+     */
     data object AmpacheDemo: Servers(
         url = AMPACHE_DEMO_URL,
         apiKey = AMPACHE_DEMO_APIKEY
     )
 
+    /**
+     * dogmazic server
+     */
     data object Dogmazic: Servers(
         url = DOGMAZIC_URL,
         user = DOGMAZIC_USER,
         password = DOGMAZIC_PASSWORD
+    )
+
+    /**
+     * dogmazic server
+     */
+    data object LocalStable: Servers(
+        url = DEBUG_LOCAL_STABLE_URL,
+        user = DEBUG_USER,
+        password = DEBUG_REMOTE_PASSWORD
     )
 }

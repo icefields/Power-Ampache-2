@@ -110,16 +110,18 @@ class AuthViewModel @Inject constructor(
                     // the user is no longer authorized
                     //   If the session is not null we are authorized and the auth token in the
                     // session object is refreshed
-                    ping.data?.second?.let {
+                    val session = ping.data?.second
+                    session?.let {
                         state = state.copy(session = it, isLoading = false)
-                    } ?: run {
+                    }
+                        //?: run {
                         // --- UNNECESSARY run BLOCK ---
                         // NO NEED TO CALL AUTOLOGIN HERE, a null token from the ping call will
                         // trigger autologin in the init block from the session observable
                         // do not show loading screen during ping, only during autologin
                         // state = state.copy(isLoading = true)
                         // autologin()
-                    }
+                        //}
                     completionCallback()
                 }
 
@@ -150,13 +152,13 @@ class AuthViewModel @Inject constructor(
 
     fun onEvent(event: luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) {
         when (event) {
-            is luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.Login -> login()
-            is luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.TryAutoLogin -> {}
-            is luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangePassword -> state = state.copy(password = event.password)
-            is luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangeServerUrl -> state = state.copy(url = event.url)
-            is luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangeUsername -> state = state.copy(username = event.username)
-            is luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangeAuthToken -> state = state.copy(authToken = event.token)
-            is luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.SignUp -> signUp(
+            is AuthEvent.Login -> login()
+            is AuthEvent.TryAutoLogin -> {}
+            is AuthEvent.OnChangePassword -> state = state.copy(password = event.password)
+            is AuthEvent.OnChangeServerUrl -> state = state.copy(url = event.url)
+            is AuthEvent.OnChangeUsername -> state = state.copy(username = event.username)
+            is AuthEvent.OnChangeAuthToken -> state = state.copy(authToken = event.token)
+            is AuthEvent.SignUp -> signUp(
                 username = event.username,
                 serverUrl = event.serverUrl,
                 email = event.email,
@@ -204,27 +206,20 @@ class AuthViewModel @Inject constructor(
                 password = password.sha256(),
                 serverUrl = serverUrl.trim(),
                 authToken = authToken
-            )
-                .collect { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            result.data?.let { auth ->
-                                // clear credentials after login
-                                state = state.copy(session = auth, username = "", authToken = "", password = "")
-                                // clear any user facing message on the UI
-                                playlistManager.updateUserMessage("")
-                            }
+            ).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let { auth ->
+                            // clear credentials after login
+                            state = state.copy(session = auth, username = "", authToken = "", password = "")
+                            // clear any user facing message on the UI
+                            playlistManager.updateUserMessage("")
                         }
-
-                        is Resource.Error -> {
-                            state = state.copy(
-                                isLoading = false
-                            )
-                        }
-
-                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                     }
+                    is Resource.Error -> state = state.copy(isLoading = false)
+                    is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                 }
+            }
         }
     }
 }

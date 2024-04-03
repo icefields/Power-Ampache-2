@@ -53,15 +53,6 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
         val baseUrl = musicDatabase.dao.getCredentials()?.serverUrl
 
         if (!baseUrl.isNullOrBlank()) {
-//            if (hostStr?.contains("/server") == false) {
-//                hostStr += "/server"
-//            }
-//            if (hostStr?.contains("http://") == false &&
-//                hostStr?.contains("https://") == false) {
-//                hostStr = "https://$hostStr"
-//            }
-            //hostStr = MainNetwork.buildServerUrl(baseUrl)
-
             val host = MainNetwork.buildServerUrl(baseUrl)?.toHttpUrlOrNull()
             host?.let { newHost ->
                 try {

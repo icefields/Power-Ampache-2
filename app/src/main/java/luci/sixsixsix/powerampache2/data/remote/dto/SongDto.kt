@@ -3,6 +3,7 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_FLOAT
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.common.processArtUrl
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -153,7 +154,10 @@ data class SongDto(
     val streamBitrate: Int? = null,
 
     @SerializedName("artists")
-    val artists: List<MusicAttributeDto> = listOf()
+    val artists: List<MusicAttributeDto> = listOf(),
+
+    @SerializedName("has_art")
+    val hasArt: Any? = null
 )
 
 data class SongsResponse(
@@ -168,7 +172,7 @@ fun SongDto.toSong() = Song(
     album = album?.toMusicAttribute() ?: MusicAttribute.emptyInstance(),
     albumArtist = albumartist?.toMusicAttribute() ?: MusicAttribute.emptyInstance(),
     songUrl = url ?: "",
-    imageUrl = art ?: "",
+    imageUrl = processArtUrl(hasArt, art),
     bitrate = bitrate ?: ERROR_INT,
     streamBitrate = streamBitrate ?: ERROR_INT,
     catalog = catalog ?: ERROR_INT,

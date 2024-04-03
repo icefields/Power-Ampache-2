@@ -8,8 +8,8 @@
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
+            <option value="/mnt/6402E00302DFD7DE/Code/Android/PowerAmpache2" />
+            <option value="/mnt/6402E00302DFD7DE/Code/Android/PowerAmpache2/app" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

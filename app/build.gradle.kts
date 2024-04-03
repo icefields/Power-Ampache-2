@@ -9,7 +9,7 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val composeVersion = "1.5.4" // rootProject.extra.get("compose_version") as String
+val composeVersion = "1.6.4" // rootProject.extra.get("compose_version") as String
 val lifecycleVersion = "2.7.0"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
@@ -35,14 +35,16 @@ android {
     val dogmazicUser = properties.getProperty("DOGMAZIC_USER")
     val dogmazicEmail = properties.getProperty("DOGMAZIC_EMAIL")
     val errorLogUrl = properties.getProperty("URL_ERROR_LOG")
+    val localDevUser = properties.getProperty("LOCAL_DEV_USER")
+    val localDevPass = properties.getProperty("LOCAL_DEV_PASSWORD")
 
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 40
-        versionName = "0.40-rc1"
-        val versionQuote = "This version is powered by pinned pigs"
+        versionCode = 41
+        versionName = "0.41-rc1"
+        val versionQuote = "This version is powered by pinned piglets"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -80,10 +82,14 @@ android {
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
             buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
+            buildConfigField("String", "LOCAL_DEV_USER", localDevUser)
+            buildConfigField("String", "LOCAL_DEV_PASSWORD", localDevPass)
 
             resValue("string", "build_type", "Debug")
             resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.debug.provider")
+            resValue("color", "launcherBgColour", "#FFE5B4")
 
+            //     <color name="launcherBgColour"></color>
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -110,9 +116,12 @@ android {
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
             buildConfigField("String", "DOGMAZIC_EMAIL", dogmazicEmail)
+            buildConfigField("String", "LOCAL_DEV_USER", "\"\"")
+            buildConfigField("String", "LOCAL_DEV_PASSWORD", "\"\"")
 
             resValue("string", "build_type", "Release")
             resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.provider")
+            resValue("color", "launcherBgColour", "#e9eff7")
 
             isMinifyEnabled = false
 
@@ -120,6 +129,23 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+
+    flavorDimensions += "ampache"
+    productFlavors {
+        create("FDroid") {
+            dimension = "ampache"
+            //applicationIdSuffix = ".fdroid"
+            //versionNameSuffix = "-fdroid"
+            buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+        }
+        create("PlayStore") {
+            dimension = "ampache"
+            applicationIdSuffix = ".play"
+            versionNameSuffix = "-play"
+
+            buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
         }
     }
 

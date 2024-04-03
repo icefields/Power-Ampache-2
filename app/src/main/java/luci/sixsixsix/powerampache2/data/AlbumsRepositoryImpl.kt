@@ -24,7 +24,10 @@ package luci.sixsixsix.powerampache2.data
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -70,12 +73,15 @@ class AlbumsRepositoryImpl @Inject constructor(
                     put(ae.id, ae)
                 }
             }
-            dao.generateOfflineAlbums().forEach { dae ->
-                albumsList.add(
-                    if (dbAlbumsHash.containsKey(dae.id)) {
-                        (dbAlbumsHash[dae.id] ?: dae)
-                    } else { dae }.toAlbum()
-                )
+
+            getUsername()?.let { username ->
+                dao.generateOfflineAlbums(username).forEach { dae ->
+                    albumsList.add(
+                        if (dbAlbumsHash.containsKey(dae.id)) {
+                            (dbAlbumsHash[dae.id] ?: dae)
+                        } else { dae }.toAlbum()
+                    )
+                }
             }
 
             emit(Resource.Success(data = albumsList.toList()))
@@ -184,6 +190,28 @@ class AlbumsRepositoryImpl @Inject constructor(
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getAlbum()", e, this) }
+
+    override suspend fun getAlbum(albumId: String): Flow<Album> {
+        if (dao.getAlbum(albumId) == null) {
+            dao.generateOfflineAlbum(albumId)?.let {
+                dao.insertAlbums(listOf(it))
+            } ?: run {
+                try {
+                    //will throw exception if session null
+                    dao.insertAlbums(listOf(
+                        api.getAlbumInfo(
+                            authKey = getSession()!!.auth,
+                            albumId = albumId
+                        ).toAlbum().toAlbumEntity())
+                    )
+                } catch (e: Exception) {
+                    // TODO handle no album in playlist
+                }
+
+            }
+        }
+        return dao.getAlbumFlow(albumId).filterNotNull().map { it.toAlbum() }
+    }
 
     // --- HOME PAGE data ---
 

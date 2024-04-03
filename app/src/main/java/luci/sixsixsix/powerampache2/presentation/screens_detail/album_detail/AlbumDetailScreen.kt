@@ -99,6 +99,7 @@ fun AlbumDetailScreen(
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val album by viewModel.albumStateFlow.collectAsState()
     val isGlobalShuffleOn by viewModel.globalShuffleStateFlow.collectAsState()
     val songs = viewModel.state.getSongList()
     val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
@@ -148,21 +149,21 @@ fun AlbumDetailScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
-            model = viewModel.state.album.artUrl,
+            model = album.artUrl,
             contentScale = ContentScale.Crop,
             //placeholder = painterResource(id = R.drawable.placeholder_album),
             error = painterResource(id = R.drawable.placeholder_album),
-            contentDescription = viewModel.state.album.name
+            contentDescription = album.name
         )
         AsyncImage(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
-            model = viewModel.state.album.artUrl,
+            model = album.artUrl,
             contentScale = ContentScale.FillWidth,
             //placeholder = painterResource(id = R.drawable.placeholder_album),
             error = painterResource(id = R.drawable.placeholder_album),
-            contentDescription = viewModel.state.album.name,
+            contentDescription = album.name,
         )
         // full screen view to add a transparent black layer on top
         // of the images for readability
@@ -183,7 +184,7 @@ fun AlbumDetailScreen(
             topBar = {
                 AlbumDetailTopBar(
                     navigator = navigator,
-                    album = viewModel.state.album,
+                    album = album,
                     isLoading = mainViewModel.isLoading,
                     isEditingPlaylist = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
                     scrollBehavior = scrollBehavior,
@@ -215,7 +216,7 @@ fun AlbumDetailScreen(
                             .padding(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
-                        album = viewModel.state.album,
+                        album = album,
                         isPlayingAlbum = isPlayingAlbum,
                         isLikeLoading = state.isLikeLoading,
                         isAlbumDownloaded = state.isAlbumDownloaded,
@@ -277,7 +278,7 @@ fun AlbumDetailScreen(
 
                     SwipeRefresh(
                         state = swipeRefreshState,
-                        onRefresh = { viewModel.onEvent(AlbumDetailEvent.Fetch(viewModel.state.album.id)) }
+                        onRefresh = { viewModel.onEvent(AlbumDetailEvent.Fetch(album.id)) }
                     ) {
                         LazyColumn(
                             modifier = Modifier
@@ -302,7 +303,7 @@ fun AlbumDetailScreen(
                                             SongItemEvent.GO_TO_ALBUM -> { } // No ACTION, we're already in this album //navigator.navigate(AlbumDetailScreenDestination(viewModel.state.album.id, viewModel.state.album))
                                             SongItemEvent.GO_TO_ARTIST ->
                                                 Ampache2NavGraphs.navigateToArtist(navigator,
-                                                    artistId = viewModel.state.album.artist.id
+                                                    artistId = album.artist.id
                                                 )
                                             SongItemEvent.ADD_SONG_TO_QUEUE ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))

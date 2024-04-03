@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.screens.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -76,7 +77,8 @@ fun SignUpBottomDrawer(
 ) {
     ModalBottomSheet(
         sheetState = sheetState,
-        onDismissRequest = { isSignUpSheetOpen.value = false }
+        onDismissRequest = { isSignUpSheetOpen.value = false },
+        containerColor = colorResource(id = R.color.surfaceContainerDark)
     ) {
         SignUpBottomSheet(
             onEvent = onEvent,
@@ -105,7 +107,7 @@ fun SignUpDialog(
 //                color = MaterialTheme.colorScheme.onSurface
 //            ),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = colorResource(id = R.color.surfaceContainerDark)
             ),
             //modifier = Modifier.padding(top = 16.dp),
             elevation = CardDefaults.cardElevation(5.dp),
@@ -125,7 +127,7 @@ fun SignUpDialog(
 
 @Composable
 fun SignUpBottomSheet(
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit,
+    onEvent: (AuthEvent) -> Unit,
     modifier: Modifier
 ) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -146,6 +148,7 @@ fun SignUpBottomSheet(
 
     LazyColumn(
         modifier = modifier
+            .background(color = colorResource(id = R.color.surfaceDark))
             .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal))
     ) {
         items(10) { index ->
@@ -163,7 +166,7 @@ fun SignUpBottomSheet(
                     },
                     modifier = Modifier
                         .fillMaxWidth().padding(bottom = 8.dp),
-                    placeholder = {
+                    label = {
                         Text(text = stringResource(id = R.string.loginScreen_server_url))
                     },
                     supportingText = {
@@ -192,7 +195,7 @@ fun SignUpBottomSheet(
                     },
                     modifier = Modifier
                         .fillMaxWidth().padding(bottom = 8.dp),
-                    placeholder = { Text(text = stringResource(id = R.string.loginScreen_username)) },
+                    label = { Text(text = stringResource(id = R.string.loginScreen_username)) },
                     supportingText = {
                         if (usernameErrorMessage.isNotBlank()) {
                             Text(
@@ -219,7 +222,7 @@ fun SignUpBottomSheet(
                     },
                     modifier = Modifier
                         .fillMaxWidth().padding(bottom = 8.dp),
-                    placeholder = { Text(text = stringResource(id = R.string.loginScreen_signUp_email)) },
+                    label = { Text(text = stringResource(id = R.string.loginScreen_signUp_email)) },
                     maxLines = 1,
                     isError = emailErrorMessage.isNotBlank(),
                     supportingText = {
@@ -240,7 +243,7 @@ fun SignUpBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 15.dp),
-                    placeholder = { Text(text = stringResource(id = R.string.loginScreen_fullname)) },
+                    label = { Text(text = stringResource(id = R.string.loginScreen_fullname)) },
                     maxLines = 1,
                     singleLine = true
                 )
@@ -258,7 +261,7 @@ fun SignUpBottomSheet(
                     },
                     modifier = Modifier
                         .fillMaxWidth().padding(bottom = 6.dp, top = 6.dp),
-                    placeholder = { Text(text = stringResource(id = R.string.loginScreen_password)) },
+                    label = { Text(text = stringResource(id = R.string.loginScreen_password)) },
                     maxLines = 1,
                     isError = passwordErrorMessage.isNotBlank(),
                     singleLine = true,
@@ -294,7 +297,7 @@ fun SignUpBottomSheet(
                     },
                     modifier = Modifier
                         .fillMaxWidth(),
-                    placeholder = { Text(text = stringResource(id = R.string.loginScreen_password_repeat)) },
+                    label = { Text(text = stringResource(id = R.string.loginScreen_password_repeat)) },
                     maxLines = 1,
                     isError = repeatPasswordErrorMessage.isNotBlank(),
                     singleLine = true,
@@ -336,22 +339,22 @@ fun SignUpBottomSheet(
                                     passwordErrorMessage = requiredFieldMessage
                                 }
                             } or
-                                    password.isBlank()
-                                        .also { if (it) passwordErrorMessage = requiredFieldMessage } or
-                                    username.isBlank()
-                                        .also { if (it) usernameErrorMessage = requiredFieldMessage } or
-                                    email.isBlank()
-                                        .also { if (it) emailErrorMessage = requiredFieldMessage } or
-                                    url.isBlank()
-                                        .also { if (it) urlErrorMessage = requiredFieldMessage } or
-                                    (password != repeatPassword).also {
-                                        if (it) repeatPasswordErrorMessage =
-                                            "The 2 passwords do not match"
-                                    }
+                                password.isBlank()
+                                    .also { if (it) passwordErrorMessage = requiredFieldMessage } or
+                                username.isBlank()
+                                    .also { if (it) usernameErrorMessage = requiredFieldMessage } or
+                                email.isBlank()
+                                    .also { if (it) emailErrorMessage = requiredFieldMessage } or
+                                url.isBlank()
+                                    .also { if (it) urlErrorMessage = requiredFieldMessage } or
+                                (password != repeatPassword).also {
+                                    if (it) repeatPasswordErrorMessage =
+                                        "The 2 passwords do not match"
+                                }
 
                         if (!isError) {
                             onEvent(
-                                luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.SignUp(
+                                AuthEvent.SignUp(
                                     serverUrl = url,
                                     username = username,
                                     password = password,

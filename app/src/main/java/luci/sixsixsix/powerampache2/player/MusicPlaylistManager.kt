@@ -31,7 +31,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 data class ErrorLogMessageState(var errorMessage: String? = null)
-data class LogMessageState(var logMessage: String? = null)
+data class LogMessageState(
+    var logMessage: String? = null,
+    val date: LocalDateTime = LocalDateTime.now(),
+    val count: Int? = null
+)
 
 @Singleton
 class MusicPlaylistManager @Inject constructor() {
@@ -40,7 +44,7 @@ class MusicPlaylistManager @Inject constructor() {
 
     private val _logMessageUserReadableState = MutableStateFlow(LogMessageState())
     val logMessageUserReadableState: StateFlow<LogMessageState> = _logMessageUserReadableState
-    var notificationsListStateFlow: MutableStateFlow<List<String>> = MutableStateFlow(listOf())
+    var notificationsListStateFlow: MutableStateFlow<List<LogMessageState>> = MutableStateFlow(listOf())
         private set
 
     private val _errorLogMessageState = MutableStateFlow(ErrorLogMessageState())
@@ -60,10 +64,23 @@ class MusicPlaylistManager @Inject constructor() {
         _logMessageUserReadableState.value = LogMessageState(logMessage = logMessage)
 
         // add to the list of notifications
-        logMessage?.let {
-            if (it.isNotBlank())
-                notificationsListStateFlow.value =
-                    ArrayList(notificationsListStateFlow.value).apply { add(0, logMessage) }
+        logMessage?.let { lm ->
+            if (lm.isNotBlank()) {
+                // if already there remove it
+                val messages = ArrayList<LogMessageState>(notificationsListStateFlow.value)
+                // remove if already present
+                var count = 0
+                messages.map { it.logMessage }.indexOf(lm).apply {
+                    if (this > -1) {
+                        count = messages[this].count ?: 0
+                        messages.removeAt(this)
+                    }
+                }
+
+                notificationsListStateFlow.value = messages.apply {
+                        add(0, LogMessageState(logMessage = lm, count = ++count))
+                    }
+            }
         }
 
         // also log for debug reasons

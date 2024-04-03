@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Constants.USER_ACCESS_DEFAULT
+import luci.sixsixsix.powerampache2.common.processArtUrl
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.User
 
@@ -40,6 +41,10 @@ data class UserDto(
     val state: String? = null,
     @SerializedName("city")
     val city: String? = null,
+    @SerializedName("has_art")
+    val hasArt: Any? = null,
+    @SerializedName("art")
+    val art: String? = null
 ) {
     companion object {
         fun getMockUserDto(): UserDto {
@@ -79,25 +84,6 @@ fun UserDto.toUser() = User(
     website = website ?: "",
     state = state ?: "",
     city = city ?: "",
-    fullName = fullName ?: ""
-)
-
-fun UserDto.toUserMinimalInfo() = User(
-    id = id,
-    username = username,
-    email = email ?: "",
-    access = USER_ACCESS_DEFAULT,
-    streamToken = "",
-    fullNamePublic = try {
-        processFlag(fullNamePublic)
-    } catch (e: Exception) { 0 },
-    disabled = try {
-        processFlag(disabled) == 1
-    } catch (e: Exception) { false },
-    createDate = ERROR_INT,
-    lastSeen = ERROR_INT,
-    website = website ?: "",
-    state = state ?: "",
-    city = city ?: "",
-    fullName = fullName ?: ""
+    fullName = fullName ?: "",
+    art = processArtUrl(hasArt, art)
 )

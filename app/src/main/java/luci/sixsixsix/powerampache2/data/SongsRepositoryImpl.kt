@@ -400,18 +400,6 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }
 
-    @Deprecated("Use buildSongUrl")
-    private suspend fun buildSongUrlOld(song: Song) = getSession()?.auth?.let { authToken ->
-        dao.getCredentials()?.serverUrl?.let { serverUrl ->
-            val sb = StringBuffer("${MainNetwork.buildServerUrl(serverUrl)}/json.server.php?action=stream&auth=$authToken&type=song&id=${song.mediaId}")
-            dao.getSettings()?.streamingQuality?.bitrate?.let { bitrate ->
-                if (bitrate < StreamingQuality.VERY_HIGH.bitrate)
-                    sb.append("&bitrate=$bitrate")
-            }
-            sb.toString()
-        }
-    } ?: song.songUrl
-
     override suspend fun getSongUri(song: Song) =
         dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri
             ?: buildSongUrl(song)

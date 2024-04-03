@@ -38,10 +38,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.MusicRepository
@@ -82,8 +84,7 @@ class PlaylistDetailViewModel @Inject constructor(
             .map { playlist ->
                 onEvent(PlaylistDetailEvent.Fetch(playlist))
                 playlist
-            }
-            .combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlist, user ->
+            }.combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlist, user ->
                 state = state.copy(
                     isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
                     isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),
@@ -92,9 +93,13 @@ class PlaylistDetailViewModel @Inject constructor(
                 playlist
             }
 //            .map { it.id }
-//            .flatMapConcat { id ->
-//                playlistsRepository.getPlaylist(id).filterNotNull()
-//            }
+            .flatMapConcat { playlist ->
+                if (PlaylistDetailState.isNotStatPlaylist(playlist)) {
+                    playlistsRepository.getPlaylist(playlist.id)
+                } else {
+                    flow { emit(playlist) }
+                }
+            }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Playlist.empty())
 
 
@@ -220,8 +225,8 @@ class PlaylistDetailViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {
-                            // refresh
-
+                        L("like received view model")
+                        // refresh
                             //state = state.copy(playlist = state.playlist.copy(flag = abs(state.album.flag - 1)))
                         }
                     }
@@ -270,11 +275,14 @@ class PlaylistDetailViewModel @Inject constructor(
                                     ))
                                 }
                                 state = state.copy(songs = songWrapperList.apply { if (state.sortMode == SortMode.DESC) { reverse() } })
+
                                 L("PlaylistDetailViewModel.getSongsFromPlaylist size ${result.data?.size} network: ${result.networkData?.size}")
                             }
                         }
-                        is Resource.Error -> state = state.copy(isLoading = false)
-                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                        is Resource.Error ->
+                            state = state.copy(isLoading = false)
+                        is Resource.Loading ->
+                            state = state.copy(isLoading = result.isLoading)
                     }
                 }
         }

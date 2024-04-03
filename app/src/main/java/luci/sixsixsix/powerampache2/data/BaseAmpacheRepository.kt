@@ -65,7 +65,7 @@ abstract class BaseAmpacheRepository(
         val userEmail = user.email ?: ""
         val userAccess = user.access ?: 0
         val userStreamToken = user.streamToken ?: ""
-        val userFullNamePublic = user.fullNamePublic ?: ""
+        val userFullNamePublic = user.fullNamePublic ?: 0
         val userFullName = user.fullName ?: ""
         val userDisabled = user.disabled ?: false
         val userCreateDate = user.createDate ?: ERROR_INT
@@ -73,7 +73,6 @@ abstract class BaseAmpacheRepository(
         val userWebsite = user.website ?: ""
         val userState = user.state ?: ""
         val userCity = user.city ?: ""
-        //val log = "$userEmail $userAccess $userStreamToken $userFullNamePublic $userFullName $userDisabled $userCreateDate $userLastSeen $userWebsite $userState $userCity"
 
         val entity = UserEntity(
             id = user.id,
@@ -81,8 +80,8 @@ abstract class BaseAmpacheRepository(
             email = userEmail,
             access = userAccess,
             streamToken = userStreamToken,
-            fullNamePublic = 0,
-            fullName = "",
+            fullNamePublic = userFullNamePublic,
+            fullName = userFullName,
             disabled = userDisabled,
             createDate = userCreateDate,
             lastSeen = userLastSeen,
@@ -90,9 +89,7 @@ abstract class BaseAmpacheRepository(
             state = userState,
             city = userCity
         )
-        //errHandler.logError("$log\n\nUSER ENTITY\n$entity")
         dao.updateUser(entity)//user.toUserEntity())
-        //errHandler.logError("$log\n\nUSER ENTITY\n$entity \n\nAFTER DB:\n${dao.getUser(user.username)}")
     }
 
     protected suspend fun getUserNetwork(): User? =
@@ -144,6 +141,7 @@ abstract class BaseAmpacheRepository(
             MainNetwork.Type.playlist -> dao.getAllPlaylists()
                 .firstOrNull { it.id == id}?.copy(flag = flag)?.let { dbPlaylist ->
                     dao.insertPlaylists(listOf(dbPlaylist))
+                    L("like inserted")
                 }
         }
         if (!isOfflineModeEnabled()) {

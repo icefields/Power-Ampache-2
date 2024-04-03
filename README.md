@@ -49,7 +49,6 @@ Power Ampache 2 is an Android Music Streaming App presented in <a target="_blank
 
 [//]: #![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/7614a6a7-898b-4a8c-b891-9a07505529be)
 
-
 # Development
 Power Ampache 2 is developed using Clean Architecture on top of MVVM, following SOLID principles.
 Contribution guidelines coming soon, please make sure to read before opening a PR.
@@ -58,19 +57,19 @@ Contribution guidelines coming soon, please make sure to read before opening a P
 | |  | |
 | ----------- | ----------- | ----------- |
 | **Home Screen** |  | **Music Player pull-up view** |
-| ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/a7f97a5a-1cce-4d08-8c5e-c25323b288ac) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/125a3a0d-7b63-4e66-a22b-c3f266b42059) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/05fb4243-88a4-43a9-84ee-4bf9c25df740) |
+| ![photo_2024-04-03_09-54-24](https://github.com/icefields/Power-Ampache-2/assets/149625124/c2e3baca-b469-4f8e-aaa7-1a18ebb62407) | ![photo_2024-04-03_09-54-56](https://github.com/icefields/Power-Ampache-2/assets/149625124/798cfb51-0584-4d75-94b6-c03ffd0aea31) | ![photo_2024-04-03_09-55-06](https://github.com/icefields/Power-Ampache-2/assets/149625124/ccc13c17-3bde-4b27-8510-d98284b6ee65) |
 | | | |
 | **Artist view, with info and discography** | **Single Album view, with info and songs** | **Single Album view, with info and songs** |
 | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/de081122-23db-4ef7-810f-95fe925dcc29") | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/b435281f-8f59-4b6a-927f-9e4a43999123) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/bdd61944-930f-4509-943f-d60928f1d8b5) |
 | | | |
 | **Album Screen** | **Albums from collection** | **Artists** |
-| ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/0a868e71-2f32-4d00-8cf4-6930492ceb74) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/59171ce6-b307-44c0-9e53-df8528eb66da) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/5daa7e07-8ab7-47cd-a653-30f12ab17733) |
+| ![photo_2024-04-03_09-55-26](https://github.com/icefields/Power-Ampache-2/assets/149625124/b169d991-cdb0-4bef-b1c4-2ac7abd9dbba) | ![photo_2024-04-03_09-55-35](https://github.com/icefields/Power-Ampache-2/assets/149625124/080dc93e-37e8-463b-a2e1-6e6c44628dbf) | ![photo_2024-04-03_09-55-48](https://github.com/icefields/Power-Ampache-2/assets/149625124/f915aeeb-2e82-469a-bd8a-0f645a08adb0) |
 | | | |
 | **Queue from bottom drawer** | **Lyrics** |**Edit Queue, Playlists. Remove/Add Playlists** |
-| ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/b201edc0-783e-4eda-a7c0-62211280c0a3) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/3c8693f1-6ceb-43ed-b231-eebbbe557315) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/a33fbe04-375e-419a-a9b7-10587dc897eb) |
+| ![photo_2024-04-03_09-55-16](https://github.com/icefields/Power-Ampache-2/assets/149625124/e291aadc-ccb4-4e80-9011-348ccfcacd64) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/3c8693f1-6ceb-43ed-b231-eebbbe557315) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/a33fbe04-375e-419a-a9b7-10587dc897eb) |
 | | | |
 | **Playlists**| **Notification with player controls** | **Notification on lock screen**|
-| ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/0e98469b-f6eb-4e85-82f0-14819d23368d) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/cf66b7f9-634d-4245-b187-6b0f08171829) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/4527632c-e1ec-4147-964c-43317e984e26) |
+| ![photo_2024-04-03_09-56-02](https://github.com/icefields/Power-Ampache-2/assets/149625124/3b3b4ade-c488-4fc3-817f-da4431ea461d) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/cf66b7f9-634d-4245-b187-6b0f08171829) | ![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/4527632c-e1ec-4147-964c-43317e984e26) |
 | | | |
 
 ## Features

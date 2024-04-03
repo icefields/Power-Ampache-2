@@ -72,9 +72,7 @@ class SimpleMediaServiceHandler @Inject constructor(
     fun getMediaItemCount() = player.mediaItemCount
 
     fun addMediaItemList(mediaItems: List<MediaItem>) {
-        L("addMediaItemList",mediaItems.size,"currently in the player: ", player.mediaItemCount)
         if(mediaItems.isNullOrEmpty() && player.mediaItemCount == 0) return
-
         if (player.mediaItemCount > 0 &&
             playlistManager.currentSongState.value?.mediaId == player.currentMediaItem?.mediaId) {
             // if the current song of the playlist (if playlist is not empty) corresponds to the current
@@ -86,7 +84,6 @@ class SimpleMediaServiceHandler @Inject constructor(
             player.removeMediaItems(player.currentMediaItemIndex + 1, player.mediaItemCount)
 
             val indexInQueue = mediaItems.map { mediaItem ->  mediaItem.mediaId }.indexOf(player.currentMediaItem?.mediaId)
-            L("indexInQueue", indexInQueue)
             if (!isPlaying() && indexInQueue > -1) {
                 player.addMediaItem(indexInQueue, mediaItems[indexInQueue])
             }

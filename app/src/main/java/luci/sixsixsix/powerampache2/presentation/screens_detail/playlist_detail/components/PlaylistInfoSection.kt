@@ -69,6 +69,8 @@ fun PlaylistInfoSection(
     isPlaylistEditLoading: Boolean,
     isLikeAvailable: Boolean,
     isLikeLoading: Boolean,
+    isBuffering: Boolean,
+    enabled: Boolean,
     songs: List<Song>,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit,
     artistClickListener: (ArtistId) -> Unit
@@ -108,17 +110,18 @@ fun PlaylistInfoSection(
 
         Spacer(modifier = Modifier.height(12.dp))
         Row {
-            Icon(
-                imageVector = when(playlist.type) {
-                    PlaylistType.private ->
-                        Icons.Outlined.Lock
-                    PlaylistType.public ->
-                        Icons.Outlined.Public
-                    else -> Icons.Outlined.LockOpen
-                },
-                contentDescription = "playlist private or public",
-                tint = iconTint
-            )
+            playlist.type?.let { type ->
+                Icon(
+                    imageVector = when(type) {
+                        PlaylistType.private ->
+                            Icons.Outlined.Lock
+                        PlaylistType.public ->
+                            Icons.Outlined.Public
+                    },
+                    contentDescription = "playlist private or public",
+                    tint = iconTint
+                )
+            }
 
             playlist.items?.let { itemCount ->
                 if (itemCount > 0) {
@@ -151,6 +154,8 @@ fun PlaylistInfoSection(
             isGlobalShuffleOn = isGlobalShuffleOn,
             isLikeAvailable = isLikeAvailable,
             isLikeLoading = isLikeLoading,
+            isBuffering = isBuffering,
+            enabled = enabled,
             isLiked = playlist.flag == 1
         )
         Spacer(modifier = Modifier.width(20.dp))
@@ -170,6 +175,8 @@ fun PlaylistInfoSectionPreview() {
         isPlaylistEditLoading = true,
         isLikeLoading = false,
         isLikeAvailable = true,
+        enabled = true,
+        isBuffering = false,
         eventListener = { },
         artistClickListener = { }
     )

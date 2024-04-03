@@ -25,7 +25,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.net.InetAddresses
 import android.net.Uri
+import android.util.Patterns
 import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
 import androidx.compose.runtime.Composable
@@ -55,6 +57,11 @@ fun String.md5(): String {
 fun String.sha256(): String {
     return hashString(this, "SHA-256")
 }
+
+fun String.isIpAddress(): Boolean =
+    //InetAddresses.isNumericAddress(this) // requires min Q
+    Patterns.IP_ADDRESS.matcher(this).matches()
+    //("(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])").toRegex().matches(this)
 
 val Int.dpTextUnit: TextUnit
     @Composable
@@ -219,6 +226,15 @@ fun processFlag(flag: Any?): Int = flag?.let {
     } else if (it is Int) it
     else 0
 } ?: 0
+
+/**
+ * if hasArt flag is present (not null), check if there's any art with it.
+ */
+fun processArtUrl(hasArt: Any?, artUrl: String?) = hasArt?.let { hasArtAny ->
+    if (artUrl != null && processFlag(hasArtAny) == 1) { artUrl } else { "" }
+} ?: run {
+    artUrl ?: ""
+}
 
 @ColorInt
 fun String.toHslColor(saturation: Float = 0.5f, lightness: Float = 0.4f): Int {

@@ -88,34 +88,18 @@ class AlbumDetailViewModel @Inject constructor(
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE)
 
-//    @OptIn(ExperimentalCoroutinesApi::class)
-//    val albumStateFlow: StateFlow<Album> =
-//        savedStateHandle.getStateFlow<String?>("albumId", null)
-//            .filterNotNull()
-//            .flatMapConcat { albumId ->
-//                albumsRepository
-//                    .getAlbum(albumId, true)
-//            }
-//            .map { playlist ->
-//                onEvent(PlaylistDetailEvent.Fetch(playlist))
-//                playlist
-//            }
-//            .combine(musicRepository.userLiveData.asFlow().filterNotNull()) { playlist, user ->
-//                state = state.copy(
-//                    isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
-//                    isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),
-//                    isUserOwner = user.username == playlist.owner
-//                )
-//                playlist
-//            }
-//            .map { it.id }
-//            .flatMapConcat { id ->
-//                playlistsRepository.getPlaylist(id).filterNotNull()
-//            }
-//            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Playlist.empty())
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val albumStateFlow: StateFlow<Album> =
+        savedStateHandle.getStateFlow<String?>("albumId", null)
+            .filterNotNull()
+            .flatMapConcat { albumId ->
+                getSongsFromAlbum(albumId)
+                albumsRepository
+                    .getAlbum(albumId)
+            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Album())
 
     init {
-        val album = savedStateHandle.get<Album>("album")?.also {
+        /*val album = savedStateHandle.get<Album>("album")?.also {
             state = state.copy(album = it)
         }
 
@@ -125,15 +109,18 @@ class AlbumDetailViewModel @Inject constructor(
                 getSongsFromAlbum(it)
             }
             if (album == null) {
-                getAlbumInfo(it, true)
+                getAlbumInfo(it, false)
             }
-        }
+        }*/
 
         viewModelScope.launch {
-            playlistManager.downloadedSongFlow.collect {
-                if(it != null) {
+            playlistManager.downloadedSongFlow.collect { song ->
+                if(song != null) {
                     L("RefreshFromCache")
-                    onEvent(AlbumDetailEvent.RefreshFromCache)
+                    // if song belongs to this album, refresh
+                    if (state.songs.map { it.song }.map { it.mediaId }.contains(song.mediaId)) {
+                        onEvent(AlbumDetailEvent.RefreshFromCache)
+                    }
                 }
             }
         }
@@ -151,7 +138,7 @@ class AlbumDetailViewModel @Inject constructor(
             }
             is AlbumDetailEvent.OnPlayAlbum -> {  }
             AlbumDetailEvent.OnShareAlbum ->
-                shareAlbum(state.album.id)
+                shareAlbum(albumStateFlow.value.id)
             AlbumDetailEvent.OnShuffleAlbum -> {
 //                val shuffled = state.getSongList().shuffled()
 //                playlistManager.replaceCurrentQueue(shuffled)
@@ -160,9 +147,9 @@ class AlbumDetailViewModel @Inject constructor(
             AlbumDetailEvent.OnFavouriteAlbum ->
                 favouriteAlbum()
             AlbumDetailEvent.RefreshFromCache -> {
-                L("AlbumDetailEvent.RefreshFromCache", state.album.id)
-                if (!state.album.id.isNullOrBlank()) {
-                    getSongsFromAlbum(albumId = state.album.id, fetchRemote = false)
+                L("AlbumDetailEvent.RefreshFromCache", albumStateFlow.value.id)
+                if (!albumStateFlow.value.id.isNullOrBlank()) {
+                    getSongsFromAlbum(albumId = albumStateFlow.value.id, fetchRemote = false)
                 }
             }
             AlbumDetailEvent.OnShufflePlaylistToggle -> viewModelScope.launch {
@@ -177,14 +164,14 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 
-    private fun rateAlbum(albumId: String = state.album.id, rating: Int) = viewModelScope.launch {
+    private fun rateAlbum(albumId: String = albumStateFlow.value.id, rating: Int) = viewModelScope.launch {
         albumsRepository.rateAlbum(albumId, rating)
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {
                             // refresh album
-                            state = state.copy(album = state.album.copy(rating = rating))
+                            // state = state.copy(album = state.album.copy(rating = rating))
                         }
                     }
                     is Resource.Error -> state = state.copy( isLoading = false)
@@ -194,14 +181,14 @@ class AlbumDetailViewModel @Inject constructor(
     }
 
 
-    private fun favouriteAlbum(albumId: String = state.album.id) = viewModelScope.launch {
-        albumsRepository.likeAlbum(albumId, (state.album.flag != 1))
+    private fun favouriteAlbum(albumId: String = albumStateFlow.value.id) = viewModelScope.launch {
+        albumsRepository.likeAlbum(albumId, (albumStateFlow.value.flag != 1))
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {
                             // refresh album
-                            state = state.copy(album = state.album.copy(flag = abs(state.album.flag - 1)))
+                            //state = state.copy(album = state.album.copy(flag = abs(state.album.flag - 1)))
                         }
                     }
                     is Resource.Error -> state = state.copy(isLikeLoading = false)
@@ -210,7 +197,7 @@ class AlbumDetailViewModel @Inject constructor(
             }
     }
 
-    private fun getAlbumInfo(albumId: String, fetchRemote: Boolean = true) {
+   /* private fun getAlbumInfo(albumId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             albumsRepository
                 .getAlbum(albumId, fetchRemote)
@@ -228,9 +215,9 @@ class AlbumDetailViewModel @Inject constructor(
                     }
                 }
         }
-    }
+    }*/
 
-    fun isAlbumDownloaded(songs: List<SongWrapper>): Boolean {
+    private fun isAlbumDownloaded(songs: List<SongWrapper>): Boolean {
         songs.forEach {
             if (!it.isOffline) return false
         }

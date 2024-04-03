@@ -88,7 +88,7 @@ fun PlaylistsScreen(
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         itemsIndexed(
                             items = playlistsState,
-                            key = { _, item: Playlist -> item }
+                            //key = { _, item: Playlist -> item }
                         ) { i, playlist ->
                             PlaylistItem(
                                 playlistInfo = playlist,

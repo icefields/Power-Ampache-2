@@ -34,18 +34,21 @@ import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.common.ButtonDownload
 import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
+import luci.sixsixsix.powerampache2.presentation.common.PlayButton
 import luci.sixsixsix.powerampache2.presentation.common.ShuffleToggleButton
 
 @Composable
@@ -53,6 +56,8 @@ fun PlaylistInfoButtonsRow(
     modifier: Modifier = Modifier,
     playlist: Playlist,
     isPlayingPlaylist: Boolean,
+    isBuffering: Boolean,
+    enabled: Boolean,
     isDownloading: Boolean,
     isPlaylistEditLoading: Boolean,
     isGlobalShuffleOn: Boolean,
@@ -86,18 +91,12 @@ fun PlaylistInfoButtonsRow(
             onStopDownloadClick = { eventListener(PlaylistInfoViewEvents.STOP_DOWNLOAD_PLAYLIST) }
         )
 
-        IconButton(modifier = Modifier
-            .height(80.dp)
-            .widthIn(min = 80.dp, max = 100.dp),
-            onClick = {
-                eventListener(PlaylistInfoViewEvents.PLAY_PLAYLIST)
-            }) {
-            Icon(
-                modifier = Modifier.aspectRatio(1f/1f),
-                imageVector = if (!isPlayingPlaylist) Icons.Default.PlayCircle else Icons.Default.PauseCircle,
-                contentDescription = "Play Pause",
-                tint = iconTint
-            )
+        PlayButton(
+            isBuffering = isBuffering,
+            isPlaying = isPlayingPlaylist,
+            enabled = enabled
+        ) {
+            eventListener(PlaylistInfoViewEvents.PLAY_PLAYLIST)
         }
 
         ShuffleToggleButton(isGlobalShuffleOn = isGlobalShuffleOn) {
@@ -111,17 +110,25 @@ fun PlaylistInfoButtonsRow(
                 eventListener(PlaylistInfoViewEvents.LIKE_PLAYLIST)
             }
         }
-
-
-        // TODO not possible to share playlists, is this a bug?
-//        IconButton(
-//            onClick = {
-//                eventListener(PlaylistInfoViewEvents.SHARE_PLAYLIST)
-//            }) {
-//            Icon(
-//                imageVector = Icons.Outlined.Share,
-//                contentDescription = "Share"
-//            )
-//        }
     }
+}
+
+@Preview(widthDp = 300) //(widthDp = 50, heightDp = 50)
+@Composable
+fun PlaylistInfoButtonsRowPreview() {
+    PlaylistInfoButtonsRow(
+        Modifier,
+        Playlist.mock(),
+        isPlayingPlaylist = true,
+        isDownloading = false,
+        isGlobalShuffleOn = true,
+        isPlaylistEditLoading = true,
+        isLiked = true,
+        isLikeLoading = false,
+        isLikeAvailable = true,
+        isBuffering = false,
+        enabled = true,
+        iconTint = Color.Red,
+        eventListener = { },
+    )
 }

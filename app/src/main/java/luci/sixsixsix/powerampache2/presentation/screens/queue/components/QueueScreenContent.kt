@@ -99,7 +99,7 @@ fun QueueScreenContent(
     LazyColumn(modifier = modifier.fillMaxSize()) {
         itemsIndexed(
             items = queue,
-            key = { _, item -> item }
+            //key = { _, item -> item }
         ) { _, song ->
             SongItem(
                 song = song,

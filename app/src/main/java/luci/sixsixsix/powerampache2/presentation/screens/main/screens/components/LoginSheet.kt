@@ -22,7 +22,9 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.screens.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,6 +44,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -49,16 +52,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.AuthTokenCheckBox
 
@@ -116,7 +124,7 @@ fun LoginDialog(
 //            ),
             modifier = Modifier,
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = colorResource(id = R.color.surfaceDark)
             ),
             elevation = CardDefaults.cardElevation(5.dp),
             shape = RoundedCornerShape(10.dp)
@@ -145,11 +153,11 @@ private fun LoginForm(
     authToken: String,
     isLoginSheetOpen: MutableState<Boolean>,
     authTokenLoginEnabled: MutableState<Boolean>,
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit
+    onEvent: (AuthEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
+            .background(color = colorResource(id = R.color.surfaceDark))
             .padding(top = 6.dp, bottom = 16.dp)
     ) {
         if (BuildConfig.ENABLE_TOKEN_LOGIN) {
@@ -175,6 +183,7 @@ private fun LoginForm(
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LoginTextFields(
     username: String,
@@ -182,20 +191,30 @@ private fun LoginTextFields(
     url: String,
     authToken: String,
     authTokenLoginEnabled: Boolean,
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit,
+    onEvent: (AuthEvent) -> Unit,
     modifier: Modifier
 ) {
-    val topPaddingInputFields = 8.dp
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier
             .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal))
     ) {
+        if (BuildConfig.SHOW_LOGIN_SERVER_VERSION_WARNING) {
+            Text(
+                modifier = Modifier.basicMarquee().padding(top = 2.dp),
+                text = "Compatible with server versions 4 and above.\nTested on server version 6",
+                fontSize = 14.sp,
+                lineHeight = 14.sp,
+                fontWeight = FontWeight.Light,
+                color = colorResource(id = R.color.onSurfaceVariantDark)
+            )
+        }
+
         LoginTextField(
             value = url,
             label = R.string.loginScreen_server_url
-        ) { onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangeServerUrl(it)) }
+        ) { onEvent(AuthEvent.OnChangeServerUrl(it)) }
 
         AnimatedVisibility(visible = !authTokenLoginEnabled) {
             Column {
@@ -220,7 +239,7 @@ private fun LoginTextFields(
                             Icon(imageVector  = image, description)
                         }
                     }
-                ) { onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangePassword(it)) }
+                ) { onEvent(AuthEvent.OnChangePassword(it)) }
             }
         }
 
@@ -228,7 +247,7 @@ private fun LoginTextFields(
             LoginTextField(
                 value = authToken,
                 label = R.string.loginScreen_auth_token
-            ) { onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangeAuthToken(it)) }
+            ) { onEvent(AuthEvent.OnChangeAuthToken(it)) }
         }
     }
 }
