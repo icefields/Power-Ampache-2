@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
@@ -37,6 +38,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -306,8 +308,17 @@ class MusicRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!
-        val response = api.getGenres(authKey = auth.auth).genres!!.map { it.toGenre() }
+        val serverVersion = try {
+            serverInfoStateFlow.value.version?.split(".")?.firstOrNull()?.let { version ->
+                if (version.isDigitsOnly()) version.toInt() else Int.MAX_VALUE
+            } ?: Int.MAX_VALUE
+        } catch (e: Exception) { Int.MAX_VALUE } // set to max value in case of errors to force the newest api
 
+        val response = if (serverVersion >= 5) {
+            api.getGenres(authKey = auth.auth).genres!!.map { it.toGenre() }
+        } else {
+            api.getTags(authKey = auth.auth).tags!!.map { it.toGenre() }
+        }
 
         if (Constants.CLEAR_TABLE_AFTER_FETCH) {
             dao.clearGenres()

@@ -25,7 +25,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.net.InetAddresses
 import android.net.Uri
+import android.util.Patterns
 import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
 import androidx.compose.runtime.Composable
@@ -55,6 +57,11 @@ fun String.md5(): String {
 fun String.sha256(): String {
     return hashString(this, "SHA-256")
 }
+
+fun String.isIpAddress(): Boolean =
+    //InetAddresses.isNumericAddress(this) // requires min Q
+    Patterns.IP_ADDRESS.matcher(this).matches()
+    //("(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])").toRegex().matches(this)
 
 val Int.dpTextUnit: TextUnit
     @Composable

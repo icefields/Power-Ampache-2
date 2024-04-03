@@ -25,6 +25,7 @@ import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
+import luci.sixsixsix.powerampache2.common.isIpAddress
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumDto
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistDto
@@ -279,6 +280,18 @@ interface MainNetwork {
     ): GenresResponse
 
     /**
+     * Genres for Server versions 3 and 4
+     */
+    @GET("json.server.php?action=tags")
+    suspend fun getTags(
+        @Query("auth") authKey: String,
+        @Query("filter") filter: String = "",
+        @Query("exact") exact: Int = 0,
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = 0
+    ): GenresResponse
+
+    /**
      * genre_artists
      * This returns the artists associated with the genre in question as defined by the UID
      *
@@ -387,7 +400,11 @@ interface MainNetwork {
             // check if url starts with http or https, if not start the string builder with that
             if (!baseUrl.startsWith("http://") &&
                 !baseUrl.startsWith("https://")) {
-                sb.append("https://")
+                if (baseUrl.isIpAddress()) {
+                    sb.append("http://")
+                } else {
+                    sb.append("https://")
+                }
             }
             // add the url
             sb.append(baseUrl)

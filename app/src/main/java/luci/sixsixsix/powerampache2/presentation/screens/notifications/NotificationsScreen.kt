@@ -23,15 +23,16 @@ package luci.sixsixsix.powerampache2.presentation.screens.notifications
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlaylistRemove
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,6 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.player.LogMessageState
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 
@@ -125,21 +127,43 @@ fun NotificationsScreen(
                 .fillMaxSize()
                 .padding(horizontal = 8.dp, vertical = 3.dp)
             ) {
-                itemsIndexed(items = notificationsState) { _, notificationStr ->
+                items(notificationsState) { noti ->
                     Card(modifier = modifier
                         .padding(horizontal = 4.dp, vertical = 3.dp)
                     ) {
                         Text(modifier = modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 8.dp),
-                            text = notificationStr,
+                            .padding(horizontal = 10.dp)
+                            .padding(top = 8.dp),
+                            text = notificationDateStr(noti),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Light,
+                            lineHeight = 16.sp,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(modifier = modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp)
+                            .padding(bottom = 8.dp),
+                            text = notificationMessage(noti),
                             fontSize = 15.sp,
                             lineHeight = 16.sp,
                         )
                     }
-
                 }
             }
         }
     }
+}
+
+private fun notificationDateStr(log: LogMessageState) =
+    "${log.date.hour}:${log.date.minute} ${log.date.dayOfMonth} ${log.date.month.name} ${log.date.year}"
+
+private fun notificationMessage(noti: LogMessageState) = noti.logMessage?.let {
+    val count = noti.count?.let {
+        if (it > 1) " ($it)" else ""
+    } ?: ""
+    "${noti.logMessage}$count"
+} ?: run {
+    "An unknown error occurred"
 }

@@ -23,19 +23,14 @@ package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.com
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PauseCircle
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material.icons.outlined.RepeatOn
 import androidx.compose.material.icons.outlined.RepeatOneOn
@@ -43,9 +38,6 @@ import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material.icons.outlined.ShuffleOn
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.player.RepeatMode
+import luci.sixsixsix.powerampache2.presentation.common.PlayButton
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
@@ -160,11 +153,6 @@ fun PlayerControls(
 
         // PLAY
         PlayButton(
-            modifier = Modifier
-                .height(80.dp)
-                .width(100.dp),
-            iconTint = tint,
-            background = Color.Transparent,
             isBuffering = isBuffering,
             isPlaying = isPlaying
         ) { onEvent(MainEvent.PlayPauseCurrent) }
@@ -196,41 +184,6 @@ fun PlayerControls(
                     Icons.Outlined.ShuffleOn,
                 contentDescription = "Shuffle"
             )
-        }
-    }
-}
-
-@Composable
-fun PlayButton(
-    modifier: Modifier = Modifier,
-    isBuffering: Boolean,
-    isPlaying: Boolean,
-    background: Color = MaterialTheme.colorScheme.background,
-    iconTint: Color = MaterialTheme.colorScheme.inverseSurface,
-    onEvent: () -> Unit
-) {
-    IconButton(
-        modifier = modifier,
-        onClick = { onEvent() }
-    ) {
-        Card(colors = CardDefaults.cardColors(containerColor = background)) {
-            Box(modifier = Modifier.wrapContentSize(),
-                contentAlignment = Alignment.Center) {
-                if (!isBuffering) {
-                    Icon(
-                        tint = iconTint,
-                        modifier = Modifier.aspectRatio(1f / 1f),
-                        imageVector = if (!isPlaying) {
-                            Icons.Default.PlayCircle
-                        } else {
-                            Icons.Default.PauseCircle
-                        },
-                        contentDescription = "Play"
-                    )
-                } else {
-                    CircularProgressIndicator()
-                }
-            }
         }
     }
 }

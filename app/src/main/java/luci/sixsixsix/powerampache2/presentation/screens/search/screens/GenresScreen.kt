@@ -130,7 +130,8 @@ fun GenresScreen(
             ) {
                 items(
                     count = genres.size,
-                    key = { i -> genres[i] })
+                    //key = { i -> genres[i] }
+                )
                 { i ->
                     val genre = genres[i]
                     GenreListItem(

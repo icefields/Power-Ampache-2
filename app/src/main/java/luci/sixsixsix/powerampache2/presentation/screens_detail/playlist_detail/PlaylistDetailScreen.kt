@@ -239,20 +239,16 @@ fun PlaylistDetailScreen(
                             .fillMaxWidth()
                             .heightIn(
                                 max = if (infoVisibility) {
-                                    470.dp // any big number
-                                } else {
-                                    0.dp
-                                }
-                            )
-                            .padding(
-                                dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
-                            ),
+                                    470.dp /* any big number */ } else { 0.dp })
+                            .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         playlist = currentPlaylistState,
                         isPlayingPlaylist = isPlayingPlaylist,
                         isLikeAvailable = !state.isGeneratedOrSmartPlaylist,
                         isLikeLoading = state.isLikeLoading ,
                         isDownloading = mainViewModel.state.isDownloading,
                         isGlobalShuffleOn = state.isGlobalShuffleOn,
+                        isBuffering = mainViewModel.isBuffering,
+                        enabled = !state.songs.isNullOrEmpty(),
                         songs = viewModel.state.getSongList(),
                         artistClickListener = {
                             artistId -> Ampache2NavGraphs.navigateToArtist(navigator, artistId)
@@ -261,7 +257,7 @@ fun PlaylistDetailScreen(
                         eventListener = { event ->
                             when(event) {
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
-                                    if (!state.isPlaybackEnabled || viewModel.state.songs.isNullOrEmpty()) return@PlaylistInfoSection
+                                    if (viewModel.state.songs.isNullOrEmpty()) return@PlaylistInfoSection
 
                                     if (isPlayingPlaylist){
                                         // will pause if playing
@@ -326,7 +322,7 @@ fun PlaylistDetailScreen(
                         ) {
                             itemsIndexed(
                                 items = state.songs,
-                                key = { _, item -> item }
+                                //key = { _, item -> item }
                             ) { _, songWrapped ->
                                 val song = songWrapped.song
                                 val isOffline = songWrapped.isOffline

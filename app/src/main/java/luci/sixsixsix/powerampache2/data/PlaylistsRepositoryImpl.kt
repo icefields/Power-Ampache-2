@@ -163,8 +163,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
         } while (fetchAll && isMoreAvailable && ++counter < maxIterations)
     }.toList()
 
-    override suspend fun getPlaylist(id: String) =
-        dao.playlistLiveData(id).distinctUntilChanged().asFlow().filterNotNull().mapNotNull { it.toPlaylist() }
+    override fun getPlaylist(id: String) =
+        dao.playlistLiveData(id).filterNotNull().mapNotNull { it.toPlaylist() }
 
     private suspend fun isPlaylistOffline(playlistId: String) =
         dao.getOfflineSongsFromPlaylist(playlistId).isNotEmpty()

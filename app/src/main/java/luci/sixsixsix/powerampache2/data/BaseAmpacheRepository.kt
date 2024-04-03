@@ -141,6 +141,7 @@ abstract class BaseAmpacheRepository(
             MainNetwork.Type.playlist -> dao.getAllPlaylists()
                 .firstOrNull { it.id == id}?.copy(flag = flag)?.let { dbPlaylist ->
                     dao.insertPlaylists(listOf(dbPlaylist))
+                    L("like inserted")
                 }
         }
         if (!isOfflineModeEnabled()) {

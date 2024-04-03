@@ -29,7 +29,7 @@ import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
 
 @Parcelize
 data class AlbumDetailState (
-    val album: Album = Album(),
+    //val album: Album = Album(),
     val songs: List<SongWrapper> = emptyList(),
     val isLoading: Boolean = false,
     val isAlbumDownloaded: Boolean = false,

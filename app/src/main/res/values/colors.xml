@@ -21,5 +21,4 @@
 
     <!-- Other, non-theme colours -->
     <color name="placeholderBgTint">@color/onSurfaceVariant</color>
-    <color name="launcherBgColour">#e9eff7</color>
 </resources>

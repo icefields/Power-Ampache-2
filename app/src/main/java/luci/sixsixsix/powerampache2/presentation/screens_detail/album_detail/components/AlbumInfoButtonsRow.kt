@@ -45,7 +45,9 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.presentation.common.ButtonDownload
 import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
+import luci.sixsixsix.powerampache2.presentation.common.PlayButton
 import luci.sixsixsix.powerampache2.presentation.common.ShuffleToggleButton
+import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
 
 @Composable
 fun AlbumInfoButtonsRow(
@@ -80,17 +82,12 @@ fun AlbumInfoButtonsRow(
             onStopDownloadClick = { eventListener(AlbumInfoViewEvents.STOP_DOWNLOAD_ALBUM) }
         )
 
-        IconButton(modifier = Modifier
-            .height(80.dp)
-            .widthIn(min = 80.dp, max = 100.dp),
-            onClick = {
-                eventListener(AlbumInfoViewEvents.PLAY_ALBUM)
-            }) {
-            Icon(
-                modifier = Modifier.aspectRatio(1f/1f),
-                imageVector = if (!isPlayingAlbum) Icons.Default.PlayCircle else Icons.Default.PauseCircle, // Pause
-                contentDescription = "Play"
-            )
+        PlayButton(
+            isBuffering = false,
+            isPlaying = isPlayingAlbum,
+            enabled = true
+        ) {
+            eventListener(AlbumInfoViewEvents.PLAY_ALBUM)
         }
 
         //Spacer(modifier = Modifier.width(0.dp))
