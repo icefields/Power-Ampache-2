@@ -41,6 +41,7 @@ fun ButtonDownload(
     onStartDownloadClick: () -> Unit,
     onStopDownloadClick: () -> Unit
 ) = ButtonWithLoadingIndicator(
+    modifier = modifier,
     imageVector = if (!isDownloaded) (if (!isDownloading) Icons.Outlined.DownloadForOffline else Icons.Outlined.Close) else Icons.Outlined.DownloadDone,
     imageContentDescription= "Download",
     iconTint = iconTint,

@@ -55,6 +55,7 @@ import luci.sixsixsix.powerampache2.presentation.common.ShuffleToggleButton
 fun PlaylistInfoButtonsRow(
     modifier: Modifier = Modifier,
     playlist: Playlist,
+    isLoading: Boolean,
     isPlayingPlaylist: Boolean,
     isBuffering: Boolean,
     enabled: Boolean,
@@ -84,7 +85,9 @@ fun PlaylistInfoButtonsRow(
             eventListener(PlaylistInfoViewEvents.ADD_PLAYLIST_TO_PLAYLIST)
         }
 
+        val alphaDownload = if (isLoading) 0.3f else 1.0f
         ButtonDownload(
+            modifier = Modifier.alpha(alphaDownload),
             isDownloading = isDownloading,
             iconTint = iconTint,
             onStartDownloadClick = { eventListener(PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST) },
@@ -128,6 +131,7 @@ fun PlaylistInfoButtonsRowPreview() {
         isLikeAvailable = true,
         isBuffering = false,
         enabled = true,
+        isLoading = true,
         iconTint = Color.Red,
         eventListener = { },
     )

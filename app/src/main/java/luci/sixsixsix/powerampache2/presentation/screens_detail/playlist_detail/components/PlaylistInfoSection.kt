@@ -63,6 +63,7 @@ enum class PlaylistInfoViewEvents {
 fun PlaylistInfoSection(
     modifier: Modifier,
     playlist: Playlist,
+    isLoading: Boolean,
     isPlayingPlaylist: Boolean,
     isDownloading: Boolean,
     isGlobalShuffleOn: Boolean,
@@ -156,6 +157,7 @@ fun PlaylistInfoSection(
             isLikeLoading = isLikeLoading,
             isBuffering = isBuffering,
             enabled = enabled,
+            isLoading = isLoading,
             isLiked = playlist.flag == 1
         )
         Spacer(modifier = Modifier.width(20.dp))
@@ -177,6 +179,7 @@ fun PlaylistInfoSectionPreview() {
         isLikeAvailable = true,
         enabled = true,
         isBuffering = false,
+        isLoading = true,
         eventListener = { },
         artistClickListener = { }
     )

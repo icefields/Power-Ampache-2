@@ -132,13 +132,16 @@ class MusicRepositoryImpl @Inject constructor(
     override suspend fun logout(): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading(true))
         val currentAuth = getSession()?.auth // need this to make the logout call
+
+        dao.clearSession()
+        dao.clearCredentials()
+        dao.clearCachedData()
+        dao.clearUser()
+
+        // first clear db then logout to guarantee data is cleared even if the call fails
         val resp = currentAuth?.let {
             api.goodbye(it)
         }
-        dao.clearCredentials()
-        dao.clearSession()
-        dao.clearCachedData()
-        dao.clearUser()
 
         L( "LOGOUT $resp")
 

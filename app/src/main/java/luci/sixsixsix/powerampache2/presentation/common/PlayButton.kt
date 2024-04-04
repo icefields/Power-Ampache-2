@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.presentation.common
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -83,7 +84,7 @@ fun PlayButton(
                         contentDescription = "Play"
                     )
                 } else {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(modifier = Modifier.fillMaxSize().padding(6.dp))
                 }
             }
         }
@@ -93,7 +94,7 @@ fun PlayButton(
 @Preview
 @Composable
 fun PlayButtonPreview() {
-    PlayButton(isBuffering = false, isPlaying = true) {
+    PlayButton(isBuffering = true, isPlaying = true) {
 
     }
 }

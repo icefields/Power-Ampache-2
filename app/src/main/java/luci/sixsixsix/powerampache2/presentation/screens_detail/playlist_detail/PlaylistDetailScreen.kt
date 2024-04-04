@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -90,6 +92,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainView
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
+import java.lang.ref.WeakReference
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -205,6 +208,8 @@ fun PlaylistDetailScreen(
             LoadingScreen()
         }
 
+        val context = WeakReference(LocalContext.current)
+
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             containerColor = Color.Transparent,
@@ -242,6 +247,7 @@ fun PlaylistDetailScreen(
                                     470.dp /* any big number */ } else { 0.dp })
                             .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         playlist = currentPlaylistState,
+                        isLoading = state.isLoading,
                         isPlayingPlaylist = isPlayingPlaylist,
                         isLikeAvailable = !state.isGeneratedOrSmartPlaylist,
                         isLikeLoading = state.isLikeLoading ,
@@ -287,11 +293,21 @@ fun PlaylistDetailScreen(
                                 }
                                 PlaylistInfoViewEvents.SHARE_PLAYLIST ->
                                     viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)
-                                PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST ->
+                                PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST -> if (!state.isLoading) {
                                     mainViewModel.onEvent(
                                         MainEvent.OnDownloadSongs(
-                                        viewModel.state.getSongList())
+                                            viewModel.state.getSongList())
                                     )
+                                } else {
+                                    // TODO move to view model
+                                    context.get()?.let { ctx ->
+                                        Toast.makeText(ctx,
+                                            "Please wait that the playlist is fully loaded before downloading",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+
                                 PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST -> {
                                     viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylistToggle)
                                 }

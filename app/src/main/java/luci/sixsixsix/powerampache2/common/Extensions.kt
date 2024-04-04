@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.io.File
@@ -226,6 +227,38 @@ fun processFlag(flag: Any?): Int = flag?.let {
     } else if (it is Int) it
     else 0
 } ?: 0
+
+/**
+ * different versions of ampache seem to return different types that are making gson crash
+ */
+fun processNumberToInt(num: Any?): Int = num?.let {
+    try {
+        when(it) {
+            is Double -> it.toInt()
+            is Float -> it.toInt()
+            is Int -> it.toInt()
+            is String -> it.toInt()
+            else -> ERROR_INT
+        }
+    } catch (e: Exception) { ERROR_INT }
+} ?: ERROR_INT
+
+/**
+ * different versions of ampache seem to return different types that are making gson crash
+ */
+fun processNumberToFloat(num: Any?): Float = num?.let {
+    try {
+        when(it) {
+            is Double -> it.toFloat()
+            is Float -> it.toFloat()
+            is Int -> it.toFloat()
+            is String -> it.toFloat()
+            else -> Constants.ERROR_FLOAT
+        }
+    } catch (e: Exception) {
+        Constants.ERROR_FLOAT
+    }
+} ?: Constants.ERROR_FLOAT
 
 /**
  * if hasArt flag is present (not null), check if there's any art with it.

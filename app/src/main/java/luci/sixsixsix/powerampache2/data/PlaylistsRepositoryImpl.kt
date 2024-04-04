@@ -41,6 +41,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
+import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
@@ -224,7 +225,18 @@ class PlaylistsRepositoryImpl @Inject constructor(
         var offset = 0
         var lastException: MusicException? = null
         do {
-            val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId, limit = limit, offset = offset)
+            val response = try {
+                api.getSongsFromPlaylist(
+                    auth.auth,
+                    albumId = playlistId,
+                    limit = limit,
+                    offset = offset
+                )
+            } catch (e: Exception) {
+                errorHandler.logError(e)
+                SongsResponse(songs = null)
+            }
+
             // save the exception if any
             response.error?.let { lastException = MusicException(it.toError()) }
             // a response exists
