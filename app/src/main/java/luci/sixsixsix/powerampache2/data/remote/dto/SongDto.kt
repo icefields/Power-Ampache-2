@@ -5,6 +5,8 @@ import luci.sixsixsix.powerampache2.common.Constants.ERROR_FLOAT
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.processArtUrl
 import luci.sixsixsix.powerampache2.common.processFlag
+import luci.sixsixsix.powerampache2.common.processNumberToFloat
+import luci.sixsixsix.powerampache2.common.processNumberToInt
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 
@@ -31,16 +33,16 @@ data class SongDto(
     val artistMbid: String? = null,
 
     @SerializedName("averagerating")
-    val averagerating: Float? = null,
+    val averagerating: Any? = null,
 
     @SerializedName("bitrate")
-    val bitrate: Int?,
+    val bitrate: Any?,
 
     @SerializedName("catalog")
-    val catalog: Int?,
+    val catalog: Any?,
 
     @SerializedName("channels")
-    val channels: Int?,
+    val channels: Any?,
 
     @SerializedName("comment")
     val comment: String? = null,
@@ -49,7 +51,7 @@ data class SongDto(
     val composer: String?,
 
     @SerializedName("disk")
-    val disk: Int? = null,
+    val disk: Any? = null,
 
     @SerializedName("filename")
     val filename: String?,
@@ -91,7 +93,7 @@ data class SongDto(
     val playlisttrack: Int?,
 
     @SerializedName("preciserating")
-    val preciserating: Float? = null,
+    val preciserating: Any? = null,
 
     @SerializedName("publisher")
     val publisher: String? = null,
@@ -103,10 +105,10 @@ data class SongDto(
     val r128TrackGain: Any,
 
     @SerializedName("rate")
-    val rate: Int?,
+    val rate: Any?,
 
     @SerializedName("rating")
-    val rating: Float? = null,
+    val rating: Any? = null,
 
     @SerializedName("replaygain_album_gain")
     val replaygainAlbumGain: Any? = null,
@@ -115,10 +117,10 @@ data class SongDto(
     val replaygainAlbumPeak: Any? = null,
 
     @SerializedName("replaygain_track_gain")
-    val replaygainTrackGain: Float? = null,
+    val replaygainTrackGain: Any? = null,
 
     @SerializedName("replaygain_track_peak")
-    val replaygainTrackPeak: Float? = null,
+    val replaygainTrackPeak: Any? = null,
 
     @SerializedName("size")
     val size: Int?,
@@ -151,7 +153,7 @@ data class SongDto(
     val diskSubtitle: String? = null,
 
     @SerializedName("stream_bitrate")
-    val streamBitrate: Int? = null,
+    val streamBitrate: Any? = null,
 
     @SerializedName("artists")
     val artists: List<MusicAttributeDto> = listOf(),
@@ -173,10 +175,10 @@ fun SongDto.toSong() = Song(
     albumArtist = albumartist?.toMusicAttribute() ?: MusicAttribute.emptyInstance(),
     songUrl = url ?: "",
     imageUrl = processArtUrl(hasArt, art),
-    bitrate = bitrate ?: ERROR_INT,
-    streamBitrate = streamBitrate ?: ERROR_INT,
-    catalog = catalog ?: ERROR_INT,
-    channels = channels ?: ERROR_INT,
+    bitrate = processNumberToInt(bitrate),
+    streamBitrate = processNumberToInt(streamBitrate),
+    catalog = processNumberToInt(catalog),
+    channels = processNumberToInt(channels),
     composer = composer ?: "",
     filename = filename ?: "",
     genre = genre?.map { it.toMusicAttribute() } ?: listOf(),
@@ -184,7 +186,7 @@ fun SongDto.toSong() = Song(
     name = name ?: "",
     playCount = playcount ?: ERROR_INT,
     playlistTrackNumber = playlisttrack ?: ERROR_INT,
-    rateHz = rate ?: ERROR_INT,
+    rateHz = processNumberToInt(rate),
     size = size ?: ERROR_INT,
     time = time ?: ERROR_INT,
     trackNumber = track ?: ERROR_INT,
@@ -196,18 +198,18 @@ fun SongDto.toSong() = Song(
     format = format,
     streamMime = streamMime,
     publisher = publisher,
-    replayGainTrackGain = replaygainTrackGain,
-    replayGainTrackPeak = replaygainTrackPeak,
+    replayGainTrackGain = processNumberToFloat(replaygainTrackGain),
+    replayGainTrackPeak = processNumberToFloat(replaygainTrackPeak),
     lyrics = lyrics ?: "",
     comment = comment ?: "",
     language = language ?: "",
-    disk = disk ?: ERROR_INT,
+    disk = processNumberToInt(disk),
     diskSubtitle = diskSubtitle ?: "",
     mbId = mbid ?: "",
     albumMbId = albumMbid ?: "",
     artistMbId = artistMbid ?: "",
     albumArtistMbId = albumartistMbid ?: "",
-    rating = rating ?: ERROR_FLOAT,
-    preciseRating = preciserating ?: ERROR_FLOAT,
-    averageRating = averagerating ?: ERROR_FLOAT
+    rating = processNumberToFloat(rating)?: ERROR_FLOAT,
+    preciseRating = processNumberToFloat(preciserating) ?: ERROR_FLOAT,
+    averageRating = processNumberToFloat(averagerating)
 )

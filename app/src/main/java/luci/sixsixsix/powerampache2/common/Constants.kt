@@ -44,11 +44,11 @@ object Constants {
     const val USER_EMAIL_DEFAULT = "" //""No@Email.Present"
     const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
 
-    const val PLAYLIST_FETCH_LIMIT = 50
+    const val PLAYLIST_FETCH_LIMIT = 30
 
     // ERROR CONSTANTS
     const val ERROR_INT = -1
-    const val ERROR_FLOAT = -1f
+    const val ERROR_FLOAT = ERROR_INT.toFloat()
     const val ERROR_STRING = "ERROR"
     const val LOADING_STRING = "LOADING"
     const val USER_ID_ERROR = ERROR_INT
