@@ -42,9 +42,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 42
-        versionName = "0.42-rc1"
-        val versionQuote = "This version is powered by Jackie Robinson"
+        versionCode = 43
+        versionName = "0.43-rc1"
+        val versionQuote = "This version is powered by water"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -87,7 +87,7 @@ android {
 
             resValue("string", "build_type", "Debug")
             resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.debug.provider")
-            resValue("color", "launcherBgColour", "#FFE5B4")
+            resValue("color", "launcherBgColour", "#d5f5d5")
 
             //     <color name="launcherBgColour"></color>
             isMinifyEnabled = false

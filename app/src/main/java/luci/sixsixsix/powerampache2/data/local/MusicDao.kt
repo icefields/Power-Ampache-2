@@ -123,7 +123,7 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE year > 1000 order by year DESC LIMIT 66""")
     suspend fun getRecentlyReleasedAlbums(): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity WHERE flag == 1 LIMIT 222""")
+    @Query("""SELECT * FROM albumentity WHERE flag == 1 ORDER BY RANDOM() LIMIT 222""")
     suspend fun getLikedAlbums(): List<AlbumEntity>
 
     @Query("""SELECT * FROM albumentity WHERE rating > 0 order by rating DESC""")
@@ -242,7 +242,7 @@ interface MusicDao {
     @Query("""SELECT * FROM downloadedsongentity WHERE rating > 0 order by rating DESC""")
     suspend fun getHighestRatedOfflineSongs(): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity ORDER BY RANDOM() LIMIT 166""")
+    @Query("""SELECT * FROM downloadedsongentity ORDER BY RANDOM() LIMIT 222""")
     suspend fun getRandomOfflineSongs(): List<DownloadedSongEntity>
 
     // TODO missing playCount field in offline table
