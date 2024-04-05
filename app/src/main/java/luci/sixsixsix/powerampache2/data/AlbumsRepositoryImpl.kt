@@ -252,7 +252,24 @@ class AlbumsRepositoryImpl @Inject constructor(
                     removeAll(preNetList)
                 }
 
-                preNetList.apply { addAll(albumsNewDiff) }
+                // DO THE SAME for network albums
+                albumsNetwork.forEachIndexed { i, albumNew ->
+                    // loop through the updated albums
+                    // if any of the new albums is present already in the previous db results, replace
+                    // with newer version from web
+                    if (preNetListIds.contains(albumNew.id)) {
+                        preNetList[preNetListIds.indexOf(albumNew.id)] = albumNew
+                    }
+                }
+                // after replacing in place, remove all the albums added from the new-albums list
+                val albumsNetNewDiff = albumsNetwork.toMutableList().apply {
+                    removeAll(preNetList)
+                }
+
+                preNetList.apply {
+                    addAll(albumsNewDiff)
+                    addAll(albumsNetNewDiff)
+                }
             } catch (e: Exception) {
                 dbAlbumsNew.map { it.toAlbum() }
             }
