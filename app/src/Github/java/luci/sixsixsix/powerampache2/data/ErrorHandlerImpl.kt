@@ -192,8 +192,7 @@ class ErrorHandlerImpl @Inject constructor(
     override suspend fun logError(message: String) {
         try {
             if (isErrorHandlingEnabled && !URL_ERROR_LOG.isNullOrBlank()) {
-                api.sendErrorReport(apiPasteCode = "${getVersionInfoString(applicationContext)}\n$message")
-                L("send report aaaa")
+               api.sendErrorReport(apiPasteCode = "${getVersionInfoString(applicationContext)}\n$message")
             }
         } catch (e: HttpException) {
             L.e(e.stackTraceToString(), e.message(), e.localizedMessage, e.code(), e.response())

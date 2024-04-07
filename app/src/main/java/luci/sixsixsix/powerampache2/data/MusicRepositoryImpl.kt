@@ -134,7 +134,6 @@ class MusicRepositoryImpl @Inject constructor(
         val currentAuth = getSession()?.auth // need this to make the logout call
 
         dao.clearSession()
-        dao.clearCredentials()
         dao.clearCachedData()
         dao.clearUser()
 
@@ -142,6 +141,8 @@ class MusicRepositoryImpl @Inject constructor(
         val resp = currentAuth?.let {
             api.goodbye(it)
         }
+        // clear credentials after api call, since the api uses base url from credentials
+        dao.clearCredentials()
 
         L( "LOGOUT $resp")
 

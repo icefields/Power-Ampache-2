@@ -29,21 +29,9 @@ import retrofit2.http.POST
 import java.time.LocalDateTime
 
 interface ErrorHandlerApi {
-    /**
-     * 'api_option=paste&
-     * api_user_key='.$api_user_key.'&
-     * api_paste_private='.$api_paste_private.'&
-     * api_paste_name='.$api_paste_name.'
-     * &api_paste_expire_date='.$api_paste_expire_date.'
-     * &api_paste_format='.$api_paste_format.'
-     * &api_dev_key='.$api_dev_key.'&
-     * api_paste_code='.$api_paste_code.'');
-     *
-     */
     @FormUrlEncoded
     @POST("api_post.php")
     suspend fun sendErrorReport(
-        //@Url url: String = BuildConfig.URL_ERROR_LOG,
         @Field("api_user_key") apiUserKey: String = "56cc36787e45df9549c77636fb889fd4",
         @Field("api_paste_private") apiPastePrivate: String = "1",
         @Field("api_paste_name") apiPasteName: String = LocalDateTime.now().toString(),
@@ -52,6 +40,7 @@ interface ErrorHandlerApi {
         @Field("api_dev_key") apiDevKey: String = BuildConfig.PASTEBIN_API_KEY,
         @Field("api_paste_code") apiPasteCode: String,
         @Field("api_option") apiOption: String = "paste"
+        //@Url url: String = BuildConfig.URL_ERROR_LOG,
         //@Body body: String
     ): ResponseBody
 }

@@ -25,6 +25,7 @@ import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
@@ -65,9 +66,6 @@ class AuthViewModel @Inject constructor(
             L(it)
             if (it == null) {
                 pingScheduler.cancel()
-                //playlistManager.reset()
-                // apply default settings
-
                 // setting the session to null will show the login screen, but the autologin call
                 // will immediately set isLoading to true which will show the loading screen instead
                 state = state.copy(session = null, isLoading = true)

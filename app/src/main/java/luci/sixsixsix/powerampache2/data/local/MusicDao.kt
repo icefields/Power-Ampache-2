@@ -95,9 +95,6 @@ interface MusicDao {
     @Query("""SELECT * FROM userentity WHERE LOWER(username) = LOWER((SELECT username FROM credentialsentity WHERE primaryKey = '$CREDENTIALS_PRIMARY_KEY')) """)
     fun getUserLiveData(): Flow<UserEntity?>
 
-    //    @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
-    //    fun getUserLiveDataOld(): LiveData<UserEntity?>
-
 // --- ALBUMS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlbums(albums: List<AlbumEntity>)
@@ -172,6 +169,9 @@ interface MusicDao {
 
     @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time DESC""")
     suspend fun getArtist(artistId: String): ArtistEntity?
+
+    @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, artistentity AS a WHERE a.id == s.artistId GROUP BY s.artistId ORDER BY acount DESC LIMIT 20""")
+    suspend fun getMostPlayedArtists(): List<ArtistEntity>
 
 // --- PLAYLISTS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)

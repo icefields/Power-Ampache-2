@@ -26,28 +26,26 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import luci.sixsixsix.powerampache2.BuildConfig
-import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.data.remote.ErrorHandlerApi
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-
 @Module
 @InstallIn(SingletonComponent::class)
 object GithubModule {
     @Provides
     @Singleton
-    fun provideErrorHandlerApi(retrofit: Retrofit): ErrorHandlerApi =
+    fun provideErrorHandlerApi(): ErrorHandlerApi =
         Retrofit.Builder()
             .baseUrl(BuildConfig.URL_ERROR_LOG)
             .client(
                 OkHttpClient.Builder()
-                    .retryOnConnectionFailure(true)
-                    .connectTimeout(Constants.TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
-                    .readTimeout(Constants.TIMEOUT_READ_S, TimeUnit.SECONDS)
-                    .writeTimeout(Constants.TIMEOUT_WRITE_S, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(false) // do not retry
+                    .connectTimeout(5, TimeUnit.SECONDS)
+                    .readTimeout(2, TimeUnit.SECONDS)
+                    .writeTimeout(2, TimeUnit.SECONDS)
                     .build()
             )
             //.addConverterFactory(GsonConverterFactory.create())

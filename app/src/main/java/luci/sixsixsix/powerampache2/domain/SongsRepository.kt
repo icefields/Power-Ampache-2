@@ -24,10 +24,8 @@ package luci.sixsixsix.powerampache2.domain
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
-import retrofit2.http.Query
 
 interface SongsRepository {
     val offlineSongsLiveData: LiveData<List<Song>>

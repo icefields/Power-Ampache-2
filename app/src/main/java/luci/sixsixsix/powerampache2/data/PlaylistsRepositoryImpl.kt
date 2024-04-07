@@ -41,6 +41,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
+import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
@@ -134,8 +135,19 @@ class PlaylistsRepositoryImpl @Inject constructor(
         var counter = 0
         var isMoreAvailable = false
         do {
-            val response = api.getPlaylists(auth, filter = query, offset = off)
-            response.error?.let { throw (MusicException(it.toError())) }
+            val response = try {
+                api.getPlaylists(auth, filter = query, offset = off)
+            } catch (e: Exception) {
+                if (!fetchAll) throw e
+                PlaylistsResponse(totalCount = 0, playlist = listOf())
+            }
+
+            response.error?.let {
+                // do not stop in case of exception if fetchAll == true
+                if (!fetchAll)
+                    throw MusicException(it.toError())
+            }
+
             val responseSize = response.playlist?.size ?: 0
             val totalCount = response.totalCount?.let { tot ->
                 // if this field is null or empty in the response, return max possible value

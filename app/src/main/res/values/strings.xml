@@ -37,6 +37,8 @@
     <string name="home_section_title_newest">Newly Added</string>
     <string name="home_section_title_playlists">Playlists</string>
     <string name="home_section_title_moreAlbums">More Albums</string>
+    <string name="home_section_title_loading">Loading</string>
+    <string name="home_artist_subtitle_item">Artist</string>
 
     <!-- content description strings-->
     <string name="back_content_description">Back</string>
