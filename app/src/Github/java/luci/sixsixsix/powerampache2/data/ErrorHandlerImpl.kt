@@ -41,6 +41,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.remote.ErrorHandlerApi
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.ErrorType
@@ -58,7 +59,7 @@ import javax.inject.Singleton
 class ErrorHandlerImpl @Inject constructor(
     private val playlistManager: MusicPlaylistManager,
     private val db: MusicDatabase,
-    private val api: MainNetwork,
+    private val api: ErrorHandlerApi,
     private val applicationContext: Application
 ): ErrorHandler {
 
@@ -191,10 +192,11 @@ class ErrorHandlerImpl @Inject constructor(
     override suspend fun logError(message: String) {
         try {
             if (isErrorHandlingEnabled && !URL_ERROR_LOG.isNullOrBlank()) {
-                api.sendErrorReport(body = "${getVersionInfoString(applicationContext)}\n$message")
+                api.sendErrorReport(apiPasteCode = "${getVersionInfoString(applicationContext)}\n$message")
+                L("send report aaaa")
             }
-        } catch (e: Exception) {
-            L.e(e)
+        } catch (e: HttpException) {
+            L.e(e.stackTraceToString(), e.message(), e.localizedMessage, e.code(), e.response())
         }
     }
 }

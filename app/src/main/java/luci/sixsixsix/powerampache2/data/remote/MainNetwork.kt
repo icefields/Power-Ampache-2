@@ -43,12 +43,15 @@ import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 import retrofit2.http.Streaming
 import retrofit2.http.Url
 import java.lang.StringBuilder
+import java.time.LocalDateTime
 
 /**
  * Main network interface which will fetch a new welcome title for us
@@ -385,8 +388,6 @@ interface MainNetwork {
         //@Query("date") date: Int = 0
     ): SuccessResponse
 
-    @POST
-    suspend fun sendErrorReport(@Url url: String = BuildConfig.URL_ERROR_LOG, @Body body: String)
 
     companion object {
         const val API_KEY = BuildConfig.API_KEY

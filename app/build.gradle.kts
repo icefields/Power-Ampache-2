@@ -37,6 +37,8 @@ android {
     val errorLogUrl = properties.getProperty("URL_ERROR_LOG")
     val localDevUser = properties.getProperty("LOCAL_DEV_USER")
     val localDevPass = properties.getProperty("LOCAL_DEV_PASSWORD")
+    val errorReportEmail = properties.getProperty("ERROR_REPORT_EMAIL")
+    val pastebinApiKey = properties.getProperty("PASTEBIN_API_KEY")
 
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
@@ -57,6 +59,7 @@ android {
         }
 
         buildConfigField("String", "VERSION_QUOTE", "\"$versionQuote\"")
+        buildConfigField("String", "ERROR_REPORT_EMAIL", errorReportEmail)
     }
 
     buildTypes {
@@ -135,7 +138,8 @@ android {
         create("Github") {
             dimension = "ampache"
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
-            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+            buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
+            buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
         }
         create("FDroid") {
             dimension = "ampache"
