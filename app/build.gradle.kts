@@ -9,7 +9,7 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val composeVersion = "1.6.4" // rootProject.extra.get("compose_version") as String
+val composeVersion = "1.6.5" // rootProject.extra.get("compose_version") as String
 val lifecycleVersion = "2.7.0"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
@@ -67,7 +67,6 @@ android {
             // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "true")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
-            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
             buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
@@ -101,7 +100,6 @@ android {
             // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "false")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
-            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
             buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
@@ -134,11 +132,17 @@ android {
 
     flavorDimensions += "ampache"
     productFlavors {
+        create("Github") {
+            dimension = "ampache"
+            buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+        }
         create("FDroid") {
             dimension = "ampache"
-            //applicationIdSuffix = ".fdroid"
-            //versionNameSuffix = "-fdroid"
+            applicationIdSuffix = ".fdroid"
+            versionNameSuffix = "-fdroid"
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
         }
         create("PlayStore") {
             dimension = "ampache"
@@ -146,6 +150,7 @@ android {
             versionNameSuffix = "-play"
 
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
         }
     }
 
@@ -191,7 +196,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:0.17.0")
-    implementation("androidx.paging:paging-compose:3.3.0-alpha05")
+    implementation("androidx.paging:paging-compose:3.3.0-beta01")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
@@ -214,7 +219,7 @@ dependencies {
     // HLS playback support with ExoPlayer
     implementation("androidx.media3:media3-exoplayer-hls:$media3Version")
     // DASH playback support with ExoPlayer
-    // implementation("androidx.media3:media3-exoplayer-dash:$media3Version")
+    "PlayStoreImplementation"("androidx.media3:media3-exoplayer-dash:$media3Version")
     // RTSP playback support with ExoPlayer
     // implementation("androidx.media3:media3-exoplayer-rtsp:$media3Version")
     // Common functionality for media database components
@@ -248,7 +253,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
     // JSON serialization
-    implementation("com.google.code.gson:gson:2.10")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // --- Room --- //
     implementation("androidx.room:room-runtime:2.6.1")
