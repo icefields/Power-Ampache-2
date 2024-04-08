@@ -21,39 +21,39 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.home.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Album
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AlbumItemSquare(modifier: Modifier = Modifier, album: Album) {
-    val width = 150.dp
-    val imageSize = 150.dp
+fun AlbumItemSquare(
+    modifier: Modifier = Modifier,
+    imageSize: Dp = dimensionResource(id = R.dimen.home_album_item_image_size_default),
+    album: Album
+) {
+    val paddingHorizontal = 6.dp
+    val width = imageSize + paddingHorizontal + paddingHorizontal
     Column(
         modifier = modifier
             .width(width)
-            .padding(horizontal = 4.dp)
+            .padding(horizontal = paddingHorizontal)
     ) {
         Card(
             //border = BorderStroke((0.5).dp, MaterialTheme.colorScheme.background),
@@ -66,8 +66,8 @@ fun AlbumItemSquare(modifier: Modifier = Modifier, album: Album) {
         ) {
             AsyncImage(
                 modifier = Modifier
-                    .height(imageSize)
-                    .width(imageSize),
+                    .aspectRatio(1f/1f)
+                    .size(imageSize),
                 model = album.artUrl,
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(id = R.drawable.placeholder_album),
@@ -75,27 +75,6 @@ fun AlbumItemSquare(modifier: Modifier = Modifier, album: Album) {
                 contentDescription = album.name,
             )
         }
-
-        Column(
-            modifier = Modifier
-                .heightIn(min = 55.dp)
-                .padding(horizontal = 4.dp, vertical = 1.dp)
-        ) {
-            Text(
-                text = album.name,
-                fontSize = fontDimensionResource(id = R.dimen.home_album_title_fontSize),
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 2,
-                lineHeight = fontDimensionResource(id = R.dimen.home_album_title_lineHeight)
-            )
-
-            Text(
-                modifier = Modifier.basicMarquee(),
-                text = album.artist.name,
-                fontSize = fontDimensionResource(id = R.dimen.home_album_artist_fontSize),
-                fontWeight = FontWeight.Normal
-            )
-
-        }
+        HomeItemText(title = album.name, subtitle = album.artist.name)
     }
 }

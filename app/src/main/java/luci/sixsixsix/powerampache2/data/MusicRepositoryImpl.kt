@@ -63,6 +63,7 @@ import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.User
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Instant
@@ -131,19 +132,32 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun logout(): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading(true))
-        val currentAuth = getSession()?.auth // need this to make the logout call
 
-        dao.clearSession()
+        // first clear db then logout to guarantee data is cleared even if the call fails
+        // clear credentials after api call, since the api uses base url from credentials
         dao.clearCredentials()
+        dao.clearSession()
         dao.clearCachedData()
         dao.clearUser()
 
-        // first clear db then logout to guarantee data is cleared even if the call fails
-        val resp = currentAuth?.let {
-            api.goodbye(it)
+        emit(Resource.Success(true))
+
+        /*
+        val url = dao.getCredentials()?.serverUrl?.let { serverUrl ->
+            "${MainNetwork.buildServerUrl(serverUrl)}/json.server.php?action=goodbye&auth=${getSession()?.auth}"
+        } ?: ""
+
+         dao.clearCredentials()
+        dao.clearSession()
+        dao.clearCachedData()
+        dao.clearUser()
+
+        // TODO: logout is not working, clear db is enough to logout but we must invalidate the token from server
+        val resp = getSession()?.auth?.let {
+            api.goodbye(url)
         }
 
-        L( "LOGOUT $resp")
+        L( "LOGOUT $resp", url)
 
         if (resp?.toBoolean() == true) {
             emit(Resource.Success(true))
@@ -152,6 +166,7 @@ class MusicRepositoryImpl @Inject constructor(
             errorHandler.logError("there is an error in the logout response.\nLOGOUT $resp")
             throw Exception(if (BuildConfig.DEBUG) "there is an error in the logout response" else "")
         }
+        */
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("logout()", e, this) }

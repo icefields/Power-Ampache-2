@@ -59,7 +59,7 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
             //each plugin you chose above can be configured in a block like this:
             mailSender {
                 //required
-                mailTo = "powerampache.ducking336@silomails.com"
+                mailTo = BuildConfig.ERROR_REPORT_EMAIL
                 //defaults to true
                 reportAsFile = true
                 //defaults to ACRA-report.stacktrace

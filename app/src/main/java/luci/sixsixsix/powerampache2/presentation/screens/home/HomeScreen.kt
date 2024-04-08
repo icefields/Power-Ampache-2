@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.home
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -54,9 +55,26 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
-import luci.sixsixsix.powerampache2.presentation.screens.home.components.HOME_LOADING_VIEW_IDENTIFIER
 import luci.sixsixsix.powerampache2.presentation.screens.home.components.HomeScreenSection
+
+sealed class HomeScreenRowItems(@StringRes val title: Int, val items: List<AmpacheModel> = listOf()) {
+    data class Playlists(val list: List<Playlist>): HomeScreenRowItems(title = R.string.home_section_title_playlists, items = list)
+    data class Recent(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_recent, items = list)
+    data class Favourite(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_flagged, items = list)
+    data class Frequent(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_frequent, items = list)
+    data class Highest(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_highest, items = list)
+    data class Newest(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_newest, items = list)
+    data class More(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_moreAlbums, items = list)
+
+    // used to indicate loading
+    data class Nothing(val isLoading: Boolean): HomeScreenRowItems(title = R.string.home_section_title_loading)
+
+    fun isNotEmpty() = !items.isNullOrEmpty()
+}
+
 
 @Composable
 @Destination(start = false)
@@ -70,20 +88,15 @@ fun HomeScreen(
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     var emptyViewVisible by remember { mutableStateOf(false) }
 
-    // to add sections to the home screen just add Title and Array of Albums, Playlists or Songs
-    val homeScreenItems = mapOf(
-        Pair(stringResource(id = R.string.home_section_title_recent), state.recentAlbums),
-        Pair(stringResource(id = R.string.home_section_title_playlists), state.playlists),
-        Pair(stringResource(id = R.string.home_section_title_flagged), state.flaggedAlbums),
-        Pair(stringResource(id = R.string.home_section_title_frequent), state.frequentAlbums),
-        Pair(stringResource(id = R.string.home_section_title_highest), state.highestAlbums),
-        Pair(stringResource(id = R.string.home_section_title_newest), state.newestAlbums),
-        Pair(stringResource(id = R.string.home_section_title_moreAlbums), state.randomAlbums),
-        // TODO this is a hack, passing a const string as identifier to visualize a loading progress
-        //  at the bottom while data is loading. A null list in this case means isLoading = true,
-        //  and empty list means isLoading = false.
-        //  Do this properly!
-        Pair(HOME_LOADING_VIEW_IDENTIFIER, if(isLoadingData(state)) null else listOf()),
+    val homeScreenRowItems = listOf(
+        HomeScreenRowItems.Recent(state.recentAlbums),
+        HomeScreenRowItems.Playlists(state.playlists),
+        HomeScreenRowItems.Favourite(state.flaggedAlbums),
+        HomeScreenRowItems.Frequent(state.frequentAlbums),
+        HomeScreenRowItems.Highest(state.highestAlbums),
+        HomeScreenRowItems.Newest(state.newestAlbums),
+        HomeScreenRowItems.More(state.randomAlbums),
+        HomeScreenRowItems.Nothing(isLoadingData(state))
     )
 
     val showEmptyView = isNoData(state) && offlineModeState
@@ -110,11 +123,11 @@ fun HomeScreen(
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(homeScreenItems.keys.toList()) { title ->
+                    items(homeScreenRowItems) {
                         HomeScreenSection(
                             navigator = navigator,
-                            albumsRow = homeScreenItems[title],
-                            text = title
+                            itemsRow = it,
+                            text = stringResource(it.title)
                         )
                     }
                 }

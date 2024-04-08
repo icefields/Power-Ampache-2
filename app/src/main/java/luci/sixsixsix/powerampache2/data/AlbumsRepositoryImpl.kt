@@ -264,6 +264,7 @@ class AlbumsRepositoryImpl @Inject constructor(
                 // after replacing in place, remove all the albums added from the new-albums list
                 val albumsNetNewDiff = albumsNetwork.toMutableList().apply {
                     removeAll(preNetList)
+                    removeAll(albumsNewDiff) // this will be added back later at the end
                 }
 
                 preNetList.apply {
