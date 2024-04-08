@@ -152,8 +152,7 @@ fun AlbumDetailScreen(
                 .align(Alignment.TopCenter),
             model = album.artUrl,
             contentScale = ContentScale.Crop,
-            placeholder = null,
-            error = placeholder,
+            placeholder = placeholder,
             contentDescription = album.name
         )
         AsyncImage(
@@ -162,8 +161,7 @@ fun AlbumDetailScreen(
                 .align(Alignment.TopCenter),
             model = album.artUrl,
             contentScale = ContentScale.FillWidth,
-            placeholder = null,
-            error = placeholder,
+            placeholder = placeholder,
             contentDescription = album.name,
         )
         // full screen view to add a transparent black layer on top
