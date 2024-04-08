@@ -61,6 +61,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -178,12 +179,14 @@ fun PlaylistDetailScreen(
         }
     }
 
+    val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
         AsyncImage(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
             model = randomBackgroundTop,
+            placeholder = placeholder,
             contentScale = ContentScale.Crop,
             contentDescription = playlist.name
         )
@@ -192,6 +195,7 @@ fun PlaylistDetailScreen(
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
             model = randomBackgroundBottom,
+            placeholder = placeholder,
             contentScale = ContentScale.FillWidth,
             contentDescription = playlist.name,
         )

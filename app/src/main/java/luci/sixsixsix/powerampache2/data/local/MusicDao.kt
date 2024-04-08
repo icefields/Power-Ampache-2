@@ -278,6 +278,15 @@ interface MusicDao {
     @Query("""SELECT count(artistId) as songCount, artistId as id, artistName as name, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed FROM DownloadedSongEntity as song WHERE LOWER(id) == LOWER(:artistId) GROUP BY artistId""")
     suspend fun generateOfflineArtist(artistId: String): ArtistEntity?
 
+    @Query("""SELECT SUM(playCount) AS acount, artist.* FROM songentity AS song, 
+              (
+                SELECT count(artistId) as songCount, artistId as id, artistName as name, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed FROM DownloadedSongEntity as song 
+                WHERE LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')
+                GROUP BY artistId ORDER BY artistName
+              ) AS artist
+            WHERE artist.id == song.artistId GROUP BY song.artistId ORDER BY acount DESC""")
+    suspend fun getMostPlayedOfflineArtists(): List<ArtistEntity>
+
     @Query("DELETE FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId)")
     suspend fun deleteDownloadedSong(songId: String)
 

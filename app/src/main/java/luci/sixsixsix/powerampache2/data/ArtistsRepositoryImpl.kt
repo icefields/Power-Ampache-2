@@ -174,5 +174,9 @@ class ArtistsRepositoryImpl @Inject constructor(
 
     override suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.artist)
 
-    override suspend fun getMostPlayedArtists(): List<Artist> = dao.getMostPlayedArtists().map { it.toArtist() }
+    override suspend fun getMostPlayedArtists(): List<Artist> = if (isOfflineModeEnabled()) {
+        dao.getMostPlayedOfflineArtists()
+    } else {
+        dao.getMostPlayedArtists()
+    }.map { it.toArtist() }
 }

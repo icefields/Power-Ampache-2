@@ -53,10 +53,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -113,6 +115,7 @@ fun ArtistDetailScreen(
         }
     }
 
+    val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
         AsyncImage(
             modifier = Modifier
@@ -120,7 +123,7 @@ fun ArtistDetailScreen(
                 .align(Alignment.TopCenter),
             model = state.artist.artUrl,
             contentScale = ContentScale.Crop,
-//            placeholder = painterResource(id = R.drawable.placeholder_album),
+            placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name
         )
@@ -130,7 +133,7 @@ fun ArtistDetailScreen(
                 .align(Alignment.TopCenter),
             model = state.artist.artUrl,
             contentScale = ContentScale.FillWidth,
-//            placeholder = painterResource(id = R.drawable.placeholder_album),
+            placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name,
         )

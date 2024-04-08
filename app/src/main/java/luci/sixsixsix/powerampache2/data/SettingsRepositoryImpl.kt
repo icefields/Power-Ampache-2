@@ -49,8 +49,8 @@ import javax.inject.Singleton
 
 @Singleton
 class SettingsRepositoryImpl @Inject constructor(
-    private val api: MainNetwork,
-    private val db: MusicDatabase,
+    api: MainNetwork,
+    db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager
 ): BaseAmpacheRepository(api, db, errorHandler), SettingsRepository {

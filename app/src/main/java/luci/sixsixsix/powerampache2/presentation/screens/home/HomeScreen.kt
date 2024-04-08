@@ -54,6 +54,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Playlist
@@ -158,21 +159,3 @@ fun isNoData(state: HomeScreenState) =
     state.randomAlbums.isNullOrEmpty() &&
     state.newestAlbums.isNullOrEmpty() &&
     state.playlists.isNullOrEmpty()
-
-@Composable
-fun LoadingView() {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(modifier = Modifier
-                .size(44.dp)
-                .align(Alignment.Center))
-        }
-    }
-}

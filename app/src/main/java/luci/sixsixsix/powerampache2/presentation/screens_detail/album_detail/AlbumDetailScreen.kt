@@ -144,6 +144,7 @@ fun AlbumDetailScreen(
         }
     }
 
+    val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
         AsyncImage(
             modifier = Modifier
@@ -151,8 +152,8 @@ fun AlbumDetailScreen(
                 .align(Alignment.TopCenter),
             model = album.artUrl,
             contentScale = ContentScale.Crop,
-            //placeholder = painterResource(id = R.drawable.placeholder_album),
-            error = painterResource(id = R.drawable.placeholder_album),
+            placeholder = null,
+            error = placeholder,
             contentDescription = album.name
         )
         AsyncImage(
@@ -161,8 +162,8 @@ fun AlbumDetailScreen(
                 .align(Alignment.TopCenter),
             model = album.artUrl,
             contentScale = ContentScale.FillWidth,
-            //placeholder = painterResource(id = R.drawable.placeholder_album),
-            error = painterResource(id = R.drawable.placeholder_album),
+            placeholder = null,
+            error = placeholder,
             contentDescription = album.name,
         )
         // full screen view to add a transparent black layer on top

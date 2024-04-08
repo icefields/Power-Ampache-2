@@ -26,6 +26,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.media3.common.PlaybackException
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
 import com.google.gson.Gson
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -48,6 +49,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorType
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
+import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import retrofit2.HttpException
 import java.io.IOException
@@ -80,7 +82,7 @@ class ErrorHandlerImpl @Inject constructor(
         }
     }
 
-    override suspend fun <T> invoke(
+    @androidx.annotation.OptIn(UnstableApi::class) override suspend fun <T> invoke(
         label: String,
         e: Throwable,
         fc: FlowCollector<Resource<T>>?,
@@ -100,6 +102,11 @@ class ErrorHandlerImpl @Inject constructor(
             .append(if (label.isBlank()) "" else " - ")
             .append(
                 when (e) {
+                    is UserNotEnabledException -> {
+                        L("aaaa user not enabled $exceptionString")
+                        readableMessage = "User not enabled, please check your email for the account confirmation link or enable the user from the server"
+                        "PlaybackException \n $exceptionString"
+                    }
                     is HttpDataSource.InvalidResponseCodeException -> {
                         readableMessage = "Problem connecting to the server or data source. \nPlay a different track or check your connection\nResponse code: ${e.responseCode}"
                         "HttpDataSource.InvalidResponseCodeException \n$label\n $exceptionString"
@@ -111,7 +118,10 @@ class ErrorHandlerImpl @Inject constructor(
                     }
 
                     is PlaybackException -> {
-                        readableMessage = "Issues playing this track. The issue could be related to your connection, the file might be corrupt, or overall trouble communicating with your server.\nIf this is an offline track please try delete and re-download"
+                        readableMessage =
+                            if (exceptionString.lowercase().contains("User disabled".lowercase())) exceptionString else
+                                "Issues playing this track. The issue could be related to your connection, the file might be corrupt, or overall trouble communicating with your server.\nIf this is an offline track please try delete and re-download"
+
                         "PlaybackException \n$readableMessage\n $exceptionString"
                     }
 
@@ -167,8 +177,7 @@ class ErrorHandlerImpl @Inject constructor(
                 // check on error on the emitted data for detailed logging
                 fc?.emit(Resource.Error(message = this, exception = e))
                 // log and report error here
-                logError(this)
-                logError(e)
+                logError(e, this)
                 playlistManager.updateErrorLogMessage(this)
                 // readable message here
                 readableMessage?.let {
@@ -180,6 +189,8 @@ class ErrorHandlerImpl @Inject constructor(
                         !readableMessage.lowercase().contains("expired") &&
                         !readableMessage.lowercase().contains("session")) {
                         playlistManager.updateUserMessage(readableMessage)
+                    } else if (e is UserNotEnabledException) {
+                        playlistManager.updateUserMessage(readableMessage)
                     }
                 }
                 onError(this, e)
@@ -187,7 +198,7 @@ class ErrorHandlerImpl @Inject constructor(
             }
     }
 
-    override suspend fun logError(e: Throwable) = logError(message = e.stackTraceToString())
+    override suspend fun logError(e: Throwable, message: String) = logError(message = "${e.stackTraceToString()}\n$message")
 
     override suspend fun logError(message: String) {
         try {
