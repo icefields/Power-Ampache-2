@@ -25,12 +25,10 @@ import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
-import luci.sixsixsix.powerampache2.domain.errors.MusicError
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.Protocol
-import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import java.net.URISyntaxException
@@ -41,12 +39,14 @@ import javax.inject.Singleton
 class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDatabase) : Interceptor {
 
     private fun isErrorReportUrl(url: String) = url == BuildConfig.URL_ERROR_LOG
+    private fun isLogoutUrl(url: String) = url.contains("action=goodbye")
 
     override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
         var request = chain.request()
 
         // if reporting an error no need to manipulate the url
-        if (isErrorReportUrl(request.url.toString())) {
+        if (isErrorReportUrl(request.url.toString()) ||
+            isLogoutUrl(request.url.toString())) {
             return@runBlocking chain.proceed(request)
         }
 

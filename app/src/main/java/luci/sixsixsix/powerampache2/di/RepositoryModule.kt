@@ -91,11 +91,11 @@ abstract class RepositoryModule {
         interceptor: AmpacheInterceptor
     ): Interceptor
 
-    @Binds
-    @Singleton
-    abstract fun bindErrorHandler(
-        errorHandlerImpl: ErrorHandlerImpl
-    ): ErrorHandler
+//    @Binds
+//    @Singleton
+//    abstract fun bindErrorHandler(
+//        errorHandlerImpl: ErrorHandlerImpl
+//    ): ErrorHandler
 
     @Binds
     @Singleton

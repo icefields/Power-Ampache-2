@@ -95,9 +95,6 @@ interface MusicDao {
     @Query("""SELECT * FROM userentity WHERE LOWER(username) = LOWER((SELECT username FROM credentialsentity WHERE primaryKey = '$CREDENTIALS_PRIMARY_KEY')) """)
     fun getUserLiveData(): Flow<UserEntity?>
 
-    //    @Query("""SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') """)
-    //    fun getUserLiveDataOld(): LiveData<UserEntity?>
-
 // --- ALBUMS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlbums(albums: List<AlbumEntity>)
@@ -123,7 +120,7 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE year > 1000 order by year DESC LIMIT 66""")
     suspend fun getRecentlyReleasedAlbums(): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity WHERE flag == 1 LIMIT 222""")
+    @Query("""SELECT * FROM albumentity WHERE flag == 1 ORDER BY RANDOM() LIMIT 222""")
     suspend fun getLikedAlbums(): List<AlbumEntity>
 
     @Query("""SELECT * FROM albumentity WHERE rating > 0 order by rating DESC""")
@@ -172,6 +169,9 @@ interface MusicDao {
 
     @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time DESC""")
     suspend fun getArtist(artistId: String): ArtistEntity?
+
+    @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, artistentity AS a WHERE a.id == s.artistId GROUP BY s.artistId ORDER BY acount DESC LIMIT 20""")
+    suspend fun getMostPlayedArtists(): List<ArtistEntity>
 
 // --- PLAYLISTS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -242,7 +242,7 @@ interface MusicDao {
     @Query("""SELECT * FROM downloadedsongentity WHERE rating > 0 order by rating DESC""")
     suspend fun getHighestRatedOfflineSongs(): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity ORDER BY RANDOM() LIMIT 166""")
+    @Query("""SELECT * FROM downloadedsongentity ORDER BY RANDOM() LIMIT 222""")
     suspend fun getRandomOfflineSongs(): List<DownloadedSongEntity>
 
     // TODO missing playCount field in offline table

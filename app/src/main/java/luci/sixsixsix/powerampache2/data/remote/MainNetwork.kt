@@ -42,13 +42,11 @@ import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import okhttp3.ResponseBody
 import retrofit2.Response
-import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Streaming
 import retrofit2.http.Url
-import java.lang.StringBuilder
 
 /**
  * Main network interface which will fetch a new welcome title for us
@@ -67,8 +65,13 @@ interface MainNetwork {
     @GET("json.server.php?action=ping")
     suspend fun ping(@Query("auth") authKey: String = ""): AuthDto
 
-    @GET("json.server.php?action=goodbye")
-    suspend fun goodbye(@Query("auth") authKey: String = ""): GoodbyeDto
+    // TODO: this is not working
+    @GET("{fullUrl}")
+    suspend fun goodbye(
+        @Path(value = "fullUrl", encoded = true) fullUrl: String,
+       // @Query("action") action: String = "goodbye",
+       // @Query("auth") authKey: String = ""
+    ): GoodbyeDto
 
     /**
      * Register as a new user if allowed.
@@ -145,28 +148,32 @@ interface MainNetwork {
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
         @Query("filter") artistId: String = "",
-        @Query("offset") offset: Int = 0, ): ArtistDto
+        @Query("offset") offset: Int = 0,
+    ): ArtistDto
 
     @GET("json.server.php?action=album")
     suspend fun getAlbumInfo(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
         @Query("filter") albumId: String = "",
-        @Query("offset") offset: Int = 0, ): AlbumDto
+        @Query("offset") offset: Int = 0,
+    ): AlbumDto
 
     @GET("json.server.php?action=artist_albums")
     suspend fun getAlbumsFromArtist(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
         @Query("filter") artistId: String = "",
-        @Query("offset") offset: Int = 0, ): AlbumsResponse
+        @Query("offset") offset: Int = 0,
+    ): AlbumsResponse
 
     @GET("json.server.php?action=album_songs")
     suspend fun getSongsFromAlbum(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
         @Query("filter") albumId: String = "",
-        @Query("offset") offset: Int = 0, ): SongsResponse
+        @Query("offset") offset: Int = 0,
+    ): SongsResponse
 
     @GET("json.server.php?action=playlist_songs")
     suspend fun getSongsFromPlaylist(
@@ -174,7 +181,8 @@ interface MainNetwork {
         @Query("limit") limit: Int = 0,
         @Query("random") random: Int = 0, // integer 0, 1 (if true get random songs using limit)
         @Query("filter") albumId: String = "",
-        @Query("offset") offset: Int = 0, ): SongsResponse
+        @Query("offset") offset: Int = 0,
+    ): SongsResponse
 
     @GET("json.server.php?action=stats")
     suspend fun getSongsStats(
@@ -184,7 +192,8 @@ interface MainNetwork {
         @Query("username") username: String? = null,
         @Query("type") _type: Type = Type.song,
         @Query("filter") filter: StatFilter,
-        @Query("offset") offset: Int = 0, ): SongsResponse
+        @Query("offset") offset: Int = 0,
+    ): SongsResponse
 
     @GET("json.server.php?action=stats")
     suspend fun getAlbumsStats(
@@ -385,8 +394,6 @@ interface MainNetwork {
         //@Query("date") date: Int = 0
     ): SuccessResponse
 
-    @POST
-    suspend fun sendErrorReport(@Url url: String = BuildConfig.URL_ERROR_LOG, @Body body: String)
 
     companion object {
         const val API_KEY = BuildConfig.API_KEY

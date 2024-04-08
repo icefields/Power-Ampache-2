@@ -29,7 +29,7 @@
     <string name="loginScreen_demo_server">Demo</string>
     <string name="loginScreen_local_server">Local Development Server</string>
     <string name="loginScreen_remote_server">Remote Debug Server</string>
-    <string name="loginScreen_dogmazic_server">Demo (Dogmazic Server)</string>
+    <string name="loginScreen_dogmazic_server">Dogmazic Music Server</string>
     <string name="home_section_title_recent">Recently Played</string>
     <string name="home_section_title_flagged">Favourites</string>
     <string name="home_section_title_frequent">Frequently Played</string>
@@ -37,6 +37,8 @@
     <string name="home_section_title_newest">Newly Added</string>
     <string name="home_section_title_playlists">Playlists</string>
     <string name="home_section_title_moreAlbums">More Albums</string>
+    <string name="home_section_title_loading">Loading</string>
+    <string name="home_artist_subtitle_item">Artist</string>
 
     <!-- content description strings-->
     <string name="back_content_description">Back</string>

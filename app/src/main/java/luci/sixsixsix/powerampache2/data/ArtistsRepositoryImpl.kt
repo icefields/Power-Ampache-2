@@ -173,4 +173,6 @@ class ArtistsRepositoryImpl @Inject constructor(
     }.catch { e -> errorHandler("getArtists()", e, this) }
 
     override suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.artist)
+
+    override suspend fun getMostPlayedArtists(): List<Artist> = dao.getMostPlayedArtists().map { it.toArtist() }
 }

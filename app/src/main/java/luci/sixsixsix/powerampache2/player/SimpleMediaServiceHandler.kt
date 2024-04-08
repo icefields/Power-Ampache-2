@@ -260,6 +260,8 @@ class SimpleMediaServiceHandler @Inject constructor(
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = false)
     }
 
+    private var errorCounter = 0
+
     override fun onPlayerError(error: PlaybackException) {
         GlobalScope.launch {
             when (val cause = error.cause) {
@@ -282,8 +284,10 @@ class SimpleMediaServiceHandler @Inject constructor(
             }
         }
         if (!player.isPlaying && !player.isLoading) {
-            player.seekToNextMediaItem()
             player.prepare()
+            if (errorCounter++ % 3 == 0) {
+                player.seekToNextMediaItem()
+            }
         }
     }
 }

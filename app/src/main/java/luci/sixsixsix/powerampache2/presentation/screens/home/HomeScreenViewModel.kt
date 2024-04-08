@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -20,9 +21,11 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
+import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
@@ -34,8 +37,8 @@ import javax.inject.Inject
 class HomeScreenViewModel @Inject constructor(
     private val albumsRepository: AlbumsRepository,
     private val playlistsRepository: PlaylistsRepository,
-    private val settingsRepository: SettingsRepository,
-    savedStateHandle: SavedStateHandle
+    private val artistsRepository: ArtistsRepository,
+    settingsRepository: SettingsRepository
 ) : ViewModel() {
     var state by mutableStateOf(HomeScreenState())
     //var state by savedStateHandle.saveable { mutableStateOf(HomeScreenState()) }
@@ -130,7 +133,7 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private suspend fun replaceWithRandomIfEmpty(
-        albums: List<Album>,
+        albums: List<AmpacheModel>,
         fetchRemote: Boolean = false,
         callback: (albums: List<Album>) -> Unit
     ) {
@@ -259,18 +262,21 @@ class HomeScreenViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let { albums ->
-                            state = state.copy(frequentAlbums = albums)
+                            state = state.copy(frequentAlbums = mergeFrequentItems(albums))
                         }
                         L("HomeScreenViewModel.getFrequent size of network array ${result.networkData?.size}")
-                        replaceWithRandomIfEmpty(state.frequentAlbums) {
-                            state = state.copy(frequentAlbums = it)
+                        replaceWithRandomIfEmpty(state.frequentAlbums) { albums ->
+                            L("aaaa", "replace with random data null")
+                            state = state.copy(frequentAlbums = albums)
                         }
                     }
 
                     is Resource.Error -> {
                         state = state.copy(isFrequentAlbumsLoading = false, isLoading = false)
-                        replaceWithRandomIfEmpty(state.frequentAlbums) {
-                            state = state.copy(frequentAlbums = it)
+                        replaceWithRandomIfEmpty(state.frequentAlbums) { albums ->
+                            L("aaaa", "replace with random error")
+
+                            state = state.copy(frequentAlbums = albums)
                         }
                         L("ERROR HomeScreenViewModel.getFrequent ${result.exception}")
                     }
@@ -281,6 +287,16 @@ class HomeScreenViewModel @Inject constructor(
                 }
             }
     }
+
+    private suspend fun mergeFrequentItems(albums: List<AmpacheModel>): List<AmpacheModel> =
+        albums.toMutableList<AmpacheModel>().apply {
+            artistsRepository.getMostPlayedArtists().forEachIndexed { index, artist ->
+                val indexToAdd = (index * 3) + 2
+                if (indexToAdd < albums.size) {
+                    add(indexToAdd, artist)
+                }
+            }
+        }
 
     private suspend fun getRandom(fetchRemote: Boolean = true) {
         getRandom(fetchRemote = fetchRemote) { albums ->

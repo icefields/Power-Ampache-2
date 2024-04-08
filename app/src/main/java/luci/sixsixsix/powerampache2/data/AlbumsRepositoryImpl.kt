@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -229,21 +228,66 @@ class AlbumsRepositoryImpl @Inject constructor(
         preNetworkDbAlbums: List<Album>,
         albumsNetwork: List<Album>,
         statFilter: MainNetwork.StatFilter
-    ) = if (statFilter == MainNetwork.StatFilter.flagged || statFilter == MainNetwork.StatFilter.highest) {
+    ) = if (statFilter == MainNetwork.StatFilter.flagged
+        || statFilter == MainNetwork.StatFilter.highest
+        || statFilter == MainNetwork.StatFilter.frequent
+        ) {
         val dbAlbumsNew = getAlbumsStatsDb(statFilter)
         if (dbAlbumsNew.isNotEmpty()) {
-            dbAlbumsNew.map { it.toAlbum() }
+            try {
+                val preNetList = ArrayList<Album>(preNetworkDbAlbums)
+                val preNetListIds = preNetworkDbAlbums.map { it.id } // just the ids
+                val albumsNew = dbAlbumsNew.map { it.toAlbum() }
+
+                albumsNew.forEachIndexed { i, albumNew ->
+                    // loop through the updated albums
+                    // if any of the new albums is present already in the previous db results, replace
+                    // with newer version from web
+                    if (preNetListIds.contains(albumNew.id)) {
+                        preNetList[preNetListIds.indexOf(albumNew.id)] = albumNew
+                    }
+                }
+                // after replacing in place, remove all the albums added from the new-albums list
+                val albumsNewDiff = albumsNew.toMutableList().apply {
+                    removeAll(preNetList)
+                }
+
+                // DO THE SAME for network albums
+                albumsNetwork.forEachIndexed { i, albumNew ->
+                    // loop through the updated albums
+                    // if any of the new albums is present already in the previous db results, replace
+                    // with newer version from web
+                    if (preNetListIds.contains(albumNew.id)) {
+                        preNetList[preNetListIds.indexOf(albumNew.id)] = albumNew
+                    }
+                }
+                // after replacing in place, remove all the albums added from the new-albums list
+                val albumsNetNewDiff = albumsNetwork.toMutableList().apply {
+                    removeAll(preNetList)
+                    removeAll(albumsNewDiff) // this will be added back later at the end
+                }
+
+                preNetList.apply {
+                    addAll(albumsNewDiff)
+                    addAll(albumsNetNewDiff)
+                }
+            } catch (e: Exception) {
+                dbAlbumsNew.map { it.toAlbum() }
+            }
         } else {
+            L("aaaa", "return albums network", statFilter)
             albumsNetwork
         }
-    } else if  (statFilter == MainNetwork.StatFilter.frequent) {
-        // frequent is locally calculate using a query that counts the number of plays
-        // for each song of each album, since the backend calculates it differently,
-        // append the 2 results
-        LinkedHashSet(preNetworkDbAlbums).apply {
-            addAll(albumsNetwork)
-        }.toList()
-    } else {
+    }
+//    else if  (statFilter == MainNetwork.StatFilter.frequent) {
+//        // frequent is locally calculate using a query that counts the number of plays
+//        // for each song of each album, since the backend calculates it differently,
+//        // append the 2 results
+//        LinkedHashSet(preNetworkDbAlbums).apply {
+//            addAll(albumsNetwork)
+//        }.toList()
+//    }
+    else {
         albumsNetwork
     }
 
@@ -259,13 +303,6 @@ class AlbumsRepositoryImpl @Inject constructor(
         fc: FlowCollector<Resource<List<Album>>>?
     ): Boolean {
         if (isOfflineModeEnabled()) {
-//            val newAlbums = ArrayList<Album>().apply {
-//                albums.forEach { album: Album ->
-//                    if (isAlbumOffline(album)) {
-//                        add(album)
-//                    }
-//                }
-//            }
             fc?.emit(Resource.Success(
                 data = albums.filter { album -> isAlbumOffline(album) },
                 networkData = null)
@@ -282,6 +319,7 @@ class AlbumsRepositoryImpl @Inject constructor(
     ) = flow {
         emit(Resource.Loading(true))
         val dbAlbums = getAlbumsStatsDb(statFilter).map { it.toAlbum() }
+
         if (checkFilterOfflineSongs(dbAlbums, this)) {
             return@flow
         }
