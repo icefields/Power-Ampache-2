@@ -29,11 +29,14 @@ import retrofit2.http.POST
 import java.time.LocalDateTime
 
 interface ErrorHandlerApi {
+    /**
+     * https://pastebin.com/doc_api
+     */
     @FormUrlEncoded
     @POST("api_post.php")
     suspend fun sendErrorReport(
         @Field("api_user_key") apiUserKey: String = "56cc36787e45df9549c77636fb889fd4",
-        @Field("api_paste_private") apiPastePrivate: String = "1",
+        @Field("api_paste_private") apiPastePrivate: String = "0", // 0 = public, 1 = unlisted, 2 = private. public is unlimited
         @Field("api_paste_name") apiPasteName: String = LocalDateTime.now().toString(),
         @Field("api_paste_expire_date") apiPasteExpireDate: String = "1W",
         @Field("api_paste_format") apiPasteFormat: String = "php",

@@ -39,12 +39,14 @@ import javax.inject.Singleton
 class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDatabase) : Interceptor {
 
     private fun isErrorReportUrl(url: String) = url == BuildConfig.URL_ERROR_LOG
+    private fun isLogoutUrl(url: String) = url.contains("action=goodbye")
 
     override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
         var request = chain.request()
 
         // if reporting an error no need to manipulate the url
-        if (isErrorReportUrl(request.url.toString())) {
+        if (isErrorReportUrl(request.url.toString()) ||
+            isLogoutUrl(request.url.toString())) {
             return@runBlocking chain.proceed(request)
         }
 

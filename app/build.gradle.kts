@@ -89,7 +89,7 @@ android {
 
             resValue("string", "build_type", "Debug")
             resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.debug.provider")
-            resValue("color", "launcherBgColour", "#FFBF00")
+            resValue("color", "launcherBgColour", "#d7afff")
 
             //     <color name="launcherBgColour"></color>
             isMinifyEnabled = false
