@@ -27,7 +27,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -60,11 +62,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private val offsetFrequent = (0..2).random()
     private val offsetNewest = (0..2).random()
-    private var artistsNewest: List<AmpacheModel> = listOf()
     private val offsetRandom = (0..2).random()
-    private var artistsRandom: List<AmpacheModel> = listOf()
-    private val offsetRecent = (0..2).random()
-    private var artistsRecent: List<AmpacheModel> = listOf()
 
     val offlineModeStateFlow = settingsRepository.offlineModeFlow.distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
@@ -91,14 +89,43 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun fetchAllAsync() = viewModelScope.launch {
-        async { getPlaylists() }
-        async { getFlagged() }
-        async { getFrequent() }
-        async { getHighest() }
-        async { getNewest() }
-        async { getRecent() }
-        async { getRandom() }
+    private var playlistsJob: Job? = null
+    private var flaggedJob: Job? = null
+    private var frequentJob: Job? = null
+    private var highestJob: Job? = null
+    private var newestJob: Job? = null
+    private var recentJob: Job? = null
+    private var randomJob: Job? = null
+
+    private fun fetchAllAsync(){
+        playlistsJob?.cancel()
+        playlistsJob = viewModelScope.launch {
+            async { getPlaylists() }
+        }
+        flaggedJob?.cancel()
+        flaggedJob = viewModelScope.launch {
+            async { getFlagged() }
+        }
+        frequentJob?.cancel()
+        frequentJob = viewModelScope.launch {
+            async { getFrequent() }
+        }
+        highestJob?.cancel()
+        highestJob = viewModelScope.launch {
+            async { getHighest() }
+        }
+        newestJob?.cancel()
+        newestJob = viewModelScope.launch {
+            async { getNewest() }
+        }
+        recentJob?.cancel()
+        recentJob = viewModelScope.launch {
+            async { getRecent() }
+        }
+        randomJob?.cancel()
+        randomJob = viewModelScope.launch {
+            async { getRandom() }
+        }
     }
 
     private suspend fun fetchAll() = viewModelScope.launch {

@@ -21,7 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.data.local
 
-fun sanitizeUrl(url: String) = url
+fun sanitizeUrl(url: String) = url.lowercase()
     .replace("https:", "")
     .replace("http:", "")
     .replace("/", "")
@@ -29,4 +29,4 @@ fun sanitizeUrl(url: String) = url
     .replace("?", "")
 
 fun multiuserDbKey(username: String, serverUrl: String) =
-    "$username${sanitizeUrl(serverUrl)}"
+    "${username.lowercase()}${sanitizeUrl(serverUrl)}"

@@ -108,7 +108,7 @@ interface MusicDao {
     @Query("DELETE FROM albumentity")
     suspend fun clearAlbums()
 
-    @Query("DELETE FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId) AND $multiUserCondition")
+    @Query("DELETE FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId)")
     suspend fun deleteAlbumsFromArtist(artistId: String)
 
     @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == LOWER(artistName)""")
@@ -218,6 +218,9 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addDownloadedSong(downloadedSongEntity: DownloadedSongEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addDownloadedSongs(downloadedSongEntities: List<DownloadedSongEntity>)
+
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND LOWER(artistId) == LOWER(:artistId) AND LOWER(albumId) == LOWER(:albumId)""")
     suspend fun getDownloadedSong(songId: String, artistId: String, albumId: String): DownloadedSongEntity?
 
@@ -293,7 +296,7 @@ interface MusicDao {
             WHERE artist.id == song.artistId GROUP BY song.artistId ORDER BY acount DESC""")
     suspend fun getMostPlayedOfflineArtists(): List<ArtistEntity>
 
-    @Query("DELETE FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND $multiUserCondition")
+    @Query("DELETE FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId)")
     suspend fun deleteDownloadedSong(songId: String)
 
     @Query("DELETE FROM downloadedsongentity")
@@ -386,7 +389,28 @@ interface MusicDao {
             ORDER BY lastPlayed DESC LIMIT 66""")
     suspend fun getOfflineSongHistory(): List<DownloadedSongEntity>
 
-    //@Query("""DELETE FROM playlistentity artistentity, songentity, albumentity""")
+    // TODO MIGRATION CALLS, REMOVE AFTERWARDS
+    // --- TODO: REMOVE AFTER MIGRATION
+    @Query("""SELECT * from songentity where multiUserId == ''""")
+    suspend fun getNotMigratedSongs(): List<SongEntity>
+
+    @Query("""SELECT * from downloadedsongentity where multiUserId == ''""")
+    suspend fun getNotMigratedOfflineSongs(): List<DownloadedSongEntity>
+
+    @Query("""SELECT * from albumentity where multiUserId == ''""")
+    suspend fun getNotMigratedAlbums(): List<AlbumEntity>
+
+    @Query("""SELECT * from artistentity where multiUserId == ''""")
+    suspend fun getNotMigratedArtists(): List<ArtistEntity>
+
+    @Query("""SELECT * from playlistentity where multiUserId == ''""")
+    suspend fun getNotMigratedPlaylists(): List<PlaylistEntity>
+
+    @Query("""SELECT * from playlistsongentity where multiUserId == ''""")
+    suspend fun getNotMigratedPlaylistSong(): List<PlaylistSongEntity>
+    // --- TODO: REMOVE AFTER MIGRATION END
+
+
     suspend fun clearCachedData() {
         clearAlbums()
         clearArtists()

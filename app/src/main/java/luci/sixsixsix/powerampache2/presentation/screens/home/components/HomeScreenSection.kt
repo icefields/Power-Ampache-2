@@ -79,7 +79,7 @@ fun HomeScreenSection(
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.home_row_spacing)))
         }
     } else if ( (itemsRow is HomeScreenRowItems.Nothing) && itemsRow.isLoading) {
-        TimedLoadingView(5000)
+        TimedLoadingView(2500)
     }
 }
 
