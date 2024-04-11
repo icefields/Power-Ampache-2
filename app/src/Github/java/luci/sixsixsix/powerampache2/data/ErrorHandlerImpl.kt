@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.BuildConfig.ENABLE_ERROR_LOG
 import luci.sixsixsix.powerampache2.BuildConfig.URL_ERROR_LOG
 import luci.sixsixsix.powerampache2.R
@@ -82,14 +83,15 @@ class ErrorHandlerImpl @Inject constructor(
         }
     }
 
-    @androidx.annotation.OptIn(UnstableApi::class) override suspend fun <T> invoke(
+    @androidx.annotation.OptIn(UnstableApi::class)
+    override suspend fun <T> invoke(
         label: String,
         e: Throwable,
         fc: FlowCollector<Resource<T>>?,
         onError: (message: String, e: Throwable) -> Unit
     ) {
         // Blocking errors for server url not initialized
-        if (e is MusicException && e.musicError.isServerUrlNotInitialized()) {
+        if (!BuildConfig.DEBUG && e is MusicException && e.musicError.isServerUrlNotInitialized()) {
             L("ServerUrlNotInitializedException")
             fc?.emit(Resource.Loading(false))
             return

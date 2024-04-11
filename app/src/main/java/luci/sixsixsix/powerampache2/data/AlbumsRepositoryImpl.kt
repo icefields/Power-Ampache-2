@@ -40,6 +40,7 @@ import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -102,10 +103,11 @@ class AlbumsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!//authorize2(false)
+        val cred = getCurrentCredentials()
         val response = api.getAlbums(auth.auth, filter = query, offset = offset, limit = limit)
         response.error?.let { throw(MusicException(it.toError())) }
         val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
-        dao.insertAlbums(albums.map { it.toAlbumEntity() })
+        dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchAlbum(query).map { it.toAlbum() }, networkData = albums))
         emit(Resource.Loading(false))
@@ -137,6 +139,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!//authorize2(false)
+        val cred = getCurrentCredentials()
         val response = api.getAlbumsFromArtist(auth.auth, artistId = artistId)
         response.error?.let { throw(MusicException(it.toError())) }
 
@@ -148,7 +151,7 @@ class AlbumsRepositoryImpl @Inject constructor(
 
         // REFRESH ALBUMS BY ARTIST, delete first then reinsert
         albums.forEach { dao.deleteAlbumsFromArtist(it.artist.id) }
-        dao.insertAlbums(albums.map { it.toAlbumEntity() })
+        dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         val dbUpdatedAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
         emit(Resource.Success(data = dbUpdatedAlbums, networkData = albums))
@@ -178,10 +181,11 @@ class AlbumsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!
+        val cred = getCurrentCredentials()
         val response = api.getAlbumInfo(authKey = auth.auth, albumId = albumId)
         val album = response.toAlbum()  //will throw exception if artist null
 
-        dao.insertAlbums(listOf(album.toAlbumEntity()))
+        dao.insertAlbums(listOf(album.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl)))
         // stick to the single source of truth pattern despite performance deterioration
         dao.getAlbum(albumId)?.let { albumEntity ->
             emit(Resource.Success(data = albumEntity.toAlbum(), networkData = album ))
@@ -196,12 +200,13 @@ class AlbumsRepositoryImpl @Inject constructor(
                 dao.insertAlbums(listOf(it))
             } ?: run {
                 try {
+                    val cred = getCurrentCredentials()
                     //will throw exception if session null
                     dao.insertAlbums(listOf(
                         api.getAlbumInfo(
                             authKey = getSession()!!.auth,
                             albumId = albumId
-                        ).toAlbum().toAlbumEntity())
+                        ).toAlbum().toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl))
                     )
                 } catch (e: Exception) {
                     // TODO handle no album in playlist
@@ -215,14 +220,50 @@ class AlbumsRepositoryImpl @Inject constructor(
     // --- HOME PAGE data ---
 
     private suspend fun getAlbumsStatsDb(statFilter: MainNetwork.StatFilter) = when (statFilter) {
-        MainNetwork.StatFilter.random -> dao.getRandomAlbums()
-        MainNetwork.StatFilter.recent -> listOf()
-        MainNetwork.StatFilter.newest -> dao.getRecentlyReleasedAlbums()
-        MainNetwork.StatFilter.frequent -> dao.getMostPlayedAlbums()
-        MainNetwork.StatFilter.flagged -> dao.getLikedAlbums()
+        MainNetwork.StatFilter.random -> dao.getRandomAlbums().map { it.toAlbum() }
+        MainNetwork.StatFilter.recent -> getRecentlyPlayedAlbums()
+        MainNetwork.StatFilter.newest -> dao.getRecentlyReleasedAlbums().map { it.toAlbum() }
+        MainNetwork.StatFilter.frequent -> dao.getMostPlayedAlbums().map { it.toAlbum() }
+        MainNetwork.StatFilter.flagged -> dao.getLikedAlbums().map { it.toAlbum() }
         MainNetwork.StatFilter.forgotten -> listOf()
-        MainNetwork.StatFilter.highest -> dao.getHighestRatedAlbums()
+        MainNetwork.StatFilter.highest -> dao.getHighestRatedAlbums().map { it.toAlbum() }
     }
+
+    private suspend fun getRecentlyPlayedAlbums() = mutableListOf<Album>().apply {
+        dao.getSongHistory().forEach {
+            val artistAttr = MusicAttribute(id = it.artistId, name = it.artistName)
+            val album = Album(
+                id = it.albumId,
+                name = it.albumName,
+                basename = it.albumName,
+                artist = artistAttr,
+                artists = listOf(artistAttr),
+                year = it.year,
+                genre = it.genre,
+                artUrl = it.imageUrl
+            )
+            add(album)
+        }
+    }
+
+    private suspend fun getRecentlyPlayedOfflineAlbums() = LinkedHashSet<Album>().apply {
+        dao.getOfflineSongHistory().forEach {
+            if (!this.map { alb -> alb.id }.contains(it.albumId)) {
+                val artistAttr = MusicAttribute(id = it.artistId, name = it.artistName)
+                val album = Album(
+                    id = it.albumId,
+                    name = it.albumName,
+                    basename = it.albumName,
+                    artist = artistAttr,
+                    artists = listOf(artistAttr),
+                    year = it.year,
+                    genre = it.genre,
+                    artUrl = it.imageUrl
+                )
+                add(album)
+            }
+        }
+    }.toList()
 
     private suspend fun parseStatData(
         preNetworkDbAlbums: List<Album>,
@@ -237,7 +278,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             try {
                 val preNetList = ArrayList<Album>(preNetworkDbAlbums)
                 val preNetListIds = preNetworkDbAlbums.map { it.id } // just the ids
-                val albumsNew = dbAlbumsNew.map { it.toAlbum() }
+                val albumsNew = dbAlbumsNew
 
                 albumsNew.forEachIndexed { i, albumNew ->
                     // loop through the updated albums
@@ -272,7 +313,7 @@ class AlbumsRepositoryImpl @Inject constructor(
                     addAll(albumsNetNewDiff)
                 }
             } catch (e: Exception) {
-                dbAlbumsNew.map { it.toAlbum() }
+                dbAlbumsNew
             }
         } else {
             L("aaaa", "return albums network", statFilter)
@@ -318,7 +359,14 @@ class AlbumsRepositoryImpl @Inject constructor(
         fetchRemote: Boolean = true
     ) = flow {
         emit(Resource.Loading(true))
-        val dbAlbums = getAlbumsStatsDb(statFilter).map { it.toAlbum() }
+        if (isOfflineModeEnabled() && statFilter == MainNetwork.StatFilter.recent) {
+            // recent has its own methods
+            val data = getRecentlyPlayedOfflineAlbums()
+            emit(Resource.Success(data = data, networkData = data))
+            return@flow
+        }
+
+        val dbAlbums = getAlbumsStatsDb(statFilter)
 
         if (checkFilterOfflineSongs(dbAlbums, this)) {
             return@flow
@@ -328,13 +376,14 @@ class AlbumsRepositoryImpl @Inject constructor(
 
         if (fetchRemote) {
             val auth = getSession()!!
+            val cred = getCurrentCredentials()
             api.getAlbumsStats(
                 auth.auth,
                 username = getCredentials()?.username,
                 filter = statFilter
             ).albums?.let { albumsDto ->
                 val albumsNetwork = albumsDto.map { it.toAlbum() }
-                dao.insertAlbums(albumsNetwork.map { it.toAlbumEntity() })
+                dao.insertAlbums(albumsNetwork.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
                 // if getting highest rated and flagged return data from database for consistency
                 val data = parseStatData(
                     preNetworkDbAlbums = dbAlbums,

@@ -267,8 +267,7 @@ class SimpleMediaServiceHandler @Inject constructor(
     @androidx.annotation.OptIn(UnstableApi::class) override fun onPlayerError(error: PlaybackException) {
         val isUserNotEnabledException =
                 (error.cause is InvalidResponseCodeException) &&
-                        (error.cause as InvalidResponseCodeException).responseCode == 403 &&
-                        (error.cause as InvalidResponseCodeException).responseMessage?.lowercase() == "User disabled".lowercase()
+                        (error.cause as InvalidResponseCodeException).responseCode == 403
 
         GlobalScope.launch {
             when (val cause = error.cause) {

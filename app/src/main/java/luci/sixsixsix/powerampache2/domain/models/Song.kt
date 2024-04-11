@@ -92,6 +92,12 @@ data class Song(
             preciseRating = Constants.ERROR_FLOAT,
             rating = Constants.ERROR_FLOAT,
         )
+
+        fun mapSongs(songs: List<Song>) = LinkedHashMap<String, Song>().apply {
+            songs.forEach {
+                put(it.mediaId, it)
+            }
+        }
     }
 }
 

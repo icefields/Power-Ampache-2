@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.data.local.entities
 
 import androidx.room.ColumnInfo
@@ -5,6 +26,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.processFlag
+import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 
@@ -44,16 +66,18 @@ data class DownloadedSongEntity(
     val owner: String,
     @ColumnInfo(name = "flag", defaultValue = "false")
     val flag: Boolean,
+    @ColumnInfo(name = "multiUserId", defaultValue = "")
+    val multiUserId: String
 )
 
-fun Song.toDownloadedSongEntity(localUri: String, owner: String) = DownloadedSongEntity(
+fun Song.toDownloadedSongEntity(downloadedSongUri: String, owner: String, serverUrl: String) = DownloadedSongEntity(
     mediaId = mediaId,
     title = title,
     artistId = artist.id,
     artistName = artist.name,
     albumId = album.id,
     albumName = album.name,
-    songUri = localUri,
+    songUri = downloadedSongUri,
     bitrate = bitrate,
     channels = channels,
     genre = genre,
@@ -74,7 +98,8 @@ fun Song.toDownloadedSongEntity(localUri: String, owner: String) = DownloadedSon
     rating = rating,
     relativePath = filename,
     owner = owner,
-    flag = flag == 1
+    flag = flag == 1,
+    multiUserId = multiuserDbKey(username = owner, serverUrl = serverUrl)
 )
 
 fun DownloadedSongEntity.toSong() = Song(

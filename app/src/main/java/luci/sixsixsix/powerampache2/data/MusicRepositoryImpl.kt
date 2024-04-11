@@ -45,6 +45,8 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toGenre
 import luci.sixsixsix.powerampache2.data.local.entities.toGenreEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toMultiUserCredentialEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toMultiUserSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toUser
@@ -88,13 +90,9 @@ class MusicRepositoryImpl @Inject constructor(
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
     override val userLiveData: Flow<User?> = dao.getUserLiveData().map {
-        val usernameCredentials = dao.getCredentials()?.username ?: ""
-        val userEntity = it ?: dao.getUser(usernameCredentials)
-//        errorHandler.logError("USER ENTITY RECEIVED:\n${it}\n\nUSER ENTITY AFTER:\n" +
-//                "${userEntity}\n" +
-//                "\nTO USER\n${userEntity?.toUser()}\n\nUserWithCredentials.toUser\n${UserWithCredentials(username = usernameCredentials).toUser()}")
-        userEntity?.toUser() ?: UserWithCredentials(username = usernameCredentials).toUser()
-        //(it ?: UserWithCredentials(username = dao.getCredentials()?.username)).toUser()
+        val cred = getCurrentCredentials()
+        val userEntity = it ?: dao.getUser(cred.username)
+        userEntity?.toUser() ?: UserWithCredentials(username = cred.username).toUser(cred.serverUrl)
     }
 
     // used to check if a call to getUserNetwork() is necessary
@@ -125,10 +123,14 @@ class MusicRepositoryImpl @Inject constructor(
             L("setSession se.auth != getSession()?.auth")
         }
         dao.updateSession(se.toSessionEntity())
+        val cred = getCurrentCredentials()
+        dao.insertMultiUserSession(se.toMultiUserSessionEntity(username = cred.username, serverUrl = cred.serverUrl))
     }
 
-    private suspend fun setCredentials(se: CredentialsEntity) =
+    private suspend fun setCredentials(se: CredentialsEntity) {
         dao.updateCredentials(se)
+        dao.insertMultiUserCredentials(se.toMultiUserCredentialEntity())
+    }
 
     override suspend fun logout(): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading(true))
@@ -315,6 +317,7 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
 
         val localGenres = dao.getGenres()
+        L("eeee", localGenres.size)
         val isDbEmpty = localGenres.isEmpty()
         if (!isDbEmpty) {
             emit(Resource.Success(data = localGenres.map { it.toGenre() }))
@@ -341,7 +344,8 @@ class MusicRepositoryImpl @Inject constructor(
         if (Constants.CLEAR_TABLE_AFTER_FETCH) {
             dao.clearGenres()
         }
-        dao.insertGenres(response.map { it.toGenreEntity() })
+        val cred = getCurrentCredentials()
+        dao.insertGenres(response.map { it.toGenreEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.getGenres().map { it.toGenre() }, networkData = response))
 

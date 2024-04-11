@@ -83,7 +83,11 @@ class SongDownloadWorker @AssistedInject constructor(
                     body()?.byteStream()?.let { inputStream ->
                         val filepath = storageManager.saveSong(song, inputStream)
                         db.dao.addDownloadedSong( // TODO fix double-bang!!
-                            song.toDownloadedSongEntity(filepath, username!!)
+                            song.toDownloadedSongEntity(
+                                filepath,
+                                username!!.lowercase(),
+                                serverUrl = db.dao.getCredentials()?.serverUrl!!.lowercase()
+                            )
                         )
                         setProgress(lastUpdate)
                         //if ()

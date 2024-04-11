@@ -7,16 +7,20 @@ import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.processArtUrl
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.common.push
+import luci.sixsixsix.powerampache2.data.local.MusicDao
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettings
+import luci.sixsixsix.powerampache2.data.local.entities.toMultiUserEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toUserEntity
+import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.data.remote.LikeData
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.OfflineData
@@ -56,62 +60,46 @@ abstract class BaseAmpacheRepository(
                 }
             }
 
+    suspend fun getCurrentCredentials() = getCredentials()?.let {
+        CurrentCredentialsWrapper(username = it.username.lowercase(), serverUrl = it.serverUrl.lowercase())
+    } ?: CurrentCredentialsWrapper(username = "", serverUrl = "")
+
     /**
      * updating the user in the database will trigger the user live data.
      * observe livedata to get updates on the user
      */
-    private suspend fun setUser(user: User) {
-
-        val userEmail = user.email ?: ""
-        val userAccess = user.access ?: 0
-        val userStreamToken = user.streamToken ?: ""
-        val userFullNamePublic = user.fullNamePublic ?: 0
-        val userFullName = user.fullName ?: ""
-        val userDisabled = user.disabled ?: false
-        val userCreateDate = user.createDate ?: ERROR_INT
-        val userLastSeen = user.lastSeen ?: ERROR_INT
-        val userWebsite = user.website ?: ""
-        val userState = user.state ?: ""
-        val userCity = user.city ?: ""
-
-        val entity = UserEntity(
-            id = user.id,
-            username = user.username.lowercase(), // lowercase to facilitate queries
-            email = userEmail,
-            access = userAccess,
-            streamToken = userStreamToken,
-            fullNamePublic = userFullNamePublic,
-            fullName = userFullName,
-            disabled = userDisabled,
-            createDate = userCreateDate,
-            lastSeen = userLastSeen,
-            website = userWebsite,
-            state = userState,
-            city = userCity
-        )
-        dao.updateUser(entity)//user.toUserEntity())
+    private suspend fun setUser(user: User) = getCurrentCredentials().serverUrl.let { serverUrl ->
+        dao.updateUser(user.toUserEntity(serverUrl))
+        dao.insertMultiUserUser(user.toMultiUserEntity(serverUrl))
     }
 
     protected suspend fun getUserNetwork(): User? =
-        getCredentials()?.username?.let { username ->
-            getSession()?.let { session ->
-                try {
-                    val user = api.getUser(authKey = session.auth, username = username).toUser()
-                    setUser(user)
-                    user
-                } catch (e: Exception) {
-                    errHandler.logError(e)
-                    null
-                }
+        getSession()?.let { session ->
+            val cred = getCurrentCredentials()
+            try {
+                val user =
+                    api.getUser(authKey = session.auth, username = cred.username)
+                        .toUser(cred.serverUrl)
+                setUser(user)
+                user
+            } catch (e: Exception) {
+                errHandler.logError(e)
+                null
             }
         }
 
+
     protected suspend fun cacheSongs(songs: List<Song>) {
-        dao.insertSongs(songs.map { it.toSongEntity() })
+        val credentials = getCurrentCredentials()
+        dao.insertSongs(songs.map { it.toSongEntity(username = credentials.username, serverUrl = credentials.serverUrl) })
         songs.forEach { song ->
             dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.let { downloadedSong ->
                 dao.addDownloadedSong(
-                    song.toDownloadedSongEntity(downloadedSong.songUri, owner = downloadedSong.owner)
+                    song.toDownloadedSongEntity(
+                        downloadedSong.songUri,
+                        owner = downloadedSong.owner.lowercase(),
+                        serverUrl = credentials.serverUrl
+                    )
                 )
             }
         }
@@ -246,3 +234,9 @@ abstract class BaseAmpacheRepository(
         return true
     }
 }
+
+data class CurrentCredentialsWrapper(
+    val username: String,
+    val serverUrl: String,
+    val multiUserId: String = multiuserDbKey(username = username, serverUrl = serverUrl)
+)

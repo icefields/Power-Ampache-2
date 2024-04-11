@@ -3,7 +3,6 @@ package luci.sixsixsix.powerampache2.data.local.models
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.common.Constants.USER_ERROR_MESSAGE
 import luci.sixsixsix.powerampache2.domain.models.User
 
 data class UserWithCredentials(
@@ -26,7 +25,7 @@ data class UserWithCredentials(
 //    val serverUrl: String
 )
 
-fun UserWithCredentials.toUser() = User(
+fun UserWithCredentials.toUser(serverUrl: String) = User(
     username = username ?: credentialsUsername ?: ERROR_STRING,
     id = id ?: ERROR_INT.toString(),
     email = email ?: Constants.USER_EMAIL_DEFAULT,
@@ -40,5 +39,6 @@ fun UserWithCredentials.toUser() = User(
     website = website ?: "",
     state = state ?: "",
     city = city ?: "",
-    art = ""
+    art = "",
+    serverUrl = serverUrl
 )

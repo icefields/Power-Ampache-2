@@ -150,17 +150,6 @@ fun MainContentScreen(
     val appName = stringResource(id = R.string.app_name)
     var barTitle by remember { mutableStateOf(appName) }
 
-    if (offlineModeState &&
-        (currentScreen == MainContentMenuItem.Logout.id)) {
-        // user cannot logout if offline mode disabled
-        //currentScreen = MainContentMenuItem.Home.id
-        //currentScreen = MainContentMenuItem.Offline.id
-        //currentScreenClass = MainContentMenuItem.Offline::class.java.canonicalName
-    } else {
-        // currentScreen = MainContentMenuItem.Home.id
-        // currentScreenClass = MainContentMenuItem.Home::class.java.canonicalName
-    }
-
     if (isSearchActive.value) {
         MainSearchBar(
             modifier = Modifier.focusRequester(focusRequester),
@@ -188,10 +177,12 @@ fun MainContentScreen(
                 versionInfo = settingsViewModel.state.appVersionInfoStr,
                 hideDonationButtons = localSettingsState.hideDonationButton,
                 onItemClick = {
-                    currentScreen = it.id
-                    currentScreenClass = it.javaClass.canonicalName
-                    scope.launch {
-                        drawerState.close()
+                    scope.launch { drawerState.close() }
+                    if (it == MainContentMenuItem.Logout) {
+                        mainViewModel.onEvent(MainEvent.OnLogout)
+                    } else {
+                        currentScreen = it.id
+                        currentScreenClass = it.javaClass.canonicalName
                     }
                 }
             )
@@ -287,9 +278,9 @@ fun MainContentScreen(
                                navigator = navigator,
                                settingsViewModel = settingsViewModel
                            ).also { barTitle = menuItem.title }
-                           MainContentMenuItem.Logout ->
-                               mainViewModel.onEvent(MainEvent.OnLogout)
-                                   .also { currentScreen = MainContentMenuItem.Home.id }
+                           MainContentMenuItem.Logout -> {
+                               // already handled by the drawer header
+                           }
                            MainContentMenuItem.About -> AboutScreen(
                                navigator = navigator,
                                settingsViewModel = settingsViewModel

@@ -58,6 +58,14 @@ class HomeScreenViewModel @Inject constructor(
 ) : ViewModel() {
     var state by mutableStateOf(HomeScreenState())
 
+    private val offsetFrequent = (0..2).random()
+    private val offsetNewest = (0..2).random()
+    private var artistsNewest: List<AmpacheModel> = listOf()
+    private val offsetRandom = (0..2).random()
+    private var artistsRandom: List<AmpacheModel> = listOf()
+    private val offsetRecent = (0..2).random()
+    private var artistsRecent: List<AmpacheModel> = listOf()
+
     val offlineModeStateFlow = settingsRepository.offlineModeFlow.distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
@@ -158,7 +166,7 @@ class HomeScreenViewModel @Inject constructor(
                         // TODO use network data for recent right now, add lastPlayed field to
                         //  every entity to start using db in conjunction
                         result.networkData?.let { albums ->
-                            state = state.copy(recentAlbums = injectArtists(albums))
+                            state = state.copy(recentAlbums = injectArtists(albums, offsetFrequent))
 
                             if (!offlineModeStateFlow.value) {
                                 replaceWithRandomIfEmpty(state.recentAlbums, fetchRemote = true) {
@@ -216,7 +224,7 @@ class HomeScreenViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let { albums ->
-                            state = state.copy(newestAlbums = injectArtists(albums))
+                            state = state.copy(newestAlbums = injectArtists(albums, offsetNewest))
                         }
                         replaceWithRandomIfEmpty(state.newestAlbums) {
                             state = state.copy(newestAlbums = it)
@@ -317,7 +325,7 @@ class HomeScreenViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let { albums ->
-                            callback(if (injectArtists) injectArtists(albums) else albums)
+                            callback(if (injectArtists) injectArtists(albums, offsetRandom) else albums)
                         }
                         L("HomeScreenViewModel.getRandom size of network array ${result.networkData?.size}")
                     }
@@ -370,25 +378,23 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun injectArtists(albums: List<AmpacheModel>): List<AmpacheModel> =
+    private fun injectArtists(albums: List<AmpacheModel>, offset: Int): List<AmpacheModel> =
         albums.toMutableList<AmpacheModel>().apply {
-            val generateArtistsList = mutableListOf<Artist>()
+            val generateArtistsList = HashMap<String, Artist>()
             forEach { album ->
                 if (album is Album) {
-                    generateArtistsList.add(
-                        Artist(
-                            id = album.artist.id,
-                            name = album.artist.name,
-                            artUrl = album.artUrl
-                        )
+                    generateArtistsList[album.artist.id] = Artist(
+                        id = album.artist.id,
+                        name = album.artist.name,
+                        artUrl = album.artUrl
                     )
                 }
             }
 
             addArtistsToAlbumList(albums,
-                generateArtistsList.shuffled(),
+                generateArtistsList.values.toList(),
                 resultList = this,
-                offset = (0..2).random())
+                offset = offset)
         }
 
     private suspend fun mergeFrequentItems(albums: List<AmpacheModel>): List<AmpacheModel> =
@@ -399,7 +405,7 @@ class HomeScreenViewModel @Inject constructor(
                     albums,
                     artistsMostPlayed,
                     resultList = this,
-                    offset = (1..2).random()
+                    offset = offsetFrequent
                 )
             }
             //else {
