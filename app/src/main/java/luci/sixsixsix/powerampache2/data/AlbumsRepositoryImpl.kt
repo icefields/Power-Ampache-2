@@ -102,9 +102,8 @@ class AlbumsRepositoryImpl @Inject constructor(
             }
         }
 
-        val auth = getSession()!!//authorize2(false)
         val cred = getCurrentCredentials()
-        val response = api.getAlbums(auth.auth, filter = query, offset = offset, limit = limit)
+        val response = api.getAlbums(authToken(), filter = query, offset = offset, limit = limit)
         response.error?.let { throw(MusicException(it.toError())) }
         val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
         dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
@@ -138,9 +137,8 @@ class AlbumsRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        val auth = getSession()!!//authorize2(false)
         val cred = getCurrentCredentials()
-        val response = api.getAlbumsFromArtist(auth.auth, artistId = artistId)
+        val response = api.getAlbumsFromArtist(authToken(), artistId = artistId)
         response.error?.let { throw(MusicException(it.toError())) }
 
         // some albums come from web with no artists id, or with artist id zero, add the id manually
@@ -180,9 +178,8 @@ class AlbumsRepositoryImpl @Inject constructor(
             }
         }
 
-        val auth = getSession()!!
         val cred = getCurrentCredentials()
-        val response = api.getAlbumInfo(authKey = auth.auth, albumId = albumId)
+        val response = api.getAlbumInfo(authKey = authToken(), albumId = albumId)
         val album = response.toAlbum()  //will throw exception if artist null
 
         dao.insertAlbums(listOf(album.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl)))
@@ -204,7 +201,7 @@ class AlbumsRepositoryImpl @Inject constructor(
                     //will throw exception if session null
                     dao.insertAlbums(listOf(
                         api.getAlbumInfo(
-                            authKey = getSession()!!.auth,
+                            authKey = authToken(),
                             albumId = albumId
                         ).toAlbum().toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl))
                     )
@@ -316,7 +313,6 @@ class AlbumsRepositoryImpl @Inject constructor(
                 dbAlbumsNew
             }
         } else {
-            L("aaaa", "return albums network", statFilter)
             albumsNetwork
         }
     }
@@ -375,10 +371,9 @@ class AlbumsRepositoryImpl @Inject constructor(
         emit(Resource.Success(data = dbAlbums, networkData = null))
 
         if (fetchRemote) {
-            val auth = getSession()!!
             val cred = getCurrentCredentials()
             api.getAlbumsStats(
-                auth.auth,
+                authToken(),
                 username = getCredentials()?.username,
                 filter = statFilter
             ).albums?.let { albumsDto ->
@@ -416,7 +411,7 @@ class AlbumsRepositoryImpl @Inject constructor(
     override suspend fun getAlbumShareLink(albumId: String) = flow {
         emit(Resource.Loading(true))
         val response = api.createShare(
-            getSession()!!.auth,
+            authToken(),
             id = albumId,
             type = MainNetwork.Type.album
         )

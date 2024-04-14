@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -48,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -89,10 +91,10 @@ fun PlaylistItemMain(
             )
     ) {
         Card(
-            border = BorderStroke(
+            /*border = BorderStroke(
                 width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
                 color = MaterialTheme.colorScheme.background
-            ),
+            ),*/
             modifier = Modifier
                 .weight(1f)
                 .background(Color.Transparent)
@@ -100,25 +102,29 @@ fun PlaylistItemMain(
             colors = CardDefaults.cardColors(
                 containerColor = RandomThemeBackgroundColour(playlistInfo.id)
             ),
-            elevation = CardDefaults.cardElevation(1.dp),
+            elevation = CardDefaults.cardElevation(0.dp),
             shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
         ) {
             val isSmartPlaylist = playlistInfo.isSmartPlaylist()
             Box {
                 if(!isSmartPlaylist) {
-                AsyncImage(
-                    model = if(!isSmartPlaylist) playlistInfo.artUrl else "",
-                    contentScale = ContentScale.FillWidth,
-                    placeholder = painterResource(id = R.drawable.placeholder_album),
-                    error = painterResource(id = R.drawable.placeholder_album),
-                    contentDescription = playlistInfo.name,
-                    colorFilter = if(isSmartPlaylist) {
-                        ColorFilter.lighting(
-                            add = Color.Black.copy(alpha = 0.4f),
-                            multiply = RandomThemeBackgroundColour(playlistInfo.id)
+                    if (playlistInfo.artUrl?.isBlank() == true) {
+                        Icon(
+                            modifier = Modifier
+                                .aspectRatio(1f/1f)
+                                .alpha(0.4f)
+                                .padding(end = 6.dp, top = 16.dp, bottom = 0.dp, start = 16.dp),
+                            painter = RandomThemeBackgroundColour.getBgEqImage(obj = playlistInfo.id),
+                            contentDescription = "smart list image",
                         )
-                    } else null
-                )} else {
+                    } else {
+                        AsyncImage(
+                            model = playlistInfo.artUrl,
+                            contentScale = ContentScale.FillWidth,
+                            contentDescription = playlistInfo.name,
+                        )
+                    }
+                } else {
                     Icon(
                         painter = painterResource(id = R.drawable.placeholder_album),
                         contentDescription = "smart list image",

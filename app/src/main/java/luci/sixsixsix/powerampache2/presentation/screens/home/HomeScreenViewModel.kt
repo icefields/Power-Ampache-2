@@ -97,32 +97,37 @@ class HomeScreenViewModel @Inject constructor(
     private var recentJob: Job? = null
     private var randomJob: Job? = null
 
-    private fun fetchAllAsync(){
+    private fun cancelJobs() {
         playlistsJob?.cancel()
+        flaggedJob?.cancel()
+        frequentJob?.cancel()
+        highestJob?.cancel()
+        newestJob?.cancel()
+        recentJob?.cancel()
+        randomJob?.cancel()
+    }
+
+    private fun fetchAllAsync(){
+        cancelJobs()
+
         playlistsJob = viewModelScope.launch {
             async { getPlaylists() }
         }
-        flaggedJob?.cancel()
-        flaggedJob = viewModelScope.launch {
-            async { getFlagged() }
-        }
-        frequentJob?.cancel()
-        frequentJob = viewModelScope.launch {
-            async { getFrequent() }
-        }
-        highestJob?.cancel()
-        highestJob = viewModelScope.launch {
-            async { getHighest() }
-        }
-        newestJob?.cancel()
-        newestJob = viewModelScope.launch {
-            async { getNewest() }
-        }
-        recentJob?.cancel()
         recentJob = viewModelScope.launch {
             async { getRecent() }
         }
-        randomJob?.cancel()
+        flaggedJob = viewModelScope.launch {
+            async { getFlagged() }
+        }
+        frequentJob = viewModelScope.launch {
+            async { getFrequent() }
+        }
+        highestJob = viewModelScope.launch {
+            async { getHighest() }
+        }
+        newestJob = viewModelScope.launch {
+            async { getNewest() }
+        }
         randomJob = viewModelScope.launch {
             async { getRandom() }
         }
@@ -311,7 +316,6 @@ class HomeScreenViewModel @Inject constructor(
                         }
                         L("HomeScreenViewModel.getFrequent size of network array ${result.networkData?.size}")
                         replaceWithRandomIfEmpty(state.frequentAlbums) { albums ->
-                            L("aaaa", "replace with random data null")
                             state = state.copy(frequentAlbums = albums)
                         }
                     }
@@ -319,8 +323,6 @@ class HomeScreenViewModel @Inject constructor(
                     is Resource.Error -> {
                         state = state.copy(isFrequentAlbumsLoading = false, isLoading = false)
                         replaceWithRandomIfEmpty(state.frequentAlbums) { albums ->
-                            L("aaaa", "replace with random error")
-
                             state = state.copy(frequentAlbums = albums)
                         }
                         L("ERROR HomeScreenViewModel.getFrequent ${result.exception}")
@@ -446,4 +448,9 @@ class HomeScreenViewModel @Inject constructor(
 //                }
 //            }
         }
+
+    override fun onCleared() {
+        cancelJobs()
+        super.onCleared()
+    }
 }

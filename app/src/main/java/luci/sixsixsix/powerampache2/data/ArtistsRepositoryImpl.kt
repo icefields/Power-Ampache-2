@@ -81,9 +81,8 @@ class ArtistsRepositoryImpl @Inject constructor(
             }
         }
 
-        val auth = getSession()!!
         val cred = getCurrentCredentials()
-        val response = api.getArtistInfo(authKey = auth.auth, artistId = artistId)
+        val response = api.getArtistInfo(authKey = authToken(), artistId = artistId)
         val artist = response.toArtist()  //will throw exception if artist null
 
 //        if (CLEAR_TABLE_AFTER_FETCH) { dao.clearArtists() }
@@ -125,9 +124,7 @@ class ArtistsRepositoryImpl @Inject constructor(
             }
         }
 
-        val auth = getSession()!!
-        val cred = getCurrentCredentials()
-        val response = api.getArtists(auth.auth, filter = query, offset = offset)
+        val response = api.getArtists(authToken(), filter = query, offset = offset)
         response.error?.let { throw(MusicException(it.toError())) }
         val artists = response.artists!!.map { it.toArtist() } //will throw exception if artist null
 
@@ -135,6 +132,8 @@ class ArtistsRepositoryImpl @Inject constructor(
             // if it's just a search do not clear cache
             dao.clearArtists()
         }
+
+        val cred = getCurrentCredentials()
         dao.insertArtists(artists.map { it.toArtistEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchArtist(query).map { it.toArtist() }, networkData = artists))
@@ -162,9 +161,7 @@ class ArtistsRepositoryImpl @Inject constructor(
             }
         }
 
-        val auth = getSession()!!
-        val cred = getCurrentCredentials()
-        val response = api.getArtistsByGenre(auth.auth, filter = genre.id, offset = offset)
+        val response = api.getArtistsByGenre(authToken(), filter = genre.id, offset = offset)
         response.error?.let { throw(MusicException(it.toError())) }
         val artists = response.artists!!.map { it.toArtist() } //will throw exception if artist null
 
@@ -172,6 +169,8 @@ class ArtistsRepositoryImpl @Inject constructor(
             // if it's just a search do not clear cache
             dao.clearArtists()
         }
+
+        val cred = getCurrentCredentials()
         dao.insertArtists(artists.map { it.toArtistEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchArtistByGenre(genre.name).map { it.toArtist() }, networkData = artists))

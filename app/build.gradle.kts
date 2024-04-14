@@ -44,9 +44,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 47
-        versionName = "0.47-rc1"
-        val versionQuote = "This version is powered by the answer to the Ultimate Question of Life, the Universe, and Everything (corrected for inflation)"
+        versionCode = 48
+        versionName = "0.48-rc1"
+        val versionQuote = "This version is powered by REVOLUTION! Revolution everywhere!"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -75,6 +75,7 @@ android {
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
             buildConfigField("boolean", "RESET_QUEUE_ON_NEW_SESSION", "true")
+            buildConfigField("boolean", "SHOW_LOADING_ON_NEW_SESSION", "false")
 
             // CONSTANTS
             buildConfigField("String", "AMPACHE_USER", ampacheUser)
@@ -108,6 +109,7 @@ android {
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
             buildConfigField("boolean", "RESET_QUEUE_ON_NEW_SESSION", "true")
+            buildConfigField("boolean", "SHOW_LOADING_ON_NEW_SESSION", "true")
 
             // CONSTANTS
             buildConfigField("String", "AMPACHE_USER", "\"\"")

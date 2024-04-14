@@ -271,7 +271,6 @@ fun UserHead(
     size: Dp = 40.dp,
     textStyle: TextStyle = MaterialTheme.typography.labelMedium,
 ) {
-    L("aaaaa ${imageUrl}")
     AnimatedVisibility(visible = !imageUrl.isNullOrBlank()) {
         AsyncImage(
             model = imageUrl,

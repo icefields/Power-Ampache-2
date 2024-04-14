@@ -32,8 +32,8 @@ data class AuthState(
     val user: User? = null,
     val isLoading: Boolean = false,
     val error: String = "",
-    val username: String = "",
-    val password: String = "",
+    val username: String = "luci",
+    val password: String = "9BAmGRLNWjrn",
     val authToken: String = "",
     val url: String = ""
 ): Parcelable
