@@ -28,8 +28,11 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toArtist
 import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
@@ -38,6 +41,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Genre
+import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -78,12 +82,13 @@ class ArtistsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!
+        val cred = getCurrentCredentials()
         val response = api.getArtistInfo(authKey = auth.auth, artistId = artistId)
         val artist = response.toArtist()  //will throw exception if artist null
 
 //        if (CLEAR_TABLE_AFTER_FETCH) { dao.clearArtists() }
 
-        dao.insertArtists(listOf(artist.toArtistEntity()))
+        dao.insertArtists(listOf(artist.toArtistEntity(username = cred.username, serverUrl = cred.serverUrl)))
         // stick to the single source of truth pattern despite performance deterioration
         dao.getArtist(artistId)?.let { artistEntity ->
             emit(Resource.Success(data = artistEntity.toArtist(), networkData = artist ))
@@ -121,6 +126,7 @@ class ArtistsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!
+        val cred = getCurrentCredentials()
         val response = api.getArtists(auth.auth, filter = query, offset = offset)
         response.error?.let { throw(MusicException(it.toError())) }
         val artists = response.artists!!.map { it.toArtist() } //will throw exception if artist null
@@ -129,7 +135,7 @@ class ArtistsRepositoryImpl @Inject constructor(
             // if it's just a search do not clear cache
             dao.clearArtists()
         }
-        dao.insertArtists(artists.map { it.toArtistEntity() })
+        dao.insertArtists(artists.map { it.toArtistEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchArtist(query).map { it.toArtist() }, networkData = artists))
 
@@ -157,6 +163,7 @@ class ArtistsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!
+        val cred = getCurrentCredentials()
         val response = api.getArtistsByGenre(auth.auth, filter = genre.id, offset = offset)
         response.error?.let { throw(MusicException(it.toError())) }
         val artists = response.artists!!.map { it.toArtist() } //will throw exception if artist null
@@ -165,7 +172,7 @@ class ArtistsRepositoryImpl @Inject constructor(
             // if it's just a search do not clear cache
             dao.clearArtists()
         }
-        dao.insertArtists(artists.map { it.toArtistEntity() })
+        dao.insertArtists(artists.map { it.toArtistEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchArtistByGenre(genre.name).map { it.toArtist() }, networkData = artists))
 
@@ -174,5 +181,28 @@ class ArtistsRepositoryImpl @Inject constructor(
 
     override suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>> = like(id, like, MainNetwork.Type.artist)
 
-    override suspend fun getMostPlayedArtists(): List<Artist> = dao.getMostPlayedArtists().map { it.toArtist() }
+    override suspend fun getMostPlayedArtists(): List<Artist> = if (isOfflineModeEnabled()) {
+        generateMostPlayedArtists(dao.getMostPlayedOfflineArtists(), dao.getOfflineSongHistory().map { it.toSong() })
+    } else {
+        generateMostPlayedArtists(dao.getMostPlayedArtists(), dao.getSongHistory().map { it.toSong() })
+    }
+
+    private fun generateMostPlayedArtists(
+        mostPlayedArtistsDb: List<ArtistEntity>,
+        mostPlayedSongsDb: List<Song>
+    ) = if (mostPlayedArtistsDb.isEmpty()) {
+            HashMap<String, Artist>().apply {
+                mostPlayedSongsDb.forEach {
+                    put(it.artist.id, Artist(
+                        id = it.artist.id,
+                        name = it.artist.name,
+                        artUrl = it.imageUrl,
+                        genre = it.genre
+                    ))
+                }
+            }.values.toList()
+        } else {
+            mostPlayedArtistsDb.map { it.toArtist() }
+        }
 }
+

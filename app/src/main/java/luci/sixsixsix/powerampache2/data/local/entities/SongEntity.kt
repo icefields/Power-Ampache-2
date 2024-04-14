@@ -1,8 +1,10 @@
 package luci.sixsixsix.powerampache2.data.local.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.data.remote.dto.MusicAttributeDto
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -55,6 +57,8 @@ data class SongEntity(
     val averageRating: Float,
     val preciseRating: Float,
     val rating: Float,
+    @ColumnInfo(name = "multiUserId", defaultValue = "")
+    val multiUserId: String
 )
 
 fun SongEntity.toSong() = Song(
@@ -104,7 +108,7 @@ fun SongEntity.toSong() = Song(
     rating = rating
 )
 
-fun Song.toSongEntity() = SongEntity(
+fun Song.toSongEntity(username: String, serverUrl: String) = SongEntity(
     mediaId = mediaId,
     title = title ?: "",
     artistId = artist.id,
@@ -150,5 +154,6 @@ fun Song.toSongEntity() = SongEntity(
     albumArtistMbId = albumArtistMbId,
     preciseRating = preciseRating,
     averageRating = averageRating,
-    rating = rating
+    rating = rating,
+    multiUserId = multiuserDbKey(username, serverUrl)
 )

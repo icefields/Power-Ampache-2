@@ -26,7 +26,7 @@ import luci.sixsixsix.powerampache2.BuildConfig
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
-    const val DATABASE_VERSION = 80
+    const val DATABASE_VERSION = 82
 
     const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 
@@ -34,17 +34,16 @@ object Constants {
     const val TIMEOUT_CONNECTION_S = 15L
     const val TIMEOUT_READ_S = 60L
     const val TIMEOUT_WRITE_S = 60L
-
     const val NETWORK_REQUEST_LIMIT_HOME = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE = 40
     const val DATABASE_LIMIT_ELEMENTS = 66
     const val QUICK_PLAY_MIN_SONGS = 50
-
     const val USER_ACCESS_DEFAULT = 25
     const val USER_EMAIL_DEFAULT = "" //""No@Email.Present"
     const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
+    const val PLAYLIST_FETCH_LIMIT = 50
 
-    const val PLAYLIST_FETCH_LIMIT = 30
+    const val LOCAL_SCROBBLE_TIMEOUT_MS = 20000L
 
     // ERROR CONSTANTS
     const val ERROR_INT = -1

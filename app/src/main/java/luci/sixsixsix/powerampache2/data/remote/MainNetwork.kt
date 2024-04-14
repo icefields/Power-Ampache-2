@@ -134,8 +134,8 @@ interface MainNetwork {
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
-        @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true if true ignore 'api_hide_dupe_searches' setting)
-    ): PlaylistsResponse // TODO remove default values
+        @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true, ignore 'api_hide_dupe_searches' setting)
+    ): PlaylistsResponse
 
     @GET("json.server.php?action=playlist")
     suspend fun getPlaylist(

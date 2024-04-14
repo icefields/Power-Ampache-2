@@ -39,7 +39,9 @@ import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.common.hasMore
 import luci.sixsixsix.powerampache2.common.pop
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.HistoryEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toHistoryEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
 import luci.sixsixsix.powerampache2.data.local.models.SongUrl
@@ -156,6 +158,7 @@ class SongsRepositoryImpl @Inject constructor(
 
         // network TODO WHAT IS THIS!!?? FIX !!!
         val auth = getSession()!!
+        val credentials = getCurrentCredentials()
         val hashSet = LinkedHashSet<Song>()
         val songs = if (query.isNullOrBlank()) {
             // not a search
@@ -186,7 +189,7 @@ class SongsRepositoryImpl @Inject constructor(
             // if it's just a search, or we were fetching more items (offset > 0) do not clear cache
             dao.clearSongs()
         }
-        dao.insertSongs(songs.map { it.toSongEntity() })
+        dao.insertSongs(songs.map { it.toSongEntity(username = credentials.username, serverUrl = credentials.serverUrl) })
 
         // stick to the single source of truth pattern despite performance deterioration
         val songsDb = dao.searchSong(query).map { it.toSong() }
@@ -248,14 +251,41 @@ class SongsRepositoryImpl @Inject constructor(
         cacheSongs(songs)
     }.catch { e -> errorHandler("getSongsFromAlbum()", e, this) }
 
-    private suspend fun getSongsStats(statFilter: MainNetwork.StatFilter) =
+    private suspend fun getSongsStats(statFilter: MainNetwork.StatFilter, fetchRemote: Boolean = true) =
         if (!isOfflineModeEnabled()) flow {
             emit(Resource.Loading(true))
+
+            if (statFilter == MainNetwork.StatFilter.recent) {
+                emit(Resource.Success(data = dao.getSongHistory().map { it.toSong() }, networkData = null))
+            }
+
+            if (!fetchRemote) {
+                emit(Resource.Loading(false))
+                return@flow
+            }
+
             val auth = getSession()!!
+            val cred = getCurrentCredentials()
             getSongsStatCall(auth.auth, statFilter)?.map { it.toSong() }?.let { songs ->
-                emit(Resource.Success(data = songs, networkData = songs))
-                // cache songs after emitting success because the result of this is not used right now
                 cacheSongs(songs)
+                if (statFilter == MainNetwork.StatFilter.recent) {
+                    val dbSongs = dao.getSongHistory().map { it.toSong() }.toMutableList()
+                    val dbSongsMap = Song.mapSongs(dbSongs)
+                    songs.forEach {
+                        if (!dbSongsMap.containsKey(it.mediaId)) {
+                            dbSongs.add(it)
+                        }
+                    }
+
+                    // cache new history
+                    dao.addSongsToHistory(songs.map { it.toHistoryEntity(
+                        username = cred.username,
+                        serverUrl = cred.serverUrl) })
+
+                    emit(Resource.Success(data = dbSongs, networkData = songs))
+                } else {
+                    emit(Resource.Success(data = songs, networkData = songs))
+                }
             }?:run {
                 throw Exception("error connecting or getting data in getSongsStats")
             }
@@ -268,7 +298,7 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
         val songs = when(statFilter) {
             MainNetwork.StatFilter.random -> dao.getRandomOfflineSongs()
-            MainNetwork.StatFilter.recent -> dao.getRecentlyReleasedOfflineSongs()
+            MainNetwork.StatFilter.recent -> dao.getOfflineSongHistory()
             MainNetwork.StatFilter.newest -> dao.getRecentlyReleasedOfflineSongs()
             MainNetwork.StatFilter.frequent -> dao.getMostPlayedOfflineSongs()
             MainNetwork.StatFilter.flagged -> dao.getLikedOfflineSongs()
@@ -285,12 +315,23 @@ class SongsRepositoryImpl @Inject constructor(
             filter = statFilter
         ).songs
 
-    override suspend fun getRecentSongs() = getSongsStats(MainNetwork.StatFilter.recent)
-    override suspend fun getNewestSongs() = getSongsStats(MainNetwork.StatFilter.newest)
-    override suspend fun getHighestSongs() = getSongsStats(MainNetwork.StatFilter.highest)
-    override suspend fun getFrequentSongs() = getSongsStats(MainNetwork.StatFilter.frequent)
-    override suspend fun getFlaggedSongs() = getSongsStats(MainNetwork.StatFilter.flagged)
-    override suspend fun getRandomSongs() = getSongsStats(MainNetwork.StatFilter.random)
+    override suspend fun getRecentSongs(fetchRemote: Boolean) =
+        getSongsStats(MainNetwork.StatFilter.recent, fetchRemote)
+
+    override suspend fun getNewestSongs() =
+        getSongsStats(MainNetwork.StatFilter.newest)
+
+    override suspend fun getHighestSongs() =
+        getSongsStats(MainNetwork.StatFilter.highest)
+
+    override suspend fun getFrequentSongs() =
+        getSongsStats(MainNetwork.StatFilter.frequent)
+
+    override suspend fun getFlaggedSongs() =
+        getSongsStats(MainNetwork.StatFilter.flagged)
+
+    override suspend fun getRandomSongs() =
+        getSongsStats(MainNetwork.StatFilter.random)
 
     override suspend fun rateSong(albumId: String, rate: Int): Flow<Resource<Any>> =
         rate(albumId, rate, MainNetwork.Type.song)
@@ -319,6 +360,7 @@ class SongsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!
+        val credentials = getCurrentCredentials()
         val response = api.getSongsByGenre(auth.auth, genreId = genre.id, offset = offset)
         response.error?.let { throw(MusicException(it.toError())) }
         val songs = response.songs!!.map { it.toSong() } //will throw exception if artist null
@@ -327,7 +369,7 @@ class SongsRepositoryImpl @Inject constructor(
             // if it's just a search do not clear cache
             dao.clearSongs()
         }
-        dao.insertSongs(songs.map { it.toSongEntity() })
+        dao.insertSongs(songs.map { it.toSongEntity(username = credentials.username, serverUrl = credentials.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchSongByGenre(genre.name).map { it.toSong() }, networkData = songs))
 
@@ -419,31 +461,6 @@ class SongsRepositoryImpl @Inject constructor(
             serverUrl = getCredentials()!!.serverUrl
         ).getUrl(song.mediaId)
     } ?: song.songUrl
-
-    suspend fun downloadSong2(song: Song) = flow {
-        emit(Resource.Loading(true))
-        val auth = getSession()!!
-        api.downloadSong(
-            authKey = auth.auth,
-            songId = song.mediaId
-        ).apply {
-            if (code() == HTTP_OK) {
-                // save file to disk and register in database
-                body()?.byteStream()?.let { inputStream ->
-                    val filepath = storageManager.saveSong(song, inputStream)
-                    dao.addDownloadedSong( // TODO fix double-bang!!
-                        song.toDownloadedSongEntity(filepath, getUsername()!!)
-                    )
-                    emit(Resource.Success(data = Any(), networkData = Any()))
-                } ?: throw Exception("cannot download/save file, body or input stream NULL response code: ${code()}")
-            } else {
-                throw Exception("cannot download/save file, response code: ${code()}, " +
-                        "response body: ${body().toString()}")
-            }
-        }
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("downloadSong()", e, this) }
-
 
     override suspend fun isSongAvailableOffline(song: Song): Boolean =
         isSongAvailableOffline(song.mediaId, song.artist.id, song.album.id)
@@ -571,6 +588,15 @@ class SongsRepositoryImpl @Inject constructor(
                 }
             }
         }
+    }
+
+    override suspend fun addToHistory(song: Song) = getCurrentCredentials().run {
+        dao.addSongToHistory(HistoryEntity.newEntry(mediaId = song.mediaId,
+            playCount = song.playCount,
+            username = this.username,
+            serverUrl = this.serverUrl
+        ))
+        true
     }
 
     @Throws(Exception::class)

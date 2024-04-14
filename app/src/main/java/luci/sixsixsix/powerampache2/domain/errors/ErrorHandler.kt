@@ -32,6 +32,6 @@ interface ErrorHandler {
         onError: (message: String, e: Throwable) -> Unit = { _, _ -> { } }
     )
 
-    suspend fun logError(e: Throwable)
+    suspend fun logError(e: Throwable, message: String = "")
     suspend fun logError(message: String)
 }

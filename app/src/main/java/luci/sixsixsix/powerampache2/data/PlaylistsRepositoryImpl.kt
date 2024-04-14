@@ -106,7 +106,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
         }
 
         val auth = getSession()!!
-        val user = dao.getCredentials()?.username
+        val cred = getCurrentCredentials()
+        val user = cred.username
         val playlists = getPlaylistsNetwork(auth.auth, user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
 
         if ( // Playlists change too often, clear every time
@@ -117,7 +118,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
             // if it's just a search do not clear cache
             dao.clearPlaylists()
         }
-        dao.insertPlaylists(playlists.map { it.toPlaylistEntity() })
+        dao.insertPlaylists(playlists.map { it.toPlaylistEntity(username = user, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchPlaylists(query).map { it.toPlaylist() }, networkData = playlists))
         emit(Resource.Loading(false))
@@ -231,6 +232,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
         //else
         val auth = getSession()!!
+        val cred = getCurrentCredentials()
         val songs = mutableListOf<Song>()
         var isFinished = false
         val limit = PLAYLIST_FETCH_LIMIT
@@ -272,7 +274,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         } while (!isFinished)
 
         dao.clearPlaylistSongs(playlistId)
-        dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId))
+        dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId, username = cred.username, serverUrl = cred.serverUrl))
         if (!shouldEmitSteps) {
             emit(Resource.Success(
                 data = dao.getSongsFromPlaylist(playlistId).map { it.toSong() },

@@ -25,14 +25,17 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.DownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.GenreEntity
+import luci.sixsixsix.powerampache2.data.local.entities.HistoryEntity
 import luci.sixsixsix.powerampache2.data.local.entities.LocalSettingsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.MultiUserCredentialEntity
+import luci.sixsixsix.powerampache2.data.local.entities.MultiUserEntity
+import luci.sixsixsix.powerampache2.data.local.entities.MultiUserSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
@@ -51,38 +54,27 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         LocalSettingsEntity::class,
         DownloadedSongEntity::class,
         GenreEntity::class,
-        PlaylistSongEntity::class
+        PlaylistSongEntity::class,
+        MultiUserSessionEntity::class,
+        MultiUserEntity::class,
+        MultiUserCredentialEntity::class,
+        HistoryEntity::class
     ], version = Constants.DATABASE_VERSION, // first prod version: 73
     autoMigrations = [
         AutoMigration(from = 73, to = 74),
-        AutoMigration(from = 73, to = 75),
-        AutoMigration(from = 73, to = 76),
-        AutoMigration(from = 73, to = 77),
-        AutoMigration(from = 73, to = 78),
-
         AutoMigration(from = 74, to = 75),
-        AutoMigration(from = 74, to = 76),
-        AutoMigration(from = 74, to = 77),
-        AutoMigration(from = 74, to = 78),
-
         AutoMigration(from = 75, to = 76),
-        AutoMigration(from = 75, to = 77),
-        AutoMigration(from = 75, to = 78),
-
         AutoMigration(from = 76, to = 77),
-        AutoMigration(from = 76, to = 78),
-        AutoMigration(from = 76, to = 79),
-        AutoMigration(from = 76, to = 80),
-
         AutoMigration(from = 77, to = 78),
-        AutoMigration(from = 77, to = 79),
-        AutoMigration(from = 77, to = 80),
 
         AutoMigration(from = 78, to = 79),
         AutoMigration(from = 78, to = 80),
 
         AutoMigration(from = 79, to = 80),
-],
+        AutoMigration(from = 80, to = 81),
+        AutoMigration(from = 81, to = 82),
+
+    ],
     exportSchema = true
 )
 @TypeConverters(Converters::class)

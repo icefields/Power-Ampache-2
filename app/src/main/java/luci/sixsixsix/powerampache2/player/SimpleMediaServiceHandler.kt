@@ -25,6 +25,7 @@ import android.media.session.PlaybackState
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource.HttpDataSourceException
 import androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException
 import androidx.media3.exoplayer.ExoPlayer
@@ -38,6 +39,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
+import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
 import javax.inject.Inject
 
 
@@ -262,7 +264,11 @@ class SimpleMediaServiceHandler @Inject constructor(
 
     private var errorCounter = 0
 
-    override fun onPlayerError(error: PlaybackException) {
+    @androidx.annotation.OptIn(UnstableApi::class) override fun onPlayerError(error: PlaybackException) {
+        val isUserNotEnabledException =
+                (error.cause is InvalidResponseCodeException) &&
+                        (error.cause as InvalidResponseCodeException).responseCode == 403
+
         GlobalScope.launch {
             when (val cause = error.cause) {
                 is HttpDataSourceException -> {
@@ -271,7 +277,10 @@ class SimpleMediaServiceHandler @Inject constructor(
                     // querying the cause.
                     if (cause is InvalidResponseCodeException) {
                         //(cause as InvalidResponseCodeException).headerFields
-                        errorHandler<InvalidResponseCodeException>(label = "onPlayerError Invalid response code ${cause.responseCode} - ${cause.responseMessage}", error)
+                        if (isUserNotEnabledException) {
+                            errorHandler<UserNotEnabledException>(label = "onPlayerError Invalid response code ${cause.responseCode} - ${cause.responseMessage}", UserNotEnabledException(cause.responseMessage ?: "Invalid response code",error, cause.responseCode))
+                        } else
+                            errorHandler<InvalidResponseCodeException>(label = "onPlayerError Invalid response code ${cause.responseCode} - ${cause.responseMessage}", cause)
                     } else {
                         // Try calling httpError.getCause() to retrieve the underlying cause,
                         // although note that it may be null.
@@ -283,7 +292,7 @@ class SimpleMediaServiceHandler @Inject constructor(
                 }
             }
         }
-        if (!player.isPlaying && !player.isLoading) {
+        if (!player.isPlaying && !player.isLoading && !isUserNotEnabledException) {
             player.prepare()
             if (errorCounter++ % 3 == 0) {
                 player.seekToNextMediaItem()

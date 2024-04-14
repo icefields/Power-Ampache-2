@@ -21,9 +21,11 @@
  */
 package luci.sixsixsix.powerampache2.data.local.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.domain.models.User
 
 @Entity
@@ -40,7 +42,13 @@ data class UserEntity(
     val lastSeen: Int = Constants.ERROR_INT,
     val website: String = "",
     val state: String = "",
-    val city: String = ""
+    val city: String = "",
+    @ColumnInfo(name = "art", defaultValue = "")
+    val art: String,
+    @ColumnInfo(name = "serverUrl", defaultValue = "")
+    val serverUrl: String,
+    @ColumnInfo(name = "multiUserId", defaultValue = "")
+    val multiUserId: String = multiuserDbKey(username = username, serverUrl = serverUrl)
 )
 
 fun UserEntity.toUser() = User(
@@ -57,10 +65,11 @@ fun UserEntity.toUser() = User(
     website = website,
     state = state,
     city = city,
-    art = ""
+    art = art,
+    serverUrl = serverUrl
 )
 
-fun User.toUserEntity() = UserEntity(
+fun User.toUserEntity2(serverUrl: String) = UserEntity(
     id = id,
     username = username,
     email = email,
@@ -73,5 +82,39 @@ fun User.toUserEntity() = UserEntity(
     lastSeen = lastSeen,
     website = website,
     state = state,
-    city = city
+    city = city,
+    art = art,
+    serverUrl = serverUrl
 )
+
+fun User.toUserEntity(serverUrl: String): UserEntity {
+    val userEmail = email ?: ""
+    val userAccess = access ?: 0
+    val userStreamToken = streamToken ?: ""
+    val userFullNamePublic = fullNamePublic ?: 0
+    val userFullName = fullName ?: ""
+    val userDisabled = disabled ?: false
+    val userCreateDate = createDate ?: Constants.ERROR_INT
+    val userLastSeen = lastSeen ?: Constants.ERROR_INT
+    val userWebsite = website ?: ""
+    val userState = state ?: ""
+    val userCity = city ?: ""
+
+    return UserEntity(
+        id = id,
+        username = username.lowercase(), // lowercase to facilitate queries
+        email = userEmail,
+        access = userAccess,
+        streamToken = userStreamToken,
+        fullNamePublic = userFullNamePublic,
+        fullName = userFullName,
+        disabled = userDisabled,
+        createDate = userCreateDate,
+        lastSeen = userLastSeen,
+        website = userWebsite,
+        state = userState,
+        city = userCity,
+        serverUrl = serverUrl.lowercase(),
+        art = art
+    )
+}
