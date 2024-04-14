@@ -21,41 +21,51 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.core.text.isDigitsOnly
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toGenre
 import luci.sixsixsix.powerampache2.data.local.entities.toGenreEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toMultiUserCredentialEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toMultiUserSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
 import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toUser
 import luci.sixsixsix.powerampache2.data.local.models.UserWithCredentials
 import luci.sixsixsix.powerampache2.data.local.models.toUser
+import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
-import luci.sixsixsix.powerampache2.data.remote.dto.toBoolean
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toGenre
 import luci.sixsixsix.powerampache2.data.remote.dto.toServerInfo
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
+import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -63,10 +73,10 @@ import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.User
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Instant
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -88,13 +98,9 @@ class MusicRepositoryImpl @Inject constructor(
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
     override val userLiveData: Flow<User?> = dao.getUserLiveData().map {
-        val usernameCredentials = dao.getCredentials()?.username ?: ""
-        val userEntity = it ?: dao.getUser(usernameCredentials)
-//        errorHandler.logError("USER ENTITY RECEIVED:\n${it}\n\nUSER ENTITY AFTER:\n" +
-//                "${userEntity}\n" +
-//                "\nTO USER\n${userEntity?.toUser()}\n\nUserWithCredentials.toUser\n${UserWithCredentials(username = usernameCredentials).toUser()}")
-        userEntity?.toUser() ?: UserWithCredentials(username = usernameCredentials).toUser()
-        //(it ?: UserWithCredentials(username = dao.getCredentials()?.username)).toUser()
+        val cred = getCurrentCredentials()
+        val userEntity = it ?: dao.getUser(cred.username)
+        userEntity?.toUser() ?: UserWithCredentials(username = cred.username).toUser(cred.serverUrl)
     }
 
     // used to check if a call to getUserNetwork() is necessary
@@ -103,32 +109,101 @@ class MusicRepositoryImpl @Inject constructor(
     init {
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
-        sessionLiveData.distinctUntilChanged().observeForever { session ->
-            session?.auth?.let { newToken ->
+        GlobalScope.launch {
+            sessionLiveData.asFlow().distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
                 // if token has changed or user is null, get user from network
                 if (newToken != currentAuthToken || currentUser == null) {
                     currentAuthToken = newToken
-                    GlobalScope.launch {
-                        try {
-                            currentUser = getUserNetwork()
-                        } catch (e: Exception) {
-                            errorHandler.logError(e)
-                        }
+                    try {
+                        currentUser = getUserNetwork()
+                    } catch (e: Exception) {
+                        errorHandler.logError(e)
                     }
                 }
             }
         }
+
+        // --- TODO: REMOVE AFTER MIGRATION
+        GlobalScope.launch {
+            try { migrateDb() } catch (e: Exception) { }
+        }
     }
+
+    // --- TODO: REMOVE AFTER MIGRATION
+//    private fun isMigrationDone(context: Context):Boolean = context
+//        .getSharedPreferences("migrationdone", Context.MODE_PRIVATE)
+//        .getBoolean("migrationdoneboolid", false)
+//
+//    @SuppressLint("ApplySharedPref")
+//    private suspend fun setMigrationDone(context: Context, done: Boolean) {
+//        withContext(Dispatchers.IO) {
+//            context.getSharedPreferences("migrationdone", Context.MODE_PRIVATE).edit().apply {
+//                putBoolean("migrationdoneboolid", done)
+//                commit()
+//            }
+//        }
+//    }
+//
+    // --- TODO: REMOVE AFTER MIGRATION
+    private suspend fun migrateDb() {
+        L("migrateDb start")
+        val credentials = dao.getCredentials()
+        if (credentials == null || credentials.serverUrl.isBlank() || credentials.username.isBlank()) return
+
+        val cred = getCurrentCredentials()
+
+        val multiuserId =  multiuserDbKey(username = cred.username, serverUrl = cred.serverUrl)
+        val art = dao.getNotMigratedArtists().map { it.copy(multiUserId = multiuserId) }
+        val play = dao.getNotMigratedPlaylists().map { it.copy(multiUserId = multiuserId) }
+        val so = dao.getNotMigratedSongs().map { it.copy(multiUserId = multiuserId) }
+        val alb = dao.getNotMigratedAlbums().map { it.copy(multiUserId = multiuserId) }
+        val ps = dao.getNotMigratedPlaylistSong().map { it.copy(multiUserId = multiuserId) }
+        val off = dao.getNotMigratedOfflineSongs().map { it.copy(multiUserId = multiuserId) }
+
+        if(art.isNotEmpty())
+            dao.insertArtists(art)
+
+        if(play.isNotEmpty())
+            dao.insertPlaylists(play)
+
+        if(so.isNotEmpty())
+            dao.insertSongs(so)
+
+        if(alb.isNotEmpty())
+            dao.insertAlbums(alb)
+
+        if(ps.isNotEmpty())
+            dao.insertPlaylistSongs(ps)
+
+        if(off.isNotEmpty())
+            dao.addDownloadedSongs(off)
+
+        credentials?.copy(multiUserId = multiuserId)?.let {
+            dao.updateCredentials(it)
+        }
+
+        dao.getUser()?.copy(multiUserId = multiuserId)?.let {
+            dao.updateUser(it)
+        }
+        L("migrateDb end")
+    }
+
+// --- TODO: END BLOCK TO REMOVE AFTER MIGRATION
+
 
     private suspend fun setSession(se: Session) {
         if (se.auth != getSession()?.auth) {
             L("setSession se.auth != getSession()?.auth")
         }
         dao.updateSession(se.toSessionEntity())
+        val cred = getCurrentCredentials()
+        dao.insertMultiUserSession(se.toMultiUserSessionEntity(username = cred.username, serverUrl = cred.serverUrl))
     }
 
-    private suspend fun setCredentials(se: CredentialsEntity) =
+    private suspend fun setCredentials(se: CredentialsEntity) {
         dao.updateCredentials(se)
+        dao.insertMultiUserCredentials(se.toMultiUserCredentialEntity())
+    }
 
     override suspend fun logout(): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading(true))
@@ -236,7 +311,13 @@ class MusicRepositoryImpl @Inject constructor(
         val usernameLow = username.lowercase()
         //   Save current credentials, so they can be picked up by the interceptor,
         // and for future autologin, this has to be first line of code before any network call
-        setCredentials(CredentialsEntity(username = usernameLow, password = sha256password, serverUrl = serverUrl, authToken = authToken))
+        setCredentials(
+            CredentialsEntity(username = usernameLow,
+                password = sha256password,
+                serverUrl = serverUrl.lowercase(),
+                authToken = authToken
+            )
+        )
         L("authorize CREDENTIALS ${getCredentials()}")
         val auth = tryAuthorize(usernameLow, sha256password, authToken, force)
         emit(Resource.Success(auth))
@@ -264,9 +345,6 @@ class MusicRepositoryImpl @Inject constructor(
                 L("NEW auth $auth")
                 auth.toSession(dateMapper).also { sess ->
                     setSession(sess)
-                    L("auth token was null or expired", sess.sessionExpire,
-                        "\nisTokenExpired?", sess.isTokenExpired(),
-                        "new auth", sess.auth)
                 }
             }
         }
@@ -288,7 +366,7 @@ class MusicRepositoryImpl @Inject constructor(
         setCredentials(CredentialsEntity(
             username = username,
             password = sha256password,
-            serverUrl = serverUrl,
+            serverUrl = serverUrl.lowercase(),
             authToken = "")
         )
 
@@ -315,6 +393,7 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
 
         val localGenres = dao.getGenres()
+        L("eeee", localGenres.size)
         val isDbEmpty = localGenres.isEmpty()
         if (!isDbEmpty) {
             emit(Resource.Success(data = localGenres.map { it.toGenre() }))
@@ -341,7 +420,8 @@ class MusicRepositoryImpl @Inject constructor(
         if (Constants.CLEAR_TABLE_AFTER_FETCH) {
             dao.clearGenres()
         }
-        dao.insertGenres(response.map { it.toGenreEntity() })
+        val cred = getCurrentCredentials()
+        dao.insertGenres(response.map { it.toGenreEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.getGenres().map { it.toGenre() }, networkData = response))
 

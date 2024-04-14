@@ -49,7 +49,8 @@ data class User(
     val website: String = "",
     val state: String = "",
     val city: String = "",
-    val art: String = ""
+    val art: String = "",
+    val serverUrl: String
 ): Parcelable {
 
     fun isError() =
@@ -68,7 +69,8 @@ data class User(
             "",
             "",
             "",
-            art = ""
+            art = "",
+            serverUrl = ""
         )
 
         fun demoUser(): User = User(
@@ -85,6 +87,7 @@ data class User(
             website = MASTODON_URL,
             state = DOGMAZIC_FAKE_STATE,
             city = DOGMAZIC_FAKE_CITY,
+            serverUrl = "https://retroscroll.cat/wp-content/",
             art = "https://retroscroll.cat/wp-content/uploads/2014/10/shyguy.png"
         )
 

@@ -32,7 +32,7 @@ interface SongsRepository {
 
     suspend fun getSongs(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Song>>>
     suspend fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
-    suspend fun getRecentSongs(): Flow<Resource<List<Song>>>
+    suspend fun getRecentSongs(fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
     suspend fun getNewestSongs(): Flow<Resource<List<Song>>>
     suspend fun getHighestSongs(): Flow<Resource<List<Song>>>
     suspend fun getFrequentSongs(): Flow<Resource<List<Song>>>
@@ -49,5 +49,6 @@ interface SongsRepository {
     suspend fun rateSong(songId: String, rate: Int): Flow<Resource<Any>>
     suspend fun likeSong(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun scrobble(song: Song): Flow<Resource<Any>>
+    suspend fun addToHistory(song: Song): Boolean
     suspend fun getSongsByGenre(genreId: Genre, fetchRemote: Boolean = true, offset: Int = 0): Flow<Resource<List<Song>>>
 }

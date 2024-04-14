@@ -1,21 +1,38 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.screens.home
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -26,6 +43,7 @@ import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
@@ -41,7 +59,10 @@ class HomeScreenViewModel @Inject constructor(
     settingsRepository: SettingsRepository
 ) : ViewModel() {
     var state by mutableStateOf(HomeScreenState())
-    //var state by savedStateHandle.saveable { mutableStateOf(HomeScreenState()) }
+
+    private val offsetFrequent = (0..2).random()
+    private val offsetNewest = (0..2).random()
+    private val offsetRandom = (0..2).random()
 
     val offlineModeStateFlow = settingsRepository.offlineModeFlow.distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
@@ -68,14 +89,43 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun fetchAllAsync() = viewModelScope.launch {
-        async { getPlaylists() }
-        async { getFlagged() }
-        async { getFrequent() }
-        async { getHighest() }
-        async { getNewest() }
-        async { getRecent() }
-        async { getRandom() }
+    private var playlistsJob: Job? = null
+    private var flaggedJob: Job? = null
+    private var frequentJob: Job? = null
+    private var highestJob: Job? = null
+    private var newestJob: Job? = null
+    private var recentJob: Job? = null
+    private var randomJob: Job? = null
+
+    private fun fetchAllAsync(){
+        playlistsJob?.cancel()
+        playlistsJob = viewModelScope.launch {
+            async { getPlaylists() }
+        }
+        flaggedJob?.cancel()
+        flaggedJob = viewModelScope.launch {
+            async { getFlagged() }
+        }
+        frequentJob?.cancel()
+        frequentJob = viewModelScope.launch {
+            async { getFrequent() }
+        }
+        highestJob?.cancel()
+        highestJob = viewModelScope.launch {
+            async { getHighest() }
+        }
+        newestJob?.cancel()
+        newestJob = viewModelScope.launch {
+            async { getNewest() }
+        }
+        recentJob?.cancel()
+        recentJob = viewModelScope.launch {
+            async { getRecent() }
+        }
+        randomJob?.cancel()
+        randomJob = viewModelScope.launch {
+            async { getRandom() }
+        }
     }
 
     private suspend fun fetchAll() = viewModelScope.launch {
@@ -98,6 +148,7 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
+// ---- PLAYLISTS
     private fun updatePlaylistsState(playlists: List<Playlist>) {
         // inject generated playlists
         val playlistList = mutableListOf<Playlist>(
@@ -132,18 +183,7 @@ class HomeScreenViewModel @Inject constructor(
             }
     }
 
-    private suspend fun replaceWithRandomIfEmpty(
-        albums: List<AmpacheModel>,
-        fetchRemote: Boolean = false,
-        callback: (albums: List<Album>) -> Unit
-    ) {
-        if (albums.isNullOrEmpty()) {
-            getRandom(fetchRemote = fetchRemote) { albums ->
-                callback(albums)
-            }
-        }
-    }
-
+// ---- RECENT
     private suspend fun getRecent(fetchRemote: Boolean = true) {
         albumsRepository
             .getRecentAlbums()
@@ -153,7 +193,7 @@ class HomeScreenViewModel @Inject constructor(
                         // TODO use network data for recent right now, add lastPlayed field to
                         //  every entity to start using db in conjunction
                         result.networkData?.let { albums ->
-                            state = state.copy(recentAlbums = albums)
+                            state = state.copy(recentAlbums = injectArtists(albums, offsetFrequent))
 
                             if (!offlineModeStateFlow.value) {
                                 replaceWithRandomIfEmpty(state.recentAlbums, fetchRemote = true) {
@@ -178,6 +218,7 @@ class HomeScreenViewModel @Inject constructor(
             }
     }
 
+// ---- FAVOURITES
     private suspend fun getFlagged(fetchRemote: Boolean = true) {
         albumsRepository
             .getFlaggedAlbums()
@@ -202,6 +243,7 @@ class HomeScreenViewModel @Inject constructor(
             }
     }
 
+// ---- NEWEST
     private suspend fun getNewest(fetchRemote: Boolean = true) {
         albumsRepository
             .getNewestAlbums()
@@ -209,7 +251,7 @@ class HomeScreenViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let { albums ->
-                            state = state.copy(newestAlbums = albums)
+                            state = state.copy(newestAlbums = injectArtists(albums, offsetNewest))
                         }
                         replaceWithRandomIfEmpty(state.newestAlbums) {
                             state = state.copy(newestAlbums = it)
@@ -231,6 +273,7 @@ class HomeScreenViewModel @Inject constructor(
             }
     }
 
+// ---- HIGHEST
     private suspend fun getHighest(fetchRemote: Boolean = true) {
         albumsRepository
             .getHighestAlbums()
@@ -255,6 +298,8 @@ class HomeScreenViewModel @Inject constructor(
             }
     }
 
+
+// ---- FREQUENT
     private suspend fun getFrequent(fetchRemote: Boolean = true) {
         albumsRepository
             .getFrequentAlbums()
@@ -288,25 +333,18 @@ class HomeScreenViewModel @Inject constructor(
             }
     }
 
-    private suspend fun mergeFrequentItems(albums: List<AmpacheModel>): List<AmpacheModel> =
-        albums.toMutableList<AmpacheModel>().apply {
-            artistsRepository.getMostPlayedArtists().forEachIndexed { index, artist ->
-                val indexToAdd = (index * 3) + 2
-                if (indexToAdd < albums.size) {
-                    add(indexToAdd, artist)
-                }
-            }
-        }
 
+// ---- RANDOM
     private suspend fun getRandom(fetchRemote: Boolean = true) {
-        getRandom(fetchRemote = fetchRemote) { albums ->
+        getRandom(fetchRemote = fetchRemote, injectArtists = true) { albums ->
             state = state.copy(randomAlbums = albums)
         }
     }
 
     private suspend fun getRandom(
         fetchRemote: Boolean = true,
-        callback: (albums: List<Album>) -> Unit
+        injectArtists: Boolean = false,
+        callback: (albums: List<AmpacheModel>) -> Unit
     ) {
         albumsRepository
             .getRandomAlbums(fetchRemote = fetchRemote)
@@ -314,7 +352,7 @@ class HomeScreenViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let { albums ->
-                            callback(albums)
+                            callback(if (injectArtists) injectArtists(albums, offsetRandom) else albums)
                         }
                         L("HomeScreenViewModel.getRandom size of network array ${result.networkData?.size}")
                     }
@@ -330,4 +368,82 @@ class HomeScreenViewModel @Inject constructor(
                 }
             }
     }
+
+    private suspend fun replaceWithRandomIfEmpty(
+        albums: List<AmpacheModel>,
+        fetchRemote: Boolean = false,
+        callback: (albums: List<AmpacheModel>) -> Unit
+    ) {
+        if (albums.isNullOrEmpty()) {
+            getRandom(fetchRemote = fetchRemote, injectArtists = true) { albums ->
+                callback(albums)
+            }
+        }
+    }
+
+
+// ---- ARTISTS INJECTION
+    private fun addArtistsToAlbumList(
+        albums: List<AmpacheModel>,
+        artists: List<Artist>,
+        resultList: MutableList<AmpacheModel>,
+        offset: Int = 2,
+        frequency: Int = 3
+    ) {
+        if (frequency < 1) return
+
+        artists.forEachIndexed { index, artist ->
+            val indexToAdd = (index * frequency) + offset
+            if (indexToAdd < albums.size) {
+                resultList.add(indexToAdd, artist)
+            } else {
+                // do not add too many artists
+                if (index < (albums.size/(frequency-1) )) {
+                    resultList.add(artist)
+                }
+            }
+        }
+    }
+
+    private fun injectArtists(albums: List<AmpacheModel>, offset: Int): List<AmpacheModel> =
+        albums.toMutableList<AmpacheModel>().apply {
+            val generateArtistsList = HashMap<String, Artist>()
+            forEach { album ->
+                if (album is Album) {
+                    generateArtistsList[album.artist.id] = Artist(
+                        id = album.artist.id,
+                        name = album.artist.name,
+                        artUrl = album.artUrl
+                    )
+                }
+            }
+
+            addArtistsToAlbumList(albums,
+                generateArtistsList.values.toList(),
+                resultList = this,
+                offset = offset)
+        }
+
+    private suspend fun mergeFrequentItems(albums: List<AmpacheModel>): List<AmpacheModel> =
+        albums.toMutableList<AmpacheModel>().apply {
+            val artistsMostPlayed = artistsRepository.getMostPlayedArtists()
+            if (artistsMostPlayed.isNotEmpty()) {
+                addArtistsToAlbumList(
+                    albums,
+                    artistsMostPlayed,
+                    resultList = this,
+                    offset = offsetFrequent
+                )
+            }
+            //else {
+            //    injectArtists(albums)
+            //}
+
+//            artistsRepository.getMostPlayedArtists().forEachIndexed { index, artist ->
+//                val indexToAdd = (index * 3) + 2
+//                if (indexToAdd < albums.size) {
+//                    add(indexToAdd, artist)
+//                }
+//            }
+        }
 }

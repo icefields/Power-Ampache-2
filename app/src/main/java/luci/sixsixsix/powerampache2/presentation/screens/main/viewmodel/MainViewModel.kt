@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.LOCAL_SCROBBLE_TIMEOUT_MS
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.common.shareLink
@@ -352,13 +353,14 @@ class MainViewModel @Inject constructor(
         super.onCleared()
     }
 
-    suspend fun scrobble(song: Song) {
-        songsRepository.scrobble(song).collect { response ->
-            when(response) {
-                is Resource.Error -> {}
-                is Resource.Loading -> {}
-                is Resource.Success -> {}
-            }
+    private var scrobbleJob: Job? = null
+    fun scrobble(song: Song) {
+        scrobbleJob?.cancel()
+        scrobbleJob = viewModelScope.launch {
+            L(song.name, "scrobble wait", "eeeee")
+            delay(LOCAL_SCROBBLE_TIMEOUT_MS) // add song to history after 30s
+            L(song.name, "scrobble now", "eeeee")
+            songsRepository.addToHistory(song)
         }
     }
 

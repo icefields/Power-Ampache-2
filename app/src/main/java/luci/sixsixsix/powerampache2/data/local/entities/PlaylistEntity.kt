@@ -21,8 +21,10 @@
  */
 package luci.sixsixsix.powerampache2.data.local.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.data.remote.dto.fromStringToPlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 
@@ -38,6 +40,8 @@ data class PlaylistEntity(
     val preciseRating: Float = 0.0f,
     val rating: Int = 0,
     val averageRating: Float = 0.0f,
+    @ColumnInfo(name = "multiUserId", defaultValue = "")
+    val multiUserId: String
 )
 
 fun PlaylistEntity.toPlaylist() = Playlist(
@@ -53,7 +57,7 @@ fun PlaylistEntity.toPlaylist() = Playlist(
     averageRating = averageRating
 )
 
-fun Playlist.toPlaylistEntity() = PlaylistEntity(
+fun Playlist.toPlaylistEntity(username: String, serverUrl: String) = PlaylistEntity(
     id = id,
     name = name ?: "",
     owner = owner ?: "",
@@ -63,5 +67,6 @@ fun Playlist.toPlaylistEntity() = PlaylistEntity(
     flag = flag,
     preciseRating = preciseRating,
     rating = rating,
-    averageRating = averageRating
+    averageRating = averageRating,
+    multiUserId = multiuserDbKey(username = username, serverUrl = serverUrl)
 )
