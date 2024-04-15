@@ -44,9 +44,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 48
-        versionName = "0.48-rc1"
-        val versionQuote = "This version is powered by REVOLUTION! Revolution everywhere!"
+        versionCode = 49
+        versionName = "0.49-rc1"
+        val versionQuote = "This version is powered by REVOLUTION! Revolution everywhere! -- DB Experiments"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

@@ -70,17 +70,17 @@ class AuthViewModel @Inject constructor(
 
     init {
         L(sessionStateFlow.value, "ssss")
-        state = state.copy(isLoading = true)
-        verifyAndAutologin()
+        state = state.copy(isLoading = sessionStateFlow.value == null)
         // Listen to changes of the session table from the database
         viewModelScope.launch {
+            pingServerSync()
             sessionStateFlow.collect { session ->
                 L(session, "ssss")
                 if (session == null) {
                     pingScheduler.cancel()
                     // setting the session to null will show the login screen, but the autologin call
                     // will immediately set isLoading to true which will show the loading screen instead
-                    state = state.copy(isLoading = true)
+                    state = state.copy(isLoading = sessionStateFlow.value == null)
                     // autologin will log back in if credentials are correct
                     L("autologin from init AuthVM ssss")
                     autologin()
@@ -118,16 +118,23 @@ class AuthViewModel @Inject constructor(
      *
      * Do not show loading screen during ping, only during autologin
      */
-    fun verifyAndAutologin() {
+    fun pingServer() {
         viewModelScope.launch {
-            // try to login with saved auth token
-            L("verifyAndAutologin")
-            when (val ping = repository.ping()) {
-                is Resource.Success -> {}
-                is Resource.Error -> state = state.copy(isLoading = false)
-                is Resource.Loading -> if (!ping.isLoading) {
-                    state = state.copy(isLoading = false)
-                }
+            pingServerSync()
+        }
+    }
+
+    /**
+     *  try to login with saved auth token
+     *  ping will refresh the token if previous one still valid
+     */
+    private suspend fun pingServerSync() {
+        L("pingServerSync")
+        when (val ping = repository.ping()) {
+            is Resource.Success -> state = state.copy(isLoading = false)
+            is Resource.Error -> state = state.copy(isLoading = false)
+            is Resource.Loading -> if (!ping.isLoading) {
+                state = state.copy(isLoading = false)
             }
         }
     }
@@ -142,7 +149,10 @@ class AuthViewModel @Inject constructor(
             is Resource.Error -> state =
                 state.copy(isLoading = false, isAutologin = false)
             is Resource.Loading ->
-                state = state.copy(isLoading = result.isLoading, isAutologin = result.isLoading)
+                state = state.copy(isLoading = result.isLoading
+                        && (sessionStateFlow.value == null),
+                    isAutologin = result.isLoading
+                )
         }
     }
 
@@ -201,7 +211,10 @@ class AuthViewModel @Inject constructor(
                         }
                     }
                     is Resource.Error -> state = state.copy(isLoading = false)
-                    is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                    is Resource.Loading -> state =
+                        state.copy(isLoading = result.isLoading
+                            && (sessionStateFlow.value == null)
+                        )
                 }
             }
         }
