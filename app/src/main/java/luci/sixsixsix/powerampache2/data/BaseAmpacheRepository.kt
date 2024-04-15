@@ -29,6 +29,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toUser
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
+import luci.sixsixsix.powerampache2.domain.errors.NullSessionException
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.User
@@ -47,6 +48,10 @@ abstract class BaseAmpacheRepository(
 
     protected suspend fun getSession(): Session? =
         dao.getSession()?.toSession()
+
+    @Throws(NullSessionException::class)
+    protected suspend fun authToken(): String =
+        dao.getSession()?.auth ?: throw NullSessionException()
 
     protected suspend fun getCredentials(): CredentialsEntity? =
         dao.getCredentials()
@@ -154,7 +159,7 @@ abstract class BaseAmpacheRepository(
     }.catch { e -> errHandler("likeSong()", e, this) }
 
     protected suspend fun likeApiCall(id: String, like: Boolean, type: MainNetwork.Type) = api.flag(
-        authKey = getSession()!!.auth,
+        authKey = authToken(),
         id = id,
         flag = if (like) { 1 } else { 0 },
         type = type
@@ -207,7 +212,7 @@ abstract class BaseAmpacheRepository(
     }.catch { e -> errHandler("likeSong()", e, this) }
 
     protected suspend fun rateApiCall(itemId: String, rating: Int, type: MainNetwork.Type) = api.rate(
-        authKey = getSession()!!.auth,
+        authKey = authToken(),
         itemId = itemId,
         rating = rating,
         type = type

@@ -54,11 +54,13 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
 
         if (!baseUrl.isNullOrBlank()) {
             val host = MainNetwork.buildServerUrl(baseUrl)?.toHttpUrlOrNull()
+
             host?.let { newHost ->
                 try {
                     request.url.newBuilder()
                         .scheme(newHost.scheme)
                         .host(newHost.host)
+                        .port(newHost.port)
                         .encodedPath("${newHost.encodedPath}${request.url.encodedPath}")
                         .encodedQuery(request.url.encodedQuery)
                         .build()
@@ -71,7 +73,7 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
                         .build()
                 }
             }
-            L(request.url)
+            L(request.url, "eeee")
             try {
                 chain.proceed(request)
             } catch (e: Exception) {

@@ -393,7 +393,6 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
 
         val localGenres = dao.getGenres()
-        L("eeee", localGenres.size)
         val isDbEmpty = localGenres.isEmpty()
         if (!isDbEmpty) {
             emit(Resource.Success(data = localGenres.map { it.toGenre() }))

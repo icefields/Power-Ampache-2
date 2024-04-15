@@ -355,11 +355,20 @@ class MainViewModel @Inject constructor(
 
     private var scrobbleJob: Job? = null
     fun scrobble(song: Song) {
+        viewModelScope.launch {
+            // scrobble offline songs
+            songsRepository.scrobble(song).collect { response ->
+                when (response) {
+                    is Resource.Error -> {}
+                    is Resource.Loading -> {}
+                    is Resource.Success -> {}
+                }
+            }
+        }
+
         scrobbleJob?.cancel()
         scrobbleJob = viewModelScope.launch {
-            L(song.name, "scrobble wait", "eeeee")
             delay(LOCAL_SCROBBLE_TIMEOUT_MS) // add song to history after 30s
-            L(song.name, "scrobble now", "eeeee")
             songsRepository.addToHistory(song)
         }
     }

@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.LoggedInScreen
@@ -68,7 +69,22 @@ fun MainScreen(
         offlineModeSwitchVisible = true
     }
 
-    if(authViewModel.state.isLoading && !offlineModeState) {
+    val shouldShowLoading =
+    // OLD BEHAVIOUR, with SHOW_LOADING_ON_NEW_SESSION set to true
+    // if session is null, SHOW_LOADING_ON_NEW_SESSION is ignored, and isLoading will determine
+    //      the visibility of loading view
+    // if session not null (a previous session exists) and SHOW_LOADING_ON_NEW_SESSION is true,
+    //      this line is ignored, and isLoading will determine the visibility of loading view
+    // NEW BEHAVIOUR, with SHOW_LOADING_ON_NEW_SESSION set to false
+    // if session is not null, and SHOW_LOADING_ON_NEW_SESSION is false, loading view will not
+        //      be shown, because all the chained && will fail
+        (authViewModel.state.session == null || BuildConfig.SHOW_LOADING_ON_NEW_SESSION)
+                && authViewModel.state.isLoading
+                && !offlineModeState
+    //L("aaaa", authViewModel.state.session == null , BuildConfig.SHOW_LOADING_ON_NEW_SESSION, authViewModel.state.isLoading)
+
+    if(shouldShowLoading) {
+        //if(authViewModel.state.isLoading && !offlineModeState) {
         Box(
             contentAlignment = Alignment.TopEnd
         ) {
