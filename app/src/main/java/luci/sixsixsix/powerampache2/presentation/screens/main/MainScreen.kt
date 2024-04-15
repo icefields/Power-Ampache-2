@@ -60,12 +60,13 @@ fun MainScreen(
     mainViewModel: MainViewModel,
     settingsViewModel: SettingsViewModel
 ) {
+    val session by authViewModel.sessionStateFlow.collectAsState()
     val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
     var offlineModeSwitchVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(offlineModeSwitchVisible) {
         // wait 2 seconds before showing the switch
-        delay(2000)
+        delay(1500)
         offlineModeSwitchVisible = true
     }
 
@@ -78,32 +79,22 @@ fun MainScreen(
     // NEW BEHAVIOUR, with SHOW_LOADING_ON_NEW_SESSION set to false
     // if session is not null, and SHOW_LOADING_ON_NEW_SESSION is false, loading view will not
         //      be shown, because all the chained && will fail
-        (authViewModel.state.session == null || BuildConfig.SHOW_LOADING_ON_NEW_SESSION)
+        (session == null || BuildConfig.SHOW_LOADING_ON_NEW_SESSION)
                 && authViewModel.state.isLoading
                 && !offlineModeState
     //L("aaaa", authViewModel.state.session == null , BuildConfig.SHOW_LOADING_ON_NEW_SESSION, authViewModel.state.isLoading)
 
-    if(shouldShowLoading) {
-        //if(authViewModel.state.isLoading && !offlineModeState) {
-        Box(
-            contentAlignment = Alignment.TopEnd
+    //if(shouldShowLoading) {
+    if(authViewModel.state.isLoading && !offlineModeState) {
+        LoadingScreenWithOfflineSwitch(
+            offlineModeSwitchVisible = offlineModeSwitchVisible,
+            offlineModeState = offlineModeState
         ) {
-            AnimatedVisibility(offlineModeSwitchVisible) {
-                LoadingScreenOfflineSwitch(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .wrapContentSize(),
-                    offlineModeEnabled = offlineModeState,
-                    onSwitchToggle = {
-                        settingsViewModel.onEvent(SettingsEvent.OnOfflineToggle)
-                    }
-                )
-            }
-            LoadingScreen()
+            settingsViewModel.onEvent(SettingsEvent.OnOfflineToggle)
         }
     } else {
         offlineModeSwitchVisible = false
-        if (authViewModel.state.session != null || offlineModeState) {
+        if (session != null || offlineModeState) {
             LoggedInScreen(mainViewModel, authViewModel, settingsViewModel)
         } else {
             LoginScreen(viewModel = authViewModel)
@@ -111,8 +102,32 @@ fun MainScreen(
     }
 }
 
+/**
+ * LOADING SCREEN WITH OFFLINE SWITCH
+ */
 @Composable
-fun LoadingScreenOfflineSwitch(
+private fun LoadingScreenWithOfflineSwitch(
+    offlineModeSwitchVisible: Boolean,
+    offlineModeState: Boolean,
+    onSwitchToggle: (newValue: Boolean) -> Unit
+) = Box(
+        contentAlignment = Alignment.TopEnd
+    ) {
+        AnimatedVisibility(offlineModeSwitchVisible) {
+            LoadingScreenOfflineSwitch(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .wrapContentSize(),
+                offlineModeEnabled = offlineModeState,
+                onSwitchToggle = onSwitchToggle
+            )
+        }
+        LoadingScreen()
+    }
+
+
+@Composable
+private fun LoadingScreenOfflineSwitch(
     modifier: Modifier,
     offlineModeEnabled: Boolean,
     onSwitchToggle: (newValue: Boolean) -> Unit

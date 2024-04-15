@@ -110,7 +110,7 @@ class MusicRepositoryImpl @Inject constructor(
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
         GlobalScope.launch {
-            sessionLiveData.asFlow().distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
+            sessionLiveData.distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
                 // if token has changed or user is null, get user from network
                 if (newToken != currentAuthToken || currentUser == null) {
                     currentAuthToken = newToken
@@ -263,7 +263,7 @@ class MusicRepositoryImpl @Inject constructor(
                     pingResponse.toSession(dateMapper)
                     // TODO Check connection error before making this call crash into the try-catch
                 } catch (e: Exception) {
-                    L("clear session, set the session to null")
+                    L("clear session, set the session to null ssss ping()")
                     dao.clearSession()
                     null
                 } ?.let { se ->

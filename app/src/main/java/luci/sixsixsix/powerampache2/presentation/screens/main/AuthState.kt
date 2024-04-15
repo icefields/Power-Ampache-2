@@ -28,10 +28,11 @@ import luci.sixsixsix.powerampache2.domain.models.User
 
 @Parcelize
 data class AuthState(
-    val session: Session? = null,
-    val user: User? = null,
+    //val session: Session? = null,
+    // val user: User? = null,
     val isLoading: Boolean = false,
-    val error: String = "",
+    val isAutologin: Boolean = false,
+    //val error: String = "",
     val username: String = "",
     val password: String = "",
     val authToken: String = "",

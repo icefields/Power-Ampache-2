@@ -120,9 +120,7 @@ class MainActivity : ComponentActivity() {
         super.onRestart()
         L( "onRestart")
         // refresh token or autologin every time the app resumes
-        authViewModel.verifyAndAutologin {
-            // mainViewModel.onActivityRestart()
-        }
+        authViewModel.verifyAndAutologin()
     }
 
     override fun onNewIntent(intent: Intent?) {

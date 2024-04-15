@@ -138,6 +138,7 @@ fun MainContentScreen(
     val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
     val localSettingsState by settingsViewModel.localSettingsStateFlow.collectAsState()
     val notificationQueueEmpty by mainViewModel.notificationQueueEmptyState.collectAsState(true)
+    val user by authViewModel.userStateFlow.collectAsState()
     val tabsCount = tabItems.size
     val pagerState = rememberPagerState { tabsCount }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -173,7 +174,7 @@ fun MainContentScreen(
             MainDrawer(
                 items = drawerItems,
                 currentItem = MainContentMenuItem.toMainContentMenuItem(currentScreen),
-                user = authViewModel.state.user ?: User.emptyUser(),
+                user = user ?: User.emptyUser(),
                 versionInfo = settingsViewModel.state.appVersionInfoStr,
                 hideDonationButtons = localSettingsState.hideDonationButton,
                 onItemClick = {

@@ -109,7 +109,7 @@ android {
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
             buildConfigField("boolean", "RESET_QUEUE_ON_NEW_SESSION", "true")
-            buildConfigField("boolean", "SHOW_LOADING_ON_NEW_SESSION", "true")
+            buildConfigField("boolean", "SHOW_LOADING_ON_NEW_SESSION", "false")
 
             // CONSTANTS
             buildConfigField("String", "AMPACHE_USER", "\"\"")

@@ -151,6 +151,7 @@ class ErrorHandlerImpl @Inject constructor(
                                 // clear session and try to autologin using the saved credentials
                                 //db.dao.clearCachedData()
                                 //db.dao.clearPlaylists()
+                                L("clear session, set the session to null ssss handle error")
                                 db.dao.clearSession()
                                 readableMessage = e.musicError.errorMessage
                             }
@@ -209,8 +210,11 @@ class ErrorHandlerImpl @Inject constructor(
             if (isErrorHandlingEnabled && !URL_ERROR_LOG.isNullOrBlank()) {
                api.sendErrorReport(apiPasteCode = "${getVersionInfoString(applicationContext)}\n$message")
             }
-        } catch (e: HttpException) {
-            L.e(e.stackTraceToString(), e.message(), e.localizedMessage, e.code(), e.response())
+        } catch (e: Exception) {
+            if (e is HttpException)
+                L.e(e.stackTraceToString(), e.message(), e.localizedMessage, e.code(), e.response())
+            else
+                L.e(e.stackTraceToString(), e.localizedMessage)
         }
     }
 }

@@ -67,7 +67,7 @@ interface MusicDao {
     suspend fun getSession(): SessionEntity?
 
     @Query("""SELECT * FROM sessionentity WHERE primaryKey == '$SESSION_PRIMARY_KEY'""")
-    fun getSessionLiveData(): LiveData<SessionEntity?>
+    fun getSessionLiveData(): Flow<SessionEntity?>
 
 // --- CREDENTIALS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
