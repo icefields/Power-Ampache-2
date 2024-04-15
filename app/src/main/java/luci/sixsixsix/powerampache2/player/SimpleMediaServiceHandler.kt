@@ -292,7 +292,7 @@ class SimpleMediaServiceHandler @Inject constructor(
                 }
             }
         }
-        if (!player.isPlaying && !player.isLoading && !isUserNotEnabledException) {
+        if (!player.isPlaying && !player.isLoading /* && !isUserNotEnabledException*/) {
             player.prepare()
             if (errorCounter++ % 3 == 0) {
                 player.seekToNextMediaItem()

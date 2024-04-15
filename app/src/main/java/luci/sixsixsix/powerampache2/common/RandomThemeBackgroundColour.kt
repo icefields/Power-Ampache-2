@@ -37,7 +37,6 @@ object RandomThemeBackgroundColour {
     @Composable
     operator fun invoke(): Color {
         if (remainingPlaylistBgColours.isEmpty()) {
-            println("aaa resetting colours 1")
             remainingPlaylistBgColours = ArrayList(playlistBgColours())
         }
         val randomIndex = Random.nextInt(remainingPlaylistBgColours.size)
@@ -49,7 +48,6 @@ object RandomThemeBackgroundColour {
     @Composable
     operator fun invoke(hash: Int): Color = hashColourMap[hash] ?: run {
         if (remainingPlaylistBgColours.isEmpty()) {
-            println("aaa resetting colours 2 ${isSystemInDarkTheme()}")
             remainingPlaylistBgColours = ArrayList(playlistBgColours())
         }
         val randomIndex = abs(hash) % remainingPlaylistBgColours.size
