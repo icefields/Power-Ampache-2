@@ -49,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,12 +87,14 @@ fun LoginScreen(
     modifier: Modifier = Modifier
 ) {
     val state = viewModel.state
+    val error by viewModel.messagesStateFlow.collectAsState()
+
     LoginScreenContent(
         username = state.username,
         password = state.password,
         url = state.url,
         authToken = state.authToken,
-        error = state.error,
+        error = error,
         onEvent = {
             viewModel.onEvent(it)
         },

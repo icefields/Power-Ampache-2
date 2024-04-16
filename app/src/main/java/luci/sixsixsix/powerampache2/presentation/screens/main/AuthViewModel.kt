@@ -25,20 +25,22 @@ import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
@@ -50,105 +52,49 @@ class AuthViewModel @Inject constructor(
     private val playlistManager: MusicPlaylistManager,
     pingScheduler: AlarmScheduler,
     private val application: Application,
-    private val savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
-    //var stateSaved = savedStateHandle.getStateFlow("keyauth", AuthState())
-    // var state by mutableStateOf(AuthState())
     var state by savedStateHandle.saveable { mutableStateOf(AuthState()) }
 
+    val sessionStateFlow = repository.sessionLiveData
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), state.savedSession)
+
+    val userStateFlow = repository.userLiveData
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+
+    val messagesStateFlow = playlistManager.logMessageUserReadableState
+        .mapNotNull { it.logMessage }
+        .filterNotNull()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "")
+
     init {
-        observeMessages()
-        state = state.copy(isLoading = true)
-        verifyAndAutologin()
+        // sessionStateFlow starts with a null value, avoid showing login screen by setting loading to true
+        state = state.copy(isLoading = sessionStateFlow.value == null)
+        L(sessionStateFlow.value, "ssss", state.savedSession)
+
         // Listen to changes of the session table from the database
-        repository.sessionLiveData.observeForever {
-            state = state.copy(session = it)
-            L(it)
-            if (it == null) {
-                pingScheduler.cancel()
-                // setting the session to null will show the login screen, but the autologin call
-                // will immediately set isLoading to true which will show the loading screen instead
-                state = state.copy(session = null, isLoading = true)
-                // autologin will log back in if credentials are correct
-                viewModelScope.launch {
-                    L("autologin from init AuthVM")
-                    autologin()
-                }
-            } else {
-                pingScheduler.schedule()
-            }
-        }
-
         viewModelScope.launch {
-            repository.userLiveData.filterNotNull().distinctUntilChanged().collect { user ->
-                L(user)
-                state = state.copy(user = user)
+            pingServerSync()
+            repository.sessionLiveData.distinctUntilChanged().collect { session ->
+                L(session, "ssss")
+                if (session == null) {
+                    // setting the session to null will show the login screen, but the autologin call
+                    // will immediately set isLoading to true which will show the loading screen instead
+                    state = state.copy(isLoading = sessionStateFlow.value == null, savedSession = null)
+                    pingScheduler.cancel()
+                    autologin()  // autologin will log back in if credentials are correct
+                } else {
+                    // save the session to restore afterwards as the init value for the session state flow
+                    state = state.copy(savedSession = session)
+                    pingScheduler.schedule()
+                }
             }
         }
     }
 
-    private fun observeMessages() {
-        viewModelScope.launch {
-            playlistManager.logMessageUserReadableState.collect { logMessageState ->
-                logMessageState.logMessage?.let {
-                    state = state.copy(error = it)
-                }
-                L(logMessageState.logMessage)
-            }
-        }
-    }
-
-    fun verifyAndAutologin(completionCallback: () -> Unit = { }) {
-        L("verifyAndAutologin")
-        viewModelScope.launch {
-            // try to login with saved auth token
-            when (val ping = repository.ping()) {
-                is Resource.Success -> {
-                    //   If the session returned by ping is null, the token is probably expired and
-                    // the user is no longer authorized
-                    //   If the session is not null we are authorized and the auth token in the
-                    // session object is refreshed
-                    val session = ping.data?.second
-                    session?.let {
-                        state = state.copy(session = it, isLoading = false)
-                    }
-                        //?: run {
-                        // --- UNNECESSARY run BLOCK ---
-                        // NO NEED TO CALL AUTOLOGIN HERE, a null token from the ping call will
-                        // trigger autologin in the init block from the session observable
-                        // do not show loading screen during ping, only during autologin
-                        // state = state.copy(isLoading = true)
-                        // autologin()
-                        //}
-                    completionCallback()
-                }
-
-                is Resource.Error -> {
-                    state = state.copy(isLoading = false)
-                    completionCallback()
-                }
-
-                is Resource.Loading ->
-                    if (!ping.isLoading) { state = state.copy(isLoading = false) }
-            }
-        }
-    }
-
-    private suspend fun autologin() = repository.autoLogin().collect { result ->
-        when (result) {
-            is Resource.Success -> result.data?.let { auth ->
-                    L("AuthViewModel", auth)
-                    // remove error messages after login
-                    playlistManager.updateErrorLogMessage("")
-                    state = state.copy(session = auth)
-                }
-            is Resource.Error -> state =
-                state.copy(isLoading = false)
-            is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
-        }
-    }
-
-    fun onEvent(event: luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) {
+    fun onEvent(event: AuthEvent) {
         when (event) {
             is AuthEvent.Login -> login()
             is AuthEvent.TryAutoLogin -> {}
@@ -163,6 +109,57 @@ class AuthViewModel @Inject constructor(
                 password = event.password,
                 fullName = event.fullName
             )
+        }
+    }
+
+    /**
+     * If the session returned by ping is null, the token is probably expired and the user is no
+     * longer authorized.
+     *
+     * NO NEED TO CALL AUTOLOGIN upon successful ping, a null token from the ping call will trigger
+     * autologin in the init from the session flow.
+     *
+     * Do not show loading screen during ping, only during autologin
+     */
+    fun pingServer() {
+        viewModelScope.launch {
+            pingServerSync()
+        }
+    }
+
+    /**
+     *  try to login with saved auth token
+     *  ping will refresh the token if previous one still valid
+     */
+    private suspend fun pingServerSync() = repository.ping().let { ping ->
+        L("pingServerSync ssss")
+        val newSession = ping.data?.second
+        //val isSessionNull = newSession == null
+        when (ping) {
+            // a null session will trigger the observable in init, start show loading screen to avoid showing the login screen
+            is Resource.Success -> state = state.copy(isLoading = false)
+            is Resource.Error -> state = state.copy(isLoading = false)
+            is Resource.Loading -> if (!ping.isLoading) {
+                state = state.copy(isLoading = false)
+            }
+        }
+        newSession
+    }
+
+    private suspend fun autologin() = repository.autoLogin().collect { result ->
+        when (result) {
+            is Resource.Success -> result.data?.let { auth ->
+                L("AuthViewModel autologin", auth)
+                // remove error messages after login
+                playlistManager.updateErrorLogMessage("")
+            }
+            is Resource.Error -> state =
+                state.copy(isLoading = false, isAutologin = false)
+            is Resource.Loading ->
+                state = state.copy(isLoading = result.isLoading
+                        && (sessionStateFlow.value == null),
+                    isAutologin = result.isLoading
+                )
         }
     }
 
@@ -182,10 +179,16 @@ class AuthViewModel @Inject constructor(
                 email = email
             ).collect { result ->
                 when (result) {
-                    is Resource.Success -> { result.data?.let {
-                        playlistManager.updateUserMessage(application.getString(R.string.loginScreen_register_success)) }
+                    is Resource.Success -> {
+                        result.data?.let {
+                            playlistManager.updateUserMessage(application.getString(R.string.loginScreen_register_success))
+                        }
                     }
-                    is Resource.Error -> { state = state.copy(isLoading = false) }
+
+                    is Resource.Error -> {
+                        state = state.copy(isLoading = false)
+                    }
+
                     is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                 }
             }
@@ -209,13 +212,16 @@ class AuthViewModel @Inject constructor(
                     is Resource.Success -> {
                         result.data?.let { auth ->
                             // clear credentials after login
-                            state = state.copy(session = auth, username = "", authToken = "", password = "")
+                            state = state.copy(username = "", authToken = "", password = "")
                             // clear any user facing message on the UI
                             playlistManager.updateUserMessage("")
                         }
                     }
                     is Resource.Error -> state = state.copy(isLoading = false)
-                    is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                    is Resource.Loading -> state =
+                        state.copy(isLoading = result.isLoading
+                            && (sessionStateFlow.value == null)
+                        )
                 }
             }
         }

@@ -31,7 +31,7 @@ import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.User
 
 interface MusicRepository {
-    val sessionLiveData: LiveData<Session?>
+    val sessionLiveData: Flow<Session?>
     val userLiveData: Flow<User?>
     val serverInfoStateFlow: StateFlow<ServerInfo>
 

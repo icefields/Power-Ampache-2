@@ -21,60 +21,41 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
-import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Constants
 
 fun MainViewModel.observeSession() {
-    // TODO use this observable instead
-//    viewModelScope.launch {
-//        musicRepository.sessionLiveData.map { it?.auth }.distinctUntilChanged().asFlow().filterNotNull().collectLatest {
-//            logToErrorLogs("observeSession asFlow $it")
-//        }
-//    }
-
-
-    musicRepository.sessionLiveData.distinctUntilChanged().observeForever {
-        //if (lock == null) lock = Any()
-        synchronized(mainLock) {
-            val oldToken = authToken
-            authToken = it?.auth ?: ""
-            logToErrorLogs(" old toke $oldToken, new one: $authToken")
-            if (authToken.isNotBlank()) {
-                // refresh the playlist with new urls with the new token
-                // only if a queue exists
-                if (oldToken != authToken && playlistManager.currentQueueState.value.isNotEmpty()) {
-                    // TODO EXPERIMENT remove?
-//                    if (!isPlaying) {
-//                        logToErrorLogs("nothing playing, new token present, stop service")
-//                        stopMusicService()
-//                    }
-                    //authToken = newToken
-                    if (Constants.RESET_QUEUE_ON_NEW_SESSION && !isPlaying) {
-                        // new session and not playing and RESET_QUEUE_ON_NEW_SESSION == true
-                        logToErrorLogs("REFRESH AUTH !isPlaying")
-                        playlistManager.reset()
-                        resetCachedQueueState()
-                        stopMusicService()
-                    } else {
-                        logToErrorLogs("REFRESH AUTH LOAD SONGS DATA")
-                        //loadSongData()
-                        restoreQueueState()
+    viewModelScope.launch {
+        musicRepository.sessionLiveData.distinctUntilChanged().collect {
+            synchronized(mainLock) {
+                val oldToken = authToken
+                authToken = it?.auth ?: ""
+                logToErrorLogs(" old toke $oldToken, new one: $authToken")
+                if (authToken.isNotBlank()) {
+                    // refresh the playlist with new urls with the new token
+                    // only if a queue exists
+                    if (oldToken != authToken && playlistManager.currentQueueState.value.isNotEmpty()) {
+                        if (Constants.RESET_QUEUE_ON_NEW_SESSION && !isPlaying) {
+                            // new session and not playing and RESET_QUEUE_ON_NEW_SESSION == true
+                            logToErrorLogs("REFRESH AUTH !isPlaying")
+                            playlistManager.reset()
+                            resetCachedQueueState()
+                            stopMusicService()
+                        } else {
+                            logToErrorLogs("REFRESH AUTH LOAD SONGS DATA")
+                            restoreQueueState()
+                        }
                     }
                 } else {
-                    // TODO should restore state here? can not-restoring lead to bugs?
-                    //restoreQueueState()
-                }
-                //authToken = newToken
-            } else {
-                // if sessions is null, stop service and invalidate queue and current song
-                if (currentSong() == null) {
-                    logToErrorLogs(" && state.song == null")
-                    if (!isPlaying) {
-                        logToErrorLogs("nothing playing, tate.song == null, stop service")
-                        // TODO EXPERIMENT remove?
-                        //stopMusicService()
+                    // if sessions is null, stop service and invalidate queue and current song
+                    if (currentSong() == null) {
+                        logToErrorLogs(" && state.song == null")
+                        if (!isPlaying) {
+                            logToErrorLogs("nothing playing, tate.song == null, stop service")
+                        }
                     }
-                    //playlistManager.reset() // this will trigger the observables in observePlaylistManager() and reset mainviewmodel as well
                 }
             }
         }
