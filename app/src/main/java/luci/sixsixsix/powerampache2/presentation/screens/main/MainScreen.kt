@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
@@ -63,6 +64,8 @@ fun MainScreen(
     val session by authViewModel.sessionStateFlow.collectAsState()
     val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
     var offlineModeSwitchVisible by remember { mutableStateOf(false) }
+    val shouldShowLoginScreen = !(session != null || offlineModeState)
+    var loginScreenVisible by remember { mutableStateOf(shouldShowLoginScreen) }
 
     LaunchedEffect(offlineModeSwitchVisible) {
         // wait 2 seconds before showing the switch
@@ -70,21 +73,13 @@ fun MainScreen(
         offlineModeSwitchVisible = true
     }
 
-    val shouldShowLoading =
-    // OLD BEHAVIOUR, with SHOW_LOADING_ON_NEW_SESSION set to true
-    // if session is null, SHOW_LOADING_ON_NEW_SESSION is ignored, and isLoading will determine
-    //      the visibility of loading view
-    // if session not null (a previous session exists) and SHOW_LOADING_ON_NEW_SESSION is true,
-    //      this line is ignored, and isLoading will determine the visibility of loading view
-    // NEW BEHAVIOUR, with SHOW_LOADING_ON_NEW_SESSION set to false
-    // if session is not null, and SHOW_LOADING_ON_NEW_SESSION is false, loading view will not
-        //      be shown, because all the chained && will fail
-        (session == null || BuildConfig.SHOW_LOADING_ON_NEW_SESSION)
-                && authViewModel.state.isLoading
-                && !offlineModeState
-    //L("aaaa", authViewModel.state.session == null , BuildConfig.SHOW_LOADING_ON_NEW_SESSION, authViewModel.state.isLoading)
+    LaunchedEffect(shouldShowLoginScreen) {
+        // wait 2 seconds before showing the switch
+        delay(1000)
+        // show login screen with a delay to allow time to the token to refresh
+        loginScreenVisible = shouldShowLoginScreen
+    }
 
-    //if(shouldShowLoading) {
     if(authViewModel.state.isLoading && !offlineModeState) {
         LoadingScreenWithOfflineSwitch(
             offlineModeSwitchVisible = offlineModeSwitchVisible,
@@ -97,7 +92,10 @@ fun MainScreen(
         if (session != null || offlineModeState) {
             LoggedInScreen(mainViewModel, authViewModel, settingsViewModel)
         } else {
-            LoginScreen(viewModel = authViewModel)
+            if (loginScreenVisible && shouldShowLoginScreen) {
+                L("ssss", "show login screen")
+                LoginScreen(viewModel = authViewModel)
+            }
         }
     }
 }

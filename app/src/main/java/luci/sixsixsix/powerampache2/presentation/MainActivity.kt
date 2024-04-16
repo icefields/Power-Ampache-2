@@ -128,10 +128,6 @@ class MainActivity : ComponentActivity() {
         L( "onNewIntent")
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-    }
-
     override fun onDestroy() {
         //mainViewModel.stopMusicService()
         super.onDestroy()

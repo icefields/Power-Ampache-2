@@ -51,7 +51,7 @@ class PingScheduler @Inject constructor(
         if (isScheduled) return
 
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis(),
+            System.currentTimeMillis() + INTERVAL_HOUR,
             INTERVAL_HOUR * 2,
             pendingIntent
         )

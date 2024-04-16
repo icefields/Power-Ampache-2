@@ -29,6 +29,7 @@ import luci.sixsixsix.powerampache2.domain.models.User
 @Parcelize
 data class AuthState(
     //val session: Session? = null,
+    val savedSession: Session? = null, // only use this to restore the session as init value of sessionStateFlow
     // val user: User? = null,
     val isLoading: Boolean = false,
     val isAutologin: Boolean = false,

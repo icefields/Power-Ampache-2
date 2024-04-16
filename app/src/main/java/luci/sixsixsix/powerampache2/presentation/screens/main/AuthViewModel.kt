@@ -40,6 +40,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
@@ -57,7 +58,7 @@ class AuthViewModel @Inject constructor(
 
     val sessionStateFlow = repository.sessionLiveData
         .distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), state.savedSession)
 
     val userStateFlow = repository.userLiveData
         .distinctUntilChanged()
@@ -69,21 +70,23 @@ class AuthViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "")
 
     init {
-        L(sessionStateFlow.value, "ssss")
+        // sessionStateFlow starts with a null value, avoid showing login screen by setting loading to true
         state = state.copy(isLoading = sessionStateFlow.value == null)
+        L(sessionStateFlow.value, "ssss", state.savedSession)
+
         // Listen to changes of the session table from the database
         viewModelScope.launch {
             pingServerSync()
-            sessionStateFlow.collect { session ->
+            repository.sessionLiveData.distinctUntilChanged().collect { session ->
                 L(session, "ssss")
+                // save the session to restore afterwards as the init value for the session state flow
+                state = state.copy(savedSession = session)
                 if (session == null) {
-                    pingScheduler.cancel()
                     // setting the session to null will show the login screen, but the autologin call
                     // will immediately set isLoading to true which will show the loading screen instead
                     state = state.copy(isLoading = sessionStateFlow.value == null)
-                    // autologin will log back in if credentials are correct
-                    L("autologin from init AuthVM ssss")
-                    autologin()
+                    pingScheduler.cancel()
+                    autologin()  // autologin will log back in if credentials are correct
                 } else {
                     pingScheduler.schedule()
                 }
@@ -128,15 +131,19 @@ class AuthViewModel @Inject constructor(
      *  try to login with saved auth token
      *  ping will refresh the token if previous one still valid
      */
-    private suspend fun pingServerSync() {
-        L("pingServerSync")
-        when (val ping = repository.ping()) {
+    private suspend fun pingServerSync() = repository.ping().let { ping ->
+        L("pingServerSync ssss")
+        val newSession = ping.data?.second
+        //val isSessionNull = newSession == null
+        when (ping) {
+            // a null session will trigger the observable in init, start show loading screen to avoid showing the login screen
             is Resource.Success -> state = state.copy(isLoading = false)
             is Resource.Error -> state = state.copy(isLoading = false)
             is Resource.Loading -> if (!ping.isLoading) {
                 state = state.copy(isLoading = false)
             }
         }
+        newSession
     }
 
     private suspend fun autologin() = repository.autoLogin().collect { result ->
