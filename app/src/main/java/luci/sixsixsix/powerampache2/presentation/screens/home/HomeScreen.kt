@@ -85,22 +85,24 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val state = viewModel.state
+    val playlists by viewModel.playlistsStateFlow.collectAsState()
+    val recentAlbums by viewModel.recentlyPlayedStateFlow.collectAsState(listOf())
     val offlineModeState by viewModel.offlineModeStateFlow.collectAsState()
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     var emptyViewVisible by remember { mutableStateOf(false) }
 
     val homeScreenRowItems = listOf(
-        HomeScreenRowItems.Recent(state.recentAlbums),
-        HomeScreenRowItems.Playlists(state.playlists),
+        HomeScreenRowItems.Recent(recentAlbums),
+        HomeScreenRowItems.Playlists(playlists),
         HomeScreenRowItems.Favourite(state.flaggedAlbums),
         HomeScreenRowItems.Frequent(state.frequentAlbums),
         HomeScreenRowItems.Highest(state.highestAlbums),
         HomeScreenRowItems.Newest(state.newestAlbums),
         HomeScreenRowItems.More(state.randomAlbums),
-        HomeScreenRowItems.Nothing(isLoadingData(state))
+        HomeScreenRowItems.Nothing(isLoadingData(state, playlists, recentAlbums))
     )
 
-    val showEmptyView = isNoData(state) && offlineModeState
+    val showEmptyView = isNoData(state, playlists, recentAlbums) && offlineModeState
     LaunchedEffect(showEmptyView) {
         // wait 1.2 seconds before showing the switch
         delay(1200)
@@ -137,7 +139,7 @@ fun HomeScreen(
     }
 }
 
-fun isLoadingData(state: HomeScreenState) = (
+fun isLoadingData(state: HomeScreenState, playlists: List<Playlist>, recentAlbums: List<AmpacheModel>) = (
         state.isLoading ||
         (
             state.isRecentAlbumsLoading ||
@@ -146,16 +148,16 @@ fun isLoadingData(state: HomeScreenState) = (
             state.isFrequentAlbumsLoading
         ) ||
         (   state.frequentAlbums.isNullOrEmpty() &&
-            state.recentAlbums.isNullOrEmpty() &&
+            recentAlbums.isNullOrEmpty() &&
             state.randomAlbums.isNullOrEmpty() &&
             state.newestAlbums.isNullOrEmpty() &&
-            state.playlists.isNullOrEmpty()
+            playlists.isNullOrEmpty()
         )
 )
 
-fun isNoData(state: HomeScreenState) =
+fun isNoData(state: HomeScreenState, playlists: List<Playlist>, recentAlbums: List<AmpacheModel>) =
     state.frequentAlbums.isNullOrEmpty() &&
-    state.recentAlbums.isNullOrEmpty() &&
+    recentAlbums.isNullOrEmpty() &&
     state.randomAlbums.isNullOrEmpty() &&
     state.newestAlbums.isNullOrEmpty() &&
-    state.playlists.isNullOrEmpty()
+    playlists.isNullOrEmpty()

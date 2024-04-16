@@ -33,7 +33,7 @@ typealias ArtistId = String
 
 @Parcelize
 data class Artist(
-    val id: String,
+    override val id: String,
     val name: String,
     val albumCount: Int = 0,
     val songCount: Int = 0,

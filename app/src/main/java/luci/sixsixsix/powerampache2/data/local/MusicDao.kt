@@ -316,7 +316,7 @@ interface MusicDao {
     suspend fun writeSettings(localSettingsEntity: LocalSettingsEntity)
 
     @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
-    fun offlineModeEnabled(): LiveData<Boolean?>
+    fun offlineModeEnabled(): Flow<Boolean?>
 
     @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     fun isOfflineModeEnabled(): Boolean?
@@ -381,15 +381,29 @@ interface MusicDao {
             WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
             AND song.mediaId == history.mediaId
             GROUP BY history.mediaId
-            ORDER BY lastPlayed DESC LIMIT 66""")
+            ORDER BY lastPlayed DESC LIMIT 666""")
     suspend fun getSongHistory(): List<SongEntity>
+
+    @Query("""SELECT history.*, song.* FROM historyentity as history, songentity as song 
+            WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
+            AND song.mediaId == history.mediaId
+            GROUP BY history.mediaId
+            ORDER BY lastPlayed DESC LIMIT 666""")
+    fun getSongHistoryFlow(): Flow<List<SongEntity>>
 
     @Query("""SELECT history.*, song.* FROM historyentity as history, downloadedsongentity as song 
             WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
             AND song.mediaId == history.mediaId
             GROUP BY history.mediaId
-            ORDER BY lastPlayed DESC LIMIT 66""")
+            ORDER BY lastPlayed DESC LIMIT 666""")
     suspend fun getOfflineSongHistory(): List<DownloadedSongEntity>
+
+    @Query("""SELECT history.*, song.* FROM historyentity as history, downloadedsongentity as song 
+            WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
+            AND song.mediaId == history.mediaId
+            GROUP BY history.mediaId
+            ORDER BY lastPlayed DESC LIMIT 666""")
+    fun getOfflineSongHistoryFlow(): Flow<List<DownloadedSongEntity>>
 
     // TODO MIGRATION CALLS, REMOVE AFTERWARDS
     // --- TODO: REMOVE AFTER MIGRATION

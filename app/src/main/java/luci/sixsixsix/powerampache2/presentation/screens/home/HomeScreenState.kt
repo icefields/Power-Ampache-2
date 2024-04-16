@@ -26,8 +26,8 @@ import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 
 data class HomeScreenState (
-    val playlists: List<Playlist> = emptyList(),
-    val recentAlbums: List<AmpacheModel> = emptyList(),
+    //val playlists: List<Playlist> = emptyList(),
+    //val recentAlbums: List<AmpacheModel> = emptyList(),
     val newestAlbums: List<AmpacheModel> = emptyList(),
     val highestAlbums: List<Album> = emptyList(),
     val frequentAlbums: List<AmpacheModel> = emptyList(),

@@ -63,7 +63,7 @@ data class User(
             "",
             Constants.ERROR_INT,
             "",
-            true,
+            false,
             Constants.ERROR_INT,
             Constants.ERROR_INT,
             "",
@@ -71,6 +71,24 @@ data class User(
             "",
             art = "",
             serverUrl = ""
+        )
+
+        fun notImplementedUser(username: String, serverUrl: String): User = User(
+            id = Constants.ERROR_INT.toString(),
+            username = username,
+            email = "",
+            access = Constants.USER_ACCESS_DEFAULT,
+            streamToken = "",
+            Constants.ERROR_INT,
+            "",
+            false,
+            Constants.ERROR_INT,
+            Constants.ERROR_INT,
+            "",
+            "",
+            "",
+            art = "",
+            serverUrl = serverUrl
         )
 
         fun demoUser(): User = User(

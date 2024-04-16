@@ -27,7 +27,7 @@ import java.util.UUID
 
 @Parcelize
 data class Album(
-    val id: String = "",
+    override val id: String = "",
     val name: String = "",
     val basename: String = "",
     val artist: MusicAttribute = MusicAttribute.emptyInstance(),

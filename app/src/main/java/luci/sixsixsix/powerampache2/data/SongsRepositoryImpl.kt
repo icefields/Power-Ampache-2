@@ -23,12 +23,14 @@ package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -76,6 +78,7 @@ import javax.inject.Singleton
  * return/emit data.
  * When breaking a rule please add a comment with a TODO: BREAKING_RULE
  */
+@OptIn(DelicateCoroutinesApi::class)
 @Singleton
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
@@ -92,9 +95,9 @@ class SongsRepositoryImpl @Inject constructor(
     }
 
     init {
-        dao.offlineModeEnabled().distinctUntilChanged().observeForever {
-            if (it != null && it == false) {
-                GlobalScope.launch {
+        GlobalScope.launch {
+            dao.offlineModeEnabled().distinctUntilChanged().collect {
+                if (it != null && it == false) {
                     try {
                         backOnlineActions()
                     } catch (e: Exception) {

@@ -54,19 +54,6 @@ class SettingsRepositoryImpl @Inject constructor(
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager
 ): BaseAmpacheRepository(api, db, errorHandler), SettingsRepository {
-    override val settingsLiveData: LiveData<LocalSettings?>
-        get() = dao.settingsLiveData().distinctUntilChanged().map {
-                it?.toLocalSettings()
-        }
-    override val offlineModeFlow: Flow<Boolean>
-        get() =  settingsLiveData
-    .distinctUntilChanged()
-    .asFlow()
-    //.filterNotNull()
-    .map {
-        it?.isOfflineModeEnabled ?: false
-    }.distinctUntilChanged()
-
     override suspend fun getLocalSettings(username: String?) =
         dao.getSettings()?.toLocalSettings()
             ?: LocalSettings.defaultSettings(username)
