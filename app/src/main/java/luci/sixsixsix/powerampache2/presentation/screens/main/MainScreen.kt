@@ -75,7 +75,7 @@ fun MainScreen(
 
     LaunchedEffect(shouldShowLoginScreen) {
         // wait 2 seconds before showing the switch
-        delay(1000)
+        delay(500)
         // show login screen with a delay to allow time to the token to refresh
         loginScreenVisible = shouldShowLoginScreen
     }

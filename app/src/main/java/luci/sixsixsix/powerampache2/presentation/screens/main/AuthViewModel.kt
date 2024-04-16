@@ -79,15 +79,15 @@ class AuthViewModel @Inject constructor(
             pingServerSync()
             repository.sessionLiveData.distinctUntilChanged().collect { session ->
                 L(session, "ssss")
-                // save the session to restore afterwards as the init value for the session state flow
-                state = state.copy(savedSession = session)
                 if (session == null) {
                     // setting the session to null will show the login screen, but the autologin call
                     // will immediately set isLoading to true which will show the loading screen instead
-                    state = state.copy(isLoading = sessionStateFlow.value == null)
+                    state = state.copy(isLoading = sessionStateFlow.value == null, savedSession = null)
                     pingScheduler.cancel()
                     autologin()  // autologin will log back in if credentials are correct
                 } else {
+                    // save the session to restore afterwards as the init value for the session state flow
+                    state = state.copy(savedSession = session)
                     pingScheduler.schedule()
                 }
             }
