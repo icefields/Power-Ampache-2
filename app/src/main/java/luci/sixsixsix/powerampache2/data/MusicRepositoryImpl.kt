@@ -21,18 +21,9 @@
  */
 package luci.sixsixsix.powerampache2.data
 
-import android.annotation.SuppressLint
-import android.content.Context
 import androidx.core.text.isDigitsOnly
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.map
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,7 +33,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants
@@ -65,7 +55,6 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toGenre
 import luci.sixsixsix.powerampache2.data.remote.dto.toServerInfo
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -76,7 +65,6 @@ import luci.sixsixsix.powerampache2.domain.models.User
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Instant
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -110,7 +98,7 @@ class MusicRepositoryImpl @Inject constructor(
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
         GlobalScope.launch {
-            sessionLiveData.asFlow().distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
+            sessionLiveData.distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
                 // if token has changed or user is null, get user from network
                 if (newToken != currentAuthToken || currentUser == null) {
                     currentAuthToken = newToken
@@ -129,21 +117,6 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    // --- TODO: REMOVE AFTER MIGRATION
-//    private fun isMigrationDone(context: Context):Boolean = context
-//        .getSharedPreferences("migrationdone", Context.MODE_PRIVATE)
-//        .getBoolean("migrationdoneboolid", false)
-//
-//    @SuppressLint("ApplySharedPref")
-//    private suspend fun setMigrationDone(context: Context, done: Boolean) {
-//        withContext(Dispatchers.IO) {
-//            context.getSharedPreferences("migrationdone", Context.MODE_PRIVATE).edit().apply {
-//                putBoolean("migrationdoneboolid", done)
-//                commit()
-//            }
-//        }
-//    }
-//
     // --- TODO: REMOVE AFTER MIGRATION
     private suspend fun migrateDb() {
         L("migrateDb start")
@@ -192,9 +165,6 @@ class MusicRepositoryImpl @Inject constructor(
 
 
     private suspend fun setSession(se: Session) {
-        if (se.auth != getSession()?.auth) {
-            L("setSession se.auth != getSession()?.auth")
-        }
         dao.updateSession(se.toSessionEntity())
         val cred = getCurrentCredentials()
         dao.insertMultiUserSession(se.toMultiUserSessionEntity(username = cred.username, serverUrl = cred.serverUrl))
@@ -205,49 +175,8 @@ class MusicRepositoryImpl @Inject constructor(
         dao.insertMultiUserCredentials(se.toMultiUserCredentialEntity())
     }
 
-    override suspend fun logout(): Flow<Resource<Boolean>> = flow {
-        emit(Resource.Loading(true))
-
-        // first clear db then logout to guarantee data is cleared even if the call fails
-        // clear credentials after api call, since the api uses base url from credentials
-        dao.clearCredentials()
-        dao.clearSession()
-        dao.clearCachedData()
-        dao.clearUser()
-
-        emit(Resource.Success(true))
-
-        /*
-        val url = dao.getCredentials()?.serverUrl?.let { serverUrl ->
-            "${MainNetwork.buildServerUrl(serverUrl)}/json.server.php?action=goodbye&auth=${getSession()?.auth}"
-        } ?: ""
-
-         dao.clearCredentials()
-        dao.clearSession()
-        dao.clearCachedData()
-        dao.clearUser()
-
-        // TODO: logout is not working, clear db is enough to logout but we must invalidate the token from server
-        val resp = getSession()?.auth?.let {
-            api.goodbye(url)
-        }
-
-        L( "LOGOUT $resp", url)
-
-        if (resp?.toBoolean() == true) {
-            emit(Resource.Success(true))
-        } else {
-            // do not show anything to the user if in prod mode, log error instead
-            errorHandler.logError("there is an error in the logout response.\nLOGOUT $resp")
-            throw Exception(if (BuildConfig.DEBUG) "there is an error in the logout response" else "")
-        }
-        */
-
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("logout()", e, this) }
-
     /**
-     * ping the server and returns 2 objects:
+     * ping the server, refresh the session stored in db, and returns 2 objects:
      *  - in case of a valid session a new Session object is return along with a server info object
      *  - in case the session is not valid, only the server info object will be returned
      */
@@ -263,7 +192,7 @@ class MusicRepositoryImpl @Inject constructor(
                     pingResponse.toSession(dateMapper)
                     // TODO Check connection error before making this call crash into the try-catch
                 } catch (e: Exception) {
-                    L("clear session, set the session to null")
+                    L("clear session, set the session to null ssss ping()")
                     dao.clearSession()
                     null
                 } ?.let { se ->
@@ -426,4 +355,45 @@ class MusicRepositoryImpl @Inject constructor(
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getGenres()", e, this) }
+
+    override suspend fun logout(): Flow<Resource<Boolean>> = flow {
+        emit(Resource.Loading(true))
+
+        // first clear db then logout to guarantee data is cleared even if the call fails
+        // clear credentials after api call, since the api uses base url from credentials
+        dao.clearCredentials()
+        dao.clearSession()
+        dao.clearCachedData()
+        dao.clearUser()
+
+        emit(Resource.Success(true))
+
+        /*
+        val url = dao.getCredentials()?.serverUrl?.let { serverUrl ->
+            "${MainNetwork.buildServerUrl(serverUrl)}/json.server.php?action=goodbye&auth=${getSession()?.auth}"
+        } ?: ""
+
+         dao.clearCredentials()
+        dao.clearSession()
+        dao.clearCachedData()
+        dao.clearUser()
+
+        // TODO: logout is not working, clear db is enough to logout but we must invalidate the token from server
+        val resp = getSession()?.auth?.let {
+            api.goodbye(url)
+        }
+
+        L( "LOGOUT $resp", url)
+
+        if (resp?.toBoolean() == true) {
+            emit(Resource.Success(true))
+        } else {
+            // do not show anything to the user if in prod mode, log error instead
+            errorHandler.logError("there is an error in the logout response.\nLOGOUT $resp")
+            throw Exception(if (BuildConfig.DEBUG) "there is an error in the logout response" else "")
+        }
+        */
+
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("logout()", e, this) }
 }
