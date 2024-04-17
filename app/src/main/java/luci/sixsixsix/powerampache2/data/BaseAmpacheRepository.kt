@@ -74,7 +74,6 @@ abstract class BaseAmpacheRepository(
         get() =  dao.offlineModeEnabled()
             .distinctUntilChanged()
             .map {
-                L("aaaa BaseAmpacheRepository offline mode changed", it)
                 it ?: false
             }.distinctUntilChanged()
 
