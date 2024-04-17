@@ -198,7 +198,7 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylistSongs(companyListingEntities: List<PlaylistSongEntity>)
 
-    @Query("DELETE FROM playlistentity")
+    @Query("DELETE FROM playlistentity WHERE $multiUserCondition")
     suspend fun clearPlaylists()
 
     @Query("DELETE FROM playlistsongentity")
@@ -207,16 +207,18 @@ interface MusicDao {
     @Query("DELETE FROM playlistsongentity WHERE LOWER(playlistId) == LOWER(:playlistId)")
     suspend fun clearPlaylistSongs(playlistId: String)
 
-    @Query("""SELECT * FROM playlistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by flag DESC, rating DESC, (LOWER(owner) == LOWER( (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name)
+        AND $multiUserCondition
+        order by flag DESC, rating DESC, (LOWER(owner) == LOWER( (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
     suspend fun searchPlaylists(query: String): List<PlaylistEntity>
 
-    @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
     fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
 
-    @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, id DESC""")
     suspend fun getAllPlaylists(): List<PlaylistEntity>
 
-    @Query("""SELECT * FROM playlistentity WHERE id == :playlistId""")
+    @Query("""SELECT * FROM playlistentity WHERE id == :playlistId AND $multiUserCondition""")
     fun playlistLiveData(playlistId: String): Flow<PlaylistEntity?>
 
     // get only playlists user owns
