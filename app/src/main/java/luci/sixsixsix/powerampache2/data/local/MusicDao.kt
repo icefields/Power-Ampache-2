@@ -126,14 +126,23 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE year > 1000 order by year DESC LIMIT 66""")
     suspend fun getRecentlyReleasedAlbums(): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity WHERE flag == 1 ORDER BY RANDOM() LIMIT 222""")
+    @Query("""SELECT * FROM albumentity WHERE flag == 1 AND $multiUserCondition ORDER BY RANDOM() LIMIT 222""")
     suspend fun getLikedAlbums(): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity WHERE rating > 0 order by rating DESC""")
+    @Query("""SELECT * FROM albumentity WHERE flag == 1 AND $multiUserCondition ORDER BY RANDOM() LIMIT 222""")
+    fun getLikedAlbumsFlow(): Flow<List<AlbumEntity>>
+
+    @Query("""SELECT * FROM albumentity WHERE rating > 0 AND $multiUserCondition order by rating DESC""")
     suspend fun getHighestRatedAlbums(): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity ORDER BY RANDOM() LIMIT 66""")
+    @Query("""SELECT * FROM albumentity WHERE rating > 0 AND $multiUserCondition order by rating DESC""")
+    fun getHighestRatedAlbumsFlow(): Flow<List<AlbumEntity>>
+
+    @Query("""SELECT * FROM albumentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 66""")
     suspend fun getRandomAlbums(): List<AlbumEntity>
+
+    @Query("""SELECT * FROM albumentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 22""")
+    fun getRandomAlbumsFlow(): Flow<List<AlbumEntity>>
 
     @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, albumentity AS a WHERE a.id == s.albumId GROUP BY s.albumId ORDER BY acount DESC LIMIT 122""")
     suspend fun getMostPlayedAlbums(): List<AlbumEntity>
@@ -297,6 +306,9 @@ interface MusicDao {
               ) AS artist
             WHERE artist.id == song.artistId GROUP BY song.artistId ORDER BY acount DESC""")
     suspend fun getMostPlayedOfflineArtists(): List<ArtistEntity>
+
+    @Query("""SELECT * FROM downloadedsongentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 66""")
+    fun getRandomOfflineSongsFlow(): Flow<List<DownloadedSongEntity>>
 
     @Query("DELETE FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId)")
     suspend fun deleteDownloadedSong(songId: String)

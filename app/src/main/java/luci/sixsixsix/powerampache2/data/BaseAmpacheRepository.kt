@@ -109,7 +109,10 @@ abstract class BaseAmpacheRepository(
      * observe livedata to get updates on the user
      */
     private suspend fun setUser(user: User) = getCurrentCredentials().serverUrl.let { serverUrl ->
+        // only current user in this table
+        dao.clearUser()
         dao.updateUser(user.toUserEntity(serverUrl))
+
         dao.insertMultiUserUser(user.toMultiUserEntity(serverUrl))
     }
 
@@ -120,7 +123,7 @@ abstract class BaseAmpacheRepository(
                 val userResponse = api.getUser(authKey = session.auth, username = cred.username)
                 // nextcloud and other services might not implement the user api
                 val isNotImplemented = userResponse.error?.toError()?.isNotImplemented() == true
-                val user = if (isNotImplemented){
+                val user = if (isNotImplemented) {
                     User.notImplementedUser(cred.username, cred.serverUrl)
                 } else {
                     userResponse.toUser(cred.serverUrl)

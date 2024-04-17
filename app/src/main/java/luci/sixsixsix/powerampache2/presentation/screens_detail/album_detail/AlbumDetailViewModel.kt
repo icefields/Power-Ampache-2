@@ -35,8 +35,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapConcat
@@ -47,18 +45,13 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
-import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
-import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.PlaylistDetailEvent
-import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.PlaylistDetailState
 import javax.inject.Inject
-import kotlin.math.abs
 
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
@@ -69,7 +62,6 @@ class AlbumDetailViewModel @Inject constructor(
     // need this because we're passing the symbol around
     private val songsRepository: SongsRepository,
     private val albumsRepository: AlbumsRepository,
-    private val playlistsRepository: PlaylistsRepository,
     private val settingsRepository: SettingsRepository,
     private val playlistManager: MusicPlaylistManager,
 ) : AndroidViewModel(application) {
@@ -99,20 +91,6 @@ class AlbumDetailViewModel @Inject constructor(
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Album())
 
     init {
-        /*val album = savedStateHandle.get<Album>("album")?.also {
-            state = state.copy(album = it)
-        }
-
-        savedStateHandle.get<String>("albumId")?.let {
-            L("albumId", it)
-            if (!it.isNullOrBlank()) {
-                getSongsFromAlbum(it)
-            }
-            if (album == null) {
-                getAlbumInfo(it, false)
-            }
-        }*/
-
         viewModelScope.launch {
             playlistManager.downloadedSongFlow.collect { song ->
                 if(song != null) {
@@ -132,18 +110,11 @@ class AlbumDetailViewModel @Inject constructor(
                 L("AlbumDetailEvent.Fetch", event.albumId)
                 getSongsFromAlbum(albumId = event.albumId, fetchRemote = true)
             }
-            is AlbumDetailEvent.OnSongSelected -> {
-                // play the selected song and add the rest of the album to the queue
-                // playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.getSongList())
-            }
-            is AlbumDetailEvent.OnPlayAlbum -> {  }
+            is AlbumDetailEvent.OnSongSelected -> { }
+            is AlbumDetailEvent.OnPlayAlbum -> { }
             AlbumDetailEvent.OnShareAlbum ->
                 shareAlbum(albumStateFlow.value.id)
-            AlbumDetailEvent.OnShuffleAlbum -> {
-//                val shuffled = state.getSongList().shuffled()
-//                playlistManager.replaceCurrentQueue(shuffled)
-//                playlistManager.updateCurrentSong(shuffled[0])
-            }
+            AlbumDetailEvent.OnShuffleAlbum -> { }
             AlbumDetailEvent.OnFavouriteAlbum ->
                 favouriteAlbum()
             AlbumDetailEvent.RefreshFromCache -> {

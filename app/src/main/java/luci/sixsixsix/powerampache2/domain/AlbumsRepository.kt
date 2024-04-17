@@ -21,14 +21,15 @@
  */
 package luci.sixsixsix.powerampache2.domain
 
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface AlbumsRepository {
     val recentlyPlayedAlbumsFlow: Flow<List<Album>>
+    val flaggedAlbumsFlow: Flow<List<Album>>
+    val highestRatedAlbumsFlow: Flow<List<Album>>
+    val randomAlbumsFlow: Flow<List<Album>>
 
     suspend fun getAlbums(fetchRemote: Boolean = true, query: String = "", offset: Int = 0, limit: Int = 0): Flow<Resource<List<Album>>>
     suspend fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Album>>>

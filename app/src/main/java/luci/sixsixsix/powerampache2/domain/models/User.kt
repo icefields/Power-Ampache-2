@@ -30,6 +30,7 @@ import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_NAME
 import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_STATE
 import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_USERNAME
 import luci.sixsixsix.powerampache2.common.Constants.MASTODON_URL
+import luci.sixsixsix.powerampache2.common.Constants.NOT_IMPLEMENTED_USER_ID
 import luci.sixsixsix.powerampache2.common.Constants.USER_ERROR_MESSAGE
 import luci.sixsixsix.powerampache2.common.Constants.USER_ID_ERROR
 
@@ -56,6 +57,9 @@ data class User(
     fun isError() =
         id == USER_ID_ERROR.toString()
 
+    fun isNotImplemented() =
+        id == NOT_IMPLEMENTED_USER_ID
+
     companion object {
         fun emptyUser(): User = User(
             "", "", "",
@@ -74,13 +78,13 @@ data class User(
         )
 
         fun notImplementedUser(username: String, serverUrl: String): User = User(
-            id = Constants.ERROR_INT.toString(),
+            id = NOT_IMPLEMENTED_USER_ID,
             username = username,
             email = "",
             access = Constants.USER_ACCESS_DEFAULT,
             streamToken = "",
-            Constants.ERROR_INT,
-            "",
+            fullNamePublic = 0,
+            fullName = "",
             false,
             Constants.ERROR_INT,
             Constants.ERROR_INT,

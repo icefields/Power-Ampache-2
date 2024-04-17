@@ -271,26 +271,59 @@ class AlbumsRepositoryImpl @Inject constructor(
             }
         }.toList()
 
-    override val recentlyPlayedAlbumsFlow = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
-        if (!isOfflineModeEnabled) {
-            dao.getSongHistoryFlow().map { songList ->
-                songHistoryToAlbumHistory(songList.map { it.toSong() })
-            }
-        } else {
-            dao.getOfflineSongHistoryFlow().map { songList ->
-                songHistoryToAlbumHistory(songList.map { it.toSong() })
+    override val recentlyPlayedAlbumsFlow
+        get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
+            if (!isOfflineModeEnabled) {
+                dao.getSongHistoryFlow().map { songList ->
+                    songHistoryToAlbumHistory(songList.map { it.toSong() })
+                }
+            } else {
+                dao.getOfflineSongHistoryFlow().map { songList ->
+                    songHistoryToAlbumHistory(songList.map { it.toSong() })
+                }
             }
         }
-    }
+
+    override val randomAlbumsFlow
+        get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
+            if (isOfflineModeEnabled) {
+                dao.getRandomOfflineSongsFlow().map { songList ->
+                    songHistoryToAlbumHistory(songList.map { it.toSong() })
+                }
+            } else {
+                dao.getRandomAlbumsFlow().map { it.map { ent -> ent.toAlbum() } }
+            }
+        }
+
+    override val flaggedAlbumsFlow: Flow<List<Album>>
+        get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
+            dao.getLikedAlbumsFlow()
+                .map { it.map { ent -> ent.toAlbum() } }
+                .map { albums ->
+                    if (isOfflineModeEnabled) {
+                        albums.filter { album -> isAlbumOffline(album) }
+                    } else
+                        albums
+                }
+        }
+
+    override val highestRatedAlbumsFlow: Flow<List<Album>>
+        get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
+            dao.getHighestRatedAlbumsFlow()
+                .map { it.map { ent -> ent.toAlbum() } }
+                .map { albums ->
+                    if (isOfflineModeEnabled) {
+                        albums.filter { album -> isAlbumOffline(album) }
+                    } else
+                        albums
+                }
+        }
 
     private suspend fun parseStatData(
         preNetworkDbAlbums: List<Album>,
         albumsNetwork: List<Album>,
         statFilter: MainNetwork.StatFilter
-    ) = if (statFilter == MainNetwork.StatFilter.flagged
-        || statFilter == MainNetwork.StatFilter.highest
-        || statFilter == MainNetwork.StatFilter.frequent
-        ) {
+    ) = if (statFilter == MainNetwork.StatFilter.frequent) {
         val dbAlbumsNew = getAlbumsStatsDb(statFilter)
         if (dbAlbumsNew.isNotEmpty()) {
             try {
@@ -368,19 +401,29 @@ class AlbumsRepositoryImpl @Inject constructor(
     ) = flow {
         emit(Resource.Loading(true))
 
-        // RECENTS, FLAGGED, FREQUENT, HIGHEST are listening to db changes already
-        if (isOfflineModeEnabled() && statFilter == MainNetwork.StatFilter.recent) {
+        // RECENT, FLAGGED, FREQUENT, HIGHEST are listening to db flow changes already
+        val isObservedFilter = (statFilter == MainNetwork.StatFilter.recent ||
+                statFilter == MainNetwork.StatFilter.highest ||
+                statFilter == MainNetwork.StatFilter.flagged)
+
+        if (isOfflineModeEnabled() && isObservedFilter) {
+            // already getting db data trough flow
             emit(Resource.Success(data = listOf(), networkData = listOf()))
             emit(Resource.Loading(false))
             return@flow
         }
 
-        val dbAlbums = getAlbumsStatsDb(statFilter)
-        if (checkFilterOfflineSongs(dbAlbums, this)) {
-            return@flow
+        val dbAlbums = if (!isObservedFilter) {
+            val dbA = getAlbumsStatsDb(statFilter)
+            if (checkFilterOfflineSongs(dbA, this)) {
+                return@flow
+            }
+            //else
+            emit(Resource.Success(data = dbA, networkData = null))
+            dbA
+        } else {
+            listOf()
         }
-        //else
-        emit(Resource.Success(data = dbAlbums, networkData = null))
 
         if (fetchRemote) {
             val cred = getCurrentCredentials()

@@ -401,35 +401,30 @@ class SongsRepositoryImpl @Inject constructor(
             try {
                 if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
                     // if not enough downloaded songs fetch most played songs
-                    val auth = getSession()!!.auth
-                    getSongsStatCall(auth, MainNetwork.StatFilter.frequent)?.let { freqSongs ->
-                        resultSet.addAll(freqSongs.map { it.toSong() })
-                        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
-                            // if still not enough songs fetch random songs
-                            getSongsStatCall(
-                                auth,
-                                MainNetwork.StatFilter.flagged
-                            )?.let { flagSongs ->
-                                resultSet.addAll(flagSongs.map { it.toSong() })
-                                if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
-                                    // if still not enough songs fetch random songs
-                                    getSongsStatCall(
-                                        auth,
-                                        MainNetwork.StatFilter.highest
-                                    )?.let { highestSongs ->
-                                        resultSet.addAll(highestSongs.map { it.toSong() })
-                                        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
-                                            // if still not enough songs fetch random songs
-                                            getSongsStatCall(
-                                                auth,
-                                                MainNetwork.StatFilter.random
-                                            )?.let { randSongs ->
-                                                resultSet.addAll(randSongs.map { it.toSong() })
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    val auth = authToken()
+                    getSongsStatCall(auth, MainNetwork.StatFilter.frequent)?.map { it.toSong() }?.let { freqSongs ->
+                        cacheSongs(freqSongs)
+                        resultSet.addAll(freqSongs)
+                    }
+                    if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                        // if still not enough songs fetch random songs
+                        getSongsStatCall(auth, MainNetwork.StatFilter.flagged)?.map { it.toSong() }?.let { flagSongs ->
+                            cacheSongs(flagSongs)
+                            resultSet.addAll(flagSongs)
+                        }
+                    }
+                    if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                        // if still not enough songs fetch random songs
+                        getSongsStatCall(auth, MainNetwork.StatFilter.highest)?.map { it.toSong() }?.let { highestSongs ->
+                            cacheSongs(highestSongs)
+                            resultSet.addAll(highestSongs)
+                        }
+                    }
+                    if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                        // if still not enough songs fetch random songs
+                        getSongsStatCall(auth, MainNetwork.StatFilter.random)?.map { it.toSong() }?.let { randSongs ->
+                            cacheSongs(randSongs)
+                            resultSet.addAll(randSongs)
                         }
                     }
                 }

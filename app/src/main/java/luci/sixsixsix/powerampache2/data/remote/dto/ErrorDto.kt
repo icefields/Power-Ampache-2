@@ -26,23 +26,23 @@ import luci.sixsixsix.powerampache2.domain.errors.MusicError
 
 data class ErrorDto(
     @SerializedName("errorAction") // "errorAction":"handshake", "albums"
-    val errorAction: String,
+    val errorAction: String?,
 
     @SerializedName("errorCode") // "errorCode":"4701" with handshake,"4704" with empty result
-    val errorCode: String,
+    val errorCode: String?,
 
     @SerializedName("errorMessage")
-    val errorMessage: String,
+    val errorMessage: String?,
 
     @SerializedName("errorType") // "errorType":"account", "empty"
-    val errorType: String
+    val errorType: String?
 )
 
 fun ErrorDto.toError() = MusicError(
-    errorAction = errorAction,
-    errorCode = errorCode,
-    errorMessage = errorMessage,
-    errorType = errorType
+    errorAction = errorAction ?: "",
+    errorCode = errorCode ?: "",
+    errorMessage = errorMessage ?: "",
+    errorType = errorType ?: ""
 )
 /*
 "error": {

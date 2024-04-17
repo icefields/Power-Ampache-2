@@ -21,18 +21,16 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.home
 
-import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
-import luci.sixsixsix.powerampache2.domain.models.Playlist
 
 data class HomeScreenState (
     //val playlists: List<Playlist> = emptyList(),
     //val recentAlbums: List<AmpacheModel> = emptyList(),
     val newestAlbums: List<AmpacheModel> = emptyList(),
-    val highestAlbums: List<Album> = emptyList(),
+    //val highestAlbums: List<Album> = emptyList(),
     val frequentAlbums: List<AmpacheModel> = emptyList(),
-    val flaggedAlbums: List<Album> = emptyList(),
-    val randomAlbums: List<AmpacheModel> = emptyList(),
+    //val flaggedAlbums: List<Album> = emptyList(),
+    // val randomAlbums: List<AmpacheModel> = emptyList(),
     val isPlaylistsLoading: Boolean = false,
     val isRecentAlbumsLoading: Boolean = false,
     val isNewestAlbumsLoading: Boolean = false,
