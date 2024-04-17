@@ -58,7 +58,10 @@ data class User(
         id == USER_ID_ERROR.toString()
 
     fun isNotImplemented() =
-        id == NOT_IMPLEMENTED_USER_ID
+        id == NOT_IMPLEMENTED_USER_ID &&
+                email.isBlank() &&
+                createDate == Constants.ERROR_INT &&
+                lastSeen == Constants.ERROR_INT
 
     companion object {
         fun emptyUser(): User = User(
@@ -86,8 +89,8 @@ data class User(
             fullNamePublic = 0,
             fullName = "",
             false,
-            Constants.ERROR_INT,
-            Constants.ERROR_INT,
+            createDate = Constants.ERROR_INT,
+            lastSeen = Constants.ERROR_INT,
             "",
             "",
             "",

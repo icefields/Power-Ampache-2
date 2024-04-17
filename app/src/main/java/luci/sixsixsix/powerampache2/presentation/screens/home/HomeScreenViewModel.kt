@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -112,6 +111,10 @@ class HomeScreenViewModel @Inject constructor(
 
     val randomAlbumsStateFlow = albumsRepository.randomAlbumsFlow.distinctUntilChanged().map { albumsDb ->
         // if list too big, ignore
+        if (offlineModeStateFlow.value) {
+            // remove non offline albums from before
+            currentRandomAlbums.clear()
+        }
         if (currentRandomAlbums.size < 200) {
             AmpacheModel.appendToList(albumsDb.toMutableList(), mainList = currentRandomAlbums)
         }
