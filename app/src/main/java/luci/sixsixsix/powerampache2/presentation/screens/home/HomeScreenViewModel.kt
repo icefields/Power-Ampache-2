@@ -88,7 +88,9 @@ class HomeScreenViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     val playlistsStateFlow = playlistsRepository.playlistsFlow.distinctUntilChanged()
-        .filter { !AmpacheModel.listsEqual(it, currentPlaylists) }
+        .filter {
+            !AmpacheModel.listsEqual(it, currentPlaylists, true)
+        }
         .map { playlists ->
             currentPlaylists.clear()
             currentPlaylists.addAll(playlists)

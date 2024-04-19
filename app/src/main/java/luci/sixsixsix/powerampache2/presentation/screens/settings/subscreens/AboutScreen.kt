@@ -152,7 +152,7 @@ fun AboutScreenContent(
                     subtitleTextSize = fontDimensionResource(id = R.dimen.about_item_fontSize)
                 )
                 21 -> TextWithOverline(
-                    title = R.string.about_flavour,
+                    title = R.string.sharing_provider_authority,
                     subtitle = BuildConfig.FLAVOR,
                     subtitleTextSize = fontDimensionResource(id = R.dimen.about_item_fontSize)
                 )

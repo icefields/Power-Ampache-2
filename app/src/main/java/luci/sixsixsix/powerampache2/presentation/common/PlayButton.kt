@@ -77,12 +77,13 @@ fun PlayButton(
                 contentAlignment = Alignment.Center
             ) {
                 if (!showLoadingWhileBuffering || !isBuffering) {
+                    // if showLoadingWhileBuffering is false always go in this block
                     Icon(
                         tint = iconTint,
                         modifier = Modifier
                             .aspectRatio(1f / 1f)
                             .padding(13.dp),
-                        imageVector = if ((!isPlaying && !isBuffering)
+                        imageVector = if ((!isPlaying/* && !isBuffering*/)
                             // if not enable always show play icon
                             || !enabled) {
                             Icons.Filled.PlayArrow

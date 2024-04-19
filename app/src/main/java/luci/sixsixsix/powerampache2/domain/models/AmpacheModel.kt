@@ -49,7 +49,11 @@ interface AmpacheModel {
             return resultList
         }
 
-        fun listsEqual(list1: List<AmpacheModel>, list2: List<AmpacheModel>): Boolean {
+        fun listsEqual(list1: List<AmpacheModel>,
+                       list2: List<AmpacheModel>,
+                       notEqualOnEmpty: Boolean = false
+        ): Boolean {
+            if (notEqualOnEmpty && list1.isEmpty() && list2.isEmpty()) return false
             if (list1.size != list2.size) return false
             list1.forEachIndexed { index, ampacheModel ->
                 if(ampacheModel.id != list2[index].id) {
