@@ -28,7 +28,7 @@
 <h2> 
 Android music client for <a target="_blank" href="https://ampache.org/"> Ampache </a>
 </h2>
-Power Ampache 2 is an complete Android Music Streaming App suite, presented in <a target="_blank" href="https://m3.material.io/">Material You</a> style.
+Power Ampache 2 is a complete Android Music Streaming App suite, presented in <a target="_blank" href="https://m3.material.io/">Material You</a> style.
 Connects to Ampache, Nextcloud and Subsonic backends (Ampache API 4 and above).
 <br><br>
 <a target="_blank" href="https://t.me/PowerAmpache">
