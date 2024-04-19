@@ -151,6 +151,11 @@ fun AboutScreenContent(
                     subtitle = BuildConfig.VERSION_QUOTE,
                     subtitleTextSize = fontDimensionResource(id = R.dimen.about_item_fontSize)
                 )
+                21 -> TextWithOverline(
+                    title = R.string.about_flavour,
+                    subtitle = BuildConfig.FLAVOR,
+                    subtitleTextSize = fontDimensionResource(id = R.dimen.about_item_fontSize)
+                )
                 //10 -> userState?.let { user -> UserInfoSection(user = user) }
                 else -> { }
             }

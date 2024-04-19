@@ -43,7 +43,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -65,8 +64,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,16 +73,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.USER_ERROR_MESSAGE
 import luci.sixsixsix.powerampache2.common.toHslColor
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
 import luci.sixsixsix.powerampache2.presentation.common.DonateButtonPreview
 import luci.sixsixsix.powerampache2.presentation.common.TextWithOverline
-import java.util.Locale
 
 val drawerItems = listOf(
     MainContentMenuItem.Home,
@@ -327,7 +323,7 @@ fun UserInfoSection(
             UserInfoTextWithTitle(title = R.string.settings_userInfo_city, subtitle = user.city)
             UserInfoTextWithTitle(title = R.string.settings_userInfo_state, subtitle = user.state)
             UserInfoTextWithTitle(title = R.string.settings_userInfo_id,
-                subtitle = if (!user.isError()) user.id else USER_ERROR_MESSAGE)
+                subtitle = if (!user.isError()) user.id else stringResource(id = R.string.error_user_fetch))
         }
     }
 }

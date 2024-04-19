@@ -1,5 +1,7 @@
 package luci.sixsixsix.powerampache2.domain.models
 
+import luci.sixsixsix.mrlog.L
+
 interface AmpacheModel {
     val id: String
 
@@ -45,6 +47,29 @@ interface AmpacheModel {
             // add the remaining not in common
             resultList.addAll(newList)
             return resultList
+        }
+
+        fun listsEqual(list1: List<AmpacheModel>, list2: List<AmpacheModel>): Boolean {
+            if (list1.size != list2.size) return false
+            list1.forEachIndexed { index, ampacheModel ->
+                if(ampacheModel.id != list2[index].id) {
+                    L("aaaa", "lists not equal")
+                    return false
+                }
+            }
+            return true
+        }
+
+        fun listsHaveSameElements(list1: List<AmpacheModel>, list2: List<AmpacheModel>): Boolean {
+            if (list1.size != list2.size) return false
+            val mappedList2 = mapModel(list2)
+
+            list1.forEach { ampacheModel ->
+                if(!mappedList2.containsKey(ampacheModel.id)) {
+                    return false
+                }
+            }
+            return true
         }
     }
 }

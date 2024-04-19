@@ -40,6 +40,8 @@ android {
     val errorReportEmail = properties.getProperty("ERROR_REPORT_EMAIL")
     val pastebinApiKey = properties.getProperty("PASTEBIN_API_KEY")
 
+    val providerStr = mutableListOf("luci.sixsixsix.powerampache2.provider")
+
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
@@ -66,6 +68,7 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = ".debug"
+            providerStr.add("debug")
 
             // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "true")
@@ -89,7 +92,6 @@ android {
             buildConfigField("String", "LOCAL_DEV_PASSWORD", localDevPass)
 
             resValue("string", "build_type", "Debug")
-            resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.debug.provider")
             resValue("color", "launcherBgColour", "#d7afff")
 
             //     <color name="launcherBgColour"></color>
@@ -123,7 +125,6 @@ android {
             buildConfigField("String", "LOCAL_DEV_PASSWORD", "\"\"")
 
             resValue("string", "build_type", "Release")
-            resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.provider")
             resValue("color", "launcherBgColour", "#e9eff7")
 
             isMinifyEnabled = false
@@ -135,28 +136,41 @@ android {
         }
     }
 
+    val flavourGithub = "Github"
+    val flavourFDroid = "FDroid"
+    val flavourPlayStore = "PlayStore"
+
     flavorDimensions += "ampache"
     productFlavors {
-        create("Github") {
+        create(flavourGithub) {
             dimension = "ampache"
+
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+
+            resValue("string", "sharing_provider_authority", "${providerStr.joinToString(".")}.$flavourGithub")
         }
-        create("FDroid") {
+        create(flavourFDroid) {
             dimension = "ampache"
             applicationIdSuffix = ".fdroid"
             versionNameSuffix = "-fdroid"
+
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
-            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+            buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
+            buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+            resValue("string", "sharing_provider_authority", "${providerStr.joinToString(".")}.$flavourFDroid")
         }
-        create("PlayStore") {
+        create(flavourPlayStore) {
             dimension = "ampache"
             applicationIdSuffix = ".play"
             versionNameSuffix = "-play"
 
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
             buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+            buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+            resValue("string", "sharing_provider_authority", "${providerStr.joinToString(".")}.$flavourPlayStore")
+
         }
     }
 

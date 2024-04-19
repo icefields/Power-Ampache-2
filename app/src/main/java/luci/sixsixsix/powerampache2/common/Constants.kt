@@ -43,7 +43,12 @@ object Constants {
     const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
     const val PLAYLIST_FETCH_LIMIT = 50
 
+    // TIMEOUTS (non-network)
     const val LOCAL_SCROBBLE_TIMEOUT_MS = 20000L
+    const val PLAY_LOAD_TIMEOUT = 10000L
+    const val LOGIN_SCREEN_TIMEOUT = 1500L
+    const val HOME_LOADING_TIMEOUT = 1000L
+
 
     // ERROR CONSTANTS
     const val NOT_IMPLEMENTED_USER_ID = "666"
@@ -52,7 +57,6 @@ object Constants {
     const val ERROR_STRING = "ERROR"
     const val LOADING_STRING = "LOADING"
     const val USER_ID_ERROR = ERROR_INT
-    const val USER_ERROR_MESSAGE = "There was a problem retrieving your User from the server"
 
     // FLAGS
     const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
@@ -78,7 +82,7 @@ object Constants {
     const val MASTODON_IMG_URL = "https://github.com/icefields/Power-Ampache-2/assets/149625124/81e35dc2-d81c-46ed-9321-4461349dc8e7"
     const val MASTODON_URL = "https://floss.social/@powerampache"
 
-    const val DOGMAZIC_FAKE_EMAIL = "floss.social/@PowerAmpache" //"PowerAmpache2@blackcats.org"
+    const val DOGMAZIC_FAKE_EMAIL = "floss.social/@PowerAmpache"
     const val DOGMAZIC_FAKE_NAME = "Draven Wilhelmine"
     const val DOGMAZIC_FAKE_USERNAME = "PowerAmpache"
     const val DOGMAZIC_FAKE_STATE = "Ehime"

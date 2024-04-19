@@ -319,59 +319,17 @@ class AlbumsRepositoryImpl @Inject constructor(
                 }
         }
 
-    private suspend fun parseStatData(
-        preNetworkDbAlbums: List<Album>,
-        albumsNetwork: List<Album>,
-        statFilter: MainNetwork.StatFilter
-    ) = if (statFilter == MainNetwork.StatFilter.frequent) {
-        val dbAlbumsNew = getAlbumsStatsDb(statFilter)
-        if (dbAlbumsNew.isNotEmpty()) {
-            try {
-                val preNetList = ArrayList<Album>(preNetworkDbAlbums)
-                val preNetListIds = preNetworkDbAlbums.map { it.id } // just the ids
-                val albumsNew = dbAlbumsNew
-
-                albumsNew.forEachIndexed { i, albumNew ->
-                    // loop through the updated albums
-                    // if any of the new albums is present already in the previous db results, replace
-                    // with newer version from web
-                    if (preNetListIds.contains(albumNew.id)) {
-                        preNetList[preNetListIds.indexOf(albumNew.id)] = albumNew
-                    }
-                }
-                // after replacing in place, remove all the albums added from the new-albums list
-                val albumsNewDiff = albumsNew.toMutableList().apply {
-                    removeAll(preNetList)
-                }
-
-                // DO THE SAME for network albums
-                albumsNetwork.forEachIndexed { i, albumNew ->
-                    // loop through the updated albums
-                    // if any of the new albums is present already in the previous db results, replace
-                    // with newer version from web
-                    if (preNetListIds.contains(albumNew.id)) {
-                        preNetList[preNetListIds.indexOf(albumNew.id)] = albumNew
-                    }
-                }
-                // after replacing in place, remove all the albums added from the new-albums list
-                val albumsNetNewDiff = albumsNetwork.toMutableList().apply {
-                    removeAll(preNetList)
-                    removeAll(albumsNewDiff) // this will be added back later at the end
-                }
-
-                preNetList.apply {
-                    addAll(albumsNewDiff)
-                    addAll(albumsNetNewDiff)
-                }
-            } catch (e: Exception) {
-                dbAlbumsNew
+    override val frequentAlbumsFlow
+        get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
+            if (!isOfflineModeEnabled) {
+                dao.getMostPlayedAlbumsFlow()
+            } else {
+                dao.getMostPlayedOfflineAlbumsFlow()
             }
-        } else {
-            albumsNetwork
+        }.map { albums ->
+            albums.map { it.toAlbum() }
         }
-    } else {
-        albumsNetwork
-    }
+
 
     private suspend fun isAlbumOffline(album: Album) =
         dao.getOfflineSongsFromAlbum(album.id).isNotEmpty()
@@ -404,6 +362,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         // RECENT, FLAGGED, FREQUENT, HIGHEST are listening to db flow changes already
         val isObservedFilter = (statFilter == MainNetwork.StatFilter.recent ||
                 statFilter == MainNetwork.StatFilter.highest ||
+                statFilter == MainNetwork.StatFilter.frequent ||
                 statFilter == MainNetwork.StatFilter.flagged)
 
         if (isOfflineModeEnabled() && isObservedFilter) {
@@ -413,16 +372,14 @@ class AlbumsRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        val dbAlbums = if (!isObservedFilter) {
+        if (!isObservedFilter) {
+            // just newest added songs (StatFilter.newest) right now is not an observed album stat
             val dbA = getAlbumsStatsDb(statFilter)
             if (checkFilterOfflineSongs(dbA, this)) {
                 return@flow
             }
             //else
             emit(Resource.Success(data = dbA, networkData = null))
-            dbA
-        } else {
-            listOf()
         }
 
         if (fetchRemote) {
@@ -432,17 +389,12 @@ class AlbumsRepositoryImpl @Inject constructor(
                 username = getCredentials()?.username,
                 filter = statFilter
             ).albums?.let { albumsDto ->
-                val albumsNetwork = albumsDto.map { it.toAlbum() }
-                dao.insertAlbums(albumsNetwork.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
-                // if getting highest rated and flagged return data from database for consistency
-                val data = parseStatData(
-                    preNetworkDbAlbums = dbAlbums,
-                    albumsNetwork = albumsNetwork,
-                    statFilter = statFilter
-                )
-                emit(Resource.Success(data = data, networkData = albumsNetwork))
+                val data = albumsDto.map { it.toAlbum() }
+                dao.insertAlbums(data.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
+                emit(Resource.Success(data = data, networkData = data))
             } ?: run {
-                // TODO throw exception, without updating the UI error message snackbar! create a MusicException that ErrorHAndler will intercept?
+                // TODO throw exception, without updating the UI error message snackbar!
+                //  create a MusicException that ErrorHAndler will intercept?
                 // throw Exception("error connecting or getting data")
                 L.e("getAlbumsStats() error connecting or getting data")
             }

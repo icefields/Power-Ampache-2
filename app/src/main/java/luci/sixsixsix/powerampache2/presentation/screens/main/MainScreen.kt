@@ -47,6 +47,7 @@ import kotlinx.coroutines.delay
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.LOGIN_SCREEN_TIMEOUT
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.LoggedInScreen
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.LoginScreen
@@ -69,7 +70,7 @@ fun MainScreen(
 
     LaunchedEffect(offlineModeSwitchVisible) {
         // wait 2 seconds before showing the switch
-        delay(1500)
+        delay(LOGIN_SCREEN_TIMEOUT)
         offlineModeSwitchVisible = true
     }
 
@@ -91,9 +92,9 @@ fun MainScreen(
         offlineModeSwitchVisible = false
         if (session != null || offlineModeState) {
             LoggedInScreen(mainViewModel, authViewModel, settingsViewModel)
+            loginScreenVisible = false
         } else {
             if (loginScreenVisible && shouldShowLoginScreen) {
-                L("ssss", "show login screen")
                 LoginScreen(viewModel = authViewModel)
             }
         }

@@ -36,6 +36,7 @@ import luci.sixsixsix.powerampache2.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.common.Constants.PLAYLIST_FETCH_LIMIT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
@@ -49,6 +50,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
+import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -86,6 +88,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
     ): Flow<Resource<List<Playlist>>> = flow {
         emit(Resource.Loading(true))
 
+        val dbList = mutableListOf<PlaylistEntity>()
         if (offset == 0) {
             val isOfflineModeEnabled = isOfflineModeEnabled()
             val localPlaylists = dao.searchPlaylists(query).filter {
@@ -93,6 +96,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
                     isPlaylistOffline(it.id)
                 } else it != null
             }
+            dbList.addAll(localPlaylists)
+
             val isDbEmpty = localPlaylists.isEmpty() && query.isEmpty()
             if (!isDbEmpty || isOfflineModeEnabled) {
                 // show empty list if offline mode enabled because this will be the actual result, there won't be an api call
@@ -107,19 +112,17 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
         val cred = getCurrentCredentials()
         val user = cred.username
-        val playlists = getPlaylistsNetwork(authToken(), user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
+        val playlistNetwork = getPlaylistsNetwork(authToken(), user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
+        val playlistNetworkEntities = playlistNetwork.map { it.toPlaylistEntity(username = user, serverUrl = cred.serverUrl) }
 
-        if ( // Playlists change too often, clear every time
-            query.isNullOrBlank() &&
-            offset == 0
-            //&& Constants.CLEAR_TABLE_AFTER_FETCH
-            ) {
-            // if it's just a search do not clear cache
+        if (query.isNullOrBlank() && offset == 0 &&
+            (!AmpacheModel.listsHaveSameElements(playlistNetwork, dbList.map { it.toPlaylist() } ))) {
+            // avoid clearing if lists are equal, insert will already replace the old versions
             dao.clearPlaylists()
         }
-        dao.insertPlaylists(playlists.map { it.toPlaylistEntity(username = user, serverUrl = cred.serverUrl) })
+        dao.insertPlaylists(playlistNetworkEntities)
         // stick to the single source of truth pattern despite performance deterioration
-        emit(Resource.Success(data = dao.searchPlaylists(query).map { it.toPlaylist() }, networkData = playlists))
+        emit(Resource.Success(data = dao.searchPlaylists(query).map { it.toPlaylist() }, networkData = playlistNetwork))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylists()", e, this) }
 

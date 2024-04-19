@@ -19,17 +19,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
+package luci.sixsixsix.powerampache2.di
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import luci.sixsixsix.powerampache2.data.ErrorHandlerImpl
+import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
+import javax.inject.Singleton
 
-@Parcelize
-data class MainState (
-    val searchQuery: String = "",
-    val errorMessage: String = "",
-    val isLikeLoading: Boolean = false,
-    val isFabLoading: Boolean = false,
-    val isPlayLoading: Boolean = false,
-    val isDownloading: Boolean = false
-): Parcelable
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class ErrorHandlerModule {
+    @Binds
+    @Singleton
+    abstract fun bindErrorHandler(
+        errorHandlerImpl: ErrorHandlerImpl
+    ): ErrorHandler
+}
