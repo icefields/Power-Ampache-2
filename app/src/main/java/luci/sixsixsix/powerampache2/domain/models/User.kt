@@ -30,6 +30,7 @@ import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_NAME
 import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_STATE
 import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_USERNAME
 import luci.sixsixsix.powerampache2.common.Constants.MASTODON_URL
+import luci.sixsixsix.powerampache2.common.Constants.NOT_IMPLEMENTED_USER_ID
 import luci.sixsixsix.powerampache2.common.Constants.USER_ERROR_MESSAGE
 import luci.sixsixsix.powerampache2.common.Constants.USER_ID_ERROR
 
@@ -56,6 +57,12 @@ data class User(
     fun isError() =
         id == USER_ID_ERROR.toString()
 
+    fun isNotImplemented() =
+        id == NOT_IMPLEMENTED_USER_ID &&
+                email.isBlank() &&
+                createDate == Constants.ERROR_INT &&
+                lastSeen == Constants.ERROR_INT
+
     companion object {
         fun emptyUser(): User = User(
             "", "", "",
@@ -63,7 +70,7 @@ data class User(
             "",
             Constants.ERROR_INT,
             "",
-            true,
+            false,
             Constants.ERROR_INT,
             Constants.ERROR_INT,
             "",
@@ -71,6 +78,24 @@ data class User(
             "",
             art = "",
             serverUrl = ""
+        )
+
+        fun notImplementedUser(username: String, serverUrl: String): User = User(
+            id = NOT_IMPLEMENTED_USER_ID,
+            username = username,
+            email = "",
+            access = Constants.USER_ACCESS_DEFAULT,
+            streamToken = "",
+            fullNamePublic = 0,
+            fullName = "",
+            false,
+            createDate = Constants.ERROR_INT,
+            lastSeen = Constants.ERROR_INT,
+            "",
+            "",
+            "",
+            art = "",
+            serverUrl = serverUrl
         )
 
         fun demoUser(): User = User(

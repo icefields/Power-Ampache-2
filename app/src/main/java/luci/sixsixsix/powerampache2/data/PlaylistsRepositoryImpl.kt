@@ -105,10 +105,9 @@ class PlaylistsRepositoryImpl @Inject constructor(
             }
         }
 
-        val auth = getSession()!!
         val cred = getCurrentCredentials()
         val user = cred.username
-        val playlists = getPlaylistsNetwork(auth.auth, user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
+        val playlists = getPlaylistsNetwork(authToken(), user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
 
         if ( // Playlists change too often, clear every time
             query.isNullOrBlank() &&
@@ -126,7 +125,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
     private suspend fun getPlaylistsNetwork(
         auth: String,
-        username: String?,
+        username: String,
         offset: Int,
         query: String,
         fetchAll: Boolean = false
@@ -160,16 +159,19 @@ class PlaylistsRepositoryImpl @Inject constructor(
             } ?: Int.MAX_VALUE
             off += responseSize
 
-            val playlists = (if (BuildConfig.SHOW_EMPTY_PLAYLISTS) {
-                response.playlist!! // will throw exception if playlist null
-            } else {
-                response.playlist!!.filter { dtoToFilter -> // will throw exception if playlist null
-                    dtoToFilter.items?.let { itemsCount ->
-                        itemsCount > 0 || dtoToFilter.owner == username // edge-case default behaviour, user==null and owner==null will show the playlist
+            val playlists = response.playlist?.let { responsePlaylist ->
+                (if (BuildConfig.SHOW_EMPTY_PLAYLISTS) {
+                    responsePlaylist // will throw exception if playlist null
+                } else {
+                    responsePlaylist.filter { dtoToFilter -> // will throw exception if playlist null
+                        dtoToFilter.items?.let { itemsCount ->
+                            itemsCount > 0 || dtoToFilter.owner == username // edge-case default behaviour, user==null and owner==null will show the playlist
+                        } ?: (dtoToFilter.owner == username) // if the count is null fallback to show the playlist if the user is the owner
                     }
-                        ?: (dtoToFilter.owner == username) // if the count is null fallback to show the playlist if the user is the owner
-                }
-            }).map { it.toPlaylist() }
+                })
+            }?.map { it.toPlaylist() } ?: listOf()
+
+            //dao.insertPlaylists(playlists.map { it.toPlaylistEntity(username = username, serverUrl = getCurrentCredentials().serverUrl) })
             addAll(playlists)
             // if the current response is not empty there might be more
             // check if the total count data is less than then current offset

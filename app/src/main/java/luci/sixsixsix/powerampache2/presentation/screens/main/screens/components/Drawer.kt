@@ -217,7 +217,8 @@ fun DrawerHeader(
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            AnimatedVisibility(visible = showFullUserInfo) {
+
+            AnimatedVisibility(visible = showFullUserInfo && !user.isNotImplemented()) {
                 UserInfoSection(
                     modifier = Modifier
                         .fillMaxWidth()
