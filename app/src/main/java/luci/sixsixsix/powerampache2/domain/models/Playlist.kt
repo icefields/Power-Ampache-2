@@ -29,7 +29,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 
 @Parcelize
 open class Playlist(
-    val id: String,
+    override val id: String,
     val name: String,
     val owner: String? = null,
     val items: Int? = 0,

@@ -126,14 +126,23 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE year > 1000 order by year DESC LIMIT 66""")
     suspend fun getRecentlyReleasedAlbums(): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity WHERE flag == 1 ORDER BY RANDOM() LIMIT 222""")
+    @Query("""SELECT * FROM albumentity WHERE flag == 1 AND $multiUserCondition ORDER BY RANDOM() LIMIT 222""")
     suspend fun getLikedAlbums(): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity WHERE rating > 0 order by rating DESC""")
+    @Query("""SELECT * FROM albumentity WHERE flag == 1 AND $multiUserCondition ORDER BY RANDOM() LIMIT 222""")
+    fun getLikedAlbumsFlow(): Flow<List<AlbumEntity>>
+
+    @Query("""SELECT * FROM albumentity WHERE rating > 0 AND $multiUserCondition order by rating DESC""")
     suspend fun getHighestRatedAlbums(): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity ORDER BY RANDOM() LIMIT 66""")
+    @Query("""SELECT * FROM albumentity WHERE rating > 0 AND $multiUserCondition order by rating DESC""")
+    fun getHighestRatedAlbumsFlow(): Flow<List<AlbumEntity>>
+
+    @Query("""SELECT * FROM albumentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 66""")
     suspend fun getRandomAlbums(): List<AlbumEntity>
+
+    @Query("""SELECT * FROM albumentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 22""")
+    fun getRandomAlbumsFlow(): Flow<List<AlbumEntity>>
 
     @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, albumentity AS a WHERE a.id == s.albumId GROUP BY s.albumId ORDER BY acount DESC LIMIT 122""")
     suspend fun getMostPlayedAlbums(): List<AlbumEntity>
@@ -189,7 +198,7 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylistSongs(companyListingEntities: List<PlaylistSongEntity>)
 
-    @Query("DELETE FROM playlistentity")
+    @Query("DELETE FROM playlistentity WHERE $multiUserCondition")
     suspend fun clearPlaylists()
 
     @Query("DELETE FROM playlistsongentity")
@@ -198,16 +207,18 @@ interface MusicDao {
     @Query("DELETE FROM playlistsongentity WHERE LOWER(playlistId) == LOWER(:playlistId)")
     suspend fun clearPlaylistSongs(playlistId: String)
 
-    @Query("""SELECT * FROM playlistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by flag DESC, rating DESC, (LOWER(owner) == LOWER( (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name)
+        AND $multiUserCondition
+        order by flag DESC, rating DESC, (LOWER(owner) == LOWER( (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
     suspend fun searchPlaylists(query: String): List<PlaylistEntity>
 
-    @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
     fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
 
-    @Query("""SELECT * FROM playlistentity order by flag DESC, rating DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, id DESC""")
     suspend fun getAllPlaylists(): List<PlaylistEntity>
 
-    @Query("""SELECT * FROM playlistentity WHERE id == :playlistId""")
+    @Query("""SELECT * FROM playlistentity WHERE id == :playlistId AND $multiUserCondition""")
     fun playlistLiveData(playlistId: String): Flow<PlaylistEntity?>
 
     // get only playlists user owns
@@ -298,6 +309,9 @@ interface MusicDao {
             WHERE artist.id == song.artistId GROUP BY song.artistId ORDER BY acount DESC""")
     suspend fun getMostPlayedOfflineArtists(): List<ArtistEntity>
 
+    @Query("""SELECT * FROM downloadedsongentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 66""")
+    fun getRandomOfflineSongsFlow(): Flow<List<DownloadedSongEntity>>
+
     @Query("DELETE FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId)")
     suspend fun deleteDownloadedSong(songId: String)
 
@@ -316,7 +330,7 @@ interface MusicDao {
     suspend fun writeSettings(localSettingsEntity: LocalSettingsEntity)
 
     @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
-    fun offlineModeEnabled(): LiveData<Boolean?>
+    fun offlineModeEnabled(): Flow<Boolean?>
 
     @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     fun isOfflineModeEnabled(): Boolean?
@@ -381,15 +395,29 @@ interface MusicDao {
             WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
             AND song.mediaId == history.mediaId
             GROUP BY history.mediaId
-            ORDER BY lastPlayed DESC LIMIT 66""")
+            ORDER BY lastPlayed DESC LIMIT 666""")
     suspend fun getSongHistory(): List<SongEntity>
+
+    @Query("""SELECT history.*, song.* FROM historyentity as history, songentity as song 
+            WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
+            AND song.mediaId == history.mediaId
+            GROUP BY history.mediaId
+            ORDER BY lastPlayed DESC LIMIT 666""")
+    fun getSongHistoryFlow(): Flow<List<SongEntity>>
 
     @Query("""SELECT history.*, song.* FROM historyentity as history, downloadedsongentity as song 
             WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
             AND song.mediaId == history.mediaId
             GROUP BY history.mediaId
-            ORDER BY lastPlayed DESC LIMIT 66""")
+            ORDER BY lastPlayed DESC LIMIT 666""")
     suspend fun getOfflineSongHistory(): List<DownloadedSongEntity>
+
+    @Query("""SELECT history.*, song.* FROM historyentity as history, downloadedsongentity as song 
+            WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
+            AND song.mediaId == history.mediaId
+            GROUP BY history.mediaId
+            ORDER BY lastPlayed DESC LIMIT 666""")
+    fun getOfflineSongHistoryFlow(): Flow<List<DownloadedSongEntity>>
 
     // TODO MIGRATION CALLS, REMOVE AFTERWARDS
     // --- TODO: REMOVE AFTER MIGRATION

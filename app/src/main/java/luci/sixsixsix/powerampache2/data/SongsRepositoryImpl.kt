@@ -23,12 +23,14 @@ package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -76,6 +78,7 @@ import javax.inject.Singleton
  * return/emit data.
  * When breaking a rule please add a comment with a TODO: BREAKING_RULE
  */
+@OptIn(DelicateCoroutinesApi::class)
 @Singleton
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
@@ -92,9 +95,9 @@ class SongsRepositoryImpl @Inject constructor(
     }
 
     init {
-        dao.offlineModeEnabled().distinctUntilChanged().observeForever {
-            if (it != null && it == false) {
-                GlobalScope.launch {
+        GlobalScope.launch {
+            dao.offlineModeEnabled().distinctUntilChanged().collect {
+                if (it != null && it == false) {
                     try {
                         backOnlineActions()
                     } catch (e: Exception) {
@@ -398,35 +401,30 @@ class SongsRepositoryImpl @Inject constructor(
             try {
                 if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
                     // if not enough downloaded songs fetch most played songs
-                    val auth = getSession()!!.auth
-                    getSongsStatCall(auth, MainNetwork.StatFilter.frequent)?.let { freqSongs ->
-                        resultSet.addAll(freqSongs.map { it.toSong() })
-                        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
-                            // if still not enough songs fetch random songs
-                            getSongsStatCall(
-                                auth,
-                                MainNetwork.StatFilter.flagged
-                            )?.let { flagSongs ->
-                                resultSet.addAll(flagSongs.map { it.toSong() })
-                                if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
-                                    // if still not enough songs fetch random songs
-                                    getSongsStatCall(
-                                        auth,
-                                        MainNetwork.StatFilter.highest
-                                    )?.let { highestSongs ->
-                                        resultSet.addAll(highestSongs.map { it.toSong() })
-                                        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
-                                            // if still not enough songs fetch random songs
-                                            getSongsStatCall(
-                                                auth,
-                                                MainNetwork.StatFilter.random
-                                            )?.let { randSongs ->
-                                                resultSet.addAll(randSongs.map { it.toSong() })
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    val auth = authToken()
+                    getSongsStatCall(auth, MainNetwork.StatFilter.frequent)?.map { it.toSong() }?.let { freqSongs ->
+                        cacheSongs(freqSongs)
+                        resultSet.addAll(freqSongs)
+                    }
+                    if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                        // if still not enough songs fetch random songs
+                        getSongsStatCall(auth, MainNetwork.StatFilter.flagged)?.map { it.toSong() }?.let { flagSongs ->
+                            cacheSongs(flagSongs)
+                            resultSet.addAll(flagSongs)
+                        }
+                    }
+                    if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                        // if still not enough songs fetch random songs
+                        getSongsStatCall(auth, MainNetwork.StatFilter.highest)?.map { it.toSong() }?.let { highestSongs ->
+                            cacheSongs(highestSongs)
+                            resultSet.addAll(highestSongs)
+                        }
+                    }
+                    if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                        // if still not enough songs fetch random songs
+                        getSongsStatCall(auth, MainNetwork.StatFilter.random)?.map { it.toSong() }?.let { randSongs ->
+                            cacheSongs(randSongs)
+                            resultSet.addAll(randSongs)
                         }
                     }
                 }

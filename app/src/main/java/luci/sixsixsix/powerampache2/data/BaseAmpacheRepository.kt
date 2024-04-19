@@ -1,19 +1,41 @@
+/**
+ * Copyright (C) 2024  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.data
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.common.processArtUrl
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.common.push
-import luci.sixsixsix.powerampache2.data.local.MusicDao
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
-import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettings
 import luci.sixsixsix.powerampache2.data.local.entities.toMultiUserEntity
@@ -30,10 +52,10 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toUser
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.NullSessionException
+import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.User
-import org.acra.ACRA.log
 
 abstract class BaseAmpacheRepository(
     private val api: MainNetwork,
@@ -42,6 +64,18 @@ abstract class BaseAmpacheRepository(
 ) {
     protected val dao = db.dao
     //protected var offlineModeEnabledLiveData = dao.offlineModeEnabled().distinctUntilChanged().map { it == true }
+
+    val settingsLiveData: LiveData<LocalSettings?>
+        get() = dao.settingsLiveData().distinctUntilChanged().map {
+            it?.toLocalSettings()
+        }
+
+    val offlineModeFlow: Flow<Boolean>
+        get() =  dao.offlineModeEnabled()
+            .distinctUntilChanged()
+            .map {
+                it ?: false
+            }.distinctUntilChanged()
 
     suspend fun isOfflineModeEnabled(): Boolean =
         dao.getSettings()?.toLocalSettings()?.isOfflineModeEnabled == true
@@ -74,7 +108,10 @@ abstract class BaseAmpacheRepository(
      * observe livedata to get updates on the user
      */
     private suspend fun setUser(user: User) = getCurrentCredentials().serverUrl.let { serverUrl ->
+        // only current user in this table
+        dao.clearUser()
         dao.updateUser(user.toUserEntity(serverUrl))
+
         dao.insertMultiUserUser(user.toMultiUserEntity(serverUrl))
     }
 
@@ -82,9 +119,14 @@ abstract class BaseAmpacheRepository(
         getSession()?.let { session ->
             val cred = getCurrentCredentials()
             try {
-                val user =
-                    api.getUser(authKey = session.auth, username = cred.username)
-                        .toUser(cred.serverUrl)
+                val userResponse = api.getUser(authKey = session.auth, username = cred.username)
+                // nextcloud and other services might not implement the user api
+                val isNotImplemented = userResponse.error?.toError()?.isNotImplemented() == true
+                val user = if (isNotImplemented) {
+                    User.notImplementedUser(cred.username, cred.serverUrl)
+                } else {
+                    userResponse.toUser(cred.serverUrl)
+                }
                 setUser(user)
                 user
             } catch (e: Exception) {

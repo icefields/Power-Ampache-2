@@ -24,7 +24,10 @@ package luci.sixsixsix.powerampache2.data
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import luci.sixsixsix.mrlog.L
@@ -33,6 +36,7 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
@@ -41,6 +45,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
+import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -243,33 +248,82 @@ class AlbumsRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun getRecentlyPlayedOfflineAlbums() = LinkedHashSet<Album>().apply {
-        dao.getOfflineSongHistory().forEach {
-            if (!this.map { alb -> alb.id }.contains(it.albumId)) {
-                val artistAttr = MusicAttribute(id = it.artistId, name = it.artistName)
-                val album = Album(
-                    id = it.albumId,
-                    name = it.albumName,
-                    basename = it.albumName,
-                    artist = artistAttr,
-                    artists = listOf(artistAttr),
-                    year = it.year,
-                    genre = it.genre,
-                    artUrl = it.imageUrl
-                )
-                add(album)
+    /**
+     * generates album-history starting from song-history
+     */
+    private fun songHistoryToAlbumHistory(songList: List<Song>): List<Album> =
+        mutableListOf<Album>().apply {
+            songList.forEach {
+                if (!this.map { alb -> alb.id }.contains(it.album.id)) {
+                    val artistAttr = MusicAttribute(id = it.artist.id, name = it.artist.name)
+                    val album = Album(
+                        id = it.album.id,
+                        name = it.album.name,
+                        basename = it.album.name,
+                        artist = artistAttr,
+                        artists = listOf(artistAttr),
+                        year = it.year,
+                        genre = it.genre,
+                        artUrl = it.imageUrl
+                    )
+                    add(album)
+                }
+            }
+        }.toList()
+
+    override val recentlyPlayedAlbumsFlow
+        get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
+            if (!isOfflineModeEnabled) {
+                dao.getSongHistoryFlow().map { songList ->
+                    songHistoryToAlbumHistory(songList.map { it.toSong() })
+                }
+            } else {
+                dao.getOfflineSongHistoryFlow().map { songList ->
+                    songHistoryToAlbumHistory(songList.map { it.toSong() })
+                }
             }
         }
-    }.toList()
+
+    override val randomAlbumsFlow
+        get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
+            if (isOfflineModeEnabled) {
+                dao.getRandomOfflineSongsFlow().map { songList ->
+                    songHistoryToAlbumHistory(songList.map { it.toSong() })
+                }
+            } else {
+                dao.getRandomAlbumsFlow().map { it.map { ent -> ent.toAlbum() } }
+            }
+        }
+
+    override val flaggedAlbumsFlow: Flow<List<Album>>
+        get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
+            dao.getLikedAlbumsFlow()
+                .map { it.map { ent -> ent.toAlbum() } }
+                .map { albums ->
+                    if (isOfflineModeEnabled) {
+                        albums.filter { album -> isAlbumOffline(album) }
+                    } else
+                        albums
+                }
+        }
+
+    override val highestRatedAlbumsFlow: Flow<List<Album>>
+        get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
+            dao.getHighestRatedAlbumsFlow()
+                .map { it.map { ent -> ent.toAlbum() } }
+                .map { albums ->
+                    if (isOfflineModeEnabled) {
+                        albums.filter { album -> isAlbumOffline(album) }
+                    } else
+                        albums
+                }
+        }
 
     private suspend fun parseStatData(
         preNetworkDbAlbums: List<Album>,
         albumsNetwork: List<Album>,
         statFilter: MainNetwork.StatFilter
-    ) = if (statFilter == MainNetwork.StatFilter.flagged
-        || statFilter == MainNetwork.StatFilter.highest
-        || statFilter == MainNetwork.StatFilter.frequent
-        ) {
+    ) = if (statFilter == MainNetwork.StatFilter.frequent) {
         val dbAlbumsNew = getAlbumsStatsDb(statFilter)
         if (dbAlbumsNew.isNotEmpty()) {
             try {
@@ -315,16 +369,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         } else {
             albumsNetwork
         }
-    }
-//    else if  (statFilter == MainNetwork.StatFilter.frequent) {
-//        // frequent is locally calculate using a query that counts the number of plays
-//        // for each song of each album, since the backend calculates it differently,
-//        // append the 2 results
-//        LinkedHashSet(preNetworkDbAlbums).apply {
-//            addAll(albumsNetwork)
-//        }.toList()
-//    }
-    else {
+    } else {
         albumsNetwork
     }
 
@@ -355,20 +400,30 @@ class AlbumsRepositoryImpl @Inject constructor(
         fetchRemote: Boolean = true
     ) = flow {
         emit(Resource.Loading(true))
-        if (isOfflineModeEnabled() && statFilter == MainNetwork.StatFilter.recent) {
-            // recent has its own methods
-            val data = getRecentlyPlayedOfflineAlbums()
-            emit(Resource.Success(data = data, networkData = data))
+
+        // RECENT, FLAGGED, FREQUENT, HIGHEST are listening to db flow changes already
+        val isObservedFilter = (statFilter == MainNetwork.StatFilter.recent ||
+                statFilter == MainNetwork.StatFilter.highest ||
+                statFilter == MainNetwork.StatFilter.flagged)
+
+        if (isOfflineModeEnabled() && isObservedFilter) {
+            // already getting db data trough flow
+            emit(Resource.Success(data = listOf(), networkData = listOf()))
+            emit(Resource.Loading(false))
             return@flow
         }
 
-        val dbAlbums = getAlbumsStatsDb(statFilter)
-
-        if (checkFilterOfflineSongs(dbAlbums, this)) {
-            return@flow
+        val dbAlbums = if (!isObservedFilter) {
+            val dbA = getAlbumsStatsDb(statFilter)
+            if (checkFilterOfflineSongs(dbA, this)) {
+                return@flow
+            }
+            //else
+            emit(Resource.Success(data = dbA, networkData = null))
+            dbA
+        } else {
+            listOf()
         }
-        //else
-        emit(Resource.Success(data = dbAlbums, networkData = null))
 
         if (fetchRemote) {
             val cred = getCurrentCredentials()

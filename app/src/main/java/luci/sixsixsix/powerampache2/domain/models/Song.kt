@@ -32,6 +32,7 @@ import luci.sixsixsix.powerampache2.common.Constants
 @Parcelize
 data class Song(
     val mediaId: String,
+    override val id: String = mediaId,
     val title: String,
     val album: MusicAttribute = MusicAttribute.emptyInstance(),
     val artist: MusicAttribute = MusicAttribute.emptyInstance(),

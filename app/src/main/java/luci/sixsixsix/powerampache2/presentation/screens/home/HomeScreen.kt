@@ -29,14 +29,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,15 +40,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Playlist
@@ -85,22 +76,27 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val state = viewModel.state
+    val playlists by viewModel.playlistsStateFlow.collectAsState()
+    val recentAlbums by viewModel.recentlyPlayedStateFlow.collectAsState()
+    val flaggedAlbums by viewModel.flaggedAlbumsStateFlow.collectAsState()
     val offlineModeState by viewModel.offlineModeStateFlow.collectAsState()
+    val highestAlbums by viewModel.highestRatedAlbumsStateFlow.collectAsState()
+    val randomAlbums by viewModel.randomAlbumsStateFlow.collectAsState()
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     var emptyViewVisible by remember { mutableStateOf(false) }
 
     val homeScreenRowItems = listOf(
-        HomeScreenRowItems.Recent(state.recentAlbums),
-        HomeScreenRowItems.Playlists(state.playlists),
-        HomeScreenRowItems.Favourite(state.flaggedAlbums),
+        HomeScreenRowItems.Recent(recentAlbums),
+        HomeScreenRowItems.Playlists(playlists),
+        HomeScreenRowItems.Favourite(flaggedAlbums),
         HomeScreenRowItems.Frequent(state.frequentAlbums),
-        HomeScreenRowItems.Highest(state.highestAlbums),
+        HomeScreenRowItems.Highest(highestAlbums),
         HomeScreenRowItems.Newest(state.newestAlbums),
-        HomeScreenRowItems.More(state.randomAlbums),
-        HomeScreenRowItems.Nothing(isLoadingData(state))
+        HomeScreenRowItems.More(randomAlbums),
+        HomeScreenRowItems.Nothing(isLoadingData(state, playlists, recentAlbums, randomAlbums))
     )
 
-    val showEmptyView = isNoData(state) && offlineModeState
+    val showEmptyView = isNoData(state, playlists, recentAlbums, randomAlbums) && offlineModeState
     LaunchedEffect(showEmptyView) {
         // wait 1.2 seconds before showing the switch
         delay(1200)
@@ -137,7 +133,12 @@ fun HomeScreen(
     }
 }
 
-fun isLoadingData(state: HomeScreenState) = (
+fun isLoadingData(
+    state: HomeScreenState,
+    playlists: List<Playlist>,
+    recentAlbums: List<AmpacheModel>,
+    randomAlbums: List<AmpacheModel>
+) = (
         state.isLoading ||
         (
             state.isRecentAlbumsLoading ||
@@ -146,16 +147,20 @@ fun isLoadingData(state: HomeScreenState) = (
             state.isFrequentAlbumsLoading
         ) ||
         (   state.frequentAlbums.isNullOrEmpty() &&
-            state.recentAlbums.isNullOrEmpty() &&
-            state.randomAlbums.isNullOrEmpty() &&
+            recentAlbums.isNullOrEmpty() &&
+            randomAlbums.isNullOrEmpty() &&
             state.newestAlbums.isNullOrEmpty() &&
-            state.playlists.isNullOrEmpty()
+            playlists.isNullOrEmpty()
         )
 )
 
-fun isNoData(state: HomeScreenState) =
+fun isNoData(
+    state: HomeScreenState,
+             playlists: List<Playlist>,
+             recentAlbums: List<AmpacheModel>,
+             randomAlbums: List<AmpacheModel>) =
     state.frequentAlbums.isNullOrEmpty() &&
-    state.recentAlbums.isNullOrEmpty() &&
-    state.randomAlbums.isNullOrEmpty() &&
+    recentAlbums.isNullOrEmpty() &&
+    randomAlbums.isNullOrEmpty() &&
     state.newestAlbums.isNullOrEmpty() &&
-    state.playlists.isNullOrEmpty()
+    playlists.isNullOrEmpty()
