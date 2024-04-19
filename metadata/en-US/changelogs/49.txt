@@ -1,0 +1,8 @@
+Code refactoring for improved performance
+- changed the way the app listens to the session
+- changed observabled inside home screen to listen automatically to changes
+
+Bug fixes
+- nextcloud login issue when specifying a port fixed
+- nextcloud no user implemented issue fixed
+- crash on offline mode when sending logs fixed

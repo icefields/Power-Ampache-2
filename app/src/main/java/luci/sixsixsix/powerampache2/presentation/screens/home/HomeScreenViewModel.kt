@@ -29,10 +29,13 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -59,35 +62,11 @@ class HomeScreenViewModel @Inject constructor(
     settingsRepository: SettingsRepository
 ) : ViewModel() {
     var state by mutableStateOf(HomeScreenState())
+    private var _recentNetwork: MutableStateFlow<List<AmpacheModel>> = MutableStateFlow(listOf())
+    private var recentNetwork: StateFlow<List<AmpacheModel>> = _recentNetwork
 
-    private val offsetFrequent = (0..2).random()
-    private val offsetNewest = (0..2).random()
-    private val offsetRandom = (0..2).random()
-
-    val offlineModeStateFlow = settingsRepository.offlineModeFlow.distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
-
-    init {
-        L()
-
-        viewModelScope.launch {
-            // playlists can change or be edited, make sure to always listen to the latest version
-            playlistsRepository.playlistsFlow.distinctUntilChanged().collect { playlists ->
-                L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
-                updatePlaylistsState(playlists)
-            }
-        }
-
-        viewModelScope.launch {
-            // playlists can change or be edited, make sure to always listen to the latest version
-            offlineModeStateFlow.collectLatest { isOfflineMode ->
-                if (isOfflineMode) {
-                    state = state.copy(playlists = listOf(), recentAlbums = listOf())
-                }
-                fetchAllAsync()
-            }
-        }
-    }
+    private val currentRandomAlbums = mutableListOf<AmpacheModel>()
+    private val currentFlaggedAlbums = mutableListOf<AmpacheModel>()
 
     private var playlistsJob: Job? = null
     private var flaggedJob: Job? = null
@@ -96,6 +75,76 @@ class HomeScreenViewModel @Inject constructor(
     private var newestJob: Job? = null
     private var recentJob: Job? = null
     private var randomJob: Job? = null
+    private val offsetFrequent = (0..2).random()
+    private val offsetNewest = (0..2).random()
+    private val offsetRandom = (0..2).random()
+
+    val offlineModeStateFlow = settingsRepository.offlineModeFlow.distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
+    val playlistsStateFlow = playlistsRepository.playlistsFlow.distinctUntilChanged()
+        .map { playlists ->
+            val playlistList = mutableListOf<Playlist>(
+                HighestPlaylist(),
+                RecentPlaylist(),
+                FrequentPlaylist(),
+                FlaggedPlaylist()
+            )
+            playlistList.addAll(playlists)
+            playlistList.toList()
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<Playlist>())
+
+    val recentlyPlayedStateFlow =
+        recentNetwork.combine(albumsRepository.recentlyPlayedAlbumsFlow) { albumsNetwork, albumsDb ->
+            val recentAlbums = mutableListOf<AmpacheModel>()
+            recentAlbums.addAll(albumsDb)
+            AmpacheModel.appendToList(albumsNetwork.toMutableList(), mainList = recentAlbums)
+
+            if (offlineModeStateFlow.value) {
+                replaceWithRandomIfEmpty(recentAlbums, fetchRemote = true) {
+                    recentAlbums.addAll(it)
+                }
+            }
+            injectArtists(recentAlbums, offsetFrequent)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<AmpacheModel>())
+
+    val randomAlbumsStateFlow = albumsRepository.randomAlbumsFlow.distinctUntilChanged().map { albumsDb ->
+        // if list too big, ignore
+        if (offlineModeStateFlow.value) {
+            // remove non offline albums from before
+            currentRandomAlbums.clear()
+        }
+        if (currentRandomAlbums.size < 200) {
+            AmpacheModel.appendToList(albumsDb.toMutableList(), mainList = currentRandomAlbums)
+        }
+        injectArtists(currentRandomAlbums, offsetRandom)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<AmpacheModel>())
+
+    val flaggedAlbumsStateFlow = albumsRepository.flaggedAlbumsFlow.distinctUntilChanged().map { albumsDb ->
+        AmpacheModel.appendToListExclusive(albumsDb.toMutableList(), mainList = currentFlaggedAlbums).also {
+            currentFlaggedAlbums.clear()
+            currentFlaggedAlbums.addAll(it)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<Album>())
+
+    val highestRatedAlbumsStateFlow = albumsRepository.highestRatedAlbumsFlow.distinctUntilChanged()
+        /*.map { albumsDb ->
+        AmpacheModel.appendToListExclusive(albumsDb.toMutableList(), mainList = currentHighestAlbums).also {
+            currentHighestAlbums.clear()
+            currentHighestAlbums.addAll(it)
+            L("aaaa highestRatedAlbumsStateFlow",  currentHighestAlbums.size)
+        }
+    }*/.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<Album>())
+
+    init {
+        viewModelScope.launch {
+            // playlists can change or be edited, make sure to always listen to the latest version
+            offlineModeStateFlow.collectLatest { isOfflineMode ->
+                fetchAllAsync()
+            }
+        }
+    }
 
     private fun cancelJobs() {
         playlistsJob?.cancel()
@@ -128,19 +177,13 @@ class HomeScreenViewModel @Inject constructor(
         newestJob = viewModelScope.launch {
             async { getNewest() }
         }
-        randomJob = viewModelScope.launch {
-            async { getRandom() }
-        }
-    }
 
-    private suspend fun fetchAll() = viewModelScope.launch {
-        getPlaylists()
-        getFlagged()
-        getFrequent()
-        getHighest()
-        getNewest()
-        getRecent()
-        getRandom()
+        // no need to waste data fetching more random albums
+        if (randomAlbumsStateFlow.value.size < 40) {
+            randomJob = viewModelScope.launch {
+                async { getRandom() }
+            }
+        }
     }
 
     fun onEvent(event: HomeScreenEvent) {
@@ -154,27 +197,14 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 // ---- PLAYLISTS
-    private fun updatePlaylistsState(playlists: List<Playlist>) {
-        // inject generated playlists
-        val playlistList = mutableListOf<Playlist>(
-            HighestPlaylist(),
-            RecentPlaylist(),
-            FrequentPlaylist(),
-            FlaggedPlaylist()
-        )
-        playlistList.addAll(playlists)
-        if (/*playlists.isNotEmpty() && */ state.playlists != playlistList) {
-            state = state.copy(playlists = playlistList)
-        }
-    }
-
     private suspend fun getPlaylists(fetchRemote: Boolean = true) {
         playlistsRepository
             .getPlaylists(fetchRemote)
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
-                        updatePlaylistsState(result.data ?: listOf())
+                        // not necessary to update the state since we're listening to playlists flow
+                        //updatePlaylistsState(result.data ?: listOf())
                         L("HomeScreenViewModel.getPlaylists size of network array ${result.networkData?.size}")
                     }
                     is Resource.Error -> {
@@ -189,29 +219,22 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 // ---- RECENT
-    private suspend fun getRecent(fetchRemote: Boolean = true) {
+    private suspend fun getRecent() {
         albumsRepository
             .getRecentAlbums()
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
-                        // TODO use network data for recent right now, add lastPlayed field to
-                        //  every entity to start using db in conjunction
                         result.networkData?.let { albums ->
-                            state = state.copy(recentAlbums = injectArtists(albums, offsetFrequent))
-
-                            if (!offlineModeStateFlow.value) {
-                                replaceWithRandomIfEmpty(state.recentAlbums, fetchRemote = true) {
-                                    state = state.copy(recentAlbums = it)
-                                }
-                            }
+                            // this will trigger the flow
+                            _recentNetwork.value = albums
                         }
                     }
                     is Resource.Error -> {
                         state = state.copy(isRecentAlbumsLoading = false, isLoading = false)
                         if (!offlineModeStateFlow.value) {
-                            replaceWithRandomIfEmpty(state.recentAlbums) {
-                                state = state.copy(recentAlbums = it)
+                            replaceWithRandomIfEmpty(recentNetwork.value) {
+                                _recentNetwork.value = it
                             }
                         }
                         L("ERROR HomeScreenViewModel.getRecent ${result.exception}")
@@ -224,15 +247,12 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 // ---- FAVOURITES
-    private suspend fun getFlagged(fetchRemote: Boolean = true) {
+    private suspend fun getFlagged() {
         albumsRepository
             .getFlaggedAlbums()
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
-                        result.data?.let { albums ->
-                            state = state.copy(flaggedAlbums = albums)
-                        }
                         L("HomeScreenViewModel.getFlagged size of network array ${result.networkData?.size}")
                     }
 
@@ -279,15 +299,12 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 // ---- HIGHEST
-    private suspend fun getHighest(fetchRemote: Boolean = true) {
+    private suspend fun getHighest() {
         albumsRepository
             .getHighestAlbums()
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
-                        result.data?.let { albums ->
-                            state = state.copy(highestAlbums = albums)
-                        }
                         L("HomeScreenViewModel.getHighest size of network array ${result.networkData?.size}")
                     }
 
@@ -339,7 +356,7 @@ class HomeScreenViewModel @Inject constructor(
 // ---- RANDOM
     private suspend fun getRandom(fetchRemote: Boolean = true) {
         getRandom(fetchRemote = fetchRemote, injectArtists = true) { albums ->
-            state = state.copy(randomAlbums = albums)
+            //state = state.copy(randomAlbums = albums)
         }
     }
 
@@ -356,12 +373,12 @@ class HomeScreenViewModel @Inject constructor(
                         result.data?.let { albums ->
                             callback(if (injectArtists) injectArtists(albums, offsetRandom) else albums)
                         }
-                        L("HomeScreenViewModel.getRandom size of network array ${result.networkData?.size}")
+                        L("HomeScreenViewModel.getRandom  fetchRemote $fetchRemote size ${result.networkData?.size}")
                     }
 
                     is Resource.Error -> {
                         state = state.copy(isRandomAlbumsLoading = false, isLoading = false)
-                        L("ERROR HomeScreenViewModel.getRandom ${result.exception}")
+                        L("ERROR HomeScreenViewModel.getRandom fetchRemote $fetchRemote ${result.exception}")
                     }
 
                     is Resource.Loading -> {
@@ -437,16 +454,6 @@ class HomeScreenViewModel @Inject constructor(
                     offset = offsetFrequent
                 )
             }
-            //else {
-            //    injectArtists(albums)
-            //}
-
-//            artistsRepository.getMostPlayedArtists().forEachIndexed { index, artist ->
-//                val indexToAdd = (index * 3) + 2
-//                if (indexToAdd < albums.size) {
-//                    add(indexToAdd, artist)
-//                }
-//            }
         }
 
     override fun onCleared() {

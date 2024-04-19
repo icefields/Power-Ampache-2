@@ -65,7 +65,7 @@ data class UserDto(
     val hasArt: Any? = null,
     @SerializedName("art")
     val art: String? = null
-) {
+): AmpacheBaseResponse() {
     companion object {
         fun getMockUserDto(): UserDto {
             val userDtoString = "{\n" +

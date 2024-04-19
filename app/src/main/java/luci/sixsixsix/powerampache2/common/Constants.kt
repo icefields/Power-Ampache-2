@@ -46,6 +46,7 @@ object Constants {
     const val LOCAL_SCROBBLE_TIMEOUT_MS = 20000L
 
     // ERROR CONSTANTS
+    const val NOT_IMPLEMENTED_USER_ID = "666"
     const val ERROR_INT = -1
     const val ERROR_FLOAT = ERROR_INT.toFloat()
     const val ERROR_STRING = "ERROR"
