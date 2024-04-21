@@ -28,19 +28,29 @@
 <h2> 
 Android music client for <a target="_blank" href="https://ampache.org/"> Ampache </a>
 </h2>
+<p style="text-align: center;">
 Power Ampache 2 is a complete Android Music Streaming App suite, presented in <a target="_blank" href="https://m3.material.io/">Material You</a> style.
-Connects to Ampache, Nextcloud and Subsonic backends (Ampache API 4 and above).
-<br><br>
-<a target="_blank" href="https://t.me/PowerAmpache">
-	<img width="50" height="50" hspace="20" alt="Telegram badge" src="https://static-00.iconduck.com/assets.00/telegram-icon-512x512-4sztjer8.png">
+<br>Connects to Ampache, Nextcloud and Subsonic backends (Ampache API 4 and above).
+</p>
+<table>
+    <tr>
+        <th>
+            <a target="_blank" href="https://t.me/PowerAmpache">
+    <img width="50" height="50" hspace="20" alt="Telegram badge" src="https://static-00.iconduck.com/assets.00/telegram-icon-512x512-4sztjer8.png">
 </a>
+        </th>
+        <th>
 <a target="_blank" href="https://floss.social/@powerampache">
-	<img width="50" height="50" hspace="20" alt="Mastodon badge" src="https://github.com/icefields/Power-Ampache-2/assets/149625124/81e35dc2-d81c-46ed-9321-4461349dc8e7">
+    <img width="50" height="50" hspace="20" alt="Mastodon badge" src="https://github.com/icefields/Power-Ampache-2/assets/149625124/81e35dc2-d81c-46ed-9321-4461349dc8e7">
 </a>
+        </th>
+        <th>
 <a target="_blank" href="https://github.com/icefields/Power-Ampache-2/blob/main/LICENSE.md">
-	<img alt="GPLv3 badge" hspace="20" src="https://www.gnu.org/graphics/gplv3-88x31.png">
+    <img alt="GPLv3 badge" hspace="20" src="https://www.gnu.org/graphics/gplv3-88x31.png">
 </a>
-<br><br>
+        </th>
+    </tr>
+</table>
 
 [//]: #![image](https://github.com/icefields/Power-Ampache-2/assets/149625124/7614a6a7-898b-4a8c-b891-9a07505529be)
 
@@ -64,7 +74,7 @@ Connects to Ampache, Nextcloud and Subsonic backends (Ampache API 4 and above).
 | | | | |
 
 ## Features
-Expect the same feature as any other mainstream music player (such as Spotify, Youtube Music, Apple Music and so on). Plus no ads, no tracking, no bloatware.
+Feature rich music client for Ampache, Subsonic, Nextcloud backends, provides all the features found in  other mainstream music player (such as Spotify, Youtube Music, Apple Music and so on) and more, like "actually" downloading and exporting music files, lyrics, multiaccount. Plus no ads, no tracking, no bloatware.
 - MaterialYou Themes, the colour of the app will automatically match the colour scheme of your device, alternatively choose or create your own theme.
 - Unique generated playlists (smartlists)
 - Dark & light mode with adaptive interface colors
@@ -149,4 +159,3 @@ You can select a demo instance from the login screen or login into your own serv
 - Consider giving the repo a ⭐ if you liked the project!
 <!--- Checkout my other projects! -->
 - Consider sponsoring me to help me build more projects like this.
-
