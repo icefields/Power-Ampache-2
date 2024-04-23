@@ -12,7 +12,7 @@ interface AmpacheModel {
             }
         }
 
-        fun appendToList(listToAppend: MutableList<AmpacheModel>, mainList: MutableList<AmpacheModel>) {
+        fun <T: AmpacheModel> appendToList(listToAppend: MutableList<T>, mainList: MutableList<T>) {
             val mappedToAppend = mapModel(listToAppend)
             // remove repeating items = all items that are already in the main list
             mainList.forEach { mainListItem ->

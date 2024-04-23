@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.data
 
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -37,13 +36,11 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.common.Stack
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.common.hasMore
 import luci.sixsixsix.powerampache2.common.pop
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.HistoryEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toHistoryEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.local.entities.toSongEntity
@@ -59,14 +56,10 @@ import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
-import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
-import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
-import okhttp3.internal.http.HTTP_OK
 import okio.IOException
 import retrofit2.HttpException
 import java.util.UUID
@@ -274,29 +267,30 @@ class SongsRepositoryImpl @Inject constructor(
             val cred = getCurrentCredentials()
             getSongsStatCall(authToken(), statFilter)?.map { it.toSong() }?.let { songs ->
                 cacheSongs(songs)
-                if (statFilter == MainNetwork.StatFilter.recent) {
-                    val dbSongs = dao.getSongHistory().map { it.toSong() }.toMutableList()
-                    val dbSongsMap = Song.mapSongs(dbSongs)
-                    songs.forEach {
-                        if (!dbSongsMap.containsKey(it.mediaId)) {
-                            dbSongs.add(it)
-                        }
+                when (statFilter) {
+                    MainNetwork.StatFilter.recent -> {
+                        // cache new history
+                        // lastPlayed info not available in the song object, to keep the order of
+                        // the songs consistent, use current time and subtract the index of the song
+                        // in the array returned by the server
+                        val lastPlayed = System.currentTimeMillis()
+                        dao.addSongsToHistory(songs.mapIndexed { index, so -> so.toHistoryEntity(
+                            username = cred.username,
+                            serverUrl = cred.serverUrl,
+                            lastPlayed = lastPlayed - index) })
+
+                        emit(Resource.Success(data = dao.getSongHistory().map { it.toSong() }.toMutableList(), networkData = songs))
                     }
-
-                    // cache new history
-                    dao.addSongsToHistory(songs.map { it.toHistoryEntity(
-                        username = cred.username,
-                        serverUrl = cred.serverUrl) })
-
-                    emit(Resource.Success(data = dbSongs, networkData = songs))
-                } else if (statFilter == MainNetwork.StatFilter.frequent) {
-                    // songs are saved already, just fetch them again and emit
-                    emit(Resource.Success(
-                        data = dao.getMostPlayedSongs().ifEmpty {
-                            dao.getMostPlayedSongsLocal() }.map { it.toSong() },
-                        networkData = songs))
-                } else {
-                    emit(Resource.Success(data = songs, networkData = songs))
+                    MainNetwork.StatFilter.frequent -> {
+                        // songs are saved already, just fetch them again and emit
+                        emit(Resource.Success(
+                            data = dao.getMostPlayedSongs().ifEmpty {
+                                dao.getMostPlayedSongsLocal() }.map { it.toSong() },
+                            networkData = songs))
+                    }
+                    else -> {
+                        emit(Resource.Success(data = songs, networkData = songs))
+                    }
                 }
             }?:run {
                 throw Exception("error connecting or getting data in getSongsStats")

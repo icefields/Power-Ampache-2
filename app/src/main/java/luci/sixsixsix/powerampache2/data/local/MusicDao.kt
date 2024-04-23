@@ -115,7 +115,9 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == LOWER(artistName)""")
     suspend fun searchAlbum(query: String): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId) AND $multiUserCondition ORDER BY year DESC""")
+    @Query("""SELECT * FROM albumentity WHERE (LOWER(artistId) == LOWER(:artistId) OR LOWER(artists) LIKE '%' || '"' || LOWER(:artistId) || '"' || '%' )
+        AND $multiUserCondition 
+        ORDER BY year DESC""")
     suspend fun getAlbumsFromArtist(artistId: String): List<AlbumEntity>
 
     @Query("""SELECT * FROM albumentity WHERE LOWER(id) == LOWER(:albumId) order by time""")

@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -79,8 +80,10 @@ fun AlbumDetailTopBar(
         EraseConfirmDialog(
             onDismissRequest = { exitWarningVisible = false },
             onConfirmation = { navigator.navigateUp() },
-            dialogTitle = "Leave Screen?",
-            dialogText = "Songs are being added to your playlist.\nLeaving this screen now will interrupt the operation"
+            dialogTitle = stringResource(id = R.string.warning_playlist_adding_title),
+            dialogText = stringResource(id = R.string.warning_playlist_adding),
+            buttonOkText = R.string.warning_playlist_adding_leave,
+            buttonCancelText = R.string.warning_playlist_adding_stay
         )
     }
 
