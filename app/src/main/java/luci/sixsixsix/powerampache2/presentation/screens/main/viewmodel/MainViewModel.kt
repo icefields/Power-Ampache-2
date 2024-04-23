@@ -47,6 +47,7 @@ import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.LOCAL_SCROBBLE_TIMEOUT_MS
 import luci.sixsixsix.powerampache2.common.Constants.PLAY_LOAD_TIMEOUT
+import luci.sixsixsix.powerampache2.common.Constants.SERVICE_STOP_TIMEOUT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.common.shareLink
@@ -308,8 +309,9 @@ class MainViewModel @Inject constructor(
 
     @OptIn(UnstableApi::class)
     fun stopMusicService() = viewModelScope.launch {
-        delay(2000) // safety net, delay stopping the service in case the application just got restored from background
+        delay(SERVICE_STOP_TIMEOUT) // safety net, delay stopping the service in case the application just got restored from background
         logToErrorLogs("SERVICE- stopMusicService $isServiceRunning")
+
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
                 applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
