@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="launcherBgColour">@color/launcherBgColourDebug</color>
+    <color name="launcherBgColourDebug">#d7ffaf</color>
 </resources>

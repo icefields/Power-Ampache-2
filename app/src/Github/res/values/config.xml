@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sharing_provider_authority_release">luci.sixsixsix.powerampache2.provider.FDroid</string>
-    <string name="sharing_provider_authority_debug">luci.sixsixsix.powerampache2.provider.debug.FDroid</string>
+    <string name="sharing_provider_authority_release">luci.sixsixsix.powerampache2.provider</string>
+    <string name="sharing_provider_authority_debug">luci.sixsixsix.powerampache2.provider.debug</string>
 </resources>

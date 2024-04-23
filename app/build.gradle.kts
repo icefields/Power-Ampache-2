@@ -9,7 +9,7 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val composeVersion = "1.6.5" // rootProject.extra.get("compose_version") as String
+val composeVersion = "1.6.6" // rootProject.extra.get("compose_version") as String
 val lifecycleVersion = "2.7.0"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
@@ -40,15 +40,13 @@ android {
     val errorReportEmail = properties.getProperty("ERROR_REPORT_EMAIL")
     val pastebinApiKey = properties.getProperty("PASTEBIN_API_KEY")
 
-    var providerStr = "luci.sixsixsix.powerampache2.provider"
-
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
         versionCode = 50
         versionName = "0.50-rc1"
-        val versionQuote = "This version is powered by happy endings and ugly restarts - play fix"
+        val versionQuote = "This version is powered by orange cats"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -68,7 +66,6 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = ".debug"
-            providerStr = "$providerStr.debug"
 
             // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "true")
@@ -92,7 +89,6 @@ android {
             buildConfigField("String", "LOCAL_DEV_PASSWORD", localDevPass)
 
             resValue("string", "build_type", "Debug")
-            resValue("color", "launcherBgColour", "#006660")
 
             isMinifyEnabled = false
             proguardFiles(
@@ -124,7 +120,6 @@ android {
             buildConfigField("String", "LOCAL_DEV_PASSWORD", "\"\"")
 
             resValue("string", "build_type", "Release")
-            resValue("color", "launcherBgColour", "#e9eff7")
 
             isMinifyEnabled = false
 
@@ -147,8 +142,6 @@ android {
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
-
-            resValue("string", "sharing_provider_authority", providerStr)
         }
         create(flavourFDroid) {
             dimension = "ampache"
@@ -158,7 +151,6 @@ android {
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
-            resValue("string", "sharing_provider_authority", "${providerStr}.$flavourFDroid")
         }
         create(flavourPlayStore) {
             dimension = "ampache"
@@ -168,8 +160,6 @@ android {
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
             buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
-            resValue("string", "sharing_provider_authority", "${providerStr}.$flavourPlayStore")
-
         }
     }
 
@@ -200,9 +190,9 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core-ktx:1.13.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.activity:activity-compose:1.9.0")
     implementation("androidx.media:media:1.7.0")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
