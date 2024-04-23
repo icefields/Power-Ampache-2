@@ -23,13 +23,8 @@ package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.co
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PauseCircle
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
@@ -40,14 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.presentation.common.ButtonDownload
 import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
 import luci.sixsixsix.powerampache2.presentation.common.PlayButton
 import luci.sixsixsix.powerampache2.presentation.common.ShuffleToggleButton
-import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
 
 @Composable
 fun AlbumInfoButtonsRow(
@@ -56,6 +49,7 @@ fun AlbumInfoButtonsRow(
     isAlbumDownloaded: Boolean,
     isPlaylistEditLoading: Boolean,
     isDownloading: Boolean,
+    isBuffering: Boolean,
     isGlobalShuffleOn: Boolean,
     modifier: Modifier = Modifier,
     eventListener: (albumInfoViewEvents: AlbumInfoViewEvents) -> Unit
@@ -83,14 +77,13 @@ fun AlbumInfoButtonsRow(
         )
 
         PlayButton(
-            isBuffering = false,
+            isBuffering = isBuffering,
             isPlaying = isPlayingAlbum,
             enabled = true
         ) {
             eventListener(AlbumInfoViewEvents.PLAY_ALBUM)
         }
 
-        //Spacer(modifier = Modifier.width(0.dp))
         ShuffleToggleButton(isGlobalShuffleOn = isGlobalShuffleOn) {
             eventListener(AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM)
         }
@@ -114,5 +107,6 @@ fun AlbumInfoButtonsRowPreview() {
         false,
         isDownloading = false,
         isGlobalShuffleOn = true,
+        isBuffering = true,
         isPlaylistEditLoading = true) { }
 }

@@ -257,7 +257,7 @@ fun PlaylistDetailScreen(
                         isLikeLoading = state.isLikeLoading ,
                         isDownloading = mainViewModel.state.isDownloading,
                         isGlobalShuffleOn = state.isGlobalShuffleOn,
-                        isBuffering = mainViewModel.isBuffering,
+                        isBuffering = mainViewModel.isPlayLoading(),
                         enabled = !state.songs.isNullOrEmpty(),
                         songs = viewModel.state.getSongList(),
                         artistClickListener = {
@@ -266,55 +266,41 @@ fun PlaylistDetailScreen(
                         isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
                         eventListener = { event ->
                             when(event) {
+
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
                                     if (viewModel.state.songs.isNullOrEmpty()) return@PlaylistInfoSection
 
                                     if (isPlayingPlaylist){
                                         // will pause if playing
                                         mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-                                    } else {
+                                    } else if (state.songs.isNotEmpty()) {
                                         if (!state.isGlobalShuffleOn) {
-                                            // add next to the list and skip to the top of the album (which is next)
-                                            if (state.songs.isNotEmpty()) {
-                                                mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlay(state.songs[0].song, state.getSongList()))
-                                                // viewModel.onEvent(PlaylistDetailEvent.OnPlayPlaylist)
-//                                                playlistManager.updateCurrentSong(state.songs[0].song)
-//                                                playlistManager.addToCurrentQueueTop(state.getSongList())
-//                                                mainViewModel.onEvent(MainEvent.Play(viewModel.state.songs[0].song))
-                                            }
+                                            mainViewModel.onEvent(
+                                                MainEvent.AddSongsToQueueAndPlay(state.songs[0].song, state.getSongList())
+                                            )
                                         } else {
-                                            if (state.songs.isNotEmpty()) {
-                                                mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(state.getSongList()))
-                                            }
-
-//                                            viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylist)
-//                                            // after updating queue and current song, play
-//                                            if (!mainViewModel.isPlaying) {
-//                                                mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-//                                            }
+                                            mainViewModel.onEvent(
+                                                MainEvent.AddSongsToQueueAndPlayShuffled(state.getSongList())
+                                            )
                                         }
                                     }
                                 }
+
                                 PlaylistInfoViewEvents.SHARE_PLAYLIST ->
                                     viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)
+
                                 PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST -> if (!state.isLoading) {
                                     mainViewModel.onEvent(
-                                        MainEvent.OnDownloadSongs(
-                                            viewModel.state.getSongList())
+                                        MainEvent.OnDownloadSongs(viewModel.state.getSongList())
                                     )
                                 } else {
-                                    // TODO move to view model
-                                    context.get()?.let { ctx ->
-                                        Toast.makeText(ctx,
-                                            "Please wait that the playlist is fully loaded before downloading",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    }
+                                    viewModel.onEvent(PlaylistDetailEvent.OnPlaylistNotReadyDownload)
                                 }
 
                                 PlaylistInfoViewEvents.SHUFFLE_PLAY_PLAYLIST -> {
                                     viewModel.onEvent(PlaylistDetailEvent.OnShufflePlaylistToggle)
                                 }
+
                                 PlaylistInfoViewEvents.STOP_DOWNLOAD_PLAYLIST ->
                                     mainViewModel.onEvent(MainEvent.OnStopDownloadSongs)
 

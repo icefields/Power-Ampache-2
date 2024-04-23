@@ -155,6 +155,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
  * to play albums and playlists
  */
 fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
+    startPlayLoading()
     playlistManager.updateCurrentSong(song)
     playlistManager.addToCurrentQueueTop(songList)
     play(song)
@@ -165,6 +166,7 @@ fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
  * the song list is just for verification (TODO: should that be optional?)
  */
 private fun MainViewModel.playSongAddToQueueTop(song: Song, songList: List<Song>) {
+    startPlayLoading()
     playlistManager.addToCurrentQueueUpdateTopSong(song, songList)
     play(song)
 }
@@ -173,11 +175,13 @@ private fun MainViewModel.playSongAddToQueueTop(song: Song, songList: List<Song>
  * select song from current queue and play
  */
 private fun MainViewModel.playSong(song: Song) {
+    startPlayLoading()
     playlistManager.updateCurrentSong(song)
     play(song)
 }
 
 private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<Song>) {
+    startPlayLoading()
     val shuffled = songList.shuffled()
     playlistManager.replaceCurrentQueue(shuffled)
     playlistManager.updateCurrentSong(shuffled[0])
@@ -187,15 +191,20 @@ private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<Song>) 
     }
 }
 
+/**
+ * the single duty of this function is to call playSongForce, either right away or upon
+ * completion of loadSongDataJob
+ *
+ * call stopPlayLoading() in case of errors
+ */
 private fun MainViewModel.play(song: Song) {
+    startPlayLoading()
     if (loadSongDataJob?.isActive == true) {
-        L( "MainEvent.Play", "loadSongDataJob?.isActive")
         loadSongDataJob?.invokeOnCompletion {
-            //loadSongDataJob = null
-            it?.let {
-                L.e(it)
+            it?.let { e ->
+                stopPlayLoading()
+                logToErrorLogs(e.stackTraceToString())
             } ?: run {
-                L( "MainEvent.Play", "invokeOnCompletion")
                 playSongForce(song)
             }
         }
@@ -215,20 +224,21 @@ private fun MainViewModel.playSongForce(song: Song) = viewModelScope.launch {
     } catch (e: Exception) {
         logToErrorLogs("fun MainViewModel.playSongForce EXCEPTION, loading song data now")
         logToErrorLogs(e.stackTraceToString())
-        // TODO this might go into an infinite loop if no connection or all urls are invalid
-        //loadSongData()
     }
-    L( "MainEvent.Play", "play song launched. After")
+    stopPlayLoading()
+    L( "MainEvent.Play", "aaaa play song launched. After")
 }
 
 private fun MainViewModel.playPauseSong() = viewModelScope.launch {
+    startPlayLoading()
     startMusicServiceIfNecessary()
     L( "MainEvent.Play", "playing song")
     try {
         simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
     } catch (e: Exception) {
-        // TODO this might go into an infinite loop if no connection or all urls are invalid
-        //  do a retry timeout that increases every time and resets on successful song playback
-        //loadSongData()
+        stopPlayLoading()
+        logToErrorLogs(e.stackTraceToString())
     }
+    stopPlayLoading()
+    L("aaaa", "after play pause")
 }

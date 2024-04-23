@@ -30,6 +30,7 @@ interface AlbumsRepository {
     val flaggedAlbumsFlow: Flow<List<Album>>
     val highestRatedAlbumsFlow: Flow<List<Album>>
     val randomAlbumsFlow: Flow<List<Album>>
+    val frequentAlbumsFlow: Flow<List<Album>>
 
     suspend fun getAlbums(fetchRemote: Boolean = true, query: String = "", offset: Int = 0, limit: Int = 0): Flow<Resource<List<Album>>>
     suspend fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Album>>>
