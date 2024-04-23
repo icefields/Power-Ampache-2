@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.HOME_LOADING_TIMEOUT
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Artist
@@ -79,7 +80,7 @@ fun HomeScreenSection(
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.home_row_spacing)))
         }
     } else if ( (itemsRow is HomeScreenRowItems.Nothing) && itemsRow.isLoading) {
-        TimedLoadingView(1200)
+        TimedLoadingView(HOME_LOADING_TIMEOUT)
     }
 }
 

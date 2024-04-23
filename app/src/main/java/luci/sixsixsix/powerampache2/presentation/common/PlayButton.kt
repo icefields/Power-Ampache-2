@@ -53,6 +53,7 @@ fun PlayButton(
         .widthIn(min = 60.dp, max = 90.dp),
     isBuffering: Boolean,
     isPlaying: Boolean,
+    showLoadingWhileBuffering: Boolean = false,
     enabled: Boolean = true,
     iconTint: Color = MaterialTheme.colorScheme.inverseOnSurface,
     background: Color = MaterialTheme.colorScheme.inverseSurface,
@@ -60,8 +61,11 @@ fun PlayButton(
 ) {
     IconButton(
         modifier = modifier.alpha(if (enabled) 1.0f else 0.2f),
-        onClick = { onEvent() },
-        enabled = enabled
+        onClick = {
+            if (!isBuffering)
+                onEvent()
+        },
+        enabled = enabled && !isBuffering
     ) {
         Card(
             modifier = modifier.padding(0.dp),
@@ -72,11 +76,16 @@ fun PlayButton(
                 modifier = Modifier.wrapContentSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if (!isBuffering) {
+                if (!showLoadingWhileBuffering || !isBuffering) {
+                    // if showLoadingWhileBuffering is false always go in this block
                     Icon(
                         tint = iconTint,
-                        modifier = Modifier.aspectRatio(1f / 1f).padding(13.dp),//.background(Color.Cyan),
-                        imageVector = if (!isPlaying) {
+                        modifier = Modifier
+                            .aspectRatio(1f / 1f)
+                            .padding(13.dp),
+                        imageVector = if ((!isPlaying/* && !isBuffering*/)
+                            // if not enable always show play icon
+                            || !enabled) {
                             Icons.Filled.PlayArrow
                         } else {
                             Icons.Filled.Pause
@@ -94,7 +103,8 @@ fun PlayButton(
 @Preview
 @Composable
 fun PlayButtonPreview() {
-    PlayButton(isBuffering = true, isPlaying = true) {
-
+    PlayButton(
+        showLoadingWhileBuffering = false,
+        isBuffering = true, isPlaying = true) {
     }
 }

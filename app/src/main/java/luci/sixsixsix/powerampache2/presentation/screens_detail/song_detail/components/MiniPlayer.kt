@@ -35,21 +35,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PauseCircle
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +72,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.RepeatMode
+import luci.sixsixsix.powerampache2.presentation.common.PlayButton
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
@@ -94,7 +91,7 @@ fun MiniPlayer(
                 shuffleOn = mainViewModel.shuffleOn,
                 repeatMode = mainViewModel.repeatMode,
                 isPlaying = mainViewModel.isPlaying,
-                isBuffering = mainViewModel.isBuffering
+                isBuffering = mainViewModel.isPlayLoading()
             ) { event ->
                 mainViewModel.onEvent(event)
             }
@@ -202,35 +199,20 @@ fun MiniPlayerContent(
                         contentDescription = "SkipPrevious"
                     )
                 }
-                IconButton(modifier = Modifier.widthIn(min = 60.dp, max = 100.dp),
-                    onClick = {
+
+                Box(modifier = Modifier
+                    .aspectRatio(1f / 1f)
+                    .widthIn(min = 60.dp, max = 100.dp)
+                    .padding(4.dp)
+                ) {
+                    PlayButton(
+                        isBuffering = isBuffering,
+                        isPlaying = isPlaying
+                    ) {
                         onEvent(MainEvent.PlayPauseCurrent)
-                    }) {
-                    if (!isBuffering) {
-                        Icon(
-                            modifier = Modifier.aspectRatio(1f / 1f),
-                            imageVector = if (!isPlaying) {
-                                Icons.Default.PlayCircle
-                            } else {
-                                Icons.Default.PauseCircle
-                            },
-                            contentDescription = "Play"
-                        )
-                    } else {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Transparent,
-                                contentColor = MaterialTheme.colorScheme.secondary
-                            )
-                        ) {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            }
-                        }
                     }
                 }
+
                 IconButton(modifier = Modifier.widthIn(min = 20.dp, max = 40.dp),
                     onClick = {
                         onEvent(MainEvent.SkipNext)
@@ -240,18 +222,7 @@ fun MiniPlayerContent(
                         contentDescription = "SkipNext"
                     )
                 }
-//                IconButton(modifier = Modifier.widthIn(min = 20.dp, max = 40.dp),
-//                    onClick = {
-//                        onEvent(MainEvent.Shuffle(!shuffleOn))
-//                    }) {
-//                    Icon(
-//                        imageVector = if(!shuffleOn)
-//                            Icons.Outlined.Shuffle
-//                        else
-//                            Icons.Outlined.ShuffleOn,
-//                        contentDescription = "shuffle toggle"
-//                    )
-//                }
+
                 IconButton(
                     modifier = Modifier
                         .widthIn(min = 20.dp, max = 40.dp)
@@ -292,7 +263,7 @@ fun previewMiniPlayer() {
             .width(400.dp)
             .height(50.dp),
         isPlaying = true,
-        isBuffering = true,
+        isBuffering = false,
         shuffleOn = true,
         repeatMode = RepeatMode.OFF
     ) { }
