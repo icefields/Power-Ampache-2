@@ -23,15 +23,13 @@ package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import luci.sixsixsix.powerampache2.domain.models.Song
 
 @Parcelize
 data class MainState (
     val searchQuery: String = "",
     val errorMessage: String = "",
-    // val song: Song? = null,
-    // val queue: List<Song> = listOf(),
-    val isLikeLoading:Boolean = false,
-    val isFabLoading:Boolean = false,
-    val isDownloading:Boolean = false
+    val isLikeLoading: Boolean = false,
+    val isFabLoading: Boolean = false,
+    val isPlayLoading: Boolean = false,
+    val isDownloading: Boolean = false
 ): Parcelable

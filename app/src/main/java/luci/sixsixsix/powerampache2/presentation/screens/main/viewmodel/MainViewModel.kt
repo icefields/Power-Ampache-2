@@ -25,8 +25,6 @@ import android.app.Application
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.OptIn
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,11 +46,12 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.LOCAL_SCROBBLE_TIMEOUT_MS
+import luci.sixsixsix.powerampache2.common.Constants.PLAY_LOAD_TIMEOUT
+import luci.sixsixsix.powerampache2.common.Constants.SERVICE_STOP_TIMEOUT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -77,8 +76,6 @@ class MainViewModel @Inject constructor(
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) /*, MainQueueManager*/ {
-//    var state by mutableStateOf(MainState())
-//        private set
     var state by savedStateHandle.saveable { mutableStateOf(MainState()) }
 
     val notificationQueueEmptyState = playlistManager.notificationsListStateFlow
@@ -97,7 +94,10 @@ class MainViewModel @Inject constructor(
     var authToken by savedStateHandle.saveable { mutableStateOf("") }
 
     var loadSongDataJob: Job? = null
+    private var playLoadingJob: Job? = null
     var searchJob: Job? = null
+    private var scrobbleJob: Job? = null
+
 
     //private var isServiceRunning by savedStateHandle.saveable { mutableStateOf(false) }
     private var isServiceRunning = false
@@ -110,11 +110,6 @@ class MainViewModel @Inject constructor(
     val mainLock = Any()
 
     init {
-        L()
-        // TODO: there is no queue or song to restore! because the queue is in MusicPlaylistManager
-        // restoredSong = state.song
-        //restoredQueue = state.queue
-
         isPlaying = simpleMediaServiceHandler.isPlaying()
         observePlaylistManager()
         observePlayerEvents()
@@ -133,6 +128,31 @@ class MainViewModel @Inject constructor(
         callback(songsRepository.isSongAvailableOffline(song))
     }
 
+    /**
+     * set isPlayLoading to true, the play button is listening to this variable
+     */
+    fun startPlayLoading() {
+        if (!state.isPlayLoading)
+            state = state.copy(isPlayLoading = true)
+        playLoadingJob?.cancel()
+        // safety net, stop loading view after timeout
+        playLoadingJob = viewModelScope.launch {
+            delay(PLAY_LOAD_TIMEOUT)
+            stopPlayLoading()
+        }
+    }
+
+    fun stopPlayLoading() {
+        if (state.isPlayLoading)
+            state = state.copy(isPlayLoading = false)
+    }
+
+    /**
+     * useful to disallow play actions during loading and buffering
+     */
+    fun isPlayLoading() =
+        (state.isPlayLoading || isBuffering || isLoading)
+
     fun getSongsForQuickPlay() = viewModelScope.launch {
         songsRepository.getSongsForQuickPlay().collect { result ->
             when (result) {
@@ -140,9 +160,6 @@ class MainViewModel @Inject constructor(
                     result.data?.let { songs ->
                         if (songs.isNotEmpty()) {
                             addSongsToQueueAndPlay(songs[0], songs)
-//                            playlistManager.updateCurrentSong(songs[0])
-//                            playlistManager.addToCurrentQueueTop(songs)
-//                            onEvent(MainEvent.Play(songs[0]))
                         }
                     }
                 }
@@ -155,12 +172,9 @@ class MainViewModel @Inject constructor(
     fun favouriteSong(song: Song) = viewModelScope.launch {
         songsRepository.likeSong(song.mediaId, (song.flag != 1)).collect { result ->
             when (result) {
-                is Resource.Success -> {
-                    result.data?.let {
-                        // refresh song
-                        playlistManager.updateCurrentSong(song.copy(flag = abs(song.flag - 1)))
-                        //state = state.copy(song = song.copy(flag = abs(song.flag - 1)))
-                    }
+                is Resource.Success -> result.data?.let {
+                    // refresh song
+                    playlistManager.updateCurrentSong(song.copy(flag = abs(song.flag - 1)))
                 }
                 is Resource.Error -> state = state.copy(isLikeLoading = false)
                 is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
@@ -171,12 +185,9 @@ class MainViewModel @Inject constructor(
     fun rateSong(song: Song, rate: Int) = viewModelScope.launch {
         songsRepository.rateSong(song.mediaId, rate).collect { result ->
             when (result) {
-                is Resource.Success -> {
-                    result.data?.let {
-                        // refresh song
-                        playlistManager.updateCurrentSong(song.copy(rating = rate.toFloat()))
-                        // state = state.copy(song = song.copy(rating = rate.toFloat()))
-                    }
+                is Resource.Success -> result.data?.let {
+                    // refresh song
+                    playlistManager.updateCurrentSong(song.copy(rating = rate.toFloat()))
                 }
                 is Resource.Error -> state = state.copy(isLikeLoading = false)
                 is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
@@ -212,9 +223,6 @@ class MainViewModel @Inject constructor(
 
     fun downloadSongs(songs: List<Song>) {
         viewModelScope.launch { songsRepository.downloadSongs(songs) }
-        songs.forEach {
-
-        }
     }
 
     fun deleteDownloadedSong(song: Song) = viewModelScope.launch {
@@ -301,8 +309,9 @@ class MainViewModel @Inject constructor(
 
     @OptIn(UnstableApi::class)
     fun stopMusicService() = viewModelScope.launch {
-        delay(2000) // safety net, delay stopping the service in case the application just got restored from background
+        delay(SERVICE_STOP_TIMEOUT) // safety net, delay stopping the service in case the application just got restored from background
         logToErrorLogs("SERVICE- stopMusicService $isServiceRunning")
+
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
                 applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
@@ -314,13 +323,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // TODO remove this after bug is fixed
-    fun logToErrorLogs(mess: String) {
-        L(mess)
-        if (BuildConfig.DEBUG)
-            playlistManager.updateErrorLogMessage(mess)
-    }
-
     fun nextRepeatMode(): RepeatMode =
         when(repeatMode) {
             RepeatMode.OFF -> RepeatMode.ONE
@@ -328,32 +330,6 @@ class MainViewModel @Inject constructor(
             RepeatMode.ALL -> RepeatMode.OFF
         }
 
-    override fun onCleared() {
-        logToErrorLogs("onCleared")
-        searchJob?.cancel()
-        loadSongDataJob?.cancel()
-        searchJob = null
-        loadSongDataJob = null
-        isLoading = false
-        isBuffering = false
-        state = state.copy(isFabLoading = false, isDownloading = false, isLikeLoading = false)
-
-        // attempt to stop the service
-        try {
-            if (!simpleMediaServiceHandler.isPlaying()) {
-                stopMusicService()
-            }
-        } catch (e: Exception) {
-            if (!isPlaying) {
-                stopMusicService()
-            }
-            L.e(e)
-        }
-
-        super.onCleared()
-    }
-
-    private var scrobbleJob: Job? = null
     fun scrobble(song: Song) {
         viewModelScope.launch {
             // scrobble offline songs
@@ -373,32 +349,48 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    @Deprecated("completely rewrite before use, those cases might not exist anymore")
-    fun onActivityRestart() {
-        // if the link to play the song is not valid reload all the data
-        // when the app goes in background without playing anything the token might be invalidated
-        // in this case reload the song data
-        currentSong()?.songUrl?.let { songUrl ->
-            logToErrorLogs("1.a songUrl is not null $songUrl")
-            if (songUrl.startsWith("http")) {
-                if (!songUrl.contains(authToken)) {
-                    logToErrorLogs("2 songUrl does not contain the updated token LOADING SONG DATA NOW $authToken, $songUrl")
-                    loadSongData()
-                } else
-                    logToErrorLogs("3 songUrl contains the updated token, not realoading data")
-            } else {
-                logToErrorLogs("1.b songUrl NULL, looping queue, size: ${playlistManager.currentQueueState.value.size}")
-                // that's a local song, check the rest of the queue
-                playlistManager.currentQueueState.value.forEach { song ->
-                    if (song.songUrl.startsWith("http") && !song.songUrl.contains(authToken)) {
-                        logToErrorLogs("4 song.songUrl does not contain the updated token LOADING SONG DATA NOW $authToken, $songUrl")
-                        loadSongData()
-                        return
-                    }
-                }
+    /**
+     * updates the error log, accessible via settings
+     */
+    fun logToErrorLogs(mess: String) {
+        L(mess)
+        if (BuildConfig.DEBUG)
+            playlistManager.updateErrorLogMessage(mess)
+    }
+
+    override fun onCleared() {
+        logToErrorLogs("onCleared")
+
+        searchJob?.cancel()
+        loadSongDataJob?.cancel()
+        playLoadingJob?.cancel()
+        scrobbleJob?.cancel()
+        searchJob = null
+        loadSongDataJob = null
+        playLoadingJob = null
+        scrobbleJob = null
+
+        isLoading = false
+        isBuffering = false
+        state = state.copy(
+            isFabLoading = false,
+            isDownloading = false,
+            isLikeLoading = false,
+            isPlayLoading = false
+        )
+
+        // attempt to stop the service
+        try {
+            if (!simpleMediaServiceHandler.isPlaying()) {
+                stopMusicService()
             }
-            logToErrorLogs("5 (songUrl is not null) reached the end of function")
+        } catch (e: Exception) {
+            if (!isPlaying) {
+                stopMusicService()
+            }
+            L.e(e)
         }
-            ?: logToErrorLogs("6 song is null? ${(currentSong() == null)} . songUrl: ${currentSong()?.songUrl}.")
+
+        super.onCleared()
     }
 }

@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.data.local
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -144,10 +145,29 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 22""")
     fun getRandomAlbumsFlow(): Flow<List<AlbumEntity>>
 
-    @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, albumentity AS a WHERE a.id == s.albumId GROUP BY s.albumId ORDER BY acount DESC LIMIT 122""")
+    @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, albumentity AS a 
+        WHERE a.id == s.albumId 
+		AND LOWER(s.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+        GROUP BY s.albumId ORDER BY acount DESC LIMIT 122""")
     suspend fun getMostPlayedAlbums(): List<AlbumEntity>
 
-// --- SONGS ---
+    @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, albumentity AS a 
+        WHERE a.id == s.albumId 
+		AND LOWER(s.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+        GROUP BY s.albumId ORDER BY acount DESC LIMIT 122""")
+    fun getMostPlayedAlbumsFlow(): Flow<List<AlbumEntity>>
+
+
+    @Query("""SELECT SUM(history.playCount) AS acount, album.*, history.*, song.* FROM historyentity as history, downloadedsongentity as song , albumentity AS album
+            WHERE history.mediaId == song.mediaId
+			AND album.id == song.albumId
+			AND LOWER(album.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
+            GROUP BY album.id
+            ORDER BY history.playCount DESC LIMIT 666""")
+    fun getMostPlayedOfflineAlbumsFlow(): Flow<List<AlbumEntity>>
+
+
+    // --- SONGS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSongs(companyListingEntities: List<SongEntity>)
 
@@ -157,8 +177,15 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName order by flag DESC, rating DESC, playCount DESC""")
     suspend fun searchSong(query: String): List<SongEntity>
 
-    @Query("""SELECT * FROM songentity WHERE playCount > 0 order by playCount DESC, flag DESC, rating DESC""")
+    @Query("""SELECT * FROM songentity WHERE playCount > 0 AND $multiUserCondition order by playCount DESC, flag DESC, rating DESC""")
     suspend fun getMostPlayedSongs(): List<SongEntity>
+
+    @Query("""SELECT history.*, song.* FROM historyentity as history, SongEntity as song 
+            WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+            AND song.mediaId == history.mediaId
+            GROUP BY song.mediaId
+            ORDER BY history.playCount DESC LIMIT 666""")
+    suspend fun getMostPlayedSongsLocal(): List<SongEntity>
 
     @Query("""SELECT * FROM songentity WHERE LOWER(:songId) == LOWER(mediaId)""")
     suspend fun getSongById(songId: String): SongEntity?
@@ -200,6 +227,9 @@ interface MusicDao {
 
     @Query("DELETE FROM playlistentity WHERE $multiUserCondition")
     suspend fun clearPlaylists()
+
+    @Delete
+    suspend fun deletePlaylists(playlists: List<PlaylistEntity>)
 
     @Query("DELETE FROM playlistsongentity")
     suspend fun clearPlaylistSongs()
@@ -267,8 +297,12 @@ interface MusicDao {
     @Query("""SELECT * FROM downloadedsongentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 222""")
     suspend fun getRandomOfflineSongs(): List<DownloadedSongEntity>
 
-    // TODO missing playCount field in offline table
-    suspend fun getMostPlayedOfflineSongs(): List<DownloadedSongEntity> = getRandomOfflineSongs()
+    @Query("""SELECT history.*, song.* FROM historyentity as history, DownloadedSongEntity as song 
+            WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+            AND song.mediaId == history.mediaId
+            GROUP BY song.mediaId
+            ORDER BY history.playCount DESC LIMIT 666""")
+    suspend fun getMostPlayedOfflineSongs(): List<DownloadedSongEntity>
 
     @Query("""SELECT album.* FROM DownloadedSongEntity as song, (SELECT * FROM AlbumEntity) as album WHERE song.albumId == album.id GROUP BY album.id ORDER BY album.name""")
     suspend fun getOfflineAlbums(): List<AlbumEntity>
@@ -392,6 +426,14 @@ interface MusicDao {
     suspend fun addSongsToHistory(historyEntities: List<HistoryEntity>)
 
     @Query("""SELECT history.*, song.* FROM historyentity as history, songentity as song 
+            WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials'))
+            AND song.mediaId == history.mediaId
+			AND song.mediaId == LOWER(:id)
+            GROUP BY history.mediaId
+            ORDER BY lastPlayed DESC LIMIT 666""")
+    suspend fun getSongFromHistory(id: String): SongEntity?
+
+    @Query("""SELECT history.*, song.* FROM historyentity as history, songentity as song 
             WHERE LOWER(history.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')) 
             AND song.mediaId == history.mediaId
             GROUP BY history.mediaId
@@ -418,6 +460,9 @@ interface MusicDao {
             GROUP BY history.mediaId
             ORDER BY lastPlayed DESC LIMIT 666""")
     fun getOfflineSongHistoryFlow(): Flow<List<DownloadedSongEntity>>
+
+    @Query("DELETE FROM historyentity")
+    suspend fun clearHistory()
 
     // TODO MIGRATION CALLS, REMOVE AFTERWARDS
     // --- TODO: REMOVE AFTER MIGRATION
@@ -448,5 +493,6 @@ interface MusicDao {
         clearPlaylists()
         clearPlaylistSongs()
         clearGenres()
+        clearHistory()
     }
 }

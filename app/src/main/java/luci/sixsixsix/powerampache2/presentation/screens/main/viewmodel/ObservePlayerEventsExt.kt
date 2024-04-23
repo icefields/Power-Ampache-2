@@ -34,6 +34,7 @@ fun MainViewModel.observePlayerEvents() {
                     /* UI STATE Initial */
                 }
                 SimpleMediaState.Ended -> {
+                    stopPlayLoading()
                     //isPlaying = mediaState.isPlaying
                 }
                 is SimpleMediaState.Buffering -> {
@@ -41,11 +42,16 @@ fun MainViewModel.observePlayerEvents() {
                     isPlaying = mediaState.isPlaying
                     calculateProgressValue(mediaState.progress)
                 }
-                is SimpleMediaState.Playing ->
+                is SimpleMediaState.Playing -> {
                     isPlaying = mediaState.isPlaying
+                    if (isPlaying)
+                        stopPlayLoading()
+                }
                 is SimpleMediaState.Progress -> {
                     isPlaying = mediaState.isPlaying
                     calculateProgressValue(mediaState.progress)
+                    if (isPlaying)
+                        stopPlayLoading()
                 }
                 is SimpleMediaState.Ready -> {
                     isBuffering = false
@@ -56,6 +62,7 @@ fun MainViewModel.observePlayerEvents() {
                 SimpleMediaState.Idle -> {
                     isBuffering = false
                     isPlaying = false
+                    stopPlayLoading()
                 }
             }
         }

@@ -149,9 +149,6 @@ class ErrorHandlerImpl @Inject constructor(
                         when (e.musicError.getErrorType()) {
                             ErrorType.ACCOUNT -> {
                                 // clear session and try to autologin using the saved credentials
-                                //db.dao.clearCachedData()
-                                //db.dao.clearPlaylists()
-                                L("clear session, set the session to null ssss handle error")
                                 db.dao.clearSession()
                                 readableMessage = e.musicError.errorMessage
                             }

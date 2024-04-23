@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -64,9 +65,11 @@ class HomeScreenViewModel @Inject constructor(
     var state by mutableStateOf(HomeScreenState())
     private var _recentNetwork: MutableStateFlow<List<AmpacheModel>> = MutableStateFlow(listOf())
     private var recentNetwork: StateFlow<List<AmpacheModel>> = _recentNetwork
+    private var frequentNetwork: MutableStateFlow<List<AmpacheModel>> = MutableStateFlow(listOf())
 
     private val currentRandomAlbums = mutableListOf<AmpacheModel>()
     private val currentFlaggedAlbums = mutableListOf<AmpacheModel>()
+    private val currentPlaylists = mutableListOf<Playlist>()
 
     private var playlistsJob: Job? = null
     private var flaggedJob: Job? = null
@@ -75,6 +78,8 @@ class HomeScreenViewModel @Inject constructor(
     private var newestJob: Job? = null
     private var recentJob: Job? = null
     private var randomJob: Job? = null
+
+    private val offsetRecent = (0..2).random()
     private val offsetFrequent = (0..2).random()
     private val offsetNewest = (0..2).random()
     private val offsetRandom = (0..2).random()
@@ -83,7 +88,13 @@ class HomeScreenViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     val playlistsStateFlow = playlistsRepository.playlistsFlow.distinctUntilChanged()
+        .filter {
+            !AmpacheModel.listsEqual(it, currentPlaylists, true)
+        }
         .map { playlists ->
+            currentPlaylists.clear()
+            currentPlaylists.addAll(playlists)
+
             val playlistList = mutableListOf<Playlist>(
                 HighestPlaylist(),
                 RecentPlaylist(),
@@ -92,8 +103,7 @@ class HomeScreenViewModel @Inject constructor(
             )
             playlistList.addAll(playlists)
             playlistList.toList()
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<Playlist>())
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<Playlist>())
 
     val recentlyPlayedStateFlow =
         recentNetwork.combine(albumsRepository.recentlyPlayedAlbumsFlow) { albumsNetwork, albumsDb ->
@@ -106,8 +116,22 @@ class HomeScreenViewModel @Inject constructor(
                     recentAlbums.addAll(it)
                 }
             }
-            injectArtists(recentAlbums, offsetFrequent)
+            injectArtists(recentAlbums, offsetRecent)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<AmpacheModel>())
+
+    val frequentlyPlayedStateFlow =
+        frequentNetwork.combine(albumsRepository.frequentAlbumsFlow) { albumsNetwork, albumsDb ->
+            val frequentAlbums = mutableListOf<AmpacheModel>()
+            frequentAlbums.addAll(albumsDb)
+            AmpacheModel.appendToList(albumsNetwork.toMutableList(), mainList = frequentAlbums)
+
+            if (offlineModeStateFlow.value) {
+                replaceWithRandomIfEmpty(frequentAlbums, fetchRemote = true) {
+                    frequentAlbums.addAll(it)
+                }
+            }
+            mergeFrequentItems(frequentAlbums)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<AmpacheModel>())
 
     val randomAlbumsStateFlow = albumsRepository.randomAlbumsFlow.distinctUntilChanged().map { albumsDb ->
         // if list too big, ignore
@@ -129,13 +153,7 @@ class HomeScreenViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<Album>())
 
     val highestRatedAlbumsStateFlow = albumsRepository.highestRatedAlbumsFlow.distinctUntilChanged()
-        /*.map { albumsDb ->
-        AmpacheModel.appendToListExclusive(albumsDb.toMutableList(), mainList = currentHighestAlbums).also {
-            currentHighestAlbums.clear()
-            currentHighestAlbums.addAll(it)
-            L("aaaa highestRatedAlbumsStateFlow",  currentHighestAlbums.size)
-        }
-    }*/.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<Album>())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<Album>())
 
     init {
         viewModelScope.launch {
@@ -322,25 +340,23 @@ class HomeScreenViewModel @Inject constructor(
 
 
 // ---- FREQUENT
-    private suspend fun getFrequent(fetchRemote: Boolean = true) {
+    private suspend fun getFrequent() {
         albumsRepository
             .getFrequentAlbums()
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let { albums ->
-                            state = state.copy(frequentAlbums = mergeFrequentItems(albums))
-                        }
-                        L("HomeScreenViewModel.getFrequent size of network array ${result.networkData?.size}")
-                        replaceWithRandomIfEmpty(state.frequentAlbums) { albums ->
-                            state = state.copy(frequentAlbums = albums)
+                            frequentNetwork.value = albums
+                            //state = state.copy(frequentAlbums = mergeFrequentItems(albums))
+                            L("aaaa HomeScreenViewModel.getFrequent size of network array ${result.networkData?.size}")
                         }
                     }
 
                     is Resource.Error -> {
                         state = state.copy(isFrequentAlbumsLoading = false, isLoading = false)
-                        replaceWithRandomIfEmpty(state.frequentAlbums) { albums ->
-                            state = state.copy(frequentAlbums = albums)
+                        replaceWithRandomIfEmpty(frequentlyPlayedStateFlow.value) { albums ->
+                            frequentNetwork.value = albums
                         }
                         L("ERROR HomeScreenViewModel.getFrequent ${result.exception}")
                     }
@@ -444,9 +460,9 @@ class HomeScreenViewModel @Inject constructor(
         }
 
     private suspend fun mergeFrequentItems(albums: List<AmpacheModel>): List<AmpacheModel> =
-        albums.toMutableList<AmpacheModel>().apply {
-            val artistsMostPlayed = artistsRepository.getMostPlayedArtists()
-            if (artistsMostPlayed.isNotEmpty()) {
+    artistsRepository.getMostPlayedArtists().let { artistsMostPlayed ->
+        if (artistsMostPlayed.isNotEmpty()) {
+            albums.toMutableList<AmpacheModel>().apply {
                 addArtistsToAlbumList(
                     albums,
                     artistsMostPlayed,
@@ -454,7 +470,10 @@ class HomeScreenViewModel @Inject constructor(
                     offset = offsetFrequent
                 )
             }
+        } else {
+            injectArtists(albums, offsetFrequent)
         }
+    }
 
     override fun onCleared() {
         cancelJobs()

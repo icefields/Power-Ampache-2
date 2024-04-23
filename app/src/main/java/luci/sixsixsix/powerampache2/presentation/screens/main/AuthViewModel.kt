@@ -132,7 +132,6 @@ class AuthViewModel @Inject constructor(
      *  ping will refresh the token if previous one still valid
      */
     private suspend fun pingServerSync() = repository.ping().let { ping ->
-        L("pingServerSync ssss")
         val newSession = ping.data?.second
         //val isSessionNull = newSession == null
         when (ping) {

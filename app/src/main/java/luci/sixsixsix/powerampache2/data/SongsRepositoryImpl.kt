@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.Stack
 import luci.sixsixsix.powerampache2.common.WeakContext
@@ -71,6 +72,7 @@ import retrofit2.HttpException
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.max
 
 /**
  * the source of truth is the database, stick to the single source of truth pattern, only return
@@ -260,6 +262,8 @@ class SongsRepositoryImpl @Inject constructor(
 
             if (statFilter == MainNetwork.StatFilter.recent) {
                 emit(Resource.Success(data = dao.getSongHistory().map { it.toSong() }, networkData = null))
+            } else if (statFilter == MainNetwork.StatFilter.frequent) {
+                emit(Resource.Success(data = dao.getMostPlayedSongs().map { it.toSong() }, networkData = null))
             }
 
             if (!fetchRemote) {
@@ -267,9 +271,8 @@ class SongsRepositoryImpl @Inject constructor(
                 return@flow
             }
 
-            val auth = getSession()!!
             val cred = getCurrentCredentials()
-            getSongsStatCall(auth.auth, statFilter)?.map { it.toSong() }?.let { songs ->
+            getSongsStatCall(authToken(), statFilter)?.map { it.toSong() }?.let { songs ->
                 cacheSongs(songs)
                 if (statFilter == MainNetwork.StatFilter.recent) {
                     val dbSongs = dao.getSongHistory().map { it.toSong() }.toMutableList()
@@ -286,6 +289,12 @@ class SongsRepositoryImpl @Inject constructor(
                         serverUrl = cred.serverUrl) })
 
                     emit(Resource.Success(data = dbSongs, networkData = songs))
+                } else if (statFilter == MainNetwork.StatFilter.frequent) {
+                    // songs are saved already, just fetch them again and emit
+                    emit(Resource.Success(
+                        data = dao.getMostPlayedSongs().ifEmpty {
+                            dao.getMostPlayedSongsLocal() }.map { it.toSong() },
+                        networkData = songs))
                 } else {
                     emit(Resource.Success(data = songs, networkData = songs))
                 }
@@ -573,7 +582,6 @@ class SongsRepositoryImpl @Inject constructor(
     private suspend fun scrobbleEverything() {
         if (!isOfflineModeEnabled()) {
             val auth = getSession()!!.auth
-            L("scrobble offline mode not enabled", songsToScrobble.size)
             while(songsToScrobble.hasMore()) {
                 delay(21000)
                 songsToScrobble.pop()?.let { sts ->
@@ -581,7 +589,6 @@ class SongsRepositoryImpl @Inject constructor(
                         L("scrobble success!", songsToScrobble.size, sts.name)
                     } else {
                         L("scrobble failed", songsToScrobble.size, sts.name)
-                        // throw Exception("error getting a response from scrobble call")
                     }
                 }
             }
@@ -589,8 +596,10 @@ class SongsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addToHistory(song: Song) = getCurrentCredentials().run {
+        // Nextcloud does not return a play count, pick that up from database if available
+        val playCount = max((dao.getSongFromHistory(song.mediaId)?.playCount ?: ERROR_INT), song.playCount) + 1
         dao.addSongToHistory(HistoryEntity.newEntry(mediaId = song.mediaId,
-            playCount = song.playCount,
+            playCount = playCount,
             username = this.username,
             serverUrl = this.serverUrl
         ))

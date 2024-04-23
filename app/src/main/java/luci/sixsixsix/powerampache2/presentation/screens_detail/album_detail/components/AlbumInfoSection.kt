@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -44,6 +45,7 @@ import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
+import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
 
 enum class AlbumInfoViewEvents {
     PLAY_ALBUM,
@@ -59,6 +61,7 @@ enum class AlbumInfoViewEvents {
 fun AlbumInfoSection(
     album: Album,
     isPlayingAlbum: Boolean,
+    isBuffering: Boolean,
     isLikeLoading: Boolean,
     isDownloading: Boolean,
     isAlbumDownloaded: Boolean,
@@ -113,11 +116,8 @@ fun AlbumInfoSection(
             }
 
             LikeButton(
-                modifier = Modifier.align(Alignment.BottomEnd).size(29.dp),
-                isLikeLoading = isLikeLoading,
-                background = Color.Transparent,
-                isFavourite = album.flag == 1
-            ) {
+                modifier = Modifier.align(Alignment.BottomEnd).size(32.dp),
+                isLikeLoading = isLikeLoading, isFavourite = album.flag == 1) {
                 eventListener(AlbumInfoViewEvents.FAVOURITE_ALBUM)
             }
         }
@@ -126,6 +126,7 @@ fun AlbumInfoSection(
         AlbumInfoButtonsRow(
             modifier = Modifier.fillMaxWidth(),
             album = album,
+            isBuffering = isBuffering,
             isAlbumDownloaded = isAlbumDownloaded,
             isPlayingAlbum = isPlayingAlbum,
             isPlaylistEditLoading = isPlaylistEditLoading,
@@ -150,6 +151,7 @@ fun AlbumInfoSectionPreview() {
         eventListener = { },
         isGlobalShuffleOn = true,
         isAlbumDownloaded = true,
+        isBuffering = false,
         artistClickListener = { }
     )
 }

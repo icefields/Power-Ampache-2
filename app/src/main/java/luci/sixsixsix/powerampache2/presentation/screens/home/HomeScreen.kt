@@ -79,6 +79,7 @@ fun HomeScreen(
     val playlists by viewModel.playlistsStateFlow.collectAsState()
     val recentAlbums by viewModel.recentlyPlayedStateFlow.collectAsState()
     val flaggedAlbums by viewModel.flaggedAlbumsStateFlow.collectAsState()
+    val frequentAlbums by viewModel.frequentlyPlayedStateFlow.collectAsState()
     val offlineModeState by viewModel.offlineModeStateFlow.collectAsState()
     val highestAlbums by viewModel.highestRatedAlbumsStateFlow.collectAsState()
     val randomAlbums by viewModel.randomAlbumsStateFlow.collectAsState()
@@ -89,14 +90,14 @@ fun HomeScreen(
         HomeScreenRowItems.Recent(recentAlbums),
         HomeScreenRowItems.Playlists(playlists),
         HomeScreenRowItems.Favourite(flaggedAlbums),
-        HomeScreenRowItems.Frequent(state.frequentAlbums),
+        HomeScreenRowItems.Frequent(frequentAlbums),
         HomeScreenRowItems.Highest(highestAlbums),
         HomeScreenRowItems.Newest(state.newestAlbums),
         HomeScreenRowItems.More(randomAlbums),
-        HomeScreenRowItems.Nothing(isLoadingData(state, playlists, recentAlbums, randomAlbums))
+        HomeScreenRowItems.Nothing(isLoadingData(state, playlists, recentAlbums, frequentAlbums, randomAlbums))
     )
 
-    val showEmptyView = isNoData(state, playlists, recentAlbums, randomAlbums) && offlineModeState
+    val showEmptyView = isNoData(state, playlists, recentAlbums, frequentAlbums, randomAlbums) && offlineModeState
     LaunchedEffect(showEmptyView) {
         // wait 1.2 seconds before showing the switch
         delay(1200)
@@ -136,6 +137,7 @@ fun HomeScreen(
 fun isLoadingData(
     state: HomeScreenState,
     playlists: List<Playlist>,
+    frequentAlbums: List<AmpacheModel>,
     recentAlbums: List<AmpacheModel>,
     randomAlbums: List<AmpacheModel>
 ) = (
@@ -146,7 +148,7 @@ fun isLoadingData(
             state.isNewestAlbumsLoading||
             state.isFrequentAlbumsLoading
         ) ||
-        (   state.frequentAlbums.isNullOrEmpty() &&
+        (   frequentAlbums.isNullOrEmpty() &&
             recentAlbums.isNullOrEmpty() &&
             randomAlbums.isNullOrEmpty() &&
             state.newestAlbums.isNullOrEmpty() &&
@@ -156,10 +158,12 @@ fun isLoadingData(
 
 fun isNoData(
     state: HomeScreenState,
-             playlists: List<Playlist>,
-             recentAlbums: List<AmpacheModel>,
-             randomAlbums: List<AmpacheModel>) =
-    state.frequentAlbums.isNullOrEmpty() &&
+    playlists: List<Playlist>,
+    frequentAlbums: List<AmpacheModel>,
+    recentAlbums: List<AmpacheModel>,
+    randomAlbums: List<AmpacheModel>
+) =
+    frequentAlbums.isNullOrEmpty() &&
     recentAlbums.isNullOrEmpty() &&
     randomAlbums.isNullOrEmpty() &&
     state.newestAlbums.isNullOrEmpty() &&

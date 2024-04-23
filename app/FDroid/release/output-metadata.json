@@ -4,17 +4,34 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "luci.sixsixsix.powerampache2",
+  "applicationId": "luci.sixsixsix.powerampache2.fdroid",
   "variantName": "FDroidRelease",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 42,
-      "versionName": "0.42-rc1",
+      "versionCode": 49,
+      "versionName": "0.49-rc1-fdroid",
       "outputFile": "app-FDroid-release.apk"
     }
   ],
-  "elementType": "File"
+  "elementType": "File",
+  "baselineProfiles": [
+    {
+      "minApi": 28,
+      "maxApi": 30,
+      "baselineProfiles": [
+        "baselineProfiles/1/app-FDroid-release.dm"
+      ]
+    },
+    {
+      "minApi": 31,
+      "maxApi": 2147483647,
+      "baselineProfiles": [
+        "baselineProfiles/0/app-FDroid-release.dm"
+      ]
+    }
+  ],
+  "minSdkVersionForDexing": 28
 }

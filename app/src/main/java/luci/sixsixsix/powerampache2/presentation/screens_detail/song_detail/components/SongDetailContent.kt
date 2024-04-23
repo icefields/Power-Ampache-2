@@ -208,7 +208,7 @@ fun SongDetailContent(
             durationStr = currentSongState?.totalTime() ?: "",
             progressStr = mainViewModel.progressStr,
             isPlaying = mainViewModel.isPlaying,
-            isBuffering = mainViewModel.isBuffering,
+            isBuffering = mainViewModel.isPlayLoading(),
             shuffleOn = mainViewModel.shuffleOn,
             repeatMode = mainViewModel.repeatMode,
             modifier = Modifier

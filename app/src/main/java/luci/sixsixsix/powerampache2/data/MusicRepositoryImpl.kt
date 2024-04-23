@@ -363,7 +363,7 @@ class MusicRepositoryImpl @Inject constructor(
         // clear credentials after api call, since the api uses base url from credentials
         dao.clearCredentials()
         dao.clearSession()
-        dao.clearCachedData()
+        if (!BuildConfig.DEBUG) dao.clearCachedData()
         dao.clearUser()
 
         emit(Resource.Success(true))

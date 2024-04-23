@@ -15,7 +15,7 @@ val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
 val exoplayerVersion = "2.19.1"
 val composeNavVersion = "1.8.42-beta"
-val media3Version = "1.3.0"
+val media3Version = "1.3.1"
 val hiltVersion = "1.2.0"
 
 val localProperties = Properties()
@@ -40,13 +40,15 @@ android {
     val errorReportEmail = properties.getProperty("ERROR_REPORT_EMAIL")
     val pastebinApiKey = properties.getProperty("PASTEBIN_API_KEY")
 
+    var providerStr = "luci.sixsixsix.powerampache2.provider"
+
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 49
-        versionName = "0.49-rc1"
-        val versionQuote = "This version is powered by REVOLUTION! Revolution everywhere! -- DB Experiments"
+        versionCode = 50
+        versionName = "0.50-rc1"
+        val versionQuote = "This version is powered by happy endings and ugly restarts - play fix"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -66,6 +68,7 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = ".debug"
+            providerStr = "$providerStr.debug"
 
             // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "true")
@@ -89,10 +92,8 @@ android {
             buildConfigField("String", "LOCAL_DEV_PASSWORD", localDevPass)
 
             resValue("string", "build_type", "Debug")
-            resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.debug.provider")
-            resValue("color", "launcherBgColour", "#d7afff")
+            resValue("color", "launcherBgColour", "#006660")
 
-            //     <color name="launcherBgColour"></color>
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -123,7 +124,6 @@ android {
             buildConfigField("String", "LOCAL_DEV_PASSWORD", "\"\"")
 
             resValue("string", "build_type", "Release")
-            resValue("string", "sharing_provider_authority", "luci.sixsixsix.powerampache2.provider")
             resValue("color", "launcherBgColour", "#e9eff7")
 
             isMinifyEnabled = false
@@ -135,28 +135,41 @@ android {
         }
     }
 
+    val flavourGithub = "Github"
+    val flavourFDroid = "FDroid"
+    val flavourPlayStore = "PlayStore"
+
     flavorDimensions += "ampache"
     productFlavors {
-        create("Github") {
+        create(flavourGithub) {
             dimension = "ampache"
+
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+
+            resValue("string", "sharing_provider_authority", providerStr)
         }
-        create("FDroid") {
+        create(flavourFDroid) {
             dimension = "ampache"
             applicationIdSuffix = ".fdroid"
             versionNameSuffix = "-fdroid"
+
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
-            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+            buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
+            buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+            resValue("string", "sharing_provider_authority", "${providerStr}.$flavourFDroid")
         }
-        create("PlayStore") {
+        create(flavourPlayStore) {
             dimension = "ampache"
             applicationIdSuffix = ".play"
             versionNameSuffix = "-play"
 
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
             buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+            buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+            resValue("string", "sharing_provider_authority", "${providerStr}.$flavourPlayStore")
+
         }
     }
 

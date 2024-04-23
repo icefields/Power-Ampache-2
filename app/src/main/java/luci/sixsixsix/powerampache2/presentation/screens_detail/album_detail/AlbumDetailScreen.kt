@@ -64,22 +64,17 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.common.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.common.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
-import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
-import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigateToArtist
-
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumDetailTopBar
@@ -216,6 +211,7 @@ fun AlbumDetailScreen(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
                         album = album,
+                        isBuffering = mainViewModel.isPlayLoading(),
                         isPlayingAlbum = isPlayingAlbum,
                         isLikeLoading = state.isLikeLoading,
                         isAlbumDownloaded = state.isAlbumDownloaded,
@@ -228,7 +224,6 @@ fun AlbumDetailScreen(
                         eventListener = { event ->
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {
-                                    L( "AlbumInfoViewEvents.PLAY_ALBUM", state.isLoading, viewModel.state.songs.isNullOrEmpty())
 
                                     if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@AlbumInfoSection
 
@@ -239,19 +234,8 @@ fun AlbumDetailScreen(
                                         if (!isGlobalShuffleOn) {
                                             // add next to the list and skip to the top of the album (which is next)
                                             mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlay(songs[0], state.getSongList()))
-//                                            viewModel.onEvent(AlbumDetailEvent.OnPlayAlbum)
-//                                            playlistManager.updateCurrentSong(state.songs[0].song)
-//                                            playlistManager.addToCurrentQueueTop(state.getSongList())
-//                                            mainViewModel.onEvent(MainEvent.Play(songs[0]))
                                         } else {
-                                            L( "isGlobalShuffleOn")
-
                                             mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(state.getSongList()))
-//                                            viewModel.onEvent(AlbumDetailEvent.OnShuffleAlbum)
-//                                            // after updating queue and current song, play
-//                                            if (!mainViewModel.isPlaying) {
-//                                                mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-//                                            }
                                         }
                                     }
                                 }

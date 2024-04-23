@@ -31,7 +31,6 @@ import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_STATE
 import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_USERNAME
 import luci.sixsixsix.powerampache2.common.Constants.MASTODON_URL
 import luci.sixsixsix.powerampache2.common.Constants.NOT_IMPLEMENTED_USER_ID
-import luci.sixsixsix.powerampache2.common.Constants.USER_ERROR_MESSAGE
 import luci.sixsixsix.powerampache2.common.Constants.USER_ID_ERROR
 
 @Parcelize

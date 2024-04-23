@@ -87,6 +87,9 @@ class MusicPlaylistManager @Inject constructor() {
         updateErrorLogMessage(logMessage)
     }
 
+    /**
+     * updates the error log in settings
+     */
     fun updateErrorLogMessage(logMessage: String?) {
         L("MusicPlaylistManager updateErrorLogMessage", logMessage)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
