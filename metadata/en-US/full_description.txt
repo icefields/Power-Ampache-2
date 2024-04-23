@@ -1,1 +1,43 @@
-Power Ampache 2 is an Ampache, Subsonic, Nextcloud Music client, presented in MaterialYou
+Feature rich music client for Ampache, Subsonic, Nextcloud backends, provides all the features found in other mainstream music player (such as Spotify, Youtube Music, Apple Music and so on) and more, like "actually" downloading and exporting music files, lyrics, multiaccount. Plus no ads, no tracking, no bloatware.
+
+- MaterialYou Themes, the colour of the app will automatically match the colour scheme of your device, alternatively choose or create your own theme.
+- Unique generated playlists (smartlists)
+- "Spin it!" button to generate a playlist for you.
+- Dark & light mode with adaptive interface colors
+- Fade out/in on pause/resume/next/previous
+- Media keys support
+- Every Bluetooth functionality is avaibable in the app.
+- Song notifications with play controls. Also on lock screen.
+- Album, Artist, Songs collections
+- Advanced search
+- Powerful offline mode
+- Create, edit, share your playlists
+
+📱 CONNECT TO AMPACHE MUSIC SERVERS
+With Power Ampache 2, you can effortlessly connect to Ampache servers and freely listen to music, without any tracker or ads. You can even download the music you want for offline use, or share with friends.
+
+🚀 LIGHTNING-FAST AND LIGHTWEIGHT:
+Despite its powerful features, Power Ampache 2 boasts a remarkable performance, making it quick and easy to listen music at full quality (FLAC support coming soon), create your own playlists (public or private) and queue. Experience speed and efficiency while enjoying your favourite music.
+
+🔐 ENHANCED PRIVACY:
+Your data is not collected and sold, there are no ads in the app.
+
+🔍 EFFICIENT SONG SEARCH:
+Power Ampache 2 provides a quick and efficient search for finding songs/albums/artists/playlists. Find what you need, when you need it.
+
+🌈 MODERN DESIGN & USER-FRIENDLY INTERFACE:
+Enjoy a clean, modern design with a user-friendly interface. The app features a material3 design, MaterialYou and other themes, providing a visually appealing and comfortable user experience.
+
+🌐 OPEN-SOURCE TRANSPARENCY:
+Power Ampache app is completely free of ads and does not request unnecessary permissions. Moreover, it is fully open-source, providing you with peace of mind, as you have access to the source code for security and privacy audits.
+
+
+Work in progress / Coming soon:
+- Widgets
+- Playlist edit drag and drop
+- Android Auto
+- Multi-account features 
+- Android TV 
+- UI Optimized for tablets
+
+
