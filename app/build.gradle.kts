@@ -26,7 +26,12 @@ android {
     compileSdk = 34
 
     val properties = Properties()
-    properties.load(project.rootProject.file("secrets.properties").inputStream())
+    val propertiesFile = project.rootProject.file("secrets.properties")
+    if (propertiesFile.exists()) {
+        properties.load(propertiesFile.inputStream())
+    } else {
+        properties.load(project.rootProject.file("secretsnot.properties").inputStream())
+    }
     val apikey = properties.getProperty("API_KEY")
     val ampacheUser = properties.getProperty("AMPACHE_USER")
     val ampachePass = properties.getProperty("AMPACHE_PASSWORD")
