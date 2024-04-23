@@ -79,7 +79,7 @@ class PlaylistDetailViewModel @Inject constructor(
         savedStateHandle.getStateFlow<Playlist?>("playlist", null)
             .filterNotNull()
             .map { playlist ->
-                onEvent(PlaylistDetailEvent.Fetch(playlist))
+                fetchPlaylistSongs(playlist)
                 playlist
             }.combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlist, user ->
                 state = state.copy(
@@ -88,27 +88,13 @@ class PlaylistDetailViewModel @Inject constructor(
                     isUserOwner = user.username == playlist.owner
                 )
                 playlist
-            }
-//            .map { it.id }
-            .flatMapConcat { playlist ->
+            }.flatMapConcat { playlist ->
                 if (PlaylistDetailState.isNotStatPlaylist(playlist)) {
                     playlistsRepository.getPlaylist(playlist.id)
                 } else {
                     flow { emit(playlist) }
                 }
-            }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Playlist.empty())
-
-
-//    private val mainState = combine(playlistStateFlow, musicRepository.userLiveData.asFlow().filterNotNull()) { playlist, user ->
-//        onEvent(PlaylistDetailEvent.Fetch(playlist))
-//
-//        state = state.copy(
-//            isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
-//            isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),
-//            isUserOwner = user.username == playlist.owner
-//        )
-//    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Playlist.empty())
 
     init {
         viewModelScope.launch {
@@ -128,6 +114,16 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
+    private fun fetchPlaylistSongs(playlist: Playlist) {
+        when (playlist) {
+            is HighestPlaylist -> getHighestSongs(fetchRemote = true)
+            is RecentPlaylist -> getRecentSongs(fetchRemote = true)
+            is FlaggedPlaylist -> getFlaggedSongs(fetchRemote = true)
+            is FrequentPlaylist -> getFrequentSongs(fetchRemote = true)
+            else -> getSongsFromPlaylist(playlistId = playlist.id, fetchRemote = true)
+        }
+    }
+
     fun onEvent(event: PlaylistDetailEvent) {
         when(event) {
             PlaylistDetailEvent.OnPlaylistNotReadyDownload -> {
@@ -136,15 +132,8 @@ class PlaylistDetailViewModel @Inject constructor(
                     Toast.LENGTH_LONG
                 ).show()
             }
-            is PlaylistDetailEvent.Fetch -> {
-                when (event.playlist) {
-                    is HighestPlaylist -> getHighestSongs(fetchRemote = true)
-                    is RecentPlaylist -> getRecentSongs(fetchRemote = true)
-                    is FlaggedPlaylist -> getFlaggedSongs(fetchRemote = true)
-                    is FrequentPlaylist -> getFrequentSongs(fetchRemote = true)
-                    else -> getSongsFromPlaylist(playlistId = event.playlist.id, fetchRemote = true)
-                }
-            }
+            is PlaylistDetailEvent.Fetch ->
+                fetchPlaylistSongs(event.playlist)
             PlaylistDetailEvent.OnSharePlaylist ->
                 sharePlaylist(playlistId = playlistStateFlow.value.id)
             is PlaylistDetailEvent.OnRemoveSong ->
@@ -268,37 +257,31 @@ class PlaylistDetailViewModel @Inject constructor(
             }
     }
 
-    private fun getRecentSongs(fetchRemote: Boolean = true, ) {
-        viewModelScope.launch {
-            songsRepository
-                .getRecentSongs()
-                .collect { result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            result.data?.let { songs ->
-                                val songWrapperList = mutableListOf<SongWrapper>()
-                                songs.forEach { song ->
-                                    songWrapperList.add(
-                                        SongWrapper(
-                                            song = song,
-                                            isOffline = songsRepository.isSongAvailableOffline(song)
-                                        ))
-                                }
-                                state = state.copy(songs = songWrapperList)
-                                L("PlaylistDetailViewModel.getRecentSongs size ${state.songs.size}")
-                            }
+    private fun getRecentSongs(fetchRemote: Boolean = true) = viewModelScope.launch {
+        songsRepository.getRecentSongs().collect { result ->
+            when(result) {
+                is Resource.Success -> {
+                    result.data?.let { songs ->
+                        val songWrapperList = mutableListOf<SongWrapper>()
+                        songs.forEach { song ->
+                            songWrapperList.add(SongWrapper(song = song,
+                                isOffline = songsRepository.isSongAvailableOffline(song)))
                         }
-                        is Resource.Error -> {
-                            state = state.copy(isLoading = false)
-                            L( "ERROR PlaylistDetailViewModel.getRecentSongs ${result.exception}")
-                        }
-                        is Resource.Loading -> {
-                            state = state.copy(isLoading = result.isLoading)
-                        }
+                        state = state.copy(songs = songWrapperList)
+                        L("PlaylistDetailViewModel.getRecentSongs size ${state.songs.size}")
                     }
                 }
+                is Resource.Error -> {
+                    state = state.copy(isLoading = false)
+                    L( "ERROR PlaylistDetailViewModel.getRecentSongs ${result.exception}")
+                }
+                is Resource.Loading -> {
+                    state = state.copy(isLoading = result.isLoading)
+                }
+            }
         }
     }
+
 
     private fun getFlaggedSongs(fetchRemote: Boolean = true, ) {
         viewModelScope.launch {

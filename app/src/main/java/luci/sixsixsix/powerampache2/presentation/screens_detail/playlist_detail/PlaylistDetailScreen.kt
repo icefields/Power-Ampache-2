@@ -62,6 +62,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -157,7 +158,7 @@ fun PlaylistDetailScreen(
                 showDeleteSongDialog = null
                 viewModel.onEvent(PlaylistDetailEvent.OnRemoveSong(songToRemove))
             },
-            dialogTitle = "REMOVE SONG",
+            dialogTitle = stringResource(id = R.string.warning_song_remove_title),
             dialogText = "Delete ${songToRemove.name} from playlist \n${currentPlaylistState.name}?"
         )
     }

@@ -51,7 +51,9 @@ fun EraseConfirmDialog(
     @StringRes dialogTitle: Int,
     @StringRes dialogText: Int? = null,
     icon: ImageVector = Icons.Default.Warning,
-    iconContentDescription: String = "Warning"
+    iconContentDescription: String = "Warning",
+    @StringRes buttonOkText: Int = android.R.string.ok,
+    @StringRes buttonCancelText: Int = android.R.string.cancel
 ) {
     EraseConfirmDialog(
         onDismissRequest = onDismissRequest,
@@ -59,7 +61,9 @@ fun EraseConfirmDialog(
         dialogTitle = stringResource(id = dialogTitle),
         dialogText = dialogText?.let { stringResource(id = it) } ?: "",
         icon = icon,
-        iconContentDescription = iconContentDescription
+        iconContentDescription = iconContentDescription,
+        buttonOkText = buttonOkText,
+        buttonCancelText = buttonCancelText
     )
 }
 
@@ -70,7 +74,9 @@ fun EraseConfirmDialog(
     dialogTitle: String,
     dialogText: String = "",
     icon: ImageVector = Icons.Default.Warning,
-    iconContentDescription: String = "Warning"
+    iconContentDescription: String = "Warning",
+    @StringRes buttonOkText: Int = android.R.string.ok,
+    @StringRes buttonCancelText: Int = android.R.string.cancel
 ) {
     AlertDialog(
         icon = null,
@@ -118,7 +124,7 @@ fun EraseConfirmDialog(
         },
         confirmButton = {
             RoundedCornerButton(
-                text = android.R.string.ok,
+                text = buttonOkText,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 borderEnabled = false
@@ -128,7 +134,7 @@ fun EraseConfirmDialog(
         },
         dismissButton = {
             RoundedCornerButton(
-                text = android.R.string.cancel,
+                text = buttonCancelText,
                 contentColor = MaterialTheme.colorScheme.primary,
                 borderEnabled = false
             ) {

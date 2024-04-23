@@ -58,9 +58,6 @@
     <string name="error_offline">Cannot connect to the internet</string>
     <string name="offlineMode_switch_title">Offline Mode</string>
 
-    <string name="warning_playlist_download">Please wait for the playlist to be fully loaded before downloading</string>
-
-
     <!-- SETTINGS -->
     <string name="quality_veryHigh_title">Very High Quality</string>
     <string name="quality_veryHigh_subtitle">320kbps or flac (no transcoding)</string>
@@ -122,6 +119,13 @@
     <string name="miniPlayer_reset_alert_message">LONG PRESS To stop music playback and reset the Queue</string>
     <string name="miniPlayer_reset_alert_title">STOP/RESET</string>
     <string name="dialog_create">CREATE</string>
+    <string name="warning_playlist_download">Please wait for the playlist to be fully loaded before downloading</string>
+    <string name="warning_playlist_server">Adding songs, if your server version is below 6.3 this operation might take a minute or so</string>
+    <string name="warning_playlist_adding">Songs are being added to your playlist.\nLeaving this screen now will interrupt the operation</string>
+    <string name="warning_playlist_adding_title">Leave Screen?</string>
+    <string name="warning_playlist_adding_stay">Stay</string>
+    <string name="warning_playlist_adding_leave">Leave Anyway</string>
+    <string name="warning_song_remove_title">REMOVE SONG</string>
 
     <!-- Song Dropdown Menu -->
     <string name="dropdownMenu_item_download">Download</string>

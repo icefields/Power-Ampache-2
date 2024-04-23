@@ -49,6 +49,7 @@ object Constants {
     const val LOGIN_SCREEN_TIMEOUT = 1500L
     const val HOME_LOADING_TIMEOUT = 1000L
     const val SERVICE_STOP_TIMEOUT = 2000L
+    const val SEARCH_TIMEOUT = 1200L    // allow user to type before starting search
 
 
     // ERROR CONSTANTS

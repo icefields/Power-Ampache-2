@@ -39,8 +39,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.queue.QueueEvent
@@ -95,11 +97,10 @@ fun SongDetailQueueScreenContent(
                 showDeleteSongDialog = null
                 viewModel.onEvent(QueueEvent.OnSongRemove(songToRemove))
             },
-            dialogTitle = "REMOVE SONG",
+            dialogTitle = stringResource(id = R.string.warning_song_remove_title),
             dialogText = "Delete ${songToRemove.name} from your queue?"
         )
     }
-
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
         itemsIndexed(
