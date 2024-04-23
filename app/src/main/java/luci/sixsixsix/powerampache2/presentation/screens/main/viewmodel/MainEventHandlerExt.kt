@@ -26,6 +26,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants.SEARCH_TIMEOUT
 import luci.sixsixsix.powerampache2.common.exportSong
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -41,7 +42,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
             state = state.copy(searchQuery = event.query)
             searchJob?.cancel()
             searchJob = viewModelScope.launch {
-                delay(1500)
+                delay(SEARCH_TIMEOUT)
                 playlistManager.updateSearchQuery(event.query)
             }
         }
@@ -124,7 +125,6 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         }
         MainEvent.OnFabPress ->
             getSongsForQuickPlay()
-
         MainEvent.Reset -> {
             try {
                 playlistManager.reset()
