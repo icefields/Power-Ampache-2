@@ -36,15 +36,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.BuildConfig.ENABLE_ERROR_LOG
-import luci.sixsixsix.powerampache2.BuildConfig.URL_ERROR_LOG
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
-import luci.sixsixsix.powerampache2.data.remote.ErrorHandlerApi
-import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.ErrorType
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -62,7 +57,6 @@ import javax.inject.Singleton
 class ErrorHandlerImpl @Inject constructor(
     private val playlistManager: MusicPlaylistManager,
     private val db: MusicDatabase,
-    private val api: ErrorHandlerApi,
     private val applicationContext: Application
 ): ErrorHandler {
 
@@ -204,8 +198,8 @@ class ErrorHandlerImpl @Inject constructor(
 
     override suspend fun logError(message: String) {
         try {
-            if (isErrorHandlingEnabled && !URL_ERROR_LOG.isNullOrBlank()) {
-               api.sendErrorReport(apiPasteCode = "${getVersionInfoString(applicationContext)}\n$message")
+            if (isErrorHandlingEnabled) {
+                playlistManager.updateErrorLogMessage(message)
             }
         } catch (e: Exception) {
             if (e is HttpException)
