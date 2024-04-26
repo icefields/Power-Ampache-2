@@ -230,7 +230,6 @@ class SimpleMediaServiceHandler @Inject constructor(
     override fun onIsLoadingChanged(isLoading: Boolean) {
         L("STATE_isLoading", isLoading)
         _simpleMediaState.value = SimpleMediaState.Loading(isLoading)
-        //if (!isLoading && player.playbackState == ExoPlayer.STATE_IDLE)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -257,7 +256,8 @@ class SimpleMediaServiceHandler @Inject constructor(
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = false)
     }
 
-    @androidx.annotation.OptIn(UnstableApi::class) override fun onPlayerError(error: PlaybackException) {
+    @androidx.annotation.OptIn(UnstableApi::class)
+    override fun onPlayerError(error: PlaybackException) {
         val isUserNotEnabledException =
                 (error.cause is InvalidResponseCodeException) &&
                         (error.cause as InvalidResponseCodeException).responseCode == 403
@@ -289,7 +289,10 @@ class SimpleMediaServiceHandler @Inject constructor(
     }
 
     private fun retryPlay() {
-        if (!player.isPlaying /*&& !player.isLoading  && !isUserNotEnabledException*/) {
+        if (!player.isPlaying &&
+            player.playbackState == ExoPlayer.STATE_IDLE
+            /*&& !player.isLoading  && !isUserNotEnabledException*/) {
+            L("retryPlay STATE")
             player.prepare()
             if (errorCounter++ % 3 == 0) {
                 player.seekToNextMediaItem()

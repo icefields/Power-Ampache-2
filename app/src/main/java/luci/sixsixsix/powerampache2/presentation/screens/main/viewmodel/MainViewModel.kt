@@ -90,6 +90,7 @@ class MainViewModel @Inject constructor(
     var isLoading by savedStateHandle.saveable { mutableStateOf(false) }
     var shuffleOn by savedStateHandle.saveable { mutableStateOf(false) }
     var repeatMode by savedStateHandle.saveable { mutableStateOf(RepeatMode.OFF) }
+
     // auth token used to figure out if the media items should be refreshed
     var authToken by savedStateHandle.saveable { mutableStateOf("") }
 
@@ -163,6 +164,7 @@ class MainViewModel @Inject constructor(
                         }
                     }
                 }
+
                 is Resource.Error -> state = state.copy(isFabLoading = false)
                 is Resource.Loading -> state = state.copy(isFabLoading = result.isLoading)
             }
@@ -176,6 +178,7 @@ class MainViewModel @Inject constructor(
                     // refresh song
                     playlistManager.updateCurrentSong(song.copy(flag = abs(song.flag - 1)))
                 }
+
                 is Resource.Error -> state = state.copy(isLikeLoading = false)
                 is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
             }
@@ -189,6 +192,7 @@ class MainViewModel @Inject constructor(
                     // refresh song
                     playlistManager.updateCurrentSong(song.copy(rating = rate.toFloat()))
                 }
+
                 is Resource.Error -> state = state.copy(isLikeLoading = false)
                 is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
             }
@@ -201,8 +205,9 @@ class MainViewModel @Inject constructor(
                 is Resource.Success -> result.data?.let {
                     weakContext.get()?.shareLink(it)
                 }
-                is Resource.Error -> { }
-                is Resource.Loading -> { }
+
+                is Resource.Error -> {}
+                is Resource.Loading -> {}
             }
         }
     }
@@ -215,6 +220,7 @@ class MainViewModel @Inject constructor(
                         // song download started successfully
                     }
                 }
+
                 is Resource.Error -> state = state.copy(isDownloading = false)
                 is Resource.Loading -> state = state.copy(isDownloading = result.isLoading)
             }
@@ -234,6 +240,7 @@ class MainViewModel @Inject constructor(
                         playlistManager.updateUserMessage("${song.name} deleted from downloads")
                     }
                 }
+
                 is Resource.Error -> playlistManager.updateUserMessage("ERROR deleting ${song.name}")
                 is Resource.Loading -> {}
             }
@@ -243,10 +250,10 @@ class MainViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             if (settingsRepository.isOfflineModeEnabled()) {
-                L( " isOfflineModeEnabled")
+                L(" isOfflineModeEnabled")
                 playlistManager.updateUserMessage(weakContext.get()?.resources?.getString(R.string.logout_offline_warning))
             } else {
-                L( " Logout")
+                L(" Logout")
                 playlistManager.reset()
                 simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Stop)
                 stopMusicService()
@@ -257,8 +264,10 @@ class MainViewModel @Inject constructor(
                                 L(auth)
                             }
                         }
+
                         is Resource.Error ->
                             L.e("MainViewModel", result.exception)
+
                         is Resource.Loading -> {}
                     }
                 }
@@ -314,7 +323,12 @@ class MainViewModel @Inject constructor(
 
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
-                applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
+                applicationContext.stopService(
+                    Intent(
+                        applicationContext,
+                        SimpleMediaService::class.java
+                    )
+                )
                     .also { isServiceRunning = false }
             } catch (e: Exception) {
                 L.e(e)
@@ -324,7 +338,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun nextRepeatMode(): RepeatMode =
-        when(repeatMode) {
+        when (repeatMode) {
             RepeatMode.OFF -> RepeatMode.ONE
             RepeatMode.ONE -> RepeatMode.ALL
             RepeatMode.ALL -> RepeatMode.OFF
