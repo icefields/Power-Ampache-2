@@ -33,8 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,7 +43,6 @@ import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
-import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components.PlaylistInfoViewEvents
 
 enum class AlbumInfoViewEvents {
     PLAY_ALBUM,
@@ -62,6 +59,7 @@ fun AlbumInfoSection(
     album: Album,
     isPlayingAlbum: Boolean,
     isBuffering: Boolean,
+    isPlayLoading: Boolean,
     isLikeLoading: Boolean,
     isDownloading: Boolean,
     isAlbumDownloaded: Boolean,
@@ -126,12 +124,13 @@ fun AlbumInfoSection(
         AlbumInfoButtonsRow(
             modifier = Modifier.fillMaxWidth(),
             album = album,
-            isBuffering = isBuffering,
+            isPlayLoading = isPlayLoading,
             isAlbumDownloaded = isAlbumDownloaded,
             isPlayingAlbum = isPlayingAlbum,
             isPlaylistEditLoading = isPlaylistEditLoading,
             isDownloading = isDownloading,
             eventListener = eventListener,
+            isBuffering = isBuffering,
             isGlobalShuffleOn = isGlobalShuffleOn
         )
         Spacer(modifier = Modifier.width(20.dp))
@@ -149,9 +148,10 @@ fun AlbumInfoSectionPreview() {
         isPlaylistEditLoading = false,
         isDownloading = false,
         eventListener = { },
+        isBuffering = false,
         isGlobalShuffleOn = true,
         isAlbumDownloaded = true,
-        isBuffering = false,
+        isPlayLoading = false,
         artistClickListener = { }
     )
 }

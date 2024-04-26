@@ -151,7 +151,7 @@ class MainViewModel @Inject constructor(
      * useful to disallow play actions during loading and buffering
      */
     fun isPlayLoading() =
-        (state.isPlayLoading || isBuffering || isLoading)
+        state.isPlayLoading
 
     fun getSongsForQuickPlay() = viewModelScope.launch {
         songsRepository.getSongsForQuickPlay().collect { result ->
@@ -271,7 +271,7 @@ class MainViewModel @Inject constructor(
         loadSongDataJob?.cancel()
         loadSongDataJob = viewModelScope.launch {
             isLoading = true
-            isBuffering = true
+            //isBuffering = true
             state = state.copy(isFabLoading = true)
             logToErrorLogs("Load song data START")
 
@@ -287,7 +287,7 @@ class MainViewModel @Inject constructor(
             logToErrorLogs("Load song data END")
 
             isLoading = false
-            isBuffering = false
+            //isBuffering = false
             state = state.copy(isFabLoading = false)
         }
     }

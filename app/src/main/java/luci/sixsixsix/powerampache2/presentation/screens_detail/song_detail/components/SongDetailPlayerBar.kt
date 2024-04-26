@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -53,7 +52,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,8 +66,9 @@ import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 @Composable
 fun SongDetailPlayerBar(
     isPlaying:Boolean,
-    isBuffering:Boolean,
+    isPlayLoading:Boolean,
     shuffleOn: Boolean,
+    isBuffering: Boolean,
     repeatMode: RepeatMode,
     progress: Float,
     durationStr: String,
@@ -91,9 +90,10 @@ fun SongDetailPlayerBar(
         )
         PlayerControls(
             isPlaying = isPlaying,
-            isBuffering = isBuffering,
+            isPlayLoading = isPlayLoading,
             shuffleOn = shuffleOn,
             repeatMode = repeatMode,
+            isBuffering = isBuffering,
             modifier = Modifier.fillMaxWidth(),
             onEvent = onEvent
         )
@@ -103,6 +103,7 @@ fun SongDetailPlayerBar(
 @Composable
 fun PlayerControls(
     isPlaying: Boolean,
+    isPlayLoading: Boolean,
     isBuffering: Boolean,
     shuffleOn: Boolean,
     repeatMode: RepeatMode,
@@ -153,8 +154,9 @@ fun PlayerControls(
 
         // PLAY
         PlayButton(
-            isBuffering = isBuffering,
-            isPlaying = isPlaying
+            isPlayLoading = isPlayLoading,
+            isPlaying = isPlaying,
+            isBuffering= isBuffering,
         ) { onEvent(MainEvent.PlayPauseCurrent) }
         Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.player_controls_spacing)))
 
@@ -240,6 +242,7 @@ fun PlayerTimeSlider(
 fun PreviewSongDetailPlayerBar() {
     SongDetailPlayerBar(
         isPlaying = true,
+        isPlayLoading = false,
         isBuffering = false,
         progress = 12f,
         durationStr = "3:40",

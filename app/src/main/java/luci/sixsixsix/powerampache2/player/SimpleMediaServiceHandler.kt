@@ -52,6 +52,8 @@ class SimpleMediaServiceHandler @Inject constructor(
     private val _simpleMediaState = MutableStateFlow<SimpleMediaState>(SimpleMediaState.Initial)
     val simpleMediaState = _simpleMediaState.asStateFlow()
     private var job: Job? = null
+    private var errorCounter = 0
+
 
     init {
         L("SERVICE- SimpleMediaServiceHandler init")
@@ -99,15 +101,6 @@ class SimpleMediaServiceHandler @Inject constructor(
                 player.setMediaItems(mediaItems)
             }
         } else {
-//            playlistManager.getCurrentSong()?.mediaId?.let { mediaId ->
-//                val indexToSeekTo = mediaItems.map { mediaItem ->  mediaItem.mediaId }.indexOf(player.currentMediaItem?.mediaId)
-//                L("addMediaItemList getCurrentSong: ", indexToSeekTo, mediaId, mediaItems.size)
-//                if (indexToSeekTo >= 0) {
-//                    player.setMediaItems(mediaItems, indexToSeekTo, 0)
-//                } else {
-//                    player.setMediaItems(mediaItems)
-//                }
-//            } ?:
             player.setMediaItems(mediaItems)
         }
         player.prepare()
@@ -140,7 +133,7 @@ class SimpleMediaServiceHandler @Inject constructor(
         L("onPlayerEvent !player.isPlaying, play now")
         player.play()
         L("onPlayerEvent !player.isPlaying, play now -after called play")
-        _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = true)
+        _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = player.isPlaying)
         startProgressUpdate()
     }
 
@@ -217,6 +210,7 @@ class SimpleMediaServiceHandler @Inject constructor(
             ExoPlayer.STATE_IDLE -> {
                 L("STATE_IDLE")
                 _simpleMediaState.value = SimpleMediaState.Idle
+                retryPlay()
             }
             ExoPlayer.STATE_BUFFERING -> {
                 L("STATE_BUFFERING")
@@ -236,6 +230,7 @@ class SimpleMediaServiceHandler @Inject constructor(
     override fun onIsLoadingChanged(isLoading: Boolean) {
         L("STATE_isLoading", isLoading)
         _simpleMediaState.value = SimpleMediaState.Loading(isLoading)
+        //if (!isLoading && player.playbackState == ExoPlayer.STATE_IDLE)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -261,8 +256,6 @@ class SimpleMediaServiceHandler @Inject constructor(
         job?.cancel()
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = false)
     }
-
-    private var errorCounter = 0
 
     @androidx.annotation.OptIn(UnstableApi::class) override fun onPlayerError(error: PlaybackException) {
         val isUserNotEnabledException =
@@ -292,7 +285,11 @@ class SimpleMediaServiceHandler @Inject constructor(
                 }
             }
         }
-        if (!player.isPlaying && !player.isLoading /* && !isUserNotEnabledException*/) {
+        retryPlay()
+    }
+
+    private fun retryPlay() {
+        if (!player.isPlaying /*&& !player.isLoading  && !isUserNotEnabledException*/) {
             player.prepare()
             if (errorCounter++ % 3 == 0) {
                 player.seekToNextMediaItem()
@@ -300,6 +297,7 @@ class SimpleMediaServiceHandler @Inject constructor(
         }
     }
 }
+
 
 sealed class SimpleMediaState {
     data object Initial: SimpleMediaState()
