@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 50,
-      "versionName": "0.50-rc1",
+      "versionCode": 51,
+      "versionName": "0.51-rc1",
       "outputFile": "app-Github-release.apk"
     }
   ],

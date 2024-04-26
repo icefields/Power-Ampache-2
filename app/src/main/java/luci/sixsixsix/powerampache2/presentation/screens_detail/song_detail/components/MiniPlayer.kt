@@ -91,7 +91,8 @@ fun MiniPlayer(
                 shuffleOn = mainViewModel.shuffleOn,
                 repeatMode = mainViewModel.repeatMode,
                 isPlaying = mainViewModel.isPlaying,
-                isBuffering = mainViewModel.isPlayLoading()
+                isBuffering = mainViewModel.isBuffering,
+                isPlayLoading = mainViewModel.isPlayLoading()
             ) { event ->
                 mainViewModel.onEvent(event)
             }
@@ -105,6 +106,7 @@ fun MiniPlayer(
 fun MiniPlayerContent(
     song: Song,
     isPlaying: Boolean,
+    isPlayLoading: Boolean,
     isBuffering: Boolean,
     shuffleOn: Boolean,
     repeatMode: RepeatMode,
@@ -206,8 +208,9 @@ fun MiniPlayerContent(
                     .padding(4.dp)
                 ) {
                     PlayButton(
-                        isBuffering = isBuffering,
-                        isPlaying = isPlaying
+                        isPlayLoading = isPlayLoading,
+                        isPlaying = isPlaying,
+                        isBuffering = isBuffering
                     ) {
                         onEvent(MainEvent.PlayPauseCurrent)
                     }
@@ -263,8 +266,9 @@ fun previewMiniPlayer() {
             .width(400.dp)
             .height(50.dp),
         isPlaying = true,
-        isBuffering = false,
+        isPlayLoading = false,
         shuffleOn = true,
+        isBuffering = true,
         repeatMode = RepeatMode.OFF
     ) { }
 }

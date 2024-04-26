@@ -211,7 +211,8 @@ fun AlbumDetailScreen(
                                 dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
                             ),
                         album = album,
-                        isBuffering = mainViewModel.isPlayLoading(),
+                        isPlayLoading = mainViewModel.isPlayLoading(),
+                        isBuffering = mainViewModel.isBuffering,
                         isPlayingAlbum = isPlayingAlbum,
                         isLikeLoading = state.isLikeLoading,
                         isAlbumDownloaded = state.isAlbumDownloaded,

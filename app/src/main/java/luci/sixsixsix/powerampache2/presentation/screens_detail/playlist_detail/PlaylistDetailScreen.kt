@@ -254,11 +254,12 @@ fun PlaylistDetailScreen(
                         playlist = currentPlaylistState,
                         isLoading = state.isLoading,
                         isPlayingPlaylist = isPlayingPlaylist,
+                        isBuffering = mainViewModel.isBuffering,
                         isLikeAvailable = !state.isGeneratedOrSmartPlaylist,
                         isLikeLoading = state.isLikeLoading ,
                         isDownloading = mainViewModel.state.isDownloading,
                         isGlobalShuffleOn = state.isGlobalShuffleOn,
-                        isBuffering = mainViewModel.isPlayLoading(),
+                        isPlayLoading = mainViewModel.isPlayLoading(),
                         enabled = !state.songs.isNullOrEmpty(),
                         songs = viewModel.state.getSongList(),
                         artistClickListener = {

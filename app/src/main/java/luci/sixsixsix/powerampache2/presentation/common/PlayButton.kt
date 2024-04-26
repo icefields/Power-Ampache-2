@@ -51,21 +51,28 @@ fun PlayButton(
     modifier: Modifier = Modifier
         .height(60.dp)
         .widthIn(min = 60.dp, max = 90.dp),
+    isPlayLoading: Boolean,
     isBuffering: Boolean,
     isPlaying: Boolean,
-    showLoadingWhileBuffering: Boolean = false,
+    showLoadingWhileBuffering: Boolean = true,
     enabled: Boolean = true,
     iconTint: Color = MaterialTheme.colorScheme.inverseOnSurface,
     background: Color = MaterialTheme.colorScheme.inverseSurface,
     onEvent: () -> Unit
 ) {
+    // show a loading animation around the button while loading play or buffering
+    val showLoading = showLoadingWhileBuffering && (isPlayLoading || isBuffering)
+    // enable tap on button only when not loading and not buffering
+    val enableActions = !isPlayLoading && !isBuffering
+    // enable button only when enabled true and not loading and not buffering
+    val isButtonEnabled = enabled && enableActions
     IconButton(
         modifier = modifier.alpha(if (enabled) 1.0f else 0.2f),
         onClick = {
-            if (!isBuffering)
+            if (enableActions)
                 onEvent()
         },
-        enabled = enabled && !isBuffering
+        enabled = isButtonEnabled
     ) {
         Card(
             modifier = modifier.padding(0.dp),
@@ -76,24 +83,26 @@ fun PlayButton(
                 modifier = Modifier.wrapContentSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if (!showLoadingWhileBuffering || !isBuffering) {
-                    // if showLoadingWhileBuffering is false always go in this block
-                    Icon(
-                        tint = iconTint,
-                        modifier = Modifier
-                            .aspectRatio(1f / 1f)
-                            .padding(13.dp),
-                        imageVector = if ((!isPlaying/* && !isBuffering*/)
-                            // if not enable always show play icon
-                            || !enabled) {
-                            Icons.Filled.PlayArrow
-                        } else {
-                            Icons.Filled.Pause
-                        },
-                        contentDescription = "Play"
+                //if (showLoading) {
+                // show pause if buffering or playing, if !enable always show play-icon
+                val showPlayIcon = (!isBuffering && !isPlaying && !isPlayLoading) || !enabled
+                Icon(
+                    tint = iconTint,
+                    modifier = Modifier
+                        .aspectRatio(1f / 1f)
+                        .padding(13.dp),
+                    imageVector = if (showPlayIcon) { Icons.Filled.PlayArrow } else {
+                        Icons.Filled.Pause },
+                    contentDescription = "Play/Pause button"
+                )
+                //}
+
+                if (showLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.fillMaxSize().padding(0.dp),
+                        color = iconTint,
+                        strokeWidth = 6.dp
                     )
-                } else {
-                    CircularProgressIndicator(modifier = Modifier.fillMaxSize().padding(6.dp))
                 }
             }
         }
@@ -104,7 +113,10 @@ fun PlayButton(
 @Composable
 fun PlayButtonPreview() {
     PlayButton(
-        showLoadingWhileBuffering = false,
-        isBuffering = true, isPlaying = true) {
+        showLoadingWhileBuffering = true,
+        isPlayLoading = false,
+        isPlaying = false,
+        isBuffering = true
+    ) {
     }
 }

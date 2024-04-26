@@ -49,6 +49,7 @@ fun AlbumInfoButtonsRow(
     isAlbumDownloaded: Boolean,
     isPlaylistEditLoading: Boolean,
     isDownloading: Boolean,
+    isPlayLoading: Boolean,
     isBuffering: Boolean,
     isGlobalShuffleOn: Boolean,
     modifier: Modifier = Modifier,
@@ -77,8 +78,9 @@ fun AlbumInfoButtonsRow(
         )
 
         PlayButton(
-            isBuffering = isBuffering,
+            isPlayLoading = isPlayLoading,
             isPlaying = isPlayingAlbum,
+            isBuffering = isBuffering,
             enabled = true
         ) {
             eventListener(AlbumInfoViewEvents.PLAY_ALBUM)
@@ -107,6 +109,7 @@ fun AlbumInfoButtonsRowPreview() {
         false,
         isDownloading = false,
         isGlobalShuffleOn = true,
-        isBuffering = true,
+        isPlayLoading = true,
+        isBuffering = false,
         isPlaylistEditLoading = true) { }
 }

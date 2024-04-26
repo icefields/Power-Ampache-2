@@ -49,9 +49,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 50
-        versionName = "0.50-rc1"
-        val versionQuote = "This version is powered by orange cats"
+        versionCode = 51
+        versionName = "0.51-rc1"
+        val versionQuote = "This version is powered by a glass half full"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -211,7 +211,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:0.17.0")
     implementation("androidx.paging:paging-compose:3.3.0-beta01")
-    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.activity:activity-compose:1.9.0")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     // DO NOT INCLUDE implementation("androidx.compose.material:material:$composeVersion")
