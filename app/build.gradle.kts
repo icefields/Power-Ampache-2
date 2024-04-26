@@ -211,7 +211,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:0.17.0")
     implementation("androidx.paging:paging-compose:3.3.0-beta01")
-    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.activity:activity-compose:1.9.0")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     // DO NOT INCLUDE implementation("androidx.compose.material:material:$composeVersion")
