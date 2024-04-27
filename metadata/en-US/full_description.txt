@@ -1,6 +1,8 @@
-Feature rich music client for Ampache, Subsonic, Nextcloud backends, provides all the features found in other mainstream music player (such as Spotify, Youtube Music, Apple Music and so on) and more, like "actually" downloading and exporting music files, lyrics, multiaccount. Plus no ads, no tracking, no bloatware.
+Power Ampache 2 is a feature-rich music client designed for Ampache, Subsonic, and Nextcloud backends. It offers all the features found in other mainstream music players, such as Spotify, YouTube Music, and Apple Music, and more. With Power Ampache 2, enjoy "actually" downloading and exporting music files, access to lyrics, multi-account support, and an ad-free, tracking-free experience.
 
-- MaterialYou Themes, the colour of the app will automatically match the colour scheme of your device, alternatively choose or create your own theme.
+Please let me know if you encounter any issue, I'll be happy to fix any reported bug.
+
+- Automatically matches the color scheme of your device or choose/create your own theme.
 - Unique generated playlists (smartlists)
 - "Spin it!" button to generate a playlist for you.
 - Dark & light mode with adaptive interface colors
@@ -31,7 +33,7 @@ Enjoy a clean, modern design with a user-friendly interface. The app features a 
 🌐 OPEN-SOURCE TRANSPARENCY:
 Power Ampache app is completely free of ads and does not request unnecessary permissions. Moreover, it is fully open-source, providing you with peace of mind, as you have access to the source code for security and privacy audits.
 
-
+Consider donating to support the project or requesting new features.
 Work in progress / Coming soon:
 - Widgets
 - Playlist edit drag and drop
@@ -39,5 +41,4 @@ Work in progress / Coming soon:
 - Multi-account features 
 - Android TV 
 - UI Optimized for tablets
-
 
