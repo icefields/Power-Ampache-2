@@ -49,9 +49,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 51
-        versionName = "0.51-rc1"
-        val versionQuote = "This version is powered by a glass half full"
+        versionCode = 52
+        versionName = "1.00-$versionCode"
+        val versionQuote = "This version is powered by the beginning of the music revolution"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -226,7 +226,6 @@ dependencies {
     // COROUTINES
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
 
     // --- ExoPlayer --- //
     implementation("androidx.media3:media3-exoplayer:$media3Version")

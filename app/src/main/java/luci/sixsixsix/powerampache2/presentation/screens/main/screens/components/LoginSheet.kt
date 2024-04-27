@@ -41,7 +41,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -52,10 +51,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -67,9 +64,7 @@ import androidx.compose.ui.window.DialogProperties
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
-
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.AuthTokenCheckBox
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +76,7 @@ fun LoginBottomDrawer(
     sheetState: SheetState,
     isLoginSheetOpen: MutableState<Boolean>,
     authTokenLoginEnabled: MutableState<Boolean>,
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit
+    onEvent: (AuthEvent) -> Unit
 ) {
     ModalBottomSheet(
         sheetState = sheetState,
@@ -108,7 +103,7 @@ fun LoginDialog(
     authToken: String,
     isLoginSheetOpen: MutableState<Boolean>,
     authTokenLoginEnabled: MutableState<Boolean>,
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit
+    onEvent: (AuthEvent) -> Unit
 ) {
     Dialog(
         properties = DialogProperties(

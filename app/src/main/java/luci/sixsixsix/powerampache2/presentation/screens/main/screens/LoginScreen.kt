@@ -53,7 +53,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,7 +71,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.data.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
-
+import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.LoginBottomDrawer
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.LoginButton
@@ -110,15 +109,13 @@ fun LoginScreenContent(
     url: String,
     authToken: String,
     error: String,
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    isLoginSheetOpen:Boolean = false,
-    isSignUpSheetOpen:Boolean = false
+    onEvent: (AuthEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState()
-    var isLoginSheetOpen = rememberSaveable { mutableStateOf(isLoginSheetOpen) }
-    var isSignUpSheetOpen = rememberSaveable { mutableStateOf(isSignUpSheetOpen) }
-    var isDebugButtonsSheetOpen by rememberSaveable { mutableStateOf(false) }
+    val isLoginSheetOpen = remember { mutableStateOf(false) }
+    val isSignUpSheetOpen = remember { mutableStateOf(false) }
+    var isDebugButtonsSheetOpen by remember { mutableStateOf(false) }
     val authTokenLoginEnabled = remember { mutableStateOf(false) }
 
     Column(
@@ -130,7 +127,6 @@ fun LoginScreenContent(
     ) {
 
         Image(
-            //tint = MaterialTheme.colorScheme.inversePrimary,
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .padding(horizontal = 20.dp)
@@ -318,7 +314,7 @@ fun SignUpButton(
 @Composable
 fun DebugLoginButton(
     server: Servers,
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit,
+    onEvent: (AuthEvent) -> Unit,
     @StringRes buttonText: Int
 ) {
     DefaultFullWidthButton(
@@ -329,11 +325,11 @@ fun DebugLoginButton(
             )
             .fillMaxWidth(),
         onClick = {
-            onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangeServerUrl(server.url))
-            onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangePassword(server.password))
-            onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangeUsername(server.user))
-            onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangeAuthToken(server.apiKey))
-            onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.Login)
+            onEvent(AuthEvent.OnChangeServerUrl(server.url))
+            onEvent(AuthEvent.OnChangePassword(server.password))
+            onEvent(AuthEvent.OnChangeUsername(server.user))
+            onEvent(AuthEvent.OnChangeAuthToken(server.apiKey))
+            onEvent(AuthEvent.Login)
         },
 
         colours = ButtonDefaults.buttonColors(
@@ -410,8 +406,8 @@ fun LoginScreenPreview() {
         authToken = "state.authToken",
         error = "state.error",
         onEvent = {},
-        isLoginSheetOpen = true,
-        isSignUpSheetOpen = false,
+        //isLoginSheetOpen = true,
+        //isSignUpSheetOpen = false,
         modifier = Modifier.fillMaxSize()
     )
 }

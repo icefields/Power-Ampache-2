@@ -129,7 +129,7 @@ fun MiniPlayerContent(
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
     ) {
         Row(
-            modifier = modifier//.background(MaterialTheme.colorScheme.surface)
+            modifier = modifier
                 .padding(vertical = 5.dp, horizontal = 5.dp)
         ) {
             Card(
@@ -205,7 +205,7 @@ fun MiniPlayerContent(
                 Box(modifier = Modifier
                     .aspectRatio(1f / 1f)
                     .widthIn(min = 60.dp, max = 100.dp)
-                    .padding(4.dp)
+                    .padding(5.dp)
                 ) {
                     PlayButton(
                         isPlayLoading = isPlayLoading,
