@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +65,7 @@ fun AlbumInfoButtonsRow(
             imageVector = Icons.Outlined.AddBox,
             imageContentDescription = "Add to playlist",
             background = Color.Transparent,
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
             isLoading = isPlaylistEditLoading,
             showBoth = true
         ) {
@@ -96,7 +98,8 @@ fun AlbumInfoButtonsRow(
             }) {
             Icon(
                 imageVector = Icons.Outlined.Share,
-                contentDescription = "Share"
+                contentDescription = "Share",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
