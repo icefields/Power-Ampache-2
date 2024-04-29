@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
@@ -55,6 +56,7 @@ import javax.inject.Singleton
  * return/emit data.
  * When breaking a rule please add a comment with a TODO: BREAKING_RULE
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class AlbumsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
@@ -157,7 +159,13 @@ class AlbumsRepositoryImpl @Inject constructor(
         dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         val dbUpdatedAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
-        emit(Resource.Success(data = dbUpdatedAlbums, networkData = albums))
+        // TODO: anti-pattern. Violating single source of data
+        //  (inconsistencies between network and db responses)
+        // TODO: document, unit-test
+        emit(Resource.Success(
+            data = if (albums.size > dbUpdatedAlbums.size) albums else dbUpdatedAlbums,
+            networkData = albums
+        ))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getAlbumsFromArtist()", e, this) }
 
