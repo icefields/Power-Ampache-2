@@ -30,21 +30,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlaylistAdd
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissState
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismiss
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,75 +58,51 @@ fun <T> SwipeToDismissItem(
     onRightToLeftSwipe: (T) -> Unit = { }
 ) {
     val currentItem by rememberUpdatedState(item)
-    if (enableSwipeToRemove) {
-        var show by remember { mutableStateOf(true) }
-        var rightShow by remember { mutableStateOf(true) }
-        val dismissState = rememberDismissState(
-            initialValue = DismissValue.Default,
-            confirmValueChange = {
-                if (it == DismissValue.DismissedToEnd) {
-                    show = false
-                    false
-                } else if (it == DismissValue.DismissedToStart) {
-                    rightShow = false
-                    false
-                } else {
-                    show = true
-                    rightShow = true
+    val dismissState = rememberSwipeToDismissBoxState(
+        initialValue = SwipeToDismissBoxValue.Settled,
+        confirmValueChange = {
+            when (it) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    onRemove(currentItem)
                     false
                 }
-            },
-            positionalThreshold = { 250.dp.toPx() }
-        )
-
-//        AnimatedVisibility(
-//            visible = show,
-//            exit = fadeOut(spring())
-//        ) {
-        SwipeToDismiss(
-            state = dismissState,
-            modifier = Modifier,
-            background = {
-                SwipeToDismissBackground(
-                    dismissState = dismissState,
-                    iconLeft = iconLeft,
-                    iconRight = iconRight
-                )
-            },
-            dismissContent = {
-                foregroundView()
-            }
-        )
-        //}
-        LaunchedEffect(show) {
-            if (!show) {
-                onRemove(currentItem)
-                show = true
-            }
-
-        }
-        LaunchedEffect(rightShow) {
-            if (!rightShow) {
-                onRightToLeftSwipe(currentItem)
-                rightShow = true
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onRightToLeftSwipe(currentItem)
+                    false
+                }
+                SwipeToDismissBoxValue.Settled -> {
+                    false
+                }
             }
         }
-    } else {
-        foregroundView()
-    }
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        modifier = Modifier,
+        enableDismissFromEndToStart = enableSwipeToRemove,
+        enableDismissFromStartToEnd = enableSwipeToRemove,
+        backgroundContent = {
+            SwipeToDismissBackground(
+                dismissState = dismissState,
+                iconLeft = iconLeft,
+                iconRight = iconRight
+            )
+        }
+    ) { foregroundView() }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeToDismissBackground(
-    dismissState: DismissState,
+    dismissState: SwipeToDismissBoxState,
     iconLeft: ImageVector = Icons.Default.Delete,
     iconRight: ImageVector = Icons.Default.PlaylistAdd
 ) {
     val color = when (dismissState.dismissDirection) {
-        DismissDirection.StartToEnd -> MaterialTheme.colorScheme.errorContainer
-        DismissDirection.EndToStart -> MaterialTheme.colorScheme.primaryContainer
-        null -> Color.Transparent
+        SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.errorContainer
+        SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.primaryContainer
+        else -> Color.Transparent
     }
     val direction = dismissState.dismissDirection
     Row(
@@ -142,11 +113,11 @@ fun SwipeToDismissBackground(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        if (direction == DismissDirection.StartToEnd) {
+        if (direction == SwipeToDismissBoxValue.StartToEnd) {
             Icon(iconLeft, contentDescription = "delete")
         }
         Spacer(modifier = Modifier)
-        if (direction == DismissDirection.EndToStart) {
+        if (direction == SwipeToDismissBoxValue.EndToStart) {
             Icon(iconRight, contentDescription = "Add to playlist")
         }
     }

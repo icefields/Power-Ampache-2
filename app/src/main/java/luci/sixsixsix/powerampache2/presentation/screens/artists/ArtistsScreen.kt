@@ -47,12 +47,10 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
-import luci.sixsixsix.powerampache2.presentation.screens.artists.components.ArtistItem
-import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
+import luci.sixsixsix.powerampache2.presentation.screens.artists.components.ArtistItem
 
 const val GRID_ITEMS_ROW = 3
 const val GRID_ITEMS_ROW_LAND = 6

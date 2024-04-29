@@ -37,7 +37,7 @@ fun ButtonDownload(
     isDownloading: Boolean,
     isDownloaded: Boolean = false,
     background: Color = Color.Transparent,
-    iconTint: Color = MaterialTheme.colorScheme.onBackground,
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     onStartDownloadClick: () -> Unit,
     onStopDownloadClick: () -> Unit
 ) = ButtonWithLoadingIndicator(

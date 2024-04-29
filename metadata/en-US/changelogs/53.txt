@@ -1,0 +1,4 @@
+- fixed UX issue with play button
+- updated jetpack library
+- improved loading songs from albums and playlists
+- prepared build for FDroid

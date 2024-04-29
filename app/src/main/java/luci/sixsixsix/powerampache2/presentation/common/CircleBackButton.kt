@@ -43,7 +43,7 @@ import luci.sixsixsix.powerampache2.R
 @Composable
 fun CircleBackButton(
     modifier: Modifier = Modifier,
-    background: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+    background: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
     iconTint: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) {

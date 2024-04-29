@@ -71,6 +71,7 @@ fun AlbumDetailTopBar(
     isLoading: Boolean,
     isEditingPlaylist: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
+    showInfoIcon: Boolean = false,
     onRate: (Int) -> Unit,
     onRightIconClick: () -> Unit
 ) {
@@ -100,13 +101,14 @@ fun AlbumDetailTopBar(
                     .padding(15.dp),
                 text = "${album.name} - ${album.artist.name}",
                 maxLines = 1,
-                fontWeight = FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium,
                 style = TextStyle(
                     fontSize = fontDimensionResource(id = R.dimen.albumDetail_title_fontSize),
                     shadow = Shadow(
-                        color = MaterialTheme.colorScheme.background,
+                        color = MaterialTheme.colorScheme.surface,
                         offset = Offset(0.0f, 0.0f),
-                        blurRadius = 32f
+                        blurRadius = 18f
                     )
                 ),
                 fontSize = fontDimensionResource(id = R.dimen.albumDetail_title_fontSize)
@@ -129,11 +131,14 @@ fun AlbumDetailTopBar(
                 currentRating = album.rating,
                 onRate = onRate
             )
-            IconButton(onClick = onRightIconClick) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = "show hide album info"
-                )
+
+            if (showInfoIcon) {
+                IconButton(onClick = onRightIconClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = "show hide album info"
+                    )
+                }
             }
         }
     )

@@ -38,9 +38,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ArtistDetailViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
-    // in the view model directly without passing them from the UI or the previos view model, we
-    // need this because we're passing the symbol around
+    private val savedStateHandle: SavedStateHandle,
     private val repository: AlbumsRepository,
     private val artistsRepository: ArtistsRepository,
 ) : ViewModel() {
@@ -73,7 +71,7 @@ class ArtistDetailViewModel @Inject constructor(
     private fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             repository
-                .getAlbumsFromArtist(artistId)
+                .getAlbumsFromArtist(artistId, fetchRemote = fetchRemote)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
@@ -93,17 +91,15 @@ class ArtistDetailViewModel @Inject constructor(
     private fun getArtist(artistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             artistsRepository
-                .getArtist(artistId)
+                .getArtist(artistId, fetchRemote = fetchRemote)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            // TODO why am I using network data here? please comment
-                            result.networkData?.let { artist ->
+                            result.data?.let { artist ->
                                 state = state.copy(artist = artist)
                                 L("viewmodel.getArtist size ${result.data} network: ${result.networkData}")
                             }
                         }
-
                         is Resource.Error -> state = state.copy(isLoading = false)
                         is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                     }
