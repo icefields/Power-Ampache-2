@@ -43,7 +43,7 @@ fun ShuffleToggleButton(
     showStroke: Boolean = false,
     onClick: () -> Unit
 ) {
-    val contentColor = /*if (isGlobalShuffleOn) MaterialTheme.colorScheme.onSecondary else */MaterialTheme.colorScheme.onSurfaceVariant
+    val contentColor = if (isGlobalShuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
     val containerColor = /*if (isGlobalShuffleOn) MaterialTheme.colorScheme.onSurfaceVariant else*/ Color.Transparent
     val iconImage = if (isGlobalShuffleOn) R.drawable.ic_shuffle_all_active else R.drawable.ic_shuffle_all
     val strokeColor = if (!showStroke) {
