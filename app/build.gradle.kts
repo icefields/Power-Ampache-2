@@ -50,7 +50,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 53
-        versionName = "1.00-$versionCode"
+        versionName = "1.00-53"
         val versionQuote = "This version is powered by the beginning of the music revolution"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
