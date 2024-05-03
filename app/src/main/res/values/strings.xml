@@ -1,10 +1,9 @@
 <resources>
-    <string name="app_name">Power Ampache 2</string>
+    <string name="app_name" translatable="false">Power Ampache 2</string>
     <string name="notification_channel_name">Music Channel</string>
     <string name="notification_channel_description">Shows the currently playing music</string>
     <string name="coming_soon">Coming Soon</string>
 
-    <string name="albumDetailScreen_infoSection_year">Year</string>
     <string name="albumDetailScreen_infoSection_songs">Songs</string>
     <string name="albumDetailScreen_infoSection_time">Total Time</string>
     <string name="playlistDetailScreen_infoSection_avgRating">Average Rating</string>
@@ -29,7 +28,7 @@
     <string name="loginScreen_demo_server">Demo</string>
     <string name="loginScreen_local_server">Local Development Server</string>
     <string name="loginScreen_remote_server">Remote Debug Server</string>
-    <string name="loginScreen_dogmazic_server">Dogmazic Music Server</string>
+    <string name="loginScreen_dogmazic_server" translatable="false">Dogmazic Music Server</string>
     <string name="home_section_title_recent">Recently Played</string>
     <string name="home_section_title_flagged">Favourites</string>
     <string name="home_section_title_frequent">Frequently Played</string>
@@ -52,8 +51,8 @@
     <string name="error_duplicate">Duplicate Entry</string>
     <string name="error_user_fetch">There was a problem retrieving your User from the server</string>
 
-    <string name="crash_mail_subject">Crash Report</string>
-    <string name="crash_mail_body">Crash Report Data. Thanks</string>
+    <string name="crash_mail_subject" translatable="false">Crash Report</string>
+    <string name="crash_mail_body" translatable="false">Crash Report Data. Thanks</string>
 
     <string name="error_offline">Cannot connect to the internet</string>
     <string name="offlineMode_switch_title">Offline Mode</string>
@@ -62,13 +61,13 @@
     <string name="quality_veryHigh_title">Very High Quality</string>
     <string name="quality_veryHigh_subtitle">320kbps or flac (no transcoding)</string>
     <string name="quality_high_title">High Quality</string>
-    <string name="quality_high_subtitle">256kbps</string>
+    <string name="quality_high_subtitle" translatable="false">256kbps</string>
     <string name="quality_medium_title">Medium Quality</string>
-    <string name="quality_medium_subtitle">192kbps</string>
+    <string name="quality_medium_subtitle" translatable="false">192kbps</string>
     <string name="quality_mediumLow_title">Medium-Low Quality</string>
-    <string name="quality_mediumLow_subtitle">128kbps</string>
+    <string name="quality_mediumLow_subtitle" translatable="false">128kbps</string>
     <string name="quality_low_title">Low Quality</string>
-    <string name="quality_low_subtitle">96kbps</string>
+    <string name="quality_low_subtitle" translatable="false">96kbps</string>
     <string name="theme_system_title">System Theme</string>
     <string name="theme_dark_title">Dark</string>
     <string name="theme_light_title">Light</string>
@@ -86,9 +85,9 @@
     <string name="settings_smartDownloads_subtitle">Automatically download most played songs while the phone is idle</string>
     <string name="settings_checkUpdatesNow_title">Check for updates now</string>
     <string name="settings_autoCheckUpdates_title">Automatically check for updates</string>
-    <string name="settings_debugLogs_title">Debug Logs</string>
-    <string name="settings_enableDebugLogging_title">Enable anonymous debug logging</string>
-    <string name="settings_enableDebugLogging_subtitle">Will send crash and error stack-traces to the developer to fix issues with the app</string>
+    <string name="settings_debugLogs_title" translatable="false">Debug Logs</string>
+    <string name="settings_enableDebugLogging_title" translatable="false">Enable anonymous debug logging</string>
+    <string name="settings_enableDebugLogging_subtitle" translatable="false">Will send crash and error stack-traces to the developer to fix issues with the app</string>
     <string name="settings_deleteDownloads_title">Delete all downloads</string>
     <string name="settings_deleteDownloads_subtitle">This will delete all the songs you downloaded</string>
     <string name="settings_deleteDownloads_success">All your offline music has been deleted</string>
@@ -138,11 +137,12 @@
     <string name="dropdownMenu_item_share">Share</string>
 
     <!---...-->
-    <string name="about_flavour">Flavor</string>
+    <string name="about_flavour" translatable="false">Flavor</string>
     <string name="version_quote_title">Quote of the version</string>
     <string name="about_appVersion_title">App Version</string>
     <string name="about_license_title">License</string>
     <string name="about_contact_title">Contact Me on Telegram and Mastodon</string>
     <string name="about_sourceCode_title">Source Code</string>
+    <string name="albumDetailScreen_infoSection_year">Year</string>
 
 </resources>

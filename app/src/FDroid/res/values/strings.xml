@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="settings_enableDebugLogging_title">Register debug logs</string>
-    <string name="settings_enableDebugLogging_subtitle">Will save debug logs in the debug view accessible from Settings -> Debug Logs.\nUseful for reporting errors</string>
+    <string name="settings_enableDebugLogging_title" translatable="false">Register debug logs</string>
+    <string name="settings_enableDebugLogging_subtitle" translatable="false">Will save debug logs in the debug view accessible from Settings -> Debug Logs.\nUseful for reporting errors</string>
 </resources>
