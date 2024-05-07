@@ -1,2 +1,2 @@
-Power Ampache 2 connects to Ampache, Nextcloud and Subsonic (Ampache API 4 and above).
+Power Ampache 2 connects to Ampache, Nextcloud and Subsonic (Ampache API-4 and above).
 It's a complete Android Music Streaming App suite, presented in Material You style.
