@@ -48,7 +48,6 @@ import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.comp
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SongDetailScreen(
-    // navigator: DestinationsNavigator,
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,

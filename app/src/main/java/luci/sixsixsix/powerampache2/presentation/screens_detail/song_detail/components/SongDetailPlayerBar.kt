@@ -138,7 +138,6 @@ fun PlayerControls(
             Icon(
                 tint = tint,
                 modifier = Modifier
-                    //.fillMaxSize()
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onLongPress = { onEvent(MainEvent.Backwards) },
@@ -167,7 +166,6 @@ fun PlayerControls(
             }) {
             Icon(
                 tint = tint,
-                //modifier = Modifier.fillMaxSize(),
                 imageVector = Icons.Outlined.SkipNext,
                 contentDescription = "SkipNext"
             )

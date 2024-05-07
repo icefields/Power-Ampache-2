@@ -67,7 +67,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -238,7 +237,6 @@ fun MiniPlayerContent(
                             .widthIn(min = 20.dp, max = 40.dp)
                             .combinedClickable(
                                 onClick = {
-                                    L.e("CLICK")
                                     weakContext.get()?.let { context ->
                                         Toast.makeText(context, R.string.miniPlayer_reset_alert_message, Toast.LENGTH_LONG).show()
                                     }

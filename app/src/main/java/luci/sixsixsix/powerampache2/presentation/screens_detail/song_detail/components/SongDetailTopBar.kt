@@ -77,7 +77,6 @@ fun SongDetailTopBar(
             modifier = Modifier
                 .fillMaxHeight()
                 .padding(dimensionResource(id = R.dimen.close_handle_icon_padding)),
-            //contentScale = ContentScale.FillHeight,
             imageVector = Icons.Default.KeyboardArrowDown,
             contentDescription = "close song detail screen",
             tint = MaterialTheme.colorScheme.onSurfaceVariant
