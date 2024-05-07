@@ -189,7 +189,6 @@ fun TabbedSongDetailView(
     mainViewModel: MainViewModel
 ) {
     Column {
-        //SongHandleTabRow(pagerState)
         HorizontalPager(
             state = pagerState,
             modifier = modifier
@@ -269,7 +268,6 @@ fun SongHandleTabRow(
             text = {
                 Text(
                     text = stringResource(id = R.string.player_queue_upNext),
-                    //color = MaterialTheme.colorScheme.onSecondary,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
                     maxLines = 1,

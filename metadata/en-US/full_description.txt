@@ -2,13 +2,11 @@ Power Ampache 2 is a feature-rich music client designed for Ampache, Subsonic, a
 
 Please let me know if you encounter any issue, I'll be happy to fix any reported bug.
 
-- Automatically matches the color scheme of your device or choose/create your own theme.
 - Unique generated playlists (smartlists)
 - "Spin it!" button to generate a playlist for you.
-- Dark & light mode with adaptive interface colors
-- Fade out/in on pause/resume/next/previous
+- Dark & light mode with adaptive interface colors, or choose/create your own theme.
 - Media keys support
-- Every Bluetooth functionality is avaibable in the app.
+- Every Bluetooth functionality is available in the app.
 - Song notifications with play controls. Also on lock screen.
 - Album, Artist, Songs collections
 - Advanced search
@@ -41,4 +39,3 @@ Work in progress / Coming soon:
 - Multi-account features 
 - Android TV 
 - UI Optimized for tablets
-

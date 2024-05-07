@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Power Ampache 2</string>
-    <string name="notification_channel_name">Music Channel</string>
     <string name="notification_channel_description">Shows the currently playing music</string>
     <string name="coming_soon">Coming Soon</string>
 
@@ -27,8 +25,6 @@
     <string name="loginScreen_login">Login</string>
     <string name="loginScreen_signup">Sign Up</string>
     <string name="loginScreen_demo_server">Demo</string>
-    <string name="loginScreen_local_server">Local Development Server</string>
-    <string name="loginScreen_remote_server">Remote Debug Server</string>
     <string name="loginScreen_dogmazic_server">Dogmazic Music Server</string>
     <string name="home_section_title_recent">Recently Played</string>
     <string name="home_section_title_flagged">Favourites</string>
