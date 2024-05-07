@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sharing_provider_authority">@string/sharing_provider_authority_release</string>
+    <string name="sharing_provider_authority" translatable="false">@string/sharing_provider_authority_release</string>
 </resources>
