@@ -127,7 +127,7 @@ android {
             resValue("string", "build_type", "Release")
 
             isMinifyEnabled = false
-            // vcsInfo.include = false
+            vcsInfo.include = false
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
