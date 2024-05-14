@@ -45,6 +45,7 @@ import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
@@ -71,6 +72,7 @@ class AlbumsRepositoryImpl @Inject constructor(
     ): Flow<Resource<List<Album>>> = flow {
         emit(Resource.Loading(true))
         L("getAlbums - repo getSongs offset $offset")
+        val cred = getCurrentCredentials()
 
         if (isOfflineModeEnabled()) {
             // TRY using cached data instead of downloaded song info if available
@@ -81,14 +83,12 @@ class AlbumsRepositoryImpl @Inject constructor(
                 }
             }
 
-            getUsername()?.let { username ->
-                dao.generateOfflineAlbums(username).forEach { dae ->
-                    albumsList.add(
-                        if (dbAlbumsHash.containsKey(dae.id)) {
-                            (dbAlbumsHash[dae.id] ?: dae)
-                        } else { dae }.toAlbum()
-                    )
-                }
+            dao.generateOfflineAlbums(cred.username).forEach { dae ->
+                albumsList.add(
+                    if (dbAlbumsHash.containsKey(dae.id)) {
+                        (dbAlbumsHash[dae.id] ?: dae)
+                    } else { dae }.toAlbum()
+                )
             }
 
             emit(Resource.Success(data = albumsList.toList()))
@@ -96,11 +96,12 @@ class AlbumsRepositoryImpl @Inject constructor(
             return@flow
         }
 
+        val localAlbums = mutableListOf<Album>()
         if (offset == 0) {
-            val localAlbums = dao.searchAlbum(query)
+            localAlbums.addAll(dao.searchAlbum(query).map { it.toAlbum() })
             val isDbEmpty = localAlbums.isEmpty() && query.isEmpty()
             if (!isDbEmpty) {
-                emit(Resource.Success(data = localAlbums.map { it.toAlbum() }))
+                emit(Resource.Success(data = localAlbums.toList()))
             }
             val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
             if(shouldLoadCacheOnly) {
@@ -109,13 +110,15 @@ class AlbumsRepositoryImpl @Inject constructor(
             }
         }
 
-        val cred = getCurrentCredentials()
         val response = api.getAlbums(authToken(), filter = query, offset = offset, limit = limit)
         response.error?.let { throw(MusicException(it.toError())) }
         val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
         dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
-        emit(Resource.Success(data = dao.searchAlbum(query).map { it.toAlbum() }, networkData = albums))
+        // append to the initial list to avoid ui flickering
+        val updatedDbAlbums = dao.searchAlbum(query).map { it.toAlbum() }.toMutableList()
+        AmpacheModel.appendToList(updatedDbAlbums, localAlbums)
+        emit(Resource.Success(data = localAlbums, networkData = albums))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getAlbums()", e, this) }
 
@@ -148,24 +151,28 @@ class AlbumsRepositoryImpl @Inject constructor(
         val response = api.getAlbumsFromArtist(authToken(), artistId = artistId)
         response.error?.let { throw(MusicException(it.toError())) }
 
-        // some albums come from web with no artists id, or with artist id zero, add the id manually
-        // so the database can find it (db is single source of truth)
-        val albums = response.albums!!.map { albumDto -> albumDto.toAlbum() } // will throw exception if songs null
+        // some albums come from web with no artists id, add the id manually so the database can find it later
+        val albums = response.albums!!.map { albumDto -> albumDto.toAlbum() }.toMutableList() // will throw exception if albums null
+        dao.deleteAlbumsFromArtist(artistId)
 
-        L("albums from web ${albums.size}")
+        albums.forEachIndexed { index, alb ->
+            try {
+                // check if the album contains the current artist Id. If not, add the artist to the list of featured artists
+                if (alb.artist.id != artistId && !alb.artists.map { art -> art.id }.contains(artistId)) {
+                    val artName = dao.getArtist(artistId)?.name ?: ""
+                    albums[index] = alb.copy(artists = alb.artists.toMutableList().apply {
+                        add(MusicAttribute(id = artistId, name = artName))
+                    })
+                }
+            } catch (e: Exception) {}
 
-        // REFRESH ALBUMS BY ARTIST, delete first then reinsert
-        albums.forEach { dao.deleteAlbumsFromArtist(it.artist.id) }
+            // delete the album, it will be reinserted right after
+            dao.deleteAlbum(alb.id)
+        }
         dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         val dbUpdatedAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
-        // TODO: anti-pattern. Violating single source of data
-        //  (inconsistencies between network and db responses)
-        // TODO: document, unit-test
-        emit(Resource.Success(
-            data = if (albums.size > dbUpdatedAlbums.size) albums else dbUpdatedAlbums,
-            networkData = albums
-        ))
+        emit(Resource.Success(data = dbUpdatedAlbums, networkData = albums))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getAlbumsFromArtist()", e, this) }
 

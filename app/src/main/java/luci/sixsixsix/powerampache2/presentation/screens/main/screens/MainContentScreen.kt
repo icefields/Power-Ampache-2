@@ -348,24 +348,15 @@ fun MainSearchBar(
 
     SearchBar(
         leadingIcon = {
-            Row(
-                modifier = Modifier.wrapContentSize()
-            ) {
-                //if (searchViewModel.state.searchQuery.isNotBlank()
-                 //   || searchViewModel.state.selectedGenre != null) {
-                    CircleBackButton(
-                        background = Color.Transparent
-                    ) {
-                        if (searchViewModel.state.isNoSearch) {
-                            isActive.value = false
-                        }
-                        searchViewModel.onEvent(SearchViewEvent.Clear)
-                        mainViewModel.onEvent(MainEvent.OnSearchQueryChange(""))
-                        controller?.hide()
+            Row(modifier = Modifier.wrapContentSize()) {
+                CircleBackButton(background = Color.Transparent) {
+                    if (searchViewModel.state.isNoSearch) {
+                        isActive.value = false
                     }
-//                } else {
-//                    Icon(imageVector = Icons.Default.Search, contentDescription = "search")
-//                }
+                    searchViewModel.onEvent(SearchViewEvent.Clear)
+                    mainViewModel.onEvent(MainEvent.OnSearchQueryChange(""))
+                    controller?.hide()
+                }
             }
         },
         colors = SearchBarDefaults.colors(

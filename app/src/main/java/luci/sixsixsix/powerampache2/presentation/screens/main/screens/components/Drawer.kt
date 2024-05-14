@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.presentation.screens.main.screens.component
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,7 +46,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -112,7 +113,7 @@ fun MainDrawer(
         DrawerHeader(user) {
             onItemClick(MainContentMenuItem.Logout)
         }
-        Divider()
+        HorizontalDivider()
         DrawerBody(
             currentItem = currentItem,
             modifier = Modifier.weight(1f),
@@ -139,6 +140,7 @@ fun MainDrawer(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DrawerHeader(
     currentUser: User,
@@ -200,8 +202,8 @@ fun DrawerHeader(
                         fontSize = 10.sp,
                         maxLines = 1,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 10.sp,
-                        fontWeight = FontWeight.Bold
+                        lineHeight = 12.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
