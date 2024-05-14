@@ -22,8 +22,9 @@
 package luci.sixsixsix.powerampache2.data.remote
 
 import luci.sixsixsix.powerampache2.BuildConfig
-import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_DEBUG
+import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_ARTISTS
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
+import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
 import luci.sixsixsix.powerampache2.common.isIpAddress
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumDto
@@ -100,7 +101,7 @@ interface MainNetwork {
     @GET("json.server.php?action=search_songs")
     suspend fun getSongs(
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_SONGS,
         @Query("filter") filter: String = "",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
@@ -116,15 +117,20 @@ interface MainNetwork {
         @Query("include") include: String = "", // albums, songs (includes track list)
     ): AlbumsResponse // TODO remove default values
 
+    /**
+     * fetch all the artists in the library
+     *  album_artist=1 to only show album artists and not song artists
+     */
     @GET("json.server.php?action=artists")
     suspend fun getArtists(
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_DEBUG,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_ARTISTS,
         @Query("filter") filter: String = "",
         @Query("exact") exact: Int = 0,
+        @Query("album_artist") albumArtist: Int = 1,
         @Query("offset") offset: Int = 0,
         @Query("include") include: String = "", // albums, songs (includes track list)
-    ): ArtistsResponse // TODO remove default values
+    ): ArtistsResponse
 
     @GET("json.server.php?action=playlists")
     suspend fun getPlaylists(

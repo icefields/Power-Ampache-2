@@ -49,9 +49,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 54
-        versionName = "1.00-54"
-        val versionQuote = "This version is powered by the beginning of the music revolution (FDroid first release)"
+        versionCode = 55
+        versionName = "1.00-55"
+        val versionQuote = "This version is powered by the beginning of the music revolution (FDroid second release)"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -127,7 +127,7 @@ android {
             resValue("string", "build_type", "Release")
 
             isMinifyEnabled = false
-            vcsInfo.include = false
+            // vcsInfo.include = false
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
