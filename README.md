@@ -156,28 +156,16 @@ You can select a demo instance from the login screen or login into your own serv
 The app is currently translated in the following languages:
 - English
 - Czech
-<br>
-Work in progress:
+  <br>
+  Work in progress:
 - French
 - Italian
 - Japanese
-<br>
-I will automate translation contributions in the future, but for now you have 3 options.
+  <br>
+  In the future I will automate translation contributions, right now you have 3 options.<br>
 - If you're an Android developer just create the resource directories and files and open a PR (`strings.xml` is where translatable strings are located).
 - If you're not familiar with Android development and don't know how to create translation resources, but you are able to edit XML files: you can just grab `strings.xml`, edit it and send it back to me. I'll review it and will include it in the app in the next release.
   Example (italian translation):
-
-```
-<resources>
-...
-    <string name="albumDetailScreen_infoSection_year">Anno</string>
-    <string name="albumDetailScreen_infoSection_songs">Canzoni</string>
-    <string name="albumDetailScreen_infoSection_time">Tempo Totale</string>
-    <string name="playlistDetailScreen_infoSection_avgRating">Voto Medio</string>
-    <string name="playlistItem_songCount">%s Canzoni</string>
-    <string name="topBar_search_hint">Search Canzoni, Album, Artisti, Playlist</string>
-...
-```
 - If you're not familiar with Android development and also not sure how to edit xml files, just send me a text document with the translations and I will take care of it.
 
 * * *
