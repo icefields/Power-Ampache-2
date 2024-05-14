@@ -271,6 +271,7 @@ fun SongHandleTabRow(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
                     maxLines = 1,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start
                 )
             }
@@ -297,6 +298,7 @@ fun SongHandleTabRow(
                         text = stringResource(id = R.string.player_queue_lyrics),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         textAlign = TextAlign.Center
                     )

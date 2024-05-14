@@ -184,7 +184,7 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity 
             WHERE (LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName)
             AND $multiUserCondition
-            order by flag DESC, rating DESC, playCount DESC""")
+            order by (LOWER(title) LIKE '%' || LOWER(:query) || '%') DESC, flag DESC, rating DESC, playCount DESC LIMIT 666""")
     suspend fun searchSong(query: String): List<SongEntity>
 
     @Query("""SELECT * FROM songentity WHERE playCount > 0 AND $multiUserCondition order by playCount DESC, flag DESC, rating DESC""")

@@ -396,13 +396,26 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
         val resultSet = HashSet<Song>()
         // add downloaded songs
-        resultSet.addAll(dao.getOfflineSongs().map { it.toSong() })
+        try { resultSet.addAll(dao.getMostPlayedOfflineSongs().map { it.toSong() }) } catch (e: Exception) { }
+        try { resultSet.addAll(dao.getLikedOfflineSongs().map { it.toSong() }) } catch (e: Exception) { }
+        try { resultSet.addAll(dao.getHighestRatedOfflineSongs().map { it.toSong() }) } catch (e: Exception) { }
+        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+            try { resultSet.addAll(dao.getOfflineSongs().map { it.toSong() }) } catch (e: Exception) { }
+        }
         // add cached songs? Too many can cause a crash when saving state
         // resultSet.addAll(dao.searchSong("").map { it.toSong() })
         // if not big enough start fetching from web
         if (!isOfflineModeEnabled()) {
             // try add cached songs first
-            try { resultSet.addAll(dao.searchSong("").map { it.toSong() }) } catch (e: Exception) { }
+            if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                try { resultSet.addAll(dao.getMostPlayedSongs().map { it.toSong() }) } catch (e: Exception) { }
+            }
+            if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                try { resultSet.addAll(dao.getMostPlayedSongsLocal().map { it.toSong() }) } catch (e: Exception) { }
+            }
+            if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                try { resultSet.addAll(dao.searchSong("").map { it.toSong() }) } catch (e: Exception) { }
+            }
             try {
                 if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
                     // if not enough downloaded songs fetch most played songs
