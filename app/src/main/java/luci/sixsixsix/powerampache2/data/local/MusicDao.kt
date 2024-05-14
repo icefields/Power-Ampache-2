@@ -99,7 +99,7 @@ interface MusicDao {
     //@Query("""SELECT credentials.username as credentialsUsername, user.* FROM
     //    (SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') AS credentials,
     //    (SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) AS user""")
-    @Query("""SELECT * FROM userentity WHERE $multiUserCondition """)
+    @Query("""SELECT * FROM userentity WHERE $multiUserCondition""")
     fun getUserLiveData(): Flow<UserEntity?>
 
 // --- ALBUMS ---
@@ -112,7 +112,12 @@ interface MusicDao {
     @Query("DELETE FROM albumentity WHERE LOWER(artistId) == LOWER(:artistId)")
     suspend fun deleteAlbumsFromArtist(artistId: String)
 
-    @Query("""SELECT * FROM albumentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == LOWER(artistName)""")
+    @Query("DELETE FROM albumentity WHERE LOWER(id) == LOWER(:albumId) AND $multiUserCondition")
+    suspend fun deleteAlbum(albumId: String)
+
+    @Query("""SELECT * FROM albumentity WHERE 
+        (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == LOWER(artistName))
+        AND $multiUserCondition""")
     suspend fun searchAlbum(query: String): List<AlbumEntity>
 
     @Query("""SELECT * FROM albumentity WHERE (LOWER(artistId) == LOWER(:artistId) OR LOWER(artists) LIKE '%' || '"' || LOWER(:artistId) || '"' || '%' )
@@ -169,14 +174,17 @@ interface MusicDao {
     fun getMostPlayedOfflineAlbumsFlow(): Flow<List<AlbumEntity>>
 
 
-    // --- SONGS ---
+// --- SONGS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSongs(companyListingEntities: List<SongEntity>)
 
     @Query("DELETE FROM songentity")
     suspend fun clearSongs()
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName order by flag DESC, rating DESC, playCount DESC""")
+    @Query("""SELECT * FROM songentity 
+            WHERE (LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName)
+            AND $multiUserCondition
+            order by (LOWER(title) LIKE '%' || LOWER(:query) || '%') DESC, flag DESC, rating DESC, playCount DESC LIMIT 666""")
     suspend fun searchSong(query: String): List<SongEntity>
 
     @Query("""SELECT * FROM songentity WHERE playCount > 0 AND $multiUserCondition order by playCount DESC, flag DESC, rating DESC""")
@@ -202,7 +210,7 @@ interface MusicDao {
     @Query("DELETE FROM artistentity")
     suspend fun clearArtists()
 
-    @Query("""SELECT * FROM artistentity WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name order by name""")
+    @Query("""SELECT * FROM artistentity WHERE (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name) AND $multiUserCondition order by name""")
     suspend fun searchArtist(query: String): List<ArtistEntity>
 
     @Query("""SELECT * FROM artistentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == LOWER(genre) order by name""")
@@ -214,7 +222,10 @@ interface MusicDao {
     @Query("""SELECT * FROM artistentity WHERE LOWER(id) == LOWER(:artistId) order by time DESC""")
     suspend fun getArtist(artistId: String): ArtistEntity?
 
-    @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, artistentity AS a WHERE a.id == s.artistId GROUP BY s.artistId ORDER BY acount DESC LIMIT 20""")
+    @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, artistentity AS a 
+        WHERE a.id == s.artistId 
+        AND LOWER(a.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+        GROUP BY s.artistId ORDER BY acount DESC LIMIT 20""")
     suspend fun getMostPlayedArtists(): List<ArtistEntity>
 
 // --- PLAYLISTS ---
@@ -466,27 +477,27 @@ interface MusicDao {
     @Query("DELETE FROM historyentity")
     suspend fun clearHistory()
 
-    // TODO MIGRATION CALLS, REMOVE AFTERWARDS
-    // --- TODO: REMOVE AFTER MIGRATION
-    @Query("""SELECT * from songentity where multiUserId == ''""")
-    suspend fun getNotMigratedSongs(): List<SongEntity>
-
-    @Query("""SELECT * from downloadedsongentity where multiUserId == ''""")
-    suspend fun getNotMigratedOfflineSongs(): List<DownloadedSongEntity>
-
-    @Query("""SELECT * from albumentity where multiUserId == ''""")
-    suspend fun getNotMigratedAlbums(): List<AlbumEntity>
-
-    @Query("""SELECT * from artistentity where multiUserId == ''""")
-    suspend fun getNotMigratedArtists(): List<ArtistEntity>
-
-    @Query("""SELECT * from playlistentity where multiUserId == ''""")
-    suspend fun getNotMigratedPlaylists(): List<PlaylistEntity>
-
-    @Query("""SELECT * from playlistsongentity where multiUserId == ''""")
-    suspend fun getNotMigratedPlaylistSong(): List<PlaylistSongEntity>
-    // --- TODO: REMOVE AFTER MIGRATION END
-
+//    // TODO MIGRATION CALLS, REMOVE AFTERWARDS
+//    // --- TODO: REMOVE AFTER MIGRATION
+//    @Query("""SELECT * from songentity where multiUserId == ''""")
+//    suspend fun getNotMigratedSongs(): List<SongEntity>
+//
+//    @Query("""SELECT * from downloadedsongentity where multiUserId == ''""")
+//    suspend fun getNotMigratedOfflineSongs(): List<DownloadedSongEntity>
+//
+//    @Query("""SELECT * from albumentity where multiUserId == ''""")
+//    suspend fun getNotMigratedAlbums(): List<AlbumEntity>
+//
+//    @Query("""SELECT * from artistentity where multiUserId == ''""")
+//    suspend fun getNotMigratedArtists(): List<ArtistEntity>
+//
+//    @Query("""SELECT * from playlistentity where multiUserId == ''""")
+//    suspend fun getNotMigratedPlaylists(): List<PlaylistEntity>
+//
+//    @Query("""SELECT * from playlistsongentity where multiUserId == ''""")
+//    suspend fun getNotMigratedPlaylistSong(): List<PlaylistSongEntity>
+//    // --- TODO: REMOVE AFTER MIGRATION END
+//
 
     suspend fun clearCachedData() {
         clearAlbums()

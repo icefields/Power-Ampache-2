@@ -34,7 +34,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -54,7 +53,6 @@ const val GRID_ITEMS_ROW = 2
 const val GRID_ITEMS_ROW_LAND = 5
 const val GRID_ITEMS_ROW_MIN = 2
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchResultsScreen(
     navigator: DestinationsNavigator,
@@ -117,8 +115,6 @@ fun SearchResultsScreen(
             onSongEvent = mainViewModel::onEvent,
             onSongSelected = { song ->
                 mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, searchViewModel.state.songs))
-//                mainViewModel.onEvent(MainEvent.Play(song))
-//                searchViewModel.onEvent(SearchViewEvent.OnSongSelected(song))
             },
             onAlbumSelected = { albumId, album ->
                 navigator.navigate(

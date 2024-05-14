@@ -208,6 +208,7 @@ private fun LoginTextFields(
 
         LoginTextField(
             value = url,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             label = R.string.loginScreen_server_url
         ) { onEvent(AuthEvent.OnChangeServerUrl(it)) }
 
@@ -216,7 +217,7 @@ private fun LoginTextFields(
                 LoginTextField(
                     value = username,
                     label = R.string.loginScreen_username
-                ) { onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.OnChangeUsername(it)) }
+                ) { onEvent(AuthEvent.OnChangeUsername(it)) }
 
                 LoginTextField(
                     value = password,

@@ -1,0 +1,7 @@
+- Improved and refined search results
+- Improved Tune Spinner song selection
+- Fixed issue with song artists
+- Removed song artists from Artists view
+- fixed UX issue with server address on header
+- improved loading songs from albums and playlists
+- improved songs loading for every songs view
