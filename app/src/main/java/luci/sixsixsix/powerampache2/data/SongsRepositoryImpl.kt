@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_SEARCH
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.common.hasMore
@@ -135,9 +136,18 @@ class SongsRepositoryImpl @Inject constructor(
         val minDbSongs = 200
         // get songs from db, if the result is less than minDbSongs
         // also get songs from network
-        val songsDb = if (query.isNullOrBlank()) dao.searchSong("") else listOf()
-        if (songsDb.size < minDbSongs) {
-            getSongsNetwork(fetchRemote = fetchRemote, query = query, offset = offset)
+        val isSearch = query.isNotBlank()
+        val songsDb = //if (query.isNullOrBlank())
+            dao.searchSong(query)
+        //else listOf()
+        // always check network in case of search, if online
+        if (isSearch || songsDb.size < minDbSongs) { // will always be less if it's a search
+            getSongsNetwork(
+                fetchRemote = fetchRemote,
+                query = query,
+                offset = offset,
+                initialList = songsDb.map { it.toSong() }.toMutableList()
+            )
         } else {
             flow {
                 emit(Resource.Success(data = songsDb.map { it.toSong()}))
@@ -150,34 +160,28 @@ class SongsRepositoryImpl @Inject constructor(
     private suspend fun getSongsNetwork(
         fetchRemote: Boolean,
         query: String,
-        offset: Int
+        offset: Int,
+        initialList: MutableList<Song> = mutableListOf()
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
+        emit(Resource.Success(data = initialList.toList()))
 
-        // network TODO WHAT IS THIS!!?? FIX !!!
-        val auth = getSession()!!
+        val auth = authToken()
         val credentials = getCurrentCredentials()
-        val hashSet = LinkedHashSet<Song>()
         val songs = if (query.isNullOrBlank()) {
             // not a search
             try {
                 api.getSongsStats(
                     filter = MainNetwork.StatFilter.random,
-                    authKey = auth.auth,
+                    authKey = auth,
                     username = getCredentials()?.username
-                ).songs?.let { dto ->
-                    val random = dto.map { it.toSong() }
-                    hashSet.addAll(random)
-                    if (random.isNotEmpty()) {
-                        emit(Resource.Success(data = hashSet.toList()))
-                    }
-                }
+                ).songs!!.map { it.toSong() }
             } catch (e: Exception) {
+                listOf()
             }
-            hashSet.toList()
         } else {
             // if this is a search
-            val response = api.getSongs(auth.auth, filter = query, offset = offset)
+            val response = api.getSongs(auth, filter = query, offset = offset, limit = NETWORK_REQUEST_LIMIT_SONGS_SEARCH)
             response.error?.let { throw(MusicException(it.toError())) }
             response.songs!!.map { it.toSong() } // will throw exception if songs null
         }
@@ -193,12 +197,10 @@ class SongsRepositoryImpl @Inject constructor(
         val songsDb = dao.searchSong(query).map { it.toSong() }
         L( "getSongs songs from db after web ${songsDb.size}")
 
-        val returnSongList =  if (query.isNullOrBlank()) {
+        val returnSongList = if (query.isNullOrBlank()) {
             // if not a search append the songsDb to the network result
-            ArrayList(songsDb).removeAll(songs.toSet())
-            ArrayList(songs).apply {
-                addAll(songsDb.shuffled())
-            }
+            AmpacheModel.appendToList(songsDb.toMutableList(), initialList)
+            initialList
         } else {
             // if it's a search return what the db found
             songsDb

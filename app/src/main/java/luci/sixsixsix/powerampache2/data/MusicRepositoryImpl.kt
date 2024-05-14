@@ -110,59 +110,7 @@ class MusicRepositoryImpl @Inject constructor(
                 }
             }
         }
-
-        // --- TODO: REMOVE AFTER MIGRATION
-        GlobalScope.launch {
-            try { migrateDb() } catch (e: Exception) { }
-        }
     }
-
-    // --- TODO: REMOVE AFTER MIGRATION
-    private suspend fun migrateDb() {
-        L("migrateDb start")
-        val credentials = dao.getCredentials()
-        if (credentials == null || credentials.serverUrl.isBlank() || credentials.username.isBlank()) return
-
-        val cred = getCurrentCredentials()
-
-        val multiuserId =  multiuserDbKey(username = cred.username, serverUrl = cred.serverUrl)
-        val art = dao.getNotMigratedArtists().map { it.copy(multiUserId = multiuserId) }
-        val play = dao.getNotMigratedPlaylists().map { it.copy(multiUserId = multiuserId) }
-        val so = dao.getNotMigratedSongs().map { it.copy(multiUserId = multiuserId) }
-        val alb = dao.getNotMigratedAlbums().map { it.copy(multiUserId = multiuserId) }
-        val ps = dao.getNotMigratedPlaylistSong().map { it.copy(multiUserId = multiuserId) }
-        val off = dao.getNotMigratedOfflineSongs().map { it.copy(multiUserId = multiuserId) }
-
-        if(art.isNotEmpty())
-            dao.insertArtists(art)
-
-        if(play.isNotEmpty())
-            dao.insertPlaylists(play)
-
-        if(so.isNotEmpty())
-            dao.insertSongs(so)
-
-        if(alb.isNotEmpty())
-            dao.insertAlbums(alb)
-
-        if(ps.isNotEmpty())
-            dao.insertPlaylistSongs(ps)
-
-        if(off.isNotEmpty())
-            dao.addDownloadedSongs(off)
-
-        credentials?.copy(multiUserId = multiuserId)?.let {
-            dao.updateCredentials(it)
-        }
-
-        dao.getUser()?.copy(multiUserId = multiuserId)?.let {
-            dao.updateUser(it)
-        }
-        L("migrateDb end")
-    }
-
-// --- TODO: END BLOCK TO REMOVE AFTER MIGRATION
-
 
     private suspend fun setSession(se: Session) {
         dao.updateSession(se.toSessionEntity())

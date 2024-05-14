@@ -42,6 +42,10 @@ object Constants {
     const val USER_EMAIL_DEFAULT = "" //""No@Email.Present"
     const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
     const val PLAYLIST_FETCH_LIMIT = 50
+    const val NETWORK_REQUEST_LIMIT_ARTISTS = 30
+    const val NETWORK_REQUEST_LIMIT_SONGS = 40
+    const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
+    const val NETWORK_REQUEST_LIMIT_ALBUMS = 40
 
     // TIMEOUTS (non-network)
     const val LOCAL_SCROBBLE_TIMEOUT_MS = 20000L
@@ -66,7 +70,6 @@ object Constants {
     const val ALWAYS_FETCH_ALL_PLAYLISTS = true
 
     // DEBUG VALUES
-    const val NETWORK_REQUEST_LIMIT_DEBUG = 20
     const val ERROR_TITLE = ERROR_STRING
 
     // DONATION LINKS
