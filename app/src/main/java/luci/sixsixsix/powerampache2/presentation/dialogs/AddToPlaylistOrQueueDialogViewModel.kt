@@ -116,7 +116,6 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {
-                           L("playlist created, now add songs")
                             addSongToPlaylist(playlistId = it.id, songId = songId)} }
                     is Resource.Error ->
                         state = state.copy(isPlaylistEditLoading = false)
@@ -167,8 +166,10 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     }
 
     private fun addSongsToPlaylist(playlist: Playlist, songs: List<Song>) = viewModelScope.launch {
-        playlistsRepository
-            .addSongsToPlaylist(playlist = playlist, songsToAdd = songs).collect { result ->
+        playlistsRepository.addSongsToPlaylist(
+            playlist = playlist,
+            songsToAdd = songs
+        ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {

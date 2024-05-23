@@ -37,7 +37,7 @@ fun MainViewModel.observeSession() {
                     // refresh the playlist with new urls with the new token
                     // only if a queue exists
                     if (oldToken != authToken && playlistManager.currentQueueState.value.isNotEmpty()) {
-                        if (Constants.RESET_QUEUE_ON_NEW_SESSION && !isPlaying) {
+                        if (Constants.config.queueResetOnNewSession && !isPlaying) {
                             // new session and not playing and RESET_QUEUE_ON_NEW_SESSION == true
                             logToErrorLogs("REFRESH AUTH !isPlaying")
                             playlistManager.reset()

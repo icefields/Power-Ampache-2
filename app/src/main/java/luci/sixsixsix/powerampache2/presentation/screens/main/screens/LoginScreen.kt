@@ -264,8 +264,8 @@ fun DebugLoginButtons(
             onEvent = onEvent
         )
         DebugLoginButton(
-            server = Servers.Dogmazic,
-            buttonText = R.string.loginScreen_dogmazic_server,
+            server = Servers.NextcloudLocal,
+            buttonText = R.string.loginScreen_local_nextcloud,
             onEvent = onEvent
         )
         DebugLoginButton(

@@ -63,7 +63,6 @@ abstract class BaseAmpacheRepository(
     private val errHandler: ErrorHandler
 ) {
     protected val dao = db.dao
-    //protected var offlineModeEnabledLiveData = dao.offlineModeEnabled().distinctUntilChanged().map { it == true }
 
     val settingsLiveData: LiveData<LocalSettings?>
         get() = dao.settingsLiveData().distinctUntilChanged().map {
@@ -135,7 +134,6 @@ abstract class BaseAmpacheRepository(
             }
         }
 
-
     protected suspend fun cacheSongs(songs: List<Song>) {
         val credentials = getCurrentCredentials()
         dao.insertSongs(songs.map { it.toSongEntity(username = credentials.username, serverUrl = credentials.serverUrl) })
@@ -176,7 +174,6 @@ abstract class BaseAmpacheRepository(
             MainNetwork.Type.playlist -> dao.getAllPlaylists()
                 .firstOrNull { it.id == id}?.copy(flag = flag)?.let { dbPlaylist ->
                     dao.insertPlaylists(listOf(dbPlaylist))
-                    L("like inserted")
                 }
         }
         if (!isOfflineModeEnabled()) {

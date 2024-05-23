@@ -39,9 +39,8 @@ object Constants {
     const val DATABASE_LIMIT_ELEMENTS = 66
     const val QUICK_PLAY_MIN_SONGS = 50
     const val USER_ACCESS_DEFAULT = 25
-    const val USER_EMAIL_DEFAULT = "" //""No@Email.Present"
+    const val USER_EMAIL_DEFAULT = ""
     const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
-    const val PLAYLIST_FETCH_LIMIT = 50
     const val NETWORK_REQUEST_LIMIT_ARTISTS = 30
     const val NETWORK_REQUEST_LIMIT_SONGS = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
@@ -65,7 +64,6 @@ object Constants {
     const val USER_ID_ERROR = ERROR_INT
 
     // FLAGS
-    const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
     const val CLEAR_TABLE_AFTER_FETCH = false
     const val ALWAYS_FETCH_ALL_PLAYLISTS = true
 
@@ -92,4 +90,8 @@ object Constants {
     const val DOGMAZIC_FAKE_USERNAME = "PowerAmpache"
     const val DOGMAZIC_FAKE_STATE = "Ehime"
     const val DOGMAZIC_FAKE_CITY = "Aoshima"
+
+    // fetch this from remote config or initialize locally
+    const val CONFIG_URL = "https://icefields.github.io/powerampache/config.json"
+    var config = Pa2Config()
 }
