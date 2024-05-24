@@ -1,0 +1,4 @@
+- Improved playlist creation and modification.
+- Improved overall performance, after SQLite refactor.
+- improved loading songs from albums and playlists.
+- added initial configuration object.

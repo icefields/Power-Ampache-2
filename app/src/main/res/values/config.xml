@@ -6,4 +6,5 @@
     <!-- Debug String, only used for development -->
     <string name="loginScreen_local_server" translatable="false">Local Development Server</string>
     <string name="loginScreen_remote_server" translatable="false">Remote Debug Server</string>
+    <string name="loginScreen_local_nextcloud" translatable="false">Local Nextcloud Server</string>
 </resources>

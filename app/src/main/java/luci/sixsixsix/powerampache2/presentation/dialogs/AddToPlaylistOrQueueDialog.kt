@@ -99,7 +99,6 @@ fun AddToPlaylistOrQueueDialog(
     val textColor = MaterialTheme.colorScheme.onSurface
 
     if (createPlaylistDialogOpen) {
-        L("createPlaylistDialogOpen")
         CreateAddToPlaylist(
             viewModel = viewModel,
             songs = songs,
@@ -178,7 +177,6 @@ fun AddToPlaylistOrQueueDialog(
                                     onDismissRequest()
                                 }
                         )
-                        //Divider()
                     }
                 }
             }

@@ -90,7 +90,7 @@ Feature rich music client for Ampache, Subsonic, Nextcloud backends, provides al
 
 ## Contributing
 Power Ampache 2 is developed using Clean Architecture on top of MVVM, following SOLID principles.<br>
-***A complete contribution readme coming soon***. In the meantime, before starting any contribution, please contact me for an overview of the design patterns, code style and libraries used. 
+***A complete contribution readme coming soon***. In the meantime, before starting any contribution, please contact me for an overview of the design patterns, code style and libraries used.
 <!-- - Fork the repository.
 - Make your changes in a separate branch.
 - Open a pull request. -->
@@ -126,21 +126,22 @@ Enjoy a clean, modern design with a user-friendly interface. The app features a 
 **🌐 OPEN-SOURCE TRANSPARENCY:**  
 Power Ampache app is completely free of ads and does not request unnecessary permissions. Moreover, it is fully open-source, providing you with peace of mind, as you have access to the source code for security and privacy audits.
 
-## FDroid and PlayStore links coming soon (Expected Release Date May 1)
+## PlayStore version coming soon
 
 [<img src="https://s1.ax1x.com/2023/01/12/pSu1a36.png" alt="Get it on GitHub" height="80">](https://github.com/icefields/Power-Ampache-2/releases)
 
 [<img src="https://s1.ax1x.com/2023/01/12/pSnTZ0f.png"
-     alt="Get it on Telegram Channel"
-     height="80">](https://t.me/powerampache)
-<!--
+alt="Get it on Telegram Channel"
+height="80">](https://t.me/powerampache)
+
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/luci.sixsixsix/)
+alt="Get it on F-Droid"
+height="80">](https://f-droid.org/packages/luci.sixsixsix.powerampache2.fdroid/)
 
 F-Droid releases can not upgrade to other releases and it is compiled, signed and distributed uniformly by [F-Droid](https://f-droid.org/docs/FAQ_-_General/).
+Github, PlayStore and Telegram releases are signed by me.
 
-
+<!--
 ➡️ Explore more  apps: https://www..org<br>
 ➡️ Open-Source Code: https://www.github.com/<br>
 ➡️ Join the community on Reddit: https://www.reddit.com/r/<br>
@@ -154,15 +155,15 @@ You can select a demo instance from the login screen or login into your own serv
 
 ## Translations
 The app is currently translated in the following languages:
-- English
-- Czech
-  <br>
-  Work in progress:
-- French
-- Italian
-- Japanese
-  <br>
-  In the future I will automate translation contributions, right now you have 3 options.<br>
+English
+Czech
+
+Work in progress:
+French
+Italian
+Japanese
+<br>
+In the future I will automate translation contributions, right now you have 3 options.<br>
 - If you're an Android developer just create the resource directories and files and open a PR (`strings.xml` is where translatable strings are located).
 - If you're not familiar with Android development and don't know how to create translation resources, but you are able to edit XML files: you can just grab `strings.xml`, edit it and send it back to me. I'll review it and will include it in the app in the next release.
   Example (italian translation):

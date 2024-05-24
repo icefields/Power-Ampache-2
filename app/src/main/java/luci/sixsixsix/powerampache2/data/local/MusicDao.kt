@@ -80,9 +80,6 @@ interface MusicDao {
     @Query("""SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'""")
     suspend fun getCredentials(): CredentialsEntity?
 
-//    @Query("""SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'""")
-//    fun getCredentialsLiveData(): LiveData<CredentialsEntity?>
-
 // --- USER ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateUser(userEntity: UserEntity)
@@ -96,9 +93,6 @@ interface MusicDao {
     @Query("""SELECT * FROM userentity WHERE LOWER(username) = LOWER(:username) AND $multiUserCondition""")
     suspend fun getUser(username: String): UserEntity?
 
-    //@Query("""SELECT credentials.username as credentialsUsername, user.* FROM
-    //    (SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') AS credentials,
-    //    (SELECT * FROM userentity WHERE username = (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) AS user""")
     @Query("""SELECT * FROM userentity WHERE $multiUserCondition""")
     fun getUserLiveData(): Flow<UserEntity?>
 
@@ -241,14 +235,20 @@ interface MusicDao {
     @Query("DELETE FROM playlistentity WHERE $multiUserCondition")
     suspend fun clearPlaylists()
 
+    @Query("DELETE FROM playlistentity WHERE LOWER(id) == LOWER(:playlistId) AND $multiUserCondition")
+    suspend fun deletePlaylist(playlistId: String)
+
     @Delete
     suspend fun deletePlaylists(playlists: List<PlaylistEntity>)
 
-    @Query("DELETE FROM playlistsongentity")
+    @Query("DELETE FROM playlistsongentity WHERE $multiUserCondition")
     suspend fun clearPlaylistSongs()
 
-    @Query("DELETE FROM playlistsongentity WHERE LOWER(playlistId) == LOWER(:playlistId)")
+    @Query("DELETE FROM playlistsongentity WHERE LOWER(playlistId) == LOWER(:playlistId) AND $multiUserCondition")
     suspend fun clearPlaylistSongs(playlistId: String)
+
+    @Query("DELETE FROM playlistsongentity WHERE LOWER(songId) == LOWER(:songId) AND LOWER(playlistId) == LOWER(:playlistId) AND $multiUserCondition")
+    suspend fun deleteSongFromPlaylist(playlistId: String, songId: String)
 
     @Query("""SELECT * FROM playlistentity WHERE (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name)
         AND $multiUserCondition
@@ -476,28 +476,6 @@ interface MusicDao {
 
     @Query("DELETE FROM historyentity")
     suspend fun clearHistory()
-
-//    // TODO MIGRATION CALLS, REMOVE AFTERWARDS
-//    // --- TODO: REMOVE AFTER MIGRATION
-//    @Query("""SELECT * from songentity where multiUserId == ''""")
-//    suspend fun getNotMigratedSongs(): List<SongEntity>
-//
-//    @Query("""SELECT * from downloadedsongentity where multiUserId == ''""")
-//    suspend fun getNotMigratedOfflineSongs(): List<DownloadedSongEntity>
-//
-//    @Query("""SELECT * from albumentity where multiUserId == ''""")
-//    suspend fun getNotMigratedAlbums(): List<AlbumEntity>
-//
-//    @Query("""SELECT * from artistentity where multiUserId == ''""")
-//    suspend fun getNotMigratedArtists(): List<ArtistEntity>
-//
-//    @Query("""SELECT * from playlistentity where multiUserId == ''""")
-//    suspend fun getNotMigratedPlaylists(): List<PlaylistEntity>
-//
-//    @Query("""SELECT * from playlistsongentity where multiUserId == ''""")
-//    suspend fun getNotMigratedPlaylistSong(): List<PlaylistSongEntity>
-//    // --- TODO: REMOVE AFTER MIGRATION END
-//
 
     suspend fun clearCachedData() {
         clearAlbums()
