@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Pa2Config
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -53,6 +54,7 @@ import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toGenre
+import luci.sixsixsix.powerampache2.data.remote.dto.toPa2Config
 import luci.sixsixsix.powerampache2.data.remote.dto.toServerInfo
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
 import luci.sixsixsix.powerampache2.domain.MusicRepository
@@ -84,6 +86,8 @@ class MusicRepositoryImpl @Inject constructor(
 ): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
     private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
+    val serverVersionStateFlow = serverInfoStateFlow.mapNotNull { it.version }.distinctUntilChanged()
+
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
     override val userLiveData: Flow<User?> = dao.getUserLiveData().map {
         val cred = getCurrentCredentials()
@@ -94,6 +98,7 @@ class MusicRepositoryImpl @Inject constructor(
     // used to check if a call to getUserNetwork() is necessary
     private var currentAuthToken: String? = null
     private var currentUser: User? = null
+
     init {
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
@@ -109,6 +114,18 @@ class MusicRepositoryImpl @Inject constructor(
                     }
                 }
             }
+        }
+
+        GlobalScope.launch {
+            initialize()
+        }
+    }
+
+    private suspend fun initialize() {
+        Constants.config = try {
+            api.getConfig().toPa2Config()
+        } catch (e: Exception) {
+            Pa2Config()
         }
     }
 
@@ -280,7 +297,7 @@ class MusicRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        val auth = getSession()!!
+        val auth = authToken()
         val serverVersion = try {
             serverInfoStateFlow.value.version?.split(".")?.firstOrNull()?.let { version ->
                 if (version.isDigitsOnly()) version.toInt() else Int.MAX_VALUE
@@ -288,9 +305,9 @@ class MusicRepositoryImpl @Inject constructor(
         } catch (e: Exception) { Int.MAX_VALUE } // set to max value in case of errors to force the newest api
 
         val response = if (serverVersion >= 5) {
-            api.getGenres(authKey = auth.auth).genres!!.map { it.toGenre() }
+            api.getGenres(authKey = auth).genres!!.map { it.toGenre() }
         } else {
-            api.getTags(authKey = auth.auth).tags!!.map { it.toGenre() }
+            api.getTags(authKey = auth).tags!!.map { it.toGenre() }
         }
 
         if (Constants.CLEAR_TABLE_AFTER_FETCH) {

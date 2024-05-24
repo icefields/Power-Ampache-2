@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data.remote
 
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.common.Constants.CONFIG_URL
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_ARTISTS
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS
@@ -34,6 +35,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.ArtistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.AuthDto
 import luci.sixsixsix.powerampache2.data.remote.dto.GenresResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.GoodbyeDto
+import luci.sixsixsix.powerampache2.data.remote.dto.Pa2ConfigDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ShareDto
@@ -255,7 +257,7 @@ interface MainNetwork {
         @Query("items") items: String? = null, // comma-separated song_id's (replaces existing items with a new id)
         @Query("tracks") tracks: String? = null, // comma-separated playlisttrack numbers matched to 'items' in order
         @Query("name") name: String? = null,
-        @Query("type") playlistType: PlaylistType
+        //@Query("type") playlistType: PlaylistType // TODO: playlist type is null in nextcloud, removed from call
     ): SuccessResponse
 
     /**
@@ -399,6 +401,9 @@ interface MainNetwork {
         @Query("albummbid") albumMbid: String = "",
         //@Query("date") date: Int = 0
     ): SuccessResponse
+
+    @GET
+    suspend fun getConfig(@Url configUrl: String = CONFIG_URL): Pa2ConfigDto
 
 
     companion object {

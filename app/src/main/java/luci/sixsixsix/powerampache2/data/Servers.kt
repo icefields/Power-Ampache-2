@@ -22,6 +22,12 @@
 package luci.sixsixsix.powerampache2.data
 
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.BuildConfig.DEBUG_LOCAL_DEVELOPMENT_URL
+import luci.sixsixsix.powerampache2.BuildConfig.DEBUG_LOCAL_STABLE_URL
+import luci.sixsixsix.powerampache2.BuildConfig.LOCAL_NEXTCLOUD_PASSWORD
+import luci.sixsixsix.powerampache2.BuildConfig.LOCAL_NEXTCLOUD_URL
+import luci.sixsixsix.powerampache2.BuildConfig.LOCAL_NEXTCLOUD_USER
+import luci.sixsixsix.powerampache2.common.Constants
 
 const val DEBUG_USER = BuildConfig.AMPACHE_USER
 const val DEBUG_PASSWORD = BuildConfig.AMPACHE_PASSWORD
@@ -33,15 +39,11 @@ const val DEBUG_DEV_PASSWORD = BuildConfig.LOCAL_DEV_PASSWORD
 const val DEBUG_REMOTE_USER = DEBUG_USER
 const val DEBUG_REMOTE_PASSWORD = DEBUG_PASSWORD
 
-const val DOGMAZIC_USER = BuildConfig.DOGMAZIC_USER
 const val DOGMAZIC_PASSWORD = BuildConfig.DOGMAZIC_PASSWORD
 
-const val DEBUG_LOCAL_STABLE_URL = "http://192.168.1.229/"
-const val DEBUG_LOCAL_DEVELOPMENT_URL = "http://192.168.50.244/"
 const val DEBUG_REMOTE_DEMO_URL = BuildConfig.AMPACHE_URL
 const val AMPACHE_DEMO_URL = "demo.ampache.dev"
 const val DOGMAZIC_URL = "play.dogmazic.net"
-
 const val AMPACHE_DEMO_APIKEY = "demodemo"
 
 sealed class Servers(
@@ -51,7 +53,7 @@ sealed class Servers(
     val apiKey: String = ""
 ) {
     /**
-     * local-ip server for testing 6.2
+     * local-ip server for testing the latest development branch
      */
     data object LocalDev: Servers(
         url = DEBUG_LOCAL_DEVELOPMENT_URL,
@@ -81,12 +83,21 @@ sealed class Servers(
      */
     data object Dogmazic: Servers(
         url = DOGMAZIC_URL,
-        user = DOGMAZIC_USER,
+        user = Constants.config.dogmazicDemoUser,
         password = DOGMAZIC_PASSWORD
     )
 
     /**
      * dogmazic server
+     */
+    data object NextcloudLocal: Servers(
+        url = LOCAL_NEXTCLOUD_URL,
+        user = LOCAL_NEXTCLOUD_USER,
+        password = LOCAL_NEXTCLOUD_PASSWORD
+    )
+
+    /**
+     * local server on stable branch
      */
     data object LocalStable: Servers(
         url = DEBUG_LOCAL_STABLE_URL,

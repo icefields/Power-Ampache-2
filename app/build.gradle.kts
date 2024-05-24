@@ -36,22 +36,27 @@ android {
     val ampacheUser = properties.getProperty("AMPACHE_USER")
     val ampachePass = properties.getProperty("AMPACHE_PASSWORD")
     val ampacheUrl = properties.getProperty("AMPACHE_URL")
+    val ampacheUrlLocal = properties.getProperty("LOCAL_STABLE_URL")
     val dogmazicPass = properties.getProperty("DOGMAZIC_PASSWORD")
     val dogmazicUser = properties.getProperty("DOGMAZIC_USER")
     val dogmazicEmail = properties.getProperty("DOGMAZIC_EMAIL")
     val errorLogUrl = properties.getProperty("URL_ERROR_LOG")
     val localDevUser = properties.getProperty("LOCAL_DEV_USER")
     val localDevPass = properties.getProperty("LOCAL_DEV_PASSWORD")
+    val localDevUrl = properties.getProperty("LOCAL_DEVELOPMENT_URL")
     val errorReportEmail = properties.getProperty("ERROR_REPORT_EMAIL")
     val pastebinApiKey = properties.getProperty("PASTEBIN_API_KEY")
+    val localNextcloudUser = properties.getProperty("LOCAL_NEXTCLOUD_USER")
+    val localNextcloudPass = properties.getProperty("LOCAL_NEXTCLOUD_PASSWORD")
+    val localNextcloudUrl = properties.getProperty("LOCAL_NEXTCLOUD_URL")
 
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 55
-        versionName = "1.00-55"
-        val versionQuote = "This version is powered by the beginning of the music revolution (FDroid second release)"
+        versionCode = 56
+        versionName = "1.00-56"
+        val versionQuote = "This version is powered by financial debt"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -65,6 +70,11 @@ android {
 
         buildConfigField("String", "VERSION_QUOTE", "\"$versionQuote\"")
         buildConfigField("String", "ERROR_REPORT_EMAIL", errorReportEmail)
+        buildConfigField("String", "LOCAL_NEXTCLOUD_USER", localNextcloudUser)
+        buildConfigField("String", "LOCAL_NEXTCLOUD_PASSWORD", localNextcloudPass)
+        buildConfigField("String", "LOCAL_NEXTCLOUD_URL", localNextcloudUrl)
+        buildConfigField("String", "DEBUG_LOCAL_STABLE_URL", ampacheUrlLocal)
+        buildConfigField("String", "DEBUG_LOCAL_DEVELOPMENT_URL", localDevUrl)
     }
 
     buildTypes {

@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
@@ -32,8 +31,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
-import luci.sixsixsix.powerampache2.common.Constants.PLAYLIST_FETCH_LIMIT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
@@ -66,7 +65,7 @@ import javax.inject.Singleton
 @Singleton
 class PlaylistsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
-    private val db: MusicDatabase,
+    db: MusicDatabase,
     private val errorHandler: ErrorHandler
 ): BaseAmpacheRepository(api, db, errorHandler), PlaylistsRepository {
 
@@ -189,21 +188,6 @@ class PlaylistsRepositoryImpl @Inject constructor(
         dao.getOfflineSongsFromPlaylist(playlistId).isNotEmpty()
 
     /**
-     * checks if offline mode is enabled, if enabled return only albums that are available offline
-     * @return true if offline mode enabled and operation successful
-     */
-    private suspend fun checkFilterOfflineSongs(
-        playlistId: String,
-        fc: FlowCollector<Resource<List<Song>>>?
-    ): Boolean = isOfflineModeEnabled().also { isOfflineModeEnabled ->
-        fc?.emit(Resource.Success(data = if (isOfflineModeEnabled) {
-            dao.getOfflineSongsFromPlaylist(playlistId).map { it.toSong() }
-        } else {
-            dao.getSongsFromPlaylist(playlistId).map { it.toSong() }
-        }, networkData = null))
-    }
-
-    /**
      * TODO BREAKING_RULE: Implement cache for playlist songs
      *  There is currently no way to get songs given the playlistId
      *  Songs are cached regardless for quick access from SongsScreen and Albums
@@ -215,10 +199,6 @@ class PlaylistsRepositoryImpl @Inject constructor(
         fetchRemote: Boolean
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-        //        if (checkFilterOfflineSongs(playlistId, this)) {
-//            emit(Resource.Loading(false))
-//            return@flow
-//        }
 
         val isOfflineMode = isOfflineModeEnabled()
         if (isOfflineMode) {
@@ -233,27 +213,30 @@ class PlaylistsRepositoryImpl @Inject constructor(
         // emit saved data first
         val dbData = dao.getSongsFromPlaylist(playlistId).map { it.toSong() }
         emit(Resource.Success(data = dbData, networkData = null))
-        val shouldEmitSteps = dbData.size < PLAYLIST_FETCH_LIMIT
+        val shouldEmitSteps = dbData.size < Constants.config.playlistSongsFetchLimit
 
         //else
-        val auth = getSession()!!
         val cred = getCurrentCredentials()
         val songs = mutableListOf<Song>()
         var isFinished = false
-        val limit = PLAYLIST_FETCH_LIMIT
+        var limit = Constants.config.playlistSongsFetchLimit
         var offset = 0
         var lastException: MusicException? = null
         do {
             val response = try {
                 api.getSongsFromPlaylist(
-                    auth.auth,
+                    authToken(),
                     albumId = playlistId,
                     limit = limit,
                     offset = offset
                 )
             } catch (e: Exception) {
                 errorHandler.logError(e)
-                SongsResponse(songs = null)
+                SongsResponse(songs = null).also {
+                    // for partial recovery:in case a subset of songs fails, reduce the limit to
+                    // try and fetch at least part of the songs in the next iteration
+                    limit /= 2
+                }
             }
 
             // save the exception if any
@@ -266,6 +249,9 @@ class PlaylistsRepositoryImpl @Inject constructor(
                     if (shouldEmitSteps) {
                         emit(Resource.Success(data = songs, networkData = partialResponse))
                     }
+
+                    // if the result is smaller than then limit, there is no more data to fetch
+                    isFinished = partialResponse.size < limit
                 } else {
                     // if no more items to fetch finish
                     isFinished = true
@@ -286,14 +272,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 networkData = songs)
             )
         }
-
-//        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlistId, limit = 50, offset = offset)
-//        response.error?.let { throw(MusicException(it.toError())) }
-//        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
-        //emit(Resource.Success(data = songs.toList(), networkData = songs.toList()))
-
         emit(Resource.Loading(false))
-
         // cache songs after emitting success
         // Songs are cached regardless for quick access from SongsScreen and Albums
         cacheSongs(songs)
@@ -308,7 +287,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
     override suspend fun getPlaylistShareLink(playlistId: String) = flow {
         emit(Resource.Loading(true))
         val response = api.createShare(
-            getSession()!!.auth,
+            authToken(),
             id = playlistId,
             type = MainNetwork.Type.playlist
         )
@@ -325,6 +304,11 @@ class PlaylistsRepositoryImpl @Inject constructor(
     ) = flow {
         emit(Resource.Loading(true))
         if (addSingleSongToPlaylist(playlistId = playlistId, songId = songId)) {
+            val cred = getCurrentCredentials()
+            dao.insertPlaylistSongs(
+                PlaylistSongEntity.newEntries(listOf(dao.getSongById(songId)!!.toSong()),
+                    playlistId, username = cred.username, serverUrl = cred.serverUrl)
+            )
             emit(Resource.Success(data = Any(), networkData = Any()))
         } else {
             throw Exception("error getting a response from addSongToPlaylist call")
@@ -336,7 +320,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         playlistId: String,
         songId: String
     ): Boolean = api.addSongToPlaylist(
-        authKey = getSession()!!.auth,
+        authKey = authToken(),
         playlistId = playlistId,
         songId = songId
     ).run {
@@ -349,9 +333,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
         songId: String
     ) = flow {
         emit(Resource.Loading(true))
-        val auth = getSession()!!
         api.removeSongFromPlaylist(
-            authKey = auth.auth,
+            authKey = authToken(),
             playlistId = playlistId,
             songId = songId
         ).apply {
@@ -362,6 +345,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 throw Exception("error getting a response from removeSongFromPlaylist call")
             }
         }
+        dao.deleteSongFromPlaylist(playlistId, songId)
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("removeSongFromPlaylist()", e, this) }
 
@@ -370,9 +354,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
         playlistType: PlaylistType
     ) = flow {
         emit(Resource.Loading(true))
-        val auth = getSession()!!
         api.createNewPlaylist(
-            authKey = auth.auth,
+            authKey = authToken(),
             name = name,
             playlistType = playlistType
         ).run {
@@ -385,9 +368,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
     override suspend fun deletePlaylist(id: String) = flow {
         emit(Resource.Loading(true))
-        val auth = getSession()!!
         api.deletePlaylist(
-            authKey = auth.auth,
+            authKey = authToken(),
             playlistId = id
         ).apply {
             error?.let { throw(MusicException(it.toError())) }
@@ -397,6 +379,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 throw Exception("error getting a response from deletePlaylist call")
             }
         }
+        dao.deletePlaylist(id)
+        dao.clearPlaylistSongs(id)
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("deletePlaylist()", e, this) }
 
@@ -423,14 +407,12 @@ class PlaylistsRepositoryImpl @Inject constructor(
             0 -> null
             else -> songListToCommaSeparatedIds(items)
         }
-        val auth = getSession()!!
         api.editPlaylist(
-            authKey = auth.auth,
+            authKey = authToken(),
             playlistId = playlistId,
             items = commaSeparatedIds,
             tracks = tracks,
-            name = playlistName,
-            playlistType = playlistType
+            name = playlistName
         ).apply {
             error?.let { throw(MusicException(it.toError())) }
             if (success != null) {
@@ -442,52 +424,80 @@ class PlaylistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("editPlaylist()", e, this) }
 
+    private suspend fun cacheSinglePlaylist(
+        playlist: Playlist,
+        songs: List<Song>,
+        clearBeforeAdd: Boolean = true
+    ) = getCurrentCredentials().let { cred ->
+        dao.insertPlaylists(listOf(playlist.toPlaylistEntity(username = cred.username, serverUrl = cred.serverUrl)))
+        if (clearBeforeAdd) {
+            dao.clearPlaylistSongs(playlist.id)
+        }
+        dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlist.id, username = cred.username, serverUrl = cred.serverUrl))
+    }
+
     override suspend fun addSongsToPlaylist(
         playlist: Playlist,
         newSongs: List<Song>
     ) = flow {
         emit(Resource.Loading(true))
 
+        if (!Constants.config.playlistAddNewEnable) {
+            val plResult = addSongsToPlaylistFallback(playlist, songsToAdd = newSongs)
+            cacheSinglePlaylist(plResult, newSongs,false)
+            emit(Resource.Success(data = plResult, networkData = plResult))
+            emit(Resource.Loading(false))
+            return@flow
+        }
+
         // Get old version of the playlist
-        val auth = getSession()!!
-        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlist.id)
-        response.error?.let { throw(MusicException(it.toError())) }
-        val existingSongs = LinkedHashSet(response.songs!!.map { songDto -> songDto.toSong() }) // will throw exception if songs null
+        val existingSongs = LinkedHashSet(dao.getSongsFromPlaylist(playlist.id).map { songDb -> songDb.toSong() })
+            .ifEmpty {
+                L.e("addSongsToPlaylist() list of songs from db is empty")
+                // if playlist not stored locally, fetch a new version
+                val response = api.getSongsFromPlaylist(authToken(), albumId = playlist.id)
+                response.error?.let { throw(MusicException(it.toError())) }
+                LinkedHashSet(response.songs!!.map { songDto -> songDto.toSong() }) // will throw exception if songs null
+            }
+        val existingPlusNewSongs = ArrayList(existingSongs).apply { addAll(newSongs) }.toList()
 
         // try new method, include every song (use songList)
         val playlistEdited = try {
-            val existingPlusNewSongs = ArrayList(existingSongs).apply { addAll(newSongs) }.toList()
-            editPlaylistNewApi(
-                playlist = playlist,
-                songList =  existingPlusNewSongs
-            )
+            editPlaylistNewApi(playlist = playlist, songList =  existingPlusNewSongs)
         } catch (e: Exception) {
             L.e(e)
-            L(newSongs.size, existingSongs.size)
             // fallback to old method, add one by one, only new songs (use songsToAdd)
             val songsToAdd = ArrayList(newSongs).apply {
                 // remove all existing songs from new songs to add to the playlist
                 removeAll(existingSongs)
             }
-            L(songsToAdd.size)
-
-
-            for (song in songsToAdd) {
-                try {
-                    addSingleSongToPlaylist(playlistId = playlist.id, songId = song.mediaId)
-                } catch (e: Exception) {
-                    L.e(e)
-
-                    // TODO handle error
-                }
-            }
-            // tODO is this call necessary?
-            api.getPlaylist(getSession()?.auth!!, playlist.id).toPlaylist()
+            addSongsToPlaylistFallback(playlist = playlist, songsToAdd = songsToAdd)
         }
 
+        cacheSinglePlaylist(playlistEdited, existingPlusNewSongs)
         emit(Resource.Success(data = playlistEdited, networkData = playlistEdited))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("editPlaylist()", e, this) }
+
+    /**
+     * Fallback method for when the new method is not supported
+     * Add one by one, only new songs (use songsToAdd)
+     */
+    private suspend fun addSongsToPlaylistFallback(
+        playlist: Playlist,
+        songsToAdd: List<Song>
+    ): Playlist {
+        for (song in songsToAdd) {
+            try {
+                addSingleSongToPlaylist(playlistId = playlist.id, songId = song.mediaId)
+            } catch (e: Exception) {
+                L.e(e)
+                // TODO handle error
+            }
+        }
+        // TODO is this call necessary? can't I just return the passed playlist?
+        return api.getPlaylist(authToken(), playlist.id).toPlaylist()
+    }
 
     override suspend fun createNewPlaylistAddSongs(
         name: String,
@@ -495,10 +505,9 @@ class PlaylistsRepositoryImpl @Inject constructor(
         songsToAdd: List<Song>
     ) = flow {
         emit(Resource.Loading(true))
-        val auth = getSession()!!
         // create new playlist
         val playlist = api.createNewPlaylist(
-            authKey = auth.auth,
+            authKey = authToken(),
             name = name,
             playlistType = playlistType
         ).toPlaylist() // TODO no error check
@@ -507,38 +516,33 @@ class PlaylistsRepositoryImpl @Inject constructor(
             editPlaylistNewApi(playlist = playlist, songsToAdd)
         } catch (e: Exception) {
             // fallback to old method, add one by one
-            for (song in songsToAdd) {
-                try {
-                    addSingleSongToPlaylist(playlistId = playlist.id, songId = song.mediaId)
-                }catch (e: Exception) {
-                    // TODO handle error
-                }
-            }
-            // tODO is this call necessary?
-            api.getPlaylist(getSession()?.auth!!, playlist.id).toPlaylist()
+            addSongsToPlaylistFallback(playlist = playlist, songsToAdd = songsToAdd)
         }
+
+        cacheSinglePlaylist(playlistEdited, songsToAdd, clearBeforeAdd = false)
         emit(Resource.Success(data = playlistEdited, networkData = playlistEdited))
         emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("editPlaylist()", e, this) }
+    }.catch { e -> errorHandler("createNewPlaylistAddSongs()", e, this) }
 
     @Throws(Exception::class)
     private suspend fun editPlaylistNewApi(
         playlist: Playlist,
         songList: List<Song>
     ) = api.editPlaylist(
-        authKey = getSession()?.auth!!,
+        authKey = authToken(),
         playlistId = playlist.id,
         items = when(songList.size) {
             0 -> null
             else -> songListToCommaSeparatedIds(songList)
         },
         tracks = trackPositionsCommaSeparated(songList),
-        owner = playlist.owner,
-        playlistType = playlist.type ?: throw Exception("addSongsToPlaylist problem with playlist type")
+        owner = playlist.owner
+        // TODO: playlist type is null in nextcloud, removed from call
+        // playlistType = playlist.type ?: throw Exception("addSongsToPlaylist problem with playlist type NULL")
     ).run {
         error?.let { throw(MusicException(it.toError())) }
         if (success != null) {
-            val updatedPlaylist = api.getPlaylist(getSession()?.auth!!, playlist.id)
+            val updatedPlaylist = api.getPlaylist(authToken(), playlist.id)
             // check if any of the new songs got added
             L(updatedPlaylist.items, playlist.items)
             if ((updatedPlaylist.items == null) || (playlist.items == null) ||
@@ -561,10 +565,9 @@ class PlaylistsRepositoryImpl @Inject constructor(
         playlistType: PlaylistType,
         songsToAdd: List<Song>
     ): Playlist {
-        val auth = getSession()!!
         // create new playlist
         val playlist = api.createNewPlaylist(
-            authKey = auth.auth,
+            authKey = authToken(),
             name = name,
             playlistType = playlistType
         ).toPlaylist() // TODO no error check
@@ -582,8 +585,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         songsToAdd: List<Song>
     ): Playlist {
         // Get old version of the playlist
-        val auth = getSession()!!
-        val response = api.getSongsFromPlaylist(auth.auth, albumId = playlist.id)
+        val response = api.getSongsFromPlaylist(authToken(), albumId = playlist.id)
         response.error?.let { throw(MusicException(it.toError())) }
         val songList = response.songs!!.map { songDto -> songDto.toSong() }.toMutableList() // will throw exception if songs null
         songList.addAll(songsToAdd)
