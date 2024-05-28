@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="launcherBgColourDebug">@color/tertiaryLight</color>
-    <color name="launcherBgColour">#0D2121</color>
+    <color name="launcherBgColourRelease">#0D2121</color>
 
     <!-- LOGIN THEME -->
     <color name="loginScreen_background">@color/surfaceDark</color>

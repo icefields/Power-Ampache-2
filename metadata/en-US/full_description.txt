@@ -39,3 +39,6 @@ Work in progress / Coming soon:
 - Multi-account features 
 - Android TV 
 - UI Optimized for tablets
+
+Known issue with Nextcloud Music:
+Only lowercase usernames are accepted at this time. We're working to resolve this in the next release.

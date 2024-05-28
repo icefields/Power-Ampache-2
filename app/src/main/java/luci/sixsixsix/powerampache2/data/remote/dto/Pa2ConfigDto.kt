@@ -46,6 +46,10 @@ data class Pa2ConfigDto(
 
     @SerializedName("forceLoginDialogsOnAllVersions")
     val forceLoginDialogsOnAllVersions: Boolean? = null,
+
+    @SerializedName("loginWarning")
+    val loginWarning: String? = null,
+
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
@@ -53,5 +57,6 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     queueResetOnNewSession = queueResetOnNewSession ?: RESET_QUEUE_ON_NEW_SESSION,
     dogmazicDemoUser = dogmazicDemoUser ?: DOGMAZIC_USER,
     playlistSongsFetchLimit = playlistSongsFetchLimit ?: PLAYLIST_FETCH_LIMIT,
-    forceLoginDialogsOnAllVersions = forceLoginDialogsOnAllVersions ?: BuildConfig.FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS
+    forceLoginDialogsOnAllVersions = forceLoginDialogsOnAllVersions ?: BuildConfig.FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS,
+    loginWarning = loginWarning ?: ""
 )

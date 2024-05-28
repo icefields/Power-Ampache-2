@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 
 @Composable
@@ -68,14 +69,19 @@ fun LoginTextFields(
         modifier = modifier
             .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal))
     ) {
-        if (BuildConfig.SHOW_LOGIN_SERVER_VERSION_WARNING) {
+        // do not show warning for pre-set url clients
+        if (BuildConfig.SHOW_LOGIN_SERVER_VERSION_WARNING && serverUrlVisible) {
+            val warningText = Constants.config.loginWarning.ifBlank {
+                stringResource(id = R.string.loginScreen_textFields_warning)
+            }
+
             Text(
                 modifier = Modifier
                     //.basicMarquee()
                     .padding(top = 2.dp)
                     .clickable {
                     },
-                text = stringResource(id = R.string.loginScreen_textFields_warning),
+                text = warningText,
                 fontSize = 14.sp,
                 lineHeight = 14.sp,
                 fontWeight = FontWeight.Light,

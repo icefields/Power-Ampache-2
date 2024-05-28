@@ -45,4 +45,7 @@ data class Pa2Config(
 
     // force login dialog instead of bottom drawer for all versions until google fixes copy paste issue
     val forceLoginDialogsOnAllVersions: Boolean = BuildConfig.FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS,
+
+    // custom text to show on the login form
+    val loginWarning: String = ""
 )
