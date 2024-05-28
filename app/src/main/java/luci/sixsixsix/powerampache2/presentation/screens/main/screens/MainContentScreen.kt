@@ -85,6 +85,7 @@ import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
@@ -167,6 +168,7 @@ fun MainContentScreen(
     val offlineSwitchVisible =
         (MainContentMenuItem.toMainContentMenuItem(currentScreen) != MainContentMenuItem.Settings)
 
+    val hideDonationButtons = BuildConfig.HIDE_DONATION || localSettingsState.hideDonationButton
     ModalNavigationDrawer(
         drawerState = drawerState,
         //scrimColor = MaterialTheme.colorScheme.scrim,
@@ -176,7 +178,7 @@ fun MainContentScreen(
                 currentItem = MainContentMenuItem.toMainContentMenuItem(currentScreen),
                 user = user ?: User.emptyUser(),
                 versionInfo = settingsViewModel.state.appVersionInfoStr,
-                hideDonationButtons = localSettingsState.hideDonationButton,
+                hideDonationButtons = hideDonationButtons,
                 onItemClick = {
                     scope.launch { drawerState.close() }
                     if (it == MainContentMenuItem.Logout) {

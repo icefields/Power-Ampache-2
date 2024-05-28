@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.DOGMAZIC_USER
 import luci.sixsixsix.powerampache2.common.PLAYLIST_ADD_NEW_ENABLE
 import luci.sixsixsix.powerampache2.common.PLAYLIST_FETCH_LIMIT
@@ -42,6 +43,9 @@ data class Pa2ConfigDto(
 
     @SerializedName("playlistSongsFetchLimit")
     val playlistSongsFetchLimit: Int? = null,
+
+    @SerializedName("forceLoginDialogsOnAllVersions")
+    val forceLoginDialogsOnAllVersions: Boolean? = null,
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
@@ -49,4 +53,5 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     queueResetOnNewSession = queueResetOnNewSession ?: RESET_QUEUE_ON_NEW_SESSION,
     dogmazicDemoUser = dogmazicDemoUser ?: DOGMAZIC_USER,
     playlistSongsFetchLimit = playlistSongsFetchLimit ?: PLAYLIST_FETCH_LIMIT,
+    forceLoginDialogsOnAllVersions = forceLoginDialogsOnAllVersions ?: BuildConfig.FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS
 )

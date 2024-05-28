@@ -42,20 +42,17 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 
 @Composable
 fun LoginButton(
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit
+    onEvent: (AuthEvent) -> Unit
 ) {
     DefaultFullWidthButton(
         modifier = Modifier
-            .padding(
-                horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal),
-                vertical = 10.dp
-            )
+            .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal), vertical = 10.dp)
             .fillMaxWidth(),
         colours = ButtonDefaults.buttonColors(
-            containerColor = colorResource(id = R.color.primaryDark),
-            contentColor = colorResource(id = R.color.onPrimaryDark)
+            containerColor = colorResource(id = R.color.loginScreen_loginButton_background),
+            contentColor = colorResource(id = R.color.loginScreen_loginButton_foreground)
         ),
-        onClick = { onEvent(luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent.Login) }
+        onClick = { onEvent(AuthEvent.Login) }
     ) {
         Icon(
             imageVector = Icons.Default.Login,

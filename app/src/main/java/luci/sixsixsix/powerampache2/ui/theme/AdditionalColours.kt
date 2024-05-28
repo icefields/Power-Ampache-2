@@ -92,7 +92,7 @@ val AdditionalLightColours
     @Composable
     get() = AdditionalColours(
         surfaceDim = Color(0xFFD7DEDC),
-        surfaceBright = Color(0xFFF2FAF7),
+        surfaceBright = colorResource(R.color.surfaceLight),
         surfaceContainerLowest  = Color(0xFFF8FFFD),
         surfaceContainerLow = Color(0xFFEDF5F2),
         surfaceContainer = colorResource(id = R.color.surfaceContainerLight),

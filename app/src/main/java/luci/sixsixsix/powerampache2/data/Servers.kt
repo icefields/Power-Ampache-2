@@ -43,7 +43,7 @@ const val DOGMAZIC_PASSWORD = BuildConfig.DOGMAZIC_PASSWORD
 
 const val DEBUG_REMOTE_DEMO_URL = BuildConfig.AMPACHE_URL
 const val AMPACHE_DEMO_URL = "demo.ampache.dev"
-const val DOGMAZIC_URL = "play.dogmazic.net"
+const val DOGMAZIC_URL = BuildConfig.DOGMAZIC_URL
 const val AMPACHE_DEMO_APIKEY = "demodemo"
 
 sealed class Servers(

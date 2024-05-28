@@ -42,4 +42,7 @@ data class Pa2Config(
     // - smaller number will result in data becoming visible to the user faster, but it will
     //   take longer to completely fetch big playlists
     val playlistSongsFetchLimit: Int = PLAYLIST_FETCH_LIMIT,
+
+    // force login dialog instead of bottom drawer for all versions until google fixes copy paste issue
+    val forceLoginDialogsOnAllVersions: Boolean = BuildConfig.FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS,
 )

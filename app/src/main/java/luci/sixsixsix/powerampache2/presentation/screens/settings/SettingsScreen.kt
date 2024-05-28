@@ -75,6 +75,7 @@ import luci.sixsixsix.powerampache2.domain.models.themesDropDownItems
 import luci.sixsixsix.powerampache2.domain.models.toPowerAmpacheDropdownItem
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
 import luci.sixsixsix.powerampache2.presentation.common.DonateButtonContent
+import luci.sixsixsix.powerampache2.presentation.common.DonateConsider
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpCheckBox
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
 import luci.sixsixsix.powerampache2.presentation.common.TextWithSubtitle
@@ -101,7 +102,9 @@ fun SettingsScreen(
     val serverInfo by settingsViewModel.serverInfoStateFlow.collectAsState(ServerInfo())
 
     SettingsScreenContent(
-        modifier = Modifier.fillMaxSize().padding(bottom = 10.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 10.dp),
         userState = user,
         serverInfo = serverInfo,
         versionInfo = settingsViewModel.state.appVersionInfoStr,
@@ -152,8 +155,20 @@ fun SettingsScreen(
         },
         onOfflineModeValueChange = {
             settingsViewModel.onEvent(SettingsEvent.OnOfflineToggle)
-        }
+        },
+        donateButton = { SettingsDonationButtonView() {
+            settingsViewModel.onEvent(SettingsEvent.goToWebsite)
+        } }
     )
+}
+
+@Composable
+fun SettingsDonationButtonView(onClick: () -> Unit) {
+    if (BuildConfig.HIDE_DONATION) {
+        DonateConsider(onClick = onClick)
+    } else {
+        DonateButton(isExpanded = true, isTransparent = false)
+    }
 }
 
 @Composable
@@ -290,7 +305,9 @@ fun SettingsScreenContent(
                 // AUTO UPDATE CHECKBOX
                 10 -> PowerAmpCheckBox(
                     enabled = IS_AUTO_UPDATE_ENABLED,
-                    modifier = Modifier.padding(vertical = paddingVerticalItem).padding(start = paddingHorizontalItem),
+                    modifier = Modifier
+                        .padding(vertical = paddingVerticalItem)
+                        .padding(start = paddingHorizontalItem),
                     checked = isAutoCheckUpdatesEnabled,
                     onCheckedChange = onAutoCheckUpdatesValueChange,
                     title = R.string.settings_autoCheckUpdates_title,
@@ -314,7 +331,10 @@ fun SettingsScreenContent(
                 8 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = paddingVerticalItem * 2, horizontal = paddingHorizontalItem),
+                        .padding(
+                            vertical = paddingVerticalItem * 2,
+                            horizontal = paddingHorizontalItem
+                        ),
                     title = R.string.settings_deleteDownloads_title,
                     trailingIcon = Icons.Outlined.DeleteOutline,
                     onClick = {
@@ -322,14 +342,12 @@ fun SettingsScreenContent(
                     }
                 )
                 13 -> donateButton()
-                // 16 -> serverInfo?.let { ServerInfoSection(it) }
-
-                14 -> PowerAmpCheckBox(
-                    title = R.string.settings_hideDonationButtonsMenu_title,
-                    checked = hideDonationButtons,
-                    onCheckedChange = onHideDonateValueChange,
-                    modifier = Modifier.padding(start = paddingHorizontalItem)
-                )
+                14 -> if (!BuildConfig.HIDE_DONATION) {
+                    PowerAmpCheckBox(title = R.string.settings_hideDonationButtonsMenu_title,
+                        checked = hideDonationButtons,
+                        onCheckedChange = onHideDonateValueChange,
+                        modifier = Modifier.padding(start = paddingHorizontalItem))
+                }
                 17 -> Text(
                     modifier = Modifier
                         .padding(8.dp)

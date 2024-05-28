@@ -9,8 +9,8 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val composeVersion = "1.6.6" // rootProject.extra.get("compose_version") as String
-val lifecycleVersion = "2.7.0"
+val composeVersion = "1.6.7" // rootProject.extra.get("compose_version") as String
+val lifecycleVersion = "2.8.0"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
 val exoplayerVersion = "2.19.1"
@@ -37,6 +37,7 @@ android {
     val ampachePass = properties.getProperty("AMPACHE_PASSWORD")
     val ampacheUrl = properties.getProperty("AMPACHE_URL")
     val ampacheUrlLocal = properties.getProperty("LOCAL_STABLE_URL")
+    val dogmazicUrl = properties.getProperty("DOGMAZIC_URL")
     val dogmazicPass = properties.getProperty("DOGMAZIC_PASSWORD")
     val dogmazicUser = properties.getProperty("DOGMAZIC_USER")
     val dogmazicEmail = properties.getProperty("DOGMAZIC_EMAIL")
@@ -54,9 +55,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 56
-        versionName = "1.00-56"
-        val versionQuote = "This version is powered by financial debt"
+        versionCode = 57
+        versionName = "1.00-57"
+        val versionQuote = "This version is powered by Pluto the planet"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -75,6 +76,10 @@ android {
         buildConfigField("String", "LOCAL_NEXTCLOUD_URL", localNextcloudUrl)
         buildConfigField("String", "DEBUG_LOCAL_STABLE_URL", ampacheUrlLocal)
         buildConfigField("String", "DEBUG_LOCAL_DEVELOPMENT_URL", localDevUrl)
+        buildConfigField("String", "DOGMAZIC_URL", dogmazicUrl)
+        buildConfigField("String", "DEFAULT_SERVER_URL", "\"\"")
+        buildConfigField("boolean", "FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS", "true")
+        buildConfigField("boolean", "DEMO_VERSION", "false")
     }
 
     buildTypes {
@@ -149,6 +154,7 @@ android {
     val flavourGithub = "Github"
     val flavourFDroid = "FDroid"
     val flavourPlayStore = "PlayStore"
+    val flavourPlayStoreFree = "PlayStoreFree"
 
     flavorDimensions += "ampache"
     productFlavors {
@@ -156,6 +162,7 @@ android {
             dimension = "ampache"
 
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+            buildConfigField("boolean", "HIDE_DONATION", "false")
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
         }
@@ -165,6 +172,7 @@ android {
             versionNameSuffix = "-fdroid"
 
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+            buildConfigField("boolean", "HIDE_DONATION", "false")
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
         }
@@ -174,7 +182,20 @@ android {
             versionNameSuffix = "-play"
 
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
-            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+            buildConfigField("boolean", "HIDE_DONATION", "true")
+            buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
+            buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+        }
+        create(flavourPlayStoreFree) {
+            dimension = "ampache"
+            applicationIdSuffix = ".free"
+            versionNameSuffix = "-free"
+
+            buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+            buildConfigField("boolean", "HIDE_DONATION", "true")
+            buildConfigField("boolean", "DEMO_VERSION", "true")
+            buildConfigField("String", "DEFAULT_SERVER_URL", dogmazicUrl)
+            buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
         }
     }
@@ -206,7 +227,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.0")
+    implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation("androidx.media:media:1.7.0")
@@ -221,7 +242,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:0.17.0")
-    implementation("androidx.paging:paging-compose:3.3.0-beta01")
+    implementation("androidx.paging:paging-compose:3.3.0")
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
