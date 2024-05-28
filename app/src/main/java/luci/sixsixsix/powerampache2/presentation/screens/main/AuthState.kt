@@ -23,19 +23,16 @@ package luci.sixsixsix.powerampache2.presentation.screens.main
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.domain.models.Session
-import luci.sixsixsix.powerampache2.domain.models.User
 
 @Parcelize
 data class AuthState(
-    //val session: Session? = null,
-    val savedSession: Session? = null, // only use this to restore the session as init value of sessionStateFlow
-    // val user: User? = null,
+    val savedSession: Session? = null,
     val isLoading: Boolean = false,
     val isAutologin: Boolean = false,
-    //val error: String = "",
     val username: String = "",
     val password: String = "",
     val authToken: String = "",
-    val url: String = ""
+    val url: String = BuildConfig.DEFAULT_SERVER_URL
 ): Parcelable

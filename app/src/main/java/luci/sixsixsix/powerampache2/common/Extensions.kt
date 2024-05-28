@@ -87,6 +87,15 @@ fun Context.shareLink(link: String) =
         }
     )
 
+fun Context.goToPlayStore() {
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse(
+            "https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.play")
+        setPackage("com.android.vending")
+    }
+    startActivity(intent)
+}
+
 fun Context.openLinkInBrowser(link: String) =
     startActivity(
         Intent.createChooser(

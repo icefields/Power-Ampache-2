@@ -74,7 +74,9 @@ import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
 import luci.sixsixsix.powerampache2.presentation.common.DonateButtonContent
+import luci.sixsixsix.powerampache2.presentation.common.DonateConsider
 import luci.sixsixsix.powerampache2.presentation.common.TextWithOverline
+import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsEvent
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 
 @Composable
@@ -92,6 +94,9 @@ fun AboutScreen(
         userState = user,
         serverInfo = serverInfo,
         versionInfo = settingsViewModel.state.appVersionInfoStr,
+        onDonateConsiderClick = {
+            settingsViewModel.onEvent(SettingsEvent.goToWebsite)
+        }
     )
 }
 
@@ -101,6 +106,7 @@ fun AboutScreenContent(
     userState: User?,
     serverInfo: ServerInfo?,
     versionInfo: String,
+    onDonateConsiderClick: () -> Unit,
     modifier: Modifier = Modifier,
     donateButton: @Composable () -> Unit = { DonateButton(isExpanded = true, isTransparent = false) }
 ) {
@@ -120,11 +126,16 @@ fun AboutScreenContent(
                     subtitleTextSize = fontDimensionResource(id = R.dimen.about_item_fontSize)
                 )
                 3 -> DividerSeparator()
-                4 -> TextWithOverline(title = R.string.about_license_title, subtitle = "")
-                5 -> AboutImageWithLink(GPLV3_IMG_URL, GPLV3_URL, stringResource(id = R.string.about_license_title))
-                6 -> DividerSeparator(modifier = Modifier.padding(top = 16.dp, bottom = 6.dp))
-                7 -> TextWithOverline(title = R.string.about_contact_title, subtitle = "")
-                8 -> Row(
+                5 -> TextWithOverline(title = R.string.about_license_title, subtitle = "")
+                6 -> AboutImageWithLink(
+                    modifier = Modifier.height(76.dp),
+                    imgUrl = GPLV3_IMG_URL,
+                    pageUrl = GPLV3_URL,
+                    contentDescription = stringResource(id = R.string.about_license_title)
+                )
+                7 -> DividerSeparator(modifier = Modifier.padding(top = 16.dp, bottom = 6.dp))
+                8 -> TextWithOverline(title = R.string.about_contact_title, subtitle = "")
+                9 -> Row(
                     Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -137,11 +148,12 @@ fun AboutScreenContent(
                             .width(66.dp)
                             .height(66.dp))
                 }
-                9 -> DividerSeparator(modifier = Modifier.padding(vertical = 6.dp))
-                10 -> TextWithOverline(title = R.string.about_sourceCode_title, subtitle = "")
-                11 -> AboutImageWithLink(
+                10 -> DividerSeparator(modifier = Modifier.padding(vertical = 6.dp))
+                11 -> DonateConsider(onClick = onDonateConsiderClick)
+                12 -> TextWithOverline(title = R.string.about_sourceCode_title, subtitle = "")
+                13 -> AboutImageWithLink(
                     tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(86.dp),
+                    modifier = Modifier.height(66.dp),
                     imgId = R.drawable.ic_github,
                     pageUrl = GITHUB_URL,
                     contentDescription = stringResource(id = R.string.about_sourceCode_title)
@@ -282,6 +294,7 @@ fun PreviewAboutScreen() {
         userState = User.mockUser(),
         serverInfo = ServerInfo("some server", "6.78"),
         versionInfo = "0.11-beta (11)",
+        onDonateConsiderClick = {},
         donateButton = { DonateButtonContent(isExpanded = true, isTransparent = false) },
     )
 }

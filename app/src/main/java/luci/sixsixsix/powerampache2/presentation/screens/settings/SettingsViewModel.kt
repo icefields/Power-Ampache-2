@@ -46,6 +46,7 @@ import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.getVersionInfoString
+import luci.sixsixsix.powerampache2.common.openLinkInBrowser
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
@@ -62,7 +63,6 @@ class SettingsViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
     private val playlistManager: MusicPlaylistManager
 ) : AndroidViewModel(application) {
-    //var state by mutableStateOf(LocalSettings.defaultSettings())
     var state by savedStateHandle.saveable {
         mutableStateOf(SettingsState(appVersionInfoStr = getVersionInfoString(application)))
     }
@@ -88,37 +88,6 @@ class SettingsViewModel @Inject constructor(
     val serverInfoStateFlow = musicRepository.serverInfoStateFlow.filterNotNull()
 
     init {
-//        settingsRepository.settingsLiveData.distinctUntilChanged().observeForever { localSettings ->
-//            localSettings?.let { updatedSettings ->
-//                if (updatedSettings != state.localSettings)
-//                    state = state.copy( localSettings = updatedSettings)
-//            }
-//        }
-
-//        viewModelScope.launch {
-//            offlineModeFlow.collect {
-//                if (it != offlineModeState) {
-//                    offlineModeState = it
-//                }
-//                if (it) {
-//                    // reset errors when switching offline
-//                    playlistManager.updateUserMessage("")
-//                }
-//            }
-//        }
-
-//        viewModelScope.launch {
-//            musicRepository.userLiveData.observeForever {
-//                state = state.copy( user = it)
-//            }
-//        }
-
-//        viewModelScope.launch {
-//            musicRepository.serverInfoLiveData.observeForever {
-//                state = state.copy(serverInfo = it)
-//            }
-//        }
-
         // collect all the logs
         viewModelScope.launch {
             playlistManager.errorLogMessageState.collect { errorState ->
@@ -180,6 +149,9 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.OnOfflineToggle ->  viewModelScope.launch {
                 settingsRepository.toggleOfflineMode()
             }
+
+            SettingsEvent.goToWebsite ->
+                application.openLinkInBrowser(application.getString(R.string.website))
         }
     }
 

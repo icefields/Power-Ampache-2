@@ -63,6 +63,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
@@ -135,7 +136,8 @@ fun SignUpBottomSheet(
     var password by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var repeatPassword by rememberSaveable { mutableStateOf("") }
-    var url by rememberSaveable { mutableStateOf("") }
+    var url by rememberSaveable { mutableStateOf(BuildConfig.DEFAULT_SERVER_URL) }
+
     var fullName by rememberSaveable { mutableStateOf("") }
 
     var passwordErrorMessage by rememberSaveable { mutableStateOf("") }
@@ -145,6 +147,7 @@ fun SignUpBottomSheet(
     var repeatPasswordErrorMessage by rememberSaveable { mutableStateOf("") }
 
     val requiredFieldMessage = stringResource(id = R.string.loginScreen_signUp_requiredField)
+    val serverUrlVisible = BuildConfig.DEFAULT_SERVER_URL.isBlank()
 
     LazyColumn(
         modifier = modifier
@@ -154,34 +157,36 @@ fun SignUpBottomSheet(
         items(10) { index ->
             when(index) {
                 // URL
-                0 -> OutlinedTextField(
-                    value = url,
-                    onValueChange = {
-                        url = it
-                        if (it.isBlank()) {
-                            urlErrorMessage = requiredFieldMessage
-                        } else {
-                            urlErrorMessage = ""
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth().padding(bottom = 8.dp),
-                    label = {
-                        Text(text = stringResource(id = R.string.loginScreen_server_url))
-                    },
-                    supportingText = {
-                        if (urlErrorMessage.isNotBlank()) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = urlErrorMessage,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    maxLines = 1,
-                    isError = urlErrorMessage.isNotBlank(),
-                    singleLine = true
-                )
+                0 -> if (serverUrlVisible) {
+                    OutlinedTextField(
+                        value = url,
+                        onValueChange = {
+                            url = it
+                            if (it.isBlank()) {
+                                urlErrorMessage = requiredFieldMessage
+                            } else {
+                                urlErrorMessage = ""
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth().padding(bottom = 8.dp),
+                        label = {
+                            Text(text = stringResource(id = R.string.loginScreen_server_url))
+                        },
+                        supportingText = {
+                            if (urlErrorMessage.isNotBlank()) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = urlErrorMessage,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
+                        maxLines = 1,
+                        isError = urlErrorMessage.isNotBlank(),
+                        singleLine = true
+                    )
+                }
                 // USERNAME
                 1 -> OutlinedTextField(
                     value = username,

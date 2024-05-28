@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Power Ampache 2</string>
+    <string name="website" translatable="false">https://power.ampache.dev</string>
+
     <string name="notification_channel_name" translatable="false">Music Channel</string>
 
     <!-- Debug String, only used for development -->

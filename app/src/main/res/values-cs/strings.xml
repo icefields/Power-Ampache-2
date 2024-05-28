@@ -25,6 +25,7 @@
     <string name="loginScreen_login">Přihlásit</string>
     <string name="loginScreen_signup">Registrovat</string>
     <string name="loginScreen_demo_server">Ukázka</string>
+
     <string name="home_section_title_recent">Nedávo hrané</string>
     <string name="home_section_title_flagged">Oblíbené</string>
     <string name="home_section_title_frequent">Často hrané</string>
@@ -85,7 +86,8 @@
     <string name="player_buttonText_artist">Umělec</string>
     <string name="player_buttonText_album">Album</string>
     <string name="player_buttonText_add">Přidat</string>
-    <string name="player_buttonText_download">Stažené</string>
+    <string name="download">Stažené</string>
+    <string name="player_buttonText_download">@string/download</string>
     <string name="player_buttonText_share">Sdílet</string>
     <string name="player_buttonText_info">Info</string>
     <string name="player_queue_upNext">Následující</string>
@@ -119,7 +121,7 @@
 
     <!-- untranslated strings that might be translatable in other languages,
          ie. in italian: Server Musicale Dogmazic -->
-    <string name="loginScreen_dogmazic_server">Dogmazic Music Server</string>
+    <string name="loginScreen_dogmazic_server">Dogmazic Music Server DEMO</string>
     <string name="crash_mail_subject">Crash Report</string>
     <string name="crash_mail_body">Crash Report Data. Thanks</string>
     <string name="quality_high_subtitle">256kbps</string>
@@ -130,5 +132,8 @@
     <string name="settings_enableDebugLogging_title">Enable anonymous debug logging</string>
     <string name="settings_enableDebugLogging_subtitle">Will send crash and error stack-traces to the developer to fix issues with the app</string>
     <string name="about_flavour">Flavor</string>
+    <string name="about_considerDonating">Please consider donating to support the project. Links on the website:</string>
+    <string name="loginScreen_textFields_warning">Compatible with server versions 4 and above.\nTested on server version 6</string>
+    <string name="loginScreen_warning">To connect to your own server, download the full version of Power Ampache 2</string>
 
 </resources>
