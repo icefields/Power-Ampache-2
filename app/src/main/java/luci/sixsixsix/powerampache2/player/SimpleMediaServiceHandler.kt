@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
 import javax.inject.Inject
@@ -294,7 +295,7 @@ class SimpleMediaServiceHandler @Inject constructor(
             /*&& !player.isLoading  && !isUserNotEnabledException*/) {
             L("retryPlay STATE")
             player.prepare()
-            if (errorCounter++ % 3 == 0) {
+            if (errorCounter++ % Constants.config.playbackErrorRetries == 0) {
                 player.seekToNextMediaItem()
             }
         }

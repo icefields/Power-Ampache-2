@@ -1,0 +1,2 @@
+- Updated SDK libraries, including Jetpack (UI)
+- Bug fixes

@@ -50,6 +50,9 @@ data class Pa2ConfigDto(
     @SerializedName("loginWarning")
     val loginWarning: String? = null,
 
+    @SerializedName("playbackErrorRetries")
+    val playbackErrorRetries: Int? = null,
+
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
