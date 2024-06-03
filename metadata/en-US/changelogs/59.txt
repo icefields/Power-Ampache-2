@@ -1,2 +1,3 @@
 - Updated SDK libraries, including Jetpack (UI)
-- Bug fixes
+- Bug fixes (including song skipping with bad connection)
+- Changed network config to allow self-signed certificates
