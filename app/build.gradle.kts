@@ -10,7 +10,7 @@ plugins {
 }
 
 val composeVersion = "1.6.7" // rootProject.extra.get("compose_version") as String
-val lifecycleVersion = "2.8.0"
+val lifecycleVersion = "2.8.1"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
 val exoplayerVersion = "2.19.1"
@@ -55,9 +55,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 58
-        versionName = "1.00-58"
-        val versionQuote = "This version is powered by Pluto (the planet!)"
+        versionCode = 59
+        versionName = "1.00-59"
+        val versionQuote = "This version is powered by calico cats"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

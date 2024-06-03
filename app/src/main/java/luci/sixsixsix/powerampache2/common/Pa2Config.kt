@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.common
 import luci.sixsixsix.powerampache2.BuildConfig
 
 const val PLAYLIST_FETCH_LIMIT = 100
+const val PLAYBACK_ERRORS_RETRIES = 16
 const val PLAYLIST_ADD_NEW_ENABLE = true
 const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
 const val DOGMAZIC_USER = BuildConfig.DOGMAZIC_USER
@@ -47,5 +48,8 @@ data class Pa2Config(
     val forceLoginDialogsOnAllVersions: Boolean = BuildConfig.FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS,
 
     // custom text to show on the login form
-    val loginWarning: String = ""
+    val loginWarning: String = "",
+
+    // number of retries in case of playback errors
+    val playbackErrorRetries: Int = PLAYBACK_ERRORS_RETRIES
 )

@@ -33,6 +33,7 @@ import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
+import coil.util.DebugLogger
 import dagger.hilt.android.HiltAndroidApp
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -77,11 +78,11 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
         .placeholder(R.drawable.placeholder_album)
         .error(R.drawable.placeholder_album)
         .diskCachePolicy(CachePolicy.ENABLED)
-        .memoryCachePolicy(CachePolicy.DISABLED)
+        .memoryCachePolicy(CachePolicy.ENABLED)
         .networkCachePolicy(CachePolicy.ENABLED)
         .memoryCache {
             MemoryCache.Builder(this)
-                .maxSizePercent(0.01)
+                .maxSizePercent(0.02)
                 .strongReferencesEnabled(true)
                 .build()
         }

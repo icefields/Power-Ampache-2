@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.DOGMAZIC_USER
+import luci.sixsixsix.powerampache2.common.PLAYBACK_ERRORS_RETRIES
 import luci.sixsixsix.powerampache2.common.PLAYLIST_ADD_NEW_ENABLE
 import luci.sixsixsix.powerampache2.common.PLAYLIST_FETCH_LIMIT
 
@@ -50,6 +51,9 @@ data class Pa2ConfigDto(
     @SerializedName("loginWarning")
     val loginWarning: String? = null,
 
+    @SerializedName("playbackErrorRetries")
+    val playbackErrorRetries: Int? = null,
+
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
@@ -58,5 +62,6 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     dogmazicDemoUser = dogmazicDemoUser ?: DOGMAZIC_USER,
     playlistSongsFetchLimit = playlistSongsFetchLimit ?: PLAYLIST_FETCH_LIMIT,
     forceLoginDialogsOnAllVersions = forceLoginDialogsOnAllVersions ?: BuildConfig.FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS,
-    loginWarning = loginWarning ?: ""
+    loginWarning = loginWarning ?: "",
+    playbackErrorRetries = playbackErrorRetries ?: PLAYBACK_ERRORS_RETRIES
 )
