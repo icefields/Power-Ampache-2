@@ -82,7 +82,7 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
         .networkCachePolicy(CachePolicy.ENABLED)
         .memoryCache {
             MemoryCache.Builder(this)
-                .maxSizePercent(0.05)
+                .maxSizePercent(0.02)
                 .strongReferencesEnabled(true)
                 .build()
         }
