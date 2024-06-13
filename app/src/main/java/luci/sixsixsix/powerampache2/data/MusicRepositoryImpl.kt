@@ -86,13 +86,17 @@ class MusicRepositoryImpl @Inject constructor(
 ): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
     private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
+
     val serverVersionStateFlow = serverInfoStateFlow.mapNotNull { it.version }.distinctUntilChanged()
 
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
+
     override val userLiveData: Flow<User?> = dao.getUserLiveData().map {
         val cred = getCurrentCredentials()
-        val userEntity = it ?: dao.getUser(cred.username)
-        userEntity?.toUser() ?: UserWithCredentials(username = cred.username).toUser(cred.serverUrl)
+        if (cred.username.isNotBlank()) {
+            val userEntity = it ?: dao.getUser(cred.username)
+            userEntity?.toUser() ?: UserWithCredentials(username = cred.username).toUser(cred.serverUrl)
+        } else null
     }
 
     // used to check if a call to getUserNetwork() is necessary
@@ -135,9 +139,22 @@ class MusicRepositoryImpl @Inject constructor(
         dao.insertMultiUserSession(se.toMultiUserSessionEntity(username = cred.username, serverUrl = cred.serverUrl))
     }
 
-    private suspend fun setCredentials(se: CredentialsEntity) {
+    private suspend fun setCredentials(
+        username: String,
+        sha256password: String,
+        authToken: String,
+        serverUrl: String
+    ) {
+        val se: CredentialsEntity = CredentialsEntity(
+            username = username.lowercase(),
+            password = sha256password,
+            serverUrl = serverUrl.lowercase(),
+            authToken = authToken
+        )
         dao.updateCredentials(se)
-        dao.insertMultiUserCredentials(se.toMultiUserCredentialEntity())
+        if (username.isNotBlank()) {
+            dao.insertMultiUserCredentials(se.toMultiUserCredentialEntity())
+        }
     }
 
     /**
@@ -206,11 +223,10 @@ class MusicRepositoryImpl @Inject constructor(
         //   Save current credentials, so they can be picked up by the interceptor,
         // and for future autologin, this has to be first line of code before any network call
         setCredentials(
-            CredentialsEntity(username = usernameLow,
-                password = sha256password,
-                serverUrl = serverUrl.lowercase(),
-                authToken = authToken
-            )
+            username = usernameLow,
+            sha256password = sha256password,
+            serverUrl = serverUrl.lowercase(),
+            authToken = authToken
         )
         L("authorize CREDENTIALS ${getCredentials()}")
         val auth = tryAuthorize(usernameLow, sha256password, authToken, force)
@@ -220,8 +236,8 @@ class MusicRepositoryImpl @Inject constructor(
 
     @Throws(Exception::class)
     private suspend fun tryAuthorize(
-        username:String,
-        sha256password:String,
+        username: String,
+        sha256password: String,
         authToken: String,
         force: Boolean,
     ): Session {
@@ -241,6 +257,17 @@ class MusicRepositoryImpl @Inject constructor(
                     setSession(sess)
                 }
             }
+
+            if (authToken.isNotBlank()) {
+                // set the user manually because we won't have it from handshake if logged in with token
+                (auth.username ?: getUserNetwork()?.username)?.let { usernameNet ->
+                    setCredentials(
+                        username = usernameNet.lowercase(),
+                        sha256password = sha256password,
+                        serverUrl = getCurrentCredentials().serverUrl,
+                        authToken = authToken
+                    ) }
+            }
         }
 
         // try to get server info from ping and return the session from ping, otherwise return the
@@ -257,11 +284,11 @@ class MusicRepositoryImpl @Inject constructor(
     ): Flow<Resource<Any>> = flow {
         emit(Resource.Loading(true))
 
-        setCredentials(CredentialsEntity(
+        setCredentials(
             username = username,
-            password = sha256password,
+            sha256password = sha256password,
             serverUrl = serverUrl.lowercase(),
-            authToken = "")
+            authToken = ""
         )
 
         val resp = api.register(

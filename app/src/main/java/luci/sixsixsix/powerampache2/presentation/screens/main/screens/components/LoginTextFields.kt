@@ -70,17 +70,13 @@ fun LoginTextFields(
             .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal))
     ) {
         // do not show warning for pre-set url clients
-        if (BuildConfig.SHOW_LOGIN_SERVER_VERSION_WARNING && serverUrlVisible) {
+        if (BuildConfig.SHOW_LOGIN_SERVER_VERSION_WARNING && serverUrlVisible && !authTokenLoginEnabled) {
             val warningText = Constants.config.loginWarning.ifBlank {
                 stringResource(id = R.string.loginScreen_textFields_warning)
             }
 
             Text(
-                modifier = Modifier
-                    //.basicMarquee()
-                    .padding(top = 2.dp)
-                    .clickable {
-                    },
+                modifier = Modifier.padding(top = 2.dp).clickable { },
                 text = warningText,
                 fontSize = 14.sp,
                 lineHeight = 14.sp,

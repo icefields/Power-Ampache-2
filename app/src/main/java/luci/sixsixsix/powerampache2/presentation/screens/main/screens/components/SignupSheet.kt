@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main.screens.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -93,7 +92,7 @@ fun SignUpBottomDrawer(
 @Composable
 fun SignUpDialog(
     isSignUpSheetOpen: MutableState<Boolean>,
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit
+    onEvent: (AuthEvent) -> Unit
 ) {
     Dialog(
         properties = DialogProperties(
@@ -103,14 +102,10 @@ fun SignUpDialog(
         onDismissRequest = { isSignUpSheetOpen.value = false }
     )  {
         Card(
-//            border = BorderStroke(
-//                width = 0.dp,
-//                color = MaterialTheme.colorScheme.onSurface
-//            ),
+            //border = BorderStroke( width = 0.dp, color = MaterialTheme.colorScheme.onSurface),
             colors = CardDefaults.cardColors(
                 containerColor = colorResource(id = R.color.surfaceContainerDark)
             ),
-            //modifier = Modifier.padding(top = 16.dp),
             elevation = CardDefaults.cardElevation(5.dp),
             shape = RoundedCornerShape(10.dp)
         ) {

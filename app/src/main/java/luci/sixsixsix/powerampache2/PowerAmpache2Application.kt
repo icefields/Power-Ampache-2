@@ -74,7 +74,7 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
     }
 
     override fun newImageLoader(): ImageLoader = ImageLoader(this).newBuilder()
-        .crossfade(true)
+        .crossfade(200)
         .placeholder(R.drawable.placeholder_album)
         .error(R.drawable.placeholder_album)
         .diskCachePolicy(CachePolicy.ENABLED)
@@ -82,13 +82,13 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
         .networkCachePolicy(CachePolicy.ENABLED)
         .memoryCache {
             MemoryCache.Builder(this)
-                .maxSizePercent(0.02)
+                .maxSizePercent(0.12)
                 .strongReferencesEnabled(true)
                 .build()
         }
         .diskCache {
             DiskCache.Builder()
-                .maxSizePercent(0.08)
+                .maxSizePercent(0.10)
                 .directory(getDir("paimages", MODE_PRIVATE))
                 .build()
 

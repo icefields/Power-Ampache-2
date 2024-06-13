@@ -43,6 +43,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.AuthTokenCheckBox
 
@@ -134,7 +135,7 @@ private fun LoginForm(
             .background(color = colorResource(id = R.color.surfaceDark))
             .padding(top = 6.dp, bottom = 16.dp)
     ) {
-        if (BuildConfig.ENABLE_TOKEN_LOGIN) {
+        if (Constants.config.enableTokenLogin) {
             AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
         }
         LoginTextFields(
@@ -150,9 +151,11 @@ private fun LoginForm(
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
-        LoginButton(onEvent = {
-            isLoginSheetOpen.value = false
-            onEvent(it)
-        })
+        LoginButton(
+            onEvent = {
+                isLoginSheetOpen.value = false
+                onEvent(it)
+            }
+        )
     }
 }

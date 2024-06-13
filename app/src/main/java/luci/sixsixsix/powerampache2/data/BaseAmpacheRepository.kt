@@ -118,7 +118,8 @@ abstract class BaseAmpacheRepository(
         getSession()?.let { session ->
             val cred = getCurrentCredentials()
             try {
-                val userResponse = api.getUser(authKey = session.auth, username = cred.username)
+                val userResponse = api.getUser(authKey = session.auth,
+                    username = cred.username.ifBlank { null }) // do not pass blank variables to network call
                 // nextcloud and other services might not implement the user api
                 val isNotImplemented = userResponse.error?.toError()?.isNotImplemented() == true
                 val user = if (isNotImplemented) {

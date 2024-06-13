@@ -78,6 +78,8 @@ data class AuthDto(
     var version: String? = null,
     @SerializedName("compatible")
     var compatible: String? = null,
+    @SerializedName("username")
+    var username: String? = null,
 ): AmpacheBaseResponse()
 
 fun AuthDto.toServerInfo(): ServerInfo = ServerInfo(

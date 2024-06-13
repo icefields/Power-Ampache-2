@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.common
 
-import luci.sixsixsix.powerampache2.BuildConfig
 
 object Constants {
     // LOCAL DB

@@ -38,12 +38,14 @@ fun DefaultFullWidthButton(
     modifier: Modifier = Modifier,
     colours: ButtonColors = ButtonDefaults.outlinedButtonColors(),
     borderStrokeColour: Color? = null,
+    enabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     OutlinedButton(
         modifier = modifier
             .fillMaxWidth(),
         colors = colours,
+        enabled = enabled,
         border = borderStrokeColour?.let {
             BorderStroke(width = 1.dp, color = it)
         },

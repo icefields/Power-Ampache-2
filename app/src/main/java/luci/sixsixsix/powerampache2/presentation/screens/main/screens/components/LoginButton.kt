@@ -42,6 +42,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 
 @Composable
 fun LoginButton(
+    enabled: Boolean = true,
     onEvent: (AuthEvent) -> Unit
 ) {
     DefaultFullWidthButton(
@@ -52,6 +53,7 @@ fun LoginButton(
             containerColor = colorResource(id = R.color.loginScreen_loginButton_background),
             contentColor = colorResource(id = R.color.loginScreen_loginButton_foreground)
         ),
+        enabled = enabled,
         onClick = { onEvent(AuthEvent.Login) }
     ) {
         Icon(

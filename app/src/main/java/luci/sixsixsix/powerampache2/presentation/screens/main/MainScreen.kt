@@ -44,8 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.LOGIN_SCREEN_TIMEOUT
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
@@ -63,6 +61,7 @@ fun MainScreen(
     settingsViewModel: SettingsViewModel
 ) {
     val session by authViewModel.sessionStateFlow.collectAsState()
+    val user by authViewModel.userStateFlow.collectAsState()
     val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
     var offlineModeSwitchVisible by remember { mutableStateOf(false) }
     val shouldShowLoginScreen = !(session != null || offlineModeState)
@@ -71,7 +70,7 @@ fun MainScreen(
     LaunchedEffect(offlineModeSwitchVisible) {
         // wait 2 seconds before showing the switch
         delay(LOGIN_SCREEN_TIMEOUT)
-        offlineModeSwitchVisible = true
+        offlineModeSwitchVisible = user != null
     }
 
     LaunchedEffect(shouldShowLoginScreen) {
@@ -94,7 +93,7 @@ fun MainScreen(
             LoggedInScreen(mainViewModel, authViewModel, settingsViewModel)
             loginScreenVisible = false
         } else {
-            if (loginScreenVisible && shouldShowLoginScreen) {
+            if (loginScreenVisible && shouldShowLoginScreen && user == null) {
                 LoginScreen(viewModel = authViewModel)
             }
         }
@@ -122,6 +121,13 @@ private fun LoadingScreenWithOfflineSwitch(
             )
         }
         LoadingScreen()
+        Text(
+            modifier = Modifier
+                .padding(32.dp)
+                .wrapContentSize()
+                .align(Alignment.BottomCenter),
+            text = stringResource(id = R.string.loginScreen_loading_authenticating),
+            fontSize = 18.sp)
     }
 
 

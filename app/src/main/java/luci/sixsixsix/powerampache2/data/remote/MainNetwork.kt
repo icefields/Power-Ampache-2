@@ -98,7 +98,8 @@ interface MainNetwork {
     @GET("json.server.php?action=user")
     suspend fun getUser(
         @Query("auth") authKey: String,
-        @Query("username") username: String): UserDto
+        @Query("username") username: String? = null
+    ): UserDto
 
     @GET("json.server.php?action=search_songs")
     suspend fun getSongs(
@@ -138,6 +139,30 @@ interface MainNetwork {
     suspend fun getPlaylists(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
+        @Query("filter") filter: String = "",
+        @Query("exact") exact: Int = 0,
+        @Query("offset") offset: Int = 0,
+        @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
+        @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true, ignore 'api_hide_dupe_searches' setting)
+    ): PlaylistsResponse
+
+    @GET("json.server.php?action=user_playlists")
+    suspend fun getUserPlaylists(
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 0,
+        @Query("user") user: String? = null,
+        @Query("filter") filter: String = "",
+        @Query("exact") exact: Int = 0,
+        @Query("offset") offset: Int = 0,
+        @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
+        @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true, ignore 'api_hide_dupe_searches' setting)
+    ): PlaylistsResponse
+
+    @GET("json.server.php?action=user_smartlists")
+    suspend fun getUserSmartlists(
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 0,
+        @Query("user") user: String? = null,
         @Query("filter") filter: String = "",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,

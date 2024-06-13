@@ -23,10 +23,10 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.BuildConfig
-import luci.sixsixsix.powerampache2.common.DOGMAZIC_USER
 import luci.sixsixsix.powerampache2.common.PLAYBACK_ERRORS_RETRIES
 import luci.sixsixsix.powerampache2.common.PLAYLIST_ADD_NEW_ENABLE
 import luci.sixsixsix.powerampache2.common.PLAYLIST_FETCH_LIMIT
+import luci.sixsixsix.powerampache2.common.PLAYLIST_SONGS_FETCH_LIMIT
 
 import luci.sixsixsix.powerampache2.common.Pa2Config
 import luci.sixsixsix.powerampache2.common.RESET_QUEUE_ON_NEW_SESSION
@@ -54,14 +54,29 @@ data class Pa2ConfigDto(
     @SerializedName("playbackErrorRetries")
     val playbackErrorRetries: Int? = null,
 
+    @SerializedName("enableTokenLogin")
+    val enableTokenLogin: Boolean? = null,
+
+    @SerializedName("dogmazicDemoToken")
+    val dogmazicDemoToken: String? = null,
+
+    @SerializedName("dogmazicDemoUrl")
+    val dogmazicDemoUrl: String? = null,
+
+    @SerializedName("playlistFetchLimit")
+    val playlistFetchLimit: Int? = null,
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     playlistAddNewEnable = playlistAddNewEnable ?: PLAYLIST_ADD_NEW_ENABLE,
     queueResetOnNewSession = queueResetOnNewSession ?: RESET_QUEUE_ON_NEW_SESSION,
-    dogmazicDemoUser = dogmazicDemoUser ?: DOGMAZIC_USER,
-    playlistSongsFetchLimit = playlistSongsFetchLimit ?: PLAYLIST_FETCH_LIMIT,
+    dogmazicDemoUser = dogmazicDemoUser ?: BuildConfig.DOGMAZIC_USER,
+    playlistSongsFetchLimit = playlistSongsFetchLimit ?: PLAYLIST_SONGS_FETCH_LIMIT,
     forceLoginDialogsOnAllVersions = forceLoginDialogsOnAllVersions ?: BuildConfig.FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS,
     loginWarning = loginWarning ?: "",
-    playbackErrorRetries = playbackErrorRetries ?: PLAYBACK_ERRORS_RETRIES
+    playbackErrorRetries = playbackErrorRetries ?: PLAYBACK_ERRORS_RETRIES,
+    enableTokenLogin = enableTokenLogin ?: BuildConfig.ENABLE_TOKEN_LOGIN,
+    dogmazicDemoToken = BuildConfig.DOGMAZIC_TOKEN,
+    dogmazicDemoUrl = BuildConfig.DOGMAZIC_URL,
+    playlistFetchLimit = playlistFetchLimit ?: PLAYLIST_FETCH_LIMIT,
 )

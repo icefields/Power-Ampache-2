@@ -109,8 +109,14 @@ class PlaylistsRepositoryImpl @Inject constructor(
             }
         }
 
+        if (query.isNullOrBlank()) {
+            // fetch user and admin playlists to quick load user's playlists before everyone else's
+            getUserPlaylists()
+        }
+
         val cred = getCurrentCredentials()
         val user = cred.username
+
         val playlistNetwork = getPlaylistsNetwork(authToken(), user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
         val playlistNetworkEntities = playlistNetwork.map { it.toPlaylistEntity(username = user, serverUrl = cred.serverUrl) }
 
@@ -125,6 +131,41 @@ class PlaylistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylists()", e, this) }
 
+    private suspend fun getUserPlaylists() {
+        val cred = getCurrentCredentials()
+
+        // first get user playlists and save to database, saving to db will trigger the flow
+        try {
+            api.getUserPlaylists(authToken()).playlist
+                ?.map { it.toPlaylist() }
+                ?.map { it.toPlaylistEntity(cred.username, cred.serverUrl) }?.let { userPlaylists ->
+                    dao.insertPlaylists(userPlaylists)
+                }
+        } catch (e: Exception) { L.e(e) }
+        try {
+            api.getUserSmartlists(authToken()).playlist
+                ?.map { it.toPlaylist() }
+                ?.map { it.toPlaylistEntity(cred.username, cred.serverUrl) }?.let { userPlaylists ->
+                    dao.insertPlaylists(userPlaylists)
+                }
+        } catch (e: Exception) { L.e(e) }
+        // fetch admin playlists
+        try {
+            api.getUserPlaylists(authToken(), user = "admin").playlist
+                ?.map { it.toPlaylist() }
+                ?.map { it.toPlaylistEntity(cred.username, cred.serverUrl) }?.let { userPlaylists ->
+                    dao.insertPlaylists(userPlaylists)
+                }
+        } catch (e: Exception) { L.e(e) }
+        try {
+            api.getUserSmartlists(authToken(), user = "admin").playlist
+                ?.map { it.toPlaylist() }
+                ?.map { it.toPlaylistEntity(cred.username, cred.serverUrl) }?.let { userPlaylists ->
+                    dao.insertPlaylists(userPlaylists)
+                }
+        } catch (e: Exception) { L.e(e) }
+    }
+
     private suspend fun getPlaylistsNetwork(
         auth: String,
         username: String,
@@ -138,7 +179,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         var isMoreAvailable = false
         do {
             val response = try {
-                api.getPlaylists(auth, filter = query, offset = off)
+                api.getPlaylists(auth, filter = query, offset = off, limit = Constants.config.playlistFetchLimit)
             } catch (e: Exception) {
                 if (!fetchAll) throw e
                 PlaylistsResponse(totalCount = 0, playlist = listOf())
