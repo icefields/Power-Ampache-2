@@ -21,6 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.common
 
+import luci.sixsixsix.powerampache2.BuildConfig
+
 
 object Constants {
     // LOCAL DB
@@ -91,6 +93,6 @@ object Constants {
     const val DOGMAZIC_FAKE_CITY = "Aoshima"
 
     // fetch this from remote config or initialize locally
-    const val CONFIG_URL = "https://icefields.github.io/powerampache/config.json"
+    const val CONFIG_URL = "https://icefields.github.io/powerampache/${BuildConfig.REMOTE_CONFIG_FILE}"
     var config = Pa2Config()
 }

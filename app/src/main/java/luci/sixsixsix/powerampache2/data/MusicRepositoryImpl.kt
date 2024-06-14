@@ -50,7 +50,6 @@ import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toUser
 import luci.sixsixsix.powerampache2.data.local.models.UserWithCredentials
 import luci.sixsixsix.powerampache2.data.local.models.toUser
-import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toGenre
@@ -129,6 +128,7 @@ class MusicRepositoryImpl @Inject constructor(
         Constants.config = try {
             api.getConfig().toPa2Config()
         } catch (e: Exception) {
+            L.e(e)
             Pa2Config()
         }
     }
@@ -165,7 +165,7 @@ class MusicRepositoryImpl @Inject constructor(
     override suspend fun ping(): Resource<Pair<ServerInfo, Session?>> =
         try {
             val dbSession = getSession()
-            val pingResponse = api.ping(dbSession?.auth ?: "")
+            val pingResponse = api.ping(authKey = dbSession?.auth)
 
             // Updated session only valid of previous session exists, authorize otherwise
             dbSession?.let { cachedSession ->

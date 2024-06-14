@@ -82,6 +82,7 @@ android {
         buildConfigField("String", "DEFAULT_SERVER_URL", "\"\"")
         buildConfigField("boolean", "FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS", "true")
         buildConfigField("boolean", "DEMO_VERSION", "false")
+        buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config.json\"")
     }
 
     buildTypes {
@@ -199,6 +200,7 @@ android {
             buildConfigField("String", "DEFAULT_SERVER_URL", dogmazicUrl)
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+            buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config-dogmazic.json\"")
         }
     }
 

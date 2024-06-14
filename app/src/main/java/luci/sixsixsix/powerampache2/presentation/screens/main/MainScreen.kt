@@ -93,7 +93,7 @@ fun MainScreen(
             LoggedInScreen(mainViewModel, authViewModel, settingsViewModel)
             loginScreenVisible = false
         } else {
-            if (loginScreenVisible && shouldShowLoginScreen && user == null) {
+            if (loginScreenVisible && shouldShowLoginScreen) {
                 LoginScreen(viewModel = authViewModel)
             }
         }

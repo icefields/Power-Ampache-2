@@ -29,6 +29,12 @@ const val PLAYLIST_FETCH_LIMIT = 0
 const val PLAYLIST_ADD_NEW_ENABLE = true
 const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
 
+const val PLAYLISTS_USER_FETCH = true
+const val SMARTLISTS_USER_FETCH = true
+const val PLAYLISTS_ADMIN_FETCH = true
+const val SMARTLISTS_ADMIN_FETCH = true
+const val PLAYLISTS_ALL_SERVER_FETCH = true
+
 data class Pa2Config(
     // use new fast method for adding albums and playlists to playlist
     val playlistAddNewEnable: Boolean = PLAYLIST_ADD_NEW_ENABLE,
@@ -61,4 +67,15 @@ data class Pa2Config(
 
     val dogmazicDemoToken: String = BuildConfig.DOGMAZIC_TOKEN,
     val dogmazicDemoUrl: String = BuildConfig.DOGMAZIC_URL,
+
+    // fetch user playlists before fetching the bulk of all server playlists
+    val playlistsUserFetch: Boolean = PLAYLISTS_USER_FETCH,
+    // fetch user smartlists before fetching the bulk of all server playlists
+    val smartlistsUserFetch: Boolean = SMARTLISTS_USER_FETCH,
+    // fetch admin playlists only before fetching the bulk of all server playlists
+    val playlistsAdminFetch: Boolean = PLAYLISTS_ADMIN_FETCH,
+    // fetch admin smartlists only before fetching the bulk of all server playlists
+    val smartlistsAdminFetch: Boolean = SMARTLISTS_ADMIN_FETCH,
+    // fetch all playlists from server
+    val playlistsServerAllFetch: Boolean = PLAYLISTS_ALL_SERVER_FETCH,
 )

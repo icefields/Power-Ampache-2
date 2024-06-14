@@ -135,9 +135,6 @@ private fun LoginForm(
             .background(color = colorResource(id = R.color.surfaceDark))
             .padding(top = 6.dp, bottom = 16.dp)
     ) {
-        if (Constants.config.enableTokenLogin) {
-            AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
-        }
         LoginTextFields(
             username = username,
             password = password,
@@ -150,6 +147,9 @@ private fun LoginForm(
                 .wrapContentHeight()
                 .fillMaxWidth()
         )
+        if (Constants.config.enableTokenLogin) {
+            AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
+        }
         Spacer(modifier = Modifier.height(10.dp))
         LoginButton(
             onEvent = {

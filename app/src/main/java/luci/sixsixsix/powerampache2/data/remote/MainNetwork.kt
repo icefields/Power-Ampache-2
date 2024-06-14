@@ -66,7 +66,7 @@ interface MainNetwork {
     ): AuthDto
 
     @GET("json.server.php?action=ping")
-    suspend fun ping(@Query("auth") authKey: String = ""): AuthDto
+    suspend fun ping(@Query("auth") authKey: String? = null): AuthDto
 
     // TODO: this is not working
     @GET("{fullUrl}")
@@ -105,7 +105,7 @@ interface MainNetwork {
     suspend fun getSongs(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_SONGS,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
     ): SongsResponse // TODO remove default values
@@ -114,10 +114,10 @@ interface MainNetwork {
     suspend fun getAlbums(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
-        @Query("include") include: String = "", // albums, songs (includes track list)
+        @Query("include") include: String? = null, // albums, songs (includes track list)
     ): AlbumsResponse // TODO remove default values
 
     /**
@@ -128,18 +128,18 @@ interface MainNetwork {
     suspend fun getArtists(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_ARTISTS,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("album_artist") albumArtist: Int = 1,
         @Query("offset") offset: Int = 0,
-        @Query("include") include: String = "", // albums, songs (includes track list)
+        @Query("include") include: String? = null, // albums, songs (includes track list)
     ): ArtistsResponse
 
     @GET("json.server.php?action=playlists")
     suspend fun getPlaylists(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
@@ -151,7 +151,7 @@ interface MainNetwork {
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
         @Query("user") user: String? = null,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
@@ -163,7 +163,7 @@ interface MainNetwork {
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
         @Query("user") user: String? = null,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
@@ -180,7 +180,7 @@ interface MainNetwork {
     suspend fun getArtistInfo(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
-        @Query("filter") artistId: String = "",
+        @Query("filter") artistId: String,
         @Query("offset") offset: Int = 0,
     ): ArtistDto
 
@@ -188,7 +188,7 @@ interface MainNetwork {
     suspend fun getAlbumInfo(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
-        @Query("filter") albumId: String = "",
+        @Query("filter") albumId: String,
         @Query("offset") offset: Int = 0,
     ): AlbumDto
 
@@ -196,7 +196,7 @@ interface MainNetwork {
     suspend fun getAlbumsFromArtist(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
-        @Query("filter") artistId: String = "",
+        @Query("filter") artistId: String,
         @Query("offset") offset: Int = 0,
     ): AlbumsResponse
 
@@ -204,7 +204,7 @@ interface MainNetwork {
     suspend fun getSongsFromAlbum(
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
-        @Query("filter") albumId: String = "",
+        @Query("filter") albumId: String,
         @Query("offset") offset: Int = 0,
     ): SongsResponse
 
@@ -213,7 +213,7 @@ interface MainNetwork {
         @Query("auth") authKey: String,
         @Query("limit") limit: Int = 0,
         @Query("random") random: Int = 0, // integer 0, 1 (if true get random songs using limit)
-        @Query("filter") albumId: String = "",
+        @Query("filter") albumId: String,
         @Query("offset") offset: Int = 0,
     ): SongsResponse
 
@@ -315,7 +315,7 @@ interface MainNetwork {
     @GET("json.server.php?action=genres")
     suspend fun getGenres(
         @Query("auth") authKey: String,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("limit") limit: Int = 0
@@ -327,7 +327,7 @@ interface MainNetwork {
     @GET("json.server.php?action=tags")
     suspend fun getTags(
         @Query("auth") authKey: String,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("limit") limit: Int = 0
@@ -345,7 +345,7 @@ interface MainNetwork {
     @GET("json.server.php?action=genre_artists")
     suspend fun getArtistsByGenre(
         @Query("auth") authKey: String,
-        @Query("filter") filter: String = "",
+        @Query("filter") filter: String,
         @Query("offset") offset: Int = 0,
         @Query("limit") limit: Int = 0
     ): ArtistsResponse
@@ -363,7 +363,7 @@ interface MainNetwork {
     @GET("json.server.php?action=genre_songs")
     suspend fun getSongsByGenre(
         @Query("auth") authKey: String,
-        @Query("filter") genreId: String = "",
+        @Query("filter") genreId: String,
         @Query("offset") offset: Int = 0,
         @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
     ): SongsResponse
@@ -381,7 +381,7 @@ interface MainNetwork {
     suspend fun createShare(
         @Query("auth") authKey: String,
         @Query("filter") id: String,
-        @Query("description") description: String = "",
+        @Query("description") description: String? = null,
         @Query("expires") expires: Int = 7,
         @Query("type") type: Type
     ): ShareDto
@@ -421,9 +421,9 @@ interface MainNetwork {
         @Query("song") song: String,
         @Query("artist") artist: String,
         @Query("album") album: String,
-        @Query("songmbid") songMbid: String = "",
-        @Query("artistmbid") artistMbid: String = "",
-        @Query("albummbid") albumMbid: String = "",
+        @Query("songmbid") songMbid: String? = null,
+        @Query("artistmbid") artistMbid: String? = null,
+        @Query("albummbid") albumMbid: String? = null,
         //@Query("date") date: Int = 0
     ): SuccessResponse
 
