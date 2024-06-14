@@ -83,7 +83,8 @@ sealed class Servers(
     data object Dogmazic: Servers(
         url = Constants.config.dogmazicDemoUrl,
         user = Constants.config.dogmazicDemoUser,
-        password = DOGMAZIC_PASSWORD
+        password = DOGMAZIC_PASSWORD,
+        apiKey = Constants.config.dogmazicDemoToken
     )
 
     /**
