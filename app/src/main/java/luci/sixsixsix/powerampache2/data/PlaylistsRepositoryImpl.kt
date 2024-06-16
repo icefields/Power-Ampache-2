@@ -120,15 +120,14 @@ class PlaylistsRepositoryImpl @Inject constructor(
         if (Constants.config.playlistsServerAllFetch) {
             val playlistNetwork =
                 getPlaylistsNetwork(authToken(), user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
-            val playlistNetworkEntities = playlistNetwork.map {
-                it.toPlaylistEntity(
-                    username = user,
-                    serverUrl = cred.serverUrl
-                )
-            }
+            val playlistNetworkEntities =
+                playlistNetwork.map {
+                    it.toPlaylistEntity(username = user, serverUrl = cred.serverUrl)
+                }
 
             if (query.isNullOrBlank() &&
                 offset == 0 &&
+                playlistNetwork.isNotEmpty() && // TODO: check for network errors instead of empty list
                 (!AmpacheModel.listsHaveSameElements(playlistNetwork, dbList.map { it.toPlaylist() }))
             ) {
                 L("aaaa", "lists don't have same elements")
