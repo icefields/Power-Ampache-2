@@ -135,5 +135,7 @@
     <string name="about_considerDonating">Please consider donating to support the project. Links on the website:</string>
     <string name="loginScreen_textFields_warning">Compatible with server versions 4 and above.\nTested on server version 6</string>
     <string name="loginScreen_warning">To connect to your own server, download the full version of Power Ampache 2</string>
+    <string name="loginScreen_loading_authenticating">Connecting …</string>
+    <string name="loginScreen_auth_token_warning">Auth Token Login works with servers 6.4 and up</string>
 
 </resources>

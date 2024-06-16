@@ -9,8 +9,8 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val composeVersion = "1.6.7" // rootProject.extra.get("compose_version") as String
-val lifecycleVersion = "2.8.1"
+val composeVersion = "1.6.8" // rootProject.extra.get("compose_version") as String
+val lifecycleVersion = "2.8.2"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
 val exoplayerVersion = "2.19.1"
@@ -39,6 +39,7 @@ android {
     val ampacheUrlLocal = properties.getProperty("LOCAL_STABLE_URL")
     val dogmazicUrl = properties.getProperty("DOGMAZIC_URL")
     val dogmazicPass = properties.getProperty("DOGMAZIC_PASSWORD")
+    val dogmazicToken = properties.getProperty("DOGMAZIC_TOKEN")
     val dogmazicUser = properties.getProperty("DOGMAZIC_USER")
     val dogmazicEmail = properties.getProperty("DOGMAZIC_EMAIL")
     val errorLogUrl = properties.getProperty("URL_ERROR_LOG")
@@ -55,9 +56,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 59
-        versionName = "1.00-59"
-        val versionQuote = "This version is powered by calico cats"
+        versionCode = 60
+        versionName = "1.00-60"
+        val versionQuote = "This version is powered by calico cats (60)"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -77,9 +78,11 @@ android {
         buildConfigField("String", "DEBUG_LOCAL_STABLE_URL", ampacheUrlLocal)
         buildConfigField("String", "DEBUG_LOCAL_DEVELOPMENT_URL", localDevUrl)
         buildConfigField("String", "DOGMAZIC_URL", dogmazicUrl)
+        buildConfigField("String", "DOGMAZIC_TOKEN", dogmazicToken)
         buildConfigField("String", "DEFAULT_SERVER_URL", "\"\"")
         buildConfigField("boolean", "FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS", "true")
         buildConfigField("boolean", "DEMO_VERSION", "false")
+        buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config.json\"")
     }
 
     buildTypes {
@@ -90,7 +93,7 @@ android {
             // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "true")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
-            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
+            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "true")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
@@ -121,7 +124,7 @@ android {
             // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "false")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
-            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
+            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "true")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
@@ -197,6 +200,7 @@ android {
             buildConfigField("String", "DEFAULT_SERVER_URL", dogmazicUrl)
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+            buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config-dogmazic.json\"")
         }
     }
 
