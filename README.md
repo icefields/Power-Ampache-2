@@ -30,7 +30,7 @@ Android music client for <a target="_blank" href="https://ampache.org/"> Ampache
 </h2>
 <p style="text-align: center;">
 Power Ampache 2 is a complete Android Music Streaming App suite, presented in <a target="_blank" href="https://m3.material.io/">Material You</a> style.
-<br>Connects to Ampache, Nextcloud and Subsonic backends (Ampache API 4 and above).
+<br>Connects to Ampache, Nextcloud Music and compatible backends. (Ampache API 4 and above).
 </p>
 <table>
     <tr>
@@ -74,7 +74,7 @@ Power Ampache 2 is a complete Android Music Streaming App suite, presented in <a
 | | | | |
 
 ## Features
-Feature rich music client for Ampache, Subsonic, Nextcloud backends, provides all the features found in  other mainstream music player (such as Spotify, Youtube Music, Apple Music and so on) and more, like "actually" downloading and exporting music files, lyrics, multiaccount. Plus no ads, no tracking, no bloatware.
+Feature rich music client for Ampache, Nextcloud Music and compatible backends, provides all the features found in  other mainstream music player (such as Spotify, Youtube Music, Apple Music and so on) and more, like "actually" downloading and exporting music files, lyrics, multiaccount. Plus no ads, no tracking, no bloatware.
 - MaterialYou Themes, the colour of the app will automatically match the colour scheme of your device, alternatively choose or create your own theme.
 - Unique generated playlists (smartlists)
 - Dark & light mode with adaptive interface colors
