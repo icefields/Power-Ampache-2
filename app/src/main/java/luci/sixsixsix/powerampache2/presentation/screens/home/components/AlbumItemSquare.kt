@@ -48,7 +48,7 @@ fun AlbumItemSquare(
     imageSize: Dp = dimensionResource(id = R.dimen.home_album_item_image_size_default),
     album: Album
 ) {
-    val paddingHorizontal = 6.dp
+    val paddingHorizontal = dimensionResource(id = R.dimen.home_album_item_image_text_padding)
     val width = imageSize + paddingHorizontal + paddingHorizontal
     Column(
         modifier = modifier

@@ -138,41 +138,23 @@ fun SectionRow(
                             is Album -> AlbumItemSquare(
                                 modifier = itemModifier
                                     .clickable {
-                                        navigator.navigate(
-                                            AlbumDetailScreenDestination(
-                                                item.id,
-                                                item
-                                            )
-                                        )
+                                        navigator.navigate(AlbumDetailScreenDestination(item.id, item))
                                     },
                                 imageSize = if (albumsRowItems is HomeScreenRowItems.Recent)
-                                    dimensionResource(id = R.dimen.home_album_item_image_size_recent)
-                                else dimensionResource(id = R.dimen.home_album_item_image_size_default),
+                                        dimensionResource(id = R.dimen.home_album_item_image_size_recent)
+                                    else dimensionResource(id = R.dimen.home_album_item_image_size_default),
                                 album = item
                             )
-                            is Artist -> {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-
-                                    ArtistItem(
-                                        modifier = Modifier
-                                            .clickable {
-                                                Ampache2NavGraphs.navigateToArtist(item.id, item)
-                                            }
-                                            .size(if (albumsRowItems is HomeScreenRowItems.Recent)
-                                                dimensionResource(id = R.dimen.home_album_item_image_size_recent)
-                                            else dimensionResource(id = R.dimen.home_album_item_image_size_default))
-                                            .padding(6.dp),
-                                        artist = item
-                                    )
-                                    HomeItemText(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        title = item.name,
-                                        subtitle = stringResource(id = R.string.home_artist_subtitle_item)
-                                    )
-                                }
-                            }
+                            is Artist -> ArtistItemSquare(
+                                modifier = Modifier
+                                    .clickable {
+                                        Ampache2NavGraphs.navigateToArtist(item.id, item)
+                                    },
+                                imageSize = if (albumsRowItems is HomeScreenRowItems.Recent)
+                                        dimensionResource(id = R.dimen.home_album_item_image_size_recent)
+                                    else dimensionResource(id = R.dimen.home_album_item_image_size_default),
+                                item = item
+                            )
                         }
                     }
                 }
