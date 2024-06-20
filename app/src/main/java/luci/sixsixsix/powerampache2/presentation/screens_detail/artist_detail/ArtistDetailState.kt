@@ -29,5 +29,6 @@ data class ArtistDetailState (
     val albums: List<Album> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
+    val isLikeLoading: Boolean = false,
     val isFetchingMore: Boolean = false
 )

@@ -55,7 +55,8 @@ import luci.sixsixsix.powerampache2.domain.models.Artist
 @Composable
 fun ArtistItem(
     artist: Artist,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showText: Boolean = true
 ) {
     Column(
         modifier = modifier,
@@ -81,29 +82,31 @@ fun ArtistItem(
             )
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = artist.name,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp,
-            lineHeight = (14).sp,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(1.dp))
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            if (artist.songCount > 0) {
-                Text(
-                    modifier = Modifier.basicMarquee(),
-                    text = artistSubtitle(artist.songCount, artist.albumCount),
-                    fontStyle = FontStyle.Italic,
-                    fontSize = 9.sp,
-                    maxLines = 1,
-                )
+        if (showText) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = artist.name,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                lineHeight = (14).sp,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(1.dp))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (artist.songCount > 0) {
+                    Text(
+                        modifier = Modifier.basicMarquee(),
+                        text = artistSubtitle(artist.songCount, artist.albumCount),
+                        fontStyle = FontStyle.Italic,
+                        fontSize = 9.sp,
+                        maxLines = 1,
+                    )
+                }
             }
         }
     }

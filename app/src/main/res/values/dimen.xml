@@ -60,6 +60,7 @@
     <dimen name="player_buttonTitle_fontSize">11sp</dimen>
     <dimen name="player_controls_spacing">16dp</dimen>
 
+    <dimen name="home_album_item_image_text_padding">6dp</dimen>
     <dimen name="home_album_item_image_size_default">150dp</dimen>
     <dimen name="home_album_item_image_size_recent">120dp</dimen>
 

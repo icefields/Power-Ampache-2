@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
@@ -39,7 +40,8 @@ import luci.sixsixsix.powerampache2.common.fontDimensionResource
 @Composable fun HomeItemText(
     title: String, subtitle: String,
     modifier: Modifier = Modifier,
-    horizontalAlignment: Alignment.Horizontal = Alignment.Start
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    textAlign: TextAlign = TextAlign.Start
 ) {
     Column(
         modifier = modifier
@@ -52,12 +54,14 @@ import luci.sixsixsix.powerampache2.common.fontDimensionResource
             fontSize = fontDimensionResource(id = R.dimen.home_album_title_fontSize),
             fontWeight = FontWeight.SemiBold,
             maxLines = 2,
+            textAlign = textAlign,
             lineHeight = fontDimensionResource(id = R.dimen.home_album_title_lineHeight)
         )
 
         Text(
             modifier = Modifier.basicMarquee(),
             text = subtitle,
+            textAlign = textAlign,
             fontSize = fontDimensionResource(id = R.dimen.home_album_artist_fontSize),
             fontWeight = FontWeight.Normal
         )
