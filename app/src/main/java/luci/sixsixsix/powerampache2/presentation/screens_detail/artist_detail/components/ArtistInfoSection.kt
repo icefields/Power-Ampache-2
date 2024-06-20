@@ -22,11 +22,14 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -45,11 +48,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AttributeText
+import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
+import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AttributeText
 
 enum class ArtistInfoViewEvents {
-    SHARE_ARTIST
+    SHARE_ARTIST,
+    FAVOURITE_ARTIST
 }
 
 @Composable
@@ -57,6 +62,7 @@ fun ArtistInfoSection(
     modifier: Modifier,
     artist: Artist,
     summaryOpen: MutableState<Boolean>,
+    isLikeLoading: Boolean,
     eventListener: (albumInfoViewEvents: ArtistInfoViewEvents) -> Unit
 ) {
     Column(modifier = modifier) {
@@ -76,13 +82,27 @@ fun ArtistInfoSection(
             )
         }
         Spacer(modifier = Modifier.height(2.dp))
-        if (artist.songCount > 0) {
-            AttributeText(
-                modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
-                title = stringResource(id = R.string.albumDetailScreen_infoSection_songs),
-                name = "${artist.songCount}"
-            )
+
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            if (artist.songCount > 0) {
+                AttributeText(
+                    modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
+                    title = stringResource(id = R.string.albumDetailScreen_infoSection_songs),
+                    name = "${artist.songCount}"
+                )
+            }
+
+            LikeButton(
+                modifier = Modifier.size(32.dp),
+                isLikeLoading = isLikeLoading, isFavourite = artist.flag == 1) {
+                eventListener(ArtistInfoViewEvents.FAVOURITE_ARTIST)
+            }
         }
+
         Spacer(modifier = Modifier.height(12.dp))
         if (!artist.summary.isNullOrBlank()) {
             Text( // name
@@ -112,6 +132,7 @@ fun ArtistInfoSectionPreview() {
         Modifier,
         Artist.mockArtist(),
         eventListener = {},
+        isLikeLoading = false,
         summaryOpen = remember { mutableStateOf(true) }
     )
 }

@@ -1,4 +1,4 @@
-Power Ampache 2 is a feature-rich music client designed for Ampache, Subsonic, and Nextcloud backends. It offers all the features found in other mainstream music players, such as Spotify, YouTube Music, and Apple Music, and more. With Power Ampache 2, enjoy "actually" downloading and exporting music files, access to lyrics, multi-account support, and an ad-free, tracking-free experience.
+Power Ampache 2 is a feature-rich music client designed for Ampache, Nextcloud Music and compatible backends. It offers all the features found in other mainstream music players, such as Spotify, YouTube Music, and Apple Music, and more. With Power Ampache 2, enjoy "actually" downloading and exporting music files, access to lyrics, multi-account support, and an ad-free, tracking-free experience.
 
 Please let me know if you encounter any issue, I'll be happy to fix any reported bug.
 

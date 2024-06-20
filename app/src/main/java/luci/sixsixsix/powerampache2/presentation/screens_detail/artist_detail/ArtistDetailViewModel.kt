@@ -35,6 +35,7 @@ import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import javax.inject.Inject
+import kotlin.math.abs
 
 @HiltViewModel
 class ArtistDetailViewModel @Inject constructor(
@@ -65,7 +66,25 @@ class ArtistDetailViewModel @Inject constructor(
             is ArtistDetailEvent.Fetch -> {
                 getAlbumsFromArtist(artistId = event.albumId, fetchRemote = true)
             }
+
+            ArtistDetailEvent.OnFavouriteArtist -> favouriteArtist()
         }
+    }
+
+    private fun favouriteArtist(artistId: String = state.artist.id) = viewModelScope.launch {
+        artistsRepository.likeArtist(artistId, (state.artist.flag != 1))
+            .collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            // refresh artist
+                            state = state.copy(artist = state.artist.copy(flag = abs(state.artist.flag - 1)))
+                        }
+                    }
+                    is Resource.Error -> state = state.copy(isLikeLoading = false)
+                    is Resource.Loading -> state = state.copy(isLikeLoading = result.isLoading)
+                }
+            }
     }
 
     private fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true) {

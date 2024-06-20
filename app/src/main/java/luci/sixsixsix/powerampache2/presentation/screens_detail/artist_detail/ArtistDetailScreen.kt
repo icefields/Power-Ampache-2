@@ -71,6 +71,7 @@ import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumItem
+import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.AlbumDetailEvent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistInfoViewEvents
@@ -175,9 +176,12 @@ fun ArtistDetailScreen(
                             .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         artist = state.artist,
                         summaryOpen = summaryOpen,
+                        isLikeLoading = state.isLikeLoading,
                         eventListener = { event ->
                             when(event) {
                                 ArtistInfoViewEvents.SHARE_ARTIST -> { }
+                                ArtistInfoViewEvents.FAVOURITE_ARTIST ->
+                                    viewModel.onEvent(ArtistDetailEvent.OnFavouriteArtist)
                             }
                         }
                     )
