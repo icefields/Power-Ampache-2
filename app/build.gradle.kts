@@ -56,7 +56,7 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 61
+        versionCode = 63
         versionName = "1.00-61"
         val versionQuote = "This version is powered by the 18th prime number"
 

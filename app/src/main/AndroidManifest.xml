@@ -6,6 +6,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
 
+    <!--Used by Android Automotive OS -->
+    <uses-permission android:name="android.car.permission.CAR_UX_RESTRICTIONS_CONFIGURATION" />
+    <uses-permission android:name="android.car.permission.CAR_DRIVING_STATE"/>
+
     <application
         android:name=".PowerAmpache2Application"
         android:allowBackup="true"
@@ -19,6 +23,19 @@
         android:theme="@style/Theme.PowerAmpache2"
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
+
+        <!--Used by Android Automotive OS -->
+        <meta-data android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc"/>
+
+        <meta-data android:name="com.android.automotive"
+            android:resource="@xml/automotive_app_desc"/>
+        <meta-data android:name="distractionOptimized" android:value="true" />
+
+        <!--Used by Android Auto-->
+        <meta-data android:name="com.google.android.gms.car.notification.SmallIcon"
+            android:resource="@mipmap/ic_launcher" />
+
         <activity
             android:launchMode="singleTop"
             android:name=".presentation.MainActivity"
@@ -28,6 +45,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:name="distractionOptimized" android:value="true" />
         </activity>
 
         <service android:name=".player.SimpleMediaService"
@@ -58,4 +76,23 @@
                 android:resource="@xml/provider_paths" />
         </provider>
     </application>
+
+    <!--Used by Android Automotive OS -->
+    <uses-feature
+        android:name="android.hardware.type.automotive"
+        android:required="true" />
+    <uses-feature
+        android:name="android.software.car.templates_host"
+        android:required="true" />
+
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.screen.portrait"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.screen.landscape"
+        android:required="false" />
+
 </manifest>
