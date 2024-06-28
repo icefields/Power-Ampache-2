@@ -1,0 +1,151 @@
+<resources>
+    <string name="notification_channel_description">Mostra la musica in Play</string>
+    <string name="coming_soon">Coming Soon</string>
+
+    <string name="albumDetailScreen_infoSection_year">Anno</string>
+    <string name="albumDetailScreen_infoSection_songs">Brani</string>
+    <string name="albumDetailScreen_infoSection_time">Tempo Totale</string>
+    <string name="playlistDetailScreen_infoSection_avgRating">Average Rating</string>
+    <string name="playlistItem_songCount">%s Brani</string>
+    <string name="topBar_search_hint">Cerca Brani, Album, Artisti, Playlist</string>
+    <string name="main_tab_title_albums">Album</string>
+    <string name="main_tab_title_home">Home</string>
+    <string name="main_tab_title_songs">Brani</string>
+    <string name="main_tab_title_artists">Artisti</string>
+    <string name="main_tab_title_playlists">Playlist</string>
+    <string name="loginScreen_username">Nome Utente</string>
+    <string name="loginScreen_signUp_email">Email</string>
+    <string name="loginScreen_fullname">Nome e Cognome (Opzionale)</string>
+    <string name="loginScreen_password">Password</string>
+    <string name="loginScreen_password_repeat">Conferma Password</string>
+    <string name="loginScreen_register_success">Utente registrato con successo\nUsa le credenziali che hai creato per fare login\nConferma la tua email se richiesto dal server</string>
+    <string name="loginScreen_server_url">URL Server</string>
+    <string name="loginScreen_signUp_requiredField">Campo Obbligatorio</string>
+    <string name="loginScreen_auth_token">Auth Token</string>
+    <string name="loginScreen_auth_token_warning">Auth Token Login funziona con server 6.4 e superiori</string>
+    <string name="loginScreen_login">Login</string>
+    <string name="loginScreen_signup">Sign Up</string>
+    <string name="loginScreen_demo_server">Demo</string>
+    <string name="loginScreen_loading_authenticating">Caricamento …</string>
+    <string name="loginScreen_dogmazic_server">DEMO su Dogmazic Music Server</string>
+    <string name="loginScreen_textFields_warning">Compatibile con Ampache 4 e superiore.\nTestato su server versione 6</string>
+    <string name="loginScreen_warning">Per connetterti al tuo server, scarica la version completa di Power Ampache 2</string>
+
+    <string name="home_section_title_recent">Recently Played</string>
+    <string name="home_section_title_flagged">Favourites</string>
+    <string name="home_section_title_frequent">Frequently Played</string>
+    <string name="home_section_title_highest">Highest Rated</string>
+    <string name="home_section_title_newest">Aggiunti Recentemente</string>
+    <string name="home_section_title_playlists">Playlist</string>
+    <string name="home_section_title_moreAlbums">Altri Album</string>
+    <string name="home_section_title_loading">Caricamento</string>
+    <string name="home_artist_subtitle_item">Artista</string>
+
+    <!-- content description strings-->
+    <string name="back_content_description">Dietro</string>
+    <string name="search_content_description">Cerca</string>
+    <string name="menu_content_description">Menu</string>
+
+    <!-- ERROR messages-->
+    <string name="error_io_exception">Cannot load data, are you connected to the internet?\nIf the problem persist try to kill and reopen the app</string>
+    <string name="error_http_exception">Cannot load data, are you connected to the internet?\nIf the problem persist try to kill and reopen the app</string>
+    <string name="error_empty_result">No results to display, or you are trying to add or remove something not found on the server</string>
+    <string name="error_duplicate">Duplicate Entry</string>
+    <string name="error_user_fetch">There was a problem retrieving your User from the server</string>
+
+    <string name="crash_mail_subject">Crash Report</string>
+    <string name="crash_mail_body">Crash Report Data. Thanks</string>
+
+    <string name="error_offline">Cannot connect to your server</string>
+    <string name="offlineMode_switch_title">Modalita Offline</string>
+
+    <!-- SETTINGS -->
+    <string name="quality_veryHigh_title">Very High Quality</string>
+    <string name="quality_veryHigh_subtitle">320kbps or flac (no transcoding)</string>
+    <string name="quality_high_title">High Quality</string>
+    <string name="quality_high_subtitle">256kbps</string>
+    <string name="quality_medium_title">Medium Quality</string>
+    <string name="quality_medium_subtitle">192kbps</string>
+    <string name="quality_mediumLow_title">Medium-Low Quality</string>
+    <string name="quality_mediumLow_subtitle">128kbps</string>
+    <string name="quality_low_title">Low Quality</string>
+    <string name="quality_low_subtitle">96kbps</string>
+    <string name="theme_system_title">System Theme</string>
+    <string name="theme_dark_title">Dark</string>
+    <string name="theme_light_title">Light</string>
+    <string name="theme_system_materialYou_title">MaterialYou System</string>
+    <string name="theme_dark_materialYou_title">MaterialYou Dark</string>
+    <string name="theme_light_materialYou_title">MaterialYou Light</string>
+    <string name="settings_equalizer">Equalizer</string>
+    <string name="settings_normalizeVolume_title">Normalize Volume</string>
+    <string name="settings_offlineMode_title">Offline Mode</string>
+    <string name="settings_offlineMode_subtitle">Enable Offline Mode</string>
+    <string name="settings_normalizeVolume_subtitle">Force same volume level for all tracks</string>
+    <string name="settings_monoAudio_title">Mono Audio</string>
+    <string name="settings_monoAudio_subtitle">Left and Right speakers will play the same audio</string>
+    <string name="settings_smartDownloads_title">Smart Downloads</string>
+    <string name="settings_smartDownloads_subtitle">Automatically download most played songs while the phone is idle</string>
+    <string name="settings_checkUpdatesNow_title">Check for updates now</string>
+    <string name="settings_autoCheckUpdates_title">Automatically check for updates</string>
+    <string name="settings_debugLogs_title">Debug Logs</string>
+    <string name="settings_enableDebugLogging_title">Enable anonymous debug logging</string>
+    <string name="settings_enableDebugLogging_subtitle">Will send crash and error stack-traces to the developer to fix issues with the app</string>
+    <string name="settings_deleteDownloads_title">Delete all downloads</string>
+    <string name="settings_deleteDownloads_subtitle">This will delete all the songs you downloaded</string>
+    <string name="settings_deleteDownloads_success">All your offline music has been deleted</string>
+    <string name="settings_deleteDownloads_fail">There was an issue deleting your offline music, if the problem persists please contact the developer to fix the bug</string>
+    <string name="settings_hideDonationButtonsMenu_title">Hide Donation Buttons on Menu</string>
+    <string name="settings_serverInfo_title">Server</string>
+    <string name="settings_serverInfo_version">Versione</string>
+    <string name="settings_serverInfo_compatible">Compatibile</string>
+    <string name="settings_userInfo_username">Username</string>
+    <string name="settings_userInfo_fullName">Nome Completo</string>
+    <string name="settings_userInfo_email">Email</string>
+    <string name="settings_userInfo_website">Sito Web</string>
+    <string name="settings_userInfo_state">Stat0</string>
+    <string name="settings_userInfo_city">Città</string>
+    <string name="settings_userInfo_id">ID</string>
+    <string name="player_buttonText_artist">Artista</string>
+    <string name="player_buttonText_album">Album</string>
+    <string name="player_buttonText_add">Aggiungi</string>
+    <string name="download">Scarica</string>
+    <string name="player_buttonText_download">@string/download</string>
+    <string name="player_buttonText_share">Condividi</string>
+    <string name="player_buttonText_info">Info</string>
+    <string name="player_queue_upNext">Up Next</string>
+    <string name="player_queue_lyrics">Testo</string>
+    <string name="logout_offline_warning">Please turn OFF Offline Mode before logging out</string>
+    <string name="offline_noData_warning">You haven\'t downloaded any song yet</string>
+
+    <!--- DIALOGS -->
+    <string name="miniPlayer_reset_alert_message">LONG PRESS To stop music playback and reset the Queue</string>
+    <string name="miniPlayer_reset_alert_title">STOP/RESET</string>
+    <string name="dialog_create">CREATE</string>
+    <string name="warning_playlist_download">Please wait for the playlist to be fully loaded before downloading</string>
+    <string name="warning_playlist_server">Adding songs, if your server version is below 6.3 this operation might take a minute or so</string>
+    <string name="warning_playlist_adding">Songs are being added to your playlist.\nLeaving this screen now will interrupt the operation</string>
+    <string name="warning_playlist_adding_title">Leave Screen?</string>
+    <string name="warning_playlist_adding_stay">Stay</string>
+    <string name="warning_playlist_adding_leave">Leave Anyway</string>
+    <string name="warning_song_remove_title">REMOVE SONG</string>
+
+    <!-- Song Dropdown Menu -->
+    <string name="dropdownMenu_item_download">Download</string>
+    <string name="dropdownMenu_item_export">Export Downloaded Song</string>
+    <string name="dropdownMenu_item_playNext">Play Next</string>
+    <string name="dropdownMenu_item_addToQueue">Add to Queue</string>
+    <string name="dropdownMenu_item_addToPlaylist">Add to Playlist</string>
+    <string name="dropdownMenu_item_goToAlbum">Go to Album</string>
+    <string name="dropdownMenu_item_goToArtist">Go to Artist</string>
+    <string name="dropdownMenu_item_share">Share</string>
+
+    <!---...-->
+    <string name="about_flavour">Flavor</string>
+    <string name="version_quote_title">Quote of the version</string>
+    <string name="about_appVersion_title">App Version</string>
+    <string name="about_license_title">License</string>
+    <string name="about_contact_title">Contact Me on Telegram and Mastodon</string>
+    <string name="about_sourceCode_title">Source Code</string>
+    <string name="about_considerDonating">Support the project with a donation!\nLinks on the website:</string>
+
+</resources>
