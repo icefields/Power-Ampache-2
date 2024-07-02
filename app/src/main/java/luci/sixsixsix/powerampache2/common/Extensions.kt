@@ -41,6 +41,7 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.common.Constants.PLAY_STORE_URL
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.io.File
@@ -89,8 +90,7 @@ fun Context.shareLink(link: String) =
 
 fun Context.goToPlayStore() {
     val intent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse(
-            "https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.play")
+        data = Uri.parse(PLAY_STORE_URL)
         setPackage("com.android.vending")
     }
     startActivity(intent)

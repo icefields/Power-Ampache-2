@@ -47,9 +47,9 @@
     <string name="menu_content_description">Menu</string>
 
     <!-- ERROR messages-->
-    <string name="error_io_exception">Caricamento fallito, controlla la connessione ad internet.\nSe il problema persiste prova a chiudere e riaprire l'applicazione</string>
-    <string name="error_http_exception">Caricamento fallito, controlla la connessione ad internet.\nSe il problema persiste prova a chiudere e riaprire l'applicazione</string>
-    <string name="error_empty_result">Nessun risultato, oppure ciò che stai tentando di aggiungere/rimuovere non esiste<string>
+    <string name="error_io_exception">Caricamento fallito, controlla la connessione ad internet.\nSe il problema persiste prova a chiudere e riaprire l\'applicazione</string>
+    <string name="error_http_exception">Caricamento fallito, controlla la connessione ad internet.\nSe il problema persiste prova a chiudere e riaprire l\'applicazione</string>
+    <string name="error_empty_result">Nessun risultato, oppure ciò che stai tentando di aggiungere/rimuovere non esiste</string>
     <string name="error_duplicate">Elemento duplicato</string>
     <string name="error_user_fetch">Si è verificato un errore col recupero del tuo utente dal server</string>
 
@@ -93,7 +93,7 @@
     <string name="settings_deleteDownloads_title">Elimina tutti i download</string>
     <string name="settings_deleteDownloads_subtitle">Questa azione eliminerà tutti i brani scaricati</string>
     <string name="settings_deleteDownloads_success">La tua musica offline è stata eliminata</string>
-    <string name="settings_deleteDownloads_fail">Errore nell'eliminazione di alcuni brani, se il problema persiste contatta lo sviluppatore</string>
+    <string name="settings_deleteDownloads_fail">Errore nell\'eliminazione di alcuni brani, se il problema persiste contatta lo sviluppatore</string>
     <string name="settings_hideDonationButtonsMenu_title">Nascondi il pulsante per le donazioni nel menù</string>
     <string name="settings_serverInfo_title">Server</string>
     <string name="settings_serverInfo_version">Versione</string>
@@ -135,8 +135,8 @@
     <string name="dropdownMenu_item_playNext">Riproduci il successivo</string>
     <string name="dropdownMenu_item_addToQueue">Aggiungi alla coda</string>
     <string name="dropdownMenu_item_addToPlaylist">Aggiungi alla playlist</string>
-    <string name="dropdownMenu_item_goToAlbum">Vai all'album</string>
-    <string name="dropdownMenu_item_goToArtist">Vai all'artista</string>
+    <string name="dropdownMenu_item_goToAlbum">Vai all\'album</string>
+    <string name="dropdownMenu_item_goToArtist">Vai all\'artista</string>
     <string name="dropdownMenu_item_share">Condividi</string>
 
     <!---...-->
