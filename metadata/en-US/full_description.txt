@@ -1,17 +1,17 @@
-Power Ampache 2 is a feature-rich music client designed for Ampache, Nextcloud Music and compatible backends. It offers all the features found in other mainstream music players, such as Spotify, YouTube Music, and Apple Music, and more. With Power Ampache 2, enjoy "actually" downloading and exporting music files, access to lyrics, multi-account support, and an ad-free, tracking-free experience.
+Power Ampache 2 is a feature-rich music client designed for Ampache, Nextcloud Music and compatible backends. It offers all the features found in other mainstream music players, such as Spotify, YouTube Music, and Apple Music, and more. With Power Ampache 2, enjoy “actually” downloading and exporting music files, access to lyrics, multi-account support, and an ad-free, tracking-free experience.
 
 Please let me know if you encounter any issue, I'll be happy to fix any reported bug.
 
-- Unique generated playlists (smartlists)
-- "Spin it!" button to generate a playlist for you.
-- Dark & light mode with adaptive interface colors, or choose/create your own theme.
-- Media keys support
-- Every Bluetooth functionality is available in the app.
-- Song notifications with play controls. Also on lock screen.
-- Album, Artist, Songs collections
-- Advanced search
-- Powerful offline mode
-- Create, edit, share your playlists
+— Unique generated playlists (smartlists)
+— “Spin it!” button to generate a playlist for you.
+— Dark & light mode with adaptive interface colours, or choose/create your own theme.
+— Media keys support
+— Every Bluetooth functionality is available in the app.
+— Song notifications with play controls. Also on lock screen.
+— Album, Artist, Songs collections
+— Advanced search
+— Powerful offline mode
+— Create, edit, share your playlists
 
 📱 CONNECT TO AMPACHE MUSIC SERVERS
 With Power Ampache 2, you can effortlessly connect to Ampache servers and freely listen to music, without any tracker or ads. You can even download the music you want for offline use, or share with friends.
@@ -33,12 +33,9 @@ Power Ampache app is completely free of ads and does not request unnecessary per
 
 Consider donating to support the project or requesting new features.
 Work in progress / Coming soon:
-- Widgets
-- Playlist edit drag and drop
-- Android Auto
-- Multi-account features 
-- Android TV 
-- UI Optimized for tablets
-
-Known issue with Nextcloud Music:
-Only lowercase usernames are accepted at this time. We're working to resolve this in the next release.
+— Widgets
+— Playlist edit drag and drop
+— Android Auto
+— Multi-account features
+— Android TV
+— UI Optimized for tablets
