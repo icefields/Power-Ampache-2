@@ -139,7 +139,7 @@ Feature rich music client for Ampache, Nextcloud Music and compatible backends, 
 With Power Ampache 2, you can effortlessly connect to Ampache servers and freely listen to music, without any tracker or ads. You can even download the music you want for offline use, or share with friends.
 
 **🚀 LIGHTNING-FAST AND LIGHTWEIGHT:**  
-Despite its powerful features, Power Ampache 2 boasts a remarkable performance, making it quick and easy to listen music at full quality (FLAC support coming soon), create your own playlists (public or private) and queue. Experience speed and efficiency while enjoying your favourite music.
+Despite its powerful features, Power Ampache 2 boasts a remarkable performance, making it quick and easy to listen music at full quality, create your own playlists (public or private) and queue. Experience speed and efficiency while enjoying your favourite music.
 
 **🔐 ENHANCED PRIVACY:**  
 Your data is not collected and sold, there are no ads in the app.
