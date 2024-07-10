@@ -85,7 +85,21 @@ F-Droid releases can not upgrade to other releases and it is compiled, signed an
 Github, PlayStore and Telegram releases are signed by me.
 
 <br>
-<br>
+
+  <h2>Donate to support the project</h2>
+  <table>
+  <tr>
+    <th>
+      <a target="_blank" href="https://live.blockcypher.com/btc/address/bc1qm9dvdrukgrqpg5f7466u4cy7tfvwcsc8pqshl4">
+      <img height="30" hspace="20" alt="Donate Bitcoin" src="https://f-droid.org/assets/bitcoin_u5ZHZdqBG9Z1IRMuwLjo739g-ULyCRR8aKF01ViGn9w=.png"></a>
+    </th>
+    <th>
+      <a target="_blank" href="https://paypal.me/powerampache">
+      <img height="40" hspace="20" alt="Donate - Paypal" src="https://clipart-library.com/image_gallery2/PayPal-Donate-Button-PNG-Images.png"></a>
+    </th>
+    </tr>
+</table>
+<hr style="height: 1px; width: 900px;" />
 
 # Screenshots (Dark, Light and MaterialYou)
 | | | | |
