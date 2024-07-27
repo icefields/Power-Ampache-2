@@ -247,7 +247,7 @@ fun DrawerBody(
                 shape = RoundedCornerShape(1.dp),
                 selected = currentItem == item,
                 label = {
-                    Text(text = item.title, style = itemTextStyle)
+                    Text(text = stringResource(id =  item.title), style = itemTextStyle)
                 },
                 icon = {
                     Icon(

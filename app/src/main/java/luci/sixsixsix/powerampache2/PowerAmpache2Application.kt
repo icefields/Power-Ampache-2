@@ -80,6 +80,7 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
         .diskCachePolicy(CachePolicy.ENABLED)
         .memoryCachePolicy(CachePolicy.ENABLED)
         .networkCachePolicy(CachePolicy.ENABLED)
+        //.respectCacheHeaders(false)
         .memoryCache {
             MemoryCache.Builder(this)
                 .maxSizePercent(0.12)
@@ -93,7 +94,7 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
                 .build()
 
         }
-        //.logger(DebugLogger()) // TODO change in production
+        .logger(DebugLogger()) // TODO change in production
         .build()
 
     override val workManagerConfiguration: Configuration

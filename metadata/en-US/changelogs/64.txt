@@ -1,0 +1,8 @@
+- handling playback error on token expired
+- improved landscape view-mode
+- clearing local data at every "clean" from the server
+- Fixed song view UI bug with over-sized font
+- Added translations
+- minor bug fixes and adjustments
+- updates Spanish translations
+- added Japanese translations

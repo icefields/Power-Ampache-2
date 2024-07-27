@@ -1,0 +1,163 @@
+<resources>
+    <string name="notification_channel_description">再生中の曲を表示</string>
+    <string name="coming_soon">Coming Soon</string>
+
+    <string name="albumDetailScreen_infoSection_year">年</string>
+    <string name="albumDetailScreen_infoSection_songs">曲数</string>
+    <string name="albumDetailScreen_infoSection_time">合計時間</string>
+    <string name="playlistDetailScreen_infoSection_avgRating">平均評価</string>
+    <string name="playlistItem_songCount">%s 曲</string>
+    <string name="topBar_search_hint">曲, アルバム, アーティスト, プレイリストから探す</string>
+    <string name="main_tab_title_albums">アルバム</string>
+    <string name="main_tab_title_home">ホーム</string>
+    <string name="main_tab_title_songs">曲</string>
+    <string name="main_tab_title_artists">アーティスト</string>
+    <string name="main_tab_title_playlists">プレイリスト</string>
+    <string name="loginScreen_username">ユーザー名</string>
+    <string name="loginScreen_signUp_email">メールアドレス</string>
+    <string name="loginScreen_fullname">氏名 (任意)</string>
+    <string name="loginScreen_password">パスワード</string>
+    <string name="loginScreen_password_repeat">パスワードの確認入力</string>
+    <string name="loginScreen_register_success">ユーザー登録が完了しました。\nあなたのIDからログインできます。\nサーバーからの要求があった場合、メールアドレスの承認を行ってください。</string>
+    <string name="loginScreen_server_url">サーバー URL</string>
+    <string name="loginScreen_signUp_requiredField">必須事項</string>
+    <string name="loginScreen_auth_token">認証トークン</string>
+    <string name="loginScreen_auth_token_warning">認証トークンでのログインはサーバー6.4以上です。</string>
+    <string name="loginScreen_login">ログイン</string>
+    <string name="loginScreen_signup">登録</string>
+    <string name="loginScreen_demo_server">デモ</string>
+    <string name="loginScreen_loading_authenticating">接続中 …</string>
+    <string name="loginScreen_dogmazic_server">Dogmazic Music Server デモ</string>
+    <string name="loginScreen_textFields_warning">サーバーバージョン4以上は互換性があります。\nバージョン6は試験済みです。</string>
+    <string name="loginScreen_warning">個人のサーバーに接続する場合はフルバージョンをダウンロードしてください。</string>
+
+    <string name="home_section_title_recent">最近の再生</string>
+    <string name="home_section_title_flagged">お気に入り</string>
+    <string name="home_section_title_frequent">よく聞く曲</string>
+    <string name="home_section_title_highest">最高評価</string>
+    <string name="home_section_title_newest">最近の追加</string>
+    <string name="home_section_title_playlists">プレイリスト</string>
+    <string name="home_section_title_moreAlbums">アルバム</string>
+    <string name="home_section_title_loading">読み込み中</string>
+    <string name="home_artist_subtitle_item">アーティスト</string>
+
+    <!-- content description strings-->
+    <string name="back_content_description">戻る</string>
+    <string name="search_content_description">検索</string>
+    <string name="menu_content_description">ドロップダウンメニュー</string>
+
+    <!-- ERROR messages-->
+    <string name="error_io_exception">データを読み込めません、インターネットに接続してください。\n問題が解決できない場合はアプリを再起動してください。</string>
+    <string name="error_http_exception">データを読み込めません、インターネットに接続してください。\n問題が解決できない場合はアプリを再起動してください。</string>
+    <string name="error_empty_result">結果を表示できません。サーバー上に存在しないデータを追加／削除しようとしています。</string>
+    <string name="error_duplicate">データが重複しています。</string>
+    <string name="error_user_fetch">There was a problem retrieving your User from the server</string>
+
+    <string name="crash_mail_subject">Crash Report</string>
+    <string name="crash_mail_body">Crash Report Data. Thanks</string>
+
+    <string name="error_offline">サーバーに接続できません。</string>
+    <string name="offlineMode_switch_title">オフラインモード</string>
+
+    <!-- SETTINGS -->
+    <string name="quality_veryHigh_title">超高音質</string>
+    <string name="quality_veryHigh_subtitle">320kbps　または flac (非トランスコーディング)</string>
+    <string name="quality_high_title">高音質</string>
+    <string name="quality_high_subtitle">256kbps</string>
+    <string name="quality_medium_title">中音質</string>
+    <string name="quality_medium_subtitle">192kbps</string>
+    <string name="quality_mediumLow_title">中・低音質</string>
+    <string name="quality_mediumLow_subtitle">128kbps</string>
+    <string name="quality_low_title">低音質</string>
+    <string name="quality_low_subtitle">96kbps</string>
+    <string name="theme_system_title">デザイン</string>
+    <string name="theme_dark_title">ダーク</string>
+    <string name="theme_light_title">ライト</string>
+    <string name="theme_system_materialYou_title">マテリアルデザイン システム</string>
+    <string name="theme_dark_materialYou_title">マテリアルデザイン　ダーク</string>
+    <string name="theme_light_materialYou_title">マテリアルデザイン　ライト</string>
+    <string name="settings_equalizer">イコライザー</string>
+    <string name="settings_normalizeVolume_title">音量の標準化</string>
+    <string name="settings_offlineMode_title">オフラインモード</string>
+    <string name="settings_offlineMode_subtitle">オフラインモードの解除</string>
+    <string name="settings_normalizeVolume_subtitle">すべての音量を統一化</string>
+    <string name="settings_monoAudio_title">モノラル</string>
+    <string name="settings_monoAudio_subtitle">左右のスピーカーの音が統一されます。</string>
+    <string name="settings_smartDownloads_title">スマートダウンロード</string>
+    <string name="settings_smartDownloads_subtitle">デバイスが使用中でない場合、よく聞く曲を自動でダウンロードする</string>
+    <string name="settings_checkUpdatesNow_title">アップデートを確認する</string>
+    <string name="settings_autoCheckUpdates_title">自動でアップデートを確認する</string>
+    <string name="settings_debugLogs_title">デバッグの報告</string>
+    <string name="settings_enableDebugLogging_title">デバッグの報告を解除</string>
+    <string name="settings_enableDebugLogging_subtitle">エラーを開発者の報告します。
+</string>
+    <string name="settings_deleteDownloads_title">すべてのダウンロードを削除する</string>
+    <string name="settings_deleteDownloads_subtitle">ダウンロードしたすべての曲が削除されます。</string>
+    <string name="settings_deleteDownloads_success">すべてのオフライン曲が削除されました。</string>
+    <string name="settings_deleteDownloads_fail">オフライン曲が削除できません。問題が解決しない場合、開発者に連絡してください。</string>
+    <string name="settings_hideDonationButtonsMenu_title">アプリへの寄付ボタンを表示しない</string>
+    <string name="settings_serverInfo_title">サーバー</string>
+    <string name="settings_serverInfo_version">バージョン</string>
+    <string name="settings_serverInfo_compatible">互換性</string>
+    <string name="settings_userInfo_username">ユーザー名</string>
+    <string name="settings_userInfo_fullName">氏名</string>
+    <string name="settings_userInfo_email">メールアドレス</string>
+    <string name="settings_userInfo_website">ウェブサイト</string>
+    <string name="settings_userInfo_state">州</string>
+    <string name="settings_userInfo_city">都市</string>
+    <string name="settings_userInfo_id">ID</string>
+    <string name="player_buttonText_artist">アーティスト</string>
+    <string name="player_buttonText_album">アルバム</string>
+    <string name="player_buttonText_add">追加</string>
+    <string name="download">ダウンロード</string>
+    <string name="player_buttonText_download">@string/download</string>
+    <string name="player_buttonText_share">シェア</string>
+    <string name="player_buttonText_info">情報</string>
+    <string name="player_queue_upNext">次</string>
+    <string name="player_queue_lyrics">歌詞</string>
+    <string name="logout_offline_warning">ログアウトの前にオフラインモードを解除してください。</string>
+    <string name="offline_noData_warning">ダウンロード済みの曲がありません。</string>
+
+    <!--- DIALOGS -->
+    <string name="miniPlayer_reset_alert_message">長押しで曲の再生と再生リストをリセットできます。</string>
+    <string name="miniPlayer_reset_alert_title">停止／リセット</string>
+    <string name="dialog_create">作成</string>
+    <string name="warning_playlist_download">プレイリストの読み込みが終わるまでダウンロードを待機してください。</string>
+    <string name="warning_playlist_server">曲を追加（サーバーバージョンが6.3以下の場合、処理に時間がかかる場合があります。)</string>
+    <string name="warning_playlist_adding">プレイリストに曲を追加中です。\nこのページを離れると作業が中断されます。</string>
+    <string name="warning_playlist_adding_title">このページを離れますか？</string>
+    <string name="warning_playlist_adding_stay">留まる</string>
+    <string name="warning_playlist_adding_leave">離れる</string>
+    <string name="warning_song_remove_title">曲を削除する</string>
+
+    <!-- Song Dropdown Menu -->
+    <string name="dropdownMenu_item_download">ダウンロード</string>
+    <string name="dropdownMenu_item_export">ダウンロード曲をエクスポートする</string>
+    <string name="dropdownMenu_item_playNext">次を再生</string>
+    <string name="dropdownMenu_item_addToQueue">再生リストに追加</string>
+    <string name="dropdownMenu_item_addToPlaylist">プレイリストに追加</string>
+    <string name="dropdownMenu_item_goToAlbum">アルバムへ移動</string>
+    <string name="dropdownMenu_item_goToArtist">アーティストへ移動</string>
+    <string name="dropdownMenu_item_share">シェア</string>
+
+    <!---...-->
+    <string name="about_flavour">Flavor</string>
+    <string name="version_quote_title">バージョンの引用</string>
+    <string name="about_appVersion_title">アプリのバージョン</string>
+    <string name="about_license_title">ライセンス</string>
+    <string name="about_contact_title">TelegramとMastodonで繋がる</string>
+    <string name="about_sourceCode_title">ソースコード</string>
+    <string name="about_considerDonating">このプロジェクトに寄付をお願いします！\nリンクはウェブサイトにて</string>
+
+    <string name="error_playback_exception">このトラックの再生に問題が生じているためリトライ中です。</string>
+
+    <!---Main Menu Items-->
+    <string name="menu_drawer_settings">設定</string>
+    <string name="menu_drawer_library">ライブラリー</string>
+    <string name="menu_drawer_genres">ジャンル</string>
+    <string name="menu_drawer_home">ホーム</string>
+    <string name="menu_drawer_about">アプリについて</string>
+    <string name="menu_drawer_logout">Salir</string>
+    <string name="menu_drawer_offline">オフライン曲</string>
+
+</resources>

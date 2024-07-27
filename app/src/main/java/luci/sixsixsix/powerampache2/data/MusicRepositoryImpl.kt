@@ -21,8 +21,10 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import android.content.Context
 import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +35,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants
@@ -66,6 +69,8 @@ import luci.sixsixsix.powerampache2.domain.models.User
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -134,9 +139,19 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     private suspend fun setSession(se: Session) {
+        val previousCleanDate = getSession()?.clean ?: LocalDateTime.MAX
+
         dao.updateSession(se.toSessionEntity())
         val cred = getCurrentCredentials()
         dao.insertMultiUserSession(se.toMultiUserSessionEntity(username = cred.username, serverUrl = cred.serverUrl))
+
+
+        // if a new clean is performed on server, empty library cache
+        if (Constants.config.clearLibraryOnCatalogClean && se.clean.isAfter(previousCleanDate)) {
+            // TODO: this has to be refactored for multi-user, right now every time a new sessions
+            //  has an updated clean date, ALL the cache is emptied
+            dao.clearCachedLibraryData()
+        }
     }
 
     private suspend fun setCredentials(
@@ -355,7 +370,7 @@ class MusicRepositoryImpl @Inject constructor(
         // clear credentials after api call, since the api uses base url from credentials
         dao.clearCredentials()
         dao.clearSession()
-        if (!BuildConfig.DEBUG) dao.clearCachedData()
+        dao.clearCachedData()
         dao.clearUser()
 
         emit(Resource.Success(true))

@@ -124,7 +124,7 @@ class ErrorHandlerImpl @Inject constructor(
                     is PlaybackException -> {
                         readableMessage =
                             if (exceptionString.lowercase().contains("User disabled".lowercase())) exceptionString else
-                                "Issues playing this track. The issue could be related to your connection, the file might be corrupt, or overall trouble communicating with your server.\nIf this is an offline track please try delete and re-download"
+                                "Error Code: ${e.errorCode}. ${applicationContext.getString(R.string.error_playback_exception)}"
 
                         "PlaybackException \n$readableMessage\n $exceptionString"
                     }

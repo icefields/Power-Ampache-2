@@ -49,6 +49,7 @@ object Constants {
 
     // TIMEOUTS (non-network)
     const val LOCAL_SCROBBLE_TIMEOUT_MS = 20000L
+    const val PLAYBACK_ERROR_COUNT_TIMEOUT_MS = 60000L
     const val PLAY_LOAD_TIMEOUT = 10000L
     const val LOGIN_SCREEN_TIMEOUT = 1500L
     const val HOME_LOADING_TIMEOUT = 1000L

@@ -107,16 +107,21 @@ class MusicPlaylistManager @Inject constructor() {
     }
 
     /**
-     * assign the new song state, remove the song from the queue if exists and re-add it on top
-     * add a list of song to the queue state
-     * if no song is currently set as state, automatically set the first song of the queue
+     * assign the new song state, remove the song from the queue if exists and re-add it after the
+     * one that is currently playing. Add a list of song to the queue state,if no song is currently
+     * set as state, automatically set the first song of the queue
      */
     fun addToCurrentQueueUpdateTopSong(newSong: Song, newQueue: List<Song>) {
         L( "MusicPlaylistManager addToCurrentQueueUpdateTopSong", newQueue.size)
         // add the current song on top of the queue
         val updatedQueue = ArrayList(_currentQueueState.value).apply {
             remove(newSong)
-            add(0, newSong)
+            // add song next to the one that is currently playing
+            try {
+                add(indexOf(_currentSongState.value) + 1, newSong)
+            } catch (e: Exception) {
+                add(0, newSong)
+            }
         }
         _currentQueueState.value = LinkedHashSet(updatedQueue).apply { addAll(newQueue) }.toList()
         _currentSongState.value = newSong

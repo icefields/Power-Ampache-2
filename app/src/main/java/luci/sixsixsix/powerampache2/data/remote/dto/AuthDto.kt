@@ -88,7 +88,6 @@ fun AuthDto.toServerInfo(): ServerInfo = ServerInfo(
     compatible = compatible
 )
 
-
 fun AuthDto.toSession(dateMapper: DateMapper): Session = Session(
     add = dateMapper(add),
     albums = albums ?: 0,
@@ -96,7 +95,7 @@ fun AuthDto.toSession(dateMapper: DateMapper): Session = Session(
     artists = artists ?: 0,
     auth = auth ?: "",
     catalogs = catalogs ?: 0,
-    clean = if (clean != null) dateMapper(clean) else LocalDateTime.MIN,
+    clean = if (clean != null) dateMapper(clean) else LocalDateTime.MAX,
     genres = genres ?: 0,
     labels = labels ?: 0,
     licenses = licenses ?: 0,

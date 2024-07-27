@@ -136,11 +136,11 @@ fun PlaylistDetailScreen(
 
     val isLandscape = when (orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> {
-            infoVisibility = false
+            // infoVisibility = false
             true
         }
         else -> {
-            infoVisibility = true
+            // infoVisibility = true
             false
         }
     }

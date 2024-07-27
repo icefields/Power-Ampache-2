@@ -272,27 +272,27 @@ fun MainContentScreen(
                                navigator = navigator,
                                pagerState = pagerState,
                                mainViewModel = mainViewModel
-                           ).also { barTitle = menuItem.title }
+                           ).also { barTitle = stringResource(id = menuItem.title) }
                            is MainContentMenuItem.Offline -> OfflineSongsMainContent(
                                navigator = navigator,
                                mainViewModel = mainViewModel
-                           ).also { barTitle = menuItem.title }
+                           ).also { barTitle = stringResource(id = menuItem.title) }
                            is MainContentMenuItem.Settings -> SettingsScreen(
                                navigator = navigator,
                                settingsViewModel = settingsViewModel
-                           ).also { barTitle = menuItem.title }
+                           ).also { barTitle = stringResource(id = menuItem.title) }
                            MainContentMenuItem.Logout -> {
                                // already handled by the drawer header
                            }
                            MainContentMenuItem.About -> AboutScreen(
                                navigator = navigator,
                                settingsViewModel = settingsViewModel
-                           ).also { barTitle = menuItem.title }
+                           ).also { barTitle = stringResource(id = menuItem.title) }
                            MainContentMenuItem.Genres -> SearchResultsScreen(
                                navigator = navigator,
                                mainViewModel = mainViewModel,
                                searchViewModel = searchViewModel).also {
-                               barTitle = menuItem.title
+                               barTitle = stringResource(id = menuItem.title)
                            }
                        }
                    }

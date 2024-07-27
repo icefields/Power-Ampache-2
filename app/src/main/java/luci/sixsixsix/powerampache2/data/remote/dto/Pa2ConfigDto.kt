@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.common.CLEAR_LIBRARY_ON_CATALOG_CLEAN
 import luci.sixsixsix.powerampache2.common.PLAYBACK_ERRORS_RETRIES
 import luci.sixsixsix.powerampache2.common.PLAYLISTS_ADMIN_FETCH
 import luci.sixsixsix.powerampache2.common.PLAYLISTS_ALL_SERVER_FETCH
@@ -81,6 +82,8 @@ data class Pa2ConfigDto(
     val smartlistsAdminFetch: Boolean? = null,
     @SerializedName("playlistsServerAllFetch")
     val playlistsServerAllFetch: Boolean? = null,
+    @SerializedName("clearLibraryOnCatalogClean")
+    val clearLibraryOnCatalogClean: Boolean? = null,
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
@@ -100,5 +103,6 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     smartlistsUserFetch = smartlistsUserFetch ?: SMARTLISTS_USER_FETCH,
     playlistsAdminFetch = playlistsAdminFetch ?: PLAYLISTS_ADMIN_FETCH,
     smartlistsAdminFetch = smartlistsAdminFetch ?: SMARTLISTS_ADMIN_FETCH,
-    playlistsServerAllFetch = playlistsServerAllFetch ?: PLAYLISTS_ALL_SERVER_FETCH
+    playlistsServerAllFetch = playlistsServerAllFetch ?: PLAYLISTS_ALL_SERVER_FETCH,
+    clearLibraryOnCatalogClean = clearLibraryOnCatalogClean ?: CLEAR_LIBRARY_ON_CATALOG_CLEAN
 )
