@@ -56,9 +56,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 63
-        versionName = "1.00-63"
-        val versionQuote = "This version is powered by the 2nd number after the 18th prime number"
+        versionCode = 64
+        versionName = "1.00-64"
+        val versionQuote = "This version is powered by a single prime number multiplied by itself five times"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
