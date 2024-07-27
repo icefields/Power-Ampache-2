@@ -4,26 +4,26 @@
 
     <string name="albumDetailScreen_infoSection_year">Año</string>
     <string name="albumDetailScreen_infoSection_songs">Pistas</string>
-    <string name="albumDetailScreen_infoSection_time">Tiempo Total</string>
-    <string name="playlistDetailScreen_infoSection_avgRating">Valoración Promedio</string>
+    <string name="albumDetailScreen_infoSection_time">Tiempo total</string>
+    <string name="playlistDetailScreen_infoSection_avgRating">Valoración promedio</string>
     <string name="playlistItem_songCount">%s Pistas</string>
-    <string name="topBar_search_hint">Buscar Pistas, Álbumes, Artistas, Listas de reproducción</string>
+    <string name="topBar_search_hint">Buscar pistas, álbumes, artistas, listas de reproducción</string>
     <string name="main_tab_title_albums">Álbumes</string>
     <string name="main_tab_title_home">Inicio</string>
     <string name="main_tab_title_songs">Pistas</string>
     <string name="main_tab_title_artists">Artistas</string>
     <string name="main_tab_title_playlists">Listas de reproducción</string>
     <string name="loginScreen_username">Usuario</string>
-    <string name="loginScreen_signUp_email">Correo Electrónico</string>
-    <string name="loginScreen_fullname">Nombre Completo (Opcional)</string>
+    <string name="loginScreen_signUp_email">Correo electrónico</string>
+    <string name="loginScreen_fullname">Nombre completo (Opcional)</string>
     <string name="loginScreen_password">Contraseña</string>
-    <string name="loginScreen_password_repeat">Confirmar Contraseña</string>
+    <string name="loginScreen_password_repeat">Confirmar contraseña</string>
     <string name="loginScreen_register_success">Usuario registrado exitosamente\nYa puede iniciar sesión con sus credenciales\nConfirme por favor su correo si el servidor lo requiere</string>
     <string name="loginScreen_server_url">URL del servidor</string>
     <string name="loginScreen_signUp_requiredField">Este es un campo obligatorio</string>
-    <string name="loginScreen_auth_token">Token de Autenticación</string>
+    <string name="loginScreen_auth_token">Token de autenticación</string>
     <string name="loginScreen_auth_token_warning">El token de autenticación funciona con servidores 6.4 en adelante</string>
-    <string name="loginScreen_login">Iniciar Sesión</string>
+    <string name="loginScreen_login">Iniciar desión</string>
     <string name="loginScreen_signup">Registrarse</string>
     <string name="loginScreen_demo_server">Demo</string>
     <string name="loginScreen_loading_authenticating">Conectando …</string>
@@ -31,57 +31,57 @@
     <string name="loginScreen_textFields_warning">Compatible con versiones de servidor 4 en adelante.\n Probado en versión de servidor 6</string>
     <string name="loginScreen_warning">Para conectarte con tu propio servidor, descarga la versión completa de Power Ampache 2</string>
 
-    <string name="home_section_title_recent">Reproducidas recientemente</string>
-    <string name="home_section_title_flagged">Favoritas</string>
-    <string name="home_section_title_frequent">Reproducidas frecuentemente</string>
-    <string name="home_section_title_highest">Mejor Valoradas</string>
+    <string name="home_section_title_recent">Reproducidos recientemente</string>
+    <string name="home_section_title_flagged">Favoritos</string>
+    <string name="home_section_title_frequent">Reproducidos frecuentemente</string>
+    <string name="home_section_title_highest">Mejor valorados</string>
     <string name="home_section_title_newest">Añadidas recientemente</string>
     <string name="home_section_title_playlists">Listas de reproducción</string>
-    <string name="home_section_title_moreAlbums">Más Álbumes</string>
+    <string name="home_section_title_moreAlbums">Más álbumes</string>
     <string name="home_section_title_loading">Cargando</string>
     <string name="home_artist_subtitle_item">Artista</string>
 
     <!-- content description strings-->
     <string name="back_content_description">Atrás</string>
     <string name="search_content_description">Buscar</string>
-    <string name="menu_content_description">Menú Desplegable</string>
+    <string name="menu_content_description">Menú desplegable</string>
 
     <!-- ERROR messages-->
     <string name="error_io_exception">No se pueden cargar los datos, ¿estás conectado a internet?\nSi el problema persiste trata de forzar la detención de la aplicación y reiniciarla</string>
     <string name="error_http_exception">No se pueden cargar los datos, ¿estás conectado a internet?\nSi el problema persiste trata de forzar la detención de la aplicación y reiniciarla</string>
     <string name="error_empty_result">Sin resultados para mostrar, o estás tratando de añadir o quitar algo que no está alojado en el servidor</string>
-    <string name="error_duplicate">Entrada Duplicada</string>
+    <string name="error_duplicate">Entrada duplicada</string>
     <string name="error_user_fetch">Hubo un problema al recuperar su nombre de usuario del servidor</string>
 
-    <string name="crash_mail_subject">Reporte de Falla</string>
-    <string name="crash_mail_body">Datos del Reporte de Falla. Gracias</string>
+    <string name="crash_mail_subject">Reporte de falla</string>
+    <string name="crash_mail_body">Datos del reporte de falla. Gracias</string>
 
     <string name="error_offline">No se puede conectar a tu servidor</string>
     <string name="offlineMode_switch_title">Modo Offline</string>
 
     <!-- SETTINGS -->
-    <string name="quality_veryHigh_title">Calidad Muy Alta</string>
+    <string name="quality_veryHigh_title">Calidad muy alta</string>
     <string name="quality_veryHigh_subtitle">320kbps o flac (sin transcodificación)</string>
-    <string name="quality_high_title">Calidad Alta</string>
+    <string name="quality_high_title">Calidad alta</string>
     <string name="quality_high_subtitle">256kbps</string>
-    <string name="quality_medium_title">Calidad Media</string>
+    <string name="quality_medium_title">Calidad media</string>
     <string name="quality_medium_subtitle">192kbps</string>
-    <string name="quality_mediumLow_title">Calidad Media-Baja</string>
+    <string name="quality_mediumLow_title">Calidad media-baja</string>
     <string name="quality_mediumLow_subtitle">128kbps</string>
-    <string name="quality_low_title">Calidad Baja</string>
+    <string name="quality_low_title">Calidad baja</string>
     <string name="quality_low_subtitle">96kbps</string>
-    <string name="theme_system_title">Tema del Sistema</string>
+    <string name="theme_system_title">Tema del sistema</string>
     <string name="theme_dark_title">Oscuro</string>
     <string name="theme_light_title">Claro</string>
     <string name="theme_system_materialYou_title">MaterialYou del Sistema</string>
     <string name="theme_dark_materialYou_title">MaterialYou Oscuro</string>
     <string name="theme_light_materialYou_title">MaterialYou Claro</string>
     <string name="settings_equalizer">Ecualizador</string>
-    <string name="settings_normalizeVolume_title">Normalizar Volumen</string>
+    <string name="settings_normalizeVolume_title">Normalizar volumen</string>
     <string name="settings_offlineMode_title">Modo Offline</string>
     <string name="settings_offlineMode_subtitle">Habilitar Modo Offline</string>
     <string name="settings_normalizeVolume_subtitle">Forzar el mismo volumen para todas las pistas</string>
-    <string name="settings_monoAudio_title">Audio Monoaural</string>
+    <string name="settings_monoAudio_title">Audio monoaural</string>
     <string name="settings_monoAudio_subtitle">Canales izquierdo y derecho tocarán el mismo audio</string>
     <string name="settings_smartDownloads_title">Descargas inteligentes</string>
     <string name="settings_smartDownloads_subtitle">Descargar automáticamente las pistas más reproducidas mientras el teléfono está en reposo</string>
@@ -89,19 +89,19 @@
     <string name="settings_autoCheckUpdates_title">Buscar actualizaciones automáticamente</string>
     <string name="settings_debugLogs_title">Registro de depuración</string>
     <string name="settings_enableDebugLogging_title">Habilitar el registro de depuración anónimo</string>
-    <string name="settings_enableDebugLogging_subtitle"> Enviará el seguimiento de fallas y errores al desarrollador para arreglar problemas en la aplicación</string>
+    <string name="settings_enableDebugLogging_subtitle">Enviará el seguimiento de fallas y errores al desarrollador para arreglar problemas en la aplicación</string>
     <string name="settings_deleteDownloads_title">Borrar todas las descargas</string>
     <string name="settings_deleteDownloads_subtitle">Esto eliminará todas las pistas que descargaste</string>
     <string name="settings_deleteDownloads_success">Toda la música descargada ha sido borrada</string>
     <string name="settings_deleteDownloads_fail">Hubo un problema borrando la música descargada, si el problema persiste por favor contacta al desarrollador para repararlo</string>
-    <string name="settings_hideDonationButtonsMenu_title">Ocultar los Botones de Donación del Menú</string>
+    <string name="settings_hideDonationButtonsMenu_title">Ocultar los botones de donación del menú</string>
     <string name="settings_serverInfo_title">Servidor</string>
     <string name="settings_serverInfo_version">Versión</string>
     <string name="settings_serverInfo_compatible">Compatible</string>
-    <string name="settings_userInfo_username">Nombre de Usuario</string>
-    <string name="settings_userInfo_fullName">Nombre Completo</string>
+    <string name="settings_userInfo_username">Nombre de usuario</string>
+    <string name="settings_userInfo_fullName">Nombre completo</string>
     <string name="settings_userInfo_email">Correo-e</string>
-    <string name="settings_userInfo_website">Sitio Web</string>
+    <string name="settings_userInfo_website">Sitio web</string>
     <string name="settings_userInfo_state">Estado</string>
     <string name="settings_userInfo_city">Ciudad</string>
     <string name="settings_userInfo_id">ID</string>
@@ -112,13 +112,13 @@
     <string name="player_buttonText_download">@string/download</string>
     <string name="player_buttonText_share">Compartir</string>
     <string name="player_buttonText_info">Info</string>
-    <string name="player_queue_upNext">Enseguida</string>
+    <string name="player_queue_upNext">En Cola</string>
     <string name="player_queue_lyrics">Letras</string>
     <string name="logout_offline_warning">Por favor apague el Modo Offline antes de cerrar la sesión</string>
     <string name="offline_noData_warning">No has descargado nada aún</string>
 
     <!--- DIALOGS -->
-    <string name="miniPlayer_reset_alert_message">TOQUE LARGO para detener la reproducción y reiniciar la cola</string>
+    <string name="miniPlayer_reset_alert_message">TOQUE LARGO para detener la reproducción y reiniciar la Cola</string>
     <string name="miniPlayer_reset_alert_title">DETENER/REINICAR</string>
     <string name="dialog_create">CREAR</string>
     <string name="warning_playlist_download">Por favor espera a que la lista de reproducción esté completamente cargada antes de descargar</string>
@@ -131,21 +131,31 @@
 
     <!-- Song Dropdown Menu -->
     <string name="dropdownMenu_item_download">Descargar</string>
-    <string name="dropdownMenu_item_export">Exportar Pista Descargada</string>
-    <string name="dropdownMenu_item_playNext">Reproducir la Siguiente</string>
+    <string name="dropdownMenu_item_export">Exportar pista descargada</string>
+    <string name="dropdownMenu_item_playNext">Reproducir la siguiente</string>
     <string name="dropdownMenu_item_addToQueue">Añadir a la Cola</string>
     <string name="dropdownMenu_item_addToPlaylist">Añadir a la lista de reproducción</string>
-    <string name="dropdownMenu_item_goToAlbum">Ir al Álbum</string>
-    <string name="dropdownMenu_item_goToArtist">Ir al Artista</string>
+    <string name="dropdownMenu_item_goToAlbum">Ir al álbum</string>
+    <string name="dropdownMenu_item_goToArtist">Ir al artista</string>
     <string name="dropdownMenu_item_share">Compartir</string>
 
     <!---...-->
     <string name="about_flavour">Flavor</string>
     <string name="version_quote_title">Frase de la versión</string>
-    <string name="about_appVersion_title">Versión de la Aplicación</string>
+    <string name="about_appVersion_title">Versión de la aplicación</string>
     <string name="about_license_title">Licencia</string>
     <string name="about_contact_title">Contáctame en Telegram y Mastodon</string>
-    <string name="about_sourceCode_title">Código Fuente</string>
+    <string name="about_sourceCode_title">Código fuente</string>
     <string name="about_considerDonating">¡Apoya al proyecto con una donación!\nEnlaces en el sitio web:</string>
 
+    <!---Main Menu Items-->
+    <string name="menu_drawer_settings">Configuración</string>
+    <string name="menu_drawer_library">Biblioteca</string>
+    <string name="menu_drawer_genres">Géneros</string>
+    <string name="menu_drawer_home">Inicio</string>
+    <string name="menu_drawer_about">Acerca de</string>
+    <string name="menu_drawer_logout">Salir</string>
+    <string name="menu_drawer_offline">Canciones descargadas</string>
+
+    <string name="error_playback_exception">Issues playing this track. Retrying now</string>
 </resources>

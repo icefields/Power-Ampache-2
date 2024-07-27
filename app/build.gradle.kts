@@ -10,12 +10,12 @@ plugins {
 }
 
 val composeVersion = "1.6.8" // rootProject.extra.get("compose_version") as String
-val lifecycleVersion = "2.8.2"
+val lifecycleVersion = "2.8.4"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
 val exoplayerVersion = "2.19.1"
 val composeNavVersion = "1.8.42-beta"
-val media3Version = "1.3.1"
+val media3Version = "1.4.0"
 val hiltVersion = "1.2.0"
 
 val localProperties = Properties()
@@ -56,9 +56,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 63
-        versionName = "1.00-63"
-        val versionQuote = "This version is powered by the 2nd number after the 18th prime number"
+        versionCode = 64
+        versionName = "1.00-64"
+        val versionQuote = "This version is powered by a single prime number multiplied by itself five times"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -233,7 +233,7 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.activity:activity-compose:1.9.1")
     implementation("androidx.media:media:1.7.0")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
@@ -246,9 +246,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:0.17.0")
-    implementation("androidx.paging:paging-compose:3.3.0")
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha")
+    implementation("androidx.paging:paging-compose:3.3.1")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.34.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     // DO NOT INCLUDE implementation("androidx.compose.material:material:$composeVersion")
 
@@ -299,7 +298,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
     //implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
     implementation("com.squareup.retrofit2:converter-gson:$retrofit2Version")
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
     // JSON serialization
     implementation("com.google.code.gson:gson:2.10.1")

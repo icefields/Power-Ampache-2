@@ -34,6 +34,7 @@ const val SMARTLISTS_USER_FETCH = true
 const val PLAYLISTS_ADMIN_FETCH = true
 const val SMARTLISTS_ADMIN_FETCH = true
 const val PLAYLISTS_ALL_SERVER_FETCH = true
+const val CLEAR_LIBRARY_ON_CATALOG_CLEAN = true
 
 data class Pa2Config(
     // use new fast method for adding albums and playlists to playlist
@@ -78,4 +79,6 @@ data class Pa2Config(
     val smartlistsAdminFetch: Boolean = SMARTLISTS_ADMIN_FETCH,
     // fetch all playlists from server
     val playlistsServerAllFetch: Boolean = PLAYLISTS_ALL_SERVER_FETCH,
+    // clear the library when a newer "clean" date in the handshake response
+    val clearLibraryOnCatalogClean: Boolean = CLEAR_LIBRARY_ON_CATALOG_CLEAN
 )

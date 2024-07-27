@@ -148,4 +148,15 @@
     <string name="about_sourceCode_title">Codice</string>
     <string name="about_considerDonating">Supporta il progetto con una donazione!\nLink al sito web:</string>
 
+    <string name="error_playback_exception">Ci sono problemi con la riproduzione del brano</string>
+
+
+    <!---Main Menu Items-->
+    <string name="menu_drawer_settings">Opzioni</string>
+    <string name="menu_drawer_library">Libreria</string>
+    <string name="menu_drawer_genres">Generi</string>
+    <string name="menu_drawer_home">Home</string>
+    <string name="menu_drawer_about">Informazioni</string>
+    <string name="menu_drawer_logout">Logout</string>
+    <string name="menu_drawer_offline">Brani Offline</string>
 </resources>
