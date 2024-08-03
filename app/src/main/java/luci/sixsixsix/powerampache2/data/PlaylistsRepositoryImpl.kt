@@ -111,19 +111,94 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
         val cred = getCurrentCredentials()
         val user = cred.username
-        val playlistNetwork = getPlaylistsNetwork(authToken(), user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
-        val playlistNetworkEntities = playlistNetwork.map { it.toPlaylistEntity(username = user, serverUrl = cred.serverUrl) }
 
-        if (query.isNullOrBlank() && offset == 0 &&
-            (!AmpacheModel.listsHaveSameElements(playlistNetwork, dbList.map { it.toPlaylist() } ))) {
-            // avoid clearing if lists are equal, insert will already replace the old versions
-            dao.clearPlaylists()
+        if (query.isNullOrBlank()) {
+            // fetch user and admin playlists to quick load user's playlists before everyone else's
+            getUserPlaylists(username = user, serverUrl = cred.serverUrl)
         }
-        dao.insertPlaylists(playlistNetworkEntities)
-        // stick to the single source of truth pattern despite performance deterioration
-        emit(Resource.Success(data = dao.searchPlaylists(query).map { it.toPlaylist() }, networkData = playlistNetwork))
+
+        if (Constants.config.playlistsServerAllFetch) {
+            val playlistNetwork =
+                getPlaylistsNetwork(authToken(), user, offset, query, ALWAYS_FETCH_ALL_PLAYLISTS)
+            val playlistNetworkEntities =
+                playlistNetwork.map {
+                    it.toPlaylistEntity(username = user, serverUrl = cred.serverUrl)
+                }
+
+            if (query.isNullOrBlank() &&
+                offset == 0 &&
+                playlistNetwork.isNotEmpty() && // TODO: check for network errors instead of empty list
+                (!AmpacheModel.listsHaveSameElements(playlistNetwork, dbList.map { it.toPlaylist() }))
+            ) {
+                L("aaaa", "lists don't have same elements")
+                // avoid clearing if lists are equal, insert will already replace the old versions
+                dao.clearPlaylists()
+            }
+            dao.insertPlaylists(playlistNetworkEntities)
+            // stick to the single source of truth pattern despite performance deterioration
+            emit(Resource.Success(
+                data = dao.searchPlaylists(query).map { it.toPlaylist() },
+                networkData = playlistNetwork)
+            )
+        }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylists()", e, this) }
+
+    private suspend fun getUserPlaylists(username: String, serverUrl: String) {
+        // first get user playlists and save to database, saving to db will trigger the flow
+        if (Constants.config.playlistsUserFetch) {
+            try {
+                api.getUserPlaylists(authToken()).playlist
+                    ?.map { it.toPlaylist() }
+                    ?.map { it.toPlaylistEntity(username, serverUrl) }
+                    ?.let { userPlaylists ->
+                        dao.insertPlaylists(userPlaylists)
+                    }
+            } catch (e: Exception) {
+                L.e(e)
+            }
+        }
+
+        if (Constants.config.smartlistsUserFetch) {
+            try {
+                api.getUserSmartlists(authToken()).playlist
+                    ?.map { it.toPlaylist() }
+                    ?.map { it.toPlaylistEntity(username, serverUrl) }
+                    ?.let { userPlaylists ->
+                        dao.insertPlaylists(userPlaylists)
+                    }
+            } catch (e: Exception) {
+                L.e(e)
+            }
+        }
+
+        if (Constants.config.playlistsAdminFetch) {
+            // fetch admin playlists
+            try {
+                api.getUserPlaylists(authToken(), user = "admin").playlist
+                    ?.map { it.toPlaylist() }
+                    ?.map { it.toPlaylistEntity(username, serverUrl) }
+                    ?.let { userPlaylists ->
+                        dao.insertPlaylists(userPlaylists)
+                    }
+            } catch (e: Exception) {
+                L.e(e)
+            }
+        }
+
+        if (Constants.config.smartlistsAdminFetch) {
+            try {
+                api.getUserSmartlists(authToken(), user = "admin").playlist
+                    ?.map { it.toPlaylist() }
+                    ?.map { it.toPlaylistEntity(username, serverUrl) }
+                    ?.let { userPlaylists ->
+                        dao.insertPlaylists(userPlaylists)
+                    }
+            } catch (e: Exception) {
+                L.e(e)
+            }
+        }
+    }
 
     private suspend fun getPlaylistsNetwork(
         auth: String,
@@ -138,7 +213,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         var isMoreAvailable = false
         do {
             val response = try {
-                api.getPlaylists(auth, filter = query, offset = off)
+                api.getPlaylists(auth, filter = query, offset = off, limit = Constants.config.playlistFetchLimit)
             } catch (e: Exception) {
                 if (!fetchAll) throw e
                 PlaylistsResponse(totalCount = 0, playlist = listOf())

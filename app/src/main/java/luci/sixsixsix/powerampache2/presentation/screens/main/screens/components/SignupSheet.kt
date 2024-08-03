@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main.screens.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -63,6 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
@@ -92,7 +92,7 @@ fun SignUpBottomDrawer(
 @Composable
 fun SignUpDialog(
     isSignUpSheetOpen: MutableState<Boolean>,
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit
+    onEvent: (AuthEvent) -> Unit
 ) {
     Dialog(
         properties = DialogProperties(
@@ -102,14 +102,10 @@ fun SignUpDialog(
         onDismissRequest = { isSignUpSheetOpen.value = false }
     )  {
         Card(
-//            border = BorderStroke(
-//                width = 0.dp,
-//                color = MaterialTheme.colorScheme.onSurface
-//            ),
+            //border = BorderStroke( width = 0.dp, color = MaterialTheme.colorScheme.onSurface),
             colors = CardDefaults.cardColors(
                 containerColor = colorResource(id = R.color.surfaceContainerDark)
             ),
-            //modifier = Modifier.padding(top = 16.dp),
             elevation = CardDefaults.cardElevation(5.dp),
             shape = RoundedCornerShape(10.dp)
         ) {
@@ -135,7 +131,8 @@ fun SignUpBottomSheet(
     var password by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var repeatPassword by rememberSaveable { mutableStateOf("") }
-    var url by rememberSaveable { mutableStateOf("") }
+    var url by rememberSaveable { mutableStateOf(BuildConfig.DEFAULT_SERVER_URL) }
+
     var fullName by rememberSaveable { mutableStateOf("") }
 
     var passwordErrorMessage by rememberSaveable { mutableStateOf("") }
@@ -145,6 +142,7 @@ fun SignUpBottomSheet(
     var repeatPasswordErrorMessage by rememberSaveable { mutableStateOf("") }
 
     val requiredFieldMessage = stringResource(id = R.string.loginScreen_signUp_requiredField)
+    val serverUrlVisible = BuildConfig.DEFAULT_SERVER_URL.isBlank()
 
     LazyColumn(
         modifier = modifier
@@ -154,34 +152,36 @@ fun SignUpBottomSheet(
         items(10) { index ->
             when(index) {
                 // URL
-                0 -> OutlinedTextField(
-                    value = url,
-                    onValueChange = {
-                        url = it
-                        if (it.isBlank()) {
-                            urlErrorMessage = requiredFieldMessage
-                        } else {
-                            urlErrorMessage = ""
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth().padding(bottom = 8.dp),
-                    label = {
-                        Text(text = stringResource(id = R.string.loginScreen_server_url))
-                    },
-                    supportingText = {
-                        if (urlErrorMessage.isNotBlank()) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = urlErrorMessage,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    maxLines = 1,
-                    isError = urlErrorMessage.isNotBlank(),
-                    singleLine = true
-                )
+                0 -> if (serverUrlVisible) {
+                    OutlinedTextField(
+                        value = url,
+                        onValueChange = {
+                            url = it
+                            if (it.isBlank()) {
+                                urlErrorMessage = requiredFieldMessage
+                            } else {
+                                urlErrorMessage = ""
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth().padding(bottom = 8.dp),
+                        label = {
+                            Text(text = stringResource(id = R.string.loginScreen_server_url))
+                        },
+                        supportingText = {
+                            if (urlErrorMessage.isNotBlank()) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = urlErrorMessage,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
+                        maxLines = 1,
+                        isError = urlErrorMessage.isNotBlank(),
+                        singleLine = true
+                    )
+                }
                 // USERNAME
                 1 -> OutlinedTextField(
                     value = username,

@@ -25,7 +25,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.net.InetAddresses
 import android.net.Uri
 import android.util.Patterns
 import androidx.annotation.ColorInt
@@ -41,6 +40,7 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.common.Constants.PLAY_STORE_URL
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.io.File
@@ -86,6 +86,14 @@ fun Context.shareLink(link: String) =
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
         }
     )
+
+fun Context.goToPlayStore() {
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse(PLAY_STORE_URL)
+        setPackage("com.android.vending")
+    }
+    startActivity(intent)
+}
 
 fun Context.openLinkInBrowser(link: String) =
     startActivity(

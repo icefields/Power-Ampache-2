@@ -22,10 +22,15 @@
     <string name="loginScreen_server_url">Server URL</string>
     <string name="loginScreen_signUp_requiredField">This is a required field</string>
     <string name="loginScreen_auth_token">Auth Token</string>
+    <string name="loginScreen_auth_token_warning">Auth Token Login works with servers 6.4 and up</string>
     <string name="loginScreen_login">Login</string>
     <string name="loginScreen_signup">Sign Up</string>
     <string name="loginScreen_demo_server">Demo</string>
-    <string name="loginScreen_dogmazic_server">Dogmazic Music Server</string>
+    <string name="loginScreen_loading_authenticating">Connecting …</string>
+    <string name="loginScreen_dogmazic_server">Dogmazic Music Server DEMO</string>
+    <string name="loginScreen_textFields_warning">Compatible with server versions 4 and above.\nTested on server version 6</string>
+    <string name="loginScreen_warning">To connect to your own server, download the full version of Power Ampache 2</string>
+
     <string name="home_section_title_recent">Recently Played</string>
     <string name="home_section_title_flagged">Favourites</string>
     <string name="home_section_title_frequent">Frequently Played</string>
@@ -48,10 +53,12 @@
     <string name="error_duplicate">Duplicate Entry</string>
     <string name="error_user_fetch">There was a problem retrieving your User from the server</string>
 
+    <string name="error_playback_exception">Issues playing this track. Retrying now</string>
+
     <string name="crash_mail_subject">Crash Report</string>
     <string name="crash_mail_body">Crash Report Data. Thanks</string>
 
-    <string name="error_offline">Cannot connect to the internet</string>
+    <string name="error_offline">Cannot connect to your server</string>
     <string name="offlineMode_switch_title">Offline Mode</string>
 
     <!-- SETTINGS -->
@@ -103,7 +110,8 @@
     <string name="player_buttonText_artist">Artist</string>
     <string name="player_buttonText_album">Album</string>
     <string name="player_buttonText_add">Add</string>
-    <string name="player_buttonText_download">Download</string>
+    <string name="download">Download</string>
+    <string name="player_buttonText_download">@string/download</string>
     <string name="player_buttonText_share">Share</string>
     <string name="player_buttonText_info">Info</string>
     <string name="player_queue_upNext">Up Next</string>
@@ -140,5 +148,14 @@
     <string name="about_license_title">License</string>
     <string name="about_contact_title">Contact Me on Telegram and Mastodon</string>
     <string name="about_sourceCode_title">Source Code</string>
+    <string name="about_considerDonating">Support the project with a donation!\nLinks on the website:</string>
 
+    <!---Main Menu Items-->
+    <string name="menu_drawer_settings">Settings</string>
+    <string name="menu_drawer_library">Library</string>
+    <string name="menu_drawer_genres">Genres</string>
+    <string name="menu_drawer_home">Home</string>
+    <string name="menu_drawer_about">About</string>
+    <string name="menu_drawer_logout">Logout</string>
+    <string name="menu_drawer_offline">Offline Songs</string>
 </resources>

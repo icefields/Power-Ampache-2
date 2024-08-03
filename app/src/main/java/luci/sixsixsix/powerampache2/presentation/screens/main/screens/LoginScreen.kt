@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -56,7 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -68,9 +69,11 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.data.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
+import luci.sixsixsix.powerampache2.presentation.common.DownloadFullVersionButton
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.LoginBottomDrawer
@@ -125,10 +128,10 @@ fun LoginScreenContent(
             .fillMaxSize()
             .background(colorResource(id = R.color.surfaceDark))
     ) {
-
         Image(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
+                //.fillMaxWidth(0.8f)
+                .fillMaxHeight(0.4f)
                 .padding(horizontal = 20.dp)
                 .padding(top = 40.dp)
                 .clickable {
@@ -136,6 +139,7 @@ fun LoginScreenContent(
                         isDebugButtonsSheetOpen = !isDebugButtonsSheetOpen
                     }
                 },
+            contentScale = ContentScale.FillHeight,
             painter = painterResource(id = R.drawable.img_power_ampache_logo_login),
             contentDescription = "Power Ampache Logo"
         )
@@ -152,7 +156,7 @@ fun LoginScreenContent(
         if (!error.isNullOrBlank()) {
             ErrorView(
                 error = error,
-                modifier = modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().wrapContentHeight()
             )
         }
 
@@ -180,22 +184,29 @@ fun LoginScreenContent(
                             onEvent = onEvent
                         )
                     }
-                    5 -> if (BuildConfig.ENABLE_DOGMAZIC_DEMO_SERVER) {
+                    6 -> if (BuildConfig.ENABLE_DOGMAZIC_DEMO_SERVER) {
                         DebugLoginButton(
                             server = Servers.Dogmazic,
                             buttonText = R.string.loginScreen_dogmazic_server,
                             onEvent = onEvent
                         )
                     }
-                    6 -> LoginScreenFooter(modifier = Modifier.padding(top = 16.dp))
+                    5 -> if (BuildConfig.DEMO_VERSION) {
+                        DownloadFullVersionButton()
+                    }
+                    7 -> LoginScreenFooter(modifier = Modifier.padding(top = 16.dp))
                     else -> { }
                 }
             }
         }
     }
 
+    // use bottom drawer or dialog
+    val showBottomDrawer = Build.VERSION.SDK_INT > Build.VERSION_CODES.Q &&
+            !Constants.config.forceLoginDialogsOnAllVersions
+
     if (isLoginSheetOpen.value) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+        if (showBottomDrawer) {
             LoginBottomDrawer(
                 username = username,
                 password = password,
@@ -220,7 +231,7 @@ fun LoginScreenContent(
     }
 
     if (isSignUpSheetOpen.value) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+        if (showBottomDrawer) {
             SignUpBottomDrawer(
                 sheetState = sheetState,
                 isSignUpSheetOpen = isSignUpSheetOpen,
@@ -292,10 +303,10 @@ fun SignUpButton(
                 vertical = 10.dp
             )
             .fillMaxWidth(),
-        borderStrokeColour = colorResource(id = R.color.outlineDark),
+        borderStrokeColour = colorResource(id = R.color.loginScreen_signUpButton_stroke),
         colours = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            contentColor = colorResource(id = R.color.primaryDark)
+            containerColor = colorResource(id = R.color.loginScreen_signUpButton_background),
+            contentColor = colorResource(id = R.color.loginScreen_signUpButton_foreground)
         ),
         onClick = onClick
     ) {
@@ -333,8 +344,8 @@ fun DebugLoginButton(
         },
 
         colours = ButtonDefaults.buttonColors(
-            containerColor = colorResource(id = R.color.tertiaryDark),
-            contentColor = colorResource(id = R.color.surfaceDark)
+            containerColor = colorResource(id = R.color.loginScreen_demoButton_background),
+            contentColor = colorResource(id = R.color.loginScreen_demoButton_foreground)
         )
     ) {
         Icon(imageVector = Icons.Default.MusicNote, contentDescription = "Demo Server login")
@@ -397,14 +408,14 @@ fun ErrorView(
 }
 
 @Composable
-@Preview
+@Preview(heightDp = 500)
 fun LoginScreenPreview() {
     LoginScreenContent(
         username = "state.username",
         password = "state.password",
         url = "state.url",
         authToken = "state.authToken",
-        error = "state.error",
+        error = " re stufferror message /n more stufferror message /n more stufferror message /n more stufferror message /n more stuff",
         onEvent = {},
         //isLoginSheetOpen = true,
         //isSignUpSheetOpen = false,

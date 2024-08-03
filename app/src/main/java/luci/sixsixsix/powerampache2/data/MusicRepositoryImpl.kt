@@ -21,8 +21,10 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import android.content.Context
 import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +35,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants
@@ -50,7 +53,6 @@ import luci.sixsixsix.powerampache2.data.local.entities.toSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toUser
 import luci.sixsixsix.powerampache2.data.local.models.UserWithCredentials
 import luci.sixsixsix.powerampache2.data.local.models.toUser
-import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toGenre
@@ -67,6 +69,8 @@ import luci.sixsixsix.powerampache2.domain.models.User
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -86,13 +90,17 @@ class MusicRepositoryImpl @Inject constructor(
 ): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
     private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
+
     val serverVersionStateFlow = serverInfoStateFlow.mapNotNull { it.version }.distinctUntilChanged()
 
     override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
+
     override val userLiveData: Flow<User?> = dao.getUserLiveData().map {
         val cred = getCurrentCredentials()
-        val userEntity = it ?: dao.getUser(cred.username)
-        userEntity?.toUser() ?: UserWithCredentials(username = cred.username).toUser(cred.serverUrl)
+        if (cred.username.isNotBlank()) {
+            val userEntity = it ?: dao.getUser(cred.username)
+            userEntity?.toUser() ?: UserWithCredentials(username = cred.username).toUser(cred.serverUrl)
+        } else null
     }
 
     // used to check if a call to getUserNetwork() is necessary
@@ -125,19 +133,43 @@ class MusicRepositoryImpl @Inject constructor(
         Constants.config = try {
             api.getConfig().toPa2Config()
         } catch (e: Exception) {
+            L.e(e)
             Pa2Config()
         }
     }
 
     private suspend fun setSession(se: Session) {
+        val previousCleanDate = getSession()?.clean ?: LocalDateTime.MAX
+
         dao.updateSession(se.toSessionEntity())
         val cred = getCurrentCredentials()
         dao.insertMultiUserSession(se.toMultiUserSessionEntity(username = cred.username, serverUrl = cred.serverUrl))
+
+
+        // if a new clean is performed on server, empty library cache
+        if (Constants.config.clearLibraryOnCatalogClean && se.clean.isAfter(previousCleanDate)) {
+            // TODO: this has to be refactored for multi-user, right now every time a new sessions
+            //  has an updated clean date, ALL the cache is emptied
+            dao.clearCachedLibraryData()
+        }
     }
 
-    private suspend fun setCredentials(se: CredentialsEntity) {
+    private suspend fun setCredentials(
+        username: String,
+        sha256password: String,
+        authToken: String,
+        serverUrl: String
+    ) {
+        val se: CredentialsEntity = CredentialsEntity(
+            username = username.lowercase(),
+            password = sha256password,
+            serverUrl = serverUrl.lowercase(),
+            authToken = authToken
+        )
         dao.updateCredentials(se)
-        dao.insertMultiUserCredentials(se.toMultiUserCredentialEntity())
+        if (username.isNotBlank()) {
+            dao.insertMultiUserCredentials(se.toMultiUserCredentialEntity())
+        }
     }
 
     /**
@@ -148,7 +180,7 @@ class MusicRepositoryImpl @Inject constructor(
     override suspend fun ping(): Resource<Pair<ServerInfo, Session?>> =
         try {
             val dbSession = getSession()
-            val pingResponse = api.ping(dbSession?.auth ?: "")
+            val pingResponse = api.ping(authKey = dbSession?.auth)
 
             // Updated session only valid of previous session exists, authorize otherwise
             dbSession?.let { cachedSession ->
@@ -206,11 +238,10 @@ class MusicRepositoryImpl @Inject constructor(
         //   Save current credentials, so they can be picked up by the interceptor,
         // and for future autologin, this has to be first line of code before any network call
         setCredentials(
-            CredentialsEntity(username = usernameLow,
-                password = sha256password,
-                serverUrl = serverUrl.lowercase(),
-                authToken = authToken
-            )
+            username = usernameLow,
+            sha256password = sha256password,
+            serverUrl = serverUrl.lowercase(),
+            authToken = authToken
         )
         L("authorize CREDENTIALS ${getCredentials()}")
         val auth = tryAuthorize(usernameLow, sha256password, authToken, force)
@@ -220,8 +251,8 @@ class MusicRepositoryImpl @Inject constructor(
 
     @Throws(Exception::class)
     private suspend fun tryAuthorize(
-        username:String,
-        sha256password:String,
+        username: String,
+        sha256password: String,
         authToken: String,
         force: Boolean,
     ): Session {
@@ -241,6 +272,17 @@ class MusicRepositoryImpl @Inject constructor(
                     setSession(sess)
                 }
             }
+
+            if (authToken.isNotBlank()) {
+                // set the user manually because we won't have it from handshake if logged in with token
+                (auth.username ?: getUserNetwork()?.username)?.let { usernameNet ->
+                    setCredentials(
+                        username = usernameNet.lowercase(),
+                        sha256password = sha256password,
+                        serverUrl = getCurrentCredentials().serverUrl,
+                        authToken = authToken
+                    ) }
+            }
         }
 
         // try to get server info from ping and return the session from ping, otherwise return the
@@ -257,11 +299,11 @@ class MusicRepositoryImpl @Inject constructor(
     ): Flow<Resource<Any>> = flow {
         emit(Resource.Loading(true))
 
-        setCredentials(CredentialsEntity(
+        setCredentials(
             username = username,
-            password = sha256password,
+            sha256password = sha256password,
             serverUrl = serverUrl.lowercase(),
-            authToken = "")
+            authToken = ""
         )
 
         val resp = api.register(
@@ -328,7 +370,7 @@ class MusicRepositoryImpl @Inject constructor(
         // clear credentials after api call, since the api uses base url from credentials
         dao.clearCredentials()
         dao.clearSession()
-        if (!BuildConfig.DEBUG) dao.clearCachedData()
+        dao.clearCachedData()
         dao.clearUser()
 
         emit(Resource.Success(true))

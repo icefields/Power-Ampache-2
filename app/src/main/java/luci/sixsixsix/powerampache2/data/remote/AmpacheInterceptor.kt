@@ -30,6 +30,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedExcepti
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.Protocol
+import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import java.net.URISyntaxException
@@ -44,7 +45,7 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
     private fun isInitUrl(url: String) = url == CONFIG_URL
 
     override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
-        var request = chain.request()
+        var request = requestWithUserAgent(chain.request())
 
         // if reporting an error no need to manipulate the url
         val requestUrlStr = request.url.toString()
@@ -77,7 +78,7 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
                         .build()
                 }
             }
-            L(request.url, "eeee")
+            L(request.url, "eeee", request.headers["User-Agent"])
             try {
                 chain.proceed(request)
             } catch (e: Exception) {
@@ -99,6 +100,11 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
                 .build()
         }
     }
+
+    private fun requestWithUserAgent(request: Request) = request.newBuilder()
+        .addHeader("User-Agent", "PowerAmpache2-${BuildConfig.VERSION_NAME}")
+        .build()
+
 }
 
 private val errorStr = ServerUrlNotInitializedException().musicError.toJson()

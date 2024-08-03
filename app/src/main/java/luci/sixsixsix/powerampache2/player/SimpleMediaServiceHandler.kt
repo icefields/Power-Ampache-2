@@ -38,7 +38,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackError
+import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackException
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
+import luci.sixsixsix.powerampache2.domain.errors.PlaybackError
 import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
 import javax.inject.Inject
 
@@ -282,10 +286,23 @@ class SimpleMediaServiceHandler @Inject constructor(
                 }
                 else -> {
                     errorHandler<PlaybackException>(label = "onPlayerError PlaybackException", error)
+                    updateErrorState(error)
                 }
             }
         }
         retryPlay()
+    }
+
+    private fun updateErrorState(error: PlaybackException) {
+        _simpleMediaState.value = SimpleMediaState.Error(playbackException = AmpPlaybackException(
+            error = PlaybackError(
+                errorCode = when(error.errorCode) {
+                    PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED -> AmpPlaybackError.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED
+                    else -> AmpPlaybackError.OTHER
+                },
+                exception = error
+            )
+        ))
     }
 
     private fun retryPlay() {
@@ -294,7 +311,7 @@ class SimpleMediaServiceHandler @Inject constructor(
             /*&& !player.isLoading  && !isUserNotEnabledException*/) {
             L("retryPlay STATE")
             player.prepare()
-            if (errorCounter++ % 3 == 0) {
+            if (errorCounter++ % Constants.config.playbackErrorRetries == 0) {
                 player.seekToNextMediaItem()
             }
         }
@@ -309,6 +326,7 @@ sealed class SimpleMediaState {
     data class Progress(val progress: Long, val isPlaying: Boolean): SimpleMediaState()
     data class Playing(val isPlaying: Boolean): SimpleMediaState()
     data class Loading(val isLoading: Boolean): SimpleMediaState()
+    data class Error(val playbackException: AmpPlaybackException): SimpleMediaState()
     data object Idle: SimpleMediaState()
     data object Ended: SimpleMediaState()
 }

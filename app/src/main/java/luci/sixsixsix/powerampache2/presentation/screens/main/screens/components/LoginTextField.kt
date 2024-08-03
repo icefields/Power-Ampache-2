@@ -25,7 +25,6 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -45,29 +44,27 @@ import luci.sixsixsix.powerampache2.R
     trailingIcon: @Composable (() -> Unit)? = null,
     onValueChange: (String) -> Unit)
 {
-    SelectionContainer {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            visualTransformation = visualTransformation,
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .fillMaxWidth(),
-            label = {
-                Text(text = stringResource(id = label))
-            },
-            maxLines = 1,
-            keyboardOptions = keyboardOptions,
-            trailingIcon = trailingIcon,
-            singleLine = true,
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = colorResource(R.color.onBackgroundDark),
-                unfocusedTextColor = colorResource(R.color.onSurfaceVariantDark),
-                unfocusedLabelColor = colorResource(R.color.onSurfaceVariantDark),
-                errorTextColor = colorResource(R.color.errorDark),
-                focusedContainerColor = colorResource(R.color.surfaceContainerDark),
-                unfocusedContainerColor = colorResource(R.color.surfaceContainerDark)
-            )
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        visualTransformation = visualTransformation,
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .fillMaxWidth(),
+        label = {
+            Text(text = stringResource(id = label))
+        },
+        maxLines = 1,
+        keyboardOptions = keyboardOptions,
+        trailingIcon = trailingIcon,
+        singleLine = true,
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = colorResource(R.color.onBackgroundDark),
+            unfocusedTextColor = colorResource(R.color.onSurfaceVariantDark),
+            unfocusedLabelColor = colorResource(R.color.onSurfaceVariantDark),
+            errorTextColor = colorResource(R.color.errorDark),
+            focusedContainerColor = colorResource(R.color.surfaceContainerDark),
+            unfocusedContainerColor = colorResource(R.color.surfaceContainerDark)
         )
-    }
+    )
 }

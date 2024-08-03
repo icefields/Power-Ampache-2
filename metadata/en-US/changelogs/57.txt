@@ -1,0 +1,4 @@
+- Improved playlist creation and modification.
+- Fixed copy/paste bug on login fields.
+- Theme changes.
+- Other minor bug fixes.

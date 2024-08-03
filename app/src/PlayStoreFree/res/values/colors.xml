@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="launcherBgColourDebug">@color/tertiaryLight</color>
+    <color name="launcherBgColourRelease">#0D2121</color>
+
+    <!-- LOGIN THEME -->
+    <color name="loginScreen_background">@color/surfaceDark</color>
+    <color name="loginScreen_title_tint">@color/onSurfaceDark</color>
+    <color name="loginScreen_signUpButton_stroke">@color/outlineDark</color>
+    <color name="loginScreen_signUpButton_background">@android:color/transparent</color>
+    <color name="loginScreen_signUpButton_foreground">@color/tertiaryDark</color>
+    <color name="loginScreen_loginButton_background">@color/tertiaryDark</color>
+    <color name="loginScreen_loginButton_foreground">@color/onTertiaryDark</color>
+    <color name="loginScreen_demoButton_background">@color/secondaryContainerDark</color>
+    <color name="loginScreen_demoButton_foreground">@color/onSecondaryContainerDark</color>
+</resources>

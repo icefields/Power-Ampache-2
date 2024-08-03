@@ -252,7 +252,8 @@ interface MusicDao {
 
     @Query("""SELECT * FROM playlistentity WHERE (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name)
         AND $multiUserCondition
-        order by flag DESC, rating DESC, (LOWER(owner) == LOWER( (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
+        GROUP BY id
+        ORDER BY flag DESC, rating DESC, (LOWER(owner) == LOWER( (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
     suspend fun searchPlaylists(query: String): List<PlaylistEntity>
 
     @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
@@ -485,5 +486,11 @@ interface MusicDao {
         clearPlaylistSongs()
         clearGenres()
         clearHistory()
+    }
+
+    suspend fun clearCachedLibraryData() {
+        clearAlbums()
+        clearArtists()
+        clearSongs()
     }
 }

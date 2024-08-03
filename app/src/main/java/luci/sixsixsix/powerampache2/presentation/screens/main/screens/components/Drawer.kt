@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.toHslColor
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.DonateButton
@@ -147,7 +148,9 @@ fun DrawerHeader(
     onLogoutAction: () -> Unit
 ) {
     // if dogmazic user show custom information
-    val user = if (BuildConfig.DOGMAZIC_USER == currentUser.username && BuildConfig.DOGMAZIC_EMAIL == currentUser.email) {
+    val user = if (Constants.config.dogmazicDemoUser.lowercase() == currentUser.username.lowercase()
+        && Constants.config.dogmazicDemoUrl.lowercase() == currentUser.serverUrl.lowercase()
+        ) {
         User.demoUser()
     } else {
         currentUser
@@ -244,7 +247,7 @@ fun DrawerBody(
                 shape = RoundedCornerShape(1.dp),
                 selected = currentItem == item,
                 label = {
-                    Text(text = item.title, style = itemTextStyle)
+                    Text(text = stringResource(id =  item.title), style = itemTextStyle)
                 },
                 icon = {
                     Icon(

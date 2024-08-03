@@ -1,0 +1,5 @@
+- Updated SDK libraries, including Jetpack (UI)
+- Bug fixes (including song skipping with bad connection)
+- Changed network config to allow self-signed certificates
+- updated Android lifecycle libraries
+- Increased image cache size

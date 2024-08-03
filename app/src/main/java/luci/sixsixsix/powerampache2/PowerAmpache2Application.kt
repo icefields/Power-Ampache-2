@@ -33,6 +33,7 @@ import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
+import coil.util.DebugLogger
 import dagger.hilt.android.HiltAndroidApp
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -73,26 +74,27 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
     }
 
     override fun newImageLoader(): ImageLoader = ImageLoader(this).newBuilder()
-        .crossfade(true)
+        .crossfade(200)
         .placeholder(R.drawable.placeholder_album)
         .error(R.drawable.placeholder_album)
         .diskCachePolicy(CachePolicy.ENABLED)
-        .memoryCachePolicy(CachePolicy.DISABLED)
+        .memoryCachePolicy(CachePolicy.ENABLED)
         .networkCachePolicy(CachePolicy.ENABLED)
+        //.respectCacheHeaders(false)
         .memoryCache {
             MemoryCache.Builder(this)
-                .maxSizePercent(0.01)
+                .maxSizePercent(0.12)
                 .strongReferencesEnabled(true)
                 .build()
         }
         .diskCache {
             DiskCache.Builder()
-                .maxSizePercent(0.08)
+                .maxSizePercent(0.10)
                 .directory(getDir("paimages", MODE_PRIVATE))
                 .build()
 
         }
-        //.logger(DebugLogger()) // TODO change in production
+        .logger(DebugLogger()) // TODO change in production
         .build()
 
     override val workManagerConfiguration: Configuration

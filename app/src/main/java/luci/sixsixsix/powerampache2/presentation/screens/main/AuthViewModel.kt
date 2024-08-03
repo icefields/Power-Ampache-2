@@ -200,10 +200,11 @@ class AuthViewModel @Inject constructor(
         serverUrl: String = state.url,
         authToken: String = state.authToken
     ) {
+        val passwordSha256 = if (state.authToken.isNullOrBlank()) password.sha256() else ""
         viewModelScope.launch {
             repository.authorize(
                 username = username.trim(),
-                password = password.sha256(),
+                password = passwordSha256,
                 serverUrl = serverUrl.trim(),
                 authToken = authToken
             ).collect { result ->

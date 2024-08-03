@@ -9,13 +9,13 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val composeVersion = "1.6.6" // rootProject.extra.get("compose_version") as String
-val lifecycleVersion = "2.7.0"
+val composeVersion = "1.6.8" // rootProject.extra.get("compose_version") as String
+val lifecycleVersion = "2.8.4"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
 val exoplayerVersion = "2.19.1"
 val composeNavVersion = "1.8.42-beta"
-val media3Version = "1.3.1"
+val media3Version = "1.4.0"
 val hiltVersion = "1.2.0"
 
 val localProperties = Properties()
@@ -37,7 +37,9 @@ android {
     val ampachePass = properties.getProperty("AMPACHE_PASSWORD")
     val ampacheUrl = properties.getProperty("AMPACHE_URL")
     val ampacheUrlLocal = properties.getProperty("LOCAL_STABLE_URL")
+    val dogmazicUrl = properties.getProperty("DOGMAZIC_URL")
     val dogmazicPass = properties.getProperty("DOGMAZIC_PASSWORD")
+    val dogmazicToken = properties.getProperty("DOGMAZIC_TOKEN")
     val dogmazicUser = properties.getProperty("DOGMAZIC_USER")
     val dogmazicEmail = properties.getProperty("DOGMAZIC_EMAIL")
     val errorLogUrl = properties.getProperty("URL_ERROR_LOG")
@@ -54,9 +56,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 56
-        versionName = "1.00-56"
-        val versionQuote = "This version is powered by financial debt"
+        versionCode = 64
+        versionName = "1.00-64"
+        val versionQuote = "This version is powered by a single prime number multiplied by itself five times"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -75,6 +77,12 @@ android {
         buildConfigField("String", "LOCAL_NEXTCLOUD_URL", localNextcloudUrl)
         buildConfigField("String", "DEBUG_LOCAL_STABLE_URL", ampacheUrlLocal)
         buildConfigField("String", "DEBUG_LOCAL_DEVELOPMENT_URL", localDevUrl)
+        buildConfigField("String", "DOGMAZIC_URL", dogmazicUrl)
+        buildConfigField("String", "DOGMAZIC_TOKEN", dogmazicToken)
+        buildConfigField("String", "DEFAULT_SERVER_URL", "\"\"")
+        buildConfigField("boolean", "FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS", "true")
+        buildConfigField("boolean", "DEMO_VERSION", "false")
+        buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config.json\"")
     }
 
     buildTypes {
@@ -85,7 +93,7 @@ android {
             // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "true")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
-            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
+            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "true")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
@@ -116,7 +124,7 @@ android {
             // FLAGS
             buildConfigField("boolean", "MRLOG_ON", "false")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
-            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "false")
+            buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "true")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
             buildConfigField("boolean", "ENABLE_OFFICIAL_DEMO_SERVER", "false")
             buildConfigField("boolean", "SHOW_EMPTY_PLAYLISTS", "false")
@@ -149,6 +157,7 @@ android {
     val flavourGithub = "Github"
     val flavourFDroid = "FDroid"
     val flavourPlayStore = "PlayStore"
+    val flavourPlayStoreFree = "PlayStoreFree"
 
     flavorDimensions += "ampache"
     productFlavors {
@@ -156,6 +165,7 @@ android {
             dimension = "ampache"
 
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+            buildConfigField("boolean", "HIDE_DONATION", "false")
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
         }
@@ -165,6 +175,7 @@ android {
             versionNameSuffix = "-fdroid"
 
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+            buildConfigField("boolean", "HIDE_DONATION", "false")
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
         }
@@ -174,8 +185,22 @@ android {
             versionNameSuffix = "-play"
 
             buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
-            buildConfigField("String", "URL_ERROR_LOG", errorLogUrl)
+            buildConfigField("boolean", "HIDE_DONATION", "true")
+            buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+        }
+        create(flavourPlayStoreFree) {
+            dimension = "ampache"
+            applicationIdSuffix = ".free"
+            versionNameSuffix = "-free"
+
+            buildConfigField("boolean", "SHOW_LOGIN_SERVER_VERSION_WARNING", "true")
+            buildConfigField("boolean", "HIDE_DONATION", "true")
+            buildConfigField("boolean", "DEMO_VERSION", "true")
+            buildConfigField("String", "DEFAULT_SERVER_URL", dogmazicUrl)
+            buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
+            buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
+            buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config-dogmazic.json\"")
         }
     }
 
@@ -206,9 +231,9 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.0")
+    implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.activity:activity-compose:1.9.1")
     implementation("androidx.media:media:1.7.0")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
@@ -221,9 +246,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:0.17.0")
-    implementation("androidx.paging:paging-compose:3.3.0-beta01")
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha")
+    implementation("androidx.paging:paging-compose:3.3.1")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.34.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     // DO NOT INCLUDE implementation("androidx.compose.material:material:$composeVersion")
 
@@ -274,7 +298,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
     //implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
     implementation("com.squareup.retrofit2:converter-gson:$retrofit2Version")
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
     // JSON serialization
     implementation("com.google.code.gson:gson:2.10.1")

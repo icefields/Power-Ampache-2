@@ -1,0 +1,6 @@
+- Updated SDK libraries, including Jetpack (UI)
+- Bug fixes
+- implemented token login
+- faster playlist loading
+- implemented calls for personal playlists
+- Increased image cache size

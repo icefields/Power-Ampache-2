@@ -1,0 +1,37 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "luci.sixsixsix.powerampache2.free",
+  "variantName": "PlayStoreFreeRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 62,
+      "versionName": "1.00-62-free",
+      "outputFile": "app-PlayStoreFree-release.apk"
+    }
+  ],
+  "elementType": "File",
+  "baselineProfiles": [
+    {
+      "minApi": 28,
+      "maxApi": 30,
+      "baselineProfiles": [
+        "baselineProfiles/1/app-PlayStoreFree-release.dm"
+      ]
+    },
+    {
+      "minApi": 31,
+      "maxApi": 2147483647,
+      "baselineProfiles": [
+        "baselineProfiles/0/app-PlayStoreFree-release.dm"
+      ]
+    }
+  ],
+  "minSdkVersionForDexing": 28
+}
