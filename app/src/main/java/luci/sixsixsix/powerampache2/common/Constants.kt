@@ -49,6 +49,7 @@ object Constants {
 
     // TIMEOUTS (non-network)
     const val LOCAL_SCROBBLE_TIMEOUT_MS = 20000L
+    const val PLAYBACK_ERROR_COUNT_TIMEOUT_MS = 60000L
     const val PLAY_LOAD_TIMEOUT = 10000L
     const val LOGIN_SCREEN_TIMEOUT = 1500L
     const val HOME_LOADING_TIMEOUT = 1000L
@@ -77,6 +78,7 @@ object Constants {
     const val DONATION_PAYPAL_URI = "https://paypal.me/powerampache"
 
     // URLs
+    const val PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.play"
     const val GITHUB_IMG_URL = "https://s1.ax1x.com/2023/01/12/pSu1a36.png"
     const val GITHUB_URL = "https://github.com/icefields/Power-Ampache-2"
     const val GPLV3_IMG_URL = "https://www.gnu.org/graphics/gplv3-with-text-136x68.png"

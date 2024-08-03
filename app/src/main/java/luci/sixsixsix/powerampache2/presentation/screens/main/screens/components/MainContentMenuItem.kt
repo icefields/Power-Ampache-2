@@ -30,10 +30,11 @@ import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.OfflineBolt
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
+import luci.sixsixsix.powerampache2.R
 
 sealed class MainContentMenuItem(
     val id: String, // identifier, because title is subject to translations
-    val title: String,
+    val title: Int,
     val contentDescription: String,
     val icon: ImageVector
 ) {
@@ -56,11 +57,11 @@ sealed class MainContentMenuItem(
 
     }
 
-    data object Home: MainContentMenuItem(id = "home", title = "Home", icon = Icons.Outlined.Home, contentDescription = "home")
-    data object Settings: MainContentMenuItem(id = "settings", title = "Settings", icon = Icons.Outlined.Settings, contentDescription = "Settings")
-    data object Library: MainContentMenuItem(id = "library", title = "Library", icon = Icons.Outlined.LibraryMusic, contentDescription = "Library")
-    data object Genres: MainContentMenuItem(id = "genres", title = "Genres", icon = Icons.Outlined.MusicNote, contentDescription = "Genres")
-    data object Offline: MainContentMenuItem(id = "offline", title = "Offline Songs", icon = Icons.Outlined.OfflineBolt, contentDescription = "Offline Songs")
-    data object About: MainContentMenuItem(id = "about", title = "About", icon = Icons.Outlined.Info, contentDescription = "About")
-    data object Logout: MainContentMenuItem(id = "logout", title = "Logout", icon = Icons.Outlined.Logout, contentDescription = "Logout")
+    data object Home: MainContentMenuItem(id = "home", title = R.string.menu_drawer_home, icon = Icons.Outlined.Home, contentDescription = "home")
+    data object Settings: MainContentMenuItem(id = "settings", title = R.string.menu_drawer_settings, icon = Icons.Outlined.Settings, contentDescription = "Settings")
+    data object Library: MainContentMenuItem(id = "library", title = R.string.menu_drawer_library, icon = Icons.Outlined.LibraryMusic, contentDescription = "Library")
+    data object Genres: MainContentMenuItem(id = "genres", title = R.string.menu_drawer_genres, icon = Icons.Outlined.MusicNote, contentDescription = "Genres")
+    data object Offline: MainContentMenuItem(id = "offline", title = R.string.menu_drawer_offline, icon = Icons.Outlined.OfflineBolt, contentDescription = "Offline Songs")
+    data object About: MainContentMenuItem(id = "about", title = R.string.menu_drawer_about, icon = Icons.Outlined.Info, contentDescription = "About")
+    data object Logout: MainContentMenuItem(id = "logout", title = R.string.menu_drawer_logout, icon = Icons.Outlined.Logout, contentDescription = "Logout")
 }

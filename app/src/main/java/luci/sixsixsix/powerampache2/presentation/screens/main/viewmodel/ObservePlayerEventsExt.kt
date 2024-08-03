@@ -22,8 +22,11 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackError
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
 import java.util.concurrent.TimeUnit
 
@@ -65,10 +68,33 @@ fun MainViewModel.observePlayerEvents() {
                     isPlaying = false
                     stopPlayLoading()
                 }
+
+                is SimpleMediaState.Error ->  when (mediaState.playbackException.error.errorCode) {
+                    AmpPlaybackError.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED -> {
+                        // count how many of those errors in the next 30s
+                        // if count>30 before 60s stop service
+                        if (++playbackErrorCount > 30) {
+                            playlistManager.reset()
+                            stopMusicService()
+                        }
+                        // restart the timer at every error, if no error in the next 30s, reset the
+                        // error count
+                        errorJob?.cancel()
+                        errorJob = viewModelScope.launch {
+                            delay(Constants.PLAYBACK_ERROR_COUNT_TIMEOUT_MS)
+                            playbackErrorCount = 0
+                        }
+                    }
+
+                    AmpPlaybackError.OTHER -> { }
+                }
             }
         }
     }
 }
+
+private var errorJob: Job? = null
+private var playbackErrorCount = 0
 
 private fun MainViewModel.calculateProgressValue(currentProgress: Long) {
     if (duration <= 0L) duration = (currentSong()?.time?.toLong() ?: 1) * 1000

@@ -33,7 +33,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.google.gson.Gson
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -42,12 +41,11 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettingsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
-import okhttp3.internal.http.HTTP_OK
+import java.net.HttpURLConnection.HTTP_OK
 import java.time.Duration
 import java.util.UUID
 
@@ -70,7 +68,6 @@ class SongDownloadWorker @AssistedInject constructor(
 
             val firstUpdate = workDataOf(KEY_PROGRESS to 0, KEY_SONG to "${song.artist.name} - ${song.name}")
             val lastUpdate = workDataOf(KEY_PROGRESS to 100, KEY_SONG to "${song.artist.name} - ${song.name}")
-
 
             setProgress(firstUpdate)
 

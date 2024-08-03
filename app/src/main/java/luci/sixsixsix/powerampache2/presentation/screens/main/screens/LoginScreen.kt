@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -129,7 +130,8 @@ fun LoginScreenContent(
     ) {
         Image(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
+                //.fillMaxWidth(0.8f)
+                .fillMaxHeight(0.4f)
                 .padding(horizontal = 20.dp)
                 .padding(top = 40.dp)
                 .clickable {
@@ -137,7 +139,7 @@ fun LoginScreenContent(
                         isDebugButtonsSheetOpen = !isDebugButtonsSheetOpen
                     }
                 },
-            contentScale = ContentScale.FillWidth,
+            contentScale = ContentScale.FillHeight,
             painter = painterResource(id = R.drawable.img_power_ampache_logo_login),
             contentDescription = "Power Ampache Logo"
         )
@@ -154,7 +156,7 @@ fun LoginScreenContent(
         if (!error.isNullOrBlank()) {
             ErrorView(
                 error = error,
-                modifier = modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().wrapContentHeight()
             )
         }
 
@@ -406,14 +408,14 @@ fun ErrorView(
 }
 
 @Composable
-@Preview
+@Preview(heightDp = 500)
 fun LoginScreenPreview() {
     LoginScreenContent(
         username = "state.username",
         password = "state.password",
         url = "state.url",
         authToken = "state.authToken",
-        error = "state.error",
+        error = " re stufferror message /n more stufferror message /n more stufferror message /n more stufferror message /n more stuff",
         onEvent = {},
         //isLoginSheetOpen = true,
         //isSignUpSheetOpen = false,

@@ -487,4 +487,10 @@ interface MusicDao {
         clearGenres()
         clearHistory()
     }
+
+    suspend fun clearCachedLibraryData() {
+        clearAlbums()
+        clearArtists()
+        clearSongs()
+    }
 }
