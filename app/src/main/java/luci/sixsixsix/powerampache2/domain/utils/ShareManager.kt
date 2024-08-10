@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.domain.utils
 
 import android.content.Context
 import android.content.Intent
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.net.URLDecoder
 
@@ -55,9 +56,8 @@ interface ShareManager {
                         3 -> album = URLDecoder.decode(value, "UTF-8")
                         4 -> artist = URLDecoder.decode(value, "UTF-8")
                     }
-
-                    callback(type, id, title, artist)
                 }
+                callback(type, id, title, artist)
             }
         }
     }

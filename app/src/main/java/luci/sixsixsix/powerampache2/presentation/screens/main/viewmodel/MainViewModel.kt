@@ -38,6 +38,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -45,6 +46,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
@@ -206,18 +208,32 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onDeepLink(type: String, id: String, title: String, artist: String) = viewModelScope.launch {
-        // wait for a session
-        musicRepository.sessionLiveData.distinctUntilChanged().filterNotNull().first()
+    private var deepLinkJob: Job? = null
 
-        when(type) {
-            "song" -> {
-                // TODO: this is a hack! Wait for loading finished the proper way!
-                delay(2000)
-                playDeepLinkedSong(id, title, artist)}
-            "album" -> { }
-            "playlist" -> { }
-            else -> { }
+    fun onDeepLink(type: String, id: String, title: String, artist: String) {
+        if (deepLinkJob == null)
+        deepLinkJob = viewModelScope.launch {
+            // wait for a session
+            musicRepository.sessionLiveData.filterNotNull().first()
+            L("aaaa onDeepLink")
+
+            when (type) {
+                "song" -> {
+
+                    // TODO: this is a hack! Wait for loading finished the proper way!
+                    delay(2000)
+
+                    withContext(Dispatchers.Main) {
+                        playDeepLinkedSong(id, title, artist)
+                    }
+                    deepLinkJob?.cancel()
+                    deepLinkJob = null
+                }
+
+                "album" -> {}
+                "playlist" -> {}
+                else -> {}
+            }
         }
     }
 

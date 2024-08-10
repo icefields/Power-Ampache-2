@@ -64,9 +64,6 @@ class MainActivity : ComponentActivity() {
             settingsViewModel = hiltViewModel<SettingsViewModel>(this)
             // homeScreenViewModel = hiltViewModel<HomeScreenViewModel>(this)
 
-            // parse intent for deeplink after initializing mainViewModel
-            parseIntent(intent)
-
             val localSettingsState by settingsViewModel.localSettingsStateFlow.collectAsState()
             var dynamicColour = true
             var isDarkTheme = true
@@ -117,6 +114,9 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+
+            // parse intent for deeplink after initializing mainViewModel
+            parseIntent(intent)
         }
     }
 
@@ -133,12 +133,18 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun parseIntent(intent: Intent) {
+        L( "aaaa parseIntent")
+
         parseDeepLinkIntent(intent) { type, id, title, artist ->
+            L( "aaaa parseIntent", type, id, title, artist)
+
             try {
                 mainViewModel.onDeepLink(type, id, title, artist)
             } catch (e: Exception) {
                 L.e(e)
             }
         }
+
+        setIntent(Intent())
     }
 }

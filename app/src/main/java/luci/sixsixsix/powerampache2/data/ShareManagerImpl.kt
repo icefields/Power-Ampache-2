@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data
 
 import android.content.Context
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.SongsRepository
@@ -60,6 +61,7 @@ class ShareManagerImpl @Inject constructor(
         errorCallback: () -> Unit
     ) {
         val song = songsRepository.getSongFromId(id)
+        L("aaaa", title, song?.title, artist, song?.artist?.name)
         if (song == null || title != song.title || artist != song.artist.name) {
             songsRepository.getSongs(query = title).collect { result ->
                 when (result) {
