@@ -49,7 +49,9 @@ interface ShareManager {
                 var album = ""
                 var artist = ""
                 dataUri.pathSegments.forEachIndexed { i, value ->
-                    when(i) {
+                    // https url schemes has one extra path segment at the beginning
+                    val ii = if (dataUri.host == "ampache") i else i-1
+                    when(ii) {
                         0 -> type = value
                         1 -> id = value
                         2 -> title = URLDecoder.decode(value, "UTF-8")

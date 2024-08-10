@@ -23,11 +23,13 @@ package luci.sixsixsix.powerampache2.data
 
 import android.content.Context
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
+import java.lang.StringBuilder
 import java.net.URLEncoder
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,7 +39,20 @@ class ShareManagerImpl @Inject constructor(
     val songsRepository: SongsRepository
 ): ShareManager {
     override fun shareSongDeepLink(context: Context, song: Song) {
-        context.shareLink("ampache://share/song/${song.id}/${URLEncoder.encode(song.title, "UTF-8")}/${URLEncoder.encode(song.album.name,"UTF-8")}/${URLEncoder.encode(song.artist.name,"UTF-8")}")
+        //context.shareLink("ampache://share/song/${song.id}/${URLEncoder.encode(song.title, "UTF-8")}/${URLEncoder.encode(song.album.name,"UTF-8")}/${URLEncoder.encode(song.artist.name,"UTF-8")}")
+//        context.shareLink("https://${context.getString(R.string.deepLink_host)}/share/song/${song.id}/${URLEncoder.encode(song.title, "UTF-8")}" +
+//                "/${URLEncoder.encode(song.album.name,"UTF-8")}" +
+//                "/${URLEncoder.encode(song.artist.name,"UTF-8")}")
+        StringBuilder("https://")
+            .append(context.getString(R.string.deepLink_host))
+            .append("/share")
+            .append("/song")
+            .append("/${song.id}")
+            .append("/${URLEncoder.encode(song.title, "UTF-8")}")
+            .append("/${URLEncoder.encode(song.album.name,"UTF-8")}")
+            .append("/${URLEncoder.encode(song.artist.name,"UTF-8")}").apply {
+                context.shareLink(toString())
+            }
     }
 
     override suspend fun shareSongWeb(context: Context, song: Song)  {
@@ -73,7 +88,7 @@ class ShareManagerImpl @Inject constructor(
                         }
                     }
                     is Resource.Error -> errorCallback()
-                    is Resource.Loading -> {}
+                    is Resource.Loading -> { }
                 }
 
             }

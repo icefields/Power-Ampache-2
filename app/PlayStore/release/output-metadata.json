@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 61,
-      "versionName": "1.00-61-play",
+      "versionCode": 65,
+      "versionName": "1.00-65-play",
       "outputFile": "app-PlayStore-release.apk"
     }
   ],
