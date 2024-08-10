@@ -39,6 +39,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.Pa2ConfigDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ShareDto
+import luci.sixsixsix.powerampache2.data.remote.dto.SongDto
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.SuccessResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.UserDto
@@ -109,6 +110,12 @@ interface MainNetwork {
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
     ): SongsResponse // TODO remove default values
+
+    @GET("json.server.php?action=song")
+    suspend fun getSong(
+        @Query("auth") authKey: String,
+        @Query("filter") filter: String? = null,
+    ): SongDto
 
     @GET("json.server.php?action=albums")
     suspend fun getAlbums(

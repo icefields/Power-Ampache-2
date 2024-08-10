@@ -159,4 +159,7 @@
     <string name="menu_drawer_about">Informazioni</string>
     <string name="menu_drawer_logout">Logout</string>
     <string name="menu_drawer_offline">Brani Offline</string>
+
+    <string name="share_song_cannot_find">Cannot find shared song</string>
+
 </resources>

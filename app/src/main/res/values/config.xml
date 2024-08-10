@@ -9,4 +9,5 @@
     <string name="loginScreen_local_server" translatable="false">Local Development Server</string>
     <string name="loginScreen_remote_server" translatable="false">Remote Debug Server</string>
     <string name="loginScreen_local_nextcloud" translatable="false">Local Nextcloud Server</string>
+    <string name="intent_filter_ampache_deeplink" translatable="false">Ampache DeepLink Share</string>
 </resources>

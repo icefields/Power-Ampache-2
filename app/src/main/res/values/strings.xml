@@ -53,7 +53,9 @@
     <string name="error_duplicate">Duplicate Entry</string>
     <string name="error_user_fetch">There was a problem retrieving your User from the server</string>
 
-    <string name="error_playback_exception">Issues playing this track. Retrying now</string>
+    <string name="error_playback_exception">Issues playing this track.</string>
+    <string name="share_song_cannot_find">Cannot find shared song</string>
+
 
     <string name="crash_mail_subject">Crash Report</string>
     <string name="crash_mail_body">Crash Report Data. Thanks</string>

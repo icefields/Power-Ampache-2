@@ -12,7 +12,7 @@
     <string name="main_tab_title_home">Inicio</string>
     <string name="main_tab_title_songs">Pistas</string>
     <string name="main_tab_title_artists">Artistas</string>
-    <string name="main_tab_title_playlists">Listas de reproducción</string>
+    <string name="main_tab_title_playlists">Listas</string>
     <string name="loginScreen_username">Usuario</string>
     <string name="loginScreen_signUp_email">Correo electrónico</string>
     <string name="loginScreen_fullname">Nombre completo (Opcional)</string>
@@ -123,7 +123,7 @@
     <string name="dialog_create">CREAR</string>
     <string name="warning_playlist_download">Por favor espera a que la lista de reproducción esté completamente cargada antes de descargar</string>
     <string name="warning_playlist_server">Añadir pistas, si la versión de tu servidor es menor a 6.3 este procedimiento puede tomar más o menos un minuto</string>
-    <string name="warning_playlist_adding">Las canciones están siendo añadidas a tu lista de reproducción.\nSi abandonas esta pantalla ahora, se interrumpirá el proceso</string>
+    <string name="warning_playlist_adding">Las pistas están siendo añadidas a tu lista de reproducción.\nSi abandonas esta pantalla ahora, se interrumpirá el proceso</string>
     <string name="warning_playlist_adding_title">¿Abandonar pantalla?</string>
     <string name="warning_playlist_adding_stay">Permancer</string>
     <string name="warning_playlist_adding_leave">Abandonar de todos modos</string>
@@ -155,7 +155,8 @@
     <string name="menu_drawer_home">Inicio</string>
     <string name="menu_drawer_about">Acerca de</string>
     <string name="menu_drawer_logout">Salir</string>
-    <string name="menu_drawer_offline">Canciones descargadas</string>
+    <string name="menu_drawer_offline">Pistas descargadas</string>
 
-    <string name="error_playback_exception">Issues playing this track. Retrying now</string>
+    <string name="error_playback_exception">Issues playing this track.</string>
+    <string name="share_song_cannot_find">Cannot find shared song</string>
 </resources>

@@ -32,5 +32,6 @@ data class PlaybackError(
 
 enum class AmpPlaybackError {
     ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED,
+    ERROR_MEDIA_TRANSITION,
     OTHER
 }

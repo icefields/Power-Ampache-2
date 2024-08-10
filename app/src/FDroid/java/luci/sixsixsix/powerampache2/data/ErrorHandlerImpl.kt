@@ -117,8 +117,9 @@ class ErrorHandlerImpl @Inject constructor(
 
                     is PlaybackException -> {
                         readableMessage =
-                            if (exceptionString.lowercase().contains("User disabled".lowercase())) exceptionString else
-                                "Error Code: ${e.errorCode}. ${applicationContext.getString(R.string.error_playback_exception)}"
+                            if (e.errorCode != PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED)
+                                "Error Code: ${e.errorCode}. ${applicationContext.getString(R.string.error_playback_exception)}\n$exceptionString"
+                            else ""
 
                         "PlaybackException \n$readableMessage\n $exceptionString"
                     }
