@@ -122,7 +122,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onRestart() {
         super.onRestart()
-        L( "onRestart")
         // refresh token or autologin every time the app resumes
         authViewModel.pingServer()
     }
@@ -133,11 +132,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun parseIntent(intent: Intent) {
-        L( "aaaa parseIntent")
-
         parseDeepLinkIntent(intent) { type, id, title, artist ->
-            L( "aaaa parseIntent", type, id, title, artist)
-
             try {
                 mainViewModel.onDeepLink(type, id, title, artist)
             } catch (e: Exception) {

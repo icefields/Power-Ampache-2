@@ -211,28 +211,28 @@ class MainViewModel @Inject constructor(
     private var deepLinkJob: Job? = null
 
     fun onDeepLink(type: String, id: String, title: String, artist: String) {
-        if (deepLinkJob == null)
-        deepLinkJob = viewModelScope.launch {
-            // wait for a session
-            musicRepository.sessionLiveData.filterNotNull().first()
-            L("aaaa onDeepLink")
+        if (deepLinkJob == null) {
+            deepLinkJob = viewModelScope.launch {
+                // wait for a session
+                musicRepository.sessionLiveData.filterNotNull().first()
 
-            when (type) {
-                "song" -> {
+                when (type) {
+                    "song" -> {
 
-                    // TODO: this is a hack! Wait for loading finished the proper way!
-                    delay(2000)
+                        // TODO: this is a hack! Wait for loading finished the proper way!
+                        delay(2000)
 
-                    withContext(Dispatchers.Main) {
-                        playDeepLinkedSong(id, title, artist)
+                        withContext(Dispatchers.Main) {
+                            playDeepLinkedSong(id, title, artist)
+                        }
+                        deepLinkJob?.cancel()
+                        deepLinkJob = null
                     }
-                    deepLinkJob?.cancel()
-                    deepLinkJob = null
-                }
 
-                "album" -> {}
-                "playlist" -> {}
-                else -> {}
+                    "album" -> {}
+                    "playlist" -> {}
+                    else -> {}
+                }
             }
         }
     }
