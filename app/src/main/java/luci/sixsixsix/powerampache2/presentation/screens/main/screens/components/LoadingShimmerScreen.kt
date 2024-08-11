@@ -61,7 +61,7 @@ fun LoadingShimmerScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 6.dp).padding(top = 66.dp)
+            .padding(start = 0.dp).padding(top = 66.dp)
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(5) {
