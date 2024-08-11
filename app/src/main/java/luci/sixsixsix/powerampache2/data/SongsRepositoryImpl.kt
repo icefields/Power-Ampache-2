@@ -157,6 +157,10 @@ class SongsRepositoryImpl @Inject constructor(
         searchOfflineSongs(query)
     }
 
+    override suspend fun getSongFromId(songId: String): Song? =
+        dao.getSongById(songId)?.run { toSong() }
+            ?: try { api.getSong(authToken(), songId).toSong() } catch (e: Exception) { null }
+
     private suspend fun getSongsNetwork(
         fetchRemote: Boolean,
         query: String,
@@ -237,8 +241,7 @@ class SongsRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        val auth = getSession()!!//authorize2(false)
-        val response = api.getSongsFromAlbum(auth.auth, albumId = albumId)
+        val response = api.getSongsFromAlbum(authToken(), albumId = albumId)
         response.error?.let { throw(MusicException(it.toError())) }
         val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
         L("getSongsFromAlbum songs from web", songs.size)
@@ -464,7 +467,7 @@ class SongsRepositoryImpl @Inject constructor(
 
     /**
      * Build Url for Ampache stream action
-     * https://tari.ddns.net/server/json.server.php?action=stream&
+     * https://www.servername.org/server/json.server.php?action=stream&
      * auth=878944fc45e121977229fe8027e52187
      * &type=song
      * &id=8895

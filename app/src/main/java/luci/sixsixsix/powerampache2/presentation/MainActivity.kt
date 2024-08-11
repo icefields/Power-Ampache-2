@@ -39,6 +39,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
+import luci.sixsixsix.powerampache2.domain.utils.ShareManager.Companion.parseDeepLinkIntent
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.MainScreen
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -62,6 +63,7 @@ class MainActivity : ComponentActivity() {
             mainViewModel = hiltViewModel<MainViewModel>(this)
             settingsViewModel = hiltViewModel<SettingsViewModel>(this)
             // homeScreenViewModel = hiltViewModel<HomeScreenViewModel>(this)
+
             val localSettingsState by settingsViewModel.localSettingsStateFlow.collectAsState()
             var dynamicColour = true
             var isDarkTheme = true
@@ -112,23 +114,32 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+
+            // parse intent for deeplink after initializing mainViewModel
+            parseIntent(intent)
         }
     }
 
     override fun onRestart() {
         super.onRestart()
-        L( "onRestart")
         // refresh token or autologin every time the app resumes
         authViewModel.pingServer()
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        L( "onNewIntent")
+        parseIntent(intent)
     }
 
-    override fun onDestroy() {
-        //mainViewModel.stopMusicService()
-        super.onDestroy()
+    private fun parseIntent(intent: Intent) {
+        parseDeepLinkIntent(intent) { type, id, title, artist ->
+            try {
+                mainViewModel.onDeepLink(type, id, title, artist)
+            } catch (e: Exception) {
+                L.e(e)
+            }
+        }
+
+        setIntent(Intent())
     }
 }

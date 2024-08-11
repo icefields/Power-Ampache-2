@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 import android.app.Application
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -37,11 +38,15 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
@@ -56,11 +61,14 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
+import luci.sixsixsix.powerampache2.domain.utils.ShareManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
+import java.net.URLDecoder
+import java.net.URLEncoder
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -74,6 +82,7 @@ class MainViewModel @Inject constructor(
     val songsRepository: SongsRepository,
     val settingsRepository: SettingsRepository,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
+    val shareManager: ShareManager,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) /*, MainQueueManager*/ {
     var state by savedStateHandle.saveable { mutableStateOf(MainState()) }
@@ -199,17 +208,50 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun shareSong(song: Song) = viewModelScope.launch {
-        songsRepository.getSongShareLink(song).collect { result ->
-            when (result) {
-                is Resource.Success -> result.data?.let {
-                    weakContext.get()?.shareLink(it)
-                }
+    private var deepLinkJob: Job? = null
 
-                is Resource.Error -> {}
-                is Resource.Loading -> {}
+    fun onDeepLink(type: String, id: String, title: String, artist: String) {
+        if (deepLinkJob == null) {
+            deepLinkJob = viewModelScope.launch {
+                // wait for a session
+                // TODO: is this the best way? (probably not)
+                musicRepository.sessionLiveData.filterNotNull().first()
+                when (type) {
+                    "song" -> {
+
+                        // TODO: this is a hack! Wait for loading finished the proper way!
+                        delay(2000)
+
+                        withContext(Dispatchers.Main) {
+                            playDeepLinkedSong(id, title, artist)
+                        }
+                        deepLinkJob?.cancel()
+                        deepLinkJob = null
+                    }
+
+                    "album" -> {}
+                    "playlist" -> {}
+                    else -> {}
+                }
             }
         }
+    }
+
+    private suspend fun playDeepLinkedSong(id: String, title: String, artist: String) {
+        shareManager.fetchDeepLinkedSong(id, title, artist,
+            songCallback = {
+                onEvent(MainEvent.PlaySongAddToQueueTop(it, currentQueue().value))
+            },
+            songsCallback = {
+                onEvent(MainEvent.AddSongsToQueueAndPlay(it.first(), it))
+            },
+            errorCallback = { weakContext.get()?.let { context ->
+                    Toast.makeText(context,
+                        context.getString(R.string.share_song_cannot_find), Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        )
     }
 
     fun downloadSong(song: Song) = viewModelScope.launch {

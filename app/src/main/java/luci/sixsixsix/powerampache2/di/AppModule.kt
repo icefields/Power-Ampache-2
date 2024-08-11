@@ -140,6 +140,4 @@ object AppModule {
         .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
         .setUsage(C.USAGE_MEDIA)
         .build()
-
-
 }
