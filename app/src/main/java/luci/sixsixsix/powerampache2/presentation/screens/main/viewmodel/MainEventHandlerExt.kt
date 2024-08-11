@@ -84,7 +84,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         is MainEvent.OnDownloadSong ->
             downloadSong(event.song)
         is MainEvent.OnShareSong -> viewModelScope.launch {
-            shareSong(event.song)
+            shareManager.shareSongDeepLink(context, event.song)
         }
         is MainEvent.Repeat -> viewModelScope.launch {
             val nextRepeatMode = nextRepeatMode()

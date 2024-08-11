@@ -160,4 +160,5 @@
     <string name="menu_drawer_logout">Salir</string>
     <string name="menu_drawer_offline">オフライン曲</string>
 
+    <string name="share_song_cannot_find">Cannot find shared song</string>
 </resources>

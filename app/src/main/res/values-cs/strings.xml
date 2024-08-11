@@ -146,5 +146,6 @@
     <string name="menu_drawer_logout">Logout</string>
     <string name="menu_drawer_offline">Offline Songs</string>
 
-    <string name="error_playback_exception">Issues playing this track. Retrying now</string>
+    <string name="error_playback_exception">Issues playing this track.</string>
+    <string name="share_song_cannot_find">Cannot find shared song</string>
 </resources>

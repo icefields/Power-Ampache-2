@@ -87,6 +87,7 @@ fun MainViewModel.observePlayerEvents() {
                     }
 
                     AmpPlaybackError.OTHER -> { }
+                    AmpPlaybackError.ERROR_MEDIA_TRANSITION -> { }
                 }
             }
         }

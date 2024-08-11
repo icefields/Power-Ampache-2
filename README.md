@@ -158,7 +158,10 @@ Power Ampache app is completely free of ads and does not request unnecessary per
 
 ## Contributing
 Power Ampache 2 is developed using Clean Architecture on top of MVVM, following SOLID principles.<br>
-***A complete contribution readme coming soon***. In the meantime, before starting any contribution, please contact me for an overview of the design patterns, code style and libraries used.
+Contribution guidelines here: 
+https://power.ampache.dev/contributing.html
+<br>
+Before starting any contribution, read the above document and if necessary contact me for an overview of the design patterns, code style and libraries used.
 <!-- - Fork the repository.
 - Make your changes in a separate branch.
 - Open a pull request. -->

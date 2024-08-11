@@ -206,6 +206,14 @@ class SimpleMediaServiceHandler @Inject constructor(
             }
         } catch (e: Exception) {
             L.e("onMediaItemTransition", e)
+            _simpleMediaState.value = SimpleMediaState.Error(
+                playbackException = AmpPlaybackException(
+                    error = PlaybackError(
+                        errorCode = AmpPlaybackError.ERROR_MEDIA_TRANSITION,
+                        exception = e
+                    )
+                )
+            )
         }
     }
 
@@ -286,14 +294,14 @@ class SimpleMediaServiceHandler @Inject constructor(
                 }
                 else -> {
                     errorHandler<PlaybackException>(label = "onPlayerError PlaybackException", error)
-                    updateErrorState(error)
+                    updateErrorStateOnPlaybackError(error)
                 }
             }
         }
         retryPlay()
     }
 
-    private fun updateErrorState(error: PlaybackException) {
+    private fun updateErrorStateOnPlaybackError(error: PlaybackException) {
         _simpleMediaState.value = SimpleMediaState.Error(playbackException = AmpPlaybackException(
             error = PlaybackError(
                 errorCode = when(error.errorCode) {
