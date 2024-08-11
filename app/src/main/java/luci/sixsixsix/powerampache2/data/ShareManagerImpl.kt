@@ -76,6 +76,8 @@ class ShareManagerImpl @Inject constructor(
         errorCallback: () -> Unit
     ) {
         val song = songsRepository.getSongFromId(id)
+        L("aaaa parse intent",id, title, artist, song?.id, song?.title, song?.album?.name, song?.artist?.name)
+
         if (song == null || title != song.title || artist != song.artist.name) {
             songsRepository.getSongs(query = title).collect { result ->
                 when (result) {

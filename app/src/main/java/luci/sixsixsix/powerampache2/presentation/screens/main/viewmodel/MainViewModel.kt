@@ -214,8 +214,8 @@ class MainViewModel @Inject constructor(
         if (deepLinkJob == null) {
             deepLinkJob = viewModelScope.launch {
                 // wait for a session
+                // TODO: is this the best way? (probably not)
                 musicRepository.sessionLiveData.filterNotNull().first()
-
                 when (type) {
                     "song" -> {
 

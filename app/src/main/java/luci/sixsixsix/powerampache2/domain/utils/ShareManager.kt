@@ -50,7 +50,7 @@ interface ShareManager {
                 var artist = ""
                 dataUri.pathSegments.forEachIndexed { i, value ->
                     // https url schemes has one extra path segment at the beginning
-                    val ii = if (dataUri.host == "ampache") i else i-1
+                    val ii = if (dataUri.scheme == "ampache") i else i-1
                     when(ii) {
                         0 -> type = value
                         1 -> id = value
