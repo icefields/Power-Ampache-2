@@ -21,10 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.data
 
-import android.content.Context
 import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +33,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants
@@ -70,7 +67,6 @@ import retrofit2.HttpException
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -160,10 +156,10 @@ class MusicRepositoryImpl @Inject constructor(
         authToken: String,
         serverUrl: String
     ) {
-        val se: CredentialsEntity = CredentialsEntity(
+        val se = CredentialsEntity(
             username = username.lowercase(),
             password = sha256password,
-            serverUrl = serverUrl.lowercase(),
+            serverUrl = serverUrl/*.lowercase()*/,
             authToken = authToken
         )
         dao.updateCredentials(se)
@@ -240,7 +236,7 @@ class MusicRepositoryImpl @Inject constructor(
         setCredentials(
             username = usernameLow,
             sha256password = sha256password,
-            serverUrl = serverUrl.lowercase(),
+            serverUrl = serverUrl/*.lowercase()*/,
             authToken = authToken
         )
         L("authorize CREDENTIALS ${getCredentials()}")
@@ -302,7 +298,7 @@ class MusicRepositoryImpl @Inject constructor(
         setCredentials(
             username = username,
             sha256password = sha256password,
-            serverUrl = serverUrl.lowercase(),
+            serverUrl = serverUrl/*.lowercase()*/,
             authToken = ""
         )
 
