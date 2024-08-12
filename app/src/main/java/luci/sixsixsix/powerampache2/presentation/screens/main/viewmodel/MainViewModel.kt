@@ -107,6 +107,7 @@ class MainViewModel @Inject constructor(
     private var playLoadingJob: Job? = null
     var searchJob: Job? = null
     private var scrobbleJob: Job? = null
+    private var deepLinkJob: Job? = null
 
 
     //private var isServiceRunning by savedStateHandle.saveable { mutableStateOf(false) }
@@ -208,9 +209,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private var deepLinkJob: Job? = null
-
-    fun onDeepLink(type: String, id: String, title: String, artist: String) {
+    fun onDeepLink(type: String, id: String, title: String, artist: String, webLink: String) {
         if (deepLinkJob == null) {
             deepLinkJob = viewModelScope.launch {
                 // wait for a session
@@ -223,7 +222,7 @@ class MainViewModel @Inject constructor(
                         delay(2000)
 
                         withContext(Dispatchers.Main) {
-                            playDeepLinkedSong(id, title, artist)
+                            playDeepLinkedSong(id, title, artist, webLink)
                         }
                         deepLinkJob?.cancel()
                         deepLinkJob = null
@@ -237,18 +236,21 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private suspend fun playDeepLinkedSong(id: String, title: String, artist: String) {
+    private suspend fun playDeepLinkedSong(id: String, title: String, artist: String, webLink: String) {
         shareManager.fetchDeepLinkedSong(id, title, artist,
             songCallback = {
                 onEvent(MainEvent.PlaySongAddToQueueTop(it, currentQueue().value))
             },
             songsCallback = {
-                onEvent(MainEvent.AddSongsToQueueAndPlay(it.first(), it))
+                onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(it))
             },
-            errorCallback = { weakContext.get()?.let { context ->
-                    Toast.makeText(context,
-                        context.getString(R.string.share_song_cannot_find), Toast.LENGTH_LONG
-                    ).show()
+            errorCallback = {
+                weakContext.get()?.let { context ->
+                    if (webLink.isNotBlank()) {
+                        context.shareLink(webLink)
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.share_song_cannot_find), Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         )

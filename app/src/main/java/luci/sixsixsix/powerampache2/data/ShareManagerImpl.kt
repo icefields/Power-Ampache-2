@@ -38,11 +38,7 @@ import javax.inject.Singleton
 class ShareManagerImpl @Inject constructor(
     val songsRepository: SongsRepository
 ): ShareManager {
-    override fun shareSongDeepLink(context: Context, song: Song) {
-        //context.shareLink("ampache://share/song/${song.id}/${URLEncoder.encode(song.title, "UTF-8")}/${URLEncoder.encode(song.album.name,"UTF-8")}/${URLEncoder.encode(song.artist.name,"UTF-8")}")
-//        context.shareLink("https://${context.getString(R.string.deepLink_host)}/share/song/${song.id}/${URLEncoder.encode(song.title, "UTF-8")}" +
-//                "/${URLEncoder.encode(song.album.name,"UTF-8")}" +
-//                "/${URLEncoder.encode(song.artist.name,"UTF-8")}")
+    override suspend fun shareSongDeepLink(context: Context, song: Song) {
         StringBuilder("https://")
             .append(context.getString(R.string.deepLink_host))
             .append("/share")
@@ -50,7 +46,15 @@ class ShareManagerImpl @Inject constructor(
             .append("/${song.id}")
             .append("/${URLEncoder.encode(song.title, "UTF-8")}")
             .append("/${URLEncoder.encode(song.album.name,"UTF-8")}")
-            .append("/${URLEncoder.encode(song.artist.name,"UTF-8")}").apply {
+            .append("/${URLEncoder.encode(song.artist.name,"UTF-8")}")
+            .apply {
+                songsRepository.getSongShareLink(song).collect { result ->
+                    if (result is Resource.Success) {
+                        result.data?.let { webShareLink ->
+                            append("/${URLEncoder.encode(webShareLink,"UTF-8")}")
+                        }
+                    }
+                }
                 context.shareLink(toString())
             }
     }
@@ -81,7 +85,7 @@ class ShareManagerImpl @Inject constructor(
         if (song == null || title != song.title || artist != song.artist.name) {
             songsRepository.getSongs(query = title).collect { result ->
                 when (result) {
-                    is Resource.Success -> result.data?.let {
+                    is Resource.Success -> result.networkData?.let {
                         if (it.isNotEmpty()) {
                             songsCallback(it)
                         } else {
