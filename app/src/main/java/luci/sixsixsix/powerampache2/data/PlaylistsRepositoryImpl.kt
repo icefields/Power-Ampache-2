@@ -139,6 +139,15 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 data = dao.searchPlaylists(query).map { it.toPlaylist() },
                 networkData = playlistNetwork)
             )
+        } else {
+            Constants.config.run {
+                smartlistsUserFetch || playlistsUserFetch || playlistsAdminFetch || smartlistsAdminFetch
+            }.let { atLeastOneUserPlaylist ->
+                // if at least one user playlist present and playlistsServerAllFetch=false
+                // remove all playlists that are not user or admin playlists
+                if (atLeastOneUserPlaylist)
+                    dao.deleteNonUserAdminPlaylist()
+            }
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylists()", e, this) }
