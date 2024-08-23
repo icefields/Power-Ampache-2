@@ -23,12 +23,11 @@ package luci.sixsixsix.powerampache2.domain.utils
 
 import android.content.Context
 import android.content.Intent
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.net.URLDecoder
 
 interface ShareManager {
-    fun shareSongDeepLink(context: Context, song: Song)
+    suspend fun shareSongDeepLink(context: Context, song: Song)
     suspend fun shareSongWeb(context: Context, song: Song)
 
      suspend fun fetchDeepLinkedSong(id: String, title: String, artist: String,
@@ -39,7 +38,7 @@ interface ShareManager {
      companion object {
         fun parseDeepLinkIntent(
             intent: Intent,
-            callback: (type: String, id: String, title: String, artist: String) -> Unit
+            callback: (type: String, id: String, title: String, artist: String, webLink: String) -> Unit
         ) {
             val action: String? = intent.action
             intent.data?.let { dataUri ->
@@ -48,6 +47,7 @@ interface ShareManager {
                 var title = ""
                 var album = ""
                 var artist = ""
+                var webLink = ""
                 dataUri.pathSegments.forEachIndexed { i, value ->
                     // https url schemes has one extra path segment at the beginning
                     val ii = if (dataUri.scheme == "ampache") i else i-1
@@ -57,9 +57,10 @@ interface ShareManager {
                         2 -> title = URLDecoder.decode(value, "UTF-8")
                         3 -> album = URLDecoder.decode(value, "UTF-8")
                         4 -> artist = URLDecoder.decode(value, "UTF-8")
+                        5 -> webLink = URLDecoder.decode(value, "UTF-8")
                     }
                 }
-                callback(type, id, title, artist)
+                callback(type, id, title, artist, webLink)
             }
         }
     }

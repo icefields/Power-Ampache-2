@@ -241,6 +241,10 @@ interface MusicDao {
     @Delete
     suspend fun deletePlaylists(playlists: List<PlaylistEntity>)
 
+    @Query("""DELETE FROM playlistentity WHERE $multiUserCondition AND LOWER(owner) != LOWER('admin') AND
+            LOWER(owner) != LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
+    suspend fun deleteNonUserAdminPlaylist()
+
     @Query("DELETE FROM playlistsongentity WHERE $multiUserCondition")
     suspend fun clearPlaylistSongs()
 
@@ -268,6 +272,9 @@ interface MusicDao {
     // get only playlists user owns
     @Query("""SELECT * FROM playlistentity WHERE LOWER(owner) = LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) order by rating DESC, id DESC""")
     suspend fun getMyPlaylists(): List<PlaylistEntity>
+
+    @Query("""SELECT * FROM playlistentity WHERE LOWER(owner) = LOWER('admin') order by rating DESC, id DESC""")
+    suspend fun getAdminPlaylists(): List<PlaylistEntity>
 
 // --- OFFLINE SONGS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)

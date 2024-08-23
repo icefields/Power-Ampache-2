@@ -94,7 +94,7 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
                 .build()
 
         }
-        .logger(DebugLogger()) // TODO change in production
+        //.logger(DebugLogger()) // TODO change in production
         .build()
 
     override val workManagerConfiguration: Configuration

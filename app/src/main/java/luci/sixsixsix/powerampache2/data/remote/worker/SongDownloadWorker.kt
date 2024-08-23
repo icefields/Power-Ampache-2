@@ -83,7 +83,7 @@ class SongDownloadWorker @AssistedInject constructor(
                             song.toDownloadedSongEntity(
                                 filepath,
                                 username!!.lowercase(),
-                                serverUrl = db.dao.getCredentials()?.serverUrl!!.lowercase()
+                                serverUrl = db.dao.getCredentials()?.serverUrl!!/*.lowercase()*/
                             )
                         )
                         setProgress(lastUpdate)

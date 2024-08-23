@@ -56,9 +56,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 65
-        versionName = "1.00-65"
-        val versionQuote = "This version is powered by a single prime number multiplied by itself five times"
+        versionCode = 66
+        versionName = "1.00-66"
+        val versionQuote = "This version is powered by the number of the beast minus 600"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -82,6 +82,14 @@ android {
         buildConfigField("String", "DEFAULT_SERVER_URL", "\"\"")
         buildConfigField("boolean", "FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS", "true")
         buildConfigField("boolean", "DEMO_VERSION", "false")
+
+        buildConfigField("boolean", "PLAYLISTS_USER_FETCH", "false")
+        buildConfigField("boolean", "SMARTLISTS_USER_FETCH", "false")
+        buildConfigField("boolean", "PLAYLISTS_ADMIN_FETCH", "false")
+        buildConfigField("boolean", "SMARTLISTS_ADMIN_FETCH", "false")
+        buildConfigField("boolean", "PLAYLISTS_ALL_SERVER_FETCH", "true")
+
+
         buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config.json\"")
     }
 
@@ -201,6 +209,12 @@ android {
             buildConfigField("String", "URL_ERROR_LOG", "\"https://pastebin.com/api/\"")
             buildConfigField("String", "PASTEBIN_API_KEY", pastebinApiKey)
             buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config-dogmazic.json\"")
+
+            buildConfigField("boolean", "PLAYLISTS_ALL_SERVER_FETCH", "false")
+            buildConfigField("boolean", "PLAYLISTS_USER_FETCH", "true")
+            buildConfigField("boolean", "SMARTLISTS_USER_FETCH", "true")
+            buildConfigField("boolean", "PLAYLISTS_ADMIN_FETCH", "true")
+            buildConfigField("boolean", "SMARTLISTS_ADMIN_FETCH", "true")
         }
     }
 

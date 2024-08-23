@@ -1,0 +1,5 @@
+- improve share with in-app deep link with fallback to web-link
+- improved landscape view-mode
+- fixed bug that blocked login when path in url was mixed-case
+- fetching only user and server playlists for the Dogmazic version
+- other minor bug fixes

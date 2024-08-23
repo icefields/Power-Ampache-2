@@ -99,7 +99,7 @@ abstract class BaseAmpacheRepository(
             }
 
     suspend fun getCurrentCredentials() = getCredentials()?.let {
-        CurrentCredentialsWrapper(username = it.username.lowercase(), serverUrl = it.serverUrl.lowercase())
+        CurrentCredentialsWrapper(username = it.username.lowercase(), serverUrl = it.serverUrl/*.lowercase()*/)
     } ?: CurrentCredentialsWrapper(username = "", serverUrl = "")
 
     /**

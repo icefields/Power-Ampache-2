@@ -132,9 +132,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun parseIntent(intent: Intent) {
-        parseDeepLinkIntent(intent) { type, id, title, artist ->
+        parseDeepLinkIntent(intent) { type, id, title, artist, webLink ->
             try {
-                mainViewModel.onDeepLink(type, id, title, artist)
+                mainViewModel.onDeepLink(type, id, title, artist, webLink)
             } catch (e: Exception) {
                 L.e(e)
             }

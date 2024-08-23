@@ -23,7 +23,6 @@ package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.asFlow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
@@ -140,6 +139,15 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 data = dao.searchPlaylists(query).map { it.toPlaylist() },
                 networkData = playlistNetwork)
             )
+        } else {
+            Constants.config.run {
+                smartlistsUserFetch || playlistsUserFetch || playlistsAdminFetch || smartlistsAdminFetch
+            }.let { atLeastOneUserPlaylist ->
+                // if at least one user playlist present and playlistsServerAllFetch=false
+                // remove all playlists that are not user or admin playlists
+                if (atLeastOneUserPlaylist)
+                    dao.deleteNonUserAdminPlaylist()
+            }
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPlaylists()", e, this) }
