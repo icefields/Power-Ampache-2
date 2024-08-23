@@ -29,11 +29,11 @@ const val PLAYLIST_FETCH_LIMIT = 0
 const val PLAYLIST_ADD_NEW_ENABLE = true
 const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
 
-const val PLAYLISTS_USER_FETCH = true
-const val SMARTLISTS_USER_FETCH = true
-const val PLAYLISTS_ADMIN_FETCH = true
-const val SMARTLISTS_ADMIN_FETCH = true
-const val PLAYLISTS_ALL_SERVER_FETCH = true
+const val PLAYLISTS_USER_FETCH = BuildConfig.PLAYLISTS_USER_FETCH
+const val SMARTLISTS_USER_FETCH = BuildConfig.SMARTLISTS_USER_FETCH
+const val PLAYLISTS_ADMIN_FETCH = BuildConfig.PLAYLISTS_ADMIN_FETCH
+const val SMARTLISTS_ADMIN_FETCH = BuildConfig.SMARTLISTS_ADMIN_FETCH
+const val PLAYLISTS_ALL_SERVER_FETCH = BuildConfig.PLAYLISTS_ALL_SERVER_FETCH
 const val CLEAR_LIBRARY_ON_CATALOG_CLEAN = true
 
 data class Pa2Config(
@@ -80,5 +80,7 @@ data class Pa2Config(
     // fetch all playlists from server
     val playlistsServerAllFetch: Boolean = PLAYLISTS_ALL_SERVER_FETCH,
     // clear the library when a newer "clean" date in the handshake response
-    val clearLibraryOnCatalogClean: Boolean = CLEAR_LIBRARY_ON_CATALOG_CLEAN
+    val clearLibraryOnCatalogClean: Boolean = CLEAR_LIBRARY_ON_CATALOG_CLEAN,
+    // message to show at login, if any present
+    val introMessage: String = ""
 )
