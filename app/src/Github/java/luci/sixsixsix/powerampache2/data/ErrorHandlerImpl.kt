@@ -66,7 +66,7 @@ class ErrorHandlerImpl @Inject constructor(
     private val applicationContext: Application
 ): ErrorHandler {
 
-    private var isErrorHandlingEnabled = ENABLE_ERROR_LOG
+    private val isErrorHandlingEnabled = true // OOM: force logs. default: var, ENABLE_ERROR_LOG
 
     init {
         GlobalScope.launch {
@@ -76,7 +76,7 @@ class ErrorHandlerImpl @Inject constructor(
                 .asFlow()
                 .filterNotNull().collectLatest {
                     if (it != isErrorHandlingEnabled) {
-                        isErrorHandlingEnabled = it
+                        //isErrorHandlingEnabled = it // OOM: force logs.
                         L.e("ERROR hand enabled? $isErrorHandlingEnabled")
                     }
                 }
@@ -177,11 +177,12 @@ class ErrorHandlerImpl @Inject constructor(
                     }
                 }
             ).toString().apply {
+                val superDebugMessage = "$this \n${e.stackTraceToString()}"
                 // check on error on the emitted data for detailed logging
-                fc?.emit(Resource.Error(message = this, exception = e))
+                fc?.emit(Resource.Error(message = superDebugMessage, exception = e))
                 // log and report error here
-                logError(e, this)
-                playlistManager.updateErrorLogMessage(this)
+                logError(e, superDebugMessage)
+                playlistManager.updateErrorLogMessage(superDebugMessage)
                 // readable message here
                 readableMessage?.let {
                     // TODO find a better way to not show verbose info
@@ -205,6 +206,7 @@ class ErrorHandlerImpl @Inject constructor(
 
     override suspend fun logError(message: String) {
         try {
+            playlistManager.updateErrorLogMessage(message)
             if (isErrorHandlingEnabled && !URL_ERROR_LOG.isNullOrBlank()) {
                api.sendErrorReport(apiPasteCode = "${getVersionInfoString(applicationContext)}\n$message")
             }
