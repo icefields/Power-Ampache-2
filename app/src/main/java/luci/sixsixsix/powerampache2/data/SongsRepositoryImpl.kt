@@ -587,6 +587,9 @@ class SongsRepositoryImpl @Inject constructor(
             L("scrobble song available offline", songsToScrobble.size)
             scrobbleEverything()
             emit(Resource.Success(data = Any(), networkData = Any()))
+        } else {
+            // TODO: Uncomment after manual record_play enabled on backend for stream
+            // scrobbleApiCall(authToken(), song)
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("scrobble()", e, this) }
@@ -620,13 +623,17 @@ class SongsRepositoryImpl @Inject constructor(
 
     @Throws(Exception::class)
     private suspend fun scrobbleApiCall(auth: String, song: Song) =
-        api.scrobble(
-            authKey = auth,
-            song = song.name,
-            artist = song.artist.name,
-            album = song.album.name
-        ).run {
+        api.recordPlay(auth, song.mediaId).run {
             error?.let { throw (ScrobbleException(it.toError())) }
             (success != null)
         }
+//        api.scrobble(
+//            authKey = auth,
+//            song = song.name,
+//            artist = song.artist.name,
+//            album = song.album.name
+//        ).run {
+//            error?.let { throw (ScrobbleException(it.toError())) }
+//            (success != null)
+//        }
 }

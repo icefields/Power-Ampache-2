@@ -22,8 +22,12 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.app.Application
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
+import android.os.IBinder
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.runtime.mutableFloatStateOf
@@ -37,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
+import androidx.media3.session.MediaSessionService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -111,7 +116,7 @@ class MainViewModel @Inject constructor(
 
 
     //private var isServiceRunning by savedStateHandle.saveable { mutableStateOf(false) }
-    private var isServiceRunning = false
+    //private var isServiceRunning = false
     var emittedDownloads by savedStateHandle.saveable { mutableStateOf(listOf<String>()) }
 
     // TODO: there is no queue to restore! because the queue is in MusicPlaylistManager
@@ -345,38 +350,92 @@ class MainViewModel @Inject constructor(
         }
     }
 
+
+
+
+
+
+
+
+
+
+    private var serviceBound = false
+    //@UnstableApi
+    //private var mediaSessionService: SimpleMediaService? = null
+
+    private lateinit var connection: ServiceConnection
+
+    private fun initBindConnection(): ServiceConnection {
+        if (!::connection.isInitialized) {
+
+            connection = object : ServiceConnection {
+                @OptIn(UnstableApi::class)
+                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                    //val binder = service as SimpleMediaService.MediaServiceBinder
+                    //mediaSessionService = binder.getService()
+                    serviceBound = true
+                }
+
+                @OptIn(UnstableApi::class)
+                override fun onServiceDisconnected(name: ComponentName?) {
+                    //mediaSessionService = null
+                    serviceBound = false
+                }
+            }
+        }
+        return connection
+    }
+
     @OptIn(UnstableApi::class)
-    fun startMusicServiceIfNecessary() {
-        logToErrorLogs("SERVICE- startMusicServiceIfNecessary. isServiceRunning? : $isServiceRunning")
-        if (!isServiceRunning) {
+    private fun bindToMediaSessionService() {
+        if (!serviceBound) {
+            L("SERVICE- bindToMediaSessionService")
             weakContext.get()?.applicationContext?.let { applicationContext ->
                 Intent(applicationContext, SimpleMediaService::class.java).apply {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        isServiceRunning = true
-                        startForegroundService(applicationContext, this)
-                    }
+                    startForegroundService(applicationContext, this)
+                    applicationContext.bindService(this, initBindConnection(), Context.BIND_AUTO_CREATE)
                 }
             }
         }
     }
 
+    private fun unbindFromMediaSessionService() {
+        if (serviceBound) {
+            weakContext.get()?.applicationContext?.unbindService(initBindConnection())
+            serviceBound = false
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    fun startMusicServiceIfNecessary() {
+        bindToMediaSessionService()
+//        logToErrorLogs("SERVICE- startMusicServiceIfNecessary. isServiceRunning? : $isServiceRunning")
+//        if (!isServiceRunning) {
+//            weakContext.get()?.applicationContext?.let { applicationContext ->
+//                Intent(applicationContext, SimpleMediaService::class.java).apply {
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                        isServiceRunning = true
+//                        startForegroundService(applicationContext, this)
+//                    }
+//                }
+//            }
+//        }
+    }
+
     @OptIn(UnstableApi::class)
     fun stopMusicService() = viewModelScope.launch {
         delay(SERVICE_STOP_TIMEOUT) // safety net, delay stopping the service in case the application just got restored from background
-        logToErrorLogs("SERVICE- stopMusicService $isServiceRunning")
 
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
+                unbindFromMediaSessionService()
                 applicationContext.stopService(
-                    Intent(
-                        applicationContext,
-                        SimpleMediaService::class.java
-                    )
-                )
-                    .also { isServiceRunning = false }
+                    Intent(applicationContext, SimpleMediaService::class.java))
+//                    .also { isServiceRunning = false }
             } catch (e: Exception) {
                 L.e(e)
-                isServiceRunning = false
+                serviceBound = false
+//                isServiceRunning = false
             }
         }
     }

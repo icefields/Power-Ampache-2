@@ -83,38 +83,32 @@ class SimpleMediaNotificationManager @Inject constructor(
     }
 
     private fun startForegroundNotification(mediaSessionService: MediaSessionService) {
-        val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notification
-                .Builder(context, NOTIFICATION_CHANNEL_ID)
-                .setCategory(Notification.CATEGORY_SERVICE)
-                // TODO tap on notification should open the app
-                .setContentIntent(
-                    PendingIntent.getActivity(
-                        context.applicationContext,
-                        3214,
-                        Intent(context.applicationContext, MainActivity::class.java)
-                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                                        Intent.FLAG_ACTIVITY_NEW_TASK),
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-                ).build()
-        } else {
-            TODO("VERSION SDK < O")
-        }
+        val notification = Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
+            .setCategory(Notification.CATEGORY_SERVICE)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    context.applicationContext,
+                    3214,
+                    Intent(context.applicationContext, MainActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                                    Intent.FLAG_ACTIVITY_NEW_TASK),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            ).build()
         mediaSessionService.startForeground(NOTIFICATION_ID, notification)
     }
 
-    private fun createNotificationChannel() =
-        notificationManager.createNotificationChannel(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID,
-                    NOTIFICATION_CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_LOW
-                )
-            } else {
-                TODO("VERSION SDK < O")
-            }
+    fun stopNotificationService(mediaSessionService: MediaSessionService) {
+        mediaSessionService.stopForeground(MediaSessionService.STOP_FOREGROUND_REMOVE)
+        notificationManager.cancel(NOTIFICATION_ID);
+    }
+
+    private fun createNotificationChannel() = notificationManager.createNotificationChannel(
+        NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            NOTIFICATION_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_LOW
         )
+    )
 }

@@ -56,9 +56,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 66
-        versionName = "1.00-66"
-        val versionQuote = "This version is powered by the number of the beast minus 600"
+        versionCode = 67
+        versionName = "1.00-67"
+        val versionQuote = "This version is powered by the 9th number in the Fibonacci sequence (also palindromic in Base 8)"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
