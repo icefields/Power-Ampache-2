@@ -47,7 +47,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
 import luci.sixsixsix.powerampache2.data.local.models.SongUrl
 
-private const val multiUserCondition = """ LOWER(multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) """
+private const val multiUserCondition = " LOWER(multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) "
 
 @Dao
 interface MusicDao {
@@ -226,7 +226,11 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylists(companyListingEntities: List<PlaylistEntity>)
 
-    @Query("""SELECT song.*, songIds.position FROM songentity as song, (SELECT * FROM playlistsongentity WHERE LOWER(:playlistId) == LOWER(playlistId)) as songIds WHERE LOWER(song.mediaId) == LOWER(songIds.songId) ORDER BY songIds.position""")
+    @Query("""SELECT song.*, songIds.position FROM songentity as song, 
+        (SELECT * FROM playlistsongentity WHERE LOWER(:playlistId) == LOWER(playlistId)) as songIds 
+        WHERE LOWER(song.mediaId) == LOWER(songIds.songId) 
+        AND LOWER(song.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))
+        GROUP BY LOWER(song.mediaId) ORDER BY songIds.position""")
     suspend fun getSongsFromPlaylist(playlistId: String): List<SongEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

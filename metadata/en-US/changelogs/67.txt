@@ -1,5 +1,6 @@
-- improve share with in-app deep link with fallback to web-link
-- improved landscape view-mode
-- fixed bug that blocked login when path in url was mixed-case
-- fetching only user and server playlists for the Dogmazic version
+- fixed issue with deleting song from playlist
+- improved internal database
+- fixed issue with inconsistent sync with server
+- fixed out of memory crash
+- improved the way the app interacts with notification and music service
 - other minor bug fixes
