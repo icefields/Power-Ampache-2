@@ -437,7 +437,8 @@ interface MainNetwork {
     @GET("json.server.php?action=record_play")
     suspend fun recordPlay(
         @Query("auth") authKey: String,
-        @Query("id") song: String
+        @Query("id") song: String,
+        @Query("date") unixTimestamp: Long
     ): SuccessResponse
 
     @GET
