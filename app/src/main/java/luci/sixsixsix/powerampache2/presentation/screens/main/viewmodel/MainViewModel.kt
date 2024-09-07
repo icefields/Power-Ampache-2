@@ -116,7 +116,7 @@ class MainViewModel @Inject constructor(
 
 
     //private var isServiceRunning by savedStateHandle.saveable { mutableStateOf(false) }
-    //private var isServiceRunning = false
+    private var isServiceRunning = false
     var emittedDownloads by savedStateHandle.saveable { mutableStateOf(listOf<String>()) }
 
     // TODO: there is no queue to restore! because the queue is in MusicPlaylistManager
@@ -380,6 +380,7 @@ class MainViewModel @Inject constructor(
                 override fun onServiceDisconnected(name: ComponentName?) {
                     //mediaSessionService = null
                     serviceBound = false
+                    isServiceRunning = false
                 }
             }
         }
@@ -389,20 +390,25 @@ class MainViewModel @Inject constructor(
     @OptIn(UnstableApi::class)
     private fun bindToMediaSessionService() {
         if (!serviceBound) {
-            L("SERVICE- bindToMediaSessionService")
             weakContext.get()?.applicationContext?.let { applicationContext ->
                 Intent(applicationContext, SimpleMediaService::class.java).apply {
-                    startForegroundService(applicationContext, this)
-                    applicationContext.bindService(this, initBindConnection(), Context.BIND_AUTO_CREATE)
+                    if (!isServiceRunning) {
+                        L("SERVICE- bindToMediaSessionService")
+                        isServiceRunning = true
+                        startForegroundService(applicationContext, this)
+                        applicationContext.bindService(this, initBindConnection(), Context.BIND_AUTO_CREATE)
+                    }
                 }
             }
         }
     }
 
     private fun unbindFromMediaSessionService() {
+        L("SERVICE- unbindFromMediaSessionService")
         if (serviceBound) {
             weakContext.get()?.applicationContext?.unbindService(initBindConnection())
             serviceBound = false
+            isServiceRunning = false
         }
     }
 
@@ -428,14 +434,15 @@ class MainViewModel @Inject constructor(
 
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
-                unbindFromMediaSessionService()
                 applicationContext.stopService(
                     Intent(applicationContext, SimpleMediaService::class.java))
 //                    .also { isServiceRunning = false }
+                unbindFromMediaSessionService()
+
             } catch (e: Exception) {
                 L.e(e)
                 serviceBound = false
-//                isServiceRunning = false
+                isServiceRunning = false
             }
         }
     }

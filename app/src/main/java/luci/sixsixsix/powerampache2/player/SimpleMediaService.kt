@@ -43,14 +43,14 @@ class SimpleMediaService: MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
         L("SERVICE- onCreate")
-        notificationManager.startNotificationService(
-            mediaSessionService = this,
-            mediaSession = mediaSession
-        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         L("SERVICE- onStartCommand")
+        notificationManager.startNotificationService(
+            mediaSessionService = this,
+            mediaSession = mediaSession
+        )
         return super.onStartCommand(intent, flags, startId)
     }
 
