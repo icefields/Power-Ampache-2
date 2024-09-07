@@ -363,29 +363,73 @@ class MainViewModel @Inject constructor(
     //@UnstableApi
     //private var mediaSessionService: SimpleMediaService? = null
 
-    private lateinit var connection: ServiceConnection
-
-    private fun initBindConnection(): ServiceConnection {
-        if (!::connection.isInitialized) {
-
-            connection = object : ServiceConnection {
-                @OptIn(UnstableApi::class)
-                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                    //val binder = service as SimpleMediaService.MediaServiceBinder
-                    //mediaSessionService = binder.getService()
-                    serviceBound = true
-                }
-
-                @OptIn(UnstableApi::class)
-                override fun onServiceDisconnected(name: ComponentName?) {
-                    //mediaSessionService = null
-                    serviceBound = false
-                    isServiceRunning = false
-                }
-            }
+    //private lateinit var connection: ServiceConnection
+    private val connection = object : ServiceConnection {
+        @OptIn(UnstableApi::class)
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            //val binder = service as SimpleMediaService.MediaServiceBinder
+            //mediaSessionService = binder.getService()
+            L("SERVICE- onServiceConnected")
+            serviceBound = true
         }
-        return connection
+
+        @OptIn(UnstableApi::class)
+        override fun onServiceDisconnected(name: ComponentName?) {
+            //mediaSessionService = null
+            serviceBound = false
+            isServiceRunning = false
+            L("SERVICE- onServiceDisconnected")
+        }
+
+        override fun onBindingDied(name: ComponentName?) {
+            super.onBindingDied(name)
+            L("SERVICE- onBindingDied")
+        }
+
+        override fun onNullBinding(name: ComponentName?) {
+            super.onNullBinding(name)
+            L("SERVICE- onNullBinding")
+
+        }
     }
+
+//    private fun initBindConnection(): ServiceConnection {
+//        if (!::connection.isInitialized) {
+//
+//            connection = object : ServiceConnection {
+//                @OptIn(UnstableApi::class)
+//                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+//                    //val binder = service as SimpleMediaService.MediaServiceBinder
+//                    //mediaSessionService = binder.getService()
+//                    serviceBound = true
+//                }
+//
+//                @OptIn(UnstableApi::class)
+//                override fun onServiceDisconnected(name: ComponentName?) {
+//                    //mediaSessionService = null
+//                    serviceBound = false
+//                    isServiceRunning = false
+//                    L("SERVICE- onServiceDisconnected")
+//                    weakContext.get()?.let { applicationContext ->
+//                        applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
+//                    }
+//
+//                }
+//
+//                override fun onBindingDied(name: ComponentName?) {
+//                    super.onBindingDied(name)
+//                    L("SERVICE- onBindingDied")
+//                }
+//
+//                override fun onNullBinding(name: ComponentName?) {
+//                    super.onNullBinding(name)
+//                    L("SERVICE- onNullBinding")
+//
+//                }
+//            }
+//        }
+//        return connection
+//    }
 
     @OptIn(UnstableApi::class)
     private fun bindToMediaSessionService() {
@@ -396,7 +440,7 @@ class MainViewModel @Inject constructor(
                         L("SERVICE- bindToMediaSessionService")
                         isServiceRunning = true
                         startForegroundService(applicationContext, this)
-                        applicationContext.bindService(this, initBindConnection(), Context.BIND_AUTO_CREATE)
+                        applicationContext.bindService(this, connection, Context.BIND_AUTO_CREATE)
                     }
                 }
             }
@@ -404,9 +448,9 @@ class MainViewModel @Inject constructor(
     }
 
     private fun unbindFromMediaSessionService() {
-        L("SERVICE- unbindFromMediaSessionService")
+        L("SERVICE- unbindFromMediaSessionService $serviceBound")
         if (serviceBound) {
-            weakContext.get()?.applicationContext?.unbindService(initBindConnection())
+            weakContext.get()?.applicationContext?.unbindService(connection)
             serviceBound = false
             isServiceRunning = false
         }
@@ -434,14 +478,12 @@ class MainViewModel @Inject constructor(
 
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
-                applicationContext.stopService(
-                    Intent(applicationContext, SimpleMediaService::class.java))
-//                    .also { isServiceRunning = false }
+                applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
+                    .also { isServiceRunning = false }
                 unbindFromMediaSessionService()
-
             } catch (e: Exception) {
-                L.e(e)
-                serviceBound = false
+                L.e(e, "SERVICE-")
+                //serviceBound = false
                 isServiceRunning = false
             }
         }

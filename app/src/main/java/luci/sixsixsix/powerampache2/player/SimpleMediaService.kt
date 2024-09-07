@@ -80,6 +80,11 @@ class SimpleMediaService: MediaSessionService() {
         return binder
     }
 
+    override fun onUnbind(intent: Intent?): Boolean {
+        L("SERVICE- onUnbind")
+        return super.onUnbind(intent)
+    }
+
     // Binder class to interact with the service
     inner class MediaServiceBinder : Binder() {
         fun getService(): SimpleMediaService = this@SimpleMediaService

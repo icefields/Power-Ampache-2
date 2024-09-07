@@ -25,6 +25,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -72,7 +73,8 @@ class SimpleMediaNotificationManager @Inject constructor(
             .setSmallIconResourceId(R.drawable.ic_power_ampache_mono)
             .build()
             .apply {
-                setMediaSessionToken(mediaSession.sessionCompatToken)
+                //setMediaSessionToken(mediaSession.sessionCompatToken)
+                setMediaSessionToken(mediaSession.platformToken)
                 setUseFastForwardActionInCompactView(true)
                 setUseRewindActionInCompactView(true)
                 setUseNextActionInCompactView(true)
@@ -101,7 +103,8 @@ class SimpleMediaNotificationManager @Inject constructor(
 
     fun stopNotificationService(mediaSessionService: MediaSessionService) {
         mediaSessionService.stopForeground(MediaSessionService.STOP_FOREGROUND_REMOVE)
-        notificationManager.cancel(NOTIFICATION_ID);
+        notificationManager.cancel(NOTIFICATION_ID)
+        notificationManager.cancelAll()
     }
 
     private fun createNotificationChannel() = notificationManager.createNotificationChannel(
