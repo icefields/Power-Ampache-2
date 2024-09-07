@@ -42,6 +42,7 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
 
     private fun isErrorReportUrl(url: String) = url == BuildConfig.URL_ERROR_LOG
     private fun isLogoutUrl(url: String) = url.contains("action=goodbye")
+    private fun isImage(url: String) = url.contains("image.php?")
     private fun isInitUrl(url: String) = url == CONFIG_URL
 
     override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
@@ -51,6 +52,7 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
         val requestUrlStr = request.url.toString()
         if (isInitUrl(requestUrlStr)||
             isErrorReportUrl(requestUrlStr) ||
+            isImage(requestUrlStr) ||
             isLogoutUrl(requestUrlStr)) {
             return@runBlocking chain.proceed(request)
         }

@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.di
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import androidx.annotation.OptIn
@@ -34,7 +35,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 import luci.sixsixsix.powerampache2.common.Constants.DB_LOCAL_NAME
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
@@ -55,22 +55,33 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.security.SecureRandom
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
     @Provides
     @Singleton
-    fun provideRetrofit(interceptor: Interceptor): Retrofit {
-        val okHttpClient = OkHttpClient.Builder()
-            .retryOnConnectionFailure(true)
-            .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
-            .readTimeout(TIMEOUT_READ_S, TimeUnit.SECONDS)
-            .writeTimeout(TIMEOUT_WRITE_S, TimeUnit.SECONDS)
-            .addInterceptor(interceptor)
-            .build()
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+//        val okHttpClient = OkHttpClient.Builder()
+////            .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+////            .hostnameVerifier({ hostname, session -> true })
+//            .retryOnConnectionFailure(true)
+//            .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
+//            .readTimeout(TIMEOUT_READ_S, TimeUnit.SECONDS)
+//            .writeTimeout(TIMEOUT_WRITE_S, TimeUnit.SECONDS)
+//            .addInterceptor(interceptor)
+//            .build()
 
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -78,6 +89,36 @@ object AppModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
+
+    private val trustAllCerts = arrayOf<TrustManager>(
+        @SuppressLint("CustomX509TrustManager")
+        object : X509TrustManager {
+            @Throws(CertificateException::class)
+            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {
+            }
+
+            @Throws(CertificateException::class)
+            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {
+            }
+
+            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+        }
+    )
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(interceptor: Interceptor): OkHttpClient = OkHttpClient.Builder()
+            .sslSocketFactory(SSLContext.getInstance("TLS").run {
+                init(null, trustAllCerts, SecureRandom())
+                socketFactory
+            }, trustAllCerts[0] as X509TrustManager)
+            .hostnameVerifier({ hostname, session -> true })
+        .retryOnConnectionFailure(true)
+        .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
+        .readTimeout(TIMEOUT_READ_S, TimeUnit.SECONDS)
+        .writeTimeout(TIMEOUT_WRITE_S, TimeUnit.SECONDS)
+        .addInterceptor(interceptor)
+        .build()
 
     @Provides
     fun provideDateMapper(): DateMapper =

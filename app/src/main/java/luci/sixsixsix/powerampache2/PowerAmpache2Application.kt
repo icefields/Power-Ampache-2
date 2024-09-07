@@ -39,6 +39,7 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
+import okhttp3.OkHttpClient
 import org.acra.config.mailSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
@@ -49,6 +50,9 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
 
     @Inject
     lateinit var workerFactory: SongDownloadWorkerFactory
+
+    @Inject
+    lateinit var okHttpClient: OkHttpClient
 
     override fun attachBaseContext(base:Context) {
         super.attachBaseContext(base)
@@ -74,6 +78,7 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
     }
 
     override fun newImageLoader(): ImageLoader = ImageLoader(this).newBuilder()
+        .okHttpClient(okHttpClient)
         .crossfade(200)
         .placeholder(R.drawable.placeholder_album)
         .error(R.drawable.placeholder_album)
@@ -94,7 +99,7 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
                 .build()
 
         }
-        //.logger(DebugLogger()) // TODO change in production
+        .logger(DebugLogger()) // TODO change in production
         .build()
 
     override val workManagerConfiguration: Configuration

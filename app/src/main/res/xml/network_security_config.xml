@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <base-config cleartextTrafficPermitted="true">
-
     <trust-anchors>
         <!-- Trust preinstalled CAs -->
         <certificates src="system" />
@@ -9,4 +8,13 @@
         <certificates src="user" />
     </trust-anchors>
     </base-config>
+
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Allow all traffic to any domain -->
+        <domain includeSubdomains="true">*.*</domain>
+        <trust-anchors>
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
 </network-security-config>
