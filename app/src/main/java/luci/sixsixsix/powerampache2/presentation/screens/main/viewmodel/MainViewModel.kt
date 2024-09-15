@@ -72,6 +72,7 @@ import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
+import java.lang.ref.WeakReference
 import java.net.URLDecoder
 import java.net.URLEncoder
 import javax.inject.Inject
@@ -114,9 +115,12 @@ class MainViewModel @Inject constructor(
     private var scrobbleJob: Job? = null
     private var deepLinkJob: Job? = null
 
-
-    //private var isServiceRunning by savedStateHandle.saveable { mutableStateOf(false) }
+    // Music service variables
     private var isServiceRunning = false
+    private var serviceBound = false
+    @UnstableApi
+    private var mediaSessionService: WeakReference<SimpleMediaService>? = null
+
     var emittedDownloads by savedStateHandle.saveable { mutableStateOf(listOf<String>()) }
 
     // TODO: there is no queue to restore! because the queue is in MusicPlaylistManager
@@ -350,99 +354,33 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private val connection by lazy {
+        object : ServiceConnection {
+            @OptIn(UnstableApi::class)
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                val binder = service as SimpleMediaService.MediaServiceBinder
+                mediaSessionService = WeakReference(binder.getService())
+                L("SERVICE- onServiceConnected")
+                serviceBound = true
+            }
 
+            @OptIn(UnstableApi::class)
+            override fun onServiceDisconnected(name: ComponentName?) {
+                mediaSessionService = null
+                serviceBound = false
+                isServiceRunning = false
+                L("SERVICE- onServiceDisconnected")
+            }
 
+            override fun onBindingDied(name: ComponentName?) {
+                super.onBindingDied(name)
+                L("SERVICE- onBindingDied")
+            }
 
+            override fun onNullBinding(name: ComponentName?) {
+                super.onNullBinding(name)
+                L("SERVICE- onNullBinding")
 
-
-
-
-
-
-    private var serviceBound = false
-    //@UnstableApi
-    //private var mediaSessionService: SimpleMediaService? = null
-
-    //private lateinit var connection: ServiceConnection
-    private val connection = object : ServiceConnection {
-        @OptIn(UnstableApi::class)
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            //val binder = service as SimpleMediaService.MediaServiceBinder
-            //mediaSessionService = binder.getService()
-            L("SERVICE- onServiceConnected")
-            serviceBound = true
-        }
-
-        @OptIn(UnstableApi::class)
-        override fun onServiceDisconnected(name: ComponentName?) {
-            //mediaSessionService = null
-            serviceBound = false
-            isServiceRunning = false
-            L("SERVICE- onServiceDisconnected")
-        }
-
-        override fun onBindingDied(name: ComponentName?) {
-            super.onBindingDied(name)
-            L("SERVICE- onBindingDied")
-        }
-
-        override fun onNullBinding(name: ComponentName?) {
-            super.onNullBinding(name)
-            L("SERVICE- onNullBinding")
-
-        }
-    }
-
-//    private fun initBindConnection(): ServiceConnection {
-//        if (!::connection.isInitialized) {
-//
-//            connection = object : ServiceConnection {
-//                @OptIn(UnstableApi::class)
-//                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-//                    //val binder = service as SimpleMediaService.MediaServiceBinder
-//                    //mediaSessionService = binder.getService()
-//                    serviceBound = true
-//                }
-//
-//                @OptIn(UnstableApi::class)
-//                override fun onServiceDisconnected(name: ComponentName?) {
-//                    //mediaSessionService = null
-//                    serviceBound = false
-//                    isServiceRunning = false
-//                    L("SERVICE- onServiceDisconnected")
-//                    weakContext.get()?.let { applicationContext ->
-//                        applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
-//                    }
-//
-//                }
-//
-//                override fun onBindingDied(name: ComponentName?) {
-//                    super.onBindingDied(name)
-//                    L("SERVICE- onBindingDied")
-//                }
-//
-//                override fun onNullBinding(name: ComponentName?) {
-//                    super.onNullBinding(name)
-//                    L("SERVICE- onNullBinding")
-//
-//                }
-//            }
-//        }
-//        return connection
-//    }
-
-    @OptIn(UnstableApi::class)
-    private fun bindToMediaSessionService() {
-        if (!serviceBound) {
-            weakContext.get()?.applicationContext?.let { applicationContext ->
-                Intent(applicationContext, SimpleMediaService::class.java).apply {
-                    if (!isServiceRunning) {
-                        L("SERVICE- bindToMediaSessionService")
-                        isServiceRunning = true
-                        startForegroundService(applicationContext, this)
-                        applicationContext.bindService(this, connection, Context.BIND_AUTO_CREATE)
-                    }
-                }
             }
         }
     }
@@ -458,7 +396,28 @@ class MainViewModel @Inject constructor(
 
     @OptIn(UnstableApi::class)
     fun startMusicServiceIfNecessary() {
-        bindToMediaSessionService()
+        if (!serviceBound || mediaSessionService?.get() == null) {
+            weakContext.get()?.applicationContext?.let { applicationContext ->
+                Intent(applicationContext, SimpleMediaService::class.java).apply {
+                    if (!isServiceRunning) {
+                        L("SERVICE- bindToMediaSessionService")
+                        isServiceRunning = true
+                        startForegroundService(applicationContext, this)
+                        try {
+                            applicationContext.bindService(this, connection, Context.BIND_AUTO_CREATE)
+                        } catch (e: Exception) {
+                            L.e(e)
+                            serviceBound = false
+                        }
+                    }
+                }
+            }
+        }
+
+        mediaSessionService?.get()?.let {
+            it.notificationManager.startNotificationService(it, it.mediaSession)
+        }
+
 //        logToErrorLogs("SERVICE- startMusicServiceIfNecessary. isServiceRunning? : $isServiceRunning")
 //        if (!isServiceRunning) {
 //            weakContext.get()?.applicationContext?.let { applicationContext ->
@@ -524,9 +483,10 @@ class MainViewModel @Inject constructor(
             playlistManager.updateErrorLogMessage(mess)
     }
 
+    @OptIn(UnstableApi::class)
     override fun onCleared() {
         logToErrorLogs("onCleared")
-
+        mediaSessionService = null
         searchJob?.cancel()
         loadSongDataJob?.cancel()
         playLoadingJob?.cancel()
