@@ -1,17 +1,15 @@
-<h1>Code of Conduct</h1>
+# Code of Conduct
+## Introduction
+<p>Our project is committed to creating an inclusive, safe, and respectful environment for all contributors and users. We are dedicated to fostering a community where everyone can participate freely without fear of discrimination or harassment.</p>
 
-    <h2>Introduction</h2>
-    <p>Our project is committed to creating an inclusive, safe, and respectful environment for all contributors and users. We are dedicated to fostering a community where everyone can participate freely without fear of discrimination or harassment.</p>
-
-    <h2>Our Pledge</h2>
+<h2>Our Pledge</h2>
     <p>We pledge to:</p>
     <ul>
         <li><strong>Promote Respect:</strong> Ensure every individual is treated with dignity and respect.</li>
         <li><strong>Foster Inclusivity:</strong> Support diversity and encourage contributions from people of all backgrounds.</li>
         <li><strong>Encourage Positive Engagement:</strong> Provide constructive feedback and collaborate effectively.</li>
     </ul>
-
-    <h2>Unacceptable Behavior</h2>
+<h2>Unacceptable Behavior</h2>
     <p>Examples of unacceptable behavior include, but are not limited to:</p>
     <ul>
         <li><strong>Racism:</strong> Any form of discrimination or derogatory comments based on race or ethnicity.</li>
@@ -35,9 +33,9 @@
     </ul>
 
 <h2>Reporting Issues</h2>
-    <p>If you witness or experience any behavior that violates this Code of Conduct, please report it immediately. Reports can be made to <a href="mailto:maintainers@example.com">Project Maintainers</a> 
+    <p>If you witness or experience any behavior that violates this Code of Conduct, please report it immediately. Reports can be made to <a href="mailto:powerampache.ducking336@silomails.com">Project Maintainers</a> 
 
-    <h2>Enforcement</h2>
+<h2>Enforcement</h2>
     <p>We are committed to enforcing this Code of Conduct and addressing violations appropriately. Actions that may be taken include:</p>
     <ul>
         <li><strong>Warnings:</strong> Issuing a formal warning to the individual about their behavior.</li>
