@@ -9,13 +9,13 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val composeVersion = "1.6.8" // rootProject.extra.get("compose_version") as String
-val lifecycleVersion = "2.8.4"
+val composeVersion = "1.7.0" // rootProject.extra.get("compose_version") as String
+val lifecycleVersion = "2.8.5"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
 val exoplayerVersion = "2.19.1"
 val composeNavVersion = "1.8.42-beta"
-val media3Version = "1.4.0"
+val media3Version = "1.4.1"
 val hiltVersion = "1.2.0"
 
 val localProperties = Properties()
@@ -56,9 +56,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 66
-        versionName = "1.00-66"
-        val versionQuote = "This version is powered by the number of the beast minus 600"
+        versionCode = 67
+        versionName = "1.00-67"
+        val versionQuote = "This version is powered by the 9th number in the Fibonacci sequence (also palindromic in Base 8)"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -247,9 +247,9 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-    implementation("androidx.activity:activity-compose:1.9.1")
+    implementation("androidx.activity:activity-compose:1.9.2")
     implementation("androidx.media:media:1.7.0")
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
 
     // --- Compose --- //
@@ -332,7 +332,7 @@ dependencies {
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.01"))
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
 
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")

@@ -434,6 +434,13 @@ interface MainNetwork {
         //@Query("date") date: Int = 0
     ): SuccessResponse
 
+    @GET("json.server.php?action=record_play")
+    suspend fun recordPlay(
+        @Query("auth") authKey: String,
+        @Query("id") song: String,
+        @Query("date") unixTimestamp: Long
+    ): SuccessResponse
+
     @GET
     suspend fun getConfig(@Url configUrl: String = CONFIG_URL): Pa2ConfigDto
 

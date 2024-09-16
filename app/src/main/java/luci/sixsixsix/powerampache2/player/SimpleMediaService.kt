@@ -22,6 +22,8 @@
 package luci.sixsixsix.powerampache2.player
 
 import android.content.Intent
+import android.os.Binder
+import android.os.IBinder
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
@@ -49,7 +51,6 @@ class SimpleMediaService: MediaSessionService() {
             mediaSessionService = this,
             mediaSession = mediaSession
         )
-
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -57,14 +58,35 @@ class SimpleMediaService: MediaSessionService() {
         super.onDestroy()
         L("SERVICE- DESTROY")
         mediaSession.run {
-            release()
             if (player.playbackState != Player.STATE_IDLE) {
                 player.seekTo(0)
                 player.playWhenReady = false
                 player.stop()
             }
+            release()
         }
+        notificationManager.stopNotificationService(this)
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
+
+// ===========================
+// === BINDING THE SERVICE ===
+
+    private val binder = MediaServiceBinder()
+
+    override fun onBind(intent: Intent?): IBinder {
+        super.onBind(intent)
+        return binder
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        L("SERVICE- onUnbind")
+        return super.onUnbind(intent)
+    }
+
+    // Binder class to interact with the service
+    inner class MediaServiceBinder : Binder() {
+        fun getService(): SimpleMediaService = this@SimpleMediaService
+    }
 }
