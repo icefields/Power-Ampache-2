@@ -99,7 +99,7 @@ Github, PlayStore and Telegram releases are signed by me.
     </th>
     <th>
       <a target="_blank" href="https://live.blockcypher.com/btc/address/bc1qm9dvdrukgrqpg5f7466u4cy7tfvwcsc8pqshl4">
-      <img height="50" hspace="20" alt="Donate Bitcoin" src="https://power.ampache.dev/images/banner_bitcoin.png"></a>
+      <img height="40" hspace="20" alt="Donate Bitcoin" src="https://power.ampache.dev/images/banner_bitcoin.png"></a>
     </th>
     
  </tr>
