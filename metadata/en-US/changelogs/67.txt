@@ -4,4 +4,5 @@
 - fixed out of memory crash
 - improved the way the app interacts with notification and music service
 - other minor bug fixes
+- fixed issue with pre-fetch scrobble
 - improved notifications and media controls
