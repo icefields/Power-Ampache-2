@@ -161,3 +161,25 @@
     <string name="menu_drawer_logout">Déconnexion</string>
     <string name="menu_drawer_offline">Musiques hors-ligne</string>
 </resources>
+
+<!--
+
+Here are translations for not-translatable-yet strings :)
+
+* Pick Your Theme → Sélectionnez votre thème
+* Streaming Quality → Qualité sonore
+* Donate → Faire un don
+* Remote Debug Server → Serveur de débogage distant
+* Local Nextcloud Server → Serveur Nextcloud Local
+* Local Development Server → Serveur de développement local
+* Use Auth Token → Utiliser un jeton d'authentification
+* Queue → File d'attente
+* Playlists → Listes de lecture
+* Create New → Créer une nouvelle
+* Add to Current Queue → Ajouter à la file d'attente
+* Highest Rated Songs → Chansons les mieux notées
+* Frequently Played Songs → Chansons jouées fréquemment
+* Recently Played Songs → Chansons jouées récemment
+* Favourite Songs → Chansons favorites
+
+-->
