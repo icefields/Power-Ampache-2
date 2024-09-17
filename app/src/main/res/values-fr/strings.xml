@@ -31,10 +31,10 @@
     <string name="loginScreen_textFields_warning">Compatible avec les serveurs en version 4 et supérieurs.\nTesté avec un serveur en version 6.</string>
     <string name="loginScreen_warning">Pour vous connecter à votre propre serveur, téléchargez la version complète de Power Ampache 2</string>
 
-    <string name="home_section_title_recent">Ecouté récemment</string>
+    <string name="home_section_title_recent">Écoutés récemment</string>
     <string name="home_section_title_flagged">Favoris</string>
-    <string name="home_section_title_frequent">Ecouté fréquemment</string>
-    <string name="home_section_title_highest">Mieux noté</string>
+    <string name="home_section_title_frequent">Écoutés fréquemment</string>
+    <string name="home_section_title_highest">Mieux notés</string>
     <string name="home_section_title_newest">Ajoutés récemment</string>
     <string name="home_section_title_playlists">Listes de lecture</string>
     <string name="home_section_title_moreAlbums">Plus d\'albums</string>
@@ -64,15 +64,15 @@
     <string name="offlineMode_switch_title">Mode hors-ligne</string>
 
     <!-- SETTINGS -->
-    <string name="quality_veryHigh_title">Très haute qualité</string>
+    <string name="quality_veryHigh_title">Qualité très élevée</string>
     <string name="quality_veryHigh_subtitle">320kbps ou flac (sans transcodage)</string>
-    <string name="quality_high_title">Haute qualité</string>
+    <string name="quality_high_title">Qualité élevée</string>
     <string name="quality_high_subtitle">256 kbps</string>
     <string name="quality_medium_title">Qualité moyenne</string>
     <string name="quality_medium_subtitle">192 kbps</string>
     <string name="quality_mediumLow_title">Qualité moyenne-basse</string>
     <string name="quality_mediumLow_subtitle">128 kbps</string>
-    <string name="quality_low_title">Qualité basse</string>
+    <string name="quality_low_title">Qualité faible</string>
     <string name="quality_low_subtitle">96 kbps</string>
     <string name="theme_system_title">Thème du systeme</string>
     <string name="theme_dark_title">Sombre</string>
@@ -100,7 +100,7 @@
     <string name="settings_deleteDownloads_fail">Une erreur est survenue lors de l\'effacement de vos musiques hors-ligne. Si le problème persiste, essayez de contacter le développeur</string>
     <string name="settings_hideDonationButtonsMenu_title">Cacher les boutons de donation dans le menu</string>
     <string name="settings_serverInfo_title">Serveur</string>
-    <string name="settings_serverInfo_version">Version</string>
+    <string name="settings_serverInfo_version">Version du serveur</string>
     <string name="settings_serverInfo_compatible">Compatible</string>
     <string name="settings_userInfo_username">Nom d\'utilisateur</string>
     <string name="settings_userInfo_fullName">Nom complet</string>
