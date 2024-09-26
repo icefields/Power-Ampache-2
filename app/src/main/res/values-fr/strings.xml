@@ -160,27 +160,21 @@
     <string name="menu_drawer_about">À propos</string>
     <string name="menu_drawer_logout">Déconnexion</string>
     <string name="menu_drawer_offline">Musiques hors-ligne</string>
+
+    <string name="settings_theme_title">Sélectionnez votre thème</string>
+    <string name="settings_quality_title">Qualité sonore</string>
+    <string name="loginScreen_useAuthToken">Utiliser un jeton d\'authentification</string>
+    <string name="queue">File d\'attente</string>
+    <!-- the following Playlist title has to be all caps -->
+    <string name="addToPlaylistOrQueueDialog_playlists">LISTES DE LECTURE</string>
+    <string name="addToPlaylistOrQueueDialog_createNew">Créer une nouvelle</string>
+    <string name="addToPlaylistOrQueueDialog_addQueue">Ajouter à la file d\'attente</string>
+    <string name="downloaded_snackbar_title">%s téléchargé</string>
+
+    <!-- NOT ADDED YET -->
+    <string name="home_playlist_highest_title">Chansons les mieux notées</string>
+    <string name="home_playlist_frequent_title">Chansons jouées fréquemment</string>
+    <string name="home_playlist_recent_title">Chansons jouées récemment</string>
+    <string name="home_playlist_favourites_title">Chansons favorites</string>
+
 </resources>
-
-<!--
-
-Here are translations for not-translatable-yet strings :)
-
-* Pick Your Theme → Sélectionnez votre thème
-* Streaming Quality → Qualité sonore
-* Donate → Faire un don
-* Remote Debug Server → Serveur de débogage distant
-* Local Nextcloud Server → Serveur Nextcloud Local
-* Local Development Server → Serveur de développement local
-* Use Auth Token → Utiliser un jeton d'authentification
-* Queue → File d'attente
-* Playlists → Listes de lecture
-* Create New → Créer une nouvelle
-* Add to Current Queue → Ajouter à la file d'attente
-* Highest Rated Songs → Chansons les mieux notées
-* Frequently Played Songs → Chansons jouées fréquemment
-* Recently Played Songs → Chansons jouées récemment
-* Favourite Songs → Chansons favorites
-* %s downloaded → %s téléchargé
-
--->

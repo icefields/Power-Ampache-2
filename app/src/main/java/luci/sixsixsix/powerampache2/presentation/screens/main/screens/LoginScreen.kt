@@ -156,7 +156,9 @@ fun LoginScreenContent(
         if (!error.isNullOrBlank()) {
             ErrorView(
                 error = error,
-                modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
             )
         }
 
@@ -381,7 +383,7 @@ fun AuthTokenCheckBox(
             },
             enabled = true
         )
-        Text(text = "Use Auth Token")
+        Text(text = stringResource(id = R.string.loginScreen_useAuthToken))
     }
 }
 

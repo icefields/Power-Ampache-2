@@ -348,6 +348,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
         } while (!isFinished)
 
         if (!shouldEmitSteps) {
+            // TODO: BREAKING_RULE(single source of truth), emitting network data to avoid slow
+            //  db operations before getting a result on the UI
             emit(Resource.Success(data = songs.toList(), networkData = songs))
         }
 
@@ -355,7 +357,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         dao.clearPlaylistSongs(playlistId)
         dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId, username = cred.username, serverUrl = cred.serverUrl))
 
-// commented because: DO LENGTHY OPERATIONS AFTER EMITTING DATA
+// commented because: DO LENGTHY OPERATIONS AFTER EMITTING DATA, this has been moved before the db operations
 //        if (!shouldEmitSteps) {
 //            emit(Resource.Success(
 //                data = dao.getSongsFromPlaylist(playlistId).map { it.toSong() },

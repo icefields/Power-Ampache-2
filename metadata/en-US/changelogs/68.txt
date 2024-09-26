@@ -1,0 +1,3 @@
+- improved French translations
+- tech debt refactoring
+- improved performance on playlist song retrieval
