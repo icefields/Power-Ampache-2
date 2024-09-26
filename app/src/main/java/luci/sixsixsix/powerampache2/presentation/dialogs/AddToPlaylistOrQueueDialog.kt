@@ -139,7 +139,7 @@ fun AddToPlaylistOrQueueDialog(
                 )
                 Divider()
                 PlaylistDialogItem(
-                    title = stringResource(id = R.string.addToPlaylistOrQueueDialog_playlists),
+                    title = stringResource(id = R.string.addToPlaylistOrQueueDialog_createNew),
                     icon = Icons.Default.Add,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
