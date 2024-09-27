@@ -185,7 +185,7 @@ class MusicRepositoryImpl @Inject constructor(
                     pingResponse.toSession(dateMapper)
                     // TODO Check connection error before making this call crash into the try-catch
                 } catch (e: Exception) {
-                    L("clear session, set the session to null ssss ping()")
+                    L("aaaa clear session, set the session to null ssss ping()")
                     dao.clearSession()
                     null
                 } ?.let { se ->
