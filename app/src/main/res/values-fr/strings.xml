@@ -177,4 +177,6 @@
     <string name="home_playlist_recent_title">Chansons jouées récemment</string>
     <string name="home_playlist_favourites_title">Chansons favorites</string>
 
+    <string name="dialog_deletePlaylist_title">DELETE PLAYLIST</string>
+    <string name="dialog_deletePlaylist_text">Delete %s?</string>
 </resources>

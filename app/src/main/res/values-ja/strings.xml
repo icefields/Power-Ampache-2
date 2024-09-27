@@ -177,4 +177,7 @@
     <string name="home_playlist_frequent_title">Frequently Played Songs</string>
     <string name="home_playlist_recent_title">Recently Played Songs</string>
     <string name="home_playlist_favourites_title">Favourite Songs</string>
+
+    <string name="dialog_deletePlaylist_title">DELETE PLAYLIST</string>
+    <string name="dialog_deletePlaylist_text">Delete %s?</string>
 </resources>
