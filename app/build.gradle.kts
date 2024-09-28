@@ -9,8 +9,8 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val composeVersion = "1.7.0" // rootProject.extra.get("compose_version") as String
-val lifecycleVersion = "2.8.5"
+val composeVersion = "1.7.2" // rootProject.extra.get("compose_version") as String
+val lifecycleVersion = "2.8.6"
 val retrofit2Version = "2.9.0"
 val coroutinesVersion = "1.7.3"
 val exoplayerVersion = "2.19.1"
@@ -56,9 +56,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 34
-        versionCode = 67
-        versionName = "1.00-67"
-        val versionQuote = "This version is powered by the 9th number in the Fibonacci sequence (also palindromic in Base 8)"
+        versionCode = 68
+        versionName = "1.00-68"
+        val versionQuote = "This version is powered by sum of two squares and erbium"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -256,11 +256,11 @@ dependencies {
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
-    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation("androidx.compose.material3:material3:1.3.0")
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:0.17.0")
-    implementation("androidx.paging:paging-compose:3.3.1")
+    implementation("androidx.paging:paging-compose:3.3.2")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.34.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     // DO NOT INCLUDE implementation("androidx.compose.material:material:$composeVersion")

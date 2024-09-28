@@ -347,14 +347,24 @@ class PlaylistsRepositoryImpl @Inject constructor(
             offset += limit
         } while (!isFinished)
 
+        if (!shouldEmitSteps) {
+            // TODO: BREAKING_RULE(single source of truth), emitting network data to avoid slow
+            //  db operations before getting a result on the UI
+            emit(Resource.Success(data = songs.toList(), networkData = songs))
+        }
+
+        // DO LENGTHY OPERATIONS AFTER EMITTING DATA
         dao.clearPlaylistSongs(playlistId)
         dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId, username = cred.username, serverUrl = cred.serverUrl))
-        if (!shouldEmitSteps) {
-            emit(Resource.Success(
-                data = dao.getSongsFromPlaylist(playlistId).map { it.toSong() },
-                networkData = songs)
-            )
-        }
+
+// commented because: DO LENGTHY OPERATIONS AFTER EMITTING DATA, this has been moved before the db operations
+//        if (!shouldEmitSteps) {
+//            emit(Resource.Success(
+//                data = dao.getSongsFromPlaylist(playlistId).map { it.toSong() },
+//                networkData = songs)
+//            )
+//        }
+        
         emit(Resource.Loading(false))
         // cache songs after emitting success
         // Songs are cached regardless for quick access from SongsScreen and Albums

@@ -1,42 +1,42 @@
 <resources>
     <string name="notification_channel_description">Afficher la musique en cours d\'écoute</string>
-    <string name="coming_soon">Bientôt</string>
+    <string name="coming_soon">Bientôt disponible</string>
 
     <string name="albumDetailScreen_infoSection_year">Année</string>
     <string name="albumDetailScreen_infoSection_songs">Chansons</string>
-    <string name="albumDetailScreen_infoSection_time">Temps total</string>
+    <string name="albumDetailScreen_infoSection_time">Durée totale</string>
     <string name="playlistDetailScreen_infoSection_avgRating">Note moyenne</string>
-    <string name="playlistItem_songCount">%s Chansons</string>
-    <string name="topBar_search_hint">Rechercher des chansons, des albums, des artistes, des listes de lecture</string>
+    <string name="playlistItem_songCount">%s chansons</string>
+    <string name="topBar_search_hint">Rechercher : chansons, albums, artistes, listes de lecture</string>
     <string name="main_tab_title_albums">Albums</string>
     <string name="main_tab_title_home">Accueil</string>
     <string name="main_tab_title_songs">Chansons</string>
     <string name="main_tab_title_artists">Artistes</string>
-    <string name="main_tab_title_playlists">Listes de lecture</string>
-    <string name="loginScreen_username">Nom de l\'utilisateur</string>
-    <string name="loginScreen_signUp_email">Courrier électronique</string>
-    <string name="loginScreen_fullname">Nom complet (Optionnel)</string>
+    <string name="main_tab_title_playlists">Playlists</string>
+    <string name="loginScreen_username">Nom d\'utilisateur</string>
+    <string name="loginScreen_signUp_email">Adresse électronique</string>
+    <string name="loginScreen_fullname">Nom complet (optionnel)</string>
     <string name="loginScreen_password">Mot de passe</string>
-    <string name="loginScreen_password_repeat">Confirmer le mot de passe</string>
-    <string name="loginScreen_register_success">L\'utilisateur est enregistré avec succès\nVouspouvez maintenant vous connecter avec votre mot de passe\nMerci de confirmer votre courrier électronique si demandé par le serveur</string>
+    <string name="loginScreen_password_repeat">Confirmation du mot de passe</string>
+    <string name="loginScreen_register_success">Utilisateur inscrit avec succès\nVous pouvez maintenant vous connecter avec votre mot de passe\nMerci de confirmer votre adresse électronique si demandé par le serveur</string>
     <string name="loginScreen_server_url">URL du serveur</string>
-    <string name="loginScreen_signUp_requiredField">Ce champ est indispensable</string>
-    <string name="loginScreen_auth_token">Token d\'authentification</string>
-    <string name="loginScreen_auth_token_warning">La connexion avec Token fonctionne avec les serveurs de version 6.4 et suivante</string>
+    <string name="loginScreen_signUp_requiredField">Ce champ est obligatoire</string>
+    <string name="loginScreen_auth_token">Jeton d\'authentification</string>
+    <string name="loginScreen_auth_token_warning">La connexion par jeton ne fonctionne qu\'avec les serveurs en version 6.4 et supérieurs.</string>
     <string name="loginScreen_login">Connexion</string>
-    <string name="loginScreen_signup">Enregistrement</string>
+    <string name="loginScreen_signup">Inscription</string>
     <string name="loginScreen_demo_server">Démonstration</string>
-    <string name="loginScreen_loading_authenticating">Connexion âŠ</string>
-    <string name="loginScreen_dogmazic_server">DEMO Dogmazic Music Server</string>
-    <string name="loginScreen_textFields_warning">Compatible avec les serveurs de version 4 et suivante.\nTesté sur les serveurs de version 6</string>
+    <string name="loginScreen_loading_authenticating">Connexion …</string>
+    <string name="loginScreen_dogmazic_server">Serveur de démonstration Dogmazic</string>
+    <string name="loginScreen_textFields_warning">Compatible avec les serveurs en version 4 et supérieurs. Testé avec un serveur en version 6.</string>
     <string name="loginScreen_warning">Pour vous connecter à votre propre serveur, téléchargez la version complète de Power Ampache 2</string>
 
-    <string name="home_section_title_recent">Ecouté récemment</string>
+    <string name="home_section_title_recent">Écoutés récemment</string>
     <string name="home_section_title_flagged">Favoris</string>
-    <string name="home_section_title_frequent">Ecouté fréquemment</string>
-    <string name="home_section_title_highest">Meilleures notes</string>
+    <string name="home_section_title_frequent">Écoutés fréquemment</string>
+    <string name="home_section_title_highest">Mieux notés</string>
     <string name="home_section_title_newest">Ajoutés récemment</string>
-    <string name="home_section_title_playlists">Liste de lecture</string>
+    <string name="home_section_title_playlists">Listes de lecture</string>
     <string name="home_section_title_moreAlbums">Plus d\'albums</string>
     <string name="home_section_title_loading">Chargement</string>
     <string name="home_artist_subtitle_item">Artiste</string>
@@ -47,14 +47,14 @@
     <string name="menu_content_description">Menu déroulant</string>
 
     <!-- ERROR messages-->
-    <string name="error_io_exception">Impossible de charger les données, êtes-vous connecté à l\'internet ?\nSi le problème persiste, essayez de fermer et de réouvrir l\'application</string>
-    <string name="error_http_exception">Impossible de charger les données, êtes-vous connecté à l\'internet ?\nSi le problème persiste, essayez de fermer et de réouvrir l\'application</string>
-    <string name="error_empty_result">Aucun résultat à afficher, ou vous ajoutez ou effacez quelque chose d\'introuvable sur le serveur</string>
+    <string name="error_io_exception">Impossible de charger les données, êtes-vous connecté à Internet ?\nSi le problème persiste, essayez de redémarrer l\'application</string>
+    <string name="error_http_exception">Impossible de charger les données, êtes-vous connecté à Internet ?\nSi le problème persiste, essayez de redémarrer l\'application</string>
+    <string name="error_empty_result">Il n\'y a aucun résultat à afficher, ou vous êtes en train d\'essayer d\'ajouter ou d\'effacer quelque chose qui nexiste pas sur le serveur</string>
     <string name="error_duplicate">Doublon</string>
-    <string name="error_user_fetch">Un problème a été rencontré en recherchant votre utilisateur sur le serveur</string>
+    <string name="error_user_fetch">Un problème a été rencontré lors de la récupération de votre utilisateur sur le serveur</string>
 
-    <string name="error_playback_exception">Erreurs lors de la lecture de ce morceau.</string>
-    <string name="share_song_cannot_find">Impossible de trouver la chason partagée</string>
+    <string name="error_playback_exception">Erreur lors de la lecture de ce morceau.</string>
+    <string name="share_song_cannot_find">Impossible de trouver la chanson partagée</string>
 
 
     <string name="crash_mail_subject">Rapport d\'erreur</string>
@@ -64,71 +64,71 @@
     <string name="offlineMode_switch_title">Mode hors-ligne</string>
 
     <!-- SETTINGS -->
-    <string name="quality_veryHigh_title">Très haute qualité</string>
-    <string name="quality_veryHigh_subtitle">320kbps ou flac (sans transcodage)</string>
-    <string name="quality_high_title">Haute qualité</string>
-    <string name="quality_high_subtitle">256kbps</string>
+    <string name="quality_veryHigh_title">Qualité très élevée</string>
+    <string name="quality_veryHigh_subtitle">320 kbps ou FLAC (sans transcodage)</string>
+    <string name="quality_high_title">Qualité élevée</string>
+    <string name="quality_high_subtitle">256 kbps</string>
     <string name="quality_medium_title">Qualité moyenne</string>
-    <string name="quality_medium_subtitle">192kbps</string>
-    <string name="quality_mediumLow_title">Qualité moyenne à basse</string>
-    <string name="quality_mediumLow_subtitle">128kbps</string>
-    <string name="quality_low_title">Qualité basse</string>
-    <string name="quality_low_subtitle">96kbps</string>
+    <string name="quality_medium_subtitle">192 kbps</string>
+    <string name="quality_mediumLow_title">Qualité moyenne-basse</string>
+    <string name="quality_mediumLow_subtitle">128 kbps</string>
+    <string name="quality_low_title">Qualité faible</string>
+    <string name="quality_low_subtitle">96 kbps</string>
     <string name="theme_system_title">Thème du systeme</string>
     <string name="theme_dark_title">Sombre</string>
     <string name="theme_light_title">Clair</string>
     <string name="theme_system_materialYou_title">MaterialYou Systeme</string>
     <string name="theme_dark_materialYou_title">MaterialYou Sombre</string>
     <string name="theme_light_materialYou_title">MaterialYou Clair</string>
-    <string name="settings_equalizer">Egalisateur</string>
-    <string name="settings_normalizeVolume_title">Normalisation du Volume</string>
+    <string name="settings_equalizer">Égaliseur</string>
+    <string name="settings_normalizeVolume_title">Normalisation du volume</string>
     <string name="settings_offlineMode_title">Mode hors-ligne</string>
     <string name="settings_offlineMode_subtitle">Activer le mode hors-ligne</string>
-    <string name="settings_normalizeVolume_subtitle">Forcer le même niveau de volume pour tous les morceaux</string>
-    <string name="settings_monoAudio_title">Audio Mono </string>
-    <string name="settings_monoAudio_subtitle">Les haut-parleurs droite et gauche joueront le même son</string>
+    <string name="settings_normalizeVolume_subtitle">Forcer le même niveau sonore pour tous les morceaux</string>
+    <string name="settings_monoAudio_title">Son mono</string>
+    <string name="settings_monoAudio_subtitle">Jouer le même son sur les haut-parleurs de droite et de gauche</string>
     <string name="settings_smartDownloads_title">Téléchargement intelligent</string>
-    <string name="settings_smartDownloads_subtitle">Télécharge automatiquement les chansons les plus jouées pendant que le téléphone n\'est pas utilisé</string>
+    <string name="settings_smartDownloads_subtitle">Télécharger automatiquement les chansons les plus jouées pendant que le téléphone n\'est pas utilisé</string>
     <string name="settings_checkUpdatesNow_title">Vérifier les mises à jour maintenant</string>
     <string name="settings_autoCheckUpdates_title">Vérifier automatiquement les mises à jour</string>
     <string name="settings_debugLogs_title">Journaux de deboguage</string>
-    <string name="settings_enableDebugLogging_title">Activer les journaux de deboguage anonymes</string>
-    <string name="settings_enableDebugLogging_subtitle">Envoi des message d\'erreur et de plantage au developpeur pour aider à corriger les erreurs de l\'application</string>
+    <string name="settings_enableDebugLogging_title">Activer les rapports de débogage anonymes</string>
+    <string name="settings_enableDebugLogging_subtitle">Envoyer les rapports d\'erreur et de plantage au développeur pour l\'aider à déboguer l\'application</string>
     <string name="settings_deleteDownloads_title">Effacer tous les téléchargements</string>
-    <string name="settings_deleteDownloads_subtitle">Ceci effacera toutes les chansons que vous avez téléchargé</string>
-    <string name="settings_deleteDownloads_success">Toute votre musique hors-ligne a été effacée</string>
-    <string name="settings_deleteDownloads_fail">Une erreur a été rencontrée lors de l\' effacement de votre musique hors-ligne. Si le problème persiste, essayez de contacter le développeur</string>
-    <string name="settings_hideDonationButtonsMenu_title">Cacher les boutons de don dans le menu</string>
+    <string name="settings_deleteDownloads_subtitle">Ceci effacera toutes les chansons que vous aviez téléchargées</string>
+    <string name="settings_deleteDownloads_success">Toutes vos musiques hors-ligne ont été effacées</string>
+    <string name="settings_deleteDownloads_fail">Une erreur est survenue lors de l\'effacement de vos musiques hors-ligne. Si le problème persiste, essayez de contacter le développeur.</string>
+    <string name="settings_hideDonationButtonsMenu_title">Cacher les boutons de donation dans le menu</string>
     <string name="settings_serverInfo_title">Serveur</string>
-    <string name="settings_serverInfo_version">Version</string>
-    <string name="settings_serverInfo_compatible">Compatible</string>
-    <string name="settings_userInfo_username">Nom utilisateur</string>
+    <string name="settings_serverInfo_version">Version du serveur</string>
+    <string name="settings_serverInfo_compatible">Compatibilité du serveur</string>
+    <string name="settings_userInfo_username">Nom d\'utilisateur</string>
     <string name="settings_userInfo_fullName">Nom complet</string>
-    <string name="settings_userInfo_email">Courrier électronique</string>
+    <string name="settings_userInfo_email">Adresse électronique</string>
     <string name="settings_userInfo_website">Site web</string>
-    <string name="settings_userInfo_state">Etat</string>
+    <string name="settings_userInfo_state">État</string>
     <string name="settings_userInfo_city">Ville</string>
-    <string name="settings_userInfo_id">ID</string>
+    <string name="settings_userInfo_id">Identifiant</string>
     <string name="player_buttonText_artist">Artiste</string>
     <string name="player_buttonText_album">Album</string>
     <string name="player_buttonText_add">Ajouter</string>
     <string name="download">Télécharger</string>
     <string name="player_buttonText_download">@string/download</string>
     <string name="player_buttonText_share">Partager</string>
-    <string name="player_buttonText_info">Info</string>
+    <string name="player_buttonText_info">Infos</string>
     <string name="player_queue_upNext">Suivant</string>
     <string name="player_queue_lyrics">Paroles</string>
-    <string name="logout_offline_warning">Merci de désactiver le mode hors-ligne avant de quitter</string>
+    <string name="logout_offline_warning">Veuillez désactiver le mode hors-ligne avant de quitter</string>
     <string name="offline_noData_warning">Vous n\'avez pas encore téléchargé de chansons</string>
 
     <!--- DIALOGS -->
-    <string name="miniPlayer_reset_alert_message">APPUI LONG pour arrêter la lecture de la musique et vider la file d\'attente</string>
+    <string name="miniPlayer_reset_alert_message">APPUI LONG Pour arrêter la lecture et vider la file d\'attente</string>
     <string name="miniPlayer_reset_alert_title">STOP/RESET</string>
-    <string name="dialog_create">CREER</string>
-    <string name="warning_playlist_download">Merci de d\'attendre la fin du téléchargement de la liste de lecture avant de lancer le téléchargement</string>
+    <string name="dialog_create">CRÉER</string>
+    <string name="warning_playlist_download">Veuillez attendre la fin du chargement de la liste de lecture avant de lancer le téléchargement</string>
     <string name="warning_playlist_server">Ajout de chansons, si la version de votre serveur est inférieure à 6.3 cette opération peut prendre environ une minute</string>
-    <string name="warning_playlist_adding">Des chansons sont en cours d\'ajout à votre liste de lecture.\nQuitter cet écran implique l\'interruption de l\'ajout</string>
-    <string name="warning_playlist_adding_title">Quitter cet écran ?</string>
+    <string name="warning_playlist_adding">Des chansons sont en cours d\'ajout à votre liste de lecture. Quitter cet écran interrompra l\'opération.</string>
+    <string name="warning_playlist_adding_title">Quitter cet écran ?</string>
     <string name="warning_playlist_adding_stay">Rester</string>
     <string name="warning_playlist_adding_leave">Quitter quand même</string>
     <string name="warning_song_remove_title">ENLEVER LA CHANSON</string>
@@ -137,27 +137,46 @@
     <string name="dropdownMenu_item_download">Télécharger</string>
     <string name="dropdownMenu_item_export">Exporter la chanson téléchargée</string>
     <string name="dropdownMenu_item_playNext">Suivant</string>
-    <string name="dropdownMenu_item_addToQueue">Ajouter à la file</string>
+    <string name="dropdownMenu_item_addToQueue">Ajouter à la file d\'attente</string>
     <string name="dropdownMenu_item_addToPlaylist">Ajouter à la liste de lecture</string>
     <string name="dropdownMenu_item_goToAlbum">Aller à l\'album</string>
     <string name="dropdownMenu_item_goToArtist">Aller à l\'artiste</string>
     <string name="dropdownMenu_item_share">Partager</string>
 
     <!---...-->
-    <string name="about_flavour">Type</string>
-    <string name="version_quote_title">Version</string>
+    <string name="about_flavour">Variante</string>
+    <string name="version_quote_title">Citation de la version</string>
     <string name="about_appVersion_title">Version de l\'application</string>
     <string name="about_license_title">Licence</string>
     <string name="about_contact_title">Contactez-moi sur Telegram et Mastodon</string>
-    <string name="about_sourceCode_title">Code Source </string>
-    <string name="about_considerDonating">Soutenez ce projet avec un don !\nLiens sur le site web:</string>
+    <string name="about_sourceCode_title">Code source</string>
+    <string name="about_considerDonating">Soutenez ce projet avec un don !\nLiens sur le site web :</string>
 
     <!---Main Menu Items-->
     <string name="menu_drawer_settings">Paramètres</string>
     <string name="menu_drawer_library">Bibliothèque</string>
     <string name="menu_drawer_genres">Genres</string>
     <string name="menu_drawer_home">Accueil</string>
-    <string name="menu_drawer_about">A propos</string>
+    <string name="menu_drawer_about">À propos</string>
     <string name="menu_drawer_logout">Déconnexion</string>
-    <string name="menu_drawer_offline">Chanson hors-ligne</string>
+    <string name="menu_drawer_offline">Musiques hors-ligne</string>
+
+    <string name="settings_theme_title">Sélectionnez votre thème</string>
+    <string name="settings_quality_title">Qualité sonore</string>
+    <string name="loginScreen_useAuthToken">Utiliser un jeton d\'authentification</string>
+    <string name="queue">File d\'attente</string>
+    <!-- the following Playlist title has to be all caps -->
+    <string name="addToPlaylistOrQueueDialog_playlists">LISTES DE LECTURE</string>
+    <string name="addToPlaylistOrQueueDialog_createNew">Créer une nouvelle</string>
+    <string name="addToPlaylistOrQueueDialog_addQueue">Ajouter à la file d\'attente</string>
+    <string name="downloaded_snackbar_title">%s téléchargé</string>
+
+    <!-- NOT ADDED YET -->
+    <string name="home_playlist_highest_title">Chansons les mieux notées</string>
+    <string name="home_playlist_frequent_title">Chansons jouées fréquemment</string>
+    <string name="home_playlist_recent_title">Chansons jouées récemment</string>
+    <string name="home_playlist_favourites_title">Chansons favorites</string>
+
+    <string name="dialog_deletePlaylist_title">DELETE PLAYLIST</string>
+    <string name="dialog_deletePlaylist_text">Delete %s?</string>
 </resources>

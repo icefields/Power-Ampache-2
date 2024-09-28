@@ -213,11 +213,13 @@ You can select a demo instance from the login screen or login into your own serv
 The app is currently translated in the following languages:
 English
 Czech
-
-Work in progress:
+German
+Spanish
 French
 Italian
 Japanese
+<br>
+Some translations are not complete, since I keep adding new features all the time.
 <br>
 In the future I will automate translation contributions, right now you have 3 options.<br>
 - If you're an Android developer just create the resource directories and files and open a PR (`strings.xml` is where translatable strings are located).

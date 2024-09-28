@@ -35,11 +35,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
@@ -71,8 +73,10 @@ fun PlaylistsScreen(
                 showDeletePlaylistDialogData = null
                 viewModel.onEvent(PlaylistEvent.OnPlaylistDelete(playlistToRemove))
             },
-            dialogTitle = "DELETE PLAYLIST",
-            dialogText = "Delete ${playlistToRemove.name}?"
+            // "DELETE PLAYLIST",
+            dialogTitle = stringResource(id = R.string.dialog_deletePlaylist_title),
+            //"Delete ${playlistToRemove.name}?"
+            dialogText = stringResource(id = R.string.dialog_deletePlaylist_text, playlistToRemove.name)
         )
     }
 

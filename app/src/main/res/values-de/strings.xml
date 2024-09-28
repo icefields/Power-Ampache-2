@@ -163,4 +163,23 @@
 
     <string name="error_playback_exception">Issues playing this track.</string>
     <string name="share_song_cannot_find">Cannot find shared song</string>
+
+    <string name="settings_theme_title">Pick Your Theme</string>
+    <string name="settings_quality_title">Streaming Quality</string>
+    <string name="loginScreen_useAuthToken">Use Auth Token</string>
+    <string name="queue">Queue</string>
+    <!-- the following Playlist title has to be all caps -->
+    <string name="addToPlaylistOrQueueDialog_playlists">PLAYLISTS</string>
+    <string name="addToPlaylistOrQueueDialog_createNew">Create New</string>
+    <string name="addToPlaylistOrQueueDialog_addQueue">Add to Current Queue</string>
+    <string name="downloaded_snackbar_title">%s downloaded</string>
+
+    <!-- NOT ADDED YET -->
+    <string name="home_playlist_highest_title">Highest Rated Songs</string>
+    <string name="home_playlist_frequent_title">Frequently Played Songs</string>
+    <string name="home_playlist_recent_title">Recently Played Songs</string>
+    <string name="home_playlist_favourites_title">Favourite Songs</string>
+
+    <string name="dialog_deletePlaylist_title">DELETE PLAYLIST</string>
+    <string name="dialog_deletePlaylist_text">Delete %s?</string>
 </resources>

@@ -35,7 +35,7 @@
     <string name="home_section_title_flagged">Favoritos</string>
     <string name="home_section_title_frequent">Reproducidos frecuentemente</string>
     <string name="home_section_title_highest">Mejor valorados</string>
-    <string name="home_section_title_newest">Añadidas recientemente</string>
+    <string name="home_section_title_newest">Añadidos recientemente</string>
     <string name="home_section_title_playlists">Listas de reproducción</string>
     <string name="home_section_title_moreAlbums">Más álbumes</string>
     <string name="home_section_title_loading">Cargando</string>
@@ -157,6 +157,25 @@
     <string name="menu_drawer_logout">Salir</string>
     <string name="menu_drawer_offline">Pistas descargadas</string>
 
-    <string name="error_playback_exception">Issues playing this track.</string>
-    <string name="share_song_cannot_find">Cannot find shared song</string>
+    <string name="error_playback_exception">Se encontraron problemas al reproducir este archivo</string>
+    <string name="share_song_cannot_find">La canción compartida no fue encontrada</string>
+
+    <string name="settings_theme_title">Elige tu tema</string>
+    <string name="settings_quality_title">Calidad de audio</string>
+    <string name="loginScreen_useAuthToken">Usar token de autenticación</string>
+    <string name="queue">En Cola</string>
+    <!-- the following Playlist title has to be all caps -->
+    <string name="addToPlaylistOrQueueDialog_playlists">LISTAS</string>
+    <string name="addToPlaylistOrQueueDialog_createNew">Crear una nueva</string>
+    <string name="addToPlaylistOrQueueDialog_addQueue">Añadir a la Cola</string>
+    <string name="downloaded_snackbar_title">%s descargada</string>
+
+    <!-- NOT ADDED YET -->
+    <string name="home_playlist_highest_title">Canciones mejor valoradas</string>
+    <string name="home_playlist_frequent_title">Canciones frecuentemente tocadas</string>
+    <string name="home_playlist_recent_title">Canciones recientemente tocadas</string>
+    <string name="home_playlist_favourites_title">Canciones favoritas</string>
+
+    <string name="dialog_deletePlaylist_title">ELIMINAR lista de reproducción</string>
+    <string name="dialog_deletePlaylist_text">Eliminar %s?</string>
 </resources>

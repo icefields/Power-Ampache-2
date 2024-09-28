@@ -50,12 +50,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
@@ -126,7 +128,7 @@ fun AddToPlaylistOrQueueDialog(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = "PLAYLISTS",
+                    text = stringResource(id = R.string.addToPlaylistOrQueueDialog_playlists),
                     modifier = Modifier
                         .wrapContentSize(Alignment.Center)
                         .padding(vertical = textPaddingVertical),
@@ -137,21 +139,19 @@ fun AddToPlaylistOrQueueDialog(
                 )
                 Divider()
                 PlaylistDialogItem(
-                    title = "Create New",
+                    title = stringResource(id = R.string.addToPlaylistOrQueueDialog_createNew),
                     icon = Icons.Default.Add,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            //onCreatePlaylistRequest()
-                            L("PlaylistDialogItem createPlaylistDialogOpen")
                             createPlaylistDialogOpen = true
                         },
                     backgroundColour = headerBgColour
                 )
                 Divider()
                 PlaylistDialogItem(
-                    title = "Add to Current Queue",
+                    title = stringResource(id = R.string.addToPlaylistOrQueueDialog_addQueue),
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .fillMaxWidth()
