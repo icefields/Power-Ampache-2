@@ -226,8 +226,9 @@ class PlaylistDetailViewModel @Inject constructor(
                                         isOffline = songsRepository.isSongAvailableOffline(song)
                                     ))
                                 }
-                                state = state.copy(songs = songWrapperList.apply {
-                                    if (state.sortMode == SortMode.DESC) { reverse() } }
+                                state = state.copy(
+                                    songs = songWrapperList.apply {
+                                        if (state.sortMode == SortMode.DESC) { reverse() } }
                                 )
                             }
                         }

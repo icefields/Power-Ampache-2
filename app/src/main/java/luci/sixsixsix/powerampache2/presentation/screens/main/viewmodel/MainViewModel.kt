@@ -22,8 +22,13 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.app.Application
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
+import android.os.IBinder
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -36,12 +41,17 @@ import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
+import androidx.media3.session.MediaSessionService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
@@ -56,11 +66,15 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
+import luci.sixsixsix.powerampache2.domain.utils.ShareManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
+import java.lang.ref.WeakReference
+import java.net.URLDecoder
+import java.net.URLEncoder
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -74,6 +88,7 @@ class MainViewModel @Inject constructor(
     val songsRepository: SongsRepository,
     val settingsRepository: SettingsRepository,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
+    val shareManager: ShareManager,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) /*, MainQueueManager*/ {
     var state by savedStateHandle.saveable { mutableStateOf(MainState()) }
@@ -98,10 +113,14 @@ class MainViewModel @Inject constructor(
     private var playLoadingJob: Job? = null
     var searchJob: Job? = null
     private var scrobbleJob: Job? = null
+    private var deepLinkJob: Job? = null
 
-
-    //private var isServiceRunning by savedStateHandle.saveable { mutableStateOf(false) }
+    // Music service variables
     private var isServiceRunning = false
+    private var serviceBound = false
+    @UnstableApi
+    private var mediaSessionService: WeakReference<SimpleMediaService>? = null
+
     var emittedDownloads by savedStateHandle.saveable { mutableStateOf(listOf<String>()) }
 
     // TODO: there is no queue to restore! because the queue is in MusicPlaylistManager
@@ -199,17 +218,51 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun shareSong(song: Song) = viewModelScope.launch {
-        songsRepository.getSongShareLink(song).collect { result ->
-            when (result) {
-                is Resource.Success -> result.data?.let {
-                    weakContext.get()?.shareLink(it)
-                }
+    fun onDeepLink(type: String, id: String, title: String, artist: String, webLink: String) {
+        if (deepLinkJob == null) {
+            deepLinkJob = viewModelScope.launch {
+                // wait for a session
+                // TODO: is this the best way? (probably not)
+                musicRepository.sessionLiveData.filterNotNull().first()
+                when (type) {
+                    "song" -> {
 
-                is Resource.Error -> {}
-                is Resource.Loading -> {}
+                        // TODO: this is a hack! Wait for loading finished the proper way!
+                        delay(2000)
+
+                        withContext(Dispatchers.Main) {
+                            playDeepLinkedSong(id, title, artist, webLink)
+                        }
+                        deepLinkJob?.cancel()
+                        deepLinkJob = null
+                    }
+
+                    "album" -> {}
+                    "playlist" -> {}
+                    else -> {}
+                }
             }
         }
+    }
+
+    private suspend fun playDeepLinkedSong(id: String, title: String, artist: String, webLink: String) {
+        shareManager.fetchDeepLinkedSong(id, title, artist,
+            songCallback = {
+                onEvent(MainEvent.PlaySongAddToQueueTop(it, currentQueue().value))
+            },
+            songsCallback = {
+                onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(it))
+            },
+            errorCallback = {
+                weakContext.get()?.let { context ->
+                    if (webLink.isNotBlank()) {
+                        context.shareLink(webLink)
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.share_song_cannot_find), Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        )
     }
 
     fun downloadSong(song: Song) = viewModelScope.launch {
@@ -301,37 +354,95 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private val connection by lazy {
+        object : ServiceConnection {
+            @OptIn(UnstableApi::class)
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                val binder = service as SimpleMediaService.MediaServiceBinder
+                mediaSessionService = WeakReference(binder.getService())
+                L("SERVICE- onServiceConnected")
+                serviceBound = true
+            }
+
+            @OptIn(UnstableApi::class)
+            override fun onServiceDisconnected(name: ComponentName?) {
+                mediaSessionService = null
+                serviceBound = false
+                isServiceRunning = false
+                L("SERVICE- onServiceDisconnected")
+            }
+
+            override fun onBindingDied(name: ComponentName?) {
+                super.onBindingDied(name)
+                L("SERVICE- onBindingDied")
+            }
+
+            override fun onNullBinding(name: ComponentName?) {
+                super.onNullBinding(name)
+                L("SERVICE- onNullBinding")
+
+            }
+        }
+    }
+
+    private fun unbindFromMediaSessionService() {
+        L("SERVICE- unbindFromMediaSessionService $serviceBound")
+        if (serviceBound) {
+            weakContext.get()?.applicationContext?.unbindService(connection)
+            serviceBound = false
+            isServiceRunning = false
+        }
+    }
+
     @OptIn(UnstableApi::class)
     fun startMusicServiceIfNecessary() {
-        logToErrorLogs("SERVICE- startMusicServiceIfNecessary. isServiceRunning? : $isServiceRunning")
-        if (!isServiceRunning) {
+        if (!serviceBound || mediaSessionService?.get() == null) {
             weakContext.get()?.applicationContext?.let { applicationContext ->
                 Intent(applicationContext, SimpleMediaService::class.java).apply {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    if (!isServiceRunning) {
+                        L("SERVICE- bindToMediaSessionService")
                         isServiceRunning = true
                         startForegroundService(applicationContext, this)
+                        try {
+                            applicationContext.bindService(this, connection, Context.BIND_AUTO_CREATE)
+                        } catch (e: Exception) {
+                            L.e(e)
+                            serviceBound = false
+                        }
                     }
                 }
             }
         }
+
+        mediaSessionService?.get()?.let {
+            it.notificationManager.startNotificationService(it, it.mediaSession)
+        }
+
+//        logToErrorLogs("SERVICE- startMusicServiceIfNecessary. isServiceRunning? : $isServiceRunning")
+//        if (!isServiceRunning) {
+//            weakContext.get()?.applicationContext?.let { applicationContext ->
+//                Intent(applicationContext, SimpleMediaService::class.java).apply {
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                        isServiceRunning = true
+//                        startForegroundService(applicationContext, this)
+//                    }
+//                }
+//            }
+//        }
     }
 
     @OptIn(UnstableApi::class)
     fun stopMusicService() = viewModelScope.launch {
         delay(SERVICE_STOP_TIMEOUT) // safety net, delay stopping the service in case the application just got restored from background
-        logToErrorLogs("SERVICE- stopMusicService $isServiceRunning")
 
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
-                applicationContext.stopService(
-                    Intent(
-                        applicationContext,
-                        SimpleMediaService::class.java
-                    )
-                )
+                applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
                     .also { isServiceRunning = false }
+                unbindFromMediaSessionService()
             } catch (e: Exception) {
-                L.e(e)
+                L.e(e, "SERVICE-")
+                //serviceBound = false
                 isServiceRunning = false
             }
         }
@@ -372,9 +483,10 @@ class MainViewModel @Inject constructor(
             playlistManager.updateErrorLogMessage(mess)
     }
 
+    @OptIn(UnstableApi::class)
     override fun onCleared() {
         logToErrorLogs("onCleared")
-
+        mediaSessionService = null
         searchJob?.cancel()
         loadSongDataJob?.cancel()
         playLoadingJob?.cancel()

@@ -84,6 +84,8 @@ data class Pa2ConfigDto(
     val playlistsServerAllFetch: Boolean? = null,
     @SerializedName("clearLibraryOnCatalogClean")
     val clearLibraryOnCatalogClean: Boolean? = null,
+    @SerializedName("introMessage")
+    val introMessage: String? = null,
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
@@ -104,5 +106,6 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     playlistsAdminFetch = playlistsAdminFetch ?: PLAYLISTS_ADMIN_FETCH,
     smartlistsAdminFetch = smartlistsAdminFetch ?: SMARTLISTS_ADMIN_FETCH,
     playlistsServerAllFetch = playlistsServerAllFetch ?: PLAYLISTS_ALL_SERVER_FETCH,
-    clearLibraryOnCatalogClean = clearLibraryOnCatalogClean ?: CLEAR_LIBRARY_ON_CATALOG_CLEAN
+    clearLibraryOnCatalogClean = clearLibraryOnCatalogClean ?: CLEAR_LIBRARY_ON_CATALOG_CLEAN,
+    introMessage = introMessage ?: ""
 )

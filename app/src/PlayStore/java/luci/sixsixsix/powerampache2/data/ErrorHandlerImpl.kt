@@ -123,8 +123,9 @@ class ErrorHandlerImpl @Inject constructor(
 
                     is PlaybackException -> {
                         readableMessage =
-                            if (exceptionString.lowercase().contains("User disabled".lowercase())) exceptionString else
-                                "Error Code: ${e.errorCode}. ${applicationContext.getString(R.string.error_playback_exception)}"
+                            if (e.errorCode != PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED)
+                                "Error Code: ${e.errorCode}. ${applicationContext.getString(R.string.error_playback_exception)}\n$exceptionString"
+                            else ""
 
                         "PlaybackException \n$readableMessage\n $exceptionString"
                     }
@@ -149,6 +150,7 @@ class ErrorHandlerImpl @Inject constructor(
                         when (e.musicError.getErrorType()) {
                             ErrorType.ACCOUNT -> {
                                 // clear session and try to autologin using the saved credentials
+                                L("aaaa ERROR HANDLER clear session, ErrorType.ACCOUNT")
                                 db.dao.clearSession()
                                 readableMessage = e.musicError.errorMessage
                             }

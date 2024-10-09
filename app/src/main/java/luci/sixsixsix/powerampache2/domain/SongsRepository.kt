@@ -31,6 +31,7 @@ interface SongsRepository {
     val offlineSongsLiveData: LiveData<List<Song>>
 
     suspend fun getSongs(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Song>>>
+    suspend fun getSongFromId(songId: String): Song?
     suspend fun getSongsFromAlbum(albumId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
     suspend fun getRecentSongs(fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
     suspend fun getNewestSongs(): Flow<Resource<List<Song>>>

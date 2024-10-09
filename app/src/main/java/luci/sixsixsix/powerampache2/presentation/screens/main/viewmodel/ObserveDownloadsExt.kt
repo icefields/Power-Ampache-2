@@ -22,12 +22,14 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.content.Context
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 
 internal fun MainViewModel.observeDownloads(application: Context) {
@@ -74,9 +76,10 @@ internal fun MainViewModel.observeDownloads(application: Context) {
                                 if (!emittedDownloads.contains(songId)) {
                                     emittedDownloads = emittedDownloads.toMutableList().apply { add(songId) }
                                     songsRepository.getDownloadedSongById(songId)?.let { finishedSong ->
-                                        //if(songsRepository.isSongAvailableOffline(song)) {}
                                         playlistManager.updateDownloadedSong(finishedSong)
-                                        playlistManager.updateUserMessage("${finishedSong.name} downloaded")
+                                        playlistManager.updateUserMessage(
+                                            application.getString(R.string.downloaded_snackbar_title, finishedSong.name)
+                                        ) //"${finishedSong.name} downloaded")
                                         state = state.copy(isDownloading = false)
                                         //WorkManager.getInstance(application).pruneWork()
                                         L("emitting", finishedSong.name)

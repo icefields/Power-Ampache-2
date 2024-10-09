@@ -10,6 +10,7 @@
         android:name=".PowerAmpache2Application"
         android:allowBackup="true"
         android:installLocation="auto"
+        android:largeHeap="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -27,6 +28,26 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter
+                android:label="@string/intent_filter_ampache_deeplink">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="ampache"
+                    android:host="share" />
+            </intent-filter>
+
+            <intent-filter
+                android:label="@string/intent_filter_ampache_deeplink_https"
+                android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="@string/deepLink_host"
+                    android:pathPrefix="/share" />
+                <!-- note that the leading "/" is required for pathPrefix-->
             </intent-filter>
         </activity>
 

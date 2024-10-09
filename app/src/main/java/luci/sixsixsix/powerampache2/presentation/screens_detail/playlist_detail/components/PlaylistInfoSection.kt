@@ -125,14 +125,12 @@ fun PlaylistInfoSection(
                 )
             }
 
-            playlist.items?.let { itemCount ->
-                if (itemCount > 0) {
-                    AttributeText(
-                        modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
-                        title = stringResource(id = R.string.albumDetailScreen_infoSection_songs),
-                        name = "$itemCount"
-                    )
-                }
+            if (songs.isNotEmpty()) {
+                AttributeText(
+                    modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
+                    title = stringResource(id = R.string.albumDetailScreen_infoSection_songs),
+                    name = "${songs.size}"
+                )
             }
 
         }
@@ -175,7 +173,7 @@ fun PlaylistInfoSectionPreview() {
         isPlayingPlaylist = true,
         isDownloading = false,
         isGlobalShuffleOn = true,
-        songs = listOf(Song.mockSong),
+        songs = listOf(Song.mockSong, Song.mockSong, Song.mockSong, Song.mockSong, Song.mockSong),
         isPlaylistEditLoading = true,
         isLikeLoading = false,
         isLikeAvailable = true,

@@ -114,7 +114,7 @@ fun User.toUserEntity(serverUrl: String): UserEntity {
         website = userWebsite,
         state = userState,
         city = userCity,
-        serverUrl = serverUrl.lowercase(),
+        serverUrl = serverUrl/*.lowercase()*/,
         art = art
     )
 }

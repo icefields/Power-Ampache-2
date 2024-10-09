@@ -180,8 +180,7 @@ fun MainContentTopAppBar(
                     }) {
                     Icon(
                         imageVector = Icons.Default.QueueMusic,
-                        contentDescription = "Queue",
-                        //tint = MaterialTheme.colorScheme.secondary
+                        contentDescription = stringResource(id = R.string.queue)
                     )
                 }
             }

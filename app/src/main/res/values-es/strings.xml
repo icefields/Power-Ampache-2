@@ -12,7 +12,7 @@
     <string name="main_tab_title_home">Inicio</string>
     <string name="main_tab_title_songs">Pistas</string>
     <string name="main_tab_title_artists">Artistas</string>
-    <string name="main_tab_title_playlists">Listas de reproducción</string>
+    <string name="main_tab_title_playlists">Listas</string>
     <string name="loginScreen_username">Usuario</string>
     <string name="loginScreen_signUp_email">Correo electrónico</string>
     <string name="loginScreen_fullname">Nombre completo (Opcional)</string>
@@ -35,7 +35,7 @@
     <string name="home_section_title_flagged">Favoritos</string>
     <string name="home_section_title_frequent">Reproducidos frecuentemente</string>
     <string name="home_section_title_highest">Mejor valorados</string>
-    <string name="home_section_title_newest">Añadidas recientemente</string>
+    <string name="home_section_title_newest">Añadidos recientemente</string>
     <string name="home_section_title_playlists">Listas de reproducción</string>
     <string name="home_section_title_moreAlbums">Más álbumes</string>
     <string name="home_section_title_loading">Cargando</string>
@@ -123,7 +123,7 @@
     <string name="dialog_create">CREAR</string>
     <string name="warning_playlist_download">Por favor espera a que la lista de reproducción esté completamente cargada antes de descargar</string>
     <string name="warning_playlist_server">Añadir pistas, si la versión de tu servidor es menor a 6.3 este procedimiento puede tomar más o menos un minuto</string>
-    <string name="warning_playlist_adding">Las canciones están siendo añadidas a tu lista de reproducción.\nSi abandonas esta pantalla ahora, se interrumpirá el proceso</string>
+    <string name="warning_playlist_adding">Las pistas están siendo añadidas a tu lista de reproducción.\nSi abandonas esta pantalla ahora, se interrumpirá el proceso</string>
     <string name="warning_playlist_adding_title">¿Abandonar pantalla?</string>
     <string name="warning_playlist_adding_stay">Permancer</string>
     <string name="warning_playlist_adding_leave">Abandonar de todos modos</string>
@@ -155,7 +155,27 @@
     <string name="menu_drawer_home">Inicio</string>
     <string name="menu_drawer_about">Acerca de</string>
     <string name="menu_drawer_logout">Salir</string>
-    <string name="menu_drawer_offline">Canciones descargadas</string>
+    <string name="menu_drawer_offline">Pistas descargadas</string>
 
-    <string name="error_playback_exception">Issues playing this track. Retrying now</string>
+    <string name="error_playback_exception">Se encontraron problemas al reproducir este archivo</string>
+    <string name="share_song_cannot_find">La canción compartida no fue encontrada</string>
+
+    <string name="settings_theme_title">Elige tu tema</string>
+    <string name="settings_quality_title">Calidad de audio</string>
+    <string name="loginScreen_useAuthToken">Usar token de autenticación</string>
+    <string name="queue">En Cola</string>
+    <!-- the following Playlist title has to be all caps -->
+    <string name="addToPlaylistOrQueueDialog_playlists">LISTAS</string>
+    <string name="addToPlaylistOrQueueDialog_createNew">Crear una nueva</string>
+    <string name="addToPlaylistOrQueueDialog_addQueue">Añadir a la Cola</string>
+    <string name="downloaded_snackbar_title">%s descargada</string>
+
+    <!-- NOT ADDED YET -->
+    <string name="home_playlist_highest_title">Canciones mejor valoradas</string>
+    <string name="home_playlist_frequent_title">Canciones frecuentemente tocadas</string>
+    <string name="home_playlist_recent_title">Canciones recientemente tocadas</string>
+    <string name="home_playlist_favourites_title">Canciones favoritas</string>
+
+    <string name="dialog_deletePlaylist_title">ELIMINAR lista de reproducción</string>
+    <string name="dialog_deletePlaylist_text">Eliminar %s?</string>
 </resources>

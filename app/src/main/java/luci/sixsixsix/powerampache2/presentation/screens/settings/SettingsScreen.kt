@@ -231,7 +231,7 @@ fun SettingsScreenContent(
                 // THEME PICKER
                 1 -> SettingsDropDownMenu(
                     modifier = Modifier.padding(vertical = paddingVerticalItem),
-                    label = "Pick Your Theme",
+                    label = stringResource(id = R.string.settings_theme_title),
                     currentlySelected = powerAmpTheme.toPowerAmpacheDropdownItem(),
                     items = themesDropDownItems,
                     onItemSelected = onThemeSelected
@@ -239,7 +239,7 @@ fun SettingsScreenContent(
                 // STREAM QUALITY PICKER
                 2 -> SettingsDropDownMenu(
                     modifier = Modifier.padding(vertical = paddingVerticalItem),
-                    label = "Streaming Quality",
+                    label = stringResource(id = R.string.settings_quality_title), // "Streaming Quality"
                     currentlySelected = streamingQuality.toPowerAmpacheDropdownItem(),
                     items = streamQualityDropdownItems,
                     onItemSelected = onStreamingQualitySelected

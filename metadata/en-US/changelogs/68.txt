@@ -1,0 +1,5 @@
+- improved French translations
+- tech debt refactoring
+- updated compose libraries
+- improved performance on playlist song retrieval
+- UI improvements on the player

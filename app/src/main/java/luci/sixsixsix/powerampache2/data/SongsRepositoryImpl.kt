@@ -50,6 +50,7 @@ import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.OfflineData.likedOffline
 import luci.sixsixsix.powerampache2.data.remote.OfflineData.ratedOffline
 import luci.sixsixsix.powerampache2.data.remote.OfflineData.songsToScrobble
+import luci.sixsixsix.powerampache2.data.remote.ScrobbleData
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
@@ -157,6 +158,10 @@ class SongsRepositoryImpl @Inject constructor(
         searchOfflineSongs(query)
     }
 
+    override suspend fun getSongFromId(songId: String): Song? =
+        dao.getSongById(songId)?.run { toSong() }
+            ?: try { api.getSong(authToken(), songId).toSong() } catch (e: Exception) { null }
+
     private suspend fun getSongsNetwork(
         fetchRemote: Boolean,
         query: String,
@@ -237,8 +242,7 @@ class SongsRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        val auth = getSession()!!//authorize2(false)
-        val response = api.getSongsFromAlbum(auth.auth, albumId = albumId)
+        val response = api.getSongsFromAlbum(authToken(), albumId = albumId)
         response.error?.let { throw(MusicException(it.toError())) }
         val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
         L("getSongsFromAlbum songs from web", songs.size)
@@ -464,7 +468,7 @@ class SongsRepositoryImpl @Inject constructor(
 
     /**
      * Build Url for Ampache stream action
-     * https://tari.ddns.net/server/json.server.php?action=stream&
+     * https://www.servername.org/server/json.server.php?action=stream&
      * auth=878944fc45e121977229fe8027e52187
      * &type=song
      * &id=8895
@@ -580,24 +584,26 @@ class SongsRepositoryImpl @Inject constructor(
     override suspend fun scrobble(song: Song) = flow {
         emit(Resource.Loading(true))
         if (isSongAvailableOffline(song)) {
-            songsToScrobble.add(song)
+            songsToScrobble.add(ScrobbleData(song))
             L("scrobble song available offline", songsToScrobble.size)
             scrobbleEverything()
             emit(Resource.Success(data = Any(), networkData = Any()))
+        } else {
+            // TODO: Uncomment after manual record_play enabled on backend for stream
+            scrobbleApiCall(authToken(), ScrobbleData(song))
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("scrobble()", e, this) }
 
     private suspend fun scrobbleEverything() {
         if (!isOfflineModeEnabled()) {
-            val auth = getSession()!!.auth
             while(songsToScrobble.hasMore()) {
-                delay(21000)
+                // delay(21000)
                 songsToScrobble.pop()?.let { sts ->
-                    if (scrobbleApiCall(auth, sts)) {
-                        L("scrobble success!", songsToScrobble.size, sts.name)
+                    if (scrobbleApiCall(authToken(), sts)) {
+                        L("scrobble success!", songsToScrobble.size, sts.song.name)
                     } else {
-                        L("scrobble failed", songsToScrobble.size, sts.name)
+                        L("scrobble failed", songsToScrobble.size, sts.song.name)
                     }
                 }
             }
@@ -616,14 +622,18 @@ class SongsRepositoryImpl @Inject constructor(
     }
 
     @Throws(Exception::class)
-    private suspend fun scrobbleApiCall(auth: String, song: Song) =
-        api.scrobble(
-            authKey = auth,
-            song = song.name,
-            artist = song.artist.name,
-            album = song.album.name
-        ).run {
+    private suspend fun scrobbleApiCall(auth: String, scrobbleData: ScrobbleData) =
+        api.recordPlay(auth, scrobbleData.song.mediaId, scrobbleData.unixTimestamp).run {
             error?.let { throw (ScrobbleException(it.toError())) }
             (success != null)
         }
+//        api.scrobble(
+//            authKey = auth,
+//            song = song.name,
+//            artist = song.artist.name,
+//            album = song.album.name
+//        ).run {
+//            error?.let { throw (ScrobbleException(it.toError())) }
+//            (success != null)
+//        }
 }

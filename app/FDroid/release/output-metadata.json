@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 64,
-      "versionName": "1.00-64-fdroid",
+      "versionCode": 67,
+      "versionName": "1.00-67-fdroid",
       "outputFile": "app-FDroid-release.apk"
     }
   ],

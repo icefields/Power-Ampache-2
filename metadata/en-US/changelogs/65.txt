@@ -1,0 +1,6 @@
+- implemented share with in-app deep link
+- improved landscape view-mode
+- removed user facing verbose player error
+- improved UI on loading states
+- Spanish translation corrections
+- other bug fixes

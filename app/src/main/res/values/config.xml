@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">Power Ampache 2</string>
     <string name="website" translatable="false">https://power.ampache.dev</string>
+    <string name="deepLink_host" translatable="false">power.ampache.dev</string>
 
     <string name="notification_channel_name" translatable="false">Music Channel</string>
 
@@ -9,4 +10,6 @@
     <string name="loginScreen_local_server" translatable="false">Local Development Server</string>
     <string name="loginScreen_remote_server" translatable="false">Remote Debug Server</string>
     <string name="loginScreen_local_nextcloud" translatable="false">Local Nextcloud Server</string>
+    <string name="intent_filter_ampache_deeplink" translatable="false">Share with Power Ampache 2</string>
+    <string name="intent_filter_ampache_deeplink_https" translatable="false">Share with Power Ampache 2</string>
 </resources>
