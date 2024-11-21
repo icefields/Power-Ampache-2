@@ -26,7 +26,7 @@
     <string name="loginScreen_login">Přihlásit</string>
     <string name="loginScreen_signup">Registrovat se</string>
     <string name="loginScreen_demo_server">Ukázka</string>
-    <string name="loginScreen_loading_authenticating">Připojení ...</string>
+    <string name="loginScreen_loading_authenticating">Připojení …</string>
     <string name="loginScreen_dogmazic_server">Dogmazic Music Server DEMO</string>
     <string name="loginScreen_textFields_warning">Kompatibilní s verzí serveru 4 a vyšší.\nTestováno na verzi serveru 6.</string>
     <string name="loginScreen_warning">Chcete-li se připojit k vlastnímu serveru, stáhněte si plnou verzi Power Ampache 2.</string>
@@ -113,7 +113,7 @@
     <string name="player_buttonText_album">Album</string>
     <string name="player_buttonText_add">Přidat</string>
     <string name="download">Ke stažení</string>
-    <string name="player_buttonText_download">@string/stáhnout</string>
+    <string name="player_buttonText_download">@string/download</string>
     <string name="player_buttonText_share">Sdílet</string>
     <string name="player_buttonText_info">Informace</string>
     <string name="player_queue_upNext">Nahoru Další</string>

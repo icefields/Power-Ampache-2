@@ -309,7 +309,7 @@ fun SettingsScreenContent(
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
                 // CHECK UPDATES NOW BUTTON
-                9 -> TextWithSubtitle(
+                10 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = paddingHorizontalItem)
@@ -319,7 +319,7 @@ fun SettingsScreenContent(
                     onClick = onCheckUpdatesNowPress
                 )
                 // AUTO UPDATE CHECKBOX
-                10 -> PowerAmpCheckBox(
+                11 -> PowerAmpCheckBox(
                     enabled = IS_AUTO_UPDATE_ENABLED,
                     modifier = Modifier
                         .padding(vertical = paddingVerticalItem)
@@ -329,7 +329,7 @@ fun SettingsScreenContent(
                     title = R.string.settings_autoCheckUpdates_title,
                     subtitle = R.string.coming_soon,
                 )
-                11 -> TextWithSubtitle(
+                12 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem),
@@ -337,14 +337,14 @@ fun SettingsScreenContent(
                     trailingIcon = Icons.Outlined.OpenInNew,
                     onClick = onDebugLogsButtonPress
                 )
-                12 -> PowerAmpSwitch(
+                13 -> PowerAmpSwitch(
                     title = R.string.settings_enableDebugLogging_title,
                     subtitle = R.string.settings_enableDebugLogging_subtitle,
                     checked = remoteLoggingEnabled,
                     onCheckedChange = onEnableLoggingValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
-                8 -> TextWithSubtitle(
+                9 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
@@ -357,8 +357,8 @@ fun SettingsScreenContent(
                         showDeleteDownloadsDialog = true
                     }
                 )
-                13 -> donateButton()
-                14 -> if (!BuildConfig.HIDE_DONATION) {
+                14 -> donateButton()
+                15 -> if (!BuildConfig.HIDE_DONATION) {
                     PowerAmpCheckBox(title = R.string.settings_hideDonationButtonsMenu_title,
                         checked = hideDonationButtons,
                         onCheckedChange = onHideDonateValueChange,
