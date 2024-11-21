@@ -34,7 +34,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 import luci.sixsixsix.powerampache2.common.Constants.DB_LOCAL_NAME
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S

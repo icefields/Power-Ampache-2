@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.common.API_RECORD_PLAY_ENABLE
 import luci.sixsixsix.powerampache2.common.CLEAR_LIBRARY_ON_CATALOG_CLEAN
 import luci.sixsixsix.powerampache2.common.PLAYBACK_ERRORS_RETRIES
 import luci.sixsixsix.powerampache2.common.PLAYLISTS_ADMIN_FETCH
@@ -34,6 +35,7 @@ import luci.sixsixsix.powerampache2.common.PLAYLIST_SONGS_FETCH_LIMIT
 
 import luci.sixsixsix.powerampache2.common.Pa2Config
 import luci.sixsixsix.powerampache2.common.RESET_QUEUE_ON_NEW_SESSION
+import luci.sixsixsix.powerampache2.common.SETTINGS_IS_DOWNLOAD_SDCARD
 import luci.sixsixsix.powerampache2.common.SMARTLISTS_ADMIN_FETCH
 import luci.sixsixsix.powerampache2.common.SMARTLISTS_USER_FETCH
 
@@ -86,6 +88,10 @@ data class Pa2ConfigDto(
     val clearLibraryOnCatalogClean: Boolean? = null,
     @SerializedName("introMessage")
     val introMessage: String? = null,
+    @SerializedName("isDownloadsSdCardOptionEnabled")
+    val isDownloadsSdCardOptionEnabled: Boolean? = null,
+    @SerializedName("isRecordPlayApiEnabled")
+    val isRecordPlayApiEnabled: Boolean? = null
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
@@ -107,5 +113,7 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     smartlistsAdminFetch = smartlistsAdminFetch ?: SMARTLISTS_ADMIN_FETCH,
     playlistsServerAllFetch = playlistsServerAllFetch ?: PLAYLISTS_ALL_SERVER_FETCH,
     clearLibraryOnCatalogClean = clearLibraryOnCatalogClean ?: CLEAR_LIBRARY_ON_CATALOG_CLEAN,
-    introMessage = introMessage ?: ""
+    introMessage = introMessage ?: "",
+    isDownloadsSdCardOptionEnabled = isDownloadsSdCardOptionEnabled ?: SETTINGS_IS_DOWNLOAD_SDCARD,
+    isRecordPlayApiEnabled = isRecordPlayApiEnabled ?: API_RECORD_PLAY_ENABLE
 )

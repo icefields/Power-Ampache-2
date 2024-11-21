@@ -65,6 +65,9 @@ data class LocalSettingsEntity(
 
     @ColumnInfo(name = "isOfflineModeEnabled", defaultValue = "${LocalSettings.SETTINGS_DEFAULTS_OFFLINE_MODE}")
     val isOfflineModeEnabled: Boolean,
+
+    @ColumnInfo(name = "isDownloadsSdCard", defaultValue = "${LocalSettings.SETTINGS_DEFAULTS_DOWNLOADS_SD_CARD}")
+    val isDownloadsSdCard: Boolean,
 )
 
 fun LocalSettingsEntity.toLocalSettings() = LocalSettings(
@@ -79,7 +82,8 @@ fun LocalSettingsEntity.toLocalSettings() = LocalSettings(
     isMonoAudioEnabled = isMonoAudioEnabled,
     isGlobalShuffleEnabled = isGlobalShuffleEnabled,
     isOfflineModeEnabled = isOfflineModeEnabled,
-    playlistSongsSorting = playlistSongsSorting
+    playlistSongsSorting = playlistSongsSorting,
+    isDownloadsSdCard = isDownloadsSdCard
 )
 
 fun LocalSettings.toLocalSettingsEntity() = LocalSettingsEntity(
@@ -94,5 +98,6 @@ fun LocalSettings.toLocalSettingsEntity() = LocalSettingsEntity(
     isNormalizeVolumeEnabled = isNormalizeVolumeEnabled,
     isGlobalShuffleEnabled = isGlobalShuffleEnabled,
     isOfflineModeEnabled = isOfflineModeEnabled,
-    playlistSongsSorting = playlistSongsSorting
+    playlistSongsSorting = playlistSongsSorting,
+    isDownloadsSdCard = isDownloadsSdCard
 )

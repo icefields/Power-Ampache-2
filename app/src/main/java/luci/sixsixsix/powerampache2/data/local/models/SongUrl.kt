@@ -9,10 +9,10 @@ data class SongUrl(
     val bitrate: Int = StreamingQuality.VERY_HIGH.bitrate
 ) {
     companion object {
-        const val songUrl = "%s/json.server.php?action=stream&auth=%s&type=song&id=%s%s"
+        const val SONG_URL = "%s/json.server.php?action=stream&stats=0&auth=%s&type=song&id=%s%s"
     }
 
     fun getUrl(mediaId: String) =
-        String.format(songUrl, MainNetwork.buildServerUrl(serverUrl), authToken, mediaId,
+        String.format(SONG_URL, MainNetwork.buildServerUrl(serverUrl), authToken, mediaId,
             if (bitrate < StreamingQuality.VERY_HIGH.bitrate) "&bitrate=$bitrate" else "")
 }

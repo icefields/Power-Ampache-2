@@ -68,8 +68,9 @@ data class LocalSettings(
     val isSmartDownloadsEnabled: Boolean,
     val isGlobalShuffleEnabled: Boolean,
     val isOfflineModeEnabled: Boolean,
-    val playlistSongsSorting: SortMode
-): Parcelable {
+    val playlistSongsSorting: SortMode,
+    val isDownloadsSdCard: Boolean,
+    ): Parcelable {
     companion object {
         // defaults
         private const val SETTINGS_DEFAULTS_USERNAME = "luci.sixsixsix.powerampache2.user.db.pa_default_user"
@@ -81,6 +82,7 @@ data class LocalSettings(
         const val SETTINGS_DEFAULTS_MONO = false
         const val SETTINGS_DEFAULTS_GLOBAL_SHUFFLE = false
         const val SETTINGS_DEFAULTS_OFFLINE_MODE = false
+        const val SETTINGS_DEFAULTS_DOWNLOADS_SD_CARD = false
         const val SETTINGS_DEFAULTS_SMART_DOWNLOADS = false
         const val SETTINGS_DEFAULTS_STREAMING_QUALITY = BITRATE_VERY_HIGH
         const val SETTINGS_DEFAULTS_THEME = ID_DARK
@@ -99,7 +101,8 @@ data class LocalSettings(
                 isSmartDownloadsEnabled = SETTINGS_DEFAULTS_SMART_DOWNLOADS,
                 isGlobalShuffleEnabled = SETTINGS_DEFAULTS_GLOBAL_SHUFFLE,
                 isOfflineModeEnabled = SETTINGS_DEFAULTS_OFFLINE_MODE,
-                playlistSongsSorting = defaultPlaylistSort
+                playlistSongsSorting = defaultPlaylistSort,
+                isDownloadsSdCard = SETTINGS_DEFAULTS_DOWNLOADS_SD_CARD
             )
     }
 
@@ -142,6 +145,9 @@ data class LocalSettings(
 
         sbThis.append(this.isOfflineModeEnabled)
         sbOthe.append(othe.isOfflineModeEnabled)
+
+        sbThis.append(this.isDownloadsSdCard)
+        sbOthe.append(othe.isDownloadsSdCard)
 
         return sbThis.toString() == sbOthe.toString()
     }

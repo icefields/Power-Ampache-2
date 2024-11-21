@@ -152,6 +152,13 @@ class SettingsViewModel @Inject constructor(
 
             SettingsEvent.goToWebsite ->
                 application.openLinkInBrowser(application.getString(R.string.website))
+
+            is SettingsEvent.OnDownloadsSdCardValueChange -> viewModelScope.launch {
+                settingsRepository.saveLocalSettings(
+                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
+                        .copy(isDownloadsSdCard = event.isDownloadsSdCard)
+                )
+            }
         }
     }
 
