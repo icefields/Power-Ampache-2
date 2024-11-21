@@ -42,5 +42,7 @@ interface MusicRepository {
     suspend fun getUsername(): String?
     suspend fun register(serverUrl: String, username: String, password: String, email: String, fullName: String? = null): Flow<Resource<Any>>
     suspend fun getGenres(fetchRemote: Boolean): Flow<Resource<List<Genre>>>
+
+    // TODO: do not pass context here
     suspend fun getStorageLocation(context: Context): String
 }
