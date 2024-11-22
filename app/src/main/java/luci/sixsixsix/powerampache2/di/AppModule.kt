@@ -27,7 +27,9 @@ import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.room.Room
 import dagger.Module
@@ -130,6 +132,12 @@ object AppModule {
         .setAudioAttributes(audioAttributes, true)
         .setHandleAudioBecomingNoisy(true)
         .setTrackSelector(DefaultTrackSelector(context))
+        .setLoadControl(DefaultLoadControl.Builder()
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .setBackBuffer(10000, true)  // Retain back buffer data only up to the last keyframe (not very impactful for audio)
+            //.setTargetBufferBytes(20 * 1024 * 1024)
+            .setBufferDurationsMs(10000, 120000, 5000, 9000)
+            .build())
         .build()
 
     //@ServiceScoped

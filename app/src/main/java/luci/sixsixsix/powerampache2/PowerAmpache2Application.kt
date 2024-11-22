@@ -83,8 +83,8 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
         //.respectCacheHeaders(false)
         .memoryCache {
             MemoryCache.Builder(this)
-                .maxSizePercent(0.12)
-                .strongReferencesEnabled(true)
+                .maxSizePercent(0.08)
+                .strongReferencesEnabled(false)
                 .build()
         }
         .diskCache {
