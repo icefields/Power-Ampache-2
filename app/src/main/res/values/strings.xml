@@ -84,6 +84,8 @@
     <string name="settings_normalizeVolume_title">Normalize Volume</string>
     <string name="settings_offlineMode_title">Offline Mode</string>
     <string name="settings_offlineMode_subtitle">Enable Offline Mode</string>
+    <string name="settings_downloadsSdCard_title">Use SD Card for Downloads</string>
+    <string name="settings_downloadsSdCard_subtitle">Works when the SD card is mounted as System Storage [EXPERIMENTAL]</string>
     <string name="settings_normalizeVolume_subtitle">Force same volume level for all tracks</string>
     <string name="settings_monoAudio_title">Mono Audio</string>
     <string name="settings_monoAudio_subtitle">Left and Right speakers will play the same audio</string>

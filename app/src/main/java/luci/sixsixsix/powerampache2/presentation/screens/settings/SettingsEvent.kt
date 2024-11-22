@@ -29,6 +29,7 @@ sealed class SettingsEvent {
     data class OnHideDonationButtonSwitch(val newValue: Boolean): SettingsEvent()
     data class OnMonoValueChange(val isMono: Boolean): SettingsEvent()
     data object OnOfflineToggle: SettingsEvent()
+    data class OnDownloadsSdCardValueChange(val isDownloadsSdCard: Boolean): SettingsEvent()
     data object goToWebsite: SettingsEvent()
     data class OnNormalizeValueChange(val isVolumeNormalized: Boolean): SettingsEvent()
     data class OnSmartDownloadValueChange(val isSmartDownloadEnabled: Boolean): SettingsEvent()

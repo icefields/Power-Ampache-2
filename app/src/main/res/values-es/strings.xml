@@ -178,4 +178,8 @@
 
     <string name="dialog_deletePlaylist_title">ELIMINAR lista de reproducción</string>
     <string name="dialog_deletePlaylist_text">Eliminar %s?</string>
+
+    <string name="settings_downloadsSdCard_title">Use SD Card for Downloads</string>
+    <string name="settings_downloadsSdCard_subtitle">Works when the SD card is mounted as System Storage [EXPERIMENTAL]</string>
+
 </resources>

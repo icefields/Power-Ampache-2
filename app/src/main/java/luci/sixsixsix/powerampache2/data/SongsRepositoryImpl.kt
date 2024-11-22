@@ -589,8 +589,9 @@ class SongsRepositoryImpl @Inject constructor(
             scrobbleEverything()
             emit(Resource.Success(data = Any(), networkData = Any()))
         } else {
-            // TODO: Uncomment after manual record_play enabled on backend for stream
-            scrobbleApiCall(authToken(), ScrobbleData(song))
+            if (Constants.config.isRecordPlayApiEnabled) {
+                scrobbleApiCall(authToken(), ScrobbleData(song))
+            }
         }
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("scrobble()", e, this) }

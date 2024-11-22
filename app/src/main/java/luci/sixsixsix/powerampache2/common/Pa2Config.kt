@@ -27,6 +27,8 @@ const val PLAYLIST_SONGS_FETCH_LIMIT = 100
 const val PLAYBACK_ERRORS_RETRIES = 16
 const val PLAYLIST_FETCH_LIMIT = 0
 const val PLAYLIST_ADD_NEW_ENABLE = true
+const val API_RECORD_PLAY_ENABLE = false
+const val SETTINGS_IS_DOWNLOAD_SDCARD = true
 const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
 
 const val PLAYLISTS_USER_FETCH = BuildConfig.PLAYLISTS_USER_FETCH
@@ -73,14 +75,18 @@ data class Pa2Config(
     val playlistsUserFetch: Boolean = PLAYLISTS_USER_FETCH,
     // fetch user smartlists before fetching the bulk of all server playlists
     val smartlistsUserFetch: Boolean = SMARTLISTS_USER_FETCH,
-    // fetch admin playlists only before fetching the bulk of all server playlists
+    // fetch playlists owned by a defined admin user
     val playlistsAdminFetch: Boolean = PLAYLISTS_ADMIN_FETCH,
-    // fetch admin smartlists only before fetching the bulk of all server playlists
+    // fetch smartlists owned by a defined admin user
     val smartlistsAdminFetch: Boolean = SMARTLISTS_ADMIN_FETCH,
     // fetch all playlists from server
     val playlistsServerAllFetch: Boolean = PLAYLISTS_ALL_SERVER_FETCH,
     // clear the library when a newer "clean" date in the handshake response
     val clearLibraryOnCatalogClean: Boolean = CLEAR_LIBRARY_ON_CATALOG_CLEAN,
     // message to show at login, if any present
-    val introMessage: String = ""
+    val introMessage: String = "",
+    // enable or disable the option in settings to download music to device sd card
+    val isDownloadsSdCardOptionEnabled: Boolean = SETTINGS_IS_DOWNLOAD_SDCARD,
+    // enable record_play call for every played song
+    val isRecordPlayApiEnabled: Boolean = API_RECORD_PLAY_ENABLE
 )

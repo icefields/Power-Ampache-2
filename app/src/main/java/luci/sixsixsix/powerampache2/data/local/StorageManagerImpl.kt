@@ -38,7 +38,7 @@ private const val SUB_DIR = "offline_music"
 
 class StorageManagerImpl @Inject constructor(
     private val weakContext: WeakContext,
-    private val musicRepository: MusicRepository
+    private val musicRepository: MusicRepository,
 ): StorageManager {
     @Throws(Exception::class)
     override suspend fun saveSong(song: Song, inputStream: InputStream) =
@@ -73,7 +73,7 @@ class StorageManagerImpl @Inject constructor(
         val fileName = relativePath.substring(relativePath.lastIndexOf("/") + 1)
         val relativeDirectory = relativePath.replace(fileName, "")
         val pathBuilder = // TODO fix double-bang!!
-            StringBuffer(weakContext.get()!!.filesDir.absolutePath)
+            StringBuffer(getStorage())
                 .append("/")
                 .append(SUB_DIR)
                 .append("/")
@@ -96,7 +96,7 @@ class StorageManagerImpl @Inject constructor(
      */
     @Throws(Exception::class)
     override suspend fun deleteAll() = withContext(Dispatchers.IO) {
-        File(StringBuffer(weakContext.get()!!.filesDir.absolutePath)
+        File(StringBuffer(getStorage())
             .append("/")
             .append(SUB_DIR)
             .append("/")
@@ -117,7 +117,7 @@ class StorageManagerImpl @Inject constructor(
             val fileName = relativePath.substring(relativePath.lastIndexOf("/") + 1)
             val relativeDirectory = relativePath.replace(fileName, "")
 
-            StringBuffer(weakContext.get()!!.filesDir.absolutePath)
+            StringBuffer(getStorage())
                 .append("/")
                 .append(SUB_DIR)
                 .append("/")
@@ -126,4 +126,6 @@ class StorageManagerImpl @Inject constructor(
                 .append(relativeDirectory)
                 .toString()
         }
+
+    private suspend fun getStorage() = musicRepository.getStorageLocation(weakContext.get()!!)
 }

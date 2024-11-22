@@ -27,7 +27,7 @@ import luci.sixsixsix.powerampache2.BuildConfig
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
-    const val DATABASE_VERSION = 82
+    const val DATABASE_VERSION = 83
 
     const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 
@@ -46,6 +46,8 @@ object Constants {
     const val NETWORK_REQUEST_LIMIT_SONGS = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
     const val NETWORK_REQUEST_LIMIT_ALBUMS = 40
+
+    const val ADMIN_USERNAME = "PowerAmpache"
 
     // TIMEOUTS (non-network)
     const val LOCAL_SCROBBLE_TIMEOUT_MS = 20000L
@@ -95,6 +97,6 @@ object Constants {
     const val DOGMAZIC_FAKE_CITY = "Aoshima"
 
     // fetch this from remote config or initialize locally
-    const val CONFIG_URL = "https://icefields.github.io/powerampache/${BuildConfig.REMOTE_CONFIG_FILE}"
+    const val CONFIG_URL = "https://power.ampache.dev/${BuildConfig.REMOTE_CONFIG_FILE}"
     var config = Pa2Config()
 }

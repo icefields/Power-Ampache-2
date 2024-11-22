@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.ADMIN_USERNAME
 import luci.sixsixsix.powerampache2.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -183,7 +184,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         if (Constants.config.playlistsAdminFetch) {
             // fetch admin playlists
             try {
-                api.getUserPlaylists(authToken(), user = "admin").playlist
+                api.getUserPlaylists(authToken(), user = ADMIN_USERNAME).playlist
                     ?.map { it.toPlaylist() }
                     ?.map { it.toPlaylistEntity(username, serverUrl) }
                     ?.let { userPlaylists ->
@@ -196,7 +197,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
         if (Constants.config.smartlistsAdminFetch) {
             try {
-                api.getUserSmartlists(authToken(), user = "admin").playlist
+                api.getUserSmartlists(authToken(), user = ADMIN_USERNAME).playlist
                     ?.map { it.toPlaylist() }
                     ?.map { it.toPlaylistEntity(username, serverUrl) }
                     ?.let { userPlaylists ->

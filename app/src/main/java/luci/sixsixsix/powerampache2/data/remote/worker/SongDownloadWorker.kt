@@ -88,9 +88,7 @@ class SongDownloadWorker @AssistedInject constructor(
                         )
                         setProgress(lastUpdate)
                         //if ()
-                        Result.success(
-                            workDataOf(KEY_RESULT_SONG to songId)
-                        )
+                        Result.success(workDataOf(KEY_RESULT_SONG to songId))
                     } ?: Result.failure(
                         workDataOf(
                             KEY_RESULT_ERROR to "cannot download/save file, " +

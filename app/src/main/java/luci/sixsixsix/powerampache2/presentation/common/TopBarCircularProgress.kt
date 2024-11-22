@@ -29,16 +29,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun TopBarCircularProgress(
     isLoading: Boolean,
     background: Color = Color.Transparent,
+    colour: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
     modifier: Modifier = Modifier
 ) {
     if (isLoading) {
@@ -53,8 +56,17 @@ fun TopBarCircularProgress(
                     .padding(5.dp),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp).align(Alignment.Center))
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp).align(Alignment.Center),
+                    color = colour
+                )
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun TopBarCircularProgressPreview() {
+    TopBarCircularProgress(true, background = MaterialTheme.colorScheme.surface)
 }

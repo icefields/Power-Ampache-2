@@ -21,6 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import android.content.Context
+import android.os.Environment
 import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -43,6 +45,7 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toGenre
 import luci.sixsixsix.powerampache2.data.local.entities.toGenreEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettings
 import luci.sixsixsix.powerampache2.data.local.entities.toMultiUserCredentialEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toMultiUserSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSession
@@ -60,6 +63,7 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
+import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.User
@@ -399,4 +403,11 @@ class MusicRepositoryImpl @Inject constructor(
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("logout()", e, this) }
+
+    override suspend fun getStorageLocation(context: Context): String =
+        if (dao.getSettings()?.toLocalSettings()?.isDownloadsSdCard == true) {
+            context.getExternalFilesDir(Environment.DIRECTORY_MUSIC)?.absolutePath ?: context.filesDir.absolutePath
+        } else {
+            context.filesDir.absolutePath
+        }
 }

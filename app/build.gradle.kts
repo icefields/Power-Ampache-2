@@ -7,23 +7,26 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val composeVersion = "1.7.2" // rootProject.extra.get("compose_version") as String
-val lifecycleVersion = "2.8.6"
-val retrofit2Version = "2.9.0"
-val coroutinesVersion = "1.7.3"
+val composeVersion = "1.7.5" // rootProject.extra.get("compose_version") as String
+val lifecycleVersion = "2.8.7"
+val retrofit2Version = "2.11.0"
+val okhttpVersion = "5.0.0-alpha.14"
+val coroutinesVersion = "1.8.1"
 val exoplayerVersion = "2.19.1"
-val composeNavVersion = "1.8.42-beta"
+val composeNavVersion = "1.11.7"
 val media3Version = "1.4.1"
 val hiltVersion = "1.2.0"
+val roomVersion = "2.6.1"
 
 val localProperties = Properties()
 localProperties.load(project.rootProject.file("local.properties").inputStream())
 
 android {
     namespace = "luci.sixsixsix.powerampache2"
-    compileSdk = 34
+    compileSdk = 35
 
     val properties = Properties()
     val propertiesFile = project.rootProject.file("secrets.properties")
@@ -55,10 +58,10 @@ android {
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
-        targetSdk = 34
-        versionCode = 68
-        versionName = "1.00-68"
-        val versionQuote = "This version is powered by sum of two squares and erbium"
+        targetSdk = 35
+        versionCode = 69
+        versionName = "1.00-69"
+        val versionQuote = "This version is powered by sexual innuendos, love, care and harmony"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -234,7 +237,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     packaging {
@@ -244,24 +247,29 @@ android {
     }
 }
 
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    //stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
+}
+
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-    implementation("androidx.activity:activity-compose:1.9.2")
+    implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.media:media:1.7.0")
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
 
     // --- Compose --- //
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
-    implementation("androidx.compose.material3:material3:1.3.0")
+    implementation("androidx.compose.material3:material3:1.3.1")
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.17.0")
-    implementation("androidx.paging:paging-compose:3.3.2")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.34.0")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.36.0")
+    implementation("androidx.paging:paging-compose:3.3.4")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.36.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     // DO NOT INCLUDE implementation("androidx.compose.material:material:$composeVersion")
 
@@ -296,32 +304,31 @@ dependencies {
     implementation("androidx.media3:media3-ui:$media3Version")
 
     // --- Coil --- //
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // --- Dagger Hilt --- //
-    implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-android-compiler:2.50")
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     kapt("androidx.hilt:hilt-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:$hiltVersion")
     implementation("androidx.hilt:hilt-common:$hiltVersion")
     implementation("androidx.hilt:hilt-work:$hiltVersion")
 
     //implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
-
     // --- Retrofit --- //
     implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
     //implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
     implementation("com.squareup.retrofit2:converter-gson:$retrofit2Version")
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+    implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     // JSON serialization
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.11.0")
 
     // --- Room --- //
-    implementation("androidx.room:room-runtime:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-runtime:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
     // Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.room:room-ktx:$roomVersion")
 
     // ERROR REPORT
     implementation("ch.acra:acra-mail:5.11.3")
@@ -329,10 +336,10 @@ dependencies {
     // --- TESTING --- //
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.01"))
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.10.01"))
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
 
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
