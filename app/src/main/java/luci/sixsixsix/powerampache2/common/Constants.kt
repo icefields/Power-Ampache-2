@@ -47,6 +47,8 @@ object Constants {
     const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
     const val NETWORK_REQUEST_LIMIT_ALBUMS = 40
 
+    const val ADMIN_USERNAME = "PowerAmpache"
+
     // TIMEOUTS (non-network)
     const val LOCAL_SCROBBLE_TIMEOUT_MS = 20000L
     const val PLAYBACK_ERROR_COUNT_TIMEOUT_MS = 60000L

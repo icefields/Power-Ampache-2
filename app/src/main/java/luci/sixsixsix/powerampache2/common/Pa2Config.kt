@@ -75,9 +75,9 @@ data class Pa2Config(
     val playlistsUserFetch: Boolean = PLAYLISTS_USER_FETCH,
     // fetch user smartlists before fetching the bulk of all server playlists
     val smartlistsUserFetch: Boolean = SMARTLISTS_USER_FETCH,
-    // fetch admin playlists only before fetching the bulk of all server playlists
+    // fetch playlists owned by a defined admin user
     val playlistsAdminFetch: Boolean = PLAYLISTS_ADMIN_FETCH,
-    // fetch admin smartlists only before fetching the bulk of all server playlists
+    // fetch smartlists owned by a defined admin user
     val smartlistsAdminFetch: Boolean = SMARTLISTS_ADMIN_FETCH,
     // fetch all playlists from server
     val playlistsServerAllFetch: Boolean = PLAYLISTS_ALL_SERVER_FETCH,
