@@ -37,6 +37,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import luci.sixsixsix.powerampache2.common.Constants.BACK_BUFFER_MS
+import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
+import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_MS
+import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MAX_MS
+import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MIN_MS
 import luci.sixsixsix.powerampache2.common.Constants.DB_LOCAL_NAME
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_READ_S
@@ -134,9 +139,14 @@ object AppModule {
         .setTrackSelector(DefaultTrackSelector(context))
         .setLoadControl(DefaultLoadControl.Builder()
             .setPrioritizeTimeOverSizeThresholds(true)
-            .setBackBuffer(10000, true)  // Retain back buffer data only up to the last keyframe (not very impactful for audio)
+            .setBackBuffer(BACK_BUFFER_MS, true)  // Retain back buffer data only up to the last keyframe (not very impactful for audio)
             //.setTargetBufferBytes(20 * 1024 * 1024)
-            .setBufferDurationsMs(10000, 120000, 5000, 9000)
+            .setBufferDurationsMs(
+                BUFFER_MIN_MS,
+                BUFFER_MAX_MS,
+                BUFFER_FOR_PLAYBACK_MS,
+                BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
+            )
             .build())
         .build()
 

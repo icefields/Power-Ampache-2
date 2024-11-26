@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Power Ampache 2 Dogmazic</string>
+    <string name="app_name" translatable="false">Dogmazic Power Ampache 2</string>
     <string name="sharing_provider_authority_release" translatable="false">luci.sixsixsix.powerampache2.provider.free</string>
     <string name="sharing_provider_authority_debug" translatable="false">luci.sixsixsix.powerampache2.provider.debug.free</string>
 </resources>

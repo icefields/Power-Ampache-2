@@ -59,8 +59,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 69
-        versionName = "1.00-69"
+        versionCode = 70
+        versionName = "1.00-70"
         val versionQuote = "This version is powered by sexual innuendos, love, care and harmony"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
