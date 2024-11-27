@@ -1,0 +1,5 @@
+- improved Spanish translation
+- updated Java compiler version
+- update media3 library version
+- increased buffer sizes for music player
+- improved error handling

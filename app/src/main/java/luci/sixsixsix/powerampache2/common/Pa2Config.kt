@@ -29,6 +29,7 @@ const val PLAYLIST_FETCH_LIMIT = 0
 const val PLAYLIST_ADD_NEW_ENABLE = true
 const val API_RECORD_PLAY_ENABLE = false
 const val SETTINGS_IS_DOWNLOAD_SDCARD = true
+const val FORCE_SKIP_NETWORK_ERROR = false
 const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
 
 const val PLAYLISTS_USER_FETCH = BuildConfig.PLAYLISTS_USER_FETCH
@@ -88,5 +89,7 @@ data class Pa2Config(
     // enable or disable the option in settings to download music to device sd card
     val isDownloadsSdCardOptionEnabled: Boolean = SETTINGS_IS_DOWNLOAD_SDCARD,
     // enable record_play call for every played song
-    val isRecordPlayApiEnabled: Boolean = API_RECORD_PLAY_ENABLE
+    val isRecordPlayApiEnabled: Boolean = API_RECORD_PLAY_ENABLE,
+    // force skip track on network errors
+    val forceSkipOnNetworkError: Boolean = FORCE_SKIP_NETWORK_ERROR
 )

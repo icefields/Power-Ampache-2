@@ -62,7 +62,7 @@ object Constants {
     const val BACK_BUFFER_MS = 30000
     // minBufferMs cannot be less than bufferForPlaybackAfterRebufferMs
     const val BUFFER_MIN_MS = 35000
-    const val BUFFER_MAX_MS = 500000
+    const val BUFFER_MAX_MS = 1200000
     const val BUFFER_FOR_PLAYBACK_MS = 30000
     const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 35000
 

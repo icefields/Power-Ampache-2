@@ -41,12 +41,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.common.openLinkInBrowser
+import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
@@ -66,7 +68,17 @@ class SettingsViewModel @Inject constructor(
     var state by savedStateHandle.saveable {
         mutableStateOf(SettingsState(appVersionInfoStr = getVersionInfoString(application)))
     }
-    val logs by mutableStateOf(mutableListOf<String>())
+    val logs by mutableStateOf(
+        if (BuildConfig.DEBUG) {
+            try {
+                mutableListOf<String>(Constants.config.toDebugString())
+            } catch (e: Exception) {
+                mutableListOf<String>()
+            }
+        } else {
+            mutableListOf<String>()
+        }
+    )
 
     val offlineModeStateFlow = settingsRepository.offlineModeFlow
         .map {

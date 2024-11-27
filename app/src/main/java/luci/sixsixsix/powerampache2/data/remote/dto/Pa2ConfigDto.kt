@@ -25,6 +25,7 @@ import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.API_RECORD_PLAY_ENABLE
 import luci.sixsixsix.powerampache2.common.CLEAR_LIBRARY_ON_CATALOG_CLEAN
+import luci.sixsixsix.powerampache2.common.FORCE_SKIP_NETWORK_ERROR
 import luci.sixsixsix.powerampache2.common.PLAYBACK_ERRORS_RETRIES
 import luci.sixsixsix.powerampache2.common.PLAYLISTS_ADMIN_FETCH
 import luci.sixsixsix.powerampache2.common.PLAYLISTS_ALL_SERVER_FETCH
@@ -91,7 +92,9 @@ data class Pa2ConfigDto(
     @SerializedName("isDownloadsSdCardOptionEnabled")
     val isDownloadsSdCardOptionEnabled: Boolean? = null,
     @SerializedName("isRecordPlayApiEnabled")
-    val isRecordPlayApiEnabled: Boolean? = null
+    val isRecordPlayApiEnabled: Boolean? = null,
+    @SerializedName("forceSkipOnNetworkError")
+    val forceSkipOnNetworkError: Boolean? = null,
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
@@ -115,5 +118,6 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     clearLibraryOnCatalogClean = clearLibraryOnCatalogClean ?: CLEAR_LIBRARY_ON_CATALOG_CLEAN,
     introMessage = introMessage ?: "",
     isDownloadsSdCardOptionEnabled = isDownloadsSdCardOptionEnabled ?: SETTINGS_IS_DOWNLOAD_SDCARD,
-    isRecordPlayApiEnabled = isRecordPlayApiEnabled ?: API_RECORD_PLAY_ENABLE
+    isRecordPlayApiEnabled = isRecordPlayApiEnabled ?: API_RECORD_PLAY_ENABLE,
+    forceSkipOnNetworkError = forceSkipOnNetworkError ?: FORCE_SKIP_NETWORK_ERROR
 )

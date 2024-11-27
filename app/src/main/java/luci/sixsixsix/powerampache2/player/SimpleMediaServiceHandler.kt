@@ -24,6 +24,8 @@ package luci.sixsixsix.powerampache2.player
 import android.media.session.PlaybackState
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
+import androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
+import androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource.HttpDataSourceException
@@ -298,8 +300,14 @@ class SimpleMediaServiceHandler @Inject constructor(
                 }
             }
         }
-        retryPlay()
+
+        // on datasource not available force skip
+        retryPlay(forceSkip = Constants.config.forceSkipOnNetworkError && isHttpConnectionError(error.errorCode))
     }
+
+    private fun isHttpConnectionError(errorCode: Int) =
+        (errorCode == ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT ||
+                errorCode == ERROR_CODE_IO_NETWORK_CONNECTION_FAILED)
 
     private fun updateErrorStateOnPlaybackError(error: PlaybackException) {
         _simpleMediaState.value = SimpleMediaState.Error(playbackException = AmpPlaybackException(
@@ -313,13 +321,13 @@ class SimpleMediaServiceHandler @Inject constructor(
         ))
     }
 
-    private fun retryPlay() {
+    private fun retryPlay(forceSkip: Boolean = false) {
         if (!player.isPlaying &&
             player.playbackState == ExoPlayer.STATE_IDLE
             /*&& !player.isLoading  && !isUserNotEnabledException*/) {
             L("retryPlay STATE")
             player.prepare()
-            if (errorCounter++ % Constants.config.playbackErrorRetries == 0) {
+            if ((errorCounter++ % Constants.config.playbackErrorRetries == 0) || forceSkip) {
                 player.seekToNextMediaItem()
             }
         }
