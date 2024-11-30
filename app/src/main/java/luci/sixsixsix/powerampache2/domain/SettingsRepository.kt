@@ -39,6 +39,12 @@ interface SettingsRepository {
     val settingsLiveData: LiveData<LocalSettings?>
     val offlineModeFlow: Flow<Boolean>
 
+//    val backBuffer: Flow<Int>
+//    val minBufferMs: Flow<Int>
+//    val maxBufferMs: Flow<Int>
+//    val bufferForPlaybackMs: Flow<Int>
+//    val bufferForPlaybackAfterRebufferMs: Flow<Int>
+
     suspend fun getLocalSettings(username: String? = null): LocalSettings
     suspend fun saveLocalSettings(localSettings: LocalSettings)
     suspend fun deleteAllDownloadedSongs(): Flow<Resource<Any>>

@@ -31,6 +31,7 @@ sealed class MainEvent {
     data class AddSongsToQueueAndPlay(val song: Song, val songList: List<Song>): MainEvent()
     data class AddSongsToQueueAndPlayShuffled(val songList: List<Song>): MainEvent()
     data class PlaySongAddToQueueTop(val song: Song, val songList: List<Song>): MainEvent()
+    data class PlaySongReplacePlaylist(val song: Song, val songList: List<Song>): MainEvent()
     data class PlaySong(val song: Song): MainEvent()
     data object PlayPauseCurrent: MainEvent()
     data object SkipNext: MainEvent()

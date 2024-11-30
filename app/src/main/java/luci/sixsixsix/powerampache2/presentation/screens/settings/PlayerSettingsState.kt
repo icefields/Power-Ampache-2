@@ -19,24 +19,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.screens.notifications
+package luci.sixsixsix.powerampache2.presentation.screens.settings
 
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
-import javax.inject.Inject
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-@HiltViewModel
-class NotificationsViewModel @Inject constructor(
-    private val playlistManager: MusicPlaylistManager
-) : ViewModel() {
-    var logListStateFlow = playlistManager.notificationsListStateFlow
-
-    fun onEvent(event: NotificationsScreenEvent) {
-        when(event) {
-            is NotificationsScreenEvent.OnClearNotifications -> {
-                playlistManager.notificationsListStateFlow.value = listOf()
-            }
-        }
-    }
-}
+@Parcelize
+data class PlayerSettingsState (
+    val backBuffer: Int,
+    val minBuffer: Int,
+    val maxBuffer: Int,
+    val bufferForPlayback: Int,
+    val bufferForPlaybackAfterRebuffer: Int
+): Parcelable

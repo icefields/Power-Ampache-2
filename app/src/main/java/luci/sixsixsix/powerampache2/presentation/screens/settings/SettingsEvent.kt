@@ -30,7 +30,7 @@ sealed class SettingsEvent {
     data class OnMonoValueChange(val isMono: Boolean): SettingsEvent()
     data object OnOfflineToggle: SettingsEvent()
     data class OnDownloadsSdCardValueChange(val isDownloadsSdCard: Boolean): SettingsEvent()
-    data object goToWebsite: SettingsEvent()
+    data object GoToWebsite: SettingsEvent()
     data class OnNormalizeValueChange(val isVolumeNormalized: Boolean): SettingsEvent()
     data class OnSmartDownloadValueChange(val isSmartDownloadEnabled: Boolean): SettingsEvent()
     data class OnAutomaticUpdateValueChange(val isAutoUpdate: Boolean): SettingsEvent()

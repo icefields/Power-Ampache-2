@@ -32,6 +32,7 @@ import luci.sixsixsix.powerampache2.data.MusicRepositoryImpl
 import luci.sixsixsix.powerampache2.data.PlaylistsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.SettingsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.ShareManagerImpl
+import luci.sixsixsix.powerampache2.data.SharedPreferencesManagerImpl
 import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
@@ -43,6 +44,7 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
+import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okhttp3.Interceptor
 import javax.inject.Singleton
@@ -110,6 +112,12 @@ abstract class RepositoryModule {
     abstract fun bindShareManager(
         shareManagerImpl: ShareManagerImpl
     ): ShareManager
+
+    @Binds
+    @Singleton
+    abstract fun bindSharedPreferencesManager(
+        sharedPreferencesManagerImpl: SharedPreferencesManagerImpl
+    ): SharedPreferencesManager
 
 //    @Binds
 //    @Singleton
