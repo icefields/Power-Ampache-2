@@ -173,7 +173,13 @@ class SettingsViewModel @Inject constructor(
                 )
             }
             is PlayerSettingsEvent.OnMaxBufferMsChange -> {
-                sharedPreferencesManager.maxBufferMs = event.newValue * 1000
+                // maxBufferMs > minBufferMs
+                val minBufferS = sharedPreferencesManager.minBufferMs / 1000
+                val newBufferS = if (minBufferS > event.newValue) {
+                    minBufferS
+                } else event.newValue
+
+                sharedPreferencesManager.maxBufferMs = newBufferS * 1000
                 playerSettingsStateFlow.value = playerSettingsStateFlow.value.copy(
                     maxBuffer = sharedPreferencesManager.maxBufferMs / 1000
                 )
@@ -184,10 +190,16 @@ class SettingsViewModel @Inject constructor(
 
                 val bufferForPlaybackS = sharedPreferencesManager.bufferForPlaybackMs / 1000
                 val bufferForPlaybackAfterRebufferS = sharedPreferencesManager.bufferForPlaybackAfterRebufferMs / 1000
+                val maxBufferS = sharedPreferencesManager.maxBufferMs / 1000
+
                 val max = max(bufferForPlaybackS, bufferForPlaybackAfterRebufferS)
-                val newMinBufferS = if (event.newValue < max) {
+                var newMinBufferS = if (event.newValue < max) {
                     max
                 } else event.newValue
+
+                if (newMinBufferS > maxBufferS) {
+                    newMinBufferS = maxBufferS
+                }
 
                 sharedPreferencesManager.minBufferMs = newMinBufferS * 1000
                 playerSettingsStateFlow.value = playerSettingsStateFlow.value.copy(
