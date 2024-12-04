@@ -22,15 +22,22 @@
 package luci.sixsixsix.powerampache2.presentation.screens.settings.components
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.SettingsVoice
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -40,14 +47,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.common.ErrorView
 import luci.sixsixsix.powerampache2.presentation.common.TextWithSubtitle
 
 @Composable
@@ -63,109 +73,150 @@ fun PlayerSettingsView(
     onMaxBufferChange: (newValue: Int) -> Unit,
     onBufferForPlaybackChange: (newValue: Int) -> Unit,
     onBufferForPlaybackAfterRebufferChange: (newValue: Int) -> Unit,
-    onResetValuesClick: () -> Unit
+    onResetValuesClick: () -> Unit,
+    onKillAppClick: () -> Unit,
 ) {
     var showSettings by remember { mutableStateOf(false) }
+    val spacerHeight = 15.dp
 
-    TextWithSubtitle(
-        modifier = modifier,
-        title = R.string.settings_playerAdvancedSettings_title,
-        subtitle = R.string.settings_playerAdvancedSettings_subtitle,
-        onClick = {
-            showSettings = !showSettings
-        }
-    )
-
-    if (showSettings) {
-        val spacerHeight = 15.dp
-
-        Card(
-            border = BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.background
-            ),
-            shape = RoundedCornerShape(9.dp)
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier
-                    .background(Color.Transparent)
-                    .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
-            ) {
-                PlayerBufferSettingSlider(
-                    R.string.settings_minBuffer_title,
-                    R.string.settings_minBuffer_subtitle,
-                    0, 100,
-                    minBuffer,
-                    onMinBufferChange
-                )
-
-                Spacer(Modifier.height(spacerHeight))
-
-                PlayerBufferSettingSlider(
-                    R.string.settings_maxBuffer_title,
-                    R.string.settings_maxBuffer_subtitle,
-                    10, 60 * 10,
-                    maxBuffer,
-                    onMaxBufferChange
-                )
-
-                Spacer(Modifier.height(spacerHeight))
-
-                PlayerBufferSettingSlider(
-                    R.string.settings_bufferForPlayback_title,
-                    R.string.settings_bufferForPlayback_subtitle,
-                    0, 100,
-                    bufferForPlayback,
-                    onBufferForPlaybackChange
-                )
-
-                Spacer(Modifier.height(spacerHeight))
-
-                PlayerBufferSettingSlider(
-                    R.string.settings_bufferForPlaybackAfterRebuffer_title,
-                    R.string.settings_bufferForPlaybackAfterRebuffer_subtitle,
-                    0, 100,
-                    bufferForPlaybackAfterRebuffer,
-                    onBufferForPlaybackAfterRebufferChange
-                )
-
-                Spacer(Modifier.height(spacerHeight))
-
-                PlayerBufferSettingSlider(
-                    R.string.settings_backBuffer_title,
-                    R.string.settings_backBuffer_subtitle,
-                    0, 100,
-                    backBuffer,
-                    onBackBufferChange
-                )
-
-                Spacer(Modifier.height(22.dp))
-
-                TextButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 0.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    onClick = onResetValuesClick,
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.background
-                    )
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(vertical = 9.dp),
-                        text = "Reset Defaults",
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 18.sp
-                    )
+            TextWithSubtitle(
+                modifier = Modifier.weight(1f),
+                title = R.string.settings_playerAdvancedSettings_title,
+                subtitle = R.string.settings_playerAdvancedSettings_subtitle,
+                onClick = {
+                    showSettings = !showSettings
                 }
-            }
+            )
+            Icon(Icons.Outlined.SettingsVoice,
+                contentDescription = stringResource(R.string.settings_playerAdvancedSettings_title)
+            )
         }
 
         Spacer(Modifier.height(spacerHeight))
 
+        AnimatedVisibility(showSettings) {
+            Card(
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.background
+                ),
+                shape = RoundedCornerShape(9.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .background(Color.Transparent)
+                        .padding(start = 6.dp, end = 6.dp, top = 10.dp, bottom = 10.dp),
+                ) {
+                    ErrorView(stringResource(R.string.settings_playerAdvancedSettings_warning))
+
+                    Spacer(Modifier.height(spacerHeight))
+
+
+                    PlayerBufferSettingSlider(
+                        R.string.settings_minBuffer_title,
+                        R.string.settings_minBuffer_subtitle,
+                        0, 100,
+                        minBuffer,
+                        onMinBufferChange
+                    )
+
+                    Spacer(Modifier.height(spacerHeight))
+
+                    PlayerBufferSettingSlider(
+                        R.string.settings_maxBuffer_title,
+                        R.string.settings_maxBuffer_subtitle,
+                        10, 60 * 10,
+                        maxBuffer,
+                        onMaxBufferChange
+                    )
+
+                    Spacer(Modifier.height(spacerHeight))
+
+                    PlayerBufferSettingSlider(
+                        R.string.settings_bufferForPlayback_title,
+                        R.string.settings_bufferForPlayback_subtitle,
+                        0, 100,
+                        bufferForPlayback,
+                        onBufferForPlaybackChange
+                    )
+
+                    Spacer(Modifier.height(spacerHeight))
+
+                    PlayerBufferSettingSlider(
+                        R.string.settings_bufferForPlaybackAfterRebuffer_title,
+                        R.string.settings_bufferForPlaybackAfterRebuffer_subtitle,
+                        0, 100,
+                        bufferForPlaybackAfterRebuffer,
+                        onBufferForPlaybackAfterRebufferChange
+                    )
+
+                    Spacer(Modifier.height(spacerHeight))
+
+                    PlayerBufferSettingSlider(
+                        R.string.settings_backBuffer_title,
+                        R.string.settings_backBuffer_subtitle,
+                        0, 100,
+                        backBuffer,
+                        onBackBufferChange
+                    )
+
+                    Spacer(Modifier.height(22.dp))
+
+                    BufferSettingsButton(
+                        textRes = R.string.settings_player_button_killApp,
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        onClick = onKillAppClick
+                    )
+
+                    Spacer(Modifier.height(22.dp))
+
+                    BufferSettingsButton(
+                        textRes = R.string.settings_player_button_resetDefaults,
+                        onClick = onResetValuesClick
+                    )
+
+                    Spacer(Modifier.height(22.dp))
+                }
+            }
+
+            Spacer(Modifier.height(spacerHeight))
+        }
+    }
+}
+
+@Composable
+fun BufferSettingsButton(
+    @StringRes textRes: Int,
+    containerColor: Color = Color.Unspecified,
+    contentColor: Color = Color.Unspecified,
+    onClick: () -> Unit
+) {
+    TextButton(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 0.dp),
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = contentColor,
+            containerColor = containerColor
+        ),
+        shape = RoundedCornerShape(10.dp),
+        onClick = onClick,
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.background,
+        )
+    ) {
+        Text(
+            modifier = Modifier.padding(vertical = 9.dp),
+            text = stringResource(textRes),
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp
+        )
     }
 }
 
@@ -212,10 +263,11 @@ fun PlayerSettingsViewPreview() {
         bufferForPlayback = 30,
         bufferForPlaybackAfterRebuffer = 22,
         onBackBufferChange = { },
-    onMinBufferChange = {},
-    onMaxBufferChange = {},
-    onBufferForPlaybackChange = {},
+        onMinBufferChange = {},
+        onMaxBufferChange = {},
+        onBufferForPlaybackChange = {},
         onResetValuesClick = {},
-    onBufferForPlaybackAfterRebufferChange = {},
+        onBufferForPlaybackAfterRebufferChange = {},
+        onKillAppClick = {}
     )
 }

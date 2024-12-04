@@ -37,6 +37,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.OpenInNew
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -103,6 +105,25 @@ fun SettingsScreen(
     val user by settingsViewModel.userStateFlow.collectAsState()
     val serverInfo by settingsViewModel.serverInfoStateFlow.collectAsState(ServerInfo())
     val playerSettingsState by settingsViewModel.playerSettingsStateFlow.collectAsState()
+
+    var showKillDialog by remember { mutableStateOf(false) }
+
+    if (showKillDialog) {
+        AlertDialog(
+            onDismissRequest = { showKillDialog = false },
+            title = { Text(stringResource(R.string.settings_player_killDialog_title)) },
+            confirmButton = {
+                Button(onClick = {
+                    showKillDialog = false
+                    settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnKillApp)
+                }) { Text(stringResource(android.R.string.yes)) }
+            },
+            dismissButton = {
+                Button(onClick = { showKillDialog = false }) {
+                    Text(stringResource(android.R.string.no)) }
+            }
+        )
+    }
 
     SettingsScreenContent(
         modifier = Modifier
@@ -190,6 +211,9 @@ fun SettingsScreen(
         onResetValuesClick = {
             settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnResetDefaults)
         },
+        onKillAppClick = {
+            showKillDialog = true
+        },
         backBuffer = playerSettingsState.backBuffer,
         minBuffer = playerSettingsState.minBuffer,
         maxBuffer = playerSettingsState.maxBuffer,
@@ -248,6 +272,7 @@ fun SettingsScreenContent(
     onBufferForPlaybackChange: (newValue: Int) -> Unit,
     onBufferForPlaybackAfterRebufferChange: (newValue: Int) -> Unit,
     onResetValuesClick: () -> Unit,
+    onKillAppClick: () -> Unit,
     modifier: Modifier = Modifier,
     donateButton: @Composable () -> Unit = { DonateButton(isExpanded = true, isTransparent = false) }
 ) {
@@ -350,6 +375,20 @@ fun SettingsScreenContent(
                     onCheckedChange = onSmartDownloadValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
+                // DELETE ALL DOWNLOADS
+                9 -> TextWithSubtitle(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            vertical = paddingVerticalItem * 2,
+                            horizontal = paddingHorizontalItem
+                        ),
+                    title = R.string.settings_deleteDownloads_title,
+                    trailingIcon = Icons.Outlined.DeleteOutline,
+                    onClick = {
+                        showDeleteDownloadsDialog = true
+                    }
+                )
                 // CHECK UPDATES NOW BUTTON
                 10 -> TextWithSubtitle(
                     modifier = Modifier
@@ -388,7 +427,8 @@ fun SettingsScreenContent(
                     maxBuffer = maxBuffer,
                     bufferForPlayback = bufferForPlayback,
                     bufferForPlaybackAfterRebuffer = bufferForPlaybackAfterRebuffer,
-                    onResetValuesClick = onResetValuesClick
+                    onResetValuesClick = onResetValuesClick,
+                    onKillAppClick = onKillAppClick
                 )
                 22 -> TextWithSubtitle(
                     modifier = Modifier
@@ -404,19 +444,6 @@ fun SettingsScreenContent(
                     checked = remoteLoggingEnabled,
                     onCheckedChange = onEnableLoggingValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
-                )
-                9 -> TextWithSubtitle(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            vertical = paddingVerticalItem * 2,
-                            horizontal = paddingHorizontalItem
-                        ),
-                    title = R.string.settings_deleteDownloads_title,
-                    trailingIcon = Icons.Outlined.DeleteOutline,
-                    onClick = {
-                        showDeleteDownloadsDialog = true
-                    }
                 )
                 24 -> donateButton()
                 25 -> if (!BuildConfig.HIDE_DONATION) {
@@ -627,6 +654,7 @@ fun PreviewSettingsScreen() {
         bufferForPlayback = 129,
         bufferForPlaybackAfterRebuffer = 400,
         onMaxBufferChange = {},
-        onResetValuesClick = {}
+        onResetValuesClick = {},
+        onKillAppClick = {}
     )
 }

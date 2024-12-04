@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.presentation.screens.settings
 sealed class PlayerSettingsEvent {
     data class OnBackBufferChange(val newValue: Int): PlayerSettingsEvent()
     data object OnResetDefaults: PlayerSettingsEvent()
+    data object OnKillApp: PlayerSettingsEvent()
     data class OnMinBufferChange(val newValue: Int): PlayerSettingsEvent()
     data class OnMaxBufferMsChange(val newValue: Int): PlayerSettingsEvent()
     data class OnBufferForPlaybackChange(val newValue: Int): PlayerSettingsEvent()

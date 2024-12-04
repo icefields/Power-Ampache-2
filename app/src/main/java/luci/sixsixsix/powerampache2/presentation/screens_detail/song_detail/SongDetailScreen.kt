@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomSheetScaffold
@@ -45,7 +44,7 @@ import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.comp
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailQueueDragHandle
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.TabbedSongDetailView
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDetailScreen(
     mainScaffoldState: BottomSheetScaffoldState,

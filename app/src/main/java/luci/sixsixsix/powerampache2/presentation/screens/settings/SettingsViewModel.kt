@@ -61,6 +61,7 @@ import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.system.exitProcess
 
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
@@ -197,6 +198,10 @@ class SettingsViewModel @Inject constructor(
             PlayerSettingsEvent.OnResetDefaults -> {
                 sharedPreferencesManager.resetBufferDefaults()
                 playerSettingsStateFlow.value = playerBuffersInitialState()
+            }
+
+            PlayerSettingsEvent.OnKillApp -> {
+                exitProcess(0)
             }
         }
     }

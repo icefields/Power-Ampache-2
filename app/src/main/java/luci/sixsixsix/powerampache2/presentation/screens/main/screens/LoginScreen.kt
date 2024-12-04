@@ -27,7 +27,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,7 +43,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -62,7 +60,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -74,6 +71,7 @@ import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.data.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadFullVersionButton
+import luci.sixsixsix.powerampache2.presentation.common.ErrorView
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.LoginBottomDrawer
@@ -155,7 +153,7 @@ fun LoginScreenContent(
 
         if (!error.isNullOrBlank()) {
             ErrorView(
-                error = error,
+                errorString = error,
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
@@ -384,28 +382,6 @@ fun AuthTokenCheckBox(
             enabled = true
         )
         Text(text = stringResource(id = R.string.loginScreen_useAuthToken))
-    }
-}
-
-@Composable
-fun ErrorView(
-    error: String,
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier
-        .wrapContentHeight()
-        .background(MaterialTheme.colorScheme.errorContainer)
-    ) {
-        Text(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
-            text = error,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onErrorContainer,
-            fontSize = fontDimensionResource(id = R.dimen.button_login_text_size)
-        )
     }
 }
 
