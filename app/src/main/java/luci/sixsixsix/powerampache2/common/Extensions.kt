@@ -164,6 +164,7 @@ fun Any.toDebugString(
         field.get(obj)?.let {
             if(
                 !field.name.lowercase().contains("url") &&
+                !field.name.lowercase().contains("token") &&
                 !field.name.lowercase().contains("artist") &&
                 !field.name.lowercase().contains("CREATOR") &&
                 !field.name.lowercase().contains("\$stable") &&

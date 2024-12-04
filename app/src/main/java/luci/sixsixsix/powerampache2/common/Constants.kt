@@ -58,7 +58,6 @@ object Constants {
     const val SERVICE_STOP_TIMEOUT = 2000L
     const val SEARCH_TIMEOUT = 1200L    // allow user to type before starting search
 
-
     // ERROR CONSTANTS
     const val NOT_IMPLEMENTED_USER_ID = "666"
     const val ERROR_INT = -1

@@ -57,6 +57,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -120,7 +121,7 @@ fun SongDetailQueueDragHandle(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDetailQueueTopBar(
     song: Song?,
@@ -139,10 +140,7 @@ fun SongDetailQueueTopBar(
         ),
         modifier = modifier.fillMaxWidth()
     ) {
-        Row(
-            //contentAlignment = Alignment.CenterStart,
-            //modifier = Modifier.padding(vertical = 5.dp, horizontal = 8.dp)
-        ) {
+        Row {
             AnimatedVisibility(visible = showCloseIcon) {
                 DragArrowIcon(modifier = modifier.width(arrowWidth), showCloseIcon)
             }
@@ -179,7 +177,7 @@ fun DragArrowIcon(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TabbedSongDetailView(
     song: Song?,
@@ -221,7 +219,7 @@ fun TabbedSongDetailView(
 }
 
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongHandleTabRow(
     modifier: Modifier = Modifier,
@@ -248,7 +246,8 @@ fun SongHandleTabRow(
         modifier = modifier,
         selectedTabIndex = selectedTabIndex.value,
         contentColor = textColour,
-        containerColor = MaterialTheme.colorScheme.additionalColours.queueHandle
+        containerColor = Color.Transparent
+    // MaterialTheme.colorScheme.additionalColours.queueHandle
     ) {
         Tab(
             unselectedContentColor = textColour.copy(alpha = 0.66f),

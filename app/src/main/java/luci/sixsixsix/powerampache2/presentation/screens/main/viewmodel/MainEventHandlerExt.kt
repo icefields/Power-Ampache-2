@@ -67,6 +67,8 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
             addSongsToQueueAndPlay(event.song, event.songList)
         is MainEvent.PlaySong ->
             playSong(event.song)
+        is MainEvent.PlaySongReplacePlaylist ->
+            playSongReplacePlaylist(event.song, event.songList)
         is MainEvent.PlaySongAddToQueueTop ->
             playSongAddToQueueTop(event.song, event.songList)
         is MainEvent.AddSongsToQueueAndPlayShuffled ->
@@ -168,6 +170,16 @@ fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
 private fun MainViewModel.playSongAddToQueueTop(song: Song, songList: List<Song>) {
     startPlayLoading()
     playlistManager.addToCurrentQueueUpdateTopSong(song, songList)
+    play(song)
+}
+
+/**
+ * select a single song, play, and put it on the top of the queue
+ * the song list is just for verification (TODO: should that be optional?)
+ */
+private fun MainViewModel.playSongReplacePlaylist(song: Song, songList: List<Song>) {
+    startPlayLoading()
+    playlistManager.replaceQueuePlaySong(songList, song)
     play(song)
 }
 

@@ -200,16 +200,8 @@ fun AlbumDetailScreen(
                     AlbumInfoSection(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(
-                                max = if (infoVisibility) {
-                                    470.dp // any big number
-                                } else {
-                                    0.dp
-                                }
-                            )
-                            .padding(
-                                dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
-                            ),
+                            .heightIn(max = if (infoVisibility) { 470.dp /*any big number*/ } else { 0.dp })
+                            .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         album = album,
                         isPlayLoading = mainViewModel.isPlayLoading(),
                         isBuffering = mainViewModel.isBuffering,
@@ -299,7 +291,7 @@ fun AlbumDetailScreen(
                                         .fillMaxWidth()
                                         .clickable {
                                             mainViewModel.onEvent(
-                                                MainEvent.PlaySongAddToQueueTop(
+                                                MainEvent.PlaySongReplacePlaylist(
                                                     song,
                                                     state.getSongList()
                                                 )

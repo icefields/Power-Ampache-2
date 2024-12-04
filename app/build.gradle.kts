@@ -1,3 +1,5 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Properties
 
 plugins {
@@ -17,7 +19,7 @@ val okhttpVersion = "5.0.0-alpha.14"
 val coroutinesVersion = "1.8.1"
 val exoplayerVersion = "2.19.1"
 val composeNavVersion = "1.11.7"
-val media3Version = "1.4.1"
+val media3Version = "1.5.0"
 val hiltVersion = "1.2.0"
 val roomVersion = "2.6.1"
 
@@ -59,9 +61,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 69
-        versionName = "1.00-69"
-        val versionQuote = "This version is powered by sexual innuendos, love, care and harmony"
+        versionCode = 70
+        versionName = "1.00-70"
+        val versionQuote = "This version is powered by innuendos, love, care and harmony.${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -343,4 +345,10 @@ dependencies {
 
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }

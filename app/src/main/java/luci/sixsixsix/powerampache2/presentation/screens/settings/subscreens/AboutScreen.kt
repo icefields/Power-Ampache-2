@@ -95,7 +95,7 @@ fun AboutScreen(
         serverInfo = serverInfo,
         versionInfo = settingsViewModel.state.appVersionInfoStr,
         onDonateConsiderClick = {
-            settingsViewModel.onEvent(SettingsEvent.goToWebsite)
+            settingsViewModel.onEvent(SettingsEvent.GoToWebsite)
         }
     )
 }

@@ -23,8 +23,6 @@ package luci.sixsixsix.powerampache2.presentation.screens.notifications
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 

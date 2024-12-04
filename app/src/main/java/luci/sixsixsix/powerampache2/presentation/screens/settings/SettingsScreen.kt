@@ -37,6 +37,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.OpenInNew
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -82,6 +84,7 @@ import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
 import luci.sixsixsix.powerampache2.presentation.common.TextWithSubtitle
 import luci.sixsixsix.powerampache2.presentation.destinations.DebugLogsScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
+import luci.sixsixsix.powerampache2.presentation.screens.settings.components.PlayerSettingsView
 import luci.sixsixsix.powerampache2.presentation.screens.settings.components.SettingsDropDownMenu
 
 private const val IS_MONO_SWITCH_ENABLED = false
@@ -101,6 +104,26 @@ fun SettingsScreen(
     val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
     val user by settingsViewModel.userStateFlow.collectAsState()
     val serverInfo by settingsViewModel.serverInfoStateFlow.collectAsState(ServerInfo())
+    val playerSettingsState by settingsViewModel.playerSettingsStateFlow.collectAsState()
+
+    var showKillDialog by remember { mutableStateOf(false) }
+
+    if (showKillDialog) {
+        AlertDialog(
+            onDismissRequest = { showKillDialog = false },
+            title = { Text(stringResource(R.string.settings_player_killDialog_title)) },
+            confirmButton = {
+                Button(onClick = {
+                    showKillDialog = false
+                    settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnKillApp)
+                }) { Text(stringResource(android.R.string.yes)) }
+            },
+            dismissButton = {
+                Button(onClick = { showKillDialog = false }) {
+                    Text(stringResource(android.R.string.no)) }
+            }
+        )
+    }
 
     SettingsScreenContent(
         modifier = Modifier
@@ -161,9 +184,41 @@ fun SettingsScreen(
         onSdCardDownloadValueChange = {
             settingsViewModel.onEvent(SettingsEvent.OnDownloadsSdCardValueChange(it))
         },
-        donateButton = { SettingsDonationButtonView() {
-            settingsViewModel.onEvent(SettingsEvent.goToWebsite)
-        } }
+        onBufferForPlaybackChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnBufferForPlaybackChange(it))
+        },
+        onMaxBufferChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnMaxBufferMsChange(it))
+        },
+        onMinBufferChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnMinBufferChange(it))
+        },
+        onBackBufferChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnBackBufferChange(it))
+        },
+        onBufferForPlaybackAfterRebufferChange = {
+            settingsViewModel.onPlayerEvent(
+                PlayerSettingsEvent.OnBufferForPlaybackAfterRebufferChange(
+                    it
+                )
+            )
+        },
+        donateButton = {
+            SettingsDonationButtonView() {
+                settingsViewModel.onEvent(SettingsEvent.GoToWebsite)
+            }
+        },
+        onResetValuesClick = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnResetDefaults)
+        },
+        onKillAppClick = {
+            showKillDialog = true
+        },
+        backBuffer = playerSettingsState.backBuffer,
+        minBuffer = playerSettingsState.minBuffer,
+        maxBuffer = playerSettingsState.maxBuffer,
+        bufferForPlayback = playerSettingsState.bufferForPlayback,
+        bufferForPlaybackAfterRebuffer = playerSettingsState.bufferForPlaybackAfterRebuffer
     )
 }
 
@@ -192,6 +247,11 @@ fun SettingsScreenContent(
     isDownloadSdCard: Boolean,
     powerAmpTheme: PowerAmpTheme,
     streamingQuality: StreamingQuality,
+    backBuffer: Int,
+    minBuffer: Int,
+    maxBuffer: Int,
+    bufferForPlayback: Int,
+    bufferForPlaybackAfterRebuffer: Int,
     onThemeSelected: (selected: PowerAmpTheme) -> Unit,
     onStreamingQualitySelected: (selected: StreamingQuality) -> Unit,
     onEnableLoggingValueChange: (newValue: Boolean) -> Unit,
@@ -206,6 +266,13 @@ fun SettingsScreenContent(
     onCheckUpdatesNowPress: () -> Unit,
     onDeleteDownloadsPress: () -> Unit,
     onDebugLogsButtonPress: () -> Unit,
+    onBackBufferChange: (newValue: Int) -> Unit,
+    onMinBufferChange: (newValue: Int) -> Unit,
+    onMaxBufferChange: (newValue: Int) -> Unit,
+    onBufferForPlaybackChange: (newValue: Int) -> Unit,
+    onBufferForPlaybackAfterRebufferChange: (newValue: Int) -> Unit,
+    onResetValuesClick: () -> Unit,
+    onKillAppClick: () -> Unit,
     modifier: Modifier = Modifier,
     donateButton: @Composable () -> Unit = { DonateButton(isExpanded = true, isTransparent = false) }
 ) {
@@ -308,6 +375,20 @@ fun SettingsScreenContent(
                     onCheckedChange = onSmartDownloadValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
+                // DELETE ALL DOWNLOADS
+                9 -> TextWithSubtitle(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            vertical = paddingVerticalItem * 2,
+                            horizontal = paddingHorizontalItem
+                        ),
+                    title = R.string.settings_deleteDownloads_title,
+                    trailingIcon = Icons.Outlined.DeleteOutline,
+                    onClick = {
+                        showDeleteDownloadsDialog = true
+                    }
+                )
                 // CHECK UPDATES NOW BUTTON
                 10 -> TextWithSubtitle(
                     modifier = Modifier
@@ -329,7 +410,27 @@ fun SettingsScreenContent(
                     title = R.string.settings_autoCheckUpdates_title,
                     subtitle = R.string.coming_soon,
                 )
-                12 -> TextWithSubtitle(
+                12 -> PlayerSettingsView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            vertical = paddingVerticalItem,
+                            horizontal = paddingHorizontalItem
+                        ),
+                    onBackBufferChange = onBackBufferChange,
+                    onMinBufferChange = onMinBufferChange,
+                    onMaxBufferChange = onMaxBufferChange,
+                    onBufferForPlaybackChange = onBufferForPlaybackChange,
+                    onBufferForPlaybackAfterRebufferChange = onBufferForPlaybackAfterRebufferChange,
+                    backBuffer = backBuffer,
+                    minBuffer = minBuffer,
+                    maxBuffer = maxBuffer,
+                    bufferForPlayback = bufferForPlayback,
+                    bufferForPlaybackAfterRebuffer = bufferForPlaybackAfterRebuffer,
+                    onResetValuesClick = onResetValuesClick,
+                    onKillAppClick = onKillAppClick
+                )
+                22 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem),
@@ -337,34 +438,21 @@ fun SettingsScreenContent(
                     trailingIcon = Icons.Outlined.OpenInNew,
                     onClick = onDebugLogsButtonPress
                 )
-                13 -> PowerAmpSwitch(
+                23 -> PowerAmpSwitch(
                     title = R.string.settings_enableDebugLogging_title,
                     subtitle = R.string.settings_enableDebugLogging_subtitle,
                     checked = remoteLoggingEnabled,
                     onCheckedChange = onEnableLoggingValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
-                9 -> TextWithSubtitle(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            vertical = paddingVerticalItem * 2,
-                            horizontal = paddingHorizontalItem
-                        ),
-                    title = R.string.settings_deleteDownloads_title,
-                    trailingIcon = Icons.Outlined.DeleteOutline,
-                    onClick = {
-                        showDeleteDownloadsDialog = true
-                    }
-                )
-                14 -> donateButton()
-                15 -> if (!BuildConfig.HIDE_DONATION) {
+                24 -> donateButton()
+                25 -> if (!BuildConfig.HIDE_DONATION) {
                     PowerAmpCheckBox(title = R.string.settings_hideDonationButtonsMenu_title,
                         checked = hideDonationButtons,
                         onCheckedChange = onHideDonateValueChange,
                         modifier = Modifier.padding(start = paddingHorizontalItem))
                 }
-                17 -> Text(
+                27 -> Text(
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth(),
@@ -374,7 +462,7 @@ fun SettingsScreenContent(
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontSize = 16.sp
                 )
-                18 -> Text(
+                28 -> Text(
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth(),
@@ -384,8 +472,6 @@ fun SettingsScreenContent(
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontSize = 16.sp
                 )
-                //10 -> userState?.let { user -> UserInfoSection(user = user) }
-                //11 -> WorkInProgressStrip()
                 else -> { }
             }
         }
@@ -557,6 +643,18 @@ fun PreviewSettingsScreen() {
         onNormalizeValueChange = {},
         onSmartDownloadValueChange = {},
         onOfflineModeValueChange = {},
-        onSdCardDownloadValueChange = {}
+        onSdCardDownloadValueChange = {},
+        onBufferForPlaybackChange = {},
+        onMinBufferChange = {},
+        onBackBufferChange = {},
+        onBufferForPlaybackAfterRebufferChange = {},
+        backBuffer = 34,
+        minBuffer = 22,
+        maxBuffer = 55,
+        bufferForPlayback = 129,
+        bufferForPlaybackAfterRebuffer = 400,
+        onMaxBufferChange = {},
+        onResetValuesClick = {},
+        onKillAppClick = {}
     )
 }

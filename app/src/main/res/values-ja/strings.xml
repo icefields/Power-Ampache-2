@@ -184,4 +184,22 @@
     <string name="settings_downloadsSdCard_title">Use SD Card for Downloads</string>
     <string name="settings_downloadsSdCard_subtitle">Works when the SD card is mounted as System Storage [EXPERIMENTAL]</string>
 
+    <!-- SETTINGS PLAYER -->
+    <string name="settings_playerAdvancedSettings_title">Player Advanced Settings (App restart required)</string>
+    <string name="settings_playerAdvancedSettings_subtitle">Adjust these settings if you\'re experiencing playback issues, such as stuttering, song interruptions, delays in starting tracks, etc…</string>
+    <string name="settings_playerAdvancedSettings_warning">To apply buffer settings, kill/restart the app.</string>
+    <string name="settings_backBuffer_title">Back Buffer</string>
+    <string name="settings_backBuffer_subtitle">Adjusts the amount of content pre-buffered ahead of playback to prevent interruptions, especially during network delays, in seconds.</string>
+    <string name="settings_minBuffer_title">Min Buffer</string>
+    <string name="settings_minBuffer_subtitle">The minimum duration of media that the player will attempt to ensure is buffered at all times, in seconds.</string>
+    <string name="settings_bufferForPlayback_title">Buffer For Playback</string>
+    <string name="settings_bufferForPlayback_subtitle">The duration of media that must be buffered for playback to start or resume following a user action such as a seek, in seconds.</string>
+    <string name="settings_maxBuffer_title">Max Buffer</string>
+    <string name="settings_maxBuffer_subtitle">The maximum duration of media that the player will attempt to buffer, in seconds.</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_title">Buffer For Playback After Re-buffer</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_subtitle">The default duration of media that must be buffered for playback to resume after a re-buffer, in seconds. A re-buffer is defined to be caused by buffer depletion rather than a user action</string>
+    <string name="settings_player_button_resetDefaults">Reset Defaults</string>
+    <string name="settings_player_button_killApp">PRESS TO KILL THE APP\n(Apply buffer settings)</string>
+    <string name="settings_player_killDialog_title">Kill the app now to apply settings?</string>
+
 </resources>

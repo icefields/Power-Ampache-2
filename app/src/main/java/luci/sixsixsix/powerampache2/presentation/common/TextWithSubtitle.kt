@@ -65,6 +65,7 @@ fun TextWithSubtitle(
             Text(
                 text = stringResource(id = title),
                 fontSize = 14.sp,
+                lineHeight = 14.sp
             )
             subtitle?.let { subtitle ->
                 Text(

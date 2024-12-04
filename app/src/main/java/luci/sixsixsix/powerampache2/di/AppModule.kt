@@ -29,7 +29,6 @@ import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.room.Room
 import dagger.Module
@@ -37,6 +36,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.DB_LOCAL_NAME
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
 import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_READ_S
@@ -50,6 +50,7 @@ import luci.sixsixsix.powerampache2.data.remote.PingScheduler
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
+import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import okhttp3.Interceptor
@@ -127,16 +128,22 @@ object AppModule {
     @Provides
     fun providePlayer(
         @ApplicationContext context: Context,
-        audioAttributes: AudioAttributes
+        audioAttributes: AudioAttributes,
+        sharedPreferencesManager: SharedPreferencesManager
     ): ExoPlayer = ExoPlayer.Builder(context)
         .setAudioAttributes(audioAttributes, true)
         .setHandleAudioBecomingNoisy(true)
         .setTrackSelector(DefaultTrackSelector(context))
         .setLoadControl(DefaultLoadControl.Builder()
             .setPrioritizeTimeOverSizeThresholds(true)
-            .setBackBuffer(10000, true)  // Retain back buffer data only up to the last keyframe (not very impactful for audio)
+            .setBackBuffer(sharedPreferencesManager.backBuffer, true)  // Retain back buffer data only up to the last keyframe (not very impactful for audio)
             //.setTargetBufferBytes(20 * 1024 * 1024)
-            .setBufferDurationsMs(10000, 120000, 5000, 9000)
+            .setBufferDurationsMs(
+                sharedPreferencesManager.minBufferMs,
+                sharedPreferencesManager.maxBufferMs,
+                sharedPreferencesManager.bufferForPlaybackMs,
+                sharedPreferencesManager.bufferForPlaybackAfterRebufferMs
+            )
             .build())
         .build()
 

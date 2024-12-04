@@ -1,0 +1,10 @@
+- improved Spanish translation
+- updated Java compiler version
+- update media3 library version
+- increased buffer sizes for music player
+- improved error handling
+- fixed material you colours bug
+- added fine tuning settings for player buffers
+- fixed bug when playing songs in albums and playlists
+- swipe-to-skip implement in the player view
+- updated media player version

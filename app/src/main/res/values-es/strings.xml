@@ -1,16 +1,16 @@
 <resources>
-    <string name="notification_channel_description">Muestra la música reproduciéndose actualmente</string>
+    <string name="notification_channel_description">Muestra la música sonando actualmente</string>
     <string name="coming_soon">Próximamente</string>
 
     <string name="albumDetailScreen_infoSection_year">Año</string>
-    <string name="albumDetailScreen_infoSection_songs">Pistas</string>
+    <string name="albumDetailScreen_infoSection_songs">Canciones</string>
     <string name="albumDetailScreen_infoSection_time">Tiempo total</string>
     <string name="playlistDetailScreen_infoSection_avgRating">Valoración promedio</string>
-    <string name="playlistItem_songCount">%s Pistas</string>
-    <string name="topBar_search_hint">Buscar pistas, álbumes, artistas, listas de reproducción</string>
-    <string name="main_tab_title_albums">Álbumes</string>
+    <string name="playlistItem_songCount">%s Canciones</string>
+    <string name="topBar_search_hint">Buscar canciones, discos, artistas, listas de reproducción</string>
+    <string name="main_tab_title_albums">Discos</string>
     <string name="main_tab_title_home">Inicio</string>
-    <string name="main_tab_title_songs">Pistas</string>
+    <string name="main_tab_title_songs">Canciones</string>
     <string name="main_tab_title_artists">Artistas</string>
     <string name="main_tab_title_playlists">Listas</string>
     <string name="loginScreen_username">Usuario</string>
@@ -22,8 +22,8 @@
     <string name="loginScreen_server_url">URL del servidor</string>
     <string name="loginScreen_signUp_requiredField">Este es un campo obligatorio</string>
     <string name="loginScreen_auth_token">Token de autenticación</string>
-    <string name="loginScreen_auth_token_warning">El token de autenticación funciona con servidores 6.4 en adelante</string>
-    <string name="loginScreen_login">Iniciar desión</string>
+    <string name="loginScreen_auth_token_warning">El token de autenticación funciona con servidores v6.4 en adelante</string>
+    <string name="loginScreen_login">Iniciar sesión</string>
     <string name="loginScreen_signup">Registrarse</string>
     <string name="loginScreen_demo_server">Demo</string>
     <string name="loginScreen_loading_authenticating">Conectando …</string>
@@ -31,13 +31,13 @@
     <string name="loginScreen_textFields_warning">Compatible con versiones de servidor 4 en adelante.\n Probado en versión de servidor 6</string>
     <string name="loginScreen_warning">Para conectarte con tu propio servidor, descarga la versión completa de Power Ampache 2</string>
 
-    <string name="home_section_title_recent">Reproducidos recientemente</string>
-    <string name="home_section_title_flagged">Favoritos</string>
-    <string name="home_section_title_frequent">Reproducidos frecuentemente</string>
+    <string name="home_section_title_recent">Escuchados recientemente</string>
+    <string name="home_section_title_flagged">Discos Favoritos</string>
+    <string name="home_section_title_frequent">Escuchados con frecuencia</string>
     <string name="home_section_title_highest">Mejor valorados</string>
     <string name="home_section_title_newest">Añadidos recientemente</string>
     <string name="home_section_title_playlists">Listas de reproducción</string>
-    <string name="home_section_title_moreAlbums">Más álbumes</string>
+    <string name="home_section_title_moreAlbums">Más discos</string>
     <string name="home_section_title_loading">Cargando</string>
     <string name="home_artist_subtitle_item">Artista</string>
 
@@ -80,18 +80,18 @@
     <string name="settings_normalizeVolume_title">Normalizar volumen</string>
     <string name="settings_offlineMode_title">Modo Offline</string>
     <string name="settings_offlineMode_subtitle">Habilitar Modo Offline</string>
-    <string name="settings_normalizeVolume_subtitle">Forzar el mismo volumen para todas las pistas</string>
+    <string name="settings_normalizeVolume_subtitle">Forzar el mismo volumen para todas las canciones</string>
     <string name="settings_monoAudio_title">Audio monoaural</string>
     <string name="settings_monoAudio_subtitle">Canales izquierdo y derecho tocarán el mismo audio</string>
     <string name="settings_smartDownloads_title">Descargas inteligentes</string>
-    <string name="settings_smartDownloads_subtitle">Descargar automáticamente las pistas más reproducidas mientras el teléfono está en reposo</string>
+    <string name="settings_smartDownloads_subtitle">Descargar automáticamente las canciones más escuchadas mientras el teléfono está en reposo</string>
     <string name="settings_checkUpdatesNow_title">Buscar actualizaciones ahora</string>
     <string name="settings_autoCheckUpdates_title">Buscar actualizaciones automáticamente</string>
     <string name="settings_debugLogs_title">Registro de depuración</string>
     <string name="settings_enableDebugLogging_title">Habilitar el registro de depuración anónimo</string>
     <string name="settings_enableDebugLogging_subtitle">Enviará el seguimiento de fallas y errores al desarrollador para arreglar problemas en la aplicación</string>
     <string name="settings_deleteDownloads_title">Borrar todas las descargas</string>
-    <string name="settings_deleteDownloads_subtitle">Esto eliminará todas las pistas que descargaste</string>
+    <string name="settings_deleteDownloads_subtitle">Esto eliminará todos los archivos que descargaste</string>
     <string name="settings_deleteDownloads_success">Toda la música descargada ha sido borrada</string>
     <string name="settings_deleteDownloads_fail">Hubo un problema borrando la música descargada, si el problema persiste por favor contacta al desarrollador para repararlo</string>
     <string name="settings_hideDonationButtonsMenu_title">Ocultar los botones de donación del menú</string>
@@ -106,7 +106,7 @@
     <string name="settings_userInfo_city">Ciudad</string>
     <string name="settings_userInfo_id">ID</string>
     <string name="player_buttonText_artist">Artista</string>
-    <string name="player_buttonText_album">Álbum</string>
+    <string name="player_buttonText_album">Disco</string>
     <string name="player_buttonText_add">Añadir</string>
     <string name="download">Descargar</string>
     <string name="player_buttonText_download">@string/download</string>
@@ -122,20 +122,20 @@
     <string name="miniPlayer_reset_alert_title">DETENER/REINICAR</string>
     <string name="dialog_create">CREAR</string>
     <string name="warning_playlist_download">Por favor espera a que la lista de reproducción esté completamente cargada antes de descargar</string>
-    <string name="warning_playlist_server">Añadir pistas, si la versión de tu servidor es menor a 6.3 este procedimiento puede tomar más o menos un minuto</string>
-    <string name="warning_playlist_adding">Las pistas están siendo añadidas a tu lista de reproducción.\nSi abandonas esta pantalla ahora, se interrumpirá el proceso</string>
+    <string name="warning_playlist_server">Añadir canciones, si la versión de tu servidor es menor a 6.3 este procedimiento puede tomar más o menos un minuto</string>
+    <string name="warning_playlist_adding">Las canciones están siendo añadidas a tu lista.\nSi abandonas esta pantalla ahora, se interrumpirá el proceso</string>
     <string name="warning_playlist_adding_title">¿Abandonar pantalla?</string>
     <string name="warning_playlist_adding_stay">Permancer</string>
     <string name="warning_playlist_adding_leave">Abandonar de todos modos</string>
-    <string name="warning_song_remove_title">QUITAR PISTA</string>
+    <string name="warning_song_remove_title">QUITAR CANCIÓN</string>
 
     <!-- Song Dropdown Menu -->
     <string name="dropdownMenu_item_download">Descargar</string>
-    <string name="dropdownMenu_item_export">Exportar pista descargada</string>
-    <string name="dropdownMenu_item_playNext">Reproducir la siguiente</string>
+    <string name="dropdownMenu_item_export">Exportar canción descargada</string>
+    <string name="dropdownMenu_item_playNext">Saltar a la siguiente</string>
     <string name="dropdownMenu_item_addToQueue">Añadir a la Cola</string>
     <string name="dropdownMenu_item_addToPlaylist">Añadir a la lista de reproducción</string>
-    <string name="dropdownMenu_item_goToAlbum">Ir al álbum</string>
+    <string name="dropdownMenu_item_goToAlbum">Ir al disco</string>
     <string name="dropdownMenu_item_goToArtist">Ir al artista</string>
     <string name="dropdownMenu_item_share">Compartir</string>
 
@@ -155,7 +155,7 @@
     <string name="menu_drawer_home">Inicio</string>
     <string name="menu_drawer_about">Acerca de</string>
     <string name="menu_drawer_logout">Salir</string>
-    <string name="menu_drawer_offline">Pistas descargadas</string>
+    <string name="menu_drawer_offline">Canciones descargadas</string>
 
     <string name="error_playback_exception">Se encontraron problemas al reproducir este archivo</string>
     <string name="share_song_cannot_find">La canción compartida no fue encontrada</string>
@@ -170,16 +170,34 @@
     <string name="addToPlaylistOrQueueDialog_addQueue">Añadir a la Cola</string>
     <string name="downloaded_snackbar_title">%s descargada</string>
 
-    <!-- NOT ADDED YET -->
     <string name="home_playlist_highest_title">Canciones mejor valoradas</string>
-    <string name="home_playlist_frequent_title">Canciones frecuentemente tocadas</string>
-    <string name="home_playlist_recent_title">Canciones recientemente tocadas</string>
+    <string name="home_playlist_frequent_title">Canciones más escuchadas</string>
+    <string name="home_playlist_recent_title">Canciones tocadas recientemente</string>
     <string name="home_playlist_favourites_title">Canciones favoritas</string>
-
     <string name="dialog_deletePlaylist_title">ELIMINAR lista de reproducción</string>
     <string name="dialog_deletePlaylist_text">Eliminar %s?</string>
 
-    <string name="settings_downloadsSdCard_title">Use SD Card for Downloads</string>
-    <string name="settings_downloadsSdCard_subtitle">Works when the SD card is mounted as System Storage [EXPERIMENTAL]</string>
+    <!-- NOT ADDED YET -->
+
+    <string name="settings_downloadsSdCard_title">Usar la tarjeta SD para las descargas</string>
+    <string name="settings_downloadsSdCard_subtitle">Funciona cuando la tarjeta SD está montada como Almacenamiento interno [EXPERIMENTAL]</string>
+
+    <!-- SETTINGS PLAYER -->
+    <string name="settings_playerAdvancedSettings_title">Player Advanced Settings (App restart required)</string>
+    <string name="settings_playerAdvancedSettings_subtitle">Adjust these settings if you\'re experiencing playback issues, such as stuttering, song interruptions, delays in starting tracks, etc…</string>
+    <string name="settings_playerAdvancedSettings_warning">To apply buffer settings, kill/restart the app.</string>
+    <string name="settings_backBuffer_title">Back Buffer</string>
+    <string name="settings_backBuffer_subtitle">Adjusts the amount of content pre-buffered ahead of playback to prevent interruptions, especially during network delays, in seconds.</string>
+    <string name="settings_minBuffer_title">Min Buffer</string>
+    <string name="settings_minBuffer_subtitle">The minimum duration of media that the player will attempt to ensure is buffered at all times, in seconds.</string>
+    <string name="settings_bufferForPlayback_title">Buffer For Playback</string>
+    <string name="settings_bufferForPlayback_subtitle">The duration of media that must be buffered for playback to start or resume following a user action such as a seek, in seconds.</string>
+    <string name="settings_maxBuffer_title">Max Buffer</string>
+    <string name="settings_maxBuffer_subtitle">The maximum duration of media that the player will attempt to buffer, in seconds.</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_title">Buffer For Playback After Re-buffer</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_subtitle">The default duration of media that must be buffered for playback to resume after a re-buffer, in seconds. A re-buffer is defined to be caused by buffer depletion rather than a user action</string>
+    <string name="settings_player_button_resetDefaults">Reset Defaults</string>
+    <string name="settings_player_button_killApp">PRESS TO KILL THE APP\n(Apply buffer settings)</string>
+    <string name="settings_player_killDialog_title">Kill the app now to apply settings?</string>
 
 </resources>

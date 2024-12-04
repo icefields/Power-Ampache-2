@@ -99,16 +99,5 @@ val AdditionalLightColours
         surfaceContainerHigh = colorResource(id = R.color.surfaceContainerHighLight),
         surfaceContainerHighest = Color(0xFFDFE5E3),
         shadow = Color(0xFF0B0D0C),
-        queueHandle = Color(0xFFD9D9D9)
+        queueHandle = colorResource(id = R.color.surfaceContainerHighLight)
     )
-
-//data class AdditionalColours2(
-//    val surfaceContainer: Color,
-//    val surfaceDim: Color,
-//    val surfaceBright: Color,
-//    val surfaceContainerLowest: Color,
-//    val surfaceContainerLow: Color,
-//    val surfaceContainerHigh: Color,
-//    val surfaceContainerHighest: Color,
-//    val shadow: Color
-//)
