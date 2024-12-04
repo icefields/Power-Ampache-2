@@ -22,15 +22,7 @@
 package luci.sixsixsix.powerampache2.domain
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.SortMode
@@ -38,12 +30,6 @@ import luci.sixsixsix.powerampache2.domain.models.SortMode
 interface SettingsRepository {
     val settingsLiveData: LiveData<LocalSettings?>
     val offlineModeFlow: Flow<Boolean>
-
-//    val backBuffer: Flow<Int>
-//    val minBufferMs: Flow<Int>
-//    val maxBufferMs: Flow<Int>
-//    val bufferForPlaybackMs: Flow<Int>
-//    val bufferForPlaybackAfterRebufferMs: Flow<Int>
 
     suspend fun getLocalSettings(username: String? = null): LocalSettings
     suspend fun saveLocalSettings(localSettings: LocalSettings)
