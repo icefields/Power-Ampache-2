@@ -145,13 +145,7 @@ object AppModule {
                 sharedPreferencesManager.bufferForPlaybackAfterRebufferMs
             )
             .build())
-        .build().also {
-            L("aaaaaa", sharedPreferencesManager.minBufferMs,
-                sharedPreferencesManager.maxBufferMs,
-                sharedPreferencesManager.bufferForPlaybackMs,
-                sharedPreferencesManager.backBuffer,
-                sharedPreferencesManager.bufferForPlaybackAfterRebufferMs)
-        }
+        .build()
 
     //@ServiceScoped
     @Singleton
