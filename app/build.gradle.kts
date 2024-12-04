@@ -63,7 +63,7 @@ android {
         targetSdk = 35
         versionCode = 70
         versionName = "1.00-70"
-        val versionQuote = "This version is powered by sexual innuendos, love, care and harmony.${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"
+        val versionQuote = "This version is powered by innuendos, love, care and harmony.${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
