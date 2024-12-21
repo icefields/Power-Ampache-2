@@ -15,7 +15,7 @@
     <string name="main_tab_title_playlists">Wiedergabelisten</string>
     <string name="loginScreen_username">Anmeldename</string>
     <string name="loginScreen_signUp_email">E-Mail</string>
-    <string name="loginScreen_fullname">Ganzer Name (Optional)</string>
+    <string name="loginScreen_fullname">Vollständiger Name (Optional)</string>
     <string name="loginScreen_password">Passwort</string>
     <string name="loginScreen_password_repeat">Passwort bestätigen</string>
     <string name="loginScreen_register_success">Benutzer*in erfolgreich registriert\nSie können sich jetzt mit Ihren Zugangsdaten anmelden\nBitte bestätigen Sie Ihre E-Mail, falls der Server dies verlangt</string>
@@ -66,143 +66,138 @@
     <string name="quality_high_subtitle">256kbps</string>
     <string name="quality_medium_title">Mittlere Qualität</string>
     <string name="quality_medium_subtitle">192kbps</string>
-
-
-    <!---NOT TRANSLATED-->
-
-    <string name="quality_mediumLow_title">Medium-Low Quality</string>
+    <string name="quality_mediumLow_title">Mittlere bis niedrige Qualität</string>
     <string name="quality_mediumLow_subtitle">128kbps</string>
-    <string name="quality_low_title">Low Quality</string>
+    <string name="quality_low_title">Niedrige Qualität</string>
     <string name="quality_low_subtitle">96kbps</string>
     <string name="theme_system_title">System Theme</string>
-    <string name="theme_dark_title">Dark</string>
-    <string name="theme_light_title">Light</string>
+    <string name="theme_dark_title">Dunkel</string>
+    <string name="theme_light_title">Hell</string>
     <string name="theme_system_materialYou_title">MaterialYou System</string>
-    <string name="theme_dark_materialYou_title">MaterialYou Dark</string>
-    <string name="theme_light_materialYou_title">MaterialYou Light</string>
+    <string name="theme_dark_materialYou_title">MaterialYou Dunkel</string>
+    <string name="theme_light_materialYou_title">MaterialYou Hell</string>
     <string name="settings_equalizer">Equalizer</string>
-    <string name="settings_normalizeVolume_title">Normalize Volume</string>
-    <string name="settings_offlineMode_title">Offline Mode</string>
-    <string name="settings_offlineMode_subtitle">Enable Offline Mode</string>
-    <string name="settings_normalizeVolume_subtitle">Force same volume level for all tracks</string>
+    <string name="settings_normalizeVolume_title">Lautstärke normalisieren</string>
+    <string name="settings_offlineMode_title">Offline Modus</string>
+    <string name="settings_offlineMode_subtitle">Offline Modus aktivieren</string>
+    <string name="settings_normalizeVolume_subtitle">Gleichen Lautstärkepegel für alle Titel erzwingen</string>
     <string name="settings_monoAudio_title">Mono Audio</string>
-    <string name="settings_monoAudio_subtitle">Left and Right speakers will play the same audio</string>
+    <string name="settings_monoAudio_subtitle">Linker und rechter Lautsprecher geben den gleichen Ton wieder</string>
     <string name="settings_smartDownloads_title">Smart Downloads</string>
-    <string name="settings_smartDownloads_subtitle">Automatically download most played songs while the phone is idle</string>
-    <string name="settings_checkUpdatesNow_title">Check for updates now</string>
-    <string name="settings_autoCheckUpdates_title">Automatically check for updates</string>
+    <string name="settings_smartDownloads_subtitle">Die meistgespielten Songs werden automatisch heruntergeladen, wenn das Telefon nicht benutzt wird</string>
+    <string name="settings_checkUpdatesNow_title">Jetzt nach Aktualisierungen suchen</string>
+    <string name="settings_autoCheckUpdates_title">Automatisch nach Aktualisierungen suchen</string>
     <string name="settings_debugLogs_title">Debug Logs</string>
-    <string name="settings_enableDebugLogging_title">Enable anonymous debug logging</string>
-    <string name="settings_enableDebugLogging_subtitle">Will send crash and error stack-traces to the developer to fix issues with the app</string>
-    <string name="settings_deleteDownloads_title">Delete all downloads</string>
-    <string name="settings_deleteDownloads_subtitle">This will delete all the songs you downloaded</string>
-    <string name="settings_deleteDownloads_success">All your offline music has been deleted</string>
-    <string name="settings_deleteDownloads_fail">There was an issue deleting your offline music, if the problem persists please contact the developer to fix the bug</string>
-    <string name="settings_hideDonationButtonsMenu_title">Hide Donation Buttons on Menu</string>
+    <string name="settings_enableDebugLogging_title">Anonyme Debug-Protokollierung einschalten</string>
+    <string name="settings_enableDebugLogging_subtitle">Sendet Absturz- und Fehler-Berichte an den Entwickler, um Probleme mit der App zu beheben</string>
+    <string name="settings_deleteDownloads_title">Alle Downloads löschen</string>
+    <string name="settings_deleteDownloads_subtitle">Dadurch werden alle heruntergeladenen Titel gelöscht</string>
+    <string name="settings_deleteDownloads_success">Ihre gesamte Offline-Musik wurde gelöscht</string>
+    <string name="settings_deleteDownloads_fail">Es gab ein Problem beim Löschen deiner Offline-Musik. Wenn das Problem weiterhin besteht, kontaktiere bitte den Entwickler, um den Fehler zu beheben</string>
+    <string name="settings_hideDonationButtonsMenu_title">Spendenbuttons im Menü ausblenden</string>
     <string name="settings_serverInfo_title">Server</string>
     <string name="settings_serverInfo_version">Version</string>
-    <string name="settings_serverInfo_compatible">Compatible</string>
-    <string name="settings_userInfo_username">Username</string>
-    <string name="settings_userInfo_fullName">Full Name</string>
-    <string name="settings_userInfo_email">Email</string>
+    <string name="settings_serverInfo_compatible">Kompatibel</string>
+    <string name="settings_userInfo_username">Anmeldename</string>
+    <string name="settings_userInfo_fullName">Vollständiger Name</string>
+    <string name="settings_userInfo_email">E-Mail</string>
     <string name="settings_userInfo_website">Website</string>
-    <string name="settings_userInfo_state">State</string>
-    <string name="settings_userInfo_city">City</string>
+    <string name="settings_userInfo_state">Staat</string>
+    <string name="settings_userInfo_city">Stadt</string>
     <string name="settings_userInfo_id">ID</string>
-    <string name="player_buttonText_artist">Artist</string>
+    <string name="player_buttonText_artist">Künstler*in</string>
     <string name="player_buttonText_album">Album</string>
-    <string name="player_buttonText_add">Add</string>
+    <string name="player_buttonText_add">Hinzufügen</string>
     <string name="download">Download</string>
     <string name="player_buttonText_download">@string/download</string>
-    <string name="player_buttonText_share">Share</string>
+    <string name="player_buttonText_share">Teilen</string>
     <string name="player_buttonText_info">Info</string>
     <string name="player_queue_upNext">Up Next</string>
-    <string name="player_queue_lyrics">Lyrics</string>
-    <string name="logout_offline_warning">Please turn OFF Offline Mode before logging out</string>
-    <string name="offline_noData_warning">You haven\'t downloaded any song yet</string>
+    <string name="player_queue_lyrics">Text</string>
+    <string name="logout_offline_warning">Bitte schalten Sie den Offline-Modus AUS, bevor Sie sich abmelden</string>
+    <string name="offline_noData_warning">Sie haben noch keinen Titel heruntergeladen</string>
 
     <!--- DIALOGS -->
-    <string name="miniPlayer_reset_alert_message">LONG PRESS To stop music playback and reset the Queue</string>
+    <string name="miniPlayer_reset_alert_message">LANG DRÜCKEN um die Musikwiedergabe zu stoppen und die Warteschlange zurückzusetzen</string>
     <string name="miniPlayer_reset_alert_title">STOP/RESET</string>
-    <string name="dialog_create">CREATE</string>
-    <string name="warning_playlist_download">Please wait for the playlist to be fully loaded before downloading</string>
-    <string name="warning_playlist_server">Adding songs, if your server version is below 6.3 this operation might take a minute or so</string>
-    <string name="warning_playlist_adding">Songs are being added to your playlist.\nLeaving this screen now will interrupt the operation</string>
-    <string name="warning_playlist_adding_title">Leave Screen?</string>
-    <string name="warning_playlist_adding_stay">Stay</string>
-    <string name="warning_playlist_adding_leave">Leave Anyway</string>
-    <string name="warning_song_remove_title">REMOVE SONG</string>
+    <string name="dialog_create">ERZEUGEN</string>
+    <string name="warning_playlist_download">Bitte warten Sie, bis die Wiedergabeliste vollständig geladen ist, bevor Sie sie herunterladen</string>
+    <string name="warning_playlist_server">Hinzufügen von Titeln: Wenn Ihr Server eine Version niedriger als 6.3 hat, kann dieser Vorgang eine Minute oder länger dauern</string>
+    <string name="warning_playlist_adding">Titel werden zu Ihrer Wiedergabeliste hinzugefügt.\nWenn Sie diesen Bildschirm jetzt verlassen, wird der Vorgang unterbrochen</string>
+    <string name="warning_playlist_adding_title">Bildschirm verlassen?</string>
+    <string name="warning_playlist_adding_stay">Bleiben</string>
+    <string name="warning_playlist_adding_leave">Trotzdem verlassen</string>
+    <string name="warning_song_remove_title">TITEL LÖSCHEN</string>
 
     <!-- Song Dropdown Menu -->
     <string name="dropdownMenu_item_download">Download</string>
-    <string name="dropdownMenu_item_export">Export Downloaded Song</string>
-    <string name="dropdownMenu_item_playNext">Play Next</string>
-    <string name="dropdownMenu_item_addToQueue">Add to Queue</string>
-    <string name="dropdownMenu_item_addToPlaylist">Add to Playlist</string>
-    <string name="dropdownMenu_item_goToAlbum">Go to Album</string>
-    <string name="dropdownMenu_item_goToArtist">Go to Artist</string>
-    <string name="dropdownMenu_item_share">Share</string>
+    <string name="dropdownMenu_item_export">Heruntergeladenen Titel exportieren</string>
+    <string name="dropdownMenu_item_playNext">Nächsten Titel abspielen</string>
+    <string name="dropdownMenu_item_addToQueue">Zur Warteschlange hinzufügen</string>
+    <string name="dropdownMenu_item_addToPlaylist">Zur Wiedergabeliste hinzufügen</string>
+    <string name="dropdownMenu_item_goToAlbum">Gehe zum Album</string>
+    <string name="dropdownMenu_item_goToArtist">Gehe zu Künstler*in</string>
+    <string name="dropdownMenu_item_share">Teilen</string>
 
     <!---...-->
     <string name="about_flavour">Flavor</string>
-    <string name="version_quote_title">Quote of the version</string>
+    <string name="version_quote_title">Zitat dieser Version</string>
     <string name="about_appVersion_title">App Version</string>
-    <string name="about_license_title">License</string>
-    <string name="about_contact_title">Contact Me on Telegram and Mastodon</string>
-    <string name="about_sourceCode_title">Source Code</string>
-    <string name="about_considerDonating">Support the project with a donation!\nLinks on the website:</string>
+    <string name="about_license_title">Lizenz</string>
+    <string name="about_contact_title">Kontaktieren Sie mich auf Telegram und Mastodon</string>
+    <string name="about_sourceCode_title">Quellcode</string>
+    <string name="about_considerDonating">Unterstützen Sie das Projekt mit einer Spende!\nLinks auf der Website:</string>
 
     <!---Main Menu Items-->
-    <string name="menu_drawer_settings">Settings</string>
-    <string name="menu_drawer_library">Library</string>
+    <string name="menu_drawer_settings">Einstellungen</string>
+    <string name="menu_drawer_library">Bibliothek</string>
     <string name="menu_drawer_genres">Genres</string>
     <string name="menu_drawer_home">Home</string>
-    <string name="menu_drawer_about">About</string>
+    <string name="menu_drawer_about">Über</string>
     <string name="menu_drawer_logout">Logout</string>
-    <string name="menu_drawer_offline">Offline Songs</string>
+    <string name="menu_drawer_offline">Offline Titel</string>
 
-    <string name="error_playback_exception">Issues playing this track.</string>
-    <string name="share_song_cannot_find">Cannot find shared song</string>
+    <string name="error_playback_exception">Fehler beim Abspielen des Titels.</string>
+    <string name="share_song_cannot_find">Kann den geteilten Titel nicht finden</string>
 
-    <string name="settings_theme_title">Pick Your Theme</string>
-    <string name="settings_quality_title">Streaming Quality</string>
-    <string name="loginScreen_useAuthToken">Use Auth Token</string>
-    <string name="queue">Queue</string>
+    <string name="settings_theme_title"> Theme auswählen</string>
+    <string name="settings_quality_title">Streaming Qualität</string>
+    <string name="loginScreen_useAuthToken">Auth Token benutzen</string>
+    <string name="queue">Warteschlange</string>
     <!-- the following Playlist title has to be all caps -->
-    <string name="addToPlaylistOrQueueDialog_playlists">PLAYLISTS</string>
-    <string name="addToPlaylistOrQueueDialog_createNew">Create New</string>
-    <string name="addToPlaylistOrQueueDialog_addQueue">Add to Current Queue</string>
-    <string name="downloaded_snackbar_title">%s downloaded</string>
+    <string name="addToPlaylistOrQueueDialog_playlists">WIEDERGABELISTEN</string>
+    <string name="addToPlaylistOrQueueDialog_createNew">Neu erzeugen</string>
+    <string name="addToPlaylistOrQueueDialog_addQueue">Zur aktuellen Wiedergabeliste hinzufügen</string>
+    <string name="downloaded_snackbar_title">%s heruntergeladen</string>
 
     <!-- NOT ADDED YET -->
-    <string name="home_playlist_highest_title">Highest Rated Songs</string>
-    <string name="home_playlist_frequent_title">Frequently Played Songs</string>
-    <string name="home_playlist_recent_title">Recently Played Songs</string>
-    <string name="home_playlist_favourites_title">Favourite Songs</string>
+    <string name="home_playlist_highest_title">Am höchsten bewertete Titel</string>
+    <string name="home_playlist_frequent_title">Häufig gespielte Titel</string>
+    <string name="home_playlist_recent_title">Kürzlich gespielte Titel</string>
+    <string name="home_playlist_favourites_title">Lieblingstitel</string>
 
-    <string name="dialog_deletePlaylist_title">DELETE PLAYLIST</string>
-    <string name="dialog_deletePlaylist_text">Delete %s?</string>
+    <string name="dialog_deletePlaylist_title">WIEDERGABELISTE LÖSCHEN</string>
+    <string name="dialog_deletePlaylist_text">%s löschen?</string>
 
-    <string name="settings_downloadsSdCard_title">Use SD Card for Downloads</string>
-    <string name="settings_downloadsSdCard_subtitle">Works when the SD card is mounted as System Storage [EXPERIMENTAL]</string>
-
+    <string name="settings_downloadsSdCard_title">SD Card für Downloads nutzen</string>
+    <string name="settings_downloadsSdCard_subtitle">Funktioniert, wenn die SD card als System Storage gemountet wurde [EXPERIMENTELL]</string>
 
     <!-- SETTINGS PLAYER -->
-    <string name="settings_playerAdvancedSettings_title">Player Advanced Settings (App restart required)</string>
-    <string name="settings_playerAdvancedSettings_subtitle">Adjust these settings if you\'re experiencing playback issues, such as stuttering, song interruptions, delays in starting tracks, etc…</string>
-    <string name="settings_playerAdvancedSettings_warning">To apply buffer settings, kill/restart the app.</string>
-    <string name="settings_backBuffer_title">Back Buffer</string>
-    <string name="settings_backBuffer_subtitle">Adjusts the amount of content pre-buffered ahead of playback to prevent interruptions, especially during network delays, in seconds.</string>
-    <string name="settings_minBuffer_title">Min Buffer</string>
-    <string name="settings_minBuffer_subtitle">The minimum duration of media that the player will attempt to ensure is buffered at all times, in seconds.</string>
-    <string name="settings_bufferForPlayback_title">Buffer For Playback</string>
-    <string name="settings_bufferForPlayback_subtitle">The duration of media that must be buffered for playback to start or resume following a user action such as a seek, in seconds.</string>
-    <string name="settings_maxBuffer_title">Max Buffer</string>
-    <string name="settings_maxBuffer_subtitle">The maximum duration of media that the player will attempt to buffer, in seconds.</string>
-    <string name="settings_bufferForPlaybackAfterRebuffer_title">Buffer For Playback After Re-buffer</string>
-    <string name="settings_bufferForPlaybackAfterRebuffer_subtitle">The default duration of media that must be buffered for playback to resume after a re-buffer, in seconds. A re-buffer is defined to be caused by buffer depletion rather than a user action</string>
-    <string name="settings_player_button_resetDefaults">Reset Defaults</string>
-    <string name="settings_player_button_killApp">PRESS TO KILL THE APP\n(Apply buffer settings)</string>
-    <string name="settings_player_killDialog_title">Kill the app now to apply settings?</string>
+    <string name="settings_playerAdvancedSettings_title">Erweiterte Einstellungen (App muss neu gestartet werden)</string>
+    <string name="settings_playerAdvancedSettings_subtitle">Passen Sie diese Einstellungen an, wenn Sie Probleme bei der Wiedergabe haben, wie z. B. Stocken, Liedunterbrechungen, Verzögerungen beim Starten von Titeln usw.</string>
+    <string name="settings_playerAdvancedSettings_warning">Um die Puffereinstellungen zu übernehmen, beenden Sie die Anwendung und starten Sie sie neu.</string>
+    <string name="settings_backBuffer_title">Anzahl zwischengespeicherter Titel</string>
+    <string name="settings_backBuffer_subtitle">Passt die Anzahl der Inhalte an, die vor der Wiedergabe zwischengespeichert werden (in Sekunden), um Unterbrechungen, insbesondere bei Netzwerkverzögerungen, zu vermeiden.</string>
+    <string name="settings_minBuffer_title">Mindestpuffer</string>
+    <string name="settings_minBuffer_subtitle">Die Mindestdauer der Medien, die der Player versucht, kontinuierlich zwischenzuspeichern (in Sekunden).</string>
+    <string name="settings_bufferForPlayback_title">Puffer für die Wiedergabe</string>
+    <string name="settings_bufferForPlayback_subtitle">Die Dauer der Medien, die zwischengespeichert werden soll, damit die Wiedergabe nach einer Benutzeraktion, z. B. einem Suchlauf, begonnen oder fortgesetzt werden kann (in Sekunden).</string>
+    <string name="settings_maxBuffer_title">Maximalpuffer</string>
+    <string name="settings_maxBuffer_subtitle">Die maximale Dauer der Medien, die der Player zwischenzuspeichern versucht (in Sekunden).</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_title">Puffer für die Wiedergabe nach dem erneuten Zwischenspeichern</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_subtitle"> Die Standarddauer der Medien, die gepuffert werden sollen, damit die Wiedergabe nach einer erneuten Zwischenspeicherung fortgesetzt werden kann (in Sekunden). Eine erneute Zwischenspeicherung wird durch einen leeren Puffer und nicht durch eine Benutzeraktion verursacht</string>
+    <string name="settings_player_button_resetDefaults"> Standardeinstellungen zurücksetzen</string>
+    <string name="settings_player_button_killApp">DRÜCKEN, UM DIE APP ZU BEENDEN\n(Puffereinstellungen anwenden)</string>
+    <string name="settings_player_killDialog_title">Die App jetzt beenden, um die Einstellungen zu übernehmen?</string>
 
 </resources>
