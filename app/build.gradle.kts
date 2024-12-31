@@ -61,9 +61,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 70
-        versionName = "1.00-70"
-        val versionQuote = "This version is powered by innuendos, love, care and harmony.${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"
+        versionCode = 71
+        versionName = "1.00-71"
+        val versionQuote = "This version is powered a centered hexagonal number, Marsenne prime and Lutetium . ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

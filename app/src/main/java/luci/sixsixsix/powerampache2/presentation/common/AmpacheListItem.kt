@@ -122,22 +122,24 @@ fun <T: AmpacheModel> AmpacheListItem(
         }
         is Album -> {
             imageUrl = item.artUrl
-            infoViewItemText = InfoViewItemText(item.name, item.artist.name, "Album")
+            infoViewItemText = InfoViewItemText(item.name, item.artist.name, stringResource(R.string.item_title_album))
             isFavourite = item.flag == 1
             rating = item.rating
         }
         is Artist -> {
             imageUrl = item.artUrl
-            infoViewItemText = InfoViewItemText(item.name, item.genresString, "Artist")
+            infoViewItemText = InfoViewItemText(item.name, item.genresString, stringResource(R.string.item_title_artist))
             isFavourite = item.flag == 1
         }
         is Playlist -> {
             imageUrl = item.artUrl
+
             val ownerText = item.owner?.let { owner ->
                 if (!item.isOwnerSystem() && !item.isOwnerAdmin()) {
                     owner
-                } else "Playlist"
-            } ?: "Playlist"
+                } else stringResource(R.string.item_title_playlist)
+            } ?: stringResource(R.string.item_title_playlist)
+
             val items = item.items?.let {
                 if (it > 0) stringResource(id = R.string.playlistItem_songCount, it) else " "
             } ?: run { " " }

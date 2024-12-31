@@ -200,4 +200,8 @@
     <string name="settings_player_button_killApp">DRÜCKEN, UM DIE APP ZU BEENDEN\n(Puffereinstellungen anwenden)</string>
     <string name="settings_player_killDialog_title">Die App jetzt beenden, um die Einstellungen zu übernehmen?</string>
 
+    <!-- NEW STRINGS -->
+    <string name="item_title_album">Album</string>
+    <string name="item_title_playlist">Playlist</string>
+    <string name="item_title_artist">Artist</string>
 </resources>

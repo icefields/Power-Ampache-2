@@ -191,7 +191,6 @@
     <string name="addToPlaylistOrQueueDialog_addQueue">Add to Current Queue</string>
     <string name="downloaded_snackbar_title">%s downloaded</string>
 
-    <!-- NOT ADDED YET -->
     <string name="home_playlist_highest_title">Highest Rated Songs</string>
     <string name="home_playlist_frequent_title">Frequently Played Songs</string>
     <string name="home_playlist_recent_title">Recently Played Songs</string>
@@ -199,4 +198,9 @@
 
     <string name="dialog_deletePlaylist_title">DELETE PLAYLIST</string>
     <string name="dialog_deletePlaylist_text">Delete %s?</string>
+
+    <!-- NEW STRINGS -->
+    <string name="item_title_album">Album</string>
+    <string name="item_title_playlist">Playlist</string>
+    <string name="item_title_artist">Artist</string>
 </resources>

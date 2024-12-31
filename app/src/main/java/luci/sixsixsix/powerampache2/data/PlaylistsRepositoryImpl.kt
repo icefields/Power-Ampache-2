@@ -251,8 +251,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 } else {
                     responsePlaylist.filter { dtoToFilter -> // will throw exception if playlist null
                         dtoToFilter.items?.let { itemsCount ->
-                            itemsCount > 0 || dtoToFilter.owner == username // edge-case default behaviour, user==null and owner==null will show the playlist
-                        } ?: (dtoToFilter.owner == username) // if the count is null fallback to show the playlist if the user is the owner
+                            itemsCount > 0 || dtoToFilter.owner?.lowercase() == username.lowercase() // edge-case default behaviour, user==null and owner==null will show the playlist
+                        } ?: (dtoToFilter.owner?.lowercase() == username.lowercase()) // if the count is null fallback to show the playlist if the user is the owner
                     }
                 })
             }?.map { it.toPlaylist() } ?: listOf()

@@ -91,7 +91,7 @@ class PlaylistsViewModel @Inject constructor(
 //    }
 
     fun isCurrentUserOwner(playlist: Playlist) =
-        currentUsername == playlist.owner
+        currentUsername.lowercase() == playlist.owner?.lowercase()
 
     fun onEvent(event: PlaylistEvent) {
         when (event) {
