@@ -50,7 +50,7 @@ import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
-import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject
 
 @OptIn(SavedStateHandleSaveableApi::class)
@@ -205,10 +205,12 @@ class AlbumDetailViewModel @Inject constructor(
                             result.data?.let { songs ->
                                 val songWrapperList = mutableListOf<SongWrapper>()
                                 songs.forEach { song ->
-                                    songWrapperList.add(SongWrapper(
+                                    songWrapperList.add(
+                                        SongWrapper(
                                         song = song,
                                         isOffline = songsRepository.isSongAvailableOffline(song)
-                                    ))
+                                    )
+                                    )
                                 }
                                 state = state.copy(songs = songWrapperList, isAlbumDownloaded = isAlbumDownloaded(songWrapperList))
                                 L("AlbumDetailViewModel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)

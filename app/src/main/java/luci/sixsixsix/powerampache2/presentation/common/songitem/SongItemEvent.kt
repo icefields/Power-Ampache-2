@@ -19,16 +19,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.domain.models
+package luci.sixsixsix.powerampache2.presentation.common.songitem
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
-@Parcelize
-class ServerInfo (
-    var server: String? = null,
-    var version: String? = null,
-    var compatible: String? = null,
-): Parcelable {
-    fun isNextcloud() = server?.lowercase()?.contains("nextcloud music") == true
+enum class SongItemEvent {
+    PLAY_NEXT,
+    SHARE_SONG,
+    DOWNLOAD_SONG,
+    EXPORT_DOWNLOADED_SONG,
+    GO_TO_ALBUM,
+    GO_TO_ARTIST,
+    ADD_SONG_TO_QUEUE,
+    ADD_SONG_TO_PLAYLIST,
 }

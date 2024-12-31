@@ -23,9 +23,7 @@ package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
-import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 
 @Parcelize
 data class AlbumDetailState (

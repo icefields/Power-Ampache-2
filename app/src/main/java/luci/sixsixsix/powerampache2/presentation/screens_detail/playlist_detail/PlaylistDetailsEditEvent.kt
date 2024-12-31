@@ -19,16 +19,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.domain.models
+package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import luci.sixsixsix.powerampache2.domain.models.Song
 
-@Parcelize
-class ServerInfo (
-    var server: String? = null,
-    var version: String? = null,
-    var compatible: String? = null,
-): Parcelable {
-    fun isNextcloud() = server?.lowercase()?.contains("nextcloud music") == true
+sealed class PlaylistDetailsEditEvent {
+    data class OnSongSelected(val isSelected: Boolean, val song: Song): PlaylistDetailsEditEvent()
+    data class OnRemoveSong(val song: Song): PlaylistDetailsEditEvent()
+    data class OnMoveUpSong(val song: Song): PlaylistDetailsEditEvent()
+    data class OnMoveDownSong(val song: Song): PlaylistDetailsEditEvent()
+    data object OnRemoveSongDismiss: PlaylistDetailsEditEvent()
+    data object OnDeleteSelectedSongs: PlaylistDetailsEditEvent()
+    data object OnConfirmEdit: PlaylistDetailsEditEvent()
 }

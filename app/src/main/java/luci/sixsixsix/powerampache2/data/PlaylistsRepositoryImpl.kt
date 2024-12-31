@@ -488,24 +488,35 @@ class PlaylistsRepositoryImpl @Inject constructor(
             }
         }.joinToString(separator = ",")
 
+    /**
+     * remember to refresh the playlist, this function doesn't cache / update db
+     */
     override suspend fun editPlaylist(
         playlistId: String,
         playlistName: String?,
         items: List<Song>,
         owner: String?,
-        tracks: String?,
+        tracks: String?, // will be calculated if null
         playlistType: PlaylistType
     ) = flow {
         emit(Resource.Loading(true))
+
         val commaSeparatedIds = when(items.size) {
             0 -> null
             else -> songListToCommaSeparatedIds(items)
         }
+        val commaSeparatedTracks = if (tracks.isNullOrBlank()) {
+            when(items.size) {
+                0 -> null
+                else -> trackPositionsCommaSeparated(items)
+            }
+        } else tracks
+
         api.editPlaylist(
             authKey = authToken(),
             playlistId = playlistId,
             items = commaSeparatedIds,
-            tracks = tracks,
+            tracks = commaSeparatedTracks,
             name = playlistName
         ).apply {
             error?.let { throw(MusicException(it.toError())) }
@@ -557,7 +568,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
         // try new method, include every song (use songList)
         val playlistEdited = try {
-            editPlaylistNewApi(playlist = playlist, songList =  existingPlusNewSongs)
+            editPlaylistNewApi(playlist = playlist, songList = existingPlusNewSongs)
         } catch (e: Exception) {
             L.e(e)
             // fallback to old method, add one by one, only new songs (use songsToAdd)

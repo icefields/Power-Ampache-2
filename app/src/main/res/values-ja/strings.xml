@@ -157,7 +157,7 @@
     <string name="menu_drawer_genres">ジャンル</string>
     <string name="menu_drawer_home">ホーム</string>
     <string name="menu_drawer_about">アプリについて</string>
-    <string name="menu_drawer_logout">Salir</string>
+    <string name="menu_drawer_logout">Logout</string>
     <string name="menu_drawer_offline">オフライン曲</string>
 
     <string name="share_song_cannot_find">Cannot find shared song</string>
@@ -206,4 +206,6 @@
     <string name="item_title_album">Album</string>
     <string name="item_title_playlist">Playlist</string>
     <string name="item_title_artist">Artist</string>
+
+    <string name="nextcloud_not_implemented">Not implemented yet in Nextcloud Music</string>
 </resources>
