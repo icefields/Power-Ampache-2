@@ -1,0 +1,4 @@
+- improved Spanish translation
+- update German translations
+- fixed add to playlist bug on Nextcloud
+- minor fixes and improvements
