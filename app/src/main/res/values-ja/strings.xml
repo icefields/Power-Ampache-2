@@ -202,4 +202,8 @@
     <string name="settings_player_button_killApp">PRESS TO KILL THE APP\n(Apply buffer settings)</string>
     <string name="settings_player_killDialog_title">Kill the app now to apply settings?</string>
 
+    <!-- NEW STRINGS -->
+    <string name="item_title_album">Album</string>
+    <string name="item_title_playlist">Playlist</string>
+    <string name="item_title_artist">Artist</string>
 </resources>
