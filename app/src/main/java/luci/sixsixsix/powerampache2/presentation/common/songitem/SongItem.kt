@@ -74,15 +74,19 @@ fun SongItem(
     song: Song,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
-    isEditMode: Boolean = true,
+    isEditMode: Boolean = false,
     isLandscape: Boolean = false,
     isSongDownloaded: Boolean = false,
     showDownloadedSongMarker: Boolean = true,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
     enableSwipeToRemove: Boolean = false,
+    isEditSongSelected: Boolean = false,
     onRemove: (Song) -> Unit = {},
-    onRightToLeftSwipe: (Song) -> Unit = {}
+    onRightToLeftSwipe: (Song) -> Unit = {},
+    onEditMoveUp: (Song) -> Unit = { _ -> },
+    onEditMoveDown: (Song) -> Unit = { _ -> },
+    onEditSelected: (Boolean, Song) -> Unit = { _, _ -> }
 ) {
     SwipeToDismissItem(
         item = song,
@@ -106,12 +110,10 @@ fun SongItem(
                     showDownloadedSongMarker = showDownloadedSongMarker,
                     subtitleString  = subtitleString,
                     songInfoThirdRow = songInfoThirdRow,
-                    checked = false,
-                    onCheckedChange = { isChecked, song ->
-
-                    },
-                    onMoveUp = {},
-                    onMoveDown = {}
+                    checked = isEditSongSelected,
+                    onCheckedChange = onEditSelected,
+                    onMoveUp = { onEditMoveUp(song) },
+                    onMoveDown = { onEditMoveDown(song) }
                 )
             }
         },
@@ -264,7 +266,5 @@ fun SongItemPreview() {
         songItemEventListener = {},
         subtitleString = SubtitleString.NOTHING,
         isSongDownloaded = true
-    ) {
-
-    }
+    )
 }

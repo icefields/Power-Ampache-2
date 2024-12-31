@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -104,7 +106,9 @@ fun PlaylistDetailScreen(
     mainViewModel: MainViewModel,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current.applicationContext
     val state = viewModel.state
+    val isNextcloud by viewModel.isNextcloudState.collectAsState()
     val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
     val currentPlaylistState by viewModel.playlistStateFlow.collectAsState()
 
@@ -112,6 +116,7 @@ fun PlaylistDetailScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
     var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
+    var isEditMode by remember { mutableStateOf(false) }
 
     var randomBackgroundTop by remember { mutableStateOf("") }
     var randomBackgroundBottom by remember { mutableStateOf("") }
@@ -149,11 +154,11 @@ fun PlaylistDetailScreen(
         EraseConfirmDialog(
             onDismissRequest = {
                 showDeleteSongDialog = null
-                viewModel.onEvent(PlaylistDetailEvent.OnRemoveSongDismiss)
+                viewModel.onEditEvent(PlaylistDetailsEditEvent.OnRemoveSongDismiss)
             },
             onConfirmation = {
                 showDeleteSongDialog = null
-                viewModel.onEvent(PlaylistDetailEvent.OnRemoveSong(songToRemove))
+                viewModel.onEditEvent(PlaylistDetailsEditEvent.OnRemoveSong(songToRemove))
             },
             dialogTitle = stringResource(id = R.string.warning_song_remove_title),
             dialogText = "Delete ${songToRemove.name} from playlist \n${currentPlaylistState.name}?"
@@ -197,8 +202,7 @@ fun PlaylistDetailScreen(
             contentScale = ContentScale.FillWidth,
             contentDescription = playlist.name,
         )
-        // full screen view to add a transparent black layer on top
-        // of the images for readability
+        // full screen view to add a transparent black layer on top of the images for readability
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -222,10 +226,26 @@ fun PlaylistDetailScreen(
                     isRatingVisible = !state.isGeneratedOrSmartPlaylist,
                     onRating = { playlist, rating ->
                         viewModel.onEvent(PlaylistDetailEvent.OnRatePlaylist(playlist, rating))
-                    }
-                ) {
-                    viewModel.onEvent(PlaylistDetailEvent.OnToggleSort)
-                }
+                    },
+                    onEdit = {
+                        if (isNextcloud.not())
+                            isEditMode = true
+                        else
+                            Toast.makeText(context,"Not implemented yet in Nextcloud Music", Toast.LENGTH_LONG).show()
+                    },
+                    onCancelEdit = { isEditMode = false },
+                    onConfirmEdit = {
+                        isEditMode = false
+                        viewModel.onEditEvent(PlaylistDetailsEditEvent.OnConfirmEdit)
+                    },
+                    onDeleteSelection = {
+                        viewModel.onEditEvent(PlaylistDetailsEditEvent.OnDeleteSelectedSongs)
+                    },
+                    onToggleSort = { viewModel.onEvent(PlaylistDetailEvent.OnToggleSort) },
+                    isEditMode = isEditMode,
+                    isUserOwner = viewModel.state.isUserOwner,
+                    showDeleteSelectionButton = viewModel.editState.selectedSongs.isEmpty().not()
+                )
             }
         ) {
             Surface(
@@ -287,7 +307,15 @@ fun PlaylistDetailScreen(
                                     viewModel.onEvent(PlaylistDetailEvent.OnSharePlaylist)
 
                                 PlaylistInfoViewEvents.DOWNLOAD_PLAYLIST -> if (!state.isLoading) {
-                                    mainViewModel.onEvent(MainEvent.OnDownloadSongs(viewModel.state.getSongList()))
+
+                                    // if in edit mode, only download selected songs
+                                    val songs = if (isEditMode.not()) {
+                                        viewModel.state.getSongList()
+                                    } else {
+                                        viewModel.editState.selectedSongs
+                                    }
+
+                                    mainViewModel.onEvent(MainEvent.OnDownloadSongs(songs))
                                 } else {
                                     viewModel.onEvent(PlaylistDetailEvent.OnPlaylistNotReadyDownload)
                                 }
@@ -302,7 +330,7 @@ fun PlaylistDetailScreen(
                                 PlaylistInfoViewEvents.ADD_PLAYLIST_TO_PLAYLIST ->
                                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(
                                         isOpen = true,
-                                        songs = viewModel.state.getSongList()
+                                        songs = if (isEditMode.not()) viewModel.state.getSongList() else viewModel.editState.selectedSongs
                                     )
 
                                 PlaylistInfoViewEvents.LIKE_PLAYLIST ->
@@ -330,6 +358,7 @@ fun PlaylistDetailScreen(
                                 SongItem(
                                     song = song,
                                     isLandscape = isLandscape,
+                                    isEditMode = isEditMode,
                                     isSongDownloaded = isOffline,
                                     songItemEventListener = { event ->
                                         when(event) {
@@ -361,11 +390,21 @@ fun PlaylistDetailScreen(
                                     subtitleString = SubtitleString.ARTIST,
                                     songInfoThirdRow = SongInfoThirdRow.Time,
                                     enableSwipeToRemove = viewModel.state.isUserOwner,
+                                    isEditSongSelected = viewModel.isEditSongSelected(song),
                                     onRemove = { songToRemove ->
                                         showDeleteSongDialog = songToRemove
                                     },
                                     onRightToLeftSwipe = {
                                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
+                                    },
+                                    onEditMoveUp = { selectedSong ->
+                                        viewModel.onEditEvent(PlaylistDetailsEditEvent.OnMoveUpSong(selectedSong))
+                                    },
+                                    onEditMoveDown = { selectedSong ->
+                                        viewModel.onEditEvent(PlaylistDetailsEditEvent.OnMoveDownSong(selectedSong))
+                                    },
+                                    onEditSelected = { isSelected, selectedSong ->
+                                        viewModel.onEditEvent(PlaylistDetailsEditEvent.OnSongSelected(isSelected, selectedSong))
                                     }
                                 )
                             }

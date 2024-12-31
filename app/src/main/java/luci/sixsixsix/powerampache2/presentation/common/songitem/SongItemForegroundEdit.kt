@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.common.songitem
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,13 +55,13 @@ fun SongItemForegroundEdit(
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
     checked: Boolean,
-    enabled: Boolean = true,
     onCheckedChange: (Boolean, Song) -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
 ) {
     Box(
         modifier = modifier
+            .border(width = (0.3).dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
             .padding(
                 horizontal = dimensionResource(id = R.dimen.songItem_row_paddingHorizontal),
                 vertical = dimensionResource(id = R.dimen.songItem_row_paddingVertical)

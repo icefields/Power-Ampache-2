@@ -206,4 +206,7 @@
     <string name="item_title_album">Album</string>
     <string name="item_title_playlist">Playlist</string>
     <string name="item_title_artist">Artista</string>
+
+    <string name="nextcloud_not_implemented">Funzione non implementata in Nextcloud Music</string>
+
 </resources>

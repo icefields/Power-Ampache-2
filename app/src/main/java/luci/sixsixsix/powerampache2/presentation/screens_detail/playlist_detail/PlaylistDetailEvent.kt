@@ -28,8 +28,6 @@ sealed class PlaylistDetailEvent {
     data object Refresh: PlaylistDetailEvent()
     data class Fetch(val playlist: Playlist): PlaylistDetailEvent()
     data class OnSongSelected(val song: Song): PlaylistDetailEvent()
-    data class OnRemoveSong(val song: Song): PlaylistDetailEvent()
-    data object OnRemoveSongDismiss: PlaylistDetailEvent()
     data object OnLikePlaylist: PlaylistDetailEvent()
     data object OnPlayPlaylist: PlaylistDetailEvent()
     data object OnSharePlaylist: PlaylistDetailEvent()
@@ -38,5 +36,4 @@ sealed class PlaylistDetailEvent {
     data object OnToggleSort: PlaylistDetailEvent()
     data class OnRatePlaylist(val playlist: Playlist, val rating: Int): PlaylistDetailEvent()
     data object OnPlaylistNotReadyDownload: PlaylistDetailEvent()
-
 }
