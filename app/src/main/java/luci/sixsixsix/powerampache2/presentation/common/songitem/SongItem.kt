@@ -19,17 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.common
+package luci.sixsixsix.powerampache2.presentation.common.songitem
 
-import android.os.Parcelable
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,7 +41,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,44 +56,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.totalTime
+import luci.sixsixsix.powerampache2.presentation.common.SongDropDownMenu
+import luci.sixsixsix.powerampache2.presentation.common.SwipeToDismissItem
 
 enum class SongInfoThirdRow { AlbumTitle, Time }
 
 enum class SubtitleString { NOTHING, ARTIST, ALBUM }
-
-enum class SongItemEvent {
-    PLAY_NEXT,
-    SHARE_SONG,
-    DOWNLOAD_SONG,
-    EXPORT_DOWNLOADED_SONG,
-    GO_TO_ALBUM,
-    GO_TO_ARTIST,
-    ADD_SONG_TO_QUEUE,
-    ADD_SONG_TO_PLAYLIST,
-}
-
-@Parcelize
-data class SongWrapper(
-    val song: Song,
-    val isOffline: Boolean
-): Parcelable
 
 @Composable
 fun SongItem(
     song: Song,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
+    isEditMode: Boolean = true,
     isLandscape: Boolean = false,
     isSongDownloaded: Boolean = false,
     showDownloadedSongMarker: Boolean = true,
@@ -111,13 +87,40 @@ fun SongItem(
     SwipeToDismissItem(
         item = song,
         foregroundView = {
-            SongItemMain(song, songItemEventListener, modifier, isLandscape, isSongDownloaded, showDownloadedSongMarker, subtitleString, songInfoThirdRow)
+            if (isEditMode.not()) {
+                SongItemMain(
+                    song = song,
+                    songItemEventListener = songItemEventListener,
+                    modifier = modifier,
+                    isLandscape  = isLandscape,
+                    isSongDownloaded  = isSongDownloaded,
+                    showDownloadedSongMarker = showDownloadedSongMarker,
+                    subtitleString  = subtitleString,
+                    songInfoThirdRow = songInfoThirdRow
+                )
+            } else {
+                SongItemForegroundEdit(
+                    song = song,
+                    modifier = modifier,
+                    isSongDownloaded  = isSongDownloaded,
+                    showDownloadedSongMarker = showDownloadedSongMarker,
+                    subtitleString  = subtitleString,
+                    songInfoThirdRow = songInfoThirdRow,
+                    checked = false,
+                    onCheckedChange = { isChecked, song ->
+
+                    },
+                    onMoveUp = {},
+                    onMoveDown = {}
+                )
+            }
         },
         enableSwipeToRemove = enableSwipeToRemove,
         onRemove = onRemove,
         onRightToLeftSwipe = onRightToLeftSwipe
     )
 }
+
 
 @Composable
 fun SongItemMain(
@@ -142,51 +145,22 @@ fun SongItemMain(
                 vertical = dimensionResource(id = R.dimen.songItem_row_paddingVertical)
             )
     ) {
-        if(!isLandscape) {
-            Card(
-                border = BorderStroke(
-                    width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
-                    color = MaterialTheme.colorScheme.background
-                ),
+        // show Image only in portrait mode
+        if(isLandscape.not()) {
+            SongAlbumCover(
                 modifier = Modifier
                     .weight(if (subtitleString == SubtitleString.NOTHING) 0.7f else 1f)
                     .background(Color.Transparent)
                     .align(Alignment.CenterVertically),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.Transparent
-                ),
-                elevation = CardDefaults.cardElevation(1.dp),
-                shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
-            ) {
-                Box(contentAlignment = Alignment.BottomEnd) {
-                    AsyncImage(
-                        model = song.imageUrl,
-                        contentScale = ContentScale.FillWidth,
-                        placeholder = painterResource(id = R.drawable.placeholder_album),
-                        error = painterResource(id = R.drawable.placeholder_album),
-                        contentDescription = song.title,
-                    )
-                    if(isSongDownloaded && showDownloadedSongMarker) {
-                        Card(modifier = Modifier.size(20.dp)) {
-                            Box(
-                                modifier = Modifier
-                                    .wrapContentSize()
-                                    .padding(2.dp)
-                                    .background(Color.Transparent),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(imageVector = Icons.Outlined.DownloadDone,
-                                    contentDescription = "download done")
-                            }
-                        }
-                    }
-                }
-            }
+                song = song,
+                isSongDownloaded = isSongDownloaded,
+                showDownloadedSongMarker = showDownloadedSongMarker
+            )
         }
 
         Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
 
-        InfoTextSection(
+        InfoTextSectionSongItem(
             modifier = Modifier
                 .weight(5f)
                 .padding(
@@ -221,7 +195,7 @@ fun SongItemMain(
     }
 
     Spacer(modifier = Modifier
-            .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer) * 2))
+        .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer) * 2))
 
     SongDropDownMenu(
         isContextMenuVisible = isContextMenuVisible,
@@ -233,67 +207,52 @@ fun SongItemMain(
         },
         onDismissRequest = {
             isContextMenuVisible = false
-        })
+        }
+    )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun InfoTextSection(
+private fun SongAlbumCover(
     modifier: Modifier,
     song: Song,
-    subtitleString: SubtitleString,
-    songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
+    isSongDownloaded: Boolean,
+    showDownloadedSongMarker: Boolean
 ) {
-    val songInfoThirdRowText = when(songInfoThirdRow) {
-        SongInfoThirdRow.AlbumTitle -> song.album.name
-        SongInfoThirdRow.Time -> song.totalTime()
-    }
-
-    Column(
-        modifier = modifier
+    Card(
+        border = BorderStroke(
+            width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
+            color = MaterialTheme.colorScheme.background
+        ),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        ),
+        elevation = CardDefaults.cardElevation(1.dp),
+        shape = RoundedCornerShape(dimensionResource(id = R.dimen.songItem_card_cornerRadius))
     ) {
-        Text(
-            modifier = Modifier.basicMarquee(),
-            text = song.title,
-            fontWeight = FontWeight.Normal,
-            fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_title),
-            maxLines = 1,
-        )
-        Spacer(modifier = Modifier
-                .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
-
-        when(subtitleString) {
-            SubtitleString.NOTHING -> {
-
+        Box(contentAlignment = Alignment.BottomEnd) {
+            AsyncImage(
+                model = song.imageUrl,
+                contentScale = ContentScale.FillWidth,
+                placeholder = painterResource(id = R.drawable.placeholder_album),
+                error = painterResource(id = R.drawable.placeholder_album),
+                contentDescription = song.title,
+            )
+            if(isSongDownloaded && showDownloadedSongMarker) {
+                Card(modifier = Modifier.size(20.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(2.dp)
+                            .background(Color.Transparent),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(imageVector = Icons.Outlined.DownloadDone,
+                            contentDescription = "download done")
+                    }
+                }
             }
-            SubtitleString.ARTIST -> Text(
-                modifier = Modifier.basicMarquee(),
-                text = song.artist.name,
-                fontWeight = FontWeight.Normal,
-                fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_artist),
-                maxLines = 1,
-                textAlign = TextAlign.Start
-            )
-            SubtitleString.ALBUM -> Text(
-                modifier = Modifier.basicMarquee(),
-                text = song.album.name,
-                fontWeight = FontWeight.Normal,
-                fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_artist),
-                maxLines = 1,
-                textAlign = TextAlign.Start
-            )
         }
-
-        Spacer(modifier = Modifier
-                .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
-        Text(
-            modifier = Modifier.basicMarquee(),
-            text = songInfoThirdRowText,
-            fontWeight = FontWeight.Light,
-            fontSize = fontDimensionResource(R.dimen.songItem_infoTextSection_textSize_album),
-            maxLines = 1,
-            textAlign = TextAlign.Start
-        )
     }
 }
 

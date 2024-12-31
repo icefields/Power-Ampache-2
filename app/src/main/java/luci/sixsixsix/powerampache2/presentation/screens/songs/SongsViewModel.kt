@@ -14,9 +14,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
-import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
-import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject
 
 @HiltViewModel
@@ -83,7 +81,8 @@ class SongsViewModel @Inject constructor(
                                         SongWrapper(
                                         song = song,
                                         isOffline = repository.isSongAvailableOffline(song)
-                                    ))
+                                    )
+                                    )
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("viewmodel.getSongs SONGS size at the end", state.songs.size)

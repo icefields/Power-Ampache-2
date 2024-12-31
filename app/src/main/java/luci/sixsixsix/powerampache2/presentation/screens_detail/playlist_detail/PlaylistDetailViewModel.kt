@@ -58,7 +58,7 @@ import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
-import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject
 
 @HiltViewModel
@@ -224,7 +224,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                         SongWrapper(
                                         song = song,
                                         isOffline = songsRepository.isSongAvailableOffline(song)
-                                    ))
+                                    )
+                                    )
                                 }
                                 state = state.copy(
                                     songs = songWrapperList.apply {
@@ -265,8 +266,10 @@ class PlaylistDetailViewModel @Inject constructor(
                     result.data?.let { songs ->
                         val songWrapperList = mutableListOf<SongWrapper>()
                         songs.forEach { song ->
-                            songWrapperList.add(SongWrapper(song = song,
-                                isOffline = songsRepository.isSongAvailableOffline(song)))
+                            songWrapperList.add(
+                                SongWrapper(song = song,
+                                isOffline = songsRepository.isSongAvailableOffline(song))
+                            )
                         }
                         state = state.copy(songs = songWrapperList)
                         L("PlaylistDetailViewModel.getRecentSongs size ${state.songs.size}")
@@ -298,7 +301,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                         SongWrapper(
                                             song = song,
                                             isOffline = songsRepository.isSongAvailableOffline(song)
-                                        ))
+                                        )
+                                    )
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getFlaggedSongs size ${state.songs.size}")
@@ -331,7 +335,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                         SongWrapper(
                                             song = song,
                                             isOffline = songsRepository.isSongAvailableOffline(song = song)
-                                        ))
+                                        )
+                                    )
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getFrequentSongs size ${state.songs.size}")
@@ -364,7 +369,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                         SongWrapper(
                                             song = song,
                                             isOffline = songsRepository.isSongAvailableOffline(song)
-                                        ))
+                                        )
+                                    )
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getHighestSongs size ${state.songs.size}")

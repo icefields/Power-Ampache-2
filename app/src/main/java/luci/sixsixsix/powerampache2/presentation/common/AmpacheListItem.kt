@@ -84,6 +84,7 @@ import luci.sixsixsix.powerampache2.domain.models.genresString
 import luci.sixsixsix.powerampache2.domain.models.isOwnerAdmin
 import luci.sixsixsix.powerampache2.domain.models.isOwnerSystem
 import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItemEvent
 
 data class InfoViewItemText(
     val firstRowText: String,
