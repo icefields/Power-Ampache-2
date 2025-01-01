@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SettingsVoice
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -57,6 +56,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.BACK_BUFFER_MAX
+import luci.sixsixsix.powerampache2.common.Constants.MAX_BUFFER_MAX
+import luci.sixsixsix.powerampache2.common.Constants.MIN_BUFFER_MAX
+import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_BUFFER_MAX
+import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_REBUFFER_MAX
 import luci.sixsixsix.powerampache2.presentation.common.ErrorView
 import luci.sixsixsix.powerampache2.presentation.common.TextWithSubtitle
 
@@ -120,7 +124,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_minBuffer_title,
                         R.string.settings_minBuffer_subtitle,
-                        0, 100,
+                        0, MIN_BUFFER_MAX,
                         minBuffer,
                         onMinBufferChange
                     )
@@ -130,7 +134,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_maxBuffer_title,
                         R.string.settings_maxBuffer_subtitle,
-                        10, 60 * 10,
+                        10, MAX_BUFFER_MAX,
                         maxBuffer,
                         onMaxBufferChange
                     )
@@ -140,7 +144,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_bufferForPlayback_title,
                         R.string.settings_bufferForPlayback_subtitle,
-                        0, 100,
+                        0, PLAYBACK_BUFFER_MAX,
                         bufferForPlayback,
                         onBufferForPlaybackChange
                     )
@@ -150,7 +154,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_bufferForPlaybackAfterRebuffer_title,
                         R.string.settings_bufferForPlaybackAfterRebuffer_subtitle,
-                        0, 100,
+                        0, PLAYBACK_REBUFFER_MAX,
                         bufferForPlaybackAfterRebuffer,
                         onBufferForPlaybackAfterRebufferChange
                     )
@@ -160,7 +164,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_backBuffer_title,
                         R.string.settings_backBuffer_subtitle,
-                        0, 100,
+                        0, BACK_BUFFER_MAX,
                         backBuffer,
                         onBackBufferChange
                     )

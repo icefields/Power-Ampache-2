@@ -58,6 +58,20 @@ object Constants {
     const val SERVICE_STOP_TIMEOUT = 2000L
     const val SEARCH_TIMEOUT = 1200L    // allow user to type before starting search
 
+    // PLAYER BUFFER CONSTANTS
+    // default values, in milliseconds
+    const val BACK_BUFFER_MS = 30000
+    const val BUFFER_MIN_MS = 60000
+    const val BUFFER_MAX_MS = 120000
+    const val BUFFER_FOR_PLAYBACK_MS = 30000
+    const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 35000
+    // max values, in seconds
+    const val MIN_BUFFER_MAX = 500
+    const val MAX_BUFFER_MAX = 700
+    const val BACK_BUFFER_MAX = 200
+    const val PLAYBACK_BUFFER_MAX = 200
+    const val PLAYBACK_REBUFFER_MAX = 300
+
     // ERROR CONSTANTS
     const val NOT_IMPLEMENTED_USER_ID = "666"
     const val ERROR_INT = -1

@@ -22,6 +22,11 @@
 package luci.sixsixsix.powerampache2.data
 
 import android.content.Context
+import luci.sixsixsix.powerampache2.common.Constants.BACK_BUFFER_MS
+import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
+import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_MS
+import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MAX_MS
+import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MIN_MS
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
@@ -33,14 +38,6 @@ private const val KEY_MIN_BUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTIN
 private const val KEY_MAX_BUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.maxBufferMs"
 private const val KEY_BUFFER_FOR_PLAYBACK = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.bufferForPlaybackMs"
 private const val KEY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.bufferForPlaybackAfterRebufferMs"
-
-
-// PLAYER BUFFERS
-private const val BACK_BUFFER_MS = 30000
-private const val BUFFER_MIN_MS = 60000
-private const val BUFFER_MAX_MS = 120000
-private const val BUFFER_FOR_PLAYBACK_MS = 30000
-private const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 35000
 
 @Singleton
 class SharedPreferencesManagerImpl @Inject constructor(
