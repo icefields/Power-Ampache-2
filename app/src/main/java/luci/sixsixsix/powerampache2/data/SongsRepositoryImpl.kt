@@ -463,8 +463,9 @@ class SongsRepositoryImpl @Inject constructor(
     }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }
 
     override suspend fun getSongUri(song: Song) =
-        dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri
-            ?: buildSongUrl(song)
+        (dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri)?.let {
+            "file://$it"
+        } ?: buildSongUrl(song)
 
     /**
      * Build Url for Ampache stream action

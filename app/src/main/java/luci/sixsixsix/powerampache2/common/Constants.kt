@@ -32,6 +32,7 @@ object Constants {
     const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 
     // NETWORK
+    const val AMPACHE_USER_AGENT = "PowerAmpache2-${BuildConfig.VERSION_NAME}"
     const val TIMEOUT_CONNECTION_S = 15L
     const val TIMEOUT_READ_S = 60L
     const val TIMEOUT_WRITE_S = 60L

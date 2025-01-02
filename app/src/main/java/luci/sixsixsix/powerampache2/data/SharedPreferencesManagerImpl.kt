@@ -22,12 +22,15 @@
 package luci.sixsixsix.powerampache2.data
 
 import android.content.Context
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.powerampache2.common.Constants.BACK_BUFFER_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MAX_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MIN_MS
 import luci.sixsixsix.powerampache2.common.WeakContext
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,11 +41,17 @@ private const val KEY_MIN_BUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTIN
 private const val KEY_MAX_BUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.maxBufferMs"
 private const val KEY_BUFFER_FOR_PLAYBACK = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.bufferForPlaybackMs"
 private const val KEY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.bufferForPlaybackAfterRebufferMs"
+private const val KEY_ALLOW_ALL_CERTIFICATES = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.alloallcertificates"
+private const val KEY_USE_OKHTTP_EXOPLAYER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.useokhttpforexoplayer"
 
 @Singleton
 class SharedPreferencesManagerImpl @Inject constructor(
     private val weakContext: WeakContext,
 ): SharedPreferencesManager {
+
+    // every time isAllowAllCertificates changes, this flow is triggered
+    private val _isAllowAllCertificatesFlow = MutableStateFlow(isAllowAllCertificates)
+    override val isAllowAllCertificatesFlow: StateFlow<Boolean> = _isAllowAllCertificatesFlow
 
     private fun getSharedPreferences() =
         weakContext.get()?.getSharedPreferences(KEY_SETTINGS_PREFERENCE, Context.MODE_PRIVATE)
@@ -53,6 +62,15 @@ class SharedPreferencesManagerImpl @Inject constructor(
 
     private fun setInt(key: String, value: Int) = getSharedPreferences()?.edit()?.run {
         putInt(key, value)
+        apply()
+    } ?: Unit
+
+    private fun getBool(key: String, defaultValue: Boolean) = getSharedPreferences()?.let { sp ->
+        sp.getBoolean(key, defaultValue)
+    } ?: defaultValue
+
+    private fun setBool(key: String, value: Boolean) = getSharedPreferences()?.edit()?.run {
+        putBoolean(key, value)
         apply()
     } ?: Unit
 
@@ -79,6 +97,15 @@ class SharedPreferencesManagerImpl @Inject constructor(
     override var bufferForPlaybackAfterRebufferMs: Int
         get() = getInt(KEY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER, BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
         set(value) = setInt(KEY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER, value)
+
+    override var isAllowAllCertificates: Boolean
+        get() = getBool(KEY_ALLOW_ALL_CERTIFICATES, false)
+        set(value) = setBool(KEY_ALLOW_ALL_CERTIFICATES, value)
+            .also { _isAllowAllCertificatesFlow.value = value }
+
+    override var useOkHttpForExoPlayer: Boolean
+        get() = getBool(KEY_USE_OKHTTP_EXOPLAYER, false)
+        set(value) = setBool(KEY_USE_OKHTTP_EXOPLAYER, value)
 
     override fun resetBufferDefaults() {
         backBuffer = BACK_BUFFER_MS

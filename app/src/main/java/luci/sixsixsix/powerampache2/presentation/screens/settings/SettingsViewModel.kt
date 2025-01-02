@@ -83,8 +83,8 @@ class SettingsViewModel @Inject constructor(
         minBuffer = sharedPreferencesManager.minBufferMs / 1000,
         maxBuffer = sharedPreferencesManager.maxBufferMs / 1000,
         bufferForPlayback = sharedPreferencesManager.bufferForPlaybackMs / 1000,
-        bufferForPlaybackAfterRebuffer = sharedPreferencesManager.bufferForPlaybackAfterRebufferMs / 1000
-
+        bufferForPlaybackAfterRebuffer = sharedPreferencesManager.bufferForPlaybackAfterRebufferMs / 1000,
+        useOkHttpExoplayer = sharedPreferencesManager.useOkHttpForExoPlayer
     )
 
     var playerSettingsStateFlow: MutableStateFlow<PlayerSettingsState> = MutableStateFlow(
@@ -214,6 +214,13 @@ class SettingsViewModel @Inject constructor(
 
             PlayerSettingsEvent.OnKillApp -> {
                 exitProcess(0)
+            }
+
+            is PlayerSettingsEvent.OnUseOkHttpExoPlayer -> {
+                sharedPreferencesManager.useOkHttpForExoPlayer = event.newValue
+                playerSettingsStateFlow.value = playerSettingsStateFlow.value.copy(
+                    useOkHttpExoplayer = event.newValue
+                )
             }
         }
     }
