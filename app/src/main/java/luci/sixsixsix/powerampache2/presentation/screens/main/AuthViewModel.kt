@@ -104,7 +104,6 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             sharedPreferencesManager.isAllowAllCertificatesFlow.filter { it }.collectLatest {
-                println("bbbb collectLatest disableSSLCertificateVerify $it")
                 disableSSLCertificateVerify()
             }
         }
@@ -126,7 +125,6 @@ class AuthViewModel @Inject constructor(
                 fullName = event.fullName
             )
             is AuthEvent.OnAllowAllCerts -> {
-                println("bbbb AuthEvent.OnAllowAllCer")
                 sharedPreferencesManager.isAllowAllCertificates = event.allow
             }
         }

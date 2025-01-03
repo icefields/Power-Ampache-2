@@ -58,19 +58,6 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
     @Inject
     lateinit var imageLoaderOkHttpClient: AmpacheOkHttpClientBuilder
 
-    @Inject
-    lateinit var sharedPreferencesManager: SharedPreferencesManager
-
-    override fun onCreate() {
-        super.onCreate()
-
-        // TODO: if (isCleartextEnabledFromSharedPreferencePlaceholder) then
-        if (sharedPreferencesManager.isAllowAllCertificates) {
-            //disableSSLCertificateVerify()
-        }
-        // TODO: also call this function from switch
-    }
-
     override fun attachBaseContext(base:Context) {
         super.attachBaseContext(base)
 

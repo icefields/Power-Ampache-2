@@ -66,11 +66,7 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideRetrofit(
-//        interceptor: Interceptor,
-//        ampacheOkHttpClientBuilder: AmpacheOkHttpClientBuilder,
-        okHttpClient: OkHttpClient
-    ): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
 //        val okHttpClient = ampacheOkHttpClientBuilder(false)
 //            .retryOnConnectionFailure(true)
 //            .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
@@ -182,20 +178,6 @@ object AppModule {
             }
             it.build()
         }
-
-    /*
-                    //
-                //  do I need to reset to okhttp data source?
-                //  javadocs say setMediaSource will clear the playlist
-//                val currentMediaItem = player.currentMediaItem
-//                val currentUri = currentMediaItem?.playbackProperties?.uri
-//                L("aaaa $currentUri")
-//                if (currentUri.toString().startsWith("http").not() && currentMediaItem != null) {
-//                    player.setMediaSource(
-//                        DefaultMediaSourceFactory(context).setDataSourceFactory(FileDataSource.Factory()).createMediaSource(currentMediaItem)
-//                    )
-//                }
-     */
 
     //@ServiceScoped
     @Singleton

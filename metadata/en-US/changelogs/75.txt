@@ -1,0 +1,9 @@
+VERSION 1.01
+— [NEW FEATURE] added playlist editor
+— [NEW FEATURE] added option to accept self-signed certificates at login
+— [NEW FEATURE] added option to use advanced audio player (uses OkHttp)
+— addressed reported bugs
+— added Russian translations
+— localized remaining strings
+— UI fixes
+— improved fine tuning settings for player buffers
