@@ -89,8 +89,8 @@
     <string name="settings_normalizeVolume_subtitle">Принудительное выравнивание максимального уровня громкости</string>
     <string name="settings_monoAudio_title">Моно-режим</string>
     <string name="settings_monoAudio_subtitle">Включить миксдаун обоих каналов в моно (одинаковый звук в обоих каналах)</string>
-    <string name="settings_smartDownloads_title">Умноеили проверьте соединение.</string>
-    <string name="settings_smartDownloads_subtitle">Автоматически загружать наиболее часто воспроизводимые треки во время "простоя" устройства</string>
+    <string name="settings_smartDownloads_title">\"Умная\" автозагрузка</string>
+    <string name="settings_smartDownloads_subtitle">Автоматически загружать наиболее часто воспроизводимые треки во время \"простоя\" устройства</string>
     <string name="settings_checkUpdatesNow_title">Проверить наличие обновлений</string>
     <string name="settings_autoCheckUpdates_title">Автоматически проверять наличие обновлений</string>
     <string name="settings_debugLogs_title">Логи отладки</string>
@@ -125,7 +125,7 @@
 
     <!-- SETTINGS PLAYER -->
     <string name="settings_playerAdvancedSettings_title">Продвинутые настройки плеера\n(потребуется перезапуск)</string>
-    <string name="settings_playerAdvancedSettings_subtitle">Изменение данных настроек может помочь с проблемами воспроизведения, например с "заиканием", остановками, паузами между треками и т.п.</string>
+    <string name="settings_playerAdvancedSettings_subtitle">Изменение данных настроек может помочь с проблемами воспроизведения, например с \"заиканием\", остановками, паузами между треками и т.п.</string>
     <string name="settings_playerAdvancedSettings_warning">Для применения настроек буффера перезапустите приложение.</string>
     <string name="settings_backBuffer_title">Back-буфер</string>
     r
@@ -147,7 +147,7 @@
     <string name="miniPlayer_reset_alert_title">ОСТАНОВИТЬ/CБРОСИТЬ</string>
     <string name="dialog_create">СОЗДАТЬ</string>
     <string name="warning_playlist_download">Скачивание станет доступно, когда плейлист полностью загрузится</string>
-    <string name="warning_playlist_server">Добавление треков… (на серверах с версией ниже 6.3 процесс может занять несколько минут) </string>
+    <string name="warning_playlist_server">Добавление треков... (на серверах с версией ниже 6.3 процесс может занять несколько минут) </string>
     <string name="warning_playlist_adding">Треки всё ещё добавляются в плейлист.\nЕсли Вы выйдите, операция будет прервана.</string>
     <string name="warning_playlist_adding_title">Прервать операцию?</string>
     <string name="warning_playlist_adding_stay">Нет</string>
@@ -198,7 +198,7 @@
     <string name="home_playlist_favourites_title">Любимые</string>
 
     <string name="dialog_deletePlaylist_title">УДАЛИТЬ ПЛЭЙЛИСТ</string>
-    <string name="dialog_deletePlaylist_text">Удалить \"%s\"?</string>
+    <string name="dialog_deletePlaylist_text">Удалить %s?</string>
 
     <!-- NEW STRINGS -->
     <string name="item_title_album">Альбом</string>
@@ -217,7 +217,7 @@
     <string name="settings_player_useOkHttp_subtitle">Может помочь при ошибках подключения во время воспроизведения, а так же при ответе 302 от сервера.\nВНИМАНИЕ: Вы потеряете возможность вопроизводить скаанные треки.\nТребует перезапуска приложения для применения.</string>
 
     <!-- %s represents the title of the song -->
-    <string name="warning_song_remove_subtitle">Удалить \'%s\' из загрузок?</string>
+    <string name="warning_song_remove_subtitle">Удалить \"%s\" из загрузок?</string>
 
     <string name="error_user_notEnabled">Пользователь не активирован на сервере. Возможно Вам придёт письмо об активации на почту, в противном случае свяжитесь с администратором сервера.</string>
     <string name="error_cannotConnect">Произошла ошибка подключения к серверу или источнику.\nВыберите другой трек или проверьте соединение.</string>
