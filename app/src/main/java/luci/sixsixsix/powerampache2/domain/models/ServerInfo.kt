@@ -29,6 +29,5 @@ class ServerInfo (
     var server: String? = null,
     var version: String? = null,
     var compatible: String? = null,
-): Parcelable {
-    fun isNextcloud() = server?.lowercase()?.contains("nextcloud music") == true
-}
+    var isNextcloud: Boolean = false
+): Parcelable

@@ -25,6 +25,7 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,8 +34,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.SettingsVoice
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -57,7 +58,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.BACK_BUFFER_MAX
+import luci.sixsixsix.powerampache2.common.Constants.MAX_BUFFER_MAX
+import luci.sixsixsix.powerampache2.common.Constants.MIN_BUFFER_MAX
+import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_BUFFER_MAX
+import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_REBUFFER_MAX
 import luci.sixsixsix.powerampache2.presentation.common.ErrorView
+import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
 import luci.sixsixsix.powerampache2.presentation.common.TextWithSubtitle
 
 @Composable
@@ -68,11 +75,13 @@ fun PlayerSettingsView(
     maxBuffer: Int,
     bufferForPlayback: Int,
     bufferForPlaybackAfterRebuffer: Int,
+    isUseOkHttpPlayer: Boolean,
     onBackBufferChange: (newValue: Int) -> Unit,
     onMinBufferChange: (newValue: Int) -> Unit,
     onMaxBufferChange: (newValue: Int) -> Unit,
     onBufferForPlaybackChange: (newValue: Int) -> Unit,
     onBufferForPlaybackAfterRebufferChange: (newValue: Int) -> Unit,
+    onUseOkHttpPlayer: (newValue: Boolean) -> Unit,
     onResetValuesClick: () -> Unit,
     onKillAppClick: () -> Unit,
 ) {
@@ -81,7 +90,9 @@ fun PlayerSettingsView(
 
     Column(modifier = modifier) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().clickable {
+                showSettings = !showSettings
+            },
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextWithSubtitle(
@@ -92,7 +103,7 @@ fun PlayerSettingsView(
                     showSettings = !showSettings
                 }
             )
-            Icon(Icons.Outlined.SettingsVoice,
+            Icon(Icons.Outlined.ArrowDropDown,
                 contentDescription = stringResource(R.string.settings_playerAdvancedSettings_title)
             )
         }
@@ -120,7 +131,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_minBuffer_title,
                         R.string.settings_minBuffer_subtitle,
-                        0, 100,
+                        0, MIN_BUFFER_MAX,
                         minBuffer,
                         onMinBufferChange
                     )
@@ -130,7 +141,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_maxBuffer_title,
                         R.string.settings_maxBuffer_subtitle,
-                        10, 60 * 10,
+                        10, MAX_BUFFER_MAX,
                         maxBuffer,
                         onMaxBufferChange
                     )
@@ -140,7 +151,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_bufferForPlayback_title,
                         R.string.settings_bufferForPlayback_subtitle,
-                        0, 100,
+                        0, PLAYBACK_BUFFER_MAX,
                         bufferForPlayback,
                         onBufferForPlaybackChange
                     )
@@ -150,7 +161,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_bufferForPlaybackAfterRebuffer_title,
                         R.string.settings_bufferForPlaybackAfterRebuffer_subtitle,
-                        0, 100,
+                        0, PLAYBACK_REBUFFER_MAX,
                         bufferForPlaybackAfterRebuffer,
                         onBufferForPlaybackAfterRebufferChange
                     )
@@ -160,9 +171,18 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_backBuffer_title,
                         R.string.settings_backBuffer_subtitle,
-                        0, 100,
+                        0, BACK_BUFFER_MAX,
                         backBuffer,
                         onBackBufferChange
+                    )
+
+                    Spacer(Modifier.height(spacerHeight))
+
+                    PowerAmpSwitch(
+                        title = R.string.settings_player_useOkHttp_title,
+                        subtitle = R.string.settings_player_useOkHttp_subtitle,
+                        checked = isUseOkHttpPlayer,
+                        onCheckedChange = onUseOkHttpPlayer,
                     )
 
                     Spacer(Modifier.height(22.dp))
@@ -268,6 +288,8 @@ fun PlayerSettingsViewPreview() {
         onBufferForPlaybackChange = {},
         onResetValuesClick = {},
         onBufferForPlaybackAfterRebufferChange = {},
-        onKillAppClick = {}
+        onKillAppClick = {},
+        isUseOkHttpPlayer = true,
+        onUseOkHttpPlayer = {}
     )
 }

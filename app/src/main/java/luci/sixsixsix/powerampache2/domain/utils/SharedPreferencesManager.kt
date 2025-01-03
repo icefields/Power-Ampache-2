@@ -21,12 +21,18 @@
  */
 package luci.sixsixsix.powerampache2.domain.utils
 
+import kotlinx.coroutines.flow.StateFlow
+
 interface SharedPreferencesManager {
     var backBuffer: Int
     var minBufferMs: Int
     var maxBufferMs: Int
     var bufferForPlaybackMs: Int
     var bufferForPlaybackAfterRebufferMs: Int
+
+    var isAllowAllCertificates: Boolean
+    var useOkHttpForExoPlayer: Boolean
+    val isAllowAllCertificatesFlow: StateFlow<Boolean>
 
     fun resetBufferDefaults()
 }

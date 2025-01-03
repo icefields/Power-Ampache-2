@@ -214,11 +214,15 @@ fun SettingsScreen(
         onKillAppClick = {
             showKillDialog = true
         },
+        onUseOkHttpExoPlayer = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnUseOkHttpExoPlayer(newValue = it))
+        },
         backBuffer = playerSettingsState.backBuffer,
         minBuffer = playerSettingsState.minBuffer,
         maxBuffer = playerSettingsState.maxBuffer,
         bufferForPlayback = playerSettingsState.bufferForPlayback,
-        bufferForPlaybackAfterRebuffer = playerSettingsState.bufferForPlaybackAfterRebuffer
+        bufferForPlaybackAfterRebuffer = playerSettingsState.bufferForPlaybackAfterRebuffer,
+        isUseOkHttpPlayer = playerSettingsState.useOkHttpExoplayer
     )
 }
 
@@ -252,6 +256,7 @@ fun SettingsScreenContent(
     maxBuffer: Int,
     bufferForPlayback: Int,
     bufferForPlaybackAfterRebuffer: Int,
+    isUseOkHttpPlayer: Boolean,
     onThemeSelected: (selected: PowerAmpTheme) -> Unit,
     onStreamingQualitySelected: (selected: StreamingQuality) -> Unit,
     onEnableLoggingValueChange: (newValue: Boolean) -> Unit,
@@ -271,6 +276,7 @@ fun SettingsScreenContent(
     onMaxBufferChange: (newValue: Int) -> Unit,
     onBufferForPlaybackChange: (newValue: Int) -> Unit,
     onBufferForPlaybackAfterRebufferChange: (newValue: Int) -> Unit,
+    onUseOkHttpExoPlayer: (newValue: Boolean) -> Unit,
     onResetValuesClick: () -> Unit,
     onKillAppClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -428,7 +434,9 @@ fun SettingsScreenContent(
                     bufferForPlayback = bufferForPlayback,
                     bufferForPlaybackAfterRebuffer = bufferForPlaybackAfterRebuffer,
                     onResetValuesClick = onResetValuesClick,
-                    onKillAppClick = onKillAppClick
+                    onKillAppClick = onKillAppClick,
+                    onUseOkHttpPlayer = onUseOkHttpExoPlayer,
+                    isUseOkHttpPlayer = isUseOkHttpPlayer
                 )
                 22 -> TextWithSubtitle(
                     modifier = Modifier
@@ -655,6 +663,6 @@ fun PreviewSettingsScreen() {
         bufferForPlaybackAfterRebuffer = 400,
         onMaxBufferChange = {},
         onResetValuesClick = {},
-        onKillAppClick = {}
+        onKillAppClick = {}, isUseOkHttpPlayer = true, onUseOkHttpExoPlayer = {}
     )
 }

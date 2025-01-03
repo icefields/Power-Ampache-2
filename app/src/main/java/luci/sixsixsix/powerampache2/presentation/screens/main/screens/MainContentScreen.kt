@@ -377,7 +377,7 @@ fun MainSearchBar(
             mainViewModel.onEvent(MainEvent.OnSearchQueryChange(it))
         },
         placeholder = {
-            Text(text = stringResource(id = R.string.topBar_search_hint))
+            Text(text = stringResource(id = R.string.topBar_search_hint), maxLines = 1)
         },
         enabled = true,
         onSearch = {

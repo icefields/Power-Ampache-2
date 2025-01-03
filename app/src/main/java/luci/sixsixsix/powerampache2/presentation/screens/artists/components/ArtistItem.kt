@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.artists.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,7 +50,6 @@ import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Artist
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArtistItem(
     artist: Artist,

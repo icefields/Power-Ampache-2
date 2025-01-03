@@ -25,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.common.Constants.CONFIG_URL
+import luci.sixsixsix.powerampache2.common.Constants.AMPACHE_USER_AGENT
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -102,9 +103,8 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
     }
 
     private fun requestWithUserAgent(request: Request) = request.newBuilder()
-        .addHeader("User-Agent", "PowerAmpache2-${BuildConfig.VERSION_NAME}")
+        .addHeader("User-Agent", AMPACHE_USER_AGENT)
         .build()
-
 }
 
 private val errorStr = ServerUrlNotInitializedException().musicError.toJson()

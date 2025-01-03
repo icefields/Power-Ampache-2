@@ -103,7 +103,7 @@ fun QueueScreen(
                 ),
                 title = {
                     Text(
-                        text = "Queue",
+                        text = stringResource(R.string.queue),
                         maxLines = 1,
                         fontWeight = FontWeight.Normal,
                     )

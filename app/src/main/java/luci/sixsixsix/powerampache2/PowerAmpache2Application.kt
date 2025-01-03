@@ -33,15 +33,20 @@ import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
-import coil.util.DebugLogger
 import dagger.hilt.android.HiltAndroidApp
+import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
+import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_READ_S
+import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_WRITE_S
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
+import luci.sixsixsix.powerampache2.di.AmpacheOkHttpClientBuilder
+import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import org.acra.config.mailSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -49,6 +54,22 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
 
     @Inject
     lateinit var workerFactory: SongDownloadWorkerFactory
+
+    @Inject
+    lateinit var imageLoaderOkHttpClient: AmpacheOkHttpClientBuilder
+
+    @Inject
+    lateinit var sharedPreferencesManager: SharedPreferencesManager
+
+    override fun onCreate() {
+        super.onCreate()
+
+        // TODO: if (isCleartextEnabledFromSharedPreferencePlaceholder) then
+        if (sharedPreferencesManager.isAllowAllCertificates) {
+            //disableSSLCertificateVerify()
+        }
+        // TODO: also call this function from switch
+    }
 
     override fun attachBaseContext(base:Context) {
         super.attachBaseContext(base)
@@ -73,6 +94,9 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
         }
     }
 
+    /**
+     * TODO: move to appmodule and inject with hilt
+     */
     override fun newImageLoader(): ImageLoader = ImageLoader(this).newBuilder()
         .crossfade(200)
         .placeholder(R.drawable.placeholder_album)
@@ -80,6 +104,14 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
         .diskCachePolicy(CachePolicy.ENABLED)
         .memoryCachePolicy(CachePolicy.ENABLED)
         .networkCachePolicy(CachePolicy.ENABLED)
+        .okHttpClient(
+            imageLoaderOkHttpClient(true)
+                //.retryOnConnectionFailure(true)
+                .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
+                .readTimeout(TIMEOUT_READ_S, TimeUnit.SECONDS)
+                .writeTimeout(TIMEOUT_WRITE_S, TimeUnit.SECONDS)
+                .build()
+        )
         //.respectCacheHeaders(false)
         .memoryCache {
             MemoryCache.Builder(this)

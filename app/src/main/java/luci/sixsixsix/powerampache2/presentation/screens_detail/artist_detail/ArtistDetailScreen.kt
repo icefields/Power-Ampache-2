@@ -67,6 +67,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
@@ -116,13 +117,16 @@ fun ArtistDetailScreen(
         }
     }
 
+    val artUrlTop = generateArtistArtUrl(state.artist, state.albums)
+    val artUrlBottom = generateArtistArtUrl(state.artist, state.albums)
+
     val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
         AsyncImage(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
-            model = state.artist.artUrl,
+            model = artUrlBottom,
             contentScale = ContentScale.Crop,
             placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
@@ -132,7 +136,7 @@ fun ArtistDetailScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
-            model = state.artist.artUrl,
+            model = artUrlTop,
             contentScale = ContentScale.FillWidth,
             placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
@@ -219,6 +223,13 @@ fun ArtistDetailScreen(
         }
     }
 }
+
+fun generateArtistArtUrl(artist: Artist, albums: List<Album>) = if(artist.artUrl.isNullOrBlank()) {
+    if (albums.isNotEmpty()) {
+        albums[albums.indices.random()].artUrl
+    } else ""
+} else artist.artUrl
+
 
 private val albumBackgroundGradient
     @Composable

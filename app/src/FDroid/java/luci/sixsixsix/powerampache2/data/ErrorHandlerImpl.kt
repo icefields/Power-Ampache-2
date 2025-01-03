@@ -102,16 +102,16 @@ class ErrorHandlerImpl @Inject constructor(
                 when (e) {
                     is UserNotEnabledException -> {
                         L("aaaa user not enabled $exceptionString")
-                        readableMessage = "User not enabled, please check your email for the account confirmation link or enable the user from the server"
+                        readableMessage = applicationContext.getString(R.string.error_user_notEnabled)
                         "PlaybackException \n $exceptionString"
                     }
                     is HttpDataSource.InvalidResponseCodeException -> {
-                        readableMessage = "Problem connecting to the server or data source. \nPlay a different track or check your connection\nResponse code: ${e.responseCode}"
+                        readableMessage = "${applicationContext.getString(R.string.error_cannotConnect)}\nResponse code: ${e.responseCode}"
                         "HttpDataSource.InvalidResponseCodeException \n$label\n $exceptionString"
                     }
 
                     is HttpDataSource.HttpDataSourceException -> {
-                        readableMessage = "Problem connecting to the server or data source. \nPlay a different track or check your connection"
+                        readableMessage = applicationContext.getString(R.string.error_cannotConnect)
                         "HttpDataSource.HttpDataSourceException \n$readableMessage\n $exceptionString"
                     }
 
