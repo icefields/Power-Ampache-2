@@ -391,7 +391,7 @@ fun PlaylistDetailScreen(
                                     songInfoThirdRow = SongInfoThirdRow.Time,
                                     enableSwipeToRemove = viewModel.state.isUserOwner,
                                     isEditSongSelected = viewModel.isEditSongSelected(song),
-                                    isEditEnabled = viewModel.state.isLoading.not() || viewModel.state.isPlaylistRemoveLoading.not(),
+                                    isEditEnabled = viewModel.state.isLoading.not() && viewModel.state.isPlaylistRemoveLoading.not(),
                                     onRemove = { songToRemove ->
                                         showDeleteSongDialog = songToRemove
                                     },

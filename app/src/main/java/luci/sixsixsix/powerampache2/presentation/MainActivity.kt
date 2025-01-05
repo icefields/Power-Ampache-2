@@ -143,9 +143,7 @@ class MainActivity : ComponentActivity() {
         if (intent.action == SpinItWidgetProvider.WIDGET_ACTION_SPIN_IT) {
             spinItJob?.cancel()
             spinItJob = lifecycleScope.launch {
-                println("aaaa onNewIntent waiting ${authViewModel.isLoginCompletedStateFlow.value}")
                 val value = authViewModel.isLoginCompletedStateFlow.first { it }
-                println("aaaa onNewIntent $value")
                 mainViewModel.onEvent(MainEvent.OnFabPress)
             }
         } else {

@@ -6,20 +6,14 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.presentation.MainActivity
-import javax.inject.Inject
 
-@AndroidEntryPoint
+// @AndroidEntryPoint
 class SpinItWidgetProvider : AppWidgetProvider() {
 
-    @Inject
-    lateinit var musicRepository: MusicRepository
+//    @Inject
+//    lateinit var musicRepository: MusicRepository
 
     override fun onUpdate(
         context: Context,
@@ -44,11 +38,11 @@ class SpinItWidgetProvider : AppWidgetProvider() {
         }
 
         // Launch a coroutine to handle background work
-        CoroutineScope(Dispatchers.Main).launch {
-            println("aaaa ping start")
-            musicRepository.ping()
-            println("aaaa ping end")
-        }
+//        CoroutineScope(Dispatchers.Main).launch {
+//            println("aaaa ping start")
+//            musicRepository.ping()
+//            println("aaaa ping end")
+//        }
     }
 
     companion object {
