@@ -32,6 +32,7 @@ object Constants {
     const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 
     // NETWORK
+    const val AMPACHE_USER_AGENT = "PowerAmpache2-${BuildConfig.VERSION_NAME}"
     const val TIMEOUT_CONNECTION_S = 15L
     const val TIMEOUT_READ_S = 60L
     const val TIMEOUT_WRITE_S = 60L
@@ -57,6 +58,20 @@ object Constants {
     const val HOME_LOADING_TIMEOUT = 1000L
     const val SERVICE_STOP_TIMEOUT = 2000L
     const val SEARCH_TIMEOUT = 1200L    // allow user to type before starting search
+
+    // PLAYER BUFFER CONSTANTS
+    // default values, in milliseconds
+    const val BACK_BUFFER_MS = 30000
+    const val BUFFER_MIN_MS = 60000
+    const val BUFFER_MAX_MS = 120000
+    const val BUFFER_FOR_PLAYBACK_MS = 30000
+    const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 35000
+    // max values, in seconds
+    const val MIN_BUFFER_MAX = 500
+    const val MAX_BUFFER_MAX = 700
+    const val BACK_BUFFER_MAX = 200
+    const val PLAYBACK_BUFFER_MAX = 200
+    const val PLAYBACK_REBUFFER_MAX = 300
 
     // ERROR CONSTANTS
     const val NOT_IMPLEMENTED_USER_ID = "666"

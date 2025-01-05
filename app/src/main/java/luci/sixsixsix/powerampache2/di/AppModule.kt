@@ -27,8 +27,10 @@ import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.room.Room
 import dagger.Module
@@ -64,14 +66,14 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideRetrofit(interceptor: Interceptor): Retrofit {
-        val okHttpClient = OkHttpClient.Builder()
-            .retryOnConnectionFailure(true)
-            .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
-            .readTimeout(TIMEOUT_READ_S, TimeUnit.SECONDS)
-            .writeTimeout(TIMEOUT_WRITE_S, TimeUnit.SECONDS)
-            .addInterceptor(interceptor)
-            .build()
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+//        val okHttpClient = ampacheOkHttpClientBuilder(false)
+//            .retryOnConnectionFailure(true)
+//            .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
+//            .readTimeout(TIMEOUT_READ_S, TimeUnit.SECONDS)
+//            .writeTimeout(TIMEOUT_WRITE_S, TimeUnit.SECONDS)
+//            .addInterceptor(interceptor)
+//            .build()
 
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -79,6 +81,24 @@ object AppModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideOkHttp(
+        interceptor: Interceptor,
+        ampacheOkHttpClientBuilder: AmpacheOkHttpClientBuilder
+    ) = ampacheOkHttpClientBuilder(false)
+        .retryOnConnectionFailure(true)
+        .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
+        .readTimeout(TIMEOUT_READ_S, TimeUnit.SECONDS)
+        .writeTimeout(TIMEOUT_WRITE_S, TimeUnit.SECONDS)
+        .addInterceptor(interceptor)
+        .build()
+
+
+    @Provides
+    fun provideAmpacheOkHttpClientBuilder(sharedPreferencesManager: SharedPreferencesManager): AmpacheOkHttpClientBuilder =
+        AmpacheOkHttpClientBuilder(sharedPreferencesManager)
 
     @Provides
     fun provideDateMapper(): DateMapper =
@@ -128,8 +148,9 @@ object AppModule {
     fun providePlayer(
         @ApplicationContext context: Context,
         audioAttributes: AudioAttributes,
-        sharedPreferencesManager: SharedPreferencesManager
-    ): ExoPlayer = ExoPlayer.Builder(context)
+        sharedPreferencesManager: SharedPreferencesManager,
+        ampacheOkHttpClientBuilder: AmpacheOkHttpClientBuilder
+    ) = ExoPlayer.Builder(context)
         .setAudioAttributes(audioAttributes, true)
         .setHandleAudioBecomingNoisy(true)
         .setTrackSelector(DefaultTrackSelector(context))
@@ -144,7 +165,19 @@ object AppModule {
                 sharedPreferencesManager.bufferForPlaybackAfterRebufferMs
             )
             .build())
-        .build()
+        .let {
+            if (sharedPreferencesManager.useOkHttpForExoPlayer) {
+                it.setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(
+                    OkHttpDataSource.Factory(ampacheOkHttpClientBuilder( addDefaultHeaderInterceptor = true)
+                        .connectTimeout(20, TimeUnit.SECONDS) // try 30 too
+                        .readTimeout(90, TimeUnit.SECONDS)
+                        .writeTimeout(20, TimeUnit.SECONDS)
+                        .build()
+                    )
+                ))
+            }
+            it.build()
+        }
 
     //@ServiceScoped
     @Singleton

@@ -12,14 +12,14 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val composeVersion = "1.7.5" // rootProject.extra.get("compose_version") as String
+val composeVersion = "1.7.6" // rootProject.extra.get("compose_version") as String
 val lifecycleVersion = "2.8.7"
 val retrofit2Version = "2.11.0"
 val okhttpVersion = "5.0.0-alpha.14"
 val coroutinesVersion = "1.8.1"
 val exoplayerVersion = "2.19.1"
 val composeNavVersion = "1.11.7"
-val media3Version = "1.5.0"
+val media3Version = "1.5.1"
 val hiltVersion = "1.2.0"
 val roomVersion = "2.6.1"
 
@@ -61,9 +61,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 71
-        versionName = "1.00-71"
-        val versionQuote = "This version is powered a centered hexagonal number, Marsenne prime and Lutetium . ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"
+        versionCode = 75
+        versionName = "1.01-00"
+        val versionQuote = "This version is powered by a globular cluster in the constellation Sagittarius and Rhenium . ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -304,6 +304,7 @@ dependencies {
     implementation("androidx.media3:media3-common:$media3Version")
     implementation("androidx.media3:media3-session:$media3Version")
     implementation("androidx.media3:media3-ui:$media3Version")
+    implementation("androidx.media3:media3-datasource-okhttp:$media3Version")
 
     // --- Coil --- //
     implementation("io.coil-kt:coil-compose:2.7.0")

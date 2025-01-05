@@ -30,7 +30,9 @@ import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
@@ -39,10 +41,13 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
+import luci.sixsixsix.powerampache2.data.remote.disableSSLCertificateVerify
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
+import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,11 +55,15 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val repository: MusicRepository,
     private val playlistManager: MusicPlaylistManager,
+    private val sharedPreferencesManager: SharedPreferencesManager,
     pingScheduler: AlarmScheduler,
     private val application: Application,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
     var state by savedStateHandle.saveable { mutableStateOf(AuthState()) }
+
+    var isAllowAllCerts = sharedPreferencesManager.isAllowAllCertificatesFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), sharedPreferencesManager.isAllowAllCertificates)
+        private set
 
     val sessionStateFlow = repository.sessionLiveData
         .distinctUntilChanged()
@@ -92,6 +101,12 @@ class AuthViewModel @Inject constructor(
                 }
             }
         }
+
+        viewModelScope.launch {
+            sharedPreferencesManager.isAllowAllCertificatesFlow.filter { it }.collectLatest {
+                disableSSLCertificateVerify()
+            }
+        }
     }
 
     fun onEvent(event: AuthEvent) {
@@ -109,6 +124,9 @@ class AuthViewModel @Inject constructor(
                 password = event.password,
                 fullName = event.fullName
             )
+            is AuthEvent.OnAllowAllCerts -> {
+                sharedPreferencesManager.isAllowAllCertificates = event.allow
+            }
         }
     }
 

@@ -27,6 +27,7 @@ sealed class PlayerSettingsEvent {
     data object OnKillApp: PlayerSettingsEvent()
     data class OnMinBufferChange(val newValue: Int): PlayerSettingsEvent()
     data class OnMaxBufferMsChange(val newValue: Int): PlayerSettingsEvent()
+    data class OnUseOkHttpExoPlayer(val newValue: Boolean): PlayerSettingsEvent()
     data class OnBufferForPlaybackChange(val newValue: Int): PlayerSettingsEvent()
     data class OnBufferForPlaybackAfterRebufferChange(val newValue: Int): PlayerSettingsEvent()
 }

@@ -28,5 +28,6 @@ sealed class AuthEvent {
     data class OnChangePassword(val password: String): AuthEvent()
     data class OnChangeServerUrl(val url: String): AuthEvent()
     data class OnChangeAuthToken(val token: String): AuthEvent()
+    data class OnAllowAllCerts(val allow: Boolean): AuthEvent()
     data class SignUp(val serverUrl: String, val username: String, val password: String, val email: String, val fullName: String): AuthEvent()
 }

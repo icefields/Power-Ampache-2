@@ -79,7 +79,7 @@ class PlaylistDetailViewModel @Inject constructor(
     var editState by mutableStateOf(PlaylistEditState(listOf()))
 
     val isNextcloudState = musicRepository.serverInfoStateFlow.filterNotNull().map { serverInfo ->
-        serverInfo.isNextcloud()
+        serverInfo.isNextcloud
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     val playlistStateFlow: StateFlow<Playlist> =
