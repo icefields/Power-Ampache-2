@@ -36,7 +36,9 @@ import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +53,7 @@ fun SongItemForegroundEdit(
     song: Song,
     modifier: Modifier = Modifier,
     isSongDownloaded: Boolean,
+    isEditEnabled: Boolean,
     showDownloadedSongMarker: Boolean,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
@@ -121,18 +124,20 @@ fun SongItemForegroundEdit(
 
             Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
 
-            Button(
-                contentPadding = PaddingValues(all = 11.dp),
+            OutlinedIconButton(
+                enabled = isEditEnabled,
+                modifier = Modifier.padding(all = 11.dp),
                 onClick = onMoveUp
             ) {
                 Icon(imageVector = Icons.Outlined.ArrowUpward,
                     contentDescription = "move up")
             }
 
-            Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
+            //Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
 
-            Button(
-                contentPadding = PaddingValues(all = 11.dp),
+            OutlinedIconButton(
+                enabled = isEditEnabled,
+                modifier = Modifier.padding(all = 11.dp),
                 onClick = onMoveDown
             ) {
                 Icon(imageVector = Icons.Outlined.ArrowDownward,
@@ -151,6 +156,7 @@ fun SongItemForegroundEditPreview() {
         showDownloadedSongMarker = true,
         checked = true,
         onMoveDown = {},
+        isEditEnabled = true,
         onMoveUp = {},
     onCheckedChange = { _,_ -> }
     )
