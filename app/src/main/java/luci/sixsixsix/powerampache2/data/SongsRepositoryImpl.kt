@@ -61,6 +61,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okio.IOException
 import retrofit2.HttpException
@@ -82,6 +83,7 @@ class SongsRepositoryImpl @Inject constructor(
     db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager,
+    private val sharedPreferencesManager: SharedPreferencesManager,
     private val weakContext: WeakContext
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
@@ -462,9 +464,13 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }
 
-    override suspend fun getSongUri(song: Song) =
+    override suspend fun getSongUri(song: Song) = if (sharedPreferencesManager.useOkHttpForExoPlayer) {
+        // the OkHttpPlayer is not able to play offline songs
+        buildSongUrl(song)
+    } else {
         dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri
             ?: buildSongUrl(song)
+    }
 
     /**
      * Build Url for Ampache stream action

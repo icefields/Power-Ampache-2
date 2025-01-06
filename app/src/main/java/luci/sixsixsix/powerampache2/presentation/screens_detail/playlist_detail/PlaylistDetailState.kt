@@ -33,7 +33,7 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.domain.models.defaultPlaylistSort
 import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
-import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 
 @Parcelize
 data class PlaylistDetailState (

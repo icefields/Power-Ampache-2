@@ -21,11 +21,13 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Sort
+import androidx.compose.material.icons.automirrored.outlined.Sort
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,16 +55,23 @@ import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.StarRatingButton
 import luci.sixsixsix.powerampache2.presentation.common.TopBarCircularProgress
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistDetailTopBar(
     navigator: DestinationsNavigator,
     playlist: Playlist,
     isLoading: Boolean,
+    isUserOwner: Boolean,
+    isEditMode: Boolean,
+    showDeleteSelectionButton: Boolean,
     isRatingVisible: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior,
     onRating: (Playlist, Int) -> Unit,
-    onToggleSort: () -> Unit
+    onToggleSort: () -> Unit,
+    onEdit: () -> Unit,
+    onDeleteSelection: () -> Unit,
+    onConfirmEdit: () -> Unit,
+    onCancelEdit: () -> Unit,
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.largeTopAppBarColors(
@@ -95,16 +104,41 @@ fun PlaylistDetailTopBar(
         scrollBehavior = scrollBehavior,
         actions = {
             TopBarCircularProgress(isLoading)
-            if (isRatingVisible) {
+
+            if (isRatingVisible && isEditMode.not()) {
                 StarRatingButton(
                     currentRating = playlist.rating,
-                    onRate = {
-                        onRating(playlist, it)
-                    }
+                    onRate = { newRating -> onRating(playlist, newRating) }
                 )
             }
-            IconButton(onClick = onToggleSort) {
-                Icon(imageVector = Icons.Outlined.Sort, contentDescription = "sorting")
+
+            if (isUserOwner) {
+                if (isEditMode.not()) {
+                    // do not show the edit button if already in edit mode
+                    IconButton(onClick = onEdit) {
+                        Icon(imageVector = Icons.Outlined.EditNote, contentDescription = "edit playlist")
+                    }
+                } else {
+                    if (showDeleteSelectionButton) {
+                        IconButton(onClick = onDeleteSelection) {
+                            Icon(imageVector = Icons.Filled.Delete, contentDescription = "confirm delete selection")
+                        }
+                    }
+
+                    IconButton(onClick = onCancelEdit) {
+                        Icon(imageVector = Icons.Outlined.Cancel, contentDescription = "cancel edit playlist")
+                    }
+//                    IconButton(onClick = onConfirmEdit) {
+//                        Icon(imageVector = Icons.Outlined.Check, contentDescription = "confirm edit playlist")
+//                    }
+                }
+            }
+
+            // do not show sort in edit mode
+            if (isEditMode.not()) {
+                IconButton(onClick = onToggleSort) {
+                    Icon(imageVector = Icons.AutoMirrored.Outlined.Sort, contentDescription = "sorting")
+                }
             }
         }
     )
@@ -120,6 +154,10 @@ fun PlaylistDetailTopBarTopBarPreview() {
         scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState()),
         onRating = { _, _ -> },
         onToggleSort = {},
-        isLoading = true
+        isLoading = false,
+        isUserOwner = true,
+        isEditMode = true,
+        showDeleteSelectionButton = true,
+        onEdit = {}, onCancelEdit = {}, onConfirmEdit = {}, onDeleteSelection = {}
     )
 }

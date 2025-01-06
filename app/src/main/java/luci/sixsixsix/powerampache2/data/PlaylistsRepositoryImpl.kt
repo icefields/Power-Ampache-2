@@ -272,7 +272,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         dao.getOfflineSongsFromPlaylist(playlistId).isNotEmpty()
 
     /**
-     * TODO BREAKING_RULE: Implement cache for playlist songs
+     * TODO BREAKING_RULE (is this an old comment?): Implement cache for playlist songs
      *  There is currently no way to get songs given the playlistId
      *  Songs are cached regardless for quick access from SongsScreen and Albums
      * This method only fetches from the network, breaking one of the rules defined in the
@@ -297,6 +297,13 @@ class PlaylistsRepositoryImpl @Inject constructor(
         // emit saved data first
         val dbData = dao.getSongsFromPlaylist(playlistId).map { it.toSong() }
         emit(Resource.Success(data = dbData, networkData = null))
+
+        // if not fetch remote, return
+        if (!fetchRemote) {
+            emit(Resource.Loading(false))
+            return@flow
+        }
+
         val shouldEmitSteps = dbData.size < Constants.config.playlistSongsFetchLimit
 
         //else
@@ -487,34 +494,55 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 add(i)
             }
         }.joinToString(separator = ",")
-
+    
     override suspend fun editPlaylist(
         playlistId: String,
         playlistName: String?,
         items: List<Song>,
         owner: String?,
-        tracks: String?,
+        tracks: String?, // will be calculated if null
         playlistType: PlaylistType
     ) = flow {
         emit(Resource.Loading(true))
+
         val commaSeparatedIds = when(items.size) {
             0 -> null
             else -> songListToCommaSeparatedIds(items)
         }
+        val commaSeparatedTracks = if (tracks.isNullOrBlank()) {
+            when(items.size) {
+                0 -> null
+                else -> trackPositionsCommaSeparated(items)
+            }
+        } else tracks
+
         api.editPlaylist(
             authKey = authToken(),
             playlistId = playlistId,
             items = commaSeparatedIds,
-            tracks = tracks,
+            tracks = commaSeparatedTracks,
             name = playlistName
         ).apply {
             error?.let { throw(MusicException(it.toError())) }
             if (success != null) {
+
+                // insert changes into database
+                dao.clearPlaylistSongs(playlistId)
+                getCurrentCredentials().let { cred ->
+                    dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(
+                        songs = items,
+                        playlistId = playlistId,
+                        username = cred.username,
+                        serverUrl = cred.serverUrl
+                    ))
+                }
+
                 emit(Resource.Success(data = Any(), networkData = Any()))
             } else {
                 throw Exception("error getting a response from editPlaylist call")
             }
         }
+
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("editPlaylist()", e, this) }
 
@@ -557,7 +585,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
 
         // try new method, include every song (use songList)
         val playlistEdited = try {
-            editPlaylistNewApi(playlist = playlist, songList =  existingPlusNewSongs)
+            editPlaylistNewApi(playlist = playlist, songList = existingPlusNewSongs)
         } catch (e: Exception) {
             L.e(e)
             // fallback to old method, add one by one, only new songs (use songsToAdd)
