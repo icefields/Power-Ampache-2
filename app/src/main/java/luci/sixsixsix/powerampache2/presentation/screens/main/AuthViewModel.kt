@@ -29,7 +29,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -43,11 +45,9 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
 import luci.sixsixsix.powerampache2.data.remote.disableSSLCertificateVerify
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
-import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,6 +61,9 @@ class AuthViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
     var state by savedStateHandle.saveable { mutableStateOf(AuthState()) }
+
+    private val _isLoginCompletedStateFlow = MutableStateFlow(false)
+    val isLoginCompletedStateFlow: StateFlow<Boolean> = _isLoginCompletedStateFlow
 
     var isAllowAllCerts = sharedPreferencesManager.isAllowAllCertificatesFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), sharedPreferencesManager.isAllowAllCertificates)
         private set
@@ -87,8 +90,8 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             pingServerSync()
             repository.sessionLiveData.distinctUntilChanged().collect { session ->
-                L(session, "ssss")
                 if (session == null) {
+                    _isLoginCompletedStateFlow.value = false
                     // setting the session to null will show the login screen, but the autologin call
                     // will immediately set isLoading to true which will show the loading screen instead
                     state = state.copy(isLoading = sessionStateFlow.value == null, savedSession = null)
@@ -98,6 +101,7 @@ class AuthViewModel @Inject constructor(
                     // save the session to restore afterwards as the init value for the session state flow
                     state = state.copy(savedSession = session)
                     pingScheduler.schedule()
+                    _isLoginCompletedStateFlow.value = true
                 }
             }
         }
@@ -169,6 +173,7 @@ class AuthViewModel @Inject constructor(
                 L("AuthViewModel autologin", auth)
                 // remove error messages after login
                 playlistManager.updateErrorLogMessage("")
+                _isLoginCompletedStateFlow.value = true
             }
             is Resource.Error -> state =
                 state.copy(isLoading = false, isAutologin = false)

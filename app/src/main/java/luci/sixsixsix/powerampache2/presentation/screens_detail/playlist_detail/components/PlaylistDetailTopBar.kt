@@ -25,9 +25,8 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Sort
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -122,7 +121,7 @@ fun PlaylistDetailTopBar(
                 } else {
                     if (showDeleteSelectionButton) {
                         IconButton(onClick = onDeleteSelection) {
-                            Icon(imageVector = Icons.Outlined.Delete, contentDescription = "confirm delete selection")
+                            Icon(imageVector = Icons.Filled.Delete, contentDescription = "confirm delete selection")
                         }
                     }
 

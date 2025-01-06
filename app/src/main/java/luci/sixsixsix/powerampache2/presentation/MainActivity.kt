@@ -34,16 +34,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager.Companion.parseDeepLinkIntent
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.MainScreen
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
+import luci.sixsixsix.powerampache2.presentation.widget.SpinItWidgetProvider
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
 
 @AndroidEntryPoint
@@ -131,15 +137,27 @@ class MainActivity : ComponentActivity() {
         parseIntent(intent)
     }
 
-    private fun parseIntent(intent: Intent) {
-        parseDeepLinkIntent(intent) { type, id, title, artist, webLink ->
-            try {
-                mainViewModel.onDeepLink(type, id, title, artist, webLink)
-            } catch (e: Exception) {
-                L.e(e)
-            }
-        }
+    private var spinItJob: Job? = null
 
-        setIntent(Intent())
+    private fun parseIntent(intent: Intent) {
+        if (intent.action == SpinItWidgetProvider.WIDGET_ACTION_SPIN_IT) {
+            spinItJob?.cancel()
+            spinItJob = lifecycleScope.launch {
+                val value = authViewModel.isLoginCompletedStateFlow.first { it }
+                mainViewModel.onEvent(MainEvent.OnFabPress)
+            }
+        } else {
+            // TODO find out the action and wait for login complete as above
+            //  this code still contains a hack in the view model, using a delay instead of waiting for autologin
+            // parse deep link
+            parseDeepLinkIntent(intent) { type, id, title, artist, webLink ->
+                try {
+                    mainViewModel.onDeepLink(type, id, title, artist, webLink)
+                } catch (e: Exception) {
+                    L.e(e)
+                }
+            }
+            setIntent(Intent())
+        }
     }
 }
