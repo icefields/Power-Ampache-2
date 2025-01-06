@@ -138,7 +138,7 @@
     <string name="settings_bufferForPlaybackAfterRebuffer_title">Buffer For Playback After Re-buffer</string>
     <string name="settings_bufferForPlaybackAfterRebuffer_subtitle">The default duration of media that must be buffered for playback to resume after a re-buffer, in seconds. A re-buffer is defined to be caused by buffer depletion rather than a user action</string>
     <string name="settings_player_button_resetDefaults">Reset Defaults</string>
-    <string name="settings_player_button_killApp">PRESS TO KILL THE APP\n(Apply buffer settings)</string>
+    <string name="settings_player_button_killApp">PRESS TO KILL THE APP\n(Apply player settings)</string>
     <string name="settings_player_killDialog_title">Kill the app now to apply settings?</string>
 
     <!--- DIALOGS -->
@@ -216,7 +216,6 @@
 
     <string name="error_user_notEnabled">User not enabled, please check your email for the account confirmation link or enable the user from the server</string>
     <string name="error_cannotConnect">Problem connecting to the server or data source. \nPlay a different track or check your connection</string>
-
 
     <string name="nextcloud_not_implemented">Not implemented yet in Nextcloud Music</string>
 </resources>
