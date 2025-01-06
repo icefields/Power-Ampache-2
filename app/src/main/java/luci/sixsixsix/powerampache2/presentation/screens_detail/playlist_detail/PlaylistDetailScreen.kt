@@ -231,7 +231,7 @@ fun PlaylistDetailScreen(
                         if (isNextcloud.not())
                             isEditMode = true
                         else
-                            Toast.makeText(context,"Not implemented yet in Nextcloud Music", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, R.string.nextcloud_not_implemented, Toast.LENGTH_LONG).show()
                     },
                     onCancelEdit = { isEditMode = false },
                     onConfirmEdit = {

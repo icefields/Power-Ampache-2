@@ -259,7 +259,7 @@ class PlaylistDetailViewModel @Inject constructor(
     private fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             playlistsRepository
-                .getSongsFromPlaylist(playlistId)
+                .getSongsFromPlaylist(playlistId, fetchRemote)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
@@ -303,7 +303,8 @@ class PlaylistDetailViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {
-                            getSongsFromPlaylist(playlist.id, true)
+                            // fetch songs without network request
+                            getSongsFromPlaylist(playlist.id, false)
                         }
                     }
                     is Resource.Error ->

@@ -272,7 +272,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         dao.getOfflineSongsFromPlaylist(playlistId).isNotEmpty()
 
     /**
-     * TODO BREAKING_RULE: Implement cache for playlist songs
+     * TODO BREAKING_RULE (is this an old comment?): Implement cache for playlist songs
      *  There is currently no way to get songs given the playlistId
      *  Songs are cached regardless for quick access from SongsScreen and Albums
      * This method only fetches from the network, breaking one of the rules defined in the
@@ -297,6 +297,13 @@ class PlaylistsRepositoryImpl @Inject constructor(
         // emit saved data first
         val dbData = dao.getSongsFromPlaylist(playlistId).map { it.toSong() }
         emit(Resource.Success(data = dbData, networkData = null))
+
+        // if not fetch remote, return
+        if (!fetchRemote) {
+            emit(Resource.Loading(false))
+            return@flow
+        }
+
         val shouldEmitSteps = dbData.size < Constants.config.playlistSongsFetchLimit
 
         //else
@@ -521,11 +528,24 @@ class PlaylistsRepositoryImpl @Inject constructor(
         ).apply {
             error?.let { throw(MusicException(it.toError())) }
             if (success != null) {
+
+                // insert changes into database
+                dao.clearPlaylistSongs(playlistId)
+                getCurrentCredentials().let { cred ->
+                    dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(
+                        songs = items,
+                        playlistId = playlistId,
+                        username = cred.username,
+                        serverUrl = cred.serverUrl
+                    ))
+                }
+
                 emit(Resource.Success(data = Any(), networkData = Any()))
             } else {
                 throw Exception("error getting a response from editPlaylist call")
             }
         }
+
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("editPlaylist()", e, this) }
 
