@@ -494,10 +494,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 add(i)
             }
         }.joinToString(separator = ",")
-
-    /**
-     * remember to refresh the playlist, this function doesn't cache / update db
-     */
+    
     override suspend fun editPlaylist(
         playlistId: String,
         playlistName: String?,
