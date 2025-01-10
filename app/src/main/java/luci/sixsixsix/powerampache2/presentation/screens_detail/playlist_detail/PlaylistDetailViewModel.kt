@@ -57,7 +57,6 @@ import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
-import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.SortMode
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -78,9 +77,9 @@ class PlaylistDetailViewModel @Inject constructor(
     var state by mutableStateOf(PlaylistDetailState())
     var editState by mutableStateOf(PlaylistEditState(listOf()))
 
-    val isNextcloudState = musicRepository.serverInfoStateFlow.filterNotNull().map { serverInfo ->
-        serverInfo.isNextcloud
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+//    val isNextcloudState = musicRepository.serverInfoStateFlow.filterNotNull().map { serverInfo ->
+//        serverInfo.isNextcloud
+//    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     val playlistStateFlow: StateFlow<Playlist> =
         savedStateHandle.getStateFlow<Playlist?>("playlist", null)

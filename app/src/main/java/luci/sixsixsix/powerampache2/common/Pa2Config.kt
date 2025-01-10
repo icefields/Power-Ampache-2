@@ -38,6 +38,7 @@ const val PLAYLISTS_ADMIN_FETCH = BuildConfig.PLAYLISTS_ADMIN_FETCH
 const val SMARTLISTS_ADMIN_FETCH = BuildConfig.SMARTLISTS_ADMIN_FETCH
 const val PLAYLISTS_ALL_SERVER_FETCH = BuildConfig.PLAYLISTS_ALL_SERVER_FETCH
 const val CLEAR_LIBRARY_ON_CATALOG_CLEAN = true
+const val FETCH_ALBUMS_WITH_ARTISTS = true
 
 data class Pa2Config(
     // use new fast method for adding albums and playlists to playlist
@@ -91,5 +92,7 @@ data class Pa2Config(
     // enable record_play call for every played song
     val isRecordPlayApiEnabled: Boolean = API_RECORD_PLAY_ENABLE,
     // force skip track on network errors
-    val forceSkipOnNetworkError: Boolean = FORCE_SKIP_NETWORK_ERROR
+    val forceSkipOnNetworkError: Boolean = FORCE_SKIP_NETWORK_ERROR,
+    // when fetching artists also fetch their albums
+    val fetchAlbumsWithArtist: Boolean = FETCH_ALBUMS_WITH_ARTISTS
 )

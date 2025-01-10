@@ -115,7 +115,7 @@ fun Context.openLinkInBrowser(link: String) =
     startActivity(
         Intent.createChooser(
             Intent(Intent.ACTION_VIEW, Uri.parse(link)),
-            "Open Link In Broser"
+            getString(R.string.share_open_link_browser)
         ).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
         }
@@ -136,7 +136,7 @@ fun Context.exportSong(song: Song, offlineUri: String) {
                     setDataAndType(fileUri, contentResolver.getType(fileUri))
                     putExtra(Intent.EXTRA_STREAM, fileUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }, "Export Song"
+                }, getString(R.string.share_export_song)
             ).apply {
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
             }

@@ -35,6 +35,8 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -95,7 +97,9 @@ class SettingsViewModel @Inject constructor(
     val logs by mutableStateOf(
         if (BuildConfig.DEBUG) {
             try {
-                mutableListOf<String>(Constants.config.toDebugString())
+                mutableListOf<String>(
+                    GsonBuilder().setPrettyPrinting().create().toJson(Constants.config)
+                )
             } catch (e: Exception) {
                 mutableListOf<String>()
             }

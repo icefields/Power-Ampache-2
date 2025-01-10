@@ -12,7 +12,7 @@ data class ArtistDto(
     @SerializedName("name")
     val name: String? = null,
     @SerializedName("albums")
-    val albums: List<Any?>? = null,
+    val albums: List<AlbumDto?>? = null,
     @SerializedName("albumcount")
     val albumcount: Int? = null,
     @SerializedName("songs")
@@ -55,10 +55,34 @@ fun ArtistDto.toArtist() = Artist(
     albumCount = albumcount ?: 0,
     songCount = songcount ?: 0,
     genre = genre?.map { it.toMusicAttribute() } ?: listOf(),
-    artUrl = processArtUrl(hasArt, art),
+    artUrl = getArtOrFallback(this), //processArtUrl(hasArt, art),
     flag = processFlag(flag),
     summary = summary,
     time = time ?: 0,
     yearFormed = yearformed ?: 0,
     placeFormed = placeformed.toString()
 )
+
+private fun getArtOrFallback(artistDto: ArtistDto) = processArtUrl(artistDto.hasArt, artistDto.art).let { artUrl ->
+    artUrl.ifBlank {
+        try {
+            artistDto.albums?.let { albums ->
+                val artArray = albums
+                    .asSequence()
+                    .filterNotNull()
+                    .filter { it.art != null }
+                    .filter { it.art?.isNotBlank() == true }
+                    .map { album -> album.art }
+                    .filterNotNull()
+                    .toList()
+
+                if (artUrl.isBlank() && artArray.isNotEmpty()) {
+                    artArray[artArray.indices.random()]
+                } else artUrl
+            } ?: artUrl
+        } catch (e: Exception) {
+            e.printStackTrace()
+            artUrl
+        }
+    }
+}

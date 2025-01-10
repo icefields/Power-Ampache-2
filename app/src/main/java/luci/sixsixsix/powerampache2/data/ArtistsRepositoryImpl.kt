@@ -29,11 +29,12 @@ import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
-import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toArtist
 import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
+import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
@@ -124,9 +125,15 @@ class ArtistsRepositoryImpl @Inject constructor(
             }
         }
 
-        val response = api.getArtists(authToken(), filter = query, offset = offset)
+        val fetchAlbumsWithArtist = Constants.config.fetchAlbumsWithArtist
+        val response = api.getArtists(authToken(),
+            filter = query,
+            offset = offset,
+            include = if (fetchAlbumsWithArtist) "albums" else null
+        )
         response.error?.let { throw(MusicException(it.toError())) }
-        val artists = response.artists!!.map { it.toArtist() } //will throw exception if artist null
+        val artistsDto = response.artists!! //will throw exception if artist null
+        val artists = artistsDto.map { it.toArtist() }
 
         if (query.isNullOrBlank() && offset == 0 && Constants.CLEAR_TABLE_AFTER_FETCH) {
             // if it's just a search do not clear cache
@@ -137,6 +144,24 @@ class ArtistsRepositoryImpl @Inject constructor(
         dao.insertArtists(artists.map { it.toArtistEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchArtist(query).map { it.toArtist() }, networkData = artists))
+
+        // add albums (if present) to database
+        if (fetchAlbumsWithArtist) {
+            try {
+                artistsDto.map { artistDto ->
+                    artistDto.albums?.filterNotNull()?.map { albumDto ->
+                        albumDto.toAlbum()
+                    }?.map { alb ->
+                        alb.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl)
+                    }?.let { albumEntities ->
+                        if (albumEntities.isNotEmpty())
+                            dao.insertAlbums(albumEntities)
+                    }
+                }
+            } catch (saveAlbumsException: Exception) {
+                saveAlbumsException.printStackTrace()
+            }
+        }
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getArtists()", e, this) }
