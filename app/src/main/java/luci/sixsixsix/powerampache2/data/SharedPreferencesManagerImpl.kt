@@ -43,6 +43,7 @@ private const val KEY_BUFFER_FOR_PLAYBACK = "luci.sixsixsix.powerampache2.data.K
 private const val KEY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.bufferForPlaybackAfterRebufferMs"
 private const val KEY_ALLOW_ALL_CERTIFICATES = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.alloallcertificates"
 private const val KEY_USE_OKHTTP_EXOPLAYER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.useokhttpforexoplayer"
+private const val KEY_INTRO_DIALOG_CONTENT = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.intro.dialog.content"
 
 @Singleton
 class SharedPreferencesManagerImpl @Inject constructor(
@@ -62,6 +63,15 @@ class SharedPreferencesManagerImpl @Inject constructor(
 
     private fun setInt(key: String, value: Int) = getSharedPreferences()?.edit()?.run {
         putInt(key, value)
+        apply()
+    } ?: Unit
+
+    private fun getString(key: String, defaultValue: String) = getSharedPreferences()?.let { sp ->
+        sp.getString(key, defaultValue)
+    } ?: defaultValue
+
+    private fun setString(key: String, value: String) = getSharedPreferences()?.edit()?.run {
+        putString(key, value)
         apply()
     } ?: Unit
 
@@ -106,6 +116,13 @@ class SharedPreferencesManagerImpl @Inject constructor(
     override var useOkHttpForExoPlayer: Boolean
         get() = getBool(KEY_USE_OKHTTP_EXOPLAYER, false)
         set(value) = setBool(KEY_USE_OKHTTP_EXOPLAYER, value)
+
+    override var introDialogContent: String
+        get() = getString(KEY_INTRO_DIALOG_CONTENT, "")
+        set(value) = setString(KEY_INTRO_DIALOG_CONTENT, value)
+
+    override fun shouldShowIntroDialog(newContent: String) =
+        newContent.isNotBlank() && newContent != introDialogContent
 
     override fun resetBufferDefaults() {
         backBuffer = BACK_BUFFER_MS

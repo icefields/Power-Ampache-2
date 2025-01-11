@@ -61,11 +61,15 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants.BUYMEACOFFEE_IMG_URL
+import luci.sixsixsix.powerampache2.common.Constants.BUYMEACOFFEE_URL
 import luci.sixsixsix.powerampache2.common.Constants.GITHUB_URL
 import luci.sixsixsix.powerampache2.common.Constants.GPLV3_IMG_URL
 import luci.sixsixsix.powerampache2.common.Constants.GPLV3_URL
 import luci.sixsixsix.powerampache2.common.Constants.MASTODON_IMG_URL
 import luci.sixsixsix.powerampache2.common.Constants.MASTODON_URL
+import luci.sixsixsix.powerampache2.common.Constants.PATREON_IMG_URL
+import luci.sixsixsix.powerampache2.common.Constants.PATREON_URL
 import luci.sixsixsix.powerampache2.common.Constants.TELEGRAM_IMG_URL
 import luci.sixsixsix.powerampache2.common.Constants.TELEGRAM_URL
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
@@ -110,6 +114,9 @@ fun AboutScreenContent(
     modifier: Modifier = Modifier,
     donateButton: @Composable () -> Unit = { DonateButton(isExpanded = true, isTransparent = false) }
 ) {
+
+    val context = LocalContext.current.applicationContext
+
     LazyColumn(
         modifier = modifier
             .padding(horizontal = dimensionResource(id = R.dimen.settings_padding_horizontal))
@@ -126,13 +133,6 @@ fun AboutScreenContent(
                     subtitleTextSize = fontDimensionResource(id = R.dimen.about_item_fontSize)
                 )
                 3 -> DividerSeparator()
-                5 -> TextWithOverline(title = R.string.about_license_title, subtitle = "")
-                6 -> AboutImageWithLink(
-                    modifier = Modifier.height(76.dp),
-                    imgUrl = GPLV3_IMG_URL,
-                    pageUrl = GPLV3_URL,
-                    contentDescription = stringResource(id = R.string.about_license_title)
-                )
                 7 -> DividerSeparator(modifier = Modifier.padding(top = 16.dp, bottom = 6.dp))
                 8 -> TextWithOverline(title = R.string.about_contact_title, subtitle = "")
                 9 -> Row(
@@ -150,13 +150,40 @@ fun AboutScreenContent(
                 }
                 10 -> DividerSeparator(modifier = Modifier.padding(vertical = 6.dp))
                 11 -> DonateConsider(onClick = onDonateConsiderClick)
-                12 -> TextWithOverline(title = R.string.about_sourceCode_title, subtitle = "")
-                13 -> AboutImageWithLink(
+                12 -> TextWithOverline(title = R.string.about_patreon_title, subtitle = "")
+                13 ->Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AboutImageWithLink(PATREON_IMG_URL, PATREON_URL, "patreon",
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .height(100.dp))
+
+                    Image(
+                        painter = painterResource(id = R.drawable.bmc_brand_logo),
+                        modifier = Modifier
+                            .height(100.dp)
+                            .padding(horizontal = 11.dp)
+                            .clickable { context.openLinkInBrowser(BUYMEACOFFEE_URL) },
+                        contentScale = ContentScale.FillWidth,
+                        contentDescription = "buy me a coffee",
+                    )
+                }
+                14 -> TextWithOverline(title = R.string.about_sourceCode_title, subtitle = "")
+                15 -> AboutImageWithLink(
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.height(66.dp),
                     imgId = R.drawable.ic_github,
                     pageUrl = GITHUB_URL,
                     contentDescription = stringResource(id = R.string.about_sourceCode_title)
+                )
+                16 -> TextWithOverline(title = R.string.about_license_title, subtitle = "")
+                17 -> AboutImageWithLink(
+                    modifier = Modifier.height(76.dp),
+                    imgUrl = GPLV3_IMG_URL,
+                    pageUrl = GPLV3_URL,
+                    contentDescription = stringResource(id = R.string.about_license_title)
                 )
                 20 -> TextWithOverline(
                     title = R.string.version_quote_title,
@@ -236,7 +263,7 @@ fun AboutImageWithLink(
             modifier = modifier
                 .padding(horizontal = 11.dp)
                 .clickable { applicationContext.openLinkInBrowser(pageUrl) },
-            contentDescription = contentDescription
+            contentDescription = contentDescription,
         )
     }
 }

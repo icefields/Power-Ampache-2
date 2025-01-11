@@ -310,4 +310,11 @@ class SettingsViewModel @Inject constructor(
             )
         }
     }
+
+    fun onDismissIntroDialog() {
+        sharedPreferencesManager.introDialogContent = Constants.config.introMessage
+    }
+
+    fun shouldShowIntroDialog() =
+        sharedPreferencesManager.shouldShowIntroDialog(Constants.config.introMessage)
 }

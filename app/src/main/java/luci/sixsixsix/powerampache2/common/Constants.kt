@@ -103,6 +103,10 @@ object Constants {
     const val TELEGRAM_URL = "https://t.me/PowerAmpache"
     const val MASTODON_IMG_URL = "https://github.com/icefields/Power-Ampache-2/assets/149625124/81e35dc2-d81c-46ed-9321-4461349dc8e7"
     const val MASTODON_URL = "https://floss.social/@powerampache"
+    const val PATREON_IMG_URL = "https://github.com/user-attachments/assets/3318ab05-3c7e-42dd-8784-f12129c0915d"
+    const val PATREON_URL = "https://www.patreon.com/Icefields"
+    const val BUYMEACOFFEE_IMG_URL = ""
+    const val BUYMEACOFFEE_URL = ""
 
     const val DOGMAZIC_FAKE_EMAIL = "floss.social/@PowerAmpache"
     const val DOGMAZIC_FAKE_NAME = "Draven Wilhelmine"

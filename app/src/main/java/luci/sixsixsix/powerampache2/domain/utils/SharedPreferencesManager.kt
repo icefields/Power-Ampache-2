@@ -34,5 +34,8 @@ interface SharedPreferencesManager {
     var useOkHttpForExoPlayer: Boolean
     val isAllowAllCertificatesFlow: StateFlow<Boolean>
 
+    var introDialogContent: String
+
+    fun shouldShowIntroDialog(newContent: String ): Boolean
     fun resetBufferDefaults()
 }
