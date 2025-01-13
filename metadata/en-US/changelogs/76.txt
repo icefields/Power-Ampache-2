@@ -1,0 +1,7 @@
+— [NEW] Added Buy Me A Coffee button and link
+— [Nextcloud] added fallback image for artists
+— [Nextcloud] enabled playlist editor
+— localized remaining strings
+— UI fixes
+— Minor bug fixes and adjustments
+— Intro web dialog for important communications and updates

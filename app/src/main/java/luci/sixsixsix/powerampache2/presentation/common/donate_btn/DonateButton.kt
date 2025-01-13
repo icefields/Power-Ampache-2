@@ -19,19 +19,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.common
+package luci.sixsixsix.powerampache2.presentation.common.donate_btn
 
-import android.app.Application
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context.CLIPBOARD_SERVICE
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -49,43 +47,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.AndroidViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.Constants.DONATION_BITCOIN_ADDRESS
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
-import javax.inject.Inject
 
 @Composable
 fun DonateButton(
     modifier: Modifier = Modifier,
     isExpanded:Boolean = false,
     isTransparent: Boolean = false,
-    donateViewModel: DonateViewModel = hiltViewModel(),
-    onDonateBtcButtonClick: () -> Unit = { },
-    onDonatePaypalButtonClick: () -> Unit = { }
+    donateViewModel: DonateViewModel = hiltViewModel()
 ) {
     DonateButtonContent(
         modifier = modifier,
         isExpanded = isExpanded,
         isTransparent = isTransparent,
-        onDonateBtcButtonClick = {
-            onDonateBtcButtonClick()
-            donateViewModel.donateBtc()
-        }, onDonatePaypalButtonClick = {
-            onDonatePaypalButtonClick()
-            donateViewModel.donatePaypal()
-        }
+        onDonateBtcButtonClick = donateViewModel::donateBtc,
+        onDonatePaypalButtonClick = donateViewModel::donatePaypal,
+        onDonateBmacButtonClick = donateViewModel::donateBmac
     )
 }
 
@@ -94,8 +83,9 @@ fun DonateButtonContent(
     modifier: Modifier = Modifier,
     isExpanded:Boolean = false,
     isTransparent: Boolean = false,
-    onDonateBtcButtonClick: () -> Unit = {},
-    onDonatePaypalButtonClick: () -> Unit = {}
+    onDonateBtcButtonClick: () -> Unit,
+    onDonatePaypalButtonClick: () -> Unit,
+    onDonateBmacButtonClick: () -> Unit
 ) {
     val isShowDonateButtons = remember { mutableStateOf(isExpanded) }
     Card(
@@ -123,7 +113,7 @@ fun DonateButtonContent(
                     onDonateBtcButtonClick()
                 }, onDonatePaypalButtonClick = {
                     onDonatePaypalButtonClick()
-                }
+                }, onDonateBmacButtonClick = onDonateBmacButtonClick
             )
         }
         AnimatedVisibility (!isShowDonateButtons.value) {
@@ -136,11 +126,16 @@ fun DonateButtonContent(
 fun DonateButtons(
     isTransparent: Boolean,
     onDonateBtcButtonClick: () -> Unit,
-    onDonatePaypalButtonClick: () -> Unit
+    onDonatePaypalButtonClick: () -> Unit,
+    onDonateBmacButtonClick: () -> Unit
 ) {
+    val buttonsVertSpacing = 10.dp
     Column {
         DonateBtcButton(isTransparent, onDonateBtcButtonClick)
+        Spacer(Modifier.height(buttonsVertSpacing))
         DonatePaypalButton(isTransparent, onDonatePaypalButtonClick)
+        Spacer(Modifier.height(buttonsVertSpacing))
+        DonateBmacButton(isTransparent, onDonateBmacButtonClick)
     }
 }
 
@@ -189,25 +184,26 @@ fun DonateBtcButton(
     onDonateBtcButtonClick: () -> Unit
 ) {
     TextButton(
-        modifier = Modifier
-            .padding(bottom = 10.dp)
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         colors = getButtonBgColour(isTransparent = isTransparent),
         onClick = {
             onDonateBtcButtonClick()
         }
     ) {
-        Icon(imageVector = Icons.Default.CurrencyBitcoin, contentDescription = "Donate Bitcoin")
+        Icon(
+            imageVector = Icons.Default.CurrencyBitcoin,
+            contentDescription = stringResource(R.string.bitcoin_btn_contentDescription)
+        )
         Text(
-            modifier = Modifier
-                .padding(vertical = 9.dp),
-            text = "Donate ",
+            modifier = Modifier.padding(vertical = 9.dp),
+            text = stringResource(R.string.donate_btn_text),
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp
         )
-        Text(text = "Bitcoin")
+        Spacer(Modifier.width(4.dp))
+        Text(text = stringResource(R.string.bitcoin_btn_text))
     }
 }
 
@@ -217,54 +213,52 @@ fun DonatePaypalButton(
     onDonatePaypalButtonClick: () -> Unit
 ) {
     TextButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 0.dp),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         colors = getButtonBgColour(isTransparent = isTransparent),
         onClick = { onDonatePaypalButtonClick() }
     ) {
-        Icon(imageVector = Icons.Default.MonetizationOn, contentDescription = "Donate Paypal")
+        Icon(
+            imageVector = Icons.Default.MonetizationOn,
+            contentDescription = stringResource(R.string.paypal_btn_contentDescription)
+        )
         Text(
             modifier = Modifier
                 .padding(vertical = 9.dp),
-            text = "Donate ",
+            text = stringResource(R.string.donate_btn_text),
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp
         )
-        Text(text = "Paypal")
+        Spacer(Modifier.width(4.dp))
+        Text(text = stringResource(R.string.paypal_btn_text))
     }
 }
 
-@HiltViewModel
-class DonateViewModel @Inject constructor(
-    private val application: Application,
-    private val playlistManager: MusicPlaylistManager
-) : AndroidViewModel(application) {
-
-    fun donateBtc() {
-        try {
-            application.startActivity(Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse(Constants.DONATION_BITCOIN_URI)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-            })
-        } catch (e: Exception) {
-            (application.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager).apply {
-                setPrimaryClip(ClipData.newPlainText(
-                    "BITCOIN donation address for ${application.getString(R.string.app_name)}",
-                    DONATION_BITCOIN_ADDRESS
-                ))
-            }
-            playlistManager.updateUserMessage("No Bitcoin Wallet found on this device, BTC address copied to clipboard")
+@Composable
+fun DonateBmacButton(
+    isTransparent: Boolean,
+    onDonateBmacButtonClick: () -> Unit
+) {
+    TextButton(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        colors = getButtonBgColour(isTransparent = isTransparent),
+        onClick = { onDonateBmacButtonClick() }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .padding(3.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painterResource(R.drawable.bmc_brand_logo),
+                contentDescription = stringResource(R.string.bmac_btn_text)
+            )
         }
-    }
 
-    fun donatePaypal() {
-        application.startActivity(Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(Constants.DONATION_PAYPAL_URI)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-        })
     }
 }
 
@@ -276,5 +270,16 @@ fun DonateButtonPreview() {
         isTransparent = false,
         onDonateBtcButtonClick = { },
         onDonatePaypalButtonClick = { }
-    )
+    ) {}
+}
+
+@Composable
+@Preview
+fun DonateButtonPreviewExpanded() {
+    DonateButtonContent(
+        isExpanded = true,
+        isTransparent = false,
+        onDonateBtcButtonClick = { },
+        onDonatePaypalButtonClick = { }
+    ) {}
 }

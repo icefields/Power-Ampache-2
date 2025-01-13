@@ -223,4 +223,11 @@
     <string name="about_patreon_title">Become a Patreon or Buy me a coffee</string>
 
 
+    <!-- "Donate" will be followed by Paypal or Bitcoin. ie "Donate Bitcoin" -->
+    <string name="donate_btn_text">Donate</string>
+
+    <string name="bitcoin_btn_contentDescription">Donate Bitcoin</string>
+    <string name="paypal_btn_contentDescription">Donate Paypal</string>
+    <string name="bmac_btn_text">Buy Me A Coffee</string>
+
 </resources>

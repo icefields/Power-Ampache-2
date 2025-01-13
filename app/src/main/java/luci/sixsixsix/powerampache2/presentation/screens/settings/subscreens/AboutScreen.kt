@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -61,7 +60,6 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.BUYMEACOFFEE_IMG_URL
 import luci.sixsixsix.powerampache2.common.Constants.BUYMEACOFFEE_URL
 import luci.sixsixsix.powerampache2.common.Constants.GITHUB_URL
 import luci.sixsixsix.powerampache2.common.Constants.GPLV3_IMG_URL
@@ -76,8 +74,8 @@ import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.common.openLinkInBrowser
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.User
-import luci.sixsixsix.powerampache2.presentation.common.DonateButton
-import luci.sixsixsix.powerampache2.presentation.common.DonateButtonContent
+import luci.sixsixsix.powerampache2.presentation.common.donate_btn.DonateButton
+import luci.sixsixsix.powerampache2.presentation.common.donate_btn.DonateButtonContent
 import luci.sixsixsix.powerampache2.presentation.common.DonateConsider
 import luci.sixsixsix.powerampache2.presentation.common.TextWithOverline
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsEvent
@@ -322,6 +320,11 @@ fun PreviewAboutScreen() {
         serverInfo = ServerInfo("some server", "6.78"),
         versionInfo = "0.11-beta (11)",
         onDonateConsiderClick = {},
-        donateButton = { DonateButtonContent(isExpanded = true, isTransparent = false) },
+        donateButton = { DonateButtonContent(isExpanded = true,
+            isTransparent = false,
+            onDonateBmacButtonClick = {},
+            onDonateBtcButtonClick =  {},
+            onDonatePaypalButtonClick =  {}
+        ) },
     )
 }

@@ -1,6 +1,5 @@
 package luci.sixsixsix.powerampache2.presentation.dialogs
 
-import android.view.ViewGroup
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -79,6 +78,10 @@ fun IntroWebView() {
            }
             //settings.loadWithOverviewMode = true
             //settings.useWideViewPort = true
+            settings.defaultFontSize = 18
+            settings.minimumLogicalFontSize = 18
+            settings.serifFontFamily = "Roboto"
+            settings.standardFontFamily = "Roboto"
             //settings.setSupportZoom(true)
             loadUrl(url)
         }
