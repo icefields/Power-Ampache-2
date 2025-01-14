@@ -87,6 +87,8 @@ data class Pa2Config(
     val clearLibraryOnCatalogClean: Boolean = CLEAR_LIBRARY_ON_CATALOG_CLEAN,
     // message to show at login, if any present
     val introMessage: String = "",
+    val isIntroMessageLocal: Boolean = introMessage == "local::asset",
+    val shouldShowIntroMessage: Boolean = introMessage == "",
     // enable or disable the option in settings to download music to device sd card
     val isDownloadsSdCardOptionEnabled: Boolean = SETTINGS_IS_DOWNLOAD_SDCARD,
     // enable record_play call for every played song

@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data
 import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.BACK_BUFFER_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_MS
@@ -122,7 +123,7 @@ class SharedPreferencesManagerImpl @Inject constructor(
         set(value) = setString(KEY_INTRO_DIALOG_CONTENT, value)
 
     override fun shouldShowIntroDialog(newContent: String) =
-        newContent.isNotBlank() && newContent != introDialogContent
+        Constants.config.shouldShowIntroMessage && newContent != introDialogContent
 
     override fun resetBufferDefaults() {
         backBuffer = BACK_BUFFER_MS
