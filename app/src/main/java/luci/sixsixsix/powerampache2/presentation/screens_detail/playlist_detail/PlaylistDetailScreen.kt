@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
 import android.content.res.Configuration
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -106,9 +105,8 @@ fun PlaylistDetailScreen(
     mainViewModel: MainViewModel,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current.applicationContext
     val state = viewModel.state
-    val isNextcloud by viewModel.isNextcloudState.collectAsState()
+    //val isNextcloud by viewModel.isNextcloudState.collectAsState()
     val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
     val currentPlaylistState by viewModel.playlistStateFlow.collectAsState()
 
@@ -227,12 +225,7 @@ fun PlaylistDetailScreen(
                     onRating = { playlist, rating ->
                         viewModel.onEvent(PlaylistDetailEvent.OnRatePlaylist(playlist, rating))
                     },
-                    onEdit = {
-                        if (isNextcloud.not())
-                            isEditMode = true
-                        else
-                            Toast.makeText(context, R.string.nextcloud_not_implemented, Toast.LENGTH_LONG).show()
-                    },
+                    onEdit = { isEditMode = true },
                     onCancelEdit = { isEditMode = false },
                     onConfirmEdit = {
                         isEditMode = false

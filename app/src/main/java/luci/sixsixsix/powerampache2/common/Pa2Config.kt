@@ -27,7 +27,7 @@ const val PLAYLIST_SONGS_FETCH_LIMIT = 100
 const val PLAYBACK_ERRORS_RETRIES = 16
 const val PLAYLIST_FETCH_LIMIT = 0
 const val PLAYLIST_ADD_NEW_ENABLE = true
-const val API_RECORD_PLAY_ENABLE = false
+const val API_RECORD_PLAY_ENABLE = true
 const val SETTINGS_IS_DOWNLOAD_SDCARD = true
 const val FORCE_SKIP_NETWORK_ERROR = false
 const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
@@ -38,6 +38,7 @@ const val PLAYLISTS_ADMIN_FETCH = BuildConfig.PLAYLISTS_ADMIN_FETCH
 const val SMARTLISTS_ADMIN_FETCH = BuildConfig.SMARTLISTS_ADMIN_FETCH
 const val PLAYLISTS_ALL_SERVER_FETCH = BuildConfig.PLAYLISTS_ALL_SERVER_FETCH
 const val CLEAR_LIBRARY_ON_CATALOG_CLEAN = true
+const val FETCH_ALBUMS_WITH_ARTISTS = true
 
 data class Pa2Config(
     // use new fast method for adding albums and playlists to playlist
@@ -86,10 +87,14 @@ data class Pa2Config(
     val clearLibraryOnCatalogClean: Boolean = CLEAR_LIBRARY_ON_CATALOG_CLEAN,
     // message to show at login, if any present
     val introMessage: String = "",
+    val isIntroMessageLocal: Boolean = introMessage == "local::asset",
+    val shouldShowIntroMessage: Boolean = introMessage == "",
     // enable or disable the option in settings to download music to device sd card
     val isDownloadsSdCardOptionEnabled: Boolean = SETTINGS_IS_DOWNLOAD_SDCARD,
     // enable record_play call for every played song
     val isRecordPlayApiEnabled: Boolean = API_RECORD_PLAY_ENABLE,
     // force skip track on network errors
-    val forceSkipOnNetworkError: Boolean = FORCE_SKIP_NETWORK_ERROR
+    val forceSkipOnNetworkError: Boolean = FORCE_SKIP_NETWORK_ERROR,
+    // when fetching artists also fetch their albums
+    val fetchAlbumsWithArtist: Boolean = FETCH_ALBUMS_WITH_ARTISTS
 )

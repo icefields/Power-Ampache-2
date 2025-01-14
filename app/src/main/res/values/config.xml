@@ -12,4 +12,9 @@
     <string name="loginScreen_local_nextcloud" translatable="false">Local Nextcloud Server</string>
     <string name="intent_filter_ampache_deeplink" translatable="false">Share with Power Ampache 2</string>
     <string name="intent_filter_ampache_deeplink_https" translatable="false">Share with Power Ampache 2</string>
+
+    <!-- untranslatable brand names -->
+    <string name="bitcoin_btn_text" translatable="false">Bitcoin</string>
+    <string name="paypal_btn_text" translatable="false">Paypal</string>
+
 </resources>

@@ -79,8 +79,8 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.toHslColor
 import luci.sixsixsix.powerampache2.domain.models.User
-import luci.sixsixsix.powerampache2.presentation.common.DonateButton
-import luci.sixsixsix.powerampache2.presentation.common.DonateButtonPreview
+import luci.sixsixsix.powerampache2.presentation.common.donate_btn.DonateButton
+import luci.sixsixsix.powerampache2.presentation.common.donate_btn.DonateButtonPreview
 import luci.sixsixsix.powerampache2.presentation.common.TextWithOverline
 
 val drawerItems = listOf(

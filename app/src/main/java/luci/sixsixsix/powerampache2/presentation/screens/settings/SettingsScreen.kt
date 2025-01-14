@@ -76,8 +76,8 @@ import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.domain.models.streamQualityDropdownItems
 import luci.sixsixsix.powerampache2.domain.models.themesDropDownItems
 import luci.sixsixsix.powerampache2.domain.models.toPowerAmpacheDropdownItem
-import luci.sixsixsix.powerampache2.presentation.common.DonateButton
-import luci.sixsixsix.powerampache2.presentation.common.DonateButtonContent
+import luci.sixsixsix.powerampache2.presentation.common.donate_btn.DonateButton
+import luci.sixsixsix.powerampache2.presentation.common.donate_btn.DonateButtonContent
 import luci.sixsixsix.powerampache2.presentation.common.DonateConsider
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpCheckBox
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
@@ -641,7 +641,13 @@ fun PreviewSettingsScreen() {
         onThemeSelected = { },
         onStreamingQualitySelected = { },
         onEnableLoggingValueChange = { },
-        donateButton = { DonateButtonContent(isExpanded = true, isTransparent = false) },
+        donateButton = { DonateButtonContent(
+            isExpanded = true,
+            isTransparent = false,
+            onDonateBmacButtonClick = {},
+            onDonateBtcButtonClick =  {},
+            onDonatePaypalButtonClick =  {}
+        )},
         onAutoCheckUpdatesValueChange = { },
         onCheckUpdatesNowPress = { },
         onDebugLogsButtonPress = { },
