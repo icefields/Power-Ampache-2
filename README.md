@@ -90,16 +90,24 @@ Github, PlayStore and Telegram releases are signed by me.
   <table>
   <tr>
 	<th>
-      <a target="_blank" href="https://www.patreon.com/Icefields">
-      <img height="40" hspace="20" alt="Become a patreon" src="https://github.com/user-attachments/assets/3318ab05-3c7e-42dd-8784-f12129c0915d"></a>
+		<a target="_blank" href="https://buymeacoffee.com/powerampache">
+  <img src="https://github.com/user-attachments/assets/6868a8a5-7fba-4f6c-871d-0a73f1955408" alt="Buy Me a Coffee" width="200" />
+</a> 
     </th>
 	<th>
-      <a target="_blank" href="https://paypal.me/powerampache">
-      <img height="40" hspace="20" alt="Donate - Paypal" src="https://power.ampache.dev/images/banner_paypal.png"></a>
+ <a target="_blank" href="https://www.patreon.com/Icefields">
+      <img width="160" hspace="20" alt="Become a Patreon" 
+         src="https://github.com/user-attachments/assets/c263bc11-3898-44ae-b926-2acd2193de22"></a>
     </th>
-    <th>
-      <a target="_blank" href="https://live.blockcypher.com/btc/address/bc1qm9dvdrukgrqpg5f7466u4cy7tfvwcsc8pqshl4">
-      <img height="40" hspace="20" alt="Donate Bitcoin" src="https://power.ampache.dev/images/banner_bitcoin.png"></a>
+	  	  </tr>
+	  <tr>
+		  <th>
+	      <a target="_blank" href="https://live.blockcypher.com/btc/address/bc1qm9dvdrukgrqpg5f7466u4cy7tfvwcsc8pqshl4">
+      <img width="200" hspace="20" alt="Donate Bitcoin" src="https://power.ampache.dev/images/banner_bitcoin.png"></a>	
+</th>
+		  <th>
+			  <a target="_blank" href="https://paypal.me/powerampache">
+      <img width="160" hspace="20" alt="Donate - Paypal" src="https://power.ampache.dev/images/banner_paypal.png"></a>
     </th>
     
  </tr>
