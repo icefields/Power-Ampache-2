@@ -184,7 +184,7 @@ Before starting any contribution, read the above document and if necessary conta
 - [x] Multi-account
 - [ ] UI for Tablets
 - [x] bulk-delete downloaded songs
-- [x] playlist edit dran and drop
+- [x] playlist edit drag and drop
 - [ ] Android TV version
 - [ ] Android widget
 - [ ] implement share with app scheme
