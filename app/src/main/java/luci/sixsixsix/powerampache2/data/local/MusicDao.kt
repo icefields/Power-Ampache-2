@@ -143,7 +143,7 @@ interface MusicDao {
     @Query("""SELECT * FROM albumentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 66""")
     suspend fun getRandomAlbums(): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 22""")
+    @Query("""SELECT * FROM albumentity WHERE $multiUserCondition ORDER BY RANDOM() LIMIT 220""")
     fun getRandomAlbumsFlow(): Flow<List<AlbumEntity>>
 
     @Query("""SELECT SUM(playCount) AS acount, a.* FROM songentity AS s, albumentity AS a 
