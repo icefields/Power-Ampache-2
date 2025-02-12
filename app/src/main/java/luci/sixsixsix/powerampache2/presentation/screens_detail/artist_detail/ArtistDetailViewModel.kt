@@ -26,14 +26,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.Artist
+import luci.sixsixsix.powerampache2.domain.models.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -42,9 +53,21 @@ class ArtistDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repository: AlbumsRepository,
     private val artistsRepository: ArtistsRepository,
+    private val settingsRepository: SettingsRepository,
+    private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
 
     var state by mutableStateOf(ArtistDetailState())
+
+    val globalShuffleStateFlow = settingsRepository.settingsLiveData
+        .distinctUntilChanged()
+        .asFlow()
+        .filterNotNull()
+        .map {
+            it.isGlobalShuffleEnabled
+        }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE)
 
     init {
         savedStateHandle.get<String>("artistId")?.let {id ->
@@ -68,6 +91,13 @@ class ArtistDetailViewModel @Inject constructor(
             }
 
             ArtistDetailEvent.OnFavouriteArtist -> favouriteArtist()
+            ArtistDetailEvent.OnShufflePlaylistToggle -> viewModelScope.launch {
+                try {
+                    settingsRepository.toggleGlobalShuffle()
+                } catch (e: Exception) {
+                    playlistManager.updateErrorLogMessage(e.stackTraceToString())
+                }
+            }
         }
     }
 
@@ -100,6 +130,33 @@ class ArtistDetailViewModel @Inject constructor(
                             }
                         }
 
+                        is Resource.Error -> state = state.copy(isLoading = false)
+                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                    }
+                }
+        }
+    }
+
+    fun getSongsFromArtist(
+        artistId: String = state.artist.id,
+        fetchRemote: Boolean = true,
+        songsCallback: (List<Song>) -> Unit
+    ) {
+        viewModelScope.launch {
+            artistsRepository
+                .getSongsFromArtist(artistId, fetchRemote = fetchRemote)
+                .collect { result ->
+                    when(result) {
+                        is Resource.Success -> {
+                            if (result.networkData != null) {
+                                // only get the data when a network response is returned
+                                // check against network data but use db data
+                                result.data?.let { songs ->
+                                    songsCallback(songs)
+                                    L("viewmodel.getSongsFromArtist size ${result.data?.size} network: ${result.networkData?.size}")
+                                }
+                            }
+                        }
                         is Resource.Error -> state = state.copy(isLoading = false)
                         is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                     }

@@ -197,6 +197,9 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by trackNumber, flag DESC, rating DESC, playCount DESC""")
     suspend fun getSongFromAlbum(albumId: String): List<SongEntity>
 
+    @Query("""SELECT * FROM songentity WHERE LOWER(artistId) == LOWER(:artistId) order by year, albumName, trackNumber, title""")
+    suspend fun getSongsFromArtist(artistId: String): List<SongEntity>
+
 // --- ARTISTS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArtists(artists: List<ArtistEntity>)
@@ -301,6 +304,9 @@ interface MusicDao {
 
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:albumId) == LOWER(albumId) AND $multiUserCondition""")
     suspend fun getOfflineSongsFromAlbum(albumId: String): List<DownloadedSongEntity>
+
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:artistId) == LOWER(artistId) AND $multiUserCondition""")
+    suspend fun getOfflineSongsFromArtist(artistId: String): List<DownloadedSongEntity>
 
     @Query("""SELECT  song.*, songIds.position FROM downloadedsongentity as song, (SELECT * FROM playlistsongentity WHERE :playlistId == playlistId) as songIds WHERE song.mediaId == songIds.songId""")
     suspend fun getOfflineSongsFromPlaylist(playlistId: String): List<DownloadedSongEntity>

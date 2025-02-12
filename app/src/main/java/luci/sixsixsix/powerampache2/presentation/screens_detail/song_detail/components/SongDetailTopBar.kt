@@ -94,11 +94,11 @@ fun SongDetailTopBar(
                 maxLines = 1,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier
-                .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
+            Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
+            val albumYear = "${currentSongState?.album?.name ?: Constants.ERROR_TITLE} (${currentSongState?.year ?: ""})"
             Text(
                 modifier = Modifier.basicMarquee(),
-                text = currentSongState?.album?.name ?: Constants.ERROR_TITLE,
+                text = albumYear,
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
                 maxLines = 1,

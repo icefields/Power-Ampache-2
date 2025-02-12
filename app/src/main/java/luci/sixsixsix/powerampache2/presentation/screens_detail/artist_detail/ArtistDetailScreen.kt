@@ -42,6 +42,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -71,11 +71,16 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
+import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumItem
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
+import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.AlbumDetailEvent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistDetailTopBar
+import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistInfoEvent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistInfoSection
-import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistInfoViewEvents
 
 private const val GRID_ITEMS_ROW = 2
 private const val GRID_ITEMS_ROW_LAND = 5
@@ -88,12 +93,16 @@ fun ArtistDetailScreen(
     artistId: String,
     artist: Artist? = null,
     modifier: Modifier = Modifier,
-    viewModel: ArtistDetailViewModel = hiltViewModel()
+    viewModel: ArtistDetailViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel,
+    addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val summaryOpen = remember { mutableStateOf(false) }
+    var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
+    val isGlobalShuffleOn by viewModel.globalShuffleStateFlow.collectAsState()
     var cardsPerRow by remember {
         mutableIntStateOf(if (state.albums.size < 2) { 1 } else { GRID_ITEMS_ROW })
     }
@@ -114,6 +123,22 @@ fun ArtistDetailScreen(
         else -> {
             cardsPerRow = GRID_ITEMS_ROW
             false
+        }
+    }
+
+    if (playlistsDialogOpen.isOpen) {
+        if (playlistsDialogOpen.songs.isNotEmpty()) {
+            AddToPlaylistOrQueueDialog(
+                songs = playlistsDialogOpen.songs,
+                onDismissRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                },
+                mainViewModel = mainViewModel,
+                viewModel = addToPlaylistOrQueueDialogViewModel,
+                onCreatePlaylistRequest = {
+                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(false)
+                }
+            )
         }
     }
 
@@ -181,11 +206,38 @@ fun ArtistDetailScreen(
                         artist = state.artist,
                         summaryOpen = summaryOpen,
                         isLikeLoading = state.isLikeLoading,
+                        isBuffering = mainViewModel.isBuffering,
+                        isPlayLoading = mainViewModel.isPlayLoading(),
+                        isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading || state.isLoading,
+                        isGlobalShuffleOn = isGlobalShuffleOn,
                         eventListener = { event ->
                             when(event) {
-                                ArtistInfoViewEvents.SHARE_ARTIST -> { }
-                                ArtistInfoViewEvents.FAVOURITE_ARTIST ->
+                                ArtistInfoEvent.SHARE_ARTIST -> { }
+                                ArtistInfoEvent.FAVOURITE_ARTIST ->
                                     viewModel.onEvent(ArtistDetailEvent.OnFavouriteArtist)
+                                ArtistInfoEvent.PLAY_ARTIST -> {
+                                    if (state.isLoading) return@ArtistInfoSection
+
+                                    viewModel.getSongsFromArtist { songs ->
+                                        // fetch songs, then play
+                                        if (!isGlobalShuffleOn) {
+                                            // add next to the list and skip to the top of the album (which is next)
+                                            mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlay(songs[0], songs))
+                                        } else {
+                                            mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(songs))
+                                        }
+                                    }
+                                }
+                                ArtistInfoEvent.SHUFFLE_PLAY_ARTIST -> viewModel.onEvent(
+                                    ArtistDetailEvent.OnShufflePlaylistToggle)
+                                ArtistInfoEvent.ADD_ARTIST_TO_PLAYLIST -> {
+                                    viewModel.getSongsFromArtist { songs ->
+                                        playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(
+                                            isOpen = true,
+                                            songs = songs
+                                        )
+                                    }
+                                }
                             }
                         }
                     )

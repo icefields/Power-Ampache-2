@@ -180,16 +180,16 @@ Before starting any contribution, read the above document and if necessary conta
 - Open a pull request. -->
 
 **What I'm working on right now and what's next**
-- [x] Improve Notifications Screen
 - [x] Multi-account
 - [ ] UI for Tablets
 - [x] bulk-delete downloaded songs
 - [x] playlist edit dran and drop
 - [ ] Android TV version
-- [ ] Android widget
+- [x] Android widget
 - [ ] implement share with app scheme
 - [ ] Android Auto
-
+- [ ] Chromecast
+- [x] Improve Notifications Screen
 <br>
 
 <!--
@@ -228,10 +228,10 @@ The app is currently translated in the following languages:
 <br>Japanese
 <br>Russian
 <br><br>
-Some translations are usually not complete, since I keep adding new features all the time.
+Non-English translations are usually not complete, since I keep adding new features all the time.
 <br>
-In the future I will automate translation contributions, right now you have 3 options.<br>
-- use this tool I made (source code in my Ampache Helper Scripts repo): https://powerampache-translations.tiiny.io . For new translations, start with English and edit one by one all the strings. When done, click on the save-button to export the newly created xml file. Please send it to me afterwards. For existing languages, scroll to the bottom (that's usually where new strings are located), translate and then save the file and send it to me.
+In the future I will automate translation contributions, right now you have the following options.<br>
+- Use this tool I made (source code in my Ampache Helper Scripts repo): https://powerampache-translations.tiiny.io . For new translations, start with English and edit one by one all the strings. When done, click on the save-button to export the newly created xml file. Please send it to me afterwards. For existing languages, scroll to the bottom (that's usually where new strings are located), translate and then save the file and send it to me.
 - If you're an Android developer just create the resource directories and files and open a PR (`strings.xml` is where translatable strings are located).
 - If you're not familiar with Android development and don't know how to create translation resources, but you are able to edit XML files: you can just grab `strings.xml`, edit it and send it back to me. I'll review it and will include it in the app in the next release.
   Example (italian translation):

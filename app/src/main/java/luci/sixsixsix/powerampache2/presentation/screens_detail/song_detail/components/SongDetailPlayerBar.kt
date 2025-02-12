@@ -178,10 +178,7 @@ fun PlayerControls(
             }) {
             Icon(
                 tint = tint,
-                imageVector = if(!shuffleOn)
-                    Icons.Outlined.Shuffle
-                else
-                    Icons.Outlined.ShuffleOn,
+                imageVector = if(!shuffleOn) Icons.Outlined.Shuffle else Icons.Outlined.ShuffleOn,
                 contentDescription = "Shuffle"
             )
         }

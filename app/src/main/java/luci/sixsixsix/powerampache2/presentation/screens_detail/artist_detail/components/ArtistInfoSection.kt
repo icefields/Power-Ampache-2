@@ -52,18 +52,17 @@ import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AttributeText
 
-enum class ArtistInfoViewEvents {
-    SHARE_ARTIST,
-    FAVOURITE_ARTIST
-}
-
 @Composable
 fun ArtistInfoSection(
     modifier: Modifier,
     artist: Artist,
     summaryOpen: MutableState<Boolean>,
     isLikeLoading: Boolean,
-    eventListener: (albumInfoViewEvents: ArtistInfoViewEvents) -> Unit
+    isBuffering: Boolean,
+    isPlayLoading: Boolean,
+    isPlaylistEditLoading: Boolean,
+    isGlobalShuffleOn: Boolean,
+    eventListener: (albumInfoViewEvents: ArtistInfoEvent) -> Unit
 ) {
     Column(modifier = modifier) {
         MusicAttributeChips(
@@ -99,7 +98,7 @@ fun ArtistInfoSection(
             LikeButton(
                 modifier = Modifier.size(32.dp),
                 isLikeLoading = isLikeLoading, isFavourite = artist.flag == 1) {
-                eventListener(ArtistInfoViewEvents.FAVOURITE_ARTIST)
+                eventListener(ArtistInfoEvent.FAVOURITE_ARTIST)
             }
         }
 
@@ -119,8 +118,15 @@ fun ArtistInfoSection(
                 lineHeight = 17.sp
             )
         }
-//        Spacer(modifier = Modifier.height(4.dp))
-//        ArtistInfoButtonsRow(modifier = Modifier.fillMaxWidth(), artist = artist, eventListener)
+        Spacer(modifier = Modifier.height(4.dp))
+        ArtistInfoButtonsRow(
+            isPlaylistEditLoading = isPlaylistEditLoading,
+            isPlayLoading = isPlayLoading,
+            isBuffering = isBuffering,
+            isGlobalShuffleOn = isGlobalShuffleOn,
+            modifier = Modifier.fillMaxWidth(),
+            eventListener
+        )
         Spacer(modifier = Modifier.width(20.dp))
     }
 }
@@ -133,6 +139,10 @@ fun ArtistInfoSectionPreview() {
         Artist.mockArtist(),
         eventListener = {},
         isLikeLoading = false,
+        isBuffering = false,
+        isPlayLoading = false,
+        isPlaylistEditLoading = false,
+        isGlobalShuffleOn = true,
         summaryOpen = remember { mutableStateOf(true) }
     )
 }

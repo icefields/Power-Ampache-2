@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Genre
+import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface ArtistsRepository {
     suspend fun getArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<Artist>>
@@ -32,4 +33,5 @@ interface ArtistsRepository {
     suspend fun getArtistsByGenre(genreId: Genre, fetchRemote: Boolean = true, offset: Int = 0): Flow<Resource<List<Artist>>>
     suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun getMostPlayedArtists(): List<Artist>
+    suspend fun getSongsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
 }
