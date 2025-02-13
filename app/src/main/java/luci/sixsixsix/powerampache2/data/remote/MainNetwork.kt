@@ -189,6 +189,7 @@ interface MainNetwork {
         @Query("limit") limit: Int = 0,
         @Query("filter") artistId: String,
         @Query("offset") offset: Int = 0,
+        @Query("include") include: String? = null  // albums, songs (includes track list)
     ): ArtistDto
 
     @GET("json.server.php?action=album")
@@ -206,6 +207,16 @@ interface MainNetwork {
         @Query("filter") artistId: String,
         @Query("offset") offset: Int = 0,
     ): AlbumsResponse
+
+    @GET("json.server.php?action=artist_songs")
+    suspend fun getSongsFromArtist(
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = 0,
+        @Query("filter") artistId: String,
+        @Query("offset") offset: Int = 0,
+        @Query("top50") top50: Int = 0, // values 0 or 1
+        //@Query("sort") sort: String = "name,ASC",
+    ): SongsResponse
 
     @GET("json.server.php?action=album_songs")
     suspend fun getSongsFromAlbum(

@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
@@ -82,7 +83,7 @@ fun HomeScreen(
     val frequentAlbums by viewModel.frequentlyPlayedStateFlow.collectAsState()
     val offlineModeState by viewModel.offlineModeStateFlow.collectAsState()
     val highestAlbums by viewModel.highestRatedAlbumsStateFlow.collectAsState()
-    val randomAlbums by viewModel.randomAlbumsStateFlow.collectAsState()
+    val randomAlbums by viewModel.randomAlbumsStateFlow.collectAsStateWithLifecycle()
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     var emptyViewVisible by remember { mutableStateOf(false) }
 

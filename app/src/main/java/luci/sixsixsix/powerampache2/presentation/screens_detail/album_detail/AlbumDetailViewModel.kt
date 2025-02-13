@@ -30,7 +30,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,7 +52,6 @@ import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject
 
-@OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     private val application: Application,

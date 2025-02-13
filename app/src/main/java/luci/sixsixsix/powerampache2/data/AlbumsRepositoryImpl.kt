@@ -25,13 +25,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
@@ -397,12 +397,24 @@ class AlbumsRepositoryImpl @Inject constructor(
             emit(Resource.Success(data = dbA, networkData = null))
         }
 
+        // assign limit according to defined constants
+        val limit = when (statFilter) {
+            MainNetwork.StatFilter.random -> NETWORK_REQUEST_LIMIT_HOME
+            MainNetwork.StatFilter.recent -> NETWORK_REQUEST_LIMIT_HOME
+            MainNetwork.StatFilter.newest -> NETWORK_REQUEST_LIMIT_HOME
+            MainNetwork.StatFilter.frequent -> NETWORK_REQUEST_LIMIT_HOME
+            MainNetwork.StatFilter.flagged -> NETWORK_REQUEST_LIMIT_HOME
+            MainNetwork.StatFilter.forgotten -> NETWORK_REQUEST_LIMIT_HOME
+            MainNetwork.StatFilter.highest -> Constants.config.albumHighestFetchLimit
+        }
+
         if (fetchRemote) {
             val cred = getCurrentCredentials()
             api.getAlbumsStats(
                 authToken(),
                 username = getCredentials()?.username,
-                filter = statFilter
+                filter = statFilter,
+                limit = limit
             ).albums?.let { albumsDto ->
                 val data = albumsDto.map { it.toAlbum() }
                 dao.insertAlbums(data.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })

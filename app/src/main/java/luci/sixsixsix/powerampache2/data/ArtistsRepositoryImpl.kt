@@ -37,6 +37,7 @@ import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
+import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -227,6 +228,36 @@ class ArtistsRepositoryImpl @Inject constructor(
             }.values.toList()
         } else {
             mostPlayedArtistsDb.map { it.toArtist() }
+        }
+
+    override suspend fun getSongsFromArtist(
+        artistId: String,
+        fetchRemote: Boolean
+    ): Flow<Resource<List<Song>>> = flow {
+        emit(Resource.Loading(true))
+        val isOfflineMode = isOfflineModeEnabled()
+        val localSongs = getDbSongsFromArtist(artistId, isOfflineMode)
+        if (
+            !checkEmitCacheData(localSongs, fetchRemote, this) ||
+            isOfflineMode
+        ) {
+            emit(Resource.Loading(false))
+            return@flow
+        }
+
+        val response = api.getSongsFromArtist(authToken(), artistId = artistId)
+        response.error?.let { throw(MusicException(it.toError())) }
+        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
+        cacheSongs(songs)
+        emit(Resource.Success(data = getDbSongsFromArtist(artistId, isOfflineMode), networkData = songs))
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getSongsFromArtist()", e, this) }
+
+    private suspend fun getDbSongsFromArtist(artistId: String, isOfflineModeEnabled: Boolean ): List<Song> =
+        if (isOfflineModeEnabled) {
+            dao.getOfflineSongsFromArtist(artistId).map { it.toSong() }
+        } else {
+            dao.getSongsFromArtist(artistId).map { it.toSong() }
         }
 }
 

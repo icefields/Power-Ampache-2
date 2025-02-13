@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,7 +72,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainView
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 fun SongDetailQueueDragHandle(
     song: Song?,
     scaffoldState: BottomSheetScaffoldState,
@@ -247,7 +246,6 @@ fun SongHandleTabRow(
         selectedTabIndex = selectedTabIndex.value,
         contentColor = textColour,
         containerColor = Color.Transparent
-    // MaterialTheme.colorScheme.additionalColours.queueHandle
     ) {
         Tab(
             unselectedContentColor = textColour.copy(alpha = 0.66f),

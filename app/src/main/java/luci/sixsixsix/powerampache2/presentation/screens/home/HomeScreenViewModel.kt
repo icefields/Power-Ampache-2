@@ -29,11 +29,13 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -67,7 +69,7 @@ class HomeScreenViewModel @Inject constructor(
     private var recentNetwork: StateFlow<List<AmpacheModel>> = _recentNetwork
     private var frequentNetwork: MutableStateFlow<List<AmpacheModel>> = MutableStateFlow(listOf())
 
-    private val currentRandomAlbums = mutableListOf<AmpacheModel>()
+    //private val currentRandomAlbums = mutableListOf<AmpacheModel>()
     private val currentFlaggedAlbums = mutableListOf<AmpacheModel>()
     private val currentPlaylists = mutableListOf<Playlist>()
 
@@ -133,16 +135,18 @@ class HomeScreenViewModel @Inject constructor(
             mergeFrequentItems(frequentAlbums)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<AmpacheModel>())
 
-    val randomAlbumsStateFlow = albumsRepository.randomAlbumsFlow.distinctUntilChanged().map { albumsDb ->
-        // if list too big, ignore
-        if (offlineModeStateFlow.value) {
-            // remove non offline albums from before
-            currentRandomAlbums.clear()
-        }
-        if (currentRandomAlbums.size < 200) {
-            AmpacheModel.appendToList(albumsDb.toMutableList(), mainList = currentRandomAlbums)
-        }
-        injectArtists(currentRandomAlbums, offsetRandom)
+    val randomAlbumsStateFlow = albumsRepository.randomAlbumsFlow
+        .distinctUntilChanged()
+        .debounce(1000) // wait a second to allow other calls to complete and avoid the flickering
+        .map { albumsDb ->
+//        if (offlineModeStateFlow.value) {
+//            // remove non offline albums from before
+//            currentRandomAlbums.clear()
+//        }
+//        if (currentRandomAlbums.size < 200) {
+//            AmpacheModel.appendToList(albumsDb.toMutableList(), mainList = currentRandomAlbums)
+//        }
+        injectArtists(albumsDb, offsetRandom)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<AmpacheModel>())
 
     val flaggedAlbumsStateFlow = albumsRepository.flaggedAlbumsFlow.distinctUntilChanged().map { albumsDb ->

@@ -19,11 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail
+package luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components
 
-sealed class ArtistDetailEvent {
-    data object Refresh: ArtistDetailEvent()
-    data class Fetch(val albumId: String): ArtistDetailEvent()
-    data object OnFavouriteArtist: ArtistDetailEvent()
-    data object OnShufflePlaylistToggle: ArtistDetailEvent()
+enum class ArtistInfoEvent {
+    PLAY_ARTIST,
+    SHUFFLE_PLAY_ARTIST,
+    ADD_ARTIST_TO_PLAYLIST,
+    SHARE_ARTIST,
+    FAVOURITE_ARTIST
 }

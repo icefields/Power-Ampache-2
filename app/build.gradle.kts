@@ -61,8 +61,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 76
-        versionName = "1.01-76"
+        versionCode = 77
+        versionName = "1.01-77"
         val versionQuote = "This version is powered by a globular cluster in the constellation Sagittarius and Rhenium . ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
