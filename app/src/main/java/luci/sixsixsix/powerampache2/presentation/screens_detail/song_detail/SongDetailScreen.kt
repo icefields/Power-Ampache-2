@@ -38,7 +38,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.hasLyrics
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailContent
