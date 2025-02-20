@@ -2,3 +2,4 @@
 — [Nextcloud] Added lyrics support for Nextcloud. Will work with Nextcloud Music versions > 2.1.2
 — Localized remaining Spanish strings.
 — Minor bug fixes and adjustments.
+— Fixed issues with limits previously imposed on song-stats requests.

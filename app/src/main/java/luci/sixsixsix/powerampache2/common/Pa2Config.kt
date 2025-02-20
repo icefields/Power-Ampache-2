@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.common
 
-import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.BuildConfig
 
 const val ALBUM_HIGHEST_FETCH_LIMIT = 500
