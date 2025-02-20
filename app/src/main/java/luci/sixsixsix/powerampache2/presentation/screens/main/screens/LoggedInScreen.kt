@@ -53,6 +53,7 @@ import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
 import luci.sixsixsix.powerampache2.presentation.dialogs.IntroDialog
@@ -114,6 +115,8 @@ fun LoggedInScreen(
     }
 
     var introDialogVisible by remember { mutableStateOf(settingsViewModel.shouldShowIntroDialog()) }
+
+    println("aaaa1 ${Constants.config.introMessage}")
 
     AnimatedVisibility(introDialogVisible) {
         IntroDialog {

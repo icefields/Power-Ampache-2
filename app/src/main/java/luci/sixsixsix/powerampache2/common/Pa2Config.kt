@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.common
 
+import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.BuildConfig
 
 const val ALBUM_HIGHEST_FETCH_LIMIT = 500
@@ -41,6 +42,13 @@ const val PLAYLISTS_ALL_SERVER_FETCH = BuildConfig.PLAYLISTS_ALL_SERVER_FETCH
 const val CLEAR_LIBRARY_ON_CATALOG_CLEAN = true
 const val FETCH_ALBUMS_WITH_ARTISTS = true
 const val INTRO_MESSAGE_LOCAL_ASSET = "local::asset"
+
+// limit the amount of songs fetched for stats
+const val SONGS_DEFAULT_LIMIT_FETCH = 5000
+const val SONGS_HIGHEST_LIMIT_FETCH = 5000
+const val SONGS_FLAGGED_LIMIT_FETCH = 5000
+const val SONGS_FREQUENT_LIMIT_FETCH = 5000
+const val SONGS_RECENT_LIMIT_FETCH = 666
 
 data class Pa2Config(
     // use new fast method for adding albums and playlists to playlist
@@ -100,5 +108,11 @@ data class Pa2Config(
     // when fetching artists also fetch their albums
     val fetchAlbumsWithArtist: Boolean = FETCH_ALBUMS_WITH_ARTISTS,
     // fetch limit for the top rated albums
-    val albumHighestFetchLimit: Int = ALBUM_HIGHEST_FETCH_LIMIT
+    val albumHighestFetchLimit: Int = ALBUM_HIGHEST_FETCH_LIMIT,
+
+    // amount of songs fetched for stats requests
+    val songsHighestFetchLimit: Int = SONGS_HIGHEST_LIMIT_FETCH,
+    val songsFlaggedFetchLimit: Int = SONGS_FLAGGED_LIMIT_FETCH,
+    val songsFrequentFetchLimit: Int = SONGS_FREQUENT_LIMIT_FETCH,
+    val songsRecentFetchLimit: Int = SONGS_RECENT_LIMIT_FETCH
 )

@@ -359,7 +359,7 @@ class PlaylistDetailViewModel @Inject constructor(
     }
 
 
-    private fun getFlaggedSongs(fetchRemote: Boolean = true, ) {
+    private fun getFlaggedSongs(fetchRemote: Boolean = true) {
         viewModelScope.launch {
             songsRepository
                 .getFlaggedSongs()

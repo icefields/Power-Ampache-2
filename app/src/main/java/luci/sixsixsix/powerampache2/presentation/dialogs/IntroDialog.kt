@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024  Antonio Tari
+ * Copyright (C) 2025  Antonio Tari
  *
  * This file is a part of Power Ampache 2
  * Ampache Android client application

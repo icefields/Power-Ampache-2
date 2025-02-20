@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.hasLyrics
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
@@ -50,12 +51,16 @@ fun SongDetailScreen(
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
+    songDetailViewModel: SongDetailViewModel = hiltViewModel(),
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val song by viewModel.currentSongStateFlow().collectAsState()
+    song?.let { songDetailViewModel.getSongLyrics(it) }
+    val lyrics by songDetailViewModel.lyrics.collectAsStateWithLifecycle()
+
     val scaffoldState = rememberBottomSheetScaffoldState()
     val pagerState = rememberPagerState(initialPage = 0) {
-        if (song?.hasLyrics() == true) { 2 } else { 1 }
+        if (lyrics != "") { 2 } else { 1 }
     }
     val selectedTabIndex = remember { mutableIntStateOf(0) }
 
@@ -64,7 +69,7 @@ fun SongDetailScreen(
         scaffoldState = scaffoldState,
         sheetContent = {
             TabbedSongDetailView(
-                song = song,
+                lyrics = lyrics,
                 pagerState = pagerState,
                 mainScaffoldState = mainScaffoldState,
                 mainViewModel = viewModel
@@ -73,6 +78,7 @@ fun SongDetailScreen(
         sheetDragHandle = {
             SongDetailQueueDragHandle(
                 song = song,
+                lyrics = lyrics,
                 scaffoldState = scaffoldState,
                 selectedTabIndex = selectedTabIndex,
                 pagerState = pagerState)
