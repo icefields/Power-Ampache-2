@@ -63,7 +63,7 @@ android {
         targetSdk = 35
         versionCode = 78
         versionName = "1.01-78"
-        val versionQuote = "This version is powered by 78 RPM vinyl and Diana, the goddess of the hunt, the moon, and nature. ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"
+        val versionQuote = "This version is powered by 78 RPM vinyl and Diana, the goddess of the hunt, the moon, and nature."
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
