@@ -229,4 +229,6 @@
     <string name="bitcoin_btn_contentDescription">Donar Bitcoin</string>
     <string name="paypal_btn_contentDescription">Donar via Paypal</string>
     <string name="bmac_btn_text">Buy Me A Coffee</string>
+    <string name="about_support_title">Support</string>
+    <string name="about_links_title">Links</string>
 </resources>

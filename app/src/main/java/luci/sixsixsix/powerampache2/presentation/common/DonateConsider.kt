@@ -41,18 +41,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.screens.settings.subscreens.components.AboutRoundCornerCard
 
 @Composable
 fun DonateConsider(
     modifier: Modifier = Modifier,
+    showLink: Boolean = true,
     onClick: () -> Unit
 ) {
     Column {
         Spacer(modifier = Modifier.height(18.dp))
-        DefaultFullWidthButton(
-            modifier = modifier,
-            borderStrokeColour = MaterialTheme.colorScheme.onSurface,
-            onClick = onClick
+        AboutRoundCornerCard (
+            modifier = modifier.clickable { onClick() }
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -65,56 +65,30 @@ fun DonateConsider(
             ) {
                 Text(
                     fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textDecoration = TextDecoration.Underline,
                     textAlign = TextAlign.Center,
                     text = stringResource(id = R.string.about_considerDonating),
                 )
-                Text(
-                    textDecoration = TextDecoration.Underline,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold,
-                    text = stringResource(id = R.string.website),
-                )
+
+                if (showLink)
+                    Text(
+                        textDecoration = TextDecoration.Underline,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold,
+                        text = stringResource(id = R.string.website),
+                    )
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
     }
-//    Card(
-//        border = BorderStroke(
-//            width = dimensionResource(id = R.dimen.songItem_card_borderStroke),
-//            color = MaterialTheme.colorScheme.onSurface
-//        ),
-//        modifier = Modifier.clickable {
-//                onClick()
-//            },
-//        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-//        elevation = CardDefaults.cardElevation(0.dp),
-//        shape = RoundedCornerShape(10.dp)
-//    ) {
-//        Column(
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.Center,
-//            modifier = modifier
-//                .padding(10.dp)
-//                .clickable {
-//                    onClick()
-//                }
-//        ) {
-//            Text(
-//                fontSize = 16.sp,
-//                textAlign = TextAlign.Center,
-//                text = stringResource(id = R.string.about_considerDonating),
-//            )
-//            Text(
-//                text = stringResource(id = R.string.website),
-//            )
-//        }
-//    }
 }
 
 @Preview
 @Composable
 fun DonateConsiderPreview() {
-    DonateConsider(modifier = Modifier.width(500.dp)) {
+    DonateConsider(modifier = Modifier.width(500.dp), showLink = true) {
     }
 }

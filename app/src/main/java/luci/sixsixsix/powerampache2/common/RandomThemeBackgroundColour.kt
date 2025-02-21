@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.common
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
