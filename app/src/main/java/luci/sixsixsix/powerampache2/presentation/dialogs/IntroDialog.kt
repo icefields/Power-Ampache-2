@@ -21,13 +21,20 @@
  */
 package luci.sixsixsix.powerampache2.presentation.dialogs
 
+import android.view.ViewGroup
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -35,6 +42,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.config
 import luci.sixsixsix.powerampache2.common.openLinkInBrowser
@@ -63,12 +72,13 @@ fun IntroDialog(onDismissRequest: () -> Unit) {
                 containerColor = MaterialTheme.colorScheme.additionalColours.surfaceContainer,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ),
-            modifier = Modifier
-                .padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             shape = RoundedCornerShape(4.dp),
         ) {
-            Column(modifier = Modifier
-                .padding(8.dp)) {
+            Box(
+                modifier = Modifier.padding(8.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
                 IntroWebView()
                 Button(
                     modifier = Modifier.fillMaxWidth(),
@@ -95,11 +105,8 @@ fun IntroWebView() {
     AndroidView(factory = { context ->
 
         WebView(context).apply {
-//            layoutParams = ViewGroup.LayoutParams(
-//                ViewGroup.LayoutParams.MATCH_PARENT,
-//                ViewGroup.LayoutParams.MATCH_PARENT
-//            )
             settings.javaScriptEnabled = false
+
             webViewClient = object:WebViewClient() {
                 override fun onReceivedError(
                     view: WebView?,
@@ -109,10 +116,22 @@ fun IntroWebView() {
                     view?.loadUrl(LOCAL_INTRO_DIALOG_URI)
                 }
 
+                override fun onReceivedHttpError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    errorResponse: WebResourceResponse?
+                ) {
+                    if (errorResponse?.statusCode == 404 && request?.isForMainFrame == true) {
+                        view?.loadUrl(LOCAL_INTRO_DIALOG_URI)
+                    } else {
+                        super.onReceivedHttpError(view, request, errorResponse)
+                    }
+                }
+
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                     val urlRedirect = request?.url.toString()
                     if (urlRedirect.startsWith("http://") || urlRedirect.startsWith("https://")) {
-                        context.openLinkInBrowser( urlRedirect)
+                        context.openLinkInBrowser(urlRedirect)
                         return true
                     }
                     // do not redirect if url is not http or https to lower the rick of malicious

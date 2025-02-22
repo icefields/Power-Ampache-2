@@ -28,6 +28,8 @@ import luci.sixsixsix.powerampache2.common.API_RECORD_PLAY_ENABLE
 import luci.sixsixsix.powerampache2.common.CLEAR_LIBRARY_ON_CATALOG_CLEAN
 import luci.sixsixsix.powerampache2.common.FETCH_ALBUMS_WITH_ARTISTS
 import luci.sixsixsix.powerampache2.common.FORCE_SKIP_NETWORK_ERROR
+import luci.sixsixsix.powerampache2.common.INTRO_MESSAGE_DEFAULT
+import luci.sixsixsix.powerampache2.common.INTRO_MESSAGE_REMOTE_VERSION
 import luci.sixsixsix.powerampache2.common.PLAYBACK_ERRORS_RETRIES
 import luci.sixsixsix.powerampache2.common.PLAYLISTS_ADMIN_FETCH
 import luci.sixsixsix.powerampache2.common.PLAYLISTS_ALL_SERVER_FETCH
@@ -134,7 +136,7 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     smartlistsAdminFetch = smartlistsAdminFetch ?: SMARTLISTS_ADMIN_FETCH,
     playlistsServerAllFetch = playlistsServerAllFetch ?: PLAYLISTS_ALL_SERVER_FETCH,
     clearLibraryOnCatalogClean = clearLibraryOnCatalogClean ?: CLEAR_LIBRARY_ON_CATALOG_CLEAN,
-    introMessage = introMessage ?: "",
+    introMessage = parseIntroMessage(introMessage),
     isDownloadsSdCardOptionEnabled = isDownloadsSdCardOptionEnabled ?: SETTINGS_IS_DOWNLOAD_SDCARD,
     isRecordPlayApiEnabled = isRecordPlayApiEnabled ?: API_RECORD_PLAY_ENABLE,
     forceSkipOnNetworkError = forceSkipOnNetworkError ?: FORCE_SKIP_NETWORK_ERROR,
@@ -145,3 +147,9 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     songsFrequentFetchLimit = songsFrequentFetchLimit ?: SONGS_FREQUENT_LIMIT_FETCH,
     songsRecentFetchLimit = songsRecentFetchLimit ?: SONGS_RECENT_LIMIT_FETCH
 )
+
+private fun parseIntroMessage(introMessage: String?): String = introMessage?.let { mess ->
+    if (mess == INTRO_MESSAGE_REMOTE_VERSION) {
+        StringBuilder("dialog").append(BuildConfig.VERSION_CODE).append(".html").toString()
+    } else mess
+} ?: INTRO_MESSAGE_DEFAULT

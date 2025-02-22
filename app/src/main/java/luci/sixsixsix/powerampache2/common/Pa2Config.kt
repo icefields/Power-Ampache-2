@@ -41,6 +41,8 @@ const val PLAYLISTS_ALL_SERVER_FETCH = BuildConfig.PLAYLISTS_ALL_SERVER_FETCH
 const val CLEAR_LIBRARY_ON_CATALOG_CLEAN = true
 const val FETCH_ALBUMS_WITH_ARTISTS = true
 const val INTRO_MESSAGE_LOCAL_ASSET = "local::asset"
+const val INTRO_MESSAGE_REMOTE_VERSION = "remote::version"
+const val INTRO_MESSAGE_DEFAULT = ""
 
 // limit the amount of songs fetched for stats
 const val SONGS_DEFAULT_LIMIT_FETCH = 5000
@@ -95,7 +97,7 @@ data class Pa2Config(
     // clear the library when a newer "clean" date in the handshake response
     val clearLibraryOnCatalogClean: Boolean = CLEAR_LIBRARY_ON_CATALOG_CLEAN,
     // message to show at login, if any present
-    val introMessage: String = "",
+    val introMessage: String = INTRO_MESSAGE_DEFAULT,
     val isIntroMessageLocal: Boolean = introMessage == INTRO_MESSAGE_LOCAL_ASSET,
     val shouldShowIntroMessage: Boolean = introMessage != "",
     // enable or disable the option in settings to download music to device sd card
