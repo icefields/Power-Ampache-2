@@ -148,6 +148,10 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     songsRecentFetchLimit = songsRecentFetchLimit ?: SONGS_RECENT_LIMIT_FETCH
 )
 
+/**
+ * If introMessage is equal to "remote::version", the dialog address must be constructed attaching
+ * the current version to it.
+ */
 private fun parseIntroMessage(introMessage: String?): String = introMessage?.let { mess ->
     if (mess == INTRO_MESSAGE_REMOTE_VERSION) {
         StringBuilder("dialog").append(BuildConfig.VERSION_CODE).append(".html").toString()
