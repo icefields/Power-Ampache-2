@@ -41,6 +41,15 @@ const val PLAYLISTS_ALL_SERVER_FETCH = BuildConfig.PLAYLISTS_ALL_SERVER_FETCH
 const val CLEAR_LIBRARY_ON_CATALOG_CLEAN = true
 const val FETCH_ALBUMS_WITH_ARTISTS = true
 const val INTRO_MESSAGE_LOCAL_ASSET = "local::asset"
+const val INTRO_MESSAGE_REMOTE_VERSION = "remote::version"
+const val INTRO_MESSAGE_DEFAULT = ""
+
+// limit the amount of songs fetched for stats
+const val SONGS_DEFAULT_LIMIT_FETCH = 5000
+const val SONGS_HIGHEST_LIMIT_FETCH = 5000
+const val SONGS_FLAGGED_LIMIT_FETCH = 5000
+const val SONGS_FREQUENT_LIMIT_FETCH = 5000
+const val SONGS_RECENT_LIMIT_FETCH = 666
 
 data class Pa2Config(
     // use new fast method for adding albums and playlists to playlist
@@ -88,7 +97,7 @@ data class Pa2Config(
     // clear the library when a newer "clean" date in the handshake response
     val clearLibraryOnCatalogClean: Boolean = CLEAR_LIBRARY_ON_CATALOG_CLEAN,
     // message to show at login, if any present
-    val introMessage: String = "",
+    val introMessage: String = INTRO_MESSAGE_DEFAULT,
     val isIntroMessageLocal: Boolean = introMessage == INTRO_MESSAGE_LOCAL_ASSET,
     val shouldShowIntroMessage: Boolean = introMessage != "",
     // enable or disable the option in settings to download music to device sd card
@@ -100,5 +109,11 @@ data class Pa2Config(
     // when fetching artists also fetch their albums
     val fetchAlbumsWithArtist: Boolean = FETCH_ALBUMS_WITH_ARTISTS,
     // fetch limit for the top rated albums
-    val albumHighestFetchLimit: Int = ALBUM_HIGHEST_FETCH_LIMIT
+    val albumHighestFetchLimit: Int = ALBUM_HIGHEST_FETCH_LIMIT,
+
+    // amount of songs fetched for stats requests
+    val songsHighestFetchLimit: Int = SONGS_HIGHEST_LIMIT_FETCH,
+    val songsFlaggedFetchLimit: Int = SONGS_FLAGGED_LIMIT_FETCH,
+    val songsFrequentFetchLimit: Int = SONGS_FREQUENT_LIMIT_FETCH,
+    val songsRecentFetchLimit: Int = SONGS_RECENT_LIMIT_FETCH
 )

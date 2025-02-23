@@ -37,6 +37,7 @@ import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_SEARCH
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.SONGS_DEFAULT_LIMIT_FETCH
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.common.hasMore
 import luci.sixsixsix.powerampache2.common.pop
@@ -160,9 +161,14 @@ class SongsRepositoryImpl @Inject constructor(
         searchOfflineSongs(query)
     }
 
-    override suspend fun getSongFromId(songId: String): Song? =
-        dao.getSongById(songId)?.run { toSong() }
-            ?: try { api.getSong(authToken(), songId).toSong() } catch (e: Exception) { null }
+    override suspend fun getSongFromId(songId: String, forceRemote: Boolean): Song? =
+        if (forceRemote) {
+            getSongFromIdNetwork(songId)
+        } else dao.getSongById(songId)?.run { toSong() } ?: getSongFromIdNetwork(songId)
+
+    // TODO: log exception properly
+    private suspend fun getSongFromIdNetwork(songId: String) =
+        try { api.getSong(authToken(), songId).toSong() } catch (e: Exception) { null }
 
     private suspend fun getSongsNetwork(
         fetchRemote: Boolean,
@@ -261,6 +267,7 @@ class SongsRepositoryImpl @Inject constructor(
         if (!isOfflineModeEnabled()) flow {
             emit(Resource.Loading(true))
 
+            // Only recent and frequent grab data from db TODO: remove limit
             if (statFilter == MainNetwork.StatFilter.recent) {
                 emit(Resource.Success(data = dao.getSongHistory().map { it.toSong() }, networkData = null))
             } else if (statFilter == MainNetwork.StatFilter.frequent) {
@@ -326,8 +333,19 @@ class SongsRepositoryImpl @Inject constructor(
     private suspend fun getSongsStatCall(auth: String, statFilter: MainNetwork.StatFilter) =
         api.getSongsStats(auth,
             username = getCredentials()?.username,
-            filter = statFilter
+            filter = statFilter,
+            limit = getStatCallLimit(statFilter)
         ).songs
+
+    private fun getStatCallLimit(statFilter: MainNetwork.StatFilter) = when(statFilter) {
+        MainNetwork.StatFilter.random -> SONGS_DEFAULT_LIMIT_FETCH
+        MainNetwork.StatFilter.recent -> Constants.config.songsRecentFetchLimit
+        MainNetwork.StatFilter.newest -> SONGS_DEFAULT_LIMIT_FETCH
+        MainNetwork.StatFilter.frequent -> Constants.config.songsFrequentFetchLimit
+        MainNetwork.StatFilter.flagged -> Constants.config.songsFlaggedFetchLimit
+        MainNetwork.StatFilter.forgotten -> SONGS_DEFAULT_LIMIT_FETCH
+        MainNetwork.StatFilter.highest -> Constants.config.songsHighestFetchLimit
+    }
 
     override suspend fun getRecentSongs(fetchRemote: Boolean) =
         getSongsStats(MainNetwork.StatFilter.recent, fetchRemote)

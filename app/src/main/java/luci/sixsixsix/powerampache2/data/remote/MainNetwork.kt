@@ -238,7 +238,7 @@ interface MainNetwork {
     @GET("json.server.php?action=stats")
     suspend fun getSongsStats(
         @Query("auth") authKey: String,
-        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_HOME,
+        @Query("limit") limit: Int = 5000,
         //@Query("user_id") userId: Int,
         @Query("username") username: String? = null,
         @Query("type") _type: Type = Type.song,

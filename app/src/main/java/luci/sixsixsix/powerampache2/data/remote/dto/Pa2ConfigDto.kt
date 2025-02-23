@@ -28,6 +28,8 @@ import luci.sixsixsix.powerampache2.common.API_RECORD_PLAY_ENABLE
 import luci.sixsixsix.powerampache2.common.CLEAR_LIBRARY_ON_CATALOG_CLEAN
 import luci.sixsixsix.powerampache2.common.FETCH_ALBUMS_WITH_ARTISTS
 import luci.sixsixsix.powerampache2.common.FORCE_SKIP_NETWORK_ERROR
+import luci.sixsixsix.powerampache2.common.INTRO_MESSAGE_DEFAULT
+import luci.sixsixsix.powerampache2.common.INTRO_MESSAGE_REMOTE_VERSION
 import luci.sixsixsix.powerampache2.common.PLAYBACK_ERRORS_RETRIES
 import luci.sixsixsix.powerampache2.common.PLAYLISTS_ADMIN_FETCH
 import luci.sixsixsix.powerampache2.common.PLAYLISTS_ALL_SERVER_FETCH
@@ -41,6 +43,10 @@ import luci.sixsixsix.powerampache2.common.RESET_QUEUE_ON_NEW_SESSION
 import luci.sixsixsix.powerampache2.common.SETTINGS_IS_DOWNLOAD_SDCARD
 import luci.sixsixsix.powerampache2.common.SMARTLISTS_ADMIN_FETCH
 import luci.sixsixsix.powerampache2.common.SMARTLISTS_USER_FETCH
+import luci.sixsixsix.powerampache2.common.SONGS_FLAGGED_LIMIT_FETCH
+import luci.sixsixsix.powerampache2.common.SONGS_FREQUENT_LIMIT_FETCH
+import luci.sixsixsix.powerampache2.common.SONGS_HIGHEST_LIMIT_FETCH
+import luci.sixsixsix.powerampache2.common.SONGS_RECENT_LIMIT_FETCH
 
 
 data class Pa2ConfigDto(
@@ -100,7 +106,16 @@ data class Pa2ConfigDto(
     @SerializedName("fetchAlbumsWithArtist")
     val fetchAlbumsWithArtist: Boolean? = null,
     @SerializedName("albumHighestFetchLimit")
-    val albumHighestFetchLimit: Int? = null
+    val albumHighestFetchLimit: Int? = null,
+
+    @SerializedName("songsHighestFetchLimit")
+    val songsHighestFetchLimit: Int? = null,
+    @SerializedName("songsFlaggedFetchLimit")
+    val songsFlaggedFetchLimit: Int? = null,
+    @SerializedName("songsFrequentFetchLimit")
+    val songsFrequentFetchLimit: Int? = null,
+    @SerializedName("songsRecentFetchLimit")
+    val songsRecentFetchLimit: Int? = null
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
@@ -115,17 +130,30 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     dogmazicDemoToken = BuildConfig.DOGMAZIC_TOKEN,
     dogmazicDemoUrl = BuildConfig.DOGMAZIC_URL,
     playlistFetchLimit = playlistFetchLimit ?: PLAYLIST_FETCH_LIMIT,
-
     playlistsUserFetch = playlistsUserFetch ?: PLAYLISTS_USER_FETCH,
     smartlistsUserFetch = smartlistsUserFetch ?: SMARTLISTS_USER_FETCH,
     playlistsAdminFetch = playlistsAdminFetch ?: PLAYLISTS_ADMIN_FETCH,
     smartlistsAdminFetch = smartlistsAdminFetch ?: SMARTLISTS_ADMIN_FETCH,
     playlistsServerAllFetch = playlistsServerAllFetch ?: PLAYLISTS_ALL_SERVER_FETCH,
     clearLibraryOnCatalogClean = clearLibraryOnCatalogClean ?: CLEAR_LIBRARY_ON_CATALOG_CLEAN,
-    introMessage = introMessage ?: "",
+    introMessage = parseIntroMessage(introMessage),
     isDownloadsSdCardOptionEnabled = isDownloadsSdCardOptionEnabled ?: SETTINGS_IS_DOWNLOAD_SDCARD,
     isRecordPlayApiEnabled = isRecordPlayApiEnabled ?: API_RECORD_PLAY_ENABLE,
     forceSkipOnNetworkError = forceSkipOnNetworkError ?: FORCE_SKIP_NETWORK_ERROR,
     fetchAlbumsWithArtist = fetchAlbumsWithArtist ?: FETCH_ALBUMS_WITH_ARTISTS,
-    albumHighestFetchLimit= albumHighestFetchLimit ?: ALBUM_HIGHEST_FETCH_LIMIT
+    albumHighestFetchLimit= albumHighestFetchLimit ?: ALBUM_HIGHEST_FETCH_LIMIT,
+    songsHighestFetchLimit = songsHighestFetchLimit ?: SONGS_HIGHEST_LIMIT_FETCH,
+    songsFlaggedFetchLimit = songsFlaggedFetchLimit ?: SONGS_FLAGGED_LIMIT_FETCH,
+    songsFrequentFetchLimit = songsFrequentFetchLimit ?: SONGS_FREQUENT_LIMIT_FETCH,
+    songsRecentFetchLimit = songsRecentFetchLimit ?: SONGS_RECENT_LIMIT_FETCH
 )
+
+/**
+ * If introMessage is equal to "remote::version", the dialog address must be constructed attaching
+ * the current version to it.
+ */
+private fun parseIntroMessage(introMessage: String?): String = introMessage?.let { mess ->
+    if (mess == INTRO_MESSAGE_REMOTE_VERSION) {
+        StringBuilder("dialog").append(BuildConfig.VERSION_CODE).append(".html").toString()
+    } else mess
+} ?: INTRO_MESSAGE_DEFAULT

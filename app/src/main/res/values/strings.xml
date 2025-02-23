@@ -220,8 +220,17 @@
     <string name="nextcloud_not_implemented">Not implemented yet in Nextcloud Music</string>
     <string name="share_export_song">Export Song</string>
     <string name="share_open_link_browser">Open Link In Browser</string>
-    <string name="about_patreon_title">Become a Patreon or Buy me a coffee</string>
+    <string name="about_support_title">Support</string>
+    <string name="about_links_title">Links</string>
 
+    <!-- do not translate, this is a reference -->
+    <string name="bmac_contentDescription" translatable="false">@string/bmac_btn_text</string>
+    <string name="patreon_contentDescription" translatable="false">Patreon</string>
+    <string name="about_telegram" translatable="false">Telegram</string>
+    <string name="about_mastodon" translatable="false">Mastodon</string>
+    <string name="about_github" translatable="false">Github</string>
+    <string name="telegram_contentDescription" translatable="false">@string/about_telegram</string>
+    <string name="mastodon_contentDescription" translatable="false">@string/about_mastodon</string>
 
     <!-- "Donate" will be followed by Paypal or Bitcoin. ie "Donate Bitcoin" -->
     <string name="donate_btn_text">Donate</string>
@@ -229,5 +238,4 @@
     <string name="bitcoin_btn_contentDescription">Donate Bitcoin</string>
     <string name="paypal_btn_contentDescription">Donate Paypal</string>
     <string name="bmac_btn_text">Buy Me A Coffee</string>
-
 </resources>

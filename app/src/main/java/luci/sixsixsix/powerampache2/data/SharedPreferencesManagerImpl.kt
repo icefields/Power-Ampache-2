@@ -31,7 +31,6 @@ import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MAX_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MIN_MS
 import luci.sixsixsix.powerampache2.common.WeakContext
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
 import javax.inject.Singleton

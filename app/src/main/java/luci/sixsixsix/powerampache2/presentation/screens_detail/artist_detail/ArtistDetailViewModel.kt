@@ -31,6 +31,7 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -58,14 +59,13 @@ class ArtistDetailViewModel @Inject constructor(
 ) : ViewModel() {
 
     var state by mutableStateOf(ArtistDetailState())
+    private var isOfflineModeState by mutableStateOf(false)
 
     val globalShuffleStateFlow = settingsRepository.settingsLiveData
         .distinctUntilChanged()
         .asFlow()
         .filterNotNull()
-        .map {
-            it.isGlobalShuffleEnabled
-        }
+        .map { it.isGlobalShuffleEnabled }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE)
 
@@ -76,6 +76,12 @@ class ArtistDetailViewModel @Inject constructor(
             savedStateHandle.get<Artist>("artist")?.let { artist ->
                 state = state.copy(artist = artist)
             } ?: getArtist(id)
+        }
+
+        viewModelScope.launch {
+            settingsRepository.offlineModeFlow.collectLatest {
+                isOfflineModeState = it
+            }
         }
     }
 
@@ -148,12 +154,14 @@ class ArtistDetailViewModel @Inject constructor(
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            if (result.networkData != null) {
+                            //L("viewmodel.getSongsFromArtist size ${isOfflineModeState} ${result.data?.size} network: ${result.networkData?.size}")
+
+                            if (result.networkData != null || isOfflineModeState) {
                                 // only get the data when a network response is returned
-                                // check against network data but use db data
+                                // check against network data but use db data.
+                                // OR if in offline mode
                                 result.data?.let { songs ->
                                     songsCallback(songs)
-                                    L("viewmodel.getSongsFromArtist size ${result.data?.size} network: ${result.networkData?.size}")
                                 }
                             }
                         }

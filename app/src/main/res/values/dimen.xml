@@ -50,6 +50,7 @@
     <dimen name="listItem_padding_vertical">8dp</dimen>
 
     <dimen name="about_item_fontSize">16sp</dimen>
+    <dimen name="about_sectionTitle_fontSize">19sp</dimen>
     <dimen name="songDetail_handle_arrow_width">36sp</dimen>
     <dimen name="playlistItem_icon_size">24dp</dimen>
 

@@ -229,7 +229,7 @@ fun SettingsScreen(
 @Composable
 fun SettingsDonationButtonView(onClick: () -> Unit) {
     if (BuildConfig.HIDE_DONATION) {
-        DonateConsider(onClick = onClick)
+        DonateConsider(onClick = onClick, showLink = true)
     } else {
         DonateButton(isExpanded = true, isTransparent = false)
     }

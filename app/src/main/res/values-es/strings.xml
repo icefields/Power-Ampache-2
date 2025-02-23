@@ -195,42 +195,40 @@
     <string name="settings_maxBuffer_subtitle">La duración máxima de contenido que el reproductor intentará prealmacenar (en segundos).</string>
     <string name="settings_bufferForPlaybackAfterRebuffer_title">Búfer para la reproducción después del rebúfer</string>
     <string name="settings_bufferForPlaybackAfterRebuffer_subtitle">La duración predeterminada de contenido que debe prealmacenarse para la reproducción para continuar después de un rebúfer (en segundos). Un rebúfer es definido como la consecuencia del consumo del contenido prealmacenado, más que por acción del usuario.</string>
+
     <!-- new player settings strings -->
     <string name="settings_playerAdvancedSettings_warning">To apply buffer settings, kill/restart the app.</string>
-    <string name="settings_player_button_resetDefaults">Reset Defaults</string>
-    <string name="settings_player_killDialog_title">Kill the app now to apply settings?</string>
+    <string name="settings_player_button_resetDefaults">Volver a valores predeterminados</string>
+    <string name="settings_player_killDialog_title">¿Cerrar ahora mismo para aplicar los cambios?</string>
 
-    <!-- NEW STRINGS -->
-    <string name="item_title_album">Album</string>
-    <string name="item_title_playlist">Playlist</string>
-    <string name="item_title_artist">Artist</string>
+    <string name="item_title_album">Disco</string>
+    <string name="item_title_playlist">Lista</string>
+    <string name="item_title_artist">Artista</string>
+    <string name="nextcloud_not_implemented">Todavía no está implementado en Nextcloud Music</string>
+    <string name="settings_player_button_killApp">PRESIONA PARA CERRAR LA APP\n(Aplicar la configuración del reproductor)</string>
 
-    <string name="nextcloud_not_implemented">Not implemented yet in Nextcloud Music</string>
-
-    <string name="settings_player_button_killApp">PRESS TO KILL THE APP\n(Apply player settings)</string>
-
-    <string name="loginScreen_acceptAllCertificates">Accept all certificates (including self-signed)</string>
-    <string name="loginScreen_killDialog_title">To apply this option please restart the app</string>
-    <string name="loginScreen_killDialog_subtitle">Kill the app now to apply?</string>
+    <string name="loginScreen_acceptAllCertificates">Aceptar todos los certificados (incluyendo autofirmados)</string>
+    <string name="loginScreen_killDialog_title">Para aplicar esta opción, por favor reinicia la aplicación</string>
+    <string name="loginScreen_killDialog_subtitle">¿Cerrar ahora para aplicar?</string>
 
     <string name="settings_player_useOkHttp_title">Use Advanced Player for music streaming (uses OkHttp)</string>
-    <string name="settings_player_useOkHttp_subtitle">Use it in case of connections errors during playback, or 302 network responses. WARNING: Downloaded songs will not play if this player is selected. This option requires app-restart</string>
+    <string name="settings_player_useOkHttp_subtitle">Úsalo en caso de errores de conexión durante la reproducción o respuestas 302 de la red. ADVERTENCIA: Las canciones descargadas no se reproducirán si este reproductor se selecciona. Esta opción requiere reiniciar la aplicación.</string>
 
     <!-- %s represents the title of the song -->
-    <string name="warning_song_remove_subtitle">"Delete %s from downloaded songs?"</string>
+    <string name="warning_song_remove_subtitle">Borrar %s de las canciones descargadas?</string>
 
-    <string name="error_user_notEnabled">User not enabled, please check your email for the account confirmation link or enable the user from the server</string>
-    <string name="error_cannotConnect">Problem connecting to the server or data source. \nPlay a different track or check your connection</string>
+    <string name="error_user_notEnabled">El usuario no está habilitado. Revisa por favor la liga de confirmación de la cuenta o habilita al usuario desde el servidor</string>
+    <string name="error_cannotConnect">Problema conectando al servidor o de la fuente de datos. \n Reproduce otra pista o revisa tu conexión</string>
 
-    <string name="share_export_song">Export Song</string>
-    <string name="share_open_link_browser">Open Link In Browser</string>
-    <string name="about_patreon_title">Become a Patreon or Buy me a coffee</string>
-
+    <string name="share_export_song">Exportar canción</string>
+    <string name="share_open_link_browser">Abrir enlace en el navegador</string>
+    <string name="about_patreon_title">Únete a mi Patreon o Cómprame un Café</string>
 
     <!-- "Donate" will be followed by Paypal or Bitcoin. ie "Donate Bitcoin" -->
-    <string name="donate_btn_text">Donate</string>
-
-    <string name="bitcoin_btn_contentDescription">Donate Bitcoin</string>
-    <string name="paypal_btn_contentDescription">Donate Paypal</string>
+    <string name="donate_btn_text">Donar</string>
+    <string name="bitcoin_btn_contentDescription">Donar Bitcoin</string>
+    <string name="paypal_btn_contentDescription">Donar via Paypal</string>
     <string name="bmac_btn_text">Buy Me A Coffee</string>
+    <string name="about_support_title">Support</string>
+    <string name="about_links_title">Links</string>
 </resources>
