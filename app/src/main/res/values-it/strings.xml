@@ -225,7 +225,6 @@
 
     <string name="share_export_song">Export Song</string>
     <string name="share_open_link_browser">Open Link In Browser</string>
-    <string name="about_patreon_title">Become a Patreon or Buy me a coffee</string>
 
 
     <!-- "Donate" will be followed by Paypal or Bitcoin. ie "Donate Bitcoin" -->
