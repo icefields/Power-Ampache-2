@@ -31,6 +31,7 @@ const val PLAYLIST_ADD_NEW_ENABLE = true
 const val API_RECORD_PLAY_ENABLE = true
 const val SETTINGS_IS_DOWNLOAD_SDCARD = true
 const val FORCE_SKIP_NETWORK_ERROR = false
+const val USE_INCREMENTAL_LIMIT_ALBUMS = true
 const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
 
 const val PLAYLISTS_USER_FETCH = BuildConfig.PLAYLISTS_USER_FETCH
@@ -115,5 +116,8 @@ data class Pa2Config(
     val songsHighestFetchLimit: Int = SONGS_HIGHEST_LIMIT_FETCH,
     val songsFlaggedFetchLimit: Int = SONGS_FLAGGED_LIMIT_FETCH,
     val songsFrequentFetchLimit: Int = SONGS_FREQUENT_LIMIT_FETCH,
-    val songsRecentFetchLimit: Int = SONGS_RECENT_LIMIT_FETCH
+    val songsRecentFetchLimit: Int = SONGS_RECENT_LIMIT_FETCH,
+
+    // override the limit with the size of the local data, expensive on network on the long term
+    val useIncrementalLimitForAlbums: Boolean = USE_INCREMENTAL_LIMIT_ALBUMS
 )

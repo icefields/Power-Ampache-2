@@ -46,7 +46,7 @@ object Constants {
     const val NETWORK_REQUEST_LIMIT_ARTISTS = 30
     const val NETWORK_REQUEST_LIMIT_SONGS = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
-    const val NETWORK_REQUEST_LIMIT_ALBUMS = 40
+    const val NETWORK_REQUEST_LIMIT_ALBUMS = 140
 
     const val ADMIN_USERNAME = "PowerAmpache"
 

@@ -123,6 +123,7 @@ interface MainNetwork {
         @Query("limit") limit: Int,
         @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
+        @Query("sort") sort: String = "name,ASC",
         @Query("offset") offset: Int = 0,
         @Query("include") include: String? = null, // albums, songs (includes track list)
     ): AlbumsResponse // TODO remove default values

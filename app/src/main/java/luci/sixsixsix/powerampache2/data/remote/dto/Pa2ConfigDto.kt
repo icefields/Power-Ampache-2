@@ -47,6 +47,7 @@ import luci.sixsixsix.powerampache2.common.SONGS_FLAGGED_LIMIT_FETCH
 import luci.sixsixsix.powerampache2.common.SONGS_FREQUENT_LIMIT_FETCH
 import luci.sixsixsix.powerampache2.common.SONGS_HIGHEST_LIMIT_FETCH
 import luci.sixsixsix.powerampache2.common.SONGS_RECENT_LIMIT_FETCH
+import luci.sixsixsix.powerampache2.common.USE_INCREMENTAL_LIMIT_ALBUMS
 
 
 data class Pa2ConfigDto(
@@ -115,7 +116,10 @@ data class Pa2ConfigDto(
     @SerializedName("songsFrequentFetchLimit")
     val songsFrequentFetchLimit: Int? = null,
     @SerializedName("songsRecentFetchLimit")
-    val songsRecentFetchLimit: Int? = null
+    val songsRecentFetchLimit: Int? = null,
+
+    @SerializedName("useIncrementalLimitForAlbums")
+    val useIncrementalLimitForAlbums: Boolean? = null,
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(
@@ -145,7 +149,8 @@ fun Pa2ConfigDto.toPa2Config() = Pa2Config(
     songsHighestFetchLimit = songsHighestFetchLimit ?: SONGS_HIGHEST_LIMIT_FETCH,
     songsFlaggedFetchLimit = songsFlaggedFetchLimit ?: SONGS_FLAGGED_LIMIT_FETCH,
     songsFrequentFetchLimit = songsFrequentFetchLimit ?: SONGS_FREQUENT_LIMIT_FETCH,
-    songsRecentFetchLimit = songsRecentFetchLimit ?: SONGS_RECENT_LIMIT_FETCH
+    songsRecentFetchLimit = songsRecentFetchLimit ?: SONGS_RECENT_LIMIT_FETCH,
+    useIncrementalLimitForAlbums = useIncrementalLimitForAlbums ?: USE_INCREMENTAL_LIMIT_ALBUMS
 )
 
 /**

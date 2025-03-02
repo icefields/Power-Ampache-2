@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2025  Antonio Tari
+ * Copyright (C) 2024  Antonio Tari
  *
  * This file is a part of Power Ampache 2
  * Ampache Android client application
@@ -19,18 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.screens.albums
+package luci.sixsixsix.powerampache2.domain.models
 
-import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
-import luci.sixsixsix.powerampache2.domain.models.SortOrder
-
-data class AlbumsState (
-    val albums: List<Album> = emptyList(),
-    val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
-    val searchQuery: String = "",
-    val isFetchingMore: Boolean = false,
-    val sort: AlbumSortOrder = AlbumSortOrder.YEAR,
-    val order: SortOrder = SortOrder.DESC
-)
+enum class AlbumSortOrder(val columnName: String) {
+    NAME("name"),
+    YEAR("year"),
+    ARTIST("artist"),
+    RATING("rating"),
+    AVERAGE_RATING("averagerating")
+}

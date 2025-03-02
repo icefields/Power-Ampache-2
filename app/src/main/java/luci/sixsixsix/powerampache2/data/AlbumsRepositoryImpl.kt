@@ -33,6 +33,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.data.local.MusicDao
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
@@ -45,11 +46,14 @@ import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.SortOrder
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.max
 
 /**
  * the source of truth is the database, stick to the single source of truth pattern, only return
@@ -64,17 +68,16 @@ class AlbumsRepositoryImpl @Inject constructor(
     private val db: MusicDatabase,
     private val errorHandler: ErrorHandler
 ): BaseAmpacheRepository(api, db, errorHandler), AlbumsRepository {
+
     override suspend fun getAlbums(
         fetchRemote: Boolean,
         query: String,
         offset: Int,
-        limit: Int
-    ): Flow<Resource<List<Album>>> = flow {
-        emit(Resource.Loading(true))
-        L("getAlbums - repo getSongs offset $offset")
-        val cred = getCurrentCredentials()
-
-        if (isOfflineModeEnabled()) {
+        limit: Int,
+        sort: AlbumSortOrder,
+        order: SortOrder
+    ): Flow<Resource<List<Album>>> =
+        if (isOfflineModeEnabled()) flow {
             // TRY using cached data instead of downloaded song info if available
             val albumsList = mutableListOf<Album>()
             val dbAlbumsHash = HashMap<String, AlbumEntity>().apply {
@@ -83,7 +86,7 @@ class AlbumsRepositoryImpl @Inject constructor(
                 }
             }
 
-            dao.generateOfflineAlbums(cred.username).forEach { dae ->
+            dao.generateOfflineAlbums(getCurrentCredentials().username).forEach { dae ->
                 albumsList.add(
                     if (dbAlbumsHash.containsKey(dae.id)) {
                         (dbAlbumsHash[dae.id] ?: dae)
@@ -91,36 +94,81 @@ class AlbumsRepositoryImpl @Inject constructor(
                 )
             }
 
+            sortAlbums(albumsList, sort, order)
+
             emit(Resource.Success(data = albumsList.toList()))
             emit(Resource.Loading(false))
-            return@flow
+        }.catch { e -> errorHandler("getOfflineModeAlbums", e, this) } else flow {
+            emit(Resource.Loading(true))
+            L("getAlbums - repo getSongs offset $offset")
+            val cred = getCurrentCredentials()
+
+    //        if (isOfflineModeEnabled()) {
+    //            // TRY using cached data instead of downloaded song info if available
+    //            val albumsList = mutableListOf<Album>()
+    //            val dbAlbumsHash = HashMap<String, AlbumEntity>().apply {
+    //                dao.getOfflineAlbums().forEach { ae ->
+    //                    put(ae.id, ae)
+    //                }
+    //            }
+    //
+    //            dao.generateOfflineAlbums(cred.username).forEach { dae ->
+    //                albumsList.add(
+    //                    if (dbAlbumsHash.containsKey(dae.id)) {
+    //                        (dbAlbumsHash[dae.id] ?: dae)
+    //                    } else { dae }.toAlbum()
+    //                )
+    //            }
+    //
+    //            emit(Resource.Success(data = albumsList.toList()))
+    //            emit(Resource.Loading(false))
+    //            return@flow
+    //        }
+
+            val localAlbums = mutableListOf<Album>()
+            if (offset == 0) {
+                localAlbums.addAll(dao.searchAlbum(query).map { it.toAlbum() })
+                val isDbEmpty = localAlbums.isEmpty() && query.isEmpty()
+                if (!isDbEmpty) {
+                    sortAlbums(localAlbums, sort, order)
+                    emit(Resource.Success(data = localAlbums.toList()))
+                }
+                val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+                if(shouldLoadCacheOnly) {
+                    emit(Resource.Loading(false))
+                    return@flow
+                }
+            }
+            val realLimit = if (Constants.config.useIncrementalLimitForAlbums) {
+                max(localAlbums.size, limit)
+            } else limit
+            val response = api.getAlbums(authToken(), filter = query, offset = offset, limit = realLimit, sort = "${sort.columnName},${order.order}")
+            response.error?.let { throw(MusicException(it.toError())) }
+            val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
+            dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
+            // stick to the single source of truth pattern despite performance deterioration
+            // append to the initial list to avoid ui flickering
+            val updatedDbAlbums = dao.searchAlbum(query).map { it.toAlbum() }.toMutableList()
+            //AmpacheModel.appendToList(updatedDbAlbums, localAlbums)
+            //emit(Resource.Success(data = localAlbums, networkData = albums))
+            sortAlbums(updatedDbAlbums, sort, order)
+            emit(Resource.Success(data = updatedDbAlbums, networkData = albums))
+            emit(Resource.Loading(false))
+        }.catch { e -> errorHandler("getAlbums()", e, this) }
+
+    private fun sortAlbums(albumsList: MutableList<Album>, sort: AlbumSortOrder, order: SortOrder) {
+        when(sort) {
+            AlbumSortOrder.NAME -> albumsList.sortBy { it.name }
+            AlbumSortOrder.YEAR -> albumsList.sortBy { it.year }
+            AlbumSortOrder.ARTIST -> albumsList.sortBy { it.artist.name }
+            AlbumSortOrder.RATING -> albumsList.sortBy { it.rating }
+            AlbumSortOrder.AVERAGE_RATING -> albumsList.sortBy { it.averageRating }
         }
 
-        val localAlbums = mutableListOf<Album>()
-        if (offset == 0) {
-            localAlbums.addAll(dao.searchAlbum(query).map { it.toAlbum() })
-            val isDbEmpty = localAlbums.isEmpty() && query.isEmpty()
-            if (!isDbEmpty) {
-                emit(Resource.Success(data = localAlbums.toList()))
-            }
-            val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
-            if(shouldLoadCacheOnly) {
-                emit(Resource.Loading(false))
-                return@flow
-            }
+        if (order == SortOrder.DESC) {
+            albumsList.reverse()
         }
-
-        val response = api.getAlbums(authToken(), filter = query, offset = offset, limit = limit)
-        response.error?.let { throw(MusicException(it.toError())) }
-        val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
-        dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
-        // stick to the single source of truth pattern despite performance deterioration
-        // append to the initial list to avoid ui flickering
-        val updatedDbAlbums = dao.searchAlbum(query).map { it.toAlbum() }.toMutableList()
-        AmpacheModel.appendToList(updatedDbAlbums, localAlbums)
-        emit(Resource.Success(data = localAlbums, networkData = albums))
-        emit(Resource.Loading(false))
-    }.catch { e -> errorHandler("getAlbums()", e, this) }
+    }
 
     override suspend fun getAlbumsFromArtist(
         artistId: String,
