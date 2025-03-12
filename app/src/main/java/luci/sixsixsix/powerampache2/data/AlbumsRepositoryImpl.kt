@@ -158,17 +158,26 @@ class AlbumsRepositoryImpl @Inject constructor(
 
     private fun sortAlbums(albumsList: MutableList<Album>, sort: AlbumSortOrder, order: SortOrder) {
         when(sort) {
-            AlbumSortOrder.NAME -> albumsList.sortBy { it.name }
+            AlbumSortOrder.NAME -> albumsList.sortBy { sanitizeSearchTerm(it.name) }
             AlbumSortOrder.YEAR -> albumsList.sortBy { it.year }
-            AlbumSortOrder.ARTIST -> albumsList.sortBy { it.artist.name }
+            AlbumSortOrder.ARTIST -> albumsList.sortBy { sanitizeSearchTerm(it.artist.name.lowercase()) }
             AlbumSortOrder.RATING -> albumsList.sortBy { it.rating }
             AlbumSortOrder.AVERAGE_RATING -> albumsList.sortBy { it.averageRating }
         }
 
-        if (order == SortOrder.DESC) {
-            albumsList.reverse()
-        }
+        if (order == SortOrder.DESC) { albumsList.reverse() }
     }
+
+    private fun sanitizeSearchTerm(term: String) = term.replace("!","")
+        .replace("\"","")
+        .replace("'","")
+        .replace("`","")
+        .replace("(","")
+        .replace("[","")
+        .replace("{","")
+        .replace(".","")
+        .replace(",","")
+        .lowercase()
 
     override suspend fun getAlbumsFromArtist(
         artistId: String,

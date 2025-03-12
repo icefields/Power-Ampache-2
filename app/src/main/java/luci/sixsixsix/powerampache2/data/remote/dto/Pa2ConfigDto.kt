@@ -119,7 +119,7 @@ data class Pa2ConfigDto(
     val songsRecentFetchLimit: Int? = null,
 
     @SerializedName("useIncrementalLimitForAlbums")
-    val useIncrementalLimitForAlbums: Boolean? = null,
+    val useIncrementalLimitForAlbums: Boolean? = null
 )
 
 fun Pa2ConfigDto.toPa2Config() = Pa2Config(

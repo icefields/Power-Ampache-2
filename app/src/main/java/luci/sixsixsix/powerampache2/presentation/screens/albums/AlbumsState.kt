@@ -31,6 +31,6 @@ data class AlbumsState (
     val isRefreshing: Boolean = false,
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false,
-    val sort: AlbumSortOrder = AlbumSortOrder.YEAR,
-    val order: SortOrder = SortOrder.DESC
+    val sort: AlbumSortOrder = AlbumSortOrder.NAME,
+    val order: SortOrder = SortOrder.ASC
 )

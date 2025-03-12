@@ -61,9 +61,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 78
-        versionName = "1.01-78"
-        val versionQuote = "This version is powered by 78 RPM vinyl and Diana, the goddess of the hunt, the moon, and nature."
+        versionCode = 79
+        versionName = "1.01-79"
+        val versionQuote = "This version is powered by Diana, the goddess of the hunt, the moon, and nature."
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -93,7 +93,7 @@ android {
         buildConfigField("boolean", "PLAYLISTS_ADMIN_FETCH", "false")
         buildConfigField("boolean", "SMARTLISTS_ADMIN_FETCH", "false")
         buildConfigField("boolean", "PLAYLISTS_ALL_SERVER_FETCH", "true")
-
+        buildConfigField("boolean", "USE_INCREMENTAL_LIMIT_ALBUMS", "true")
 
         buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config.json\"")
     }
@@ -220,6 +220,7 @@ android {
             buildConfigField("boolean", "SMARTLISTS_USER_FETCH", "true")
             buildConfigField("boolean", "PLAYLISTS_ADMIN_FETCH", "true")
             buildConfigField("boolean", "SMARTLISTS_ADMIN_FETCH", "true")
+            buildConfigField("boolean", "USE_INCREMENTAL_LIMIT_ALBUMS", "false")
         }
     }
 

@@ -38,6 +38,8 @@ import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_ALBUM
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
+import luci.sixsixsix.powerampache2.domain.models.SortOrder
 import javax.inject.Inject
 
 @HiltViewModel
@@ -87,6 +89,22 @@ class AlbumsViewModel @Inject constructor(
                     }
                 }
             }
+
+            is AlbumsEvent.OnSortDirection -> {
+                state = state.copy(order = event.sortDirection)
+                getAlbums()
+            }
+            is AlbumsEvent.OnSortOrder -> {
+                // force direction for ratings
+//                val direction = if (
+//                    (event.sortOrder == AlbumSortOrder.RATING || event.sortOrder == AlbumSortOrder.AVERAGE_RATING)
+//                        && state.order == SortOrder.ASC) {
+//                    SortOrder.DESC
+//                } else state.order
+
+                state = state.copy(sort = event.sortOrder)
+                getAlbums()
+            }
         }
     }
 
@@ -94,7 +112,9 @@ class AlbumsViewModel @Inject constructor(
         query: String = state.searchQuery.lowercase(),
         fetchRemote: Boolean = true,
         offset: Int = 0,
-        limit: Int = NETWORK_REQUEST_LIMIT_ALBUMS
+        limit: Int = NETWORK_REQUEST_LIMIT_ALBUMS,
+        sort: AlbumSortOrder = state.sort,
+        order: SortOrder = state.order
     ) {
         viewModelScope.launch {
             repository
@@ -103,14 +123,20 @@ class AlbumsViewModel @Inject constructor(
                     query = query,
                     offset = offset,
                     limit = limit,
-                    sort = state.sort,
-                    order = state.order
-                )
-                .collect { result ->
+                    sort = sort,
+                    order = order
+                ).collect { result ->
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { albums ->
-                                state = state.copy(albums = albums)
+
+                                state = when (sort) {
+                                    AlbumSortOrder.RATING -> state.copy(albums = albums.filter { it.rating > 0 })
+                                    AlbumSortOrder.AVERAGE_RATING -> state.copy(albums = albums.filter { it.averageRating > 0 })
+                                    else -> state.copy(albums = albums)
+                                }
+
+
                                 L("viewmodel.getAlbums size ${state.albums.size}")
                             }
                             isEndOfDataList = ( ((result.networkData?.size ?: 0) < limit) && offset > 0)

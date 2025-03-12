@@ -24,18 +24,22 @@ package luci.sixsixsix.powerampache2.presentation.screens.albums
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -53,12 +57,15 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
-import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumItem
+import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumsGridHeader
+import kotlin.math.abs
 
 const val GRID_ITEMS_ROW = 2
 const val GRID_ITEMS_ROW_LAND = 5
 const val GRID_ITEMS_ROW_MIN = 2
+const val GRID_ITEMS_ROW_SQUARE = 4
 
 @Destination
 @Composable
@@ -82,11 +89,21 @@ fun AlbumsScreen(
             .collect { orientation = it }
     }
     val cardsPerRow = when (orientation) {
-        Configuration.ORIENTATION_LANDSCAPE -> {
-            GRID_ITEMS_ROW_LAND
-        }
+        Configuration.ORIENTATION_LANDSCAPE -> GRID_ITEMS_ROW_LAND
         else -> {
-            if (state.albums.size < 5) { minGridItemsRow } else { gridItemsRow }
+            if (state.albums.size < 5) {
+                minGridItemsRow
+            } else {
+                //calculations might fail in case of a division by zero
+                if (LocalConfiguration.current.screenHeightDp > 0 && LocalConfiguration.current.screenWidthDp > 0) {
+                    val screenRatio = abs(LocalConfiguration.current.screenHeightDp.toFloat() / LocalConfiguration.current.screenWidthDp.toFloat())
+                    println("aaaa ${screenRatio} ${LocalConfiguration.current.screenHeightDp} ${LocalConfiguration.current.screenWidthDp}")
+                    val isSquare = screenRatio < 1.4f
+                    if (!isSquare) gridItemsRow else GRID_ITEMS_ROW_SQUARE
+                } else {
+                    gridItemsRow
+                }
+            }
         }
     }
 
@@ -99,21 +116,44 @@ fun AlbumsScreen(
         EmptyListView(title = stringResource(id = R.string.offline_noData_warning))
     }
 
-    Box(
-        modifier = modifier
-    ) {
+    var sortMenuExpanded by remember { mutableStateOf(false) }
+    var sortDirectionExpanded by remember { mutableStateOf(false) }
+    val scrollState = rememberLazyGridState()
+    val isHeaderVisible by remember {
+        derivedStateOf { scrollState.firstVisibleItemIndex == 0 }
+    }
+
+    Column(modifier = modifier) {
+        AlbumsGridHeader(
+            isHeaderVisible = (isHeaderVisible) && state.albums.isNotEmpty(),
+            isLoading = state.isLoading,
+            currentSortSelection = state.sort,
+            currentDirection = state.order,
+            sortMenuExpanded = sortMenuExpanded,
+            sortDirectionExpanded = sortDirectionExpanded,
+            onSortSelection = { newSortOrder ->
+                viewModel.onEvent(AlbumsEvent.OnSortOrder(newSortOrder))
+            },
+            onDirectionSelection = { newSortOrder ->
+                viewModel.onEvent(AlbumsEvent.OnSortDirection(newSortOrder))
+            },
+            onSortExpandedChange = { sortMenuExpanded = it },
+            onDirectionExpandedChange = { sortDirectionExpanded = it },
+            onDismissMenu = {
+                sortMenuExpanded = false
+                sortDirectionExpanded = false
+            }
+        )
+
         SwipeRefresh(
             state = swipeRefreshState,
             onRefresh = { viewModel.onEvent(AlbumsEvent.Refresh) }
         ) {
             LazyVerticalGrid(
+                state = scrollState,
                 columns = GridCells.Fixed(cardsPerRow)
             ) {
-                items(
-                    count = state.albums.size,
-                    //key = { i -> state.albums[i] }
-                )
-                { i ->
+                items(count = state.albums.size) { i ->
                     val album = state.albums[i]
                     AlbumItem(
                         album = album,
@@ -137,7 +177,7 @@ fun AlbumsScreen(
         }
 
         if (state.isFetchingMore) {
-            LoadingView(modifier = Modifier.align(Alignment.BottomCenter))
+            LoadingView(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
     }
 }
