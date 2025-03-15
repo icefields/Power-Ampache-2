@@ -85,8 +85,7 @@ fun AlbumsScreen(
     // If our configuration changes then this will launch a new coroutine scope for it
     LaunchedEffect(configuration) {
         // Save any changes to the orientation value on the configuration object
-        snapshotFlow { configuration.orientation }
-            .collect { orientation = it }
+        snapshotFlow { configuration.orientation }.collect { orientation = it }
     }
     val cardsPerRow = when (orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> GRID_ITEMS_ROW_LAND
@@ -94,15 +93,7 @@ fun AlbumsScreen(
             if (state.albums.size < 5) {
                 minGridItemsRow
             } else {
-                //calculations might fail in case of a division by zero
-                if (LocalConfiguration.current.screenHeightDp > 0 && LocalConfiguration.current.screenWidthDp > 0) {
-                    val screenRatio = abs(LocalConfiguration.current.screenHeightDp.toFloat() / LocalConfiguration.current.screenWidthDp.toFloat())
-                    println("aaaa ${screenRatio} ${LocalConfiguration.current.screenHeightDp} ${LocalConfiguration.current.screenWidthDp}")
-                    val isSquare = screenRatio < 1.4f
-                    if (!isSquare) gridItemsRow else GRID_ITEMS_ROW_SQUARE
-                } else {
-                    gridItemsRow
-                }
+                if (isSquare()) GRID_ITEMS_ROW_SQUARE else gridItemsRow
             }
         }
     }
@@ -181,6 +172,17 @@ fun AlbumsScreen(
         }
     }
 }
+
+@Composable
+private fun isSquare(threshold: Float = 1.4f): Boolean =
+    if (LocalConfiguration.current.screenHeightDp > 0 && LocalConfiguration.current.screenWidthDp > 0) {
+        val screenRatio = abs(LocalConfiguration.current.screenHeightDp.toFloat() / LocalConfiguration.current.screenWidthDp.toFloat())
+        screenRatio < threshold // ratio lower than the constant are considered square
+    } else {
+        // default to not square if cannot calculate screen size
+        false
+    }
+
 
 @Composable
 fun LoadingView(modifier: Modifier = Modifier) {

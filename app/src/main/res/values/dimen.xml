@@ -44,7 +44,7 @@
     <dimen name="settings_padding_horizontal">20dp</dimen>
     <dimen name="settings_padding_top">8dp</dimen>
     <dimen name="settings_padding_horizontal_item">10dp</dimen>
-    <dimen name="settings_padding_vertical_item">10dp</dimen>
+    <dimen name="settings_padding_vertical_item">12dp</dimen>
 
     <dimen name="listItem_padding_horizontal">16dp</dimen>
     <dimen name="listItem_padding_vertical">8dp</dimen>

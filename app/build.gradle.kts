@@ -95,6 +95,9 @@ android {
         buildConfigField("boolean", "PLAYLISTS_ALL_SERVER_FETCH", "true")
         buildConfigField("boolean", "USE_INCREMENTAL_LIMIT_ALBUMS", "true")
 
+        // set to false for flavours that implement a data layer different that Ampache
+        buildConfigField("boolean", "IS_AMPACHE_DATA", "true")
+
         buildConfigField("String", "REMOTE_CONFIG_FILE", "\"config.json\"")
     }
 

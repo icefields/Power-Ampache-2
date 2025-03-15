@@ -40,6 +40,7 @@ import luci.sixsixsix.powerampache2.BuildConfig.ENABLE_ERROR_LOG
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.domain.errors.AmpachePreferenceException
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.ErrorType
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -132,6 +133,11 @@ class ErrorHandlerImpl @Inject constructor(
                     is HttpException -> {
                         readableMessage = e.localizedMessage
                         "cannot load data HttpException $exceptionString"
+                    }
+
+                    is AmpachePreferenceException -> {
+                        readableMessage = applicationContext.getString(R.string.error_cannotEditPreference)
+                        "$readableMessage $exceptionString"
                     }
 
                     is ServerUrlNotInitializedException ->

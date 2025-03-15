@@ -26,6 +26,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import luci.sixsixsix.powerampache2.data.AlbumsRepositoryImpl
+import luci.sixsixsix.powerampache2.data.AmpachePreferencesRepositoryImpl
 import luci.sixsixsix.powerampache2.data.ArtistsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.ErrorHandlerImpl
 import luci.sixsixsix.powerampache2.data.MusicRepositoryImpl
@@ -37,6 +38,7 @@ import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
+import luci.sixsixsix.powerampache2.domain.AmpachePreferencesRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
@@ -118,6 +120,12 @@ abstract class RepositoryModule {
     abstract fun bindSharedPreferencesManager(
         sharedPreferencesManagerImpl: SharedPreferencesManagerImpl
     ): SharedPreferencesManager
+
+    @Binds
+    @Singleton
+    abstract fun bindAmpachePreferencesRepository(
+        ampachePreferencesRepositoryImpl: AmpachePreferencesRepositoryImpl
+    ): AmpachePreferencesRepository
 
 //    @Binds
 //    @Singleton

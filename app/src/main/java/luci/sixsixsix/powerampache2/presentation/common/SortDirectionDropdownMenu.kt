@@ -21,48 +21,35 @@
  */
 package luci.sixsixsix.powerampache2.presentation.common
 
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Modifier
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SortDirectionDropdownMenu(
+    modifier: Modifier = Modifier,
     currentDirection: SortOrder,
     expanded: Boolean,
     onSelection: (SortOrder) -> Unit,
     onDismissMenu: () -> Unit,
     onExpandedChange: (Boolean) -> Unit,
 ) {
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { onExpandedChange(!expanded) }
-    ) {
-        OutlinedButton(
-            //modifier = Modifier.menuAnchor(),
-            onClick = {
-                onSelection(if (currentDirection == SortOrder.ASC) SortOrder.DESC else SortOrder.ASC)
-                //onExpandedChange(true)
-            }
-        ) { Text(text = currentDirection.order.uppercase(), fontSize = 12.sp) }
+    val icon = if (expanded) { Icons.Filled.ArrowUpward } else { Icons.Filled.ArrowDownward }
 
-//        ExposedDropdownMenu(
-//            expanded = expanded,
-//            onDismissRequest = onDismissMenu
-//        ) {
-//            SortOrder.entries.forEach { option ->
-//                DropdownMenuItem(
-//                    text = { Text(option.order.uppercase()) },
-//                    onClick = {
-//                        if (option != currentDirection) onSelection(option)
-//                        onDismissMenu()
-//                    }
-//                )
-//            }
-//        }
-    }
+    DropdownMenuItem(
+        modifier = modifier,
+        text = { Text(currentDirection.order.uppercase(), maxLines = 1) },
+        onClick = {
+            onSelection(if (currentDirection == SortOrder.ASC) SortOrder.DESC else SortOrder.ASC)
+            if (expanded) onDismissMenu() else onExpandedChange(true)
+        },
+        trailingIcon = { Icon( icon, contentDescription = "Sort direction", tint = MaterialTheme.colorScheme.primary) }
+    )
 }

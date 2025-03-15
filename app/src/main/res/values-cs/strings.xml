@@ -232,4 +232,15 @@
     <string name="bmac_btn_text">Buy Me A Coffee</string>
     <string name="about_support_title">Support</string>
     <string name="about_links_title">Links</string>
+
+    <string name="error_cannotEditPreference">Cannot Edit Preference</string>
+    <string name="settings_ampachePreferences_title">Ampache Preferences</string>
+    <string name="settings_ampachePreferences_subtitle">Preferences for your Ampache Server</string>
+    <string name="ampachePreferences_updated_toast">Preference Updated</string>
+    <string name="ampachePreferences_userPreferences_title">User</string>
+    <string name="albums_sortOrder_name">Name</string>
+    <string name="albums_sortOrder_year">Year</string>
+    <string name="albums_sortOrder_artist">Artist</string>
+    <string name="albums_sortOrder_rating">Rating</string>
+    <string name="albums_sortOrder_averageRating">Name</string>
 </resources>
