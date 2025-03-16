@@ -244,14 +244,14 @@
     <string name="bmac_btn_text">Buy Me A Coffee</string>
 
     <string name="ampachePreferences_screen_title">Ampache Preferences</string>
+    <string name="ampachePreferences_screen_undo_btn_title">Undo</string>
     <string name="ampachePreferences_systemPreferences_title">System</string>
     <string name="ampachePreferences_userPreferences_title">User</string>
     <string name="ampachePreferences_updated_toast">Preference Updated</string>
-
 
     <string name="albums_sortOrder_name">Name</string>
     <string name="albums_sortOrder_year">Year</string>
     <string name="albums_sortOrder_artist">Artist</string>
     <string name="albums_sortOrder_rating">Rating</string>
-    <string name="albums_sortOrder_averageRating">Name</string>
+    <string name="albums_sortOrder_averageRating">Average Rating</string>
 </resources>

@@ -33,6 +33,8 @@ object Constants {
 
     const val IS_AMPACHE_DATA = BuildConfig.IS_AMPACHE_DATA
 
+    const val AMPACHE_PREFERENCE_UNDO_VISIBLE = false
+
     // NETWORK
     const val AMPACHE_USER_AGENT = "PowerAmpache2-${BuildConfig.VERSION_NAME}"
     const val TIMEOUT_CONNECTION_S = 15L

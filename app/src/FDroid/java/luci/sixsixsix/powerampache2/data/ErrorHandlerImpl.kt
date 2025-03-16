@@ -142,6 +142,7 @@ class ErrorHandlerImpl @Inject constructor(
 
                     is ServerUrlNotInitializedException ->
                         "ServerUrlNotInitializedException $exceptionString"
+
                     is ScrobbleException -> {
                         readableMessage = ""
                         ""

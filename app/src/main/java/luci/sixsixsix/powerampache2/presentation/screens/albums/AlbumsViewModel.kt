@@ -48,6 +48,7 @@ class AlbumsViewModel @Inject constructor(
     settingsRepository: SettingsRepository
 ) : ViewModel() {
     private var fetchMoreJob: Job? = null
+    private var fetchJob: Job? = null
     var state by mutableStateOf(AlbumsState())
     private var isEndOfDataList: Boolean = false
 
@@ -91,19 +92,14 @@ class AlbumsViewModel @Inject constructor(
             }
 
             is AlbumsEvent.OnSortDirection -> {
-                state = state.copy(order = event.sortDirection)
-                getAlbums()
+                state = state.copy(order = event.sortDirection, isLoading = false)
+                fetchJob?.cancel()
+                fetchJob = getAlbums()
             }
             is AlbumsEvent.OnSortOrder -> {
-                // force direction for ratings
-//                val direction = if (
-//                    (event.sortOrder == AlbumSortOrder.RATING || event.sortOrder == AlbumSortOrder.AVERAGE_RATING)
-//                        && state.order == SortOrder.ASC) {
-//                    SortOrder.DESC
-//                } else state.order
-
-                state = state.copy(sort = event.sortOrder)
-                getAlbums()
+                state = state.copy(sort = event.sortOrder, isLoading = false)
+                fetchJob?.cancel()
+                fetchJob = getAlbums()
             }
         }
     }
@@ -115,48 +111,51 @@ class AlbumsViewModel @Inject constructor(
         limit: Int = NETWORK_REQUEST_LIMIT_ALBUMS,
         sort: AlbumSortOrder = state.sort,
         order: SortOrder = state.order
-    ) {
-        viewModelScope.launch {
-            repository
-                .getAlbums(
-                    fetchRemote = fetchRemote,
-                    query = query,
-                    offset = offset,
-                    limit = limit,
-                    sort = sort,
-                    order = order
-                ).collect { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            result.data?.let { albums ->
+    ) = viewModelScope.launch { repository.getAlbums(
+        fetchRemote = fetchRemote,
+        query = query,
+        offset = offset,
+        limit = limit,
+        sort = sort,
+        order = order
+    ).collect { result ->
+        when (result) {
+            is Resource.Success -> {
+                result.data?.let { albums ->
 
-                                state = when (sort) {
-                                    AlbumSortOrder.RATING -> state.copy(albums = albums.filter { it.rating > 0 })
-                                    AlbumSortOrder.AVERAGE_RATING -> state.copy(albums = albums.filter { it.averageRating > 0 })
-                                    else -> state.copy(albums = albums)
-                                }
-
-
-                                L("viewmodel.getAlbums size ${state.albums.size}")
-                            }
-                            isEndOfDataList = ( ((result.networkData?.size ?: 0) < limit) && offset > 0)
-                        }
-
-                        is Resource.Error -> {
-                            // TODO set end of data list otherwise keeps fetching? do for other screens too
-                            isEndOfDataList = true
-                            state = state.copy(isFetchingMore = false, isLoading = false)
-                            L("ERROR AlbumsViewModel ${result.exception}")
-                        }
-
-                        is Resource.Loading -> {
-                            state = state.copy(isLoading = result.isLoading)
-                            if (!result.isLoading) {
-                                state = state.copy(isFetchingMore = false)
-                            }
-                        }
+                    state = when (sort) {
+                        AlbumSortOrder.RATING -> state.copy(albums = albums.filter { it.rating > 0 })
+                        AlbumSortOrder.AVERAGE_RATING -> state.copy(albums = albums.filter { it.averageRating > 0 })
+                        else -> state.copy(albums = albums)
                     }
+
+
+                    L("viewmodel.getAlbums size ${state.albums.size}")
                 }
+                isEndOfDataList = ( ((result.networkData?.size ?: 0) < limit) && offset > 0)
+            }
+
+            is Resource.Error -> {
+                // TODO set end of data list otherwise keeps fetching? do for other screens too
+                isEndOfDataList = true
+                state = state.copy(isFetchingMore = false, isLoading = false)
+                L("ERROR AlbumsViewModel ${result.exception}")
+            }
+
+            is Resource.Loading -> {
+                state = state.copy(isLoading = result.isLoading)
+                if (!result.isLoading) {
+                    state = state.copy(isFetchingMore = false)
+                }
+            }
         }
+    } }
+
+    override fun onCleared() {
+        super.onCleared()
+        fetchJob?.cancel()
+        fetchJob = null
+        fetchMoreJob?.cancel()
+        fetchMoreJob = null
     }
 }

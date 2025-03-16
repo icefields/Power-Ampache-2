@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
 
 @Composable
@@ -45,7 +46,10 @@ fun SortDirectionDropdownMenu(
 
     DropdownMenuItem(
         modifier = modifier,
-        text = { Text(currentDirection.order.uppercase(), maxLines = 1) },
+        text = { Text(
+            textAlign = TextAlign.End,
+            text = currentDirection.order.uppercase(),
+            maxLines = 1) },
         onClick = {
             onSelection(if (currentDirection == SortOrder.ASC) SortOrder.DESC else SortOrder.ASC)
             if (expanded) onDismissMenu() else onExpandedChange(true)

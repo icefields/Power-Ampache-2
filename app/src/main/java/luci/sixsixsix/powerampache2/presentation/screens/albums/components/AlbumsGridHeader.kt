@@ -25,6 +25,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +33,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -59,7 +61,7 @@ fun AlbumsGridHeader(
 ) {
     AnimatedVisibility(
         visible = isHeaderVisible,
-        exit = slideOutVertically(),
+        exit = slideOutVertically(spring(stiffness = Spring.StiffnessHigh)) + fadeOut(spring(stiffness = Spring.StiffnessHigh)),
         enter = fadeIn(spring(stiffness = Spring.StiffnessLow))
     ) {
         Row(
@@ -83,13 +85,8 @@ fun AlbumsGridHeader(
                     .background(Color.Blue)
                 )
             } else {
-                Box(modifier = Modifier
-                    .width(150.dp)
-                    .align(Alignment.CenterVertically)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.padding(8.dp).align(Alignment.Center)
-                    )
+                Box(modifier = Modifier.width(150.dp).align(Alignment.CenterVertically)) {
+                    CircularProgressIndicator(Modifier.size(28.dp).padding(4.dp).align(Alignment.Center))
                 }
             }
 

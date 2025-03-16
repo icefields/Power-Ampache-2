@@ -233,6 +233,8 @@
     <string name="about_support_title">Support</string>
     <string name="about_links_title">Links</string>
 
+    <string name="ampachePreferences_screen_title">Ampache Preferences</string>
+    <string name="ampachePreferences_systemPreferences_title">System</string>
     <string name="error_cannotEditPreference">Cannot Edit Preference</string>
     <string name="settings_ampachePreferences_title">Ampache Preferences</string>
     <string name="settings_ampachePreferences_subtitle">Preferences for your Ampache Server</string>
@@ -242,5 +244,5 @@
     <string name="albums_sortOrder_year">Year</string>
     <string name="albums_sortOrder_artist">Artist</string>
     <string name="albums_sortOrder_rating">Rating</string>
-    <string name="albums_sortOrder_averageRating">Name</string>
+    <string name="albums_sortOrder_averageRating">Average Rating</string>
 </resources>
