@@ -248,4 +248,6 @@
     <string name="albums_sortOrder_averageRating">Average Rating</string>
     <string name="ampachePreferences_screen_title">Ampache Preferences</string>
     <string name="ampachePreferences_systemPreferences_title">System</string>
+    <string name="ampachePreferences_screen_undo_btn_title">Undo</string>
+    <string name="albums_emptyView_warning">No Albums to Show</string>
 </resources>
