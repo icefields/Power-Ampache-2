@@ -33,7 +33,6 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.data.local.MusicDao
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
@@ -47,10 +46,10 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
-import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
+import java.util.TreeSet
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.max
@@ -125,13 +124,46 @@ class AlbumsRepositoryImpl @Inject constructor(
     //            return@flow
     //        }
 
-            val localAlbums = mutableListOf<Album>()
+            val albumsSet = TreeSet<Album> { a1, a2 ->
+                val comparison = if (order == SortOrder.DESC) {
+                    when(sort) {
+                        AlbumSortOrder.NAME -> sanitizeSortTerm(a2.name).compareTo(sanitizeSortTerm(a1.name))
+                        AlbumSortOrder.YEAR -> a2.year.compareTo(a1.year)
+                        AlbumSortOrder.ARTIST -> a2.artist.name.lowercase().compareTo(a1.artist.name.lowercase())
+                        AlbumSortOrder.RATING -> a2.rating.compareTo(a1.rating)
+                        AlbumSortOrder.AVERAGE_RATING -> a2.rating.compareTo(a1.averageRating)
+                    }
+                } else {
+                    when(sort) {
+                        AlbumSortOrder.NAME -> sanitizeSortTerm(a1.name).compareTo(sanitizeSortTerm(a2.name))
+                        AlbumSortOrder.YEAR -> a1.year.compareTo(a2.year)
+                        AlbumSortOrder.ARTIST -> a1.artist.name.lowercase().compareTo(a2.artist.name.lowercase())
+                        AlbumSortOrder.RATING -> a1.rating.compareTo(a2.rating)
+                        AlbumSortOrder.AVERAGE_RATING -> a1.rating.compareTo(a2.averageRating)
+                    }
+                }
+
+                if (comparison != 0) {
+                    comparison
+                } else {
+                    if (order == SortOrder.DESC) {
+                        a2.id.compareTo(a1.id)
+                    } else {
+                        a1.id.compareTo(a2.id)
+                    }
+                }
+            }
+
+            //val localAlbums = mutableListOf<Album>()
+            albumsSet.addAll(dao.searchAlbum(query).map { it.toAlbum() })
+
             if (offset == 0) {
-                localAlbums.addAll(dao.searchAlbum(query).map { it.toAlbum() })
-                val isDbEmpty = localAlbums.isEmpty() && query.isEmpty()
+                //localAlbums.addAll(dao.searchAlbum(query).map { it.toAlbum() })
+                L("albumsSet size1 ${albumsSet.size}")
+                val isDbEmpty = albumsSet.isEmpty() && query.isEmpty()
                 if (!isDbEmpty) {
-                    sortAlbums(localAlbums, sort, order)
-                    emit(Resource.Success(data = localAlbums.toList()))
+                    //sortAlbums(localAlbums, sort, order)
+                    emit(Resource.Success(data = albumsSet.toList()))
                 }
                 val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
                 if(shouldLoadCacheOnly) {
@@ -140,27 +172,33 @@ class AlbumsRepositoryImpl @Inject constructor(
                 }
             }
             val realLimit = if (Constants.config.useIncrementalLimitForAlbums) {
-                max(localAlbums.size, limit)
+                max(albumsSet.size, limit)
             } else limit
             val response = api.getAlbums(authToken(), filter = query, offset = offset, limit = realLimit, sort = "${sort.columnName},${order.order}")
             response.error?.let { throw(MusicException(it.toError())) }
             val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
+            albumsSet.addAll(albums)
+            L("albumsSet size2 ${albumsSet.size}")
+
+            emit(Resource.Success(data = albumsSet.toList(), networkData = albums))
+            emit(Resource.Loading(false))
+
             dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
             // stick to the single source of truth pattern despite performance deterioration
             // append to the initial list to avoid ui flickering
-            val updatedDbAlbums = dao.searchAlbum(query).map { it.toAlbum() }.toMutableList()
-            //AmpacheModel.appendToList(updatedDbAlbums, localAlbums)
-            //emit(Resource.Success(data = localAlbums, networkData = albums))
-            sortAlbums(updatedDbAlbums, sort, order)
-            emit(Resource.Success(data = updatedDbAlbums, networkData = albums))
-            emit(Resource.Loading(false))
+            //val updatedDbAlbums = dao.searchAlbum(query).map { it.toAlbum() }.toMutableList()
+            ////AmpacheModel.appendToList(updatedDbAlbums, localAlbums)
+            ////emit(Resource.Success(data = localAlbums, networkData = albums))
+            //sortAlbums(updatedDbAlbums, sort, order)
+            // emit(Resource.Success(data = updatedDbAlbums, networkData = albums))
+            //emit(Resource.Loading(false))
         }.catch { e -> errorHandler("getAlbums()", e, this) }
 
     private fun sortAlbums(albumsList: MutableList<Album>, sort: AlbumSortOrder, order: SortOrder) {
         when(sort) {
-            AlbumSortOrder.NAME -> albumsList.sortBy { sanitizeSearchTerm(it.name) }
+            AlbumSortOrder.NAME -> albumsList.sortBy { sanitizeSortTerm(it.name) }
             AlbumSortOrder.YEAR -> albumsList.sortBy { it.year }
-            AlbumSortOrder.ARTIST -> albumsList.sortBy { sanitizeSearchTerm(it.artist.name.lowercase()) }
+            AlbumSortOrder.ARTIST -> albumsList.sortBy { sanitizeSortTerm(it.artist.name.lowercase()) }
             AlbumSortOrder.RATING -> albumsList.sortBy { it.rating }
             AlbumSortOrder.AVERAGE_RATING -> albumsList.sortBy { it.averageRating }
         }
@@ -168,7 +206,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         if (order == SortOrder.DESC) { albumsList.reverse() }
     }
 
-    private fun sanitizeSearchTerm(term: String) = term.replace("!","")
+    private fun sanitizeSortTerm(term: String) = term.replace("!","")
         .replace("\"","")
         .replace("'","")
         .replace("`","")

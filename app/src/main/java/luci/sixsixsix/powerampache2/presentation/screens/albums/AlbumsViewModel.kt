@@ -59,7 +59,8 @@ class AlbumsViewModel @Inject constructor(
         viewModelScope.launch {
             // playlists can change or be edited, make sure to always listen to the latest version
             offlineModeStateFlow.collectLatest { isOfflineMode ->
-                getAlbums()
+                fetchJob?.cancel()
+                fetchJob = getAlbums()
             }
         }
     }
@@ -67,30 +68,9 @@ class AlbumsViewModel @Inject constructor(
     fun onEvent(event: AlbumsEvent) {
         when (event) {
             is AlbumsEvent.Refresh -> {
-                getAlbums(fetchRemote = true)
+                fetchJob?.cancel()
+                fetchJob = getAlbums(fetchRemote = true)
             }
-
-            is AlbumsEvent.OnSearchQueryChange -> {
-                if (event.query.isBlank() && state.searchQuery.isBlank()) {
-
-                } else {
-                    state = state.copy(searchQuery = event.query)
-                    getAlbums()
-                }
-            }
-
-            is AlbumsEvent.OnBottomListReached -> {
-                if (!state.isFetchingMore && !isEndOfDataList) {
-                    fetchMoreJob?.cancel()
-                    fetchMoreJob = viewModelScope.launch {
-                        delay(500)
-                        L("AlbumsEvent.OnBottomListReached")
-                        state = state.copy(isFetchingMore = true)
-                        getAlbums(fetchRemote = true, offset = state.albums.size)
-                    }
-                }
-            }
-
             is AlbumsEvent.OnSortDirection -> {
                 state = state.copy(order = event.sortDirection, isLoading = false)
                 fetchJob?.cancel()
@@ -100,6 +80,26 @@ class AlbumsViewModel @Inject constructor(
                 state = state.copy(sort = event.sortOrder, isLoading = false)
                 fetchJob?.cancel()
                 fetchJob = getAlbums()
+            }
+            is AlbumsEvent.OnBottomListReached -> {
+                if (!state.isFetchingMore && !isEndOfDataList && fetchJob?.isActive == false) {
+                    fetchMoreJob?.cancel()
+                    fetchMoreJob = viewModelScope.launch {
+                        delay(500)
+                        L("AlbumsEvent.OnBottomListReached")
+                        state = state.copy(isFetchingMore = true)
+                        fetchJob?.cancel()
+                        fetchJob = getAlbums(fetchRemote = true, offset = state.albums.size)
+                    }
+                }
+            }
+            is AlbumsEvent.OnSearchQueryChange -> {
+                if (event.query.isBlank() && state.searchQuery.isBlank()) {
+
+                } else {
+                    state = state.copy(searchQuery = event.query)
+                    getAlbums()
+                }
             }
         }
     }
@@ -111,45 +111,45 @@ class AlbumsViewModel @Inject constructor(
         limit: Int = NETWORK_REQUEST_LIMIT_ALBUMS,
         sort: AlbumSortOrder = state.sort,
         order: SortOrder = state.order
-    ) = viewModelScope.launch { repository.getAlbums(
-        fetchRemote = fetchRemote,
-        query = query,
-        offset = offset,
-        limit = limit,
-        sort = sort,
-        order = order
-    ).collect { result ->
-        when (result) {
-            is Resource.Success -> {
-                result.data?.let { albums ->
-
-                    state = when (sort) {
-                        AlbumSortOrder.RATING -> state.copy(albums = albums.filter { it.rating > 0 })
-                        AlbumSortOrder.AVERAGE_RATING -> state.copy(albums = albums.filter { it.averageRating > 0 })
-                        else -> state.copy(albums = albums)
+    ) = viewModelScope.launch {
+            repository.getAlbums(
+            fetchRemote = fetchRemote,
+            query = query,
+            offset = offset,
+            limit = limit,
+            sort = sort,
+            order = order
+        ).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let { albums ->
+                        L("viewmodel.getAlbums pre filter size ${albums.size}")
+                        state = when (sort) {
+                            AlbumSortOrder.RATING -> state.copy(albums = albums.filter { it.rating > 0 })
+                            AlbumSortOrder.AVERAGE_RATING -> state.copy(albums = albums.filter { it.averageRating > 0 })
+                            else -> state.copy(albums = albums)
+                        }
+                        L("viewmodel.getAlbums size ${state.albums.size}")
                     }
-
-
-                    L("viewmodel.getAlbums size ${state.albums.size}")
+                    isEndOfDataList = ( ((result.networkData?.size ?: 0) < limit) && offset > 0)
                 }
-                isEndOfDataList = ( ((result.networkData?.size ?: 0) < limit) && offset > 0)
-            }
 
-            is Resource.Error -> {
-                // TODO set end of data list otherwise keeps fetching? do for other screens too
-                isEndOfDataList = true
-                state = state.copy(isFetchingMore = false, isLoading = false)
-                L("ERROR AlbumsViewModel ${result.exception}")
-            }
+                is Resource.Error -> {
+                    // TODO set end of data list otherwise keeps fetching? do for other screens too
+                    isEndOfDataList = true
+                    state = state.copy(isFetchingMore = false, isLoading = false)
+                    L("ERROR AlbumsViewModel ${result.exception}")
+                }
 
-            is Resource.Loading -> {
-                state = state.copy(isLoading = result.isLoading)
-                if (!result.isLoading) {
-                    state = state.copy(isFetchingMore = false)
+                is Resource.Loading -> {
+                    state = state.copy(isLoading = result.isLoading)
+                    if (!result.isLoading) {
+                        state = state.copy(isFetchingMore = false)
+                    }
                 }
             }
         }
-    } }
+    }
 
     override fun onCleared() {
         super.onCleared()

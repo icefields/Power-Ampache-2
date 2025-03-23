@@ -25,6 +25,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -100,13 +101,6 @@ fun AlbumsScreen(
 
     //val cardsPerRow = if (state.albums.size < 5) { minGridItemsRow } else { gridItemsRow }
     val albumCardSize = (LocalConfiguration.current.screenWidthDp / cardsPerRow).dp
-
-    if (!offlineModeState && state.isLoading && state.albums.isEmpty()) {
-        LoadingScreen()
-    } else if (offlineModeState && state.albums.isEmpty() && !state.isLoading) {
-        EmptyListView(title = stringResource(id = R.string.offline_noData_warning))
-    }
-
     var sortMenuExpanded by remember { mutableStateOf(false) }
     var sortDirectionExpanded by remember { mutableStateOf(false) }
     val scrollState = rememberLazyGridState()
@@ -116,7 +110,7 @@ fun AlbumsScreen(
 
     Column(modifier = modifier) {
         AlbumsGridHeader(
-            isHeaderVisible = (isHeaderVisible) && state.albums.isNotEmpty(),
+            isHeaderVisible = (isHeaderVisible) || (state.isLoading.not() && state.albums.isEmpty()),
             isLoading = state.isLoading,
             currentSortSelection = state.sort,
             currentDirection = state.order,
@@ -136,32 +130,42 @@ fun AlbumsScreen(
             }
         )
 
-        SwipeRefresh(
-            state = swipeRefreshState,
-            onRefresh = { viewModel.onEvent(AlbumsEvent.Refresh) }
-        ) {
-            LazyVerticalGrid(
-                state = scrollState,
-                columns = GridCells.Fixed(cardsPerRow)
+        if (state.albums.isEmpty()) {
+            if (!offlineModeState && state.isLoading) {
+                LoadingScreen()
+            } else if (!offlineModeState) {
+                EmptyListView(title = stringResource(id = R.string.albums_emptyView_warning))
+            } else if (!state.isLoading) {
+                EmptyListView(title = stringResource(id = R.string.offline_noData_warning))
+            }
+        } else {
+            SwipeRefresh(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                state = swipeRefreshState,
+                onRefresh = { viewModel.onEvent(AlbumsEvent.Refresh) }
             ) {
-                items(count = state.albums.size) { i ->
-                    val album = state.albums[i]
-                    AlbumItem(
-                        album = album,
-                        modifier = Modifier
-                            .size(albumCardSize)
-                            .clickable {
-                                navigator.navigate(AlbumDetailScreenDestination(album.id, album))
-                            }
-                            .padding(
-                                horizontal = dimensionResource(id = R.dimen.albumItem_paddingHorizontal),
-                                vertical = dimensionResource(id = R.dimen.albumItem_paddingVertical)
-                            )
-                    )
-                    // search queries are limited, do not fetch more in case of a search string
-                    if (i == (state.albums.size - gridItemsRow) && state.searchQuery.isBlank()) {
-                        // if last item, fetch more
-                        viewModel.onEvent(AlbumsEvent.OnBottomListReached(i))
+                LazyVerticalGrid(
+                    state = scrollState,
+                    columns = GridCells.Fixed(cardsPerRow)
+                ) {
+                    items(count = state.albums.size) { i ->
+                        val album = state.albums[i]
+                        AlbumItem(
+                            album = album,
+                            modifier = Modifier
+                                .size(albumCardSize)
+                                .clickable {
+                                    navigator.navigate(AlbumDetailScreenDestination(album.id, album))
+                                }.padding(
+                                    horizontal = dimensionResource(id = R.dimen.albumItem_paddingHorizontal),
+                                    vertical = dimensionResource(id = R.dimen.albumItem_paddingVertical)
+                                )
+                        )
+                        // search queries are limited, do not fetch more in case of a search string
+                        if (i == (state.albums.size - gridItemsRow) && state.searchQuery.isBlank()) {
+                            // if last item, fetch more
+                            viewModel.onEvent(AlbumsEvent.OnBottomListReached(i))
+                        }
                     }
                 }
             }

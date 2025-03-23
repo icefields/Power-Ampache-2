@@ -36,6 +36,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,13 +82,14 @@ fun AlbumsGridHeader(
             )
 
             if (!isLoading) {
-                Box(modifier = Modifier
-                    .width(150.dp)
-                    .background(Color.Blue)
-                )
+                Box(modifier = Modifier.width(150.dp).background(Color.Transparent))
             } else {
                 Box(modifier = Modifier.width(150.dp).align(Alignment.CenterVertically)) {
-                    CircularProgressIndicator(Modifier.size(28.dp).padding(4.dp).align(Alignment.Center))
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(28.dp).padding(4.dp).align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                        strokeWidth = 2.dp
+                    )
                 }
             }
 
