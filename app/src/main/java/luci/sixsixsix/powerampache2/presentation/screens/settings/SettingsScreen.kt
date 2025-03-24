@@ -238,7 +238,19 @@ fun SettingsScreen(
 @Composable
 fun SettingsDonationButtonView(onClick: () -> Unit) {
     if (BuildConfig.HIDE_DONATION) {
-        DonateConsider(onClick = onClick, showLink = true)
+        val showDonationBtn = BuildConfig.HIDE_DONATION.not()
+        DonateButton(
+            isExpanded = true,
+            isTransparent = false,
+            showPaypal = showDonationBtn,
+            showBTC = showDonationBtn,
+            showBmac = true
+        )
+        DonateConsider(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onClick,
+            showLink = true
+        )
     } else {
         DonateButton(isExpanded = true, isTransparent = false)
     }

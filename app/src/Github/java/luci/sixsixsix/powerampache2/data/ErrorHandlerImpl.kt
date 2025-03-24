@@ -45,6 +45,7 @@ import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.remote.ErrorHandlerApi
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
+import luci.sixsixsix.powerampache2.domain.errors.AmpachePreferenceException
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.ErrorType
 import luci.sixsixsix.powerampache2.domain.errors.MusicException

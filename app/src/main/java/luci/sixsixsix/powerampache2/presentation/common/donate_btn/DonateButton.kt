@@ -59,6 +59,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 
 @Composable
@@ -66,12 +67,18 @@ fun DonateButton(
     modifier: Modifier = Modifier,
     isExpanded:Boolean = false,
     isTransparent: Boolean = false,
+    showBmac: Boolean = true,
+    showPaypal: Boolean = true,
+    showBTC: Boolean = true,
     donateViewModel: DonateViewModel = hiltViewModel()
 ) {
     DonateButtonContent(
         modifier = modifier,
         isExpanded = isExpanded,
         isTransparent = isTransparent,
+        showBTC = showBTC,
+        showPaypal = showPaypal,
+        showBmac = showBmac,
         onDonateBtcButtonClick = donateViewModel::donateBtc,
         onDonatePaypalButtonClick = donateViewModel::donatePaypal,
         onDonateBmacButtonClick = donateViewModel::donateBmac
@@ -83,6 +90,9 @@ fun DonateButtonContent(
     modifier: Modifier = Modifier,
     isExpanded:Boolean = false,
     isTransparent: Boolean = false,
+    showBmac: Boolean = true,
+    showPaypal: Boolean = true,
+    showBTC: Boolean = true,
     onDonateBtcButtonClick: () -> Unit,
     onDonatePaypalButtonClick: () -> Unit,
     onDonateBmacButtonClick: () -> Unit
@@ -109,6 +119,9 @@ fun DonateButtonContent(
         AnimatedVisibility (isShowDonateButtons.value) {
             DonateButtons(
                 isTransparent = isTransparent,
+                showBmac = showBmac,
+                showPaypal = showPaypal,
+                showBTC = showBTC,
                 onDonateBtcButtonClick = {
                     onDonateBtcButtonClick()
                 }, onDonatePaypalButtonClick = {
@@ -125,17 +138,26 @@ fun DonateButtonContent(
 @Composable
 fun DonateButtons(
     isTransparent: Boolean,
+    showBmac: Boolean = true,
+    showPaypal: Boolean = true,
+    showBTC: Boolean = true,
     onDonateBtcButtonClick: () -> Unit,
     onDonatePaypalButtonClick: () -> Unit,
     onDonateBmacButtonClick: () -> Unit
 ) {
     val buttonsVertSpacing = 10.dp
     Column {
-        DonateBtcButton(isTransparent, onDonateBtcButtonClick)
-        Spacer(Modifier.height(buttonsVertSpacing))
-        DonatePaypalButton(isTransparent, onDonatePaypalButtonClick)
-        Spacer(Modifier.height(buttonsVertSpacing))
-        DonateBmacButton(isTransparent, onDonateBmacButtonClick)
+        if (showBTC) {
+            DonateBtcButton(isTransparent, onDonateBtcButtonClick)
+            Spacer(Modifier.height(buttonsVertSpacing))
+        }
+        if (showPaypal) {
+            DonatePaypalButton(isTransparent, onDonatePaypalButtonClick)
+            Spacer(Modifier.height(buttonsVertSpacing))
+        }
+        if (showBmac) {
+            DonateBmacButton(isTransparent, onDonateBmacButtonClick)
+        }
     }
 }
 
