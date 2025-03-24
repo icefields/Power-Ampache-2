@@ -63,7 +63,7 @@ android {
         targetSdk = 35
         versionCode = 79
         versionName = "1.01-79"
-        val versionQuote = "This version is powered by Diana, the goddess of the hunt, the moon, and nature."
+        val versionQuote = "This version is powered by gold, Fibonacci and Vesuvius"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

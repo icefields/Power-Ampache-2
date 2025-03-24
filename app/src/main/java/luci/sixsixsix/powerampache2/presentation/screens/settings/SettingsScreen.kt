@@ -411,9 +411,6 @@ fun SettingsScreenContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem),
-//                        title = R.string.settings_ampachePreferences_title,
-//                        subtitle = R.string.settings_ampachePreferences_subtitle,
-//                        trailingIcon = ImageVector.vectorResource(R.drawable.ampache_logo),
                         onClick = onAmpachePreferencesButtonPress
                     )
                 }
