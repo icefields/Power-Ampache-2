@@ -31,6 +31,10 @@ object Constants {
 
     const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 
+    const val IS_AMPACHE_DATA = BuildConfig.IS_AMPACHE_DATA
+
+    const val AMPACHE_PREFERENCE_UNDO_VISIBLE = false
+
     // NETWORK
     const val AMPACHE_USER_AGENT = "PowerAmpache2-${BuildConfig.VERSION_NAME}"
     const val TIMEOUT_CONNECTION_S = 15L
@@ -46,7 +50,7 @@ object Constants {
     const val NETWORK_REQUEST_LIMIT_ARTISTS = 30
     const val NETWORK_REQUEST_LIMIT_SONGS = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
-    const val NETWORK_REQUEST_LIMIT_ALBUMS = 40
+    const val NETWORK_REQUEST_LIMIT_ALBUMS = 140
 
     const val ADMIN_USERNAME = "PowerAmpache"
 

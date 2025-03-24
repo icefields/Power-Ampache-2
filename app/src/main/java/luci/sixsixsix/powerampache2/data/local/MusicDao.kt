@@ -27,6 +27,9 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
@@ -47,6 +50,8 @@ import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
 import luci.sixsixsix.powerampache2.data.local.models.SongUrl
+import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
+import luci.sixsixsix.powerampache2.domain.models.SortOrder
 
 private const val multiUserCondition = " LOWER(multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) "
 
@@ -109,6 +114,9 @@ interface MusicDao {
 
     @Query("DELETE FROM albumentity WHERE LOWER(id) == LOWER(:albumId) AND $multiUserCondition")
     suspend fun deleteAlbum(albumId: String)
+
+    @RawQuery(observedEntities = [AlbumEntity::class])
+    fun getAlbums(query: SupportSQLiteQuery): List<AlbumEntity>
 
     @Query("""SELECT * FROM albumentity WHERE 
         (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == LOWER(artistName))
@@ -496,6 +504,10 @@ interface MusicDao {
 
     @Query("DELETE FROM historyentity")
     suspend fun clearHistory()
+
+    fun getAlbumsSortedQuery(column: AlbumSortOrder, order: SortOrder) =
+        SimpleSQLiteQuery("SELECT * FROM album ORDER BY ${column.columnName} ${order.order}")
+
 
     suspend fun clearCachedData() {
         clearAlbums()

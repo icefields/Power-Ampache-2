@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2025  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.screens.albums
 
 import androidx.compose.runtime.getValue
@@ -17,16 +38,17 @@ import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_ALBUM
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
+import luci.sixsixsix.powerampache2.domain.models.SortOrder
 import javax.inject.Inject
 
 @HiltViewModel
 class AlbumsViewModel @Inject constructor(
     private val repository: AlbumsRepository,
-    settingsRepository: SettingsRepository,
-    private val playlistManager: MusicPlaylistManager
+    settingsRepository: SettingsRepository
 ) : ViewModel() {
     private var fetchMoreJob: Job? = null
+    private var fetchJob: Job? = null
     var state by mutableStateOf(AlbumsState())
     private var isEndOfDataList: Boolean = false
 
@@ -37,42 +59,46 @@ class AlbumsViewModel @Inject constructor(
         viewModelScope.launch {
             // playlists can change or be edited, make sure to always listen to the latest version
             offlineModeStateFlow.collectLatest { isOfflineMode ->
-                getAlbums()
+                fetchJob?.cancel()
+                fetchJob = getAlbums()
             }
         }
-
-//        viewModelScope.launch {
-//            playlistManager.currentSearchQuery.collect { query ->
-//                L("AlbumsViewModel collect", query)
-//                onEvent(AlbumsEvent.OnSearchQueryChange(query))
-//            }
-//        }
     }
 
     fun onEvent(event: AlbumsEvent) {
         when (event) {
             is AlbumsEvent.Refresh -> {
-                getAlbums(fetchRemote = true)
+                fetchJob?.cancel()
+                fetchJob = getAlbums(fetchRemote = true)
             }
-
+            is AlbumsEvent.OnSortDirection -> {
+                state = state.copy(order = event.sortDirection, isLoading = false)
+                fetchJob?.cancel()
+                fetchJob = getAlbums()
+            }
+            is AlbumsEvent.OnSortOrder -> {
+                state = state.copy(sort = event.sortOrder, isLoading = false)
+                fetchJob?.cancel()
+                fetchJob = getAlbums()
+            }
+            is AlbumsEvent.OnBottomListReached -> {
+                if (!state.isFetchingMore && !isEndOfDataList && fetchJob?.isActive == false) {
+                    fetchMoreJob?.cancel()
+                    fetchMoreJob = viewModelScope.launch {
+                        delay(500)
+                        L("AlbumsEvent.OnBottomListReached")
+                        state = state.copy(isFetchingMore = true)
+                        fetchJob?.cancel()
+                        fetchJob = getAlbums(fetchRemote = true, offset = state.albums.size)
+                    }
+                }
+            }
             is AlbumsEvent.OnSearchQueryChange -> {
                 if (event.query.isBlank() && state.searchQuery.isBlank()) {
 
                 } else {
                     state = state.copy(searchQuery = event.query)
                     getAlbums()
-                }
-            }
-
-            is AlbumsEvent.OnBottomListReached -> {
-                if (!state.isFetchingMore && !isEndOfDataList) {
-                    fetchMoreJob?.cancel()
-                    fetchMoreJob = viewModelScope.launch {
-                        delay(500)
-                        L("AlbumsEvent.OnBottomListReached")
-                        state = state.copy(isFetchingMore = true)
-                        getAlbums(fetchRemote = true, offset = state.albums.size)
-                    }
                 }
             }
         }
@@ -82,41 +108,54 @@ class AlbumsViewModel @Inject constructor(
         query: String = state.searchQuery.lowercase(),
         fetchRemote: Boolean = true,
         offset: Int = 0,
-        limit: Int = NETWORK_REQUEST_LIMIT_ALBUMS
-    ) {
-        viewModelScope.launch {
-            repository
-                .getAlbums(
-                    fetchRemote = fetchRemote,
-                    query = query,
-                    offset = offset,
-                    limit = limit
-                )
-                .collect { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            result.data?.let { albums ->
-                                state = state.copy(albums = albums)
-                                L("viewmodel.getAlbums size ${state.albums.size}")
-                            }
-                            isEndOfDataList = ( ((result.networkData?.size ?: 0) < limit) && offset > 0)
+        limit: Int = NETWORK_REQUEST_LIMIT_ALBUMS,
+        sort: AlbumSortOrder = state.sort,
+        order: SortOrder = state.order
+    ) = viewModelScope.launch {
+            repository.getAlbums(
+            fetchRemote = fetchRemote,
+            query = query,
+            offset = offset,
+            limit = limit,
+            sort = sort,
+            order = order
+        ).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let { albums ->
+                        L("viewmodel.getAlbums pre filter size ${albums.size}")
+                        state = when (sort) {
+                            AlbumSortOrder.RATING -> state.copy(albums = albums.filter { it.rating > 0 })
+                            AlbumSortOrder.AVERAGE_RATING -> state.copy(albums = albums.filter { it.averageRating > 0 })
+                            else -> state.copy(albums = albums)
                         }
+                        L("viewmodel.getAlbums size ${state.albums.size}")
+                    }
+                    isEndOfDataList = ( ((result.networkData?.size ?: 0) < limit) && offset > 0)
+                }
 
-                        is Resource.Error -> {
-                            // TODO set end of data list otherwise keeps fetching? do for other screens too
-                            isEndOfDataList = true
-                            state = state.copy(isFetchingMore = false, isLoading = false)
-                            L("ERROR AlbumsViewModel ${result.exception}")
-                        }
+                is Resource.Error -> {
+                    // TODO set end of data list otherwise keeps fetching? do for other screens too
+                    isEndOfDataList = true
+                    state = state.copy(isFetchingMore = false, isLoading = false)
+                    L("ERROR AlbumsViewModel ${result.exception}")
+                }
 
-                        is Resource.Loading -> {
-                            state = state.copy(isLoading = result.isLoading)
-                            if (!result.isLoading) {
-                                state = state.copy(isFetchingMore = false)
-                            }
-                        }
+                is Resource.Loading -> {
+                    state = state.copy(isLoading = result.isLoading)
+                    if (!result.isLoading) {
+                        state = state.copy(isFetchingMore = false)
                     }
                 }
+            }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        fetchJob?.cancel()
+        fetchJob = null
+        fetchMoreJob?.cancel()
+        fetchMoreJob = null
     }
 }

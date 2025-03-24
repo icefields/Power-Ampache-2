@@ -24,6 +24,8 @@ package luci.sixsixsix.powerampache2.domain
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
+import luci.sixsixsix.powerampache2.domain.models.SortOrder
 
 interface AlbumsRepository {
     val recentlyPlayedAlbumsFlow: Flow<List<Album>>
@@ -32,7 +34,7 @@ interface AlbumsRepository {
     val randomAlbumsFlow: Flow<List<Album>>
     val frequentAlbumsFlow: Flow<List<Album>>
 
-    suspend fun getAlbums(fetchRemote: Boolean = true, query: String = "", offset: Int = 0, limit: Int = 0): Flow<Resource<List<Album>>>
+    suspend fun getAlbums(fetchRemote: Boolean = true, query: String = "", offset: Int = 0, limit: Int = 0, sort: AlbumSortOrder = AlbumSortOrder.NAME, order: SortOrder = SortOrder.ASC): Flow<Resource<List<Album>>>
     suspend fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Album>>>
     suspend fun getRecentAlbums(): Flow<Resource<List<Album>>>
     suspend fun getNewestAlbums(): Flow<Resource<List<Album>>>

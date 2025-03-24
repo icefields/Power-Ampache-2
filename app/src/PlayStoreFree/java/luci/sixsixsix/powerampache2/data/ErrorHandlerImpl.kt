@@ -140,6 +140,11 @@ class ErrorHandlerImpl @Inject constructor(
                         "cannot load data HttpException $exceptionString"
                     }
 
+                    is AmpachePreferenceException -> {
+                        readableMessage = applicationContext.getString(R.string.error_cannotEditPreference)
+                        "$readableMessage $exceptionString"
+                    }
+
                     is ServerUrlNotInitializedException ->
                         "ServerUrlNotInitializedException $exceptionString"
                     is ScrobbleException -> {

@@ -219,7 +219,6 @@ fun TabbedSongDetailView(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongHandleTabRow(

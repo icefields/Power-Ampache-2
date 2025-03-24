@@ -19,15 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.screens.albums
+package luci.sixsixsix.powerampache2.presentation.screens.settings.ampache_preferences
 
-import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
-import luci.sixsixsix.powerampache2.domain.models.SortOrder
+import luci.sixsixsix.powerampache2.domain.models.ampache.AmpachePreference
 
-sealed class AlbumsEvent {
-    data object Refresh: AlbumsEvent()
-    data class OnSortOrder(val sortOrder: AlbumSortOrder): AlbumsEvent()
-    data class OnSortDirection(val sortDirection: SortOrder): AlbumsEvent()
-    data class OnSearchQueryChange(val query: String): AlbumsEvent()
-    data class OnBottomListReached(val currentIndex: Int): AlbumsEvent()
-}
+data class AmpachePreferencesState (
+    val userPreferences: Map<String, AmpachePreference> = mapOf(),
+    val systemPreferences: Map<String, AmpachePreference> = mapOf(),
+    val isLoading: Boolean = false,
+    val isLoadingEdit: Boolean = false
+)

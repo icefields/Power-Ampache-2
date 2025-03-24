@@ -30,6 +30,8 @@ import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS
 import luci.sixsixsix.powerampache2.common.isIpAddress
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumDto
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
+import luci.sixsixsix.powerampache2.data.remote.dto.AmpachePreferenceDto
+import luci.sixsixsix.powerampache2.data.remote.dto.AmpachePreferenceResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.ArtistsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.AuthDto
@@ -123,6 +125,7 @@ interface MainNetwork {
         @Query("limit") limit: Int,
         @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
+        @Query("sort") sort: String = "name,ASC",
         @Query("offset") offset: Int = 0,
         @Query("include") include: String? = null, // albums, songs (includes track list)
     ): AlbumsResponse // TODO remove default values
@@ -451,6 +454,33 @@ interface MainNetwork {
         @Query("id") song: String,
         @Query("date") unixTimestamp: Long
     ): SuccessResponse
+
+    @GET("json.server.php?action=user_preferences")
+    suspend fun getUserPreferences(
+        @Query("auth") authKey: String
+    ): AmpachePreferenceResponse
+
+    @GET("json.server.php?action=system_preferences")
+    suspend fun getSystemPreferences(
+        @Query("auth") authKey: String
+    ): AmpachePreferenceResponse
+
+    /**
+     * Edit a preference value and apply to all users if allowed.
+     * ACCESS REQUIRED: 100 (Admin)
+     *
+     * Input    Type	Description                                         Optional
+     * 'filter' string	Preference name e.g ('notify_email', 'ajax_load')	NO
+     * 'value'	mixed	(string/integer) Preference value	                NO
+     * 'all'	boolean	0, 1 apply to all users	                            YES
+     */
+    @GET("json.server.php?action=preference_edit")
+    suspend fun editSystemPreferences(
+        @Query("auth") authKey: String,
+        @Query("filter") filter: String,
+        @Query("value") value: String,
+        @Query("all") all: String? = "0",
+    ): AmpachePreferenceDto
 
     @GET
     suspend fun getConfig(@Url configUrl: String = CONFIG_URL): Pa2ConfigDto

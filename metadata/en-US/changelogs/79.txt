@@ -1,0 +1,4 @@
+— [NEW] Added sorting filters for Albums screen.
+— [NEW] Added Ampache server settings.
+— Minor bug fixes and adjustments.
+— Refactored settings screen.
