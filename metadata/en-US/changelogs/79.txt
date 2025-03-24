@@ -2,3 +2,4 @@
 — [NEW] Added Ampache server settings.
 — Minor bug fixes and adjustments.
 — Refactored settings screen.
+— Fixed UI on Library screen for flip phone.
