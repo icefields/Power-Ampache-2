@@ -141,6 +141,12 @@
     <string name="settings_maxBuffer_subtitle">The maximum duration of media that the player will attempt to buffer, in seconds.</string>
     <string name="settings_bufferForPlaybackAfterRebuffer_title">Buffer For Playback After Re-buffer</string>
     <string name="settings_bufferForPlaybackAfterRebuffer_subtitle">The default duration of media that must be buffered for playback to resume after a re-buffer, in seconds. A re-buffer is defined to be caused by buffer depletion rather than a user action</string>
+    <string name="settings_playerCache_title">Player Cache (in MB)</string>
+    <string name="settings_playerCache_subtitle">Amount of disc cache for the player, in MB</string>
+    <string name="settings_player_unit_seconds">Seconds</string>
+    <string name="settings_player_unit_mb">MB</string>
+
+
     <string name="settings_player_button_resetDefaults">Reset Defaults</string>
     <string name="settings_player_button_killApp">PRESS TO KILL THE APP\n(Apply player settings)</string>
     <string name="settings_player_killDialog_title">Kill the app now to apply settings?</string>

@@ -19,9 +19,9 @@ val okhttpVersion = "5.0.0-alpha.14"
 val coroutinesVersion = "1.8.1"
 val exoplayerVersion = "2.19.1"
 val composeNavVersion = "1.11.7"
-val media3Version = "1.5.1"
+val media3Version = "1.6.1"
 val hiltVersion = "1.2.0"
-val roomVersion = "2.6.1"
+val roomVersion = "2.7.0"
 
 val localProperties = Properties()
 localProperties.load(project.rootProject.file("local.properties").inputStream())
@@ -61,8 +61,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 79
-        versionName = "1.01-79"
+        versionCode = 80
+        versionName = "1.01-80"
         val versionQuote = "This version is powered by gold, Fibonacci and Vesuvius"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -346,7 +346,7 @@ dependencies {
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.10.01"))
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")

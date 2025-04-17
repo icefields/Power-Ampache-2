@@ -86,20 +86,17 @@ class SettingsViewModel @Inject constructor(
         maxBuffer = sharedPreferencesManager.maxBufferMs / 1000,
         bufferForPlayback = sharedPreferencesManager.bufferForPlaybackMs / 1000,
         bufferForPlaybackAfterRebuffer = sharedPreferencesManager.bufferForPlaybackAfterRebufferMs / 1000,
-        useOkHttpExoplayer = sharedPreferencesManager.useOkHttpForExoPlayer
+        useOkHttpExoplayer = sharedPreferencesManager.useOkHttpForExoPlayer,
+        cacheSizeMb = sharedPreferencesManager.cacheSizeMb
     )
 
-    var playerSettingsStateFlow: MutableStateFlow<PlayerSettingsState> = MutableStateFlow(
-        playerBuffersInitialState()
-    )
+    var playerSettingsStateFlow = MutableStateFlow(playerBuffersInitialState())
         private set
 
     val logs by mutableStateOf(
         if (BuildConfig.DEBUG) {
             try {
-                mutableListOf<String>(
-                    GsonBuilder().setPrettyPrinting().create().toJson(Constants.config)
-                )
+                mutableListOf<String>(GsonBuilder().setPrettyPrinting().create().toJson(Constants.config))
             } catch (e: Exception) {
                 mutableListOf<String>()
             }
@@ -224,6 +221,13 @@ class SettingsViewModel @Inject constructor(
                 sharedPreferencesManager.useOkHttpForExoPlayer = event.newValue
                 playerSettingsStateFlow.value = playerSettingsStateFlow.value.copy(
                     useOkHttpExoplayer = event.newValue
+                )
+            }
+
+            is PlayerSettingsEvent.OnPlayerCacheSizeChange -> {
+                sharedPreferencesManager.cacheSizeMb = event.newValue
+                playerSettingsStateFlow.value = playerSettingsStateFlow.value.copy(
+                    cacheSizeMb = event.newValue
                 )
             }
         }

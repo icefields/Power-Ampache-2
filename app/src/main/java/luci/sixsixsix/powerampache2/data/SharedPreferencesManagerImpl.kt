@@ -30,6 +30,7 @@ import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_AFTER_R
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MAX_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MIN_MS
+import luci.sixsixsix.powerampache2.common.Constants.PLAYER_MAX_CACHE_SIZE_MB
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
@@ -41,6 +42,7 @@ private const val KEY_MIN_BUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTIN
 private const val KEY_MAX_BUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.maxBufferMs"
 private const val KEY_BUFFER_FOR_PLAYBACK = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.bufferForPlaybackMs"
 private const val KEY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.bufferForPlaybackAfterRebufferMs"
+private const val KEY_PLAYER_CACHE_SIZE = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.playerCacheSize"
 private const val KEY_ALLOW_ALL_CERTIFICATES = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.alloallcertificates"
 private const val KEY_USE_OKHTTP_EXOPLAYER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.useokhttpforexoplayer"
 private const val KEY_INTRO_DIALOG_CONTENT = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.intro.dialog.content"
@@ -107,6 +109,10 @@ class SharedPreferencesManagerImpl @Inject constructor(
     override var bufferForPlaybackAfterRebufferMs: Int
         get() = getInt(KEY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER, BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS)
         set(value) = setInt(KEY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER, value)
+
+    override var cacheSizeMb: Int
+        get() = getInt(KEY_PLAYER_CACHE_SIZE, PLAYER_MAX_CACHE_SIZE_MB)// 100MB default
+        set(value) = setInt(KEY_PLAYER_CACHE_SIZE, value)
 
     override var isAllowAllCertificates: Boolean
         get() = getBool(KEY_ALLOW_ALL_CERTIFICATES, false)

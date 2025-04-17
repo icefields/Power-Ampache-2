@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.SettingsVoice
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -63,6 +62,7 @@ import luci.sixsixsix.powerampache2.common.Constants.MAX_BUFFER_MAX
 import luci.sixsixsix.powerampache2.common.Constants.MIN_BUFFER_MAX
 import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_BUFFER_MAX
 import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_REBUFFER_MAX
+import luci.sixsixsix.powerampache2.common.Constants.PLAYER_MAX_CACHE_SIZE_MB_MAX
 import luci.sixsixsix.powerampache2.presentation.common.ErrorView
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
 import luci.sixsixsix.powerampache2.presentation.common.TextWithSubtitle
@@ -73,12 +73,14 @@ fun PlayerSettingsView(
     backBuffer: Int,
     minBuffer: Int,
     maxBuffer: Int,
+    cache: Int,
     bufferForPlayback: Int,
     bufferForPlaybackAfterRebuffer: Int,
     isUseOkHttpPlayer: Boolean,
     onBackBufferChange: (newValue: Int) -> Unit,
     onMinBufferChange: (newValue: Int) -> Unit,
     onMaxBufferChange: (newValue: Int) -> Unit,
+    onCacheChange: (newValue: Int) -> Unit,
     onBufferForPlaybackChange: (newValue: Int) -> Unit,
     onBufferForPlaybackAfterRebufferChange: (newValue: Int) -> Unit,
     onUseOkHttpPlayer: (newValue: Boolean) -> Unit,
@@ -178,6 +180,17 @@ fun PlayerSettingsView(
 
                     Spacer(Modifier.height(spacerHeight))
 
+                    PlayerBufferSettingSlider(
+                        R.string.settings_playerCache_title,
+                        R.string.settings_playerCache_subtitle,
+                        0, PLAYER_MAX_CACHE_SIZE_MB_MAX,
+                        cache,
+                        onCacheChange,
+                        unit = R.string.settings_player_unit_mb
+                    )
+
+                    Spacer(Modifier.height(spacerHeight))
+
                     PowerAmpSwitch(
                         title = R.string.settings_player_useOkHttp_title,
                         subtitle = R.string.settings_player_useOkHttp_subtitle,
@@ -248,6 +261,7 @@ fun PlayerBufferSettingSlider(
     max: Int,
     sliderValue: Int,
     onValueChange: (newValue: Int) -> Unit,
+    @StringRes unit: Int = R.string.settings_player_unit_seconds
 ) {
     Column {
         TextWithSubtitle(
@@ -256,7 +270,7 @@ fun PlayerBufferSettingSlider(
         )
         Spacer(Modifier.height(10.dp))
         Text(
-            text = "$sliderValue Seconds",
+            text = "$sliderValue ${stringResource(unit)}",
             //fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
             fontSize = 14.sp,
@@ -280,6 +294,7 @@ fun PlayerSettingsViewPreview() {
         backBuffer = 30,
         minBuffer = 30,
         maxBuffer =  120000,
+        cache = 100,
         bufferForPlayback = 30,
         bufferForPlaybackAfterRebuffer = 22,
         onBackBufferChange = { },
@@ -290,6 +305,7 @@ fun PlayerSettingsViewPreview() {
         onBufferForPlaybackAfterRebufferChange = {},
         onKillAppClick = {},
         isUseOkHttpPlayer = true,
-        onUseOkHttpPlayer = {}
+        onUseOkHttpPlayer = {},
+        onCacheChange = {}
     )
 }

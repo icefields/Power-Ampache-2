@@ -1,0 +1,4 @@
+— [NEW] Added disc cache to the player.
+— Minor bug fixes and adjustments.
+— Fixed bug with lyrics when next songs has no lyrics.
+— Updated media3 libraries.
