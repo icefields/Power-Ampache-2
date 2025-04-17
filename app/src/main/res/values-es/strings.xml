@@ -245,4 +245,8 @@
     <string name="ampachePreferences_systemPreferences_title">System</string>
     <string name="ampachePreferences_screen_undo_btn_title">Undo</string>
     <string name="albums_emptyView_warning">No Albums to Show</string>
+    <string name="settings_playerCache_title">Player Cache (in MB)</string>
+    <string name="settings_playerCache_subtitle">Amount of disc cache for the player, in MB</string>
+    <string name="settings_player_unit_seconds">Seconds</string>
+    <string name="settings_player_unit_mb">MB</string>
 </resources>
