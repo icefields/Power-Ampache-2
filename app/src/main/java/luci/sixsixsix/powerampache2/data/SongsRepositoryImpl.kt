@@ -533,9 +533,11 @@ class SongsRepositoryImpl @Inject constructor(
     private suspend fun startDownloadingSong(song: Song): UUID? {
         val isSongDownloadedAlready =
             dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
+
         if (isSongDownloadedAlready) {
             return null
         }
+
         return weakContext.get()?.let { context ->
             val auth = getSession()!!.auth
             val username = getUsername()!!
@@ -546,6 +548,10 @@ class SongsRepositoryImpl @Inject constructor(
                 username = username,
                 song = song
             )
+
+            // add delay to attempt avoiding TooManyRequestsException
+            delay(2000)
+
             L(requestId)
             requestId
         } ?: run {
