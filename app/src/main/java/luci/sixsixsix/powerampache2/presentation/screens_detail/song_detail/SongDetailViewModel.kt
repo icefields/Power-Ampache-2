@@ -46,8 +46,6 @@ class SongDetailViewModel @Inject constructor(
         // if we already have lyrics, for a song with the same id there is no need to fetch again
         if (lyrics.value.isNotBlank() && song.id == songId) return
         songId = song.id
-        // If lyrics are already attached to the song object, there is no need to fetch.
-        _lyrics.value = song.lyrics
         viewModelScope.launch {
             if (song.lyrics.isBlank() && musicRepository.serverInfoStateFlow.first().isNextcloud) {
                 songsRepository.getSongFromId(song.id, true)?.let {
@@ -55,6 +53,9 @@ class SongDetailViewModel @Inject constructor(
                         _lyrics.value = it.lyrics.replace("\r\n", "<br>")
                     }
                 }
+            } else {
+                // If lyrics are already attached to the song object, there is no need to fetch.
+                _lyrics.value = song.lyrics
             }
         }
     }

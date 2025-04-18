@@ -482,13 +482,15 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }
 
-    override suspend fun getSongUri(song: Song) = if (sharedPreferencesManager.useOkHttpForExoPlayer) {
-        // the OkHttpPlayer is not able to play offline songs
-        buildSongUrl(song)
-    } else {
+    override suspend fun getSongUri(song: Song) =
+//        if (sharedPreferencesManager.useOkHttpForExoPlayer) {
+//        // the OkHttpPlayer is not able to play offline songs
+//        buildSongUrl(song)
+//    } else
+//    {
         dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri
             ?: buildSongUrl(song)
-    }
+//    }
 
     /**
      * Build Url for Ampache stream action

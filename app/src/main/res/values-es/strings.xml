@@ -212,7 +212,7 @@
     <string name="loginScreen_killDialog_subtitle">¿Cerrar ahora para aplicar?</string>
 
     <string name="settings_player_useOkHttp_title">Use Advanced Player for music streaming (uses OkHttp)</string>
-    <string name="settings_player_useOkHttp_subtitle">Úsalo en caso de errores de conexión durante la reproducción o respuestas 302 de la red. ADVERTENCIA: Las canciones descargadas no se reproducirán si este reproductor se selecciona. Esta opción requiere reiniciar la aplicación.</string>
+    <string name="settings_player_useOkHttp_subtitle">Úsalo en caso de errores de conexión durante la reproducción o respuestas 302 de la red. Esta opción requiere reiniciar la aplicación.</string>
 
     <!-- %s represents the title of the song -->
     <string name="warning_song_remove_subtitle">Borrar %s de las canciones descargadas?</string>

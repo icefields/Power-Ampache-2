@@ -1,4 +1,5 @@
 — [NEW] Added disc cache to the player.
+— [NEW] Advanced player (soon to be the default) now works with downloaded files.
 — Fixed bug with lyrics when next songs has no lyrics.
 — Updated media3 libraries.
 — Attempt to fix Download crash.

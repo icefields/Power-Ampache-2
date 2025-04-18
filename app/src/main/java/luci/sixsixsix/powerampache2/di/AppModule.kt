@@ -28,7 +28,6 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
-import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
@@ -173,34 +172,104 @@ object AppModule {
                     sharedPreferencesManager.bufferForPlaybackMs,
                     sharedPreferencesManager.bufferForPlaybackAfterRebufferMs
                 )
-                .build())
-        .let { builder ->
-            val cacheDataSourceFactory = CacheDataSource.Factory()
-                .setCache(cache)
-                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                .build()
+        )
+        .setMediaSourceFactory(
+            DefaultMediaSourceFactory(context).setDataSourceFactory(
+                CacheDataSource.Factory()
+                    .setCache(cache)
+                    .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                    .setUpstreamDataSourceFactory(
+                        getDataSourceFactory(
+                            context = context,
+                            useOkHttpForExoPlayer = sharedPreferencesManager.useOkHttpForExoPlayer,
+                            ampacheOkHttpClientBuilder
+                        )
+                    )
+            )
+        )
+        .build()
 
-            if (sharedPreferencesManager.useOkHttpForExoPlayer) {
-                builder.setMediaSourceFactory(
-                    DefaultMediaSourceFactory(context).setDataSourceFactory(
-                        OkHttpDataSource.Factory(ampacheOkHttpClientBuilder(addDefaultHeaderInterceptor = true)
-                            .connectTimeout(20, TimeUnit.SECONDS) // try 30 too
-                            .readTimeout(90, TimeUnit.SECONDS)
-                            .writeTimeout(20, TimeUnit.SECONDS)
-                            .build()
-                        ).let { okHttpFactory ->
-                            cacheDataSourceFactory.setUpstreamDataSourceFactory(okHttpFactory)
-                        }
-                    )
-                )
-            } else {
-                builder.setMediaSourceFactory(
-                    DefaultMediaSourceFactory(context).setDataSourceFactory(
-                        cacheDataSourceFactory.setUpstreamDataSourceFactory(DefaultDataSource.Factory(context))
-                    )
-                )
-            }
-            builder.build()
+
+//        .let { builder ->
+//            val cacheDataSourceFactory = CacheDataSource.Factory()
+//                .setCache(cache)
+//                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+//
+////            if (sharedPreferencesManager.useOkHttpForExoPlayer) {
+////                val okHttpFactory = OkHttpDataSource.Factory(
+////                    ampacheOkHttpClientBuilder(addDefaultHeaderInterceptor = true)
+////                        .connectTimeout(20, TimeUnit.SECONDS)
+////                        .readTimeout(90, TimeUnit.SECONDS)
+////                        .writeTimeout(20, TimeUnit.SECONDS)
+////                        .build()
+////                )
+////
+////                builder.setMediaSourceFactory(
+////                    DefaultMediaSourceFactory(context).setDataSourceFactory(
+////                        cacheDataSourceFactory.setUpstreamDataSourceFactory(
+////                            DefaultDataSource.Factory(context, okHttpFactory)
+////                        )
+////                    )
+////                )
+////
+//////                builder.setMediaSourceFactory(
+//////                    DefaultMediaSourceFactory(context).setDataSourceFactory(
+//////
+////            //                        OkHttpDataSource.Factory(ampacheOkHttpClientBuilder(addDefaultHeaderInterceptor = true)
+//////                            .connectTimeout(20, TimeUnit.SECONDS) // try 30 too
+//////                            .readTimeout(90, TimeUnit.SECONDS)
+//////                            .writeTimeout(20, TimeUnit.SECONDS)
+//////                            .build()
+//////                        ).let { okHttpFactory ->
+//////                            cacheDataSourceFactory.setUpstreamDataSourceFactory(
+//////                                DefaultDataSource.Factory(context, okHttpFactory)
+//////                            )
+//////                        }
+//////                    )
+//////                )
+////            } else {
+////                builder.setMediaSourceFactory(
+////                    DefaultMediaSourceFactory(context).setDataSourceFactory(
+////                        cacheDataSourceFactory.setUpstreamDataSourceFactory(DefaultDataSource.Factory(context))
+////                    )
+////                )
+////            }
+//
+//            builder.setMediaSourceFactory(
+//                DefaultMediaSourceFactory(context).setDataSourceFactory(
+//                    cacheDataSourceFactory.setUpstreamDataSourceFactory(
+//                        getDataSourceFactory(
+//                            context = context,
+//                            useOkHttpForExoPlayer = sharedPreferencesManager.useOkHttpForExoPlayer,
+//                            ampacheOkHttpClientBuilder
+//                        )
+//                    )
+//                )
+//            ).build()
+//        }
+
+    private fun getDataSourceFactory(
+        @ApplicationContext context: Context,
+        useOkHttpForExoPlayer: Boolean,
+        ampacheOkHttpClientBuilder: AmpacheOkHttpClientBuilder
+    ) = if (useOkHttpForExoPlayer) {
+        OkHttpDataSource.Factory(
+            ampacheOkHttpClientBuilder(addDefaultHeaderInterceptor = true)
+                .retryOnConnectionFailure(true)
+                .followRedirects(true)
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(90, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
+                .build()
+        ).let { okHttpFactory ->
+            DefaultDataSource.Factory(context, okHttpFactory)
         }
+    } else {
+        DefaultDataSource.Factory(context)
+    }
+
+
 
     @OptIn(UnstableApi::class)
     @Provides
