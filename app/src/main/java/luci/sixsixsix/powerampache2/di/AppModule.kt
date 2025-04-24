@@ -190,65 +190,6 @@ object AppModule {
         )
         .build()
 
-
-//        .let { builder ->
-//            val cacheDataSourceFactory = CacheDataSource.Factory()
-//                .setCache(cache)
-//                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-//
-////            if (sharedPreferencesManager.useOkHttpForExoPlayer) {
-////                val okHttpFactory = OkHttpDataSource.Factory(
-////                    ampacheOkHttpClientBuilder(addDefaultHeaderInterceptor = true)
-////                        .connectTimeout(20, TimeUnit.SECONDS)
-////                        .readTimeout(90, TimeUnit.SECONDS)
-////                        .writeTimeout(20, TimeUnit.SECONDS)
-////                        .build()
-////                )
-////
-////                builder.setMediaSourceFactory(
-////                    DefaultMediaSourceFactory(context).setDataSourceFactory(
-////                        cacheDataSourceFactory.setUpstreamDataSourceFactory(
-////                            DefaultDataSource.Factory(context, okHttpFactory)
-////                        )
-////                    )
-////                )
-////
-//////                builder.setMediaSourceFactory(
-//////                    DefaultMediaSourceFactory(context).setDataSourceFactory(
-//////
-////            //                        OkHttpDataSource.Factory(ampacheOkHttpClientBuilder(addDefaultHeaderInterceptor = true)
-//////                            .connectTimeout(20, TimeUnit.SECONDS) // try 30 too
-//////                            .readTimeout(90, TimeUnit.SECONDS)
-//////                            .writeTimeout(20, TimeUnit.SECONDS)
-//////                            .build()
-//////                        ).let { okHttpFactory ->
-//////                            cacheDataSourceFactory.setUpstreamDataSourceFactory(
-//////                                DefaultDataSource.Factory(context, okHttpFactory)
-//////                            )
-//////                        }
-//////                    )
-//////                )
-////            } else {
-////                builder.setMediaSourceFactory(
-////                    DefaultMediaSourceFactory(context).setDataSourceFactory(
-////                        cacheDataSourceFactory.setUpstreamDataSourceFactory(DefaultDataSource.Factory(context))
-////                    )
-////                )
-////            }
-//
-//            builder.setMediaSourceFactory(
-//                DefaultMediaSourceFactory(context).setDataSourceFactory(
-//                    cacheDataSourceFactory.setUpstreamDataSourceFactory(
-//                        getDataSourceFactory(
-//                            context = context,
-//                            useOkHttpForExoPlayer = sharedPreferencesManager.useOkHttpForExoPlayer,
-//                            ampacheOkHttpClientBuilder
-//                        )
-//                    )
-//                )
-//            ).build()
-//        }
-
     private fun getDataSourceFactory(
         @ApplicationContext context: Context,
         useOkHttpForExoPlayer: Boolean,
@@ -268,8 +209,6 @@ object AppModule {
     } else {
         DefaultDataSource.Factory(context)
     }
-
-
 
     @OptIn(UnstableApi::class)
     @Provides

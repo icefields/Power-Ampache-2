@@ -77,9 +77,9 @@ object Constants {
     const val PLAYBACK_BUFFER_MAX = 200
     const val PLAYBACK_REBUFFER_MAX = 300
 
-    const val PLAYER_MAX_CACHE_SIZE_MB = 100
-    const val PLAYER_MAX_CACHE_SIZE_MB_MAX = 2000
-
+    const val PLAYER_CACHE_SIZE_MB = 100
+    const val PLAYER_CACHE_SIZE_MB_MAX = 2000
+    const val PLAYER_CACHE_SIZE_MB_MIN = 20
 
     // ERROR CONSTANTS
     const val NOT_IMPLEMENTED_USER_ID = "666"

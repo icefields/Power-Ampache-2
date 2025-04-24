@@ -62,7 +62,8 @@ import luci.sixsixsix.powerampache2.common.Constants.MAX_BUFFER_MAX
 import luci.sixsixsix.powerampache2.common.Constants.MIN_BUFFER_MAX
 import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_BUFFER_MAX
 import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_REBUFFER_MAX
-import luci.sixsixsix.powerampache2.common.Constants.PLAYER_MAX_CACHE_SIZE_MB_MAX
+import luci.sixsixsix.powerampache2.common.Constants.PLAYER_CACHE_SIZE_MB_MAX
+import luci.sixsixsix.powerampache2.common.Constants.PLAYER_CACHE_SIZE_MB_MIN
 import luci.sixsixsix.powerampache2.presentation.common.ErrorView
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
 import luci.sixsixsix.powerampache2.presentation.common.TextWithSubtitle
@@ -183,7 +184,7 @@ fun PlayerSettingsView(
                     PlayerBufferSettingSlider(
                         R.string.settings_playerCache_title,
                         R.string.settings_playerCache_subtitle,
-                        0, PLAYER_MAX_CACHE_SIZE_MB_MAX,
+                        PLAYER_CACHE_SIZE_MB_MIN, PLAYER_CACHE_SIZE_MB_MAX,
                         cache,
                         onCacheChange,
                         unit = R.string.settings_player_unit_mb

@@ -30,7 +30,7 @@ import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_AFTER_R
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MAX_MS
 import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MIN_MS
-import luci.sixsixsix.powerampache2.common.Constants.PLAYER_MAX_CACHE_SIZE_MB
+import luci.sixsixsix.powerampache2.common.Constants.PLAYER_CACHE_SIZE_MB
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
@@ -111,7 +111,7 @@ class SharedPreferencesManagerImpl @Inject constructor(
         set(value) = setInt(KEY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER, value)
 
     override var cacheSizeMb: Int
-        get() = getInt(KEY_PLAYER_CACHE_SIZE, PLAYER_MAX_CACHE_SIZE_MB)// 100MB default
+        get() = getInt(KEY_PLAYER_CACHE_SIZE, PLAYER_CACHE_SIZE_MB)
         set(value) = setInt(KEY_PLAYER_CACHE_SIZE, value)
 
     override var isAllowAllCertificates: Boolean
@@ -136,5 +136,6 @@ class SharedPreferencesManagerImpl @Inject constructor(
         maxBufferMs = BUFFER_MAX_MS
         bufferForPlaybackMs = BUFFER_FOR_PLAYBACK_MS
         bufferForPlaybackAfterRebufferMs = BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
+        cacheSizeMb = PLAYER_CACHE_SIZE_MB
     }
 }
