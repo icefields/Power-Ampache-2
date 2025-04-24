@@ -27,6 +27,11 @@ import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
@@ -58,6 +63,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -149,35 +155,72 @@ object AppModule {
         @ApplicationContext context: Context,
         audioAttributes: AudioAttributes,
         sharedPreferencesManager: SharedPreferencesManager,
-        ampacheOkHttpClientBuilder: AmpacheOkHttpClientBuilder
+        ampacheOkHttpClientBuilder: AmpacheOkHttpClientBuilder,
+        cache: SimpleCache
     ) = ExoPlayer.Builder(context)
         .setAudioAttributes(audioAttributes, true)
         .setHandleAudioBecomingNoisy(true)
         .setTrackSelector(DefaultTrackSelector(context))
-        .setLoadControl(DefaultLoadControl.Builder()
-            .setPrioritizeTimeOverSizeThresholds(true)
-            .setBackBuffer(sharedPreferencesManager.backBuffer, true)  // Retain back buffer data only up to the last keyframe (not very impactful for audio)
-            //.setTargetBufferBytes(20 * 1024 * 1024)
-            .setBufferDurationsMs(
-                sharedPreferencesManager.minBufferMs,
-                sharedPreferencesManager.maxBufferMs,
-                sharedPreferencesManager.bufferForPlaybackMs,
-                sharedPreferencesManager.bufferForPlaybackAfterRebufferMs
-            )
-            .build())
-        .let {
-            if (sharedPreferencesManager.useOkHttpForExoPlayer) {
-                it.setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(
-                    OkHttpDataSource.Factory(ampacheOkHttpClientBuilder( addDefaultHeaderInterceptor = true)
-                        .connectTimeout(20, TimeUnit.SECONDS) // try 30 too
-                        .readTimeout(90, TimeUnit.SECONDS)
-                        .writeTimeout(20, TimeUnit.SECONDS)
-                        .build()
+        .setLoadControl(
+            DefaultLoadControl.Builder()
+                .setPrioritizeTimeOverSizeThresholds(true)
+                .setBackBuffer(sharedPreferencesManager.backBuffer, true)  // Retain back buffer data only up to the last keyframe (not very impactful for audio)
+                //.setTargetBufferBytes(20 * 1024 * 1024)
+                .setBufferDurationsMs(
+                    sharedPreferencesManager.minBufferMs,
+                    sharedPreferencesManager.maxBufferMs,
+                    sharedPreferencesManager.bufferForPlaybackMs,
+                    sharedPreferencesManager.bufferForPlaybackAfterRebufferMs
+                )
+                .build()
+        )
+        .setMediaSourceFactory(
+            DefaultMediaSourceFactory(context).setDataSourceFactory(
+                CacheDataSource.Factory()
+                    .setCache(cache)
+                    .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                    .setUpstreamDataSourceFactory(
+                        getDataSourceFactory(
+                            context = context,
+                            useOkHttpForExoPlayer = sharedPreferencesManager.useOkHttpForExoPlayer,
+                            ampacheOkHttpClientBuilder
+                        )
                     )
-                ))
-            }
-            it.build()
+            )
+        )
+        .build()
+
+    private fun getDataSourceFactory(
+        @ApplicationContext context: Context,
+        useOkHttpForExoPlayer: Boolean,
+        ampacheOkHttpClientBuilder: AmpacheOkHttpClientBuilder
+    ) = if (useOkHttpForExoPlayer) {
+        OkHttpDataSource.Factory(
+            ampacheOkHttpClientBuilder(addDefaultHeaderInterceptor = true)
+                .retryOnConnectionFailure(true)
+                .followRedirects(true)
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(90, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
+                .build()
+        ).let { okHttpFactory ->
+            DefaultDataSource.Factory(context, okHttpFactory)
         }
+    } else {
+        DefaultDataSource.Factory(context)
+    }
+
+    @OptIn(UnstableApi::class)
+    @Provides
+    @Singleton
+    fun providePlayerCache(
+        @ApplicationContext context: Context,
+        sharedPreferencesManager: SharedPreferencesManager
+    ) = SimpleCache(
+        File(context.cacheDir, "pa2_media_cache"),
+        LeastRecentlyUsedCacheEvictor(sharedPreferencesManager.cacheSizeMb.toLong() * 1024L * 1024L),
+        StandaloneDatabaseProvider(context)
+    )
 
     //@ServiceScoped
     @Singleton

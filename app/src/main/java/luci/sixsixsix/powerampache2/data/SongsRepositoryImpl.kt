@@ -482,13 +482,12 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }
 
-    override suspend fun getSongUri(song: Song) = if (sharedPreferencesManager.useOkHttpForExoPlayer) {
-        // the OkHttpPlayer is not able to play offline songs
-        buildSongUrl(song)
-    } else {
+    /**
+     * Attempts to get the song URI from downloaded songs first, if not present, build a remote Url.
+     */
+    override suspend fun getSongUri(song: Song) =
         dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri
             ?: buildSongUrl(song)
-    }
 
     /**
      * Build Url for Ampache stream action
@@ -533,9 +532,11 @@ class SongsRepositoryImpl @Inject constructor(
     private suspend fun startDownloadingSong(song: Song): UUID? {
         val isSongDownloadedAlready =
             dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id) != null
+
         if (isSongDownloadedAlready) {
             return null
         }
+
         return weakContext.get()?.let { context ->
             val auth = getSession()!!.auth
             val username = getUsername()!!
@@ -546,6 +547,10 @@ class SongsRepositoryImpl @Inject constructor(
                 username = username,
                 song = song
             )
+
+            // add delay to attempt avoiding TooManyRequestsException
+            delay(2000)
+
             L(requestId)
             requestId
         } ?: run {

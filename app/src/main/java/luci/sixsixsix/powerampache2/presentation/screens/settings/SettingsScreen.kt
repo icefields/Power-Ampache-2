@@ -206,11 +206,10 @@ fun SettingsScreen(
             settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnBackBufferChange(it))
         },
         onBufferForPlaybackAfterRebufferChange = {
-            settingsViewModel.onPlayerEvent(
-                PlayerSettingsEvent.OnBufferForPlaybackAfterRebufferChange(
-                    it
-                )
-            )
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnBufferForPlaybackAfterRebufferChange(it))
+        },
+        onCacheChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnPlayerCacheSizeChange(it))
         },
         donateButton = {
             SettingsDonationButtonView() {
@@ -231,6 +230,7 @@ fun SettingsScreen(
         maxBuffer = playerSettingsState.maxBuffer,
         bufferForPlayback = playerSettingsState.bufferForPlayback,
         bufferForPlaybackAfterRebuffer = playerSettingsState.bufferForPlaybackAfterRebuffer,
+        cache = playerSettingsState.cacheSizeMb,
         isUseOkHttpPlayer = playerSettingsState.useOkHttpExoplayer
     )
 }
@@ -275,6 +275,7 @@ fun SettingsScreenContent(
     backBuffer: Int,
     minBuffer: Int,
     maxBuffer: Int,
+    cache: Int,
     bufferForPlayback: Int,
     bufferForPlaybackAfterRebuffer: Int,
     isUseOkHttpPlayer: Boolean,
@@ -296,6 +297,7 @@ fun SettingsScreenContent(
     onBackBufferChange: (newValue: Int) -> Unit,
     onMinBufferChange: (newValue: Int) -> Unit,
     onMaxBufferChange: (newValue: Int) -> Unit,
+    onCacheChange: (newValue: Int) -> Unit,
     onBufferForPlaybackChange: (newValue: Int) -> Unit,
     onBufferForPlaybackAfterRebufferChange: (newValue: Int) -> Unit,
     onUseOkHttpExoPlayer: (newValue: Boolean) -> Unit,
@@ -393,10 +395,12 @@ fun SettingsScreenContent(
                     backBuffer = backBuffer,
                     minBuffer = minBuffer,
                     maxBuffer = maxBuffer,
+                    cache = cache,
                     bufferForPlayback = bufferForPlayback,
                     bufferForPlaybackAfterRebuffer = bufferForPlaybackAfterRebuffer,
                     onResetValuesClick = onResetValuesClick,
                     onKillAppClick = onKillAppClick,
+                    onCacheChange = onCacheChange,
                     onUseOkHttpPlayer = onUseOkHttpExoPlayer,
                     isUseOkHttpPlayer = isUseOkHttpPlayer
                 )
@@ -734,6 +738,8 @@ fun PreviewSettingsScreen() {
         bufferForPlaybackAfterRebuffer = 400,
         onMaxBufferChange = {},
         onResetValuesClick = {},
+        onCacheChange = {},
+        cache = 100,
         onKillAppClick = {}, isUseOkHttpPlayer = true, onUseOkHttpExoPlayer = {}
     )
 }

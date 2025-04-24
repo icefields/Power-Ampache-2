@@ -54,8 +54,8 @@ fun SongDetailScreen(
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val song by viewModel.currentSongStateFlow().collectAsState()
-    song?.let { songDetailViewModel.getSongLyrics(it) }
     val lyrics by songDetailViewModel.lyrics.collectAsStateWithLifecycle()
+    song?.let { songDetailViewModel.getSongLyrics(it) }
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val pagerState = rememberPagerState(initialPage = 0) {

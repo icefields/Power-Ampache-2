@@ -31,5 +31,6 @@ data class PlayerSettingsState (
     val maxBuffer: Int,
     val bufferForPlayback: Int,
     val bufferForPlaybackAfterRebuffer: Int,
+    val cacheSizeMb: Int,
     val useOkHttpExoplayer: Boolean
 ): Parcelable

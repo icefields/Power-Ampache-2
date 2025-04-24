@@ -212,7 +212,7 @@
     <string name="loginScreen_killDialog_subtitle">¿Cerrar ahora para aplicar?</string>
 
     <string name="settings_player_useOkHttp_title">Use Advanced Player for music streaming (uses OkHttp)</string>
-    <string name="settings_player_useOkHttp_subtitle">Úsalo en caso de errores de conexión durante la reproducción o respuestas 302 de la red. ADVERTENCIA: Las canciones descargadas no se reproducirán si este reproductor se selecciona. Esta opción requiere reiniciar la aplicación.</string>
+    <string name="settings_player_useOkHttp_subtitle">Úsalo en caso de errores de conexión durante la reproducción o respuestas 302 de la red. Esta opción requiere reiniciar la aplicación.</string>
 
     <!-- %s represents the title of the song -->
     <string name="warning_song_remove_subtitle">Borrar %s de las canciones descargadas?</string>
@@ -245,4 +245,8 @@
     <string name="ampachePreferences_systemPreferences_title">System</string>
     <string name="ampachePreferences_screen_undo_btn_title">Undo</string>
     <string name="albums_emptyView_warning">No Albums to Show</string>
+    <string name="settings_playerCache_title">Player Cache (in MB)</string>
+    <string name="settings_playerCache_subtitle">Amount of disc cache for the player, in MB</string>
+    <string name="settings_player_unit_seconds">Seconds</string>
+    <string name="settings_player_unit_mb">MB</string>
 </resources>
