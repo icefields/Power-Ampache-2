@@ -13,9 +13,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel

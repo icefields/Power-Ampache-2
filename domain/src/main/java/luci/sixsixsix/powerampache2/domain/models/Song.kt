@@ -27,7 +27,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.StarRating
 import kotlinx.parcelize.Parcelize
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 
 @Parcelize
 data class Song(
@@ -38,7 +38,7 @@ data class Song(
     val artist: MusicAttribute = MusicAttribute.emptyInstance(),
     val albumArtist: MusicAttribute = MusicAttribute.emptyInstance(),
     val songUrl: String = "",
-    val imageUrl: String = "" ,
+    val imageUrl: String = "",
     val bitrate: Int = Constants.ERROR_INT,
     val streamBitrate: Int = Constants.ERROR_INT,
     val catalog: Int = Constants.ERROR_INT,

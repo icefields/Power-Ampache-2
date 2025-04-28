@@ -22,8 +22,6 @@
 package luci.sixsixsix.powerampache2.presentation.screens.settings
 
 import android.app.Application
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -31,11 +29,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,22 +43,19 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.common.openLinkInBrowser
-import luci.sixsixsix.powerampache2.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
-import luci.sixsixsix.powerampache2.player.LogMessageState
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.system.exitProcess
 
 @OptIn(SavedStateHandleSaveableApi::class)

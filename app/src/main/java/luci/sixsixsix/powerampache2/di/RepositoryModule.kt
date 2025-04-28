@@ -25,10 +25,10 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import luci.sixsixsix.powerampache2.common.ConfigProviderImpl
 import luci.sixsixsix.powerampache2.data.AlbumsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.AmpachePreferencesRepositoryImpl
 import luci.sixsixsix.powerampache2.data.ArtistsRepositoryImpl
-import luci.sixsixsix.powerampache2.data.ErrorHandlerImpl
 import luci.sixsixsix.powerampache2.data.MusicRepositoryImpl
 import luci.sixsixsix.powerampache2.data.PlaylistsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.SettingsRepositoryImpl
@@ -44,7 +44,7 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
-import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
+import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager

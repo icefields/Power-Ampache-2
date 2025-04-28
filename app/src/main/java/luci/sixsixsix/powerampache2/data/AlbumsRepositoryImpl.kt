@@ -30,8 +30,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
+import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
@@ -453,7 +453,8 @@ class AlbumsRepositoryImpl @Inject constructor(
         fc: FlowCollector<Resource<List<Album>>>?
     ): Boolean {
         if (isOfflineModeEnabled()) {
-            fc?.emit(Resource.Success(
+            fc?.emit(
+                Resource.Success(
                 data = albums.filter { album -> isAlbumOffline(album) },
                 networkData = null)
             )

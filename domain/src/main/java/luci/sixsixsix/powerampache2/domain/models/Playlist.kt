@@ -22,10 +22,7 @@
 package luci.sixsixsix.powerampache2.domain.models
 
 import android.os.Parcelable
-import com.google.gson.Gson
 import kotlinx.parcelize.Parcelize
-import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistDto
-import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 
 @Parcelize
 open class Playlist(
@@ -42,17 +39,18 @@ open class Playlist(
 ): Parcelable, AmpacheModel {
     companion object {
         fun empty() = Playlist("", "")
-        fun mock(): Playlist = Gson().fromJson("{\n" +
-                "            \"id\": \"2\",\n" +
-                "            \"name\": \"2023-techdeath\",\n" +
-                "            \"owner\": \"System\",\n" +
-                "            \"items\": 67,\n" +
-                "            \"type\": \"public\",\n" +
-                "            \"art\": \"https:\\/\\/tari.ddns.net\\/image.php?object_id=2&object_type=playlist&name=art.jpg\",\n" +
-                "            \"flag\": true,\n" +
-                "            \"rating\": 4,\n" +
-                "            \"averagerating\": 3\n" +
-                "        }", PlaylistDto::class.java).toPlaylist()
+        fun mock(): Playlist = Playlist(
+            id = "2",
+            name = "2023-techdeath",
+            owner = "System",
+            items = 66,
+            type = PlaylistType.public,
+            artUrl = "https://tari.ddns.net/image.php?object_id=2&object_type=playlist&name=art.jpg",
+            flag = 1,
+            preciseRating = 4.2f,
+            rating = 4,
+            averageRating = 3.6f
+        )
     }
 }
 

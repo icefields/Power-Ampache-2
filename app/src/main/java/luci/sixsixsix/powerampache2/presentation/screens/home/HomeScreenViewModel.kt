@@ -29,7 +29,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -421,11 +420,11 @@ class HomeScreenViewModel @Inject constructor(
 
 // ---- ARTISTS INJECTION
     private fun addArtistsToAlbumList(
-        albums: List<AmpacheModel>,
-        artists: List<Artist>,
-        resultList: MutableList<AmpacheModel>,
-        offset: Int = 2,
-        frequency: Int = 3
+    albums: List<AmpacheModel>,
+    artists: List<Artist>,
+    resultList: MutableList<AmpacheModel>,
+    offset: Int = 2,
+    frequency: Int = 3
     ) {
         if (frequency < 1) return
 

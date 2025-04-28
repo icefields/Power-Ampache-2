@@ -27,7 +27,7 @@ import luci.sixsixsix.powerampache2.BuildConfig.DEBUG_LOCAL_STABLE_URL
 import luci.sixsixsix.powerampache2.BuildConfig.LOCAL_NEXTCLOUD_PASSWORD
 import luci.sixsixsix.powerampache2.BuildConfig.LOCAL_NEXTCLOUD_URL
 import luci.sixsixsix.powerampache2.BuildConfig.LOCAL_NEXTCLOUD_USER
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 
 const val DEBUG_USER = BuildConfig.AMPACHE_USER
 const val DEBUG_PASSWORD = BuildConfig.AMPACHE_PASSWORD

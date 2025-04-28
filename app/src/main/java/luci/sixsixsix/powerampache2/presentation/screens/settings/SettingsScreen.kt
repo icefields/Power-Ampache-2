@@ -72,7 +72,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.IS_AMPACHE_DATA
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
@@ -422,7 +423,7 @@ fun SettingsScreenContent(
                     onCheckedChange = onMonoValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
-                9 -> if (Constants.IS_AMPACHE_DATA) {
+                9 -> if (IS_AMPACHE_DATA) {
                     AmpacheSettingsListItem(
                         modifier = Modifier
                             .fillMaxWidth()

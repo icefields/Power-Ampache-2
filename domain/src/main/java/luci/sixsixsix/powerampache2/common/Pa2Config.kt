@@ -21,8 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.common
 
-import luci.sixsixsix.powerampache2.BuildConfig
-
 const val ALBUM_HIGHEST_FETCH_LIMIT = 500
 const val PLAYLIST_SONGS_FETCH_LIMIT = 100
 const val PLAYBACK_ERRORS_RETRIES = 16
@@ -31,14 +29,7 @@ const val PLAYLIST_ADD_NEW_ENABLE = true
 const val API_RECORD_PLAY_ENABLE = true
 const val SETTINGS_IS_DOWNLOAD_SDCARD = true
 const val FORCE_SKIP_NETWORK_ERROR = false
-const val USE_INCREMENTAL_LIMIT_ALBUMS = BuildConfig.USE_INCREMENTAL_LIMIT_ALBUMS
-const val RESET_QUEUE_ON_NEW_SESSION = BuildConfig.RESET_QUEUE_ON_NEW_SESSION
 
-const val PLAYLISTS_USER_FETCH = BuildConfig.PLAYLISTS_USER_FETCH
-const val SMARTLISTS_USER_FETCH = BuildConfig.SMARTLISTS_USER_FETCH
-const val PLAYLISTS_ADMIN_FETCH = BuildConfig.PLAYLISTS_ADMIN_FETCH
-const val SMARTLISTS_ADMIN_FETCH = BuildConfig.SMARTLISTS_ADMIN_FETCH
-const val PLAYLISTS_ALL_SERVER_FETCH = BuildConfig.PLAYLISTS_ALL_SERVER_FETCH
 const val CLEAR_LIBRARY_ON_CATALOG_CLEAN = true
 const val FETCH_ALBUMS_WITH_ARTISTS = true
 const val INTRO_MESSAGE_LOCAL_ASSET = "local::asset"
@@ -60,9 +51,9 @@ data class Pa2Config(
     val playlistFetchLimit: Int = PLAYLIST_FETCH_LIMIT,
 
     // reset queue on new session
-    val queueResetOnNewSession: Boolean = RESET_QUEUE_ON_NEW_SESSION,
+    val queueResetOnNewSession: Boolean,// = RESET_QUEUE_ON_NEW_SESSION,
 
-    val dogmazicDemoUser: String = BuildConfig.DOGMAZIC_USER,
+    val dogmazicDemoUser: String,// = DOGMAZIC_DEMO_USER,
 
     // limit of songs to fetch for playlists
     // - bigger number results in faster fetching
@@ -71,7 +62,7 @@ data class Pa2Config(
     val playlistSongsFetchLimit: Int = PLAYLIST_SONGS_FETCH_LIMIT,
 
     // force login dialog instead of bottom drawer for all versions until google fixes copy paste issue
-    val forceLoginDialogsOnAllVersions: Boolean = BuildConfig.FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS,
+    val forceLoginDialogsOnAllVersions: Boolean,// = FORCE_LOGIN_DIALOG_ON_ALL_VERSIONS,
 
     // custom text to show on the login form
     val loginWarning: String = "",
@@ -80,21 +71,21 @@ data class Pa2Config(
     val playbackErrorRetries: Int = PLAYBACK_ERRORS_RETRIES,
 
     // Enable login via token along with username/password
-    val enableTokenLogin: Boolean = BuildConfig.ENABLE_TOKEN_LOGIN,
+    val enableTokenLogin: Boolean,// = ENABLE_TOKEN_LOGIN,
 
-    val dogmazicDemoToken: String = BuildConfig.DOGMAZIC_TOKEN,
-    val dogmazicDemoUrl: String = BuildConfig.DOGMAZIC_URL,
+    val dogmazicDemoToken: String,// = DOGMAZIC_TOKEN,
+    val dogmazicDemoUrl: String,// = DOGMAZIC_URL,
 
     // fetch user playlists before fetching the bulk of all server playlists
-    val playlistsUserFetch: Boolean = PLAYLISTS_USER_FETCH,
+    val playlistsUserFetch: Boolean,// = PLAYLISTS_USER_FETCH,
     // fetch user smartlists before fetching the bulk of all server playlists
-    val smartlistsUserFetch: Boolean = SMARTLISTS_USER_FETCH,
+    val smartlistsUserFetch: Boolean,// = SMARTLISTS_USER_FETCH,
     // fetch playlists owned by a defined admin user
-    val playlistsAdminFetch: Boolean = PLAYLISTS_ADMIN_FETCH,
+    val playlistsAdminFetch: Boolean,// = PLAYLISTS_ADMIN_FETCH,
     // fetch smartlists owned by a defined admin user
-    val smartlistsAdminFetch: Boolean = SMARTLISTS_ADMIN_FETCH,
+    val smartlistsAdminFetch: Boolean,// = SMARTLISTS_ADMIN_FETCH,
     // fetch all playlists from server
-    val playlistsServerAllFetch: Boolean = PLAYLISTS_ALL_SERVER_FETCH,
+    val playlistsServerAllFetch: Boolean,// = PLAYLISTS_ALL_SERVER_FETCH,
     // clear the library when a newer "clean" date in the handshake response
     val clearLibraryOnCatalogClean: Boolean = CLEAR_LIBRARY_ON_CATALOG_CLEAN,
     // message to show at login, if any present
@@ -119,5 +110,5 @@ data class Pa2Config(
     val songsRecentFetchLimit: Int = SONGS_RECENT_LIMIT_FETCH,
 
     // override the limit with the size of the local data, expensive on network on the long term
-    val useIncrementalLimitForAlbums: Boolean = USE_INCREMENTAL_LIMIT_ALBUMS
+    val useIncrementalLimitForAlbums: Boolean,// = USE_INCREMENTAL_LIMIT_ALBUMS
 )

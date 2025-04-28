@@ -25,7 +25,7 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.data.common.Constants
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity

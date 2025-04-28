@@ -24,14 +24,15 @@ package luci.sixsixsix.powerampache2.data
 import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.Constants.BACK_BUFFER_MS
-import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
-import luci.sixsixsix.powerampache2.common.Constants.BUFFER_FOR_PLAYBACK_MS
-import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MAX_MS
-import luci.sixsixsix.powerampache2.common.Constants.BUFFER_MIN_MS
-import luci.sixsixsix.powerampache2.common.Constants.PLAYER_CACHE_SIZE_MB
+
 import luci.sixsixsix.powerampache2.common.WeakContext
+import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants.BACK_BUFFER_MS
+import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
+import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_FOR_PLAYBACK_MS
+import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_MAX_MS
+import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_MIN_MS
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLAYER_CACHE_SIZE_MB
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
 import javax.inject.Singleton

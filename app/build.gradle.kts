@@ -1,5 +1,3 @@
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Properties
 
 plugins {
@@ -21,7 +19,7 @@ val exoplayerVersion = "2.19.1"
 val composeNavVersion = "1.11.7"
 val media3Version = "1.6.1"
 val hiltVersion = "1.2.0"
-val roomVersion = "2.7.0"
+val roomVersion = "2.7.1"
 
 val localProperties = Properties()
 localProperties.load(project.rootProject.file("local.properties").inputStream())
@@ -107,7 +105,7 @@ android {
             versionNameSuffix = ".debug"
 
             // FLAGS
-            buildConfigField("boolean", "MRLOG_ON", "true")
+            //buildConfigField("boolean", "MRLOG_ON", "true")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
             buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "true")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
@@ -138,7 +136,7 @@ android {
 
         release {
             // FLAGS
-            buildConfigField("boolean", "MRLOG_ON", "false")
+            //buildConfigField("boolean", "MRLOG_ON", "false")
             buildConfigField("boolean", "ENABLE_ERROR_LOG", "true")
             buildConfigField("boolean", "ENABLE_TOKEN_LOGIN", "true")
             buildConfigField("boolean", "ENABLE_DOGMAZIC_DEMO_SERVER", "true")
@@ -259,11 +257,14 @@ composeCompiler {
 }
 
 dependencies {
+    implementation(project(":domain"))
+    implementation(project(":MrLog"))
+
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.media:media:1.7.0")
-    implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation("androidx.work:work-runtime-ktx:2.10.1")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
 
     // --- Compose --- //
@@ -310,7 +311,7 @@ dependencies {
     implementation("androidx.media3:media3-ui:$media3Version")
     implementation("androidx.media3:media3-datasource-okhttp:$media3Version")
 
-    // --- Coil --- //
+    // --- Coil, image-loader --- //
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // --- Dagger Hilt --- //

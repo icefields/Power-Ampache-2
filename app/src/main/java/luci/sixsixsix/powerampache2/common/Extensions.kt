@@ -55,8 +55,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.common.Constants.PLAY_STORE_URL
+import luci.sixsixsix.powerampache2.data.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_FLOAT
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_TITLE
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.io.File
@@ -201,10 +205,10 @@ fun Any.toDebugString(
                 } else {
                     val valueStr = "${field.get(obj)}"
                     if (!excludeErrorValues ||
-                            (!valueStr.startsWith(Constants.ERROR_STRING) &&
-                             !valueStr.startsWith(Constants.ERROR_TITLE) &&
-                             !valueStr.startsWith(Constants.ERROR_INT.toString()) &&
-                             !valueStr.startsWith(Constants.ERROR_FLOAT.toString())
+                            (!valueStr.startsWith(ERROR_STRING) &&
+                             !valueStr.startsWith(ERROR_TITLE) &&
+                             !valueStr.startsWith(ERROR_INT.toString()) &&
+                             !valueStr.startsWith(ERROR_FLOAT.toString())
                             )
                     ) {
                         sb.append(field.name)
@@ -278,12 +282,12 @@ fun processNumberToFloat(num: Any?): Float = num?.let {
             is Float -> it.toFloat()
             is Int -> it.toFloat()
             is String -> it.toFloat()
-            else -> Constants.ERROR_FLOAT
+            else -> ERROR_FLOAT
         }
     } catch (e: Exception) {
-        Constants.ERROR_FLOAT
+        ERROR_FLOAT
     }
-} ?: Constants.ERROR_FLOAT
+} ?: ERROR_FLOAT
 
 /**
  * if hasArt flag is present (not null), check if there's any art with it.

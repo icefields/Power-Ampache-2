@@ -23,9 +23,9 @@ package luci.sixsixsix.powerampache2.domain.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.common.Constants.LOADING_STRING
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.domain.common.Constants.LOADING_STRING
 
 typealias ArtistId = String
 

@@ -33,14 +33,15 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
-import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_SEARCH
+import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_SEARCH
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.SONGS_DEFAULT_LIMIT_FETCH
 import luci.sixsixsix.powerampache2.common.WeakContext
 import luci.sixsixsix.powerampache2.common.hasMore
 import luci.sixsixsix.powerampache2.common.pop
+import luci.sixsixsix.powerampache2.data.common.Constants.CLEAR_TABLE_AFTER_FETCH
+import luci.sixsixsix.powerampache2.data.common.Constants.QUICK_PLAY_MIN_SONGS
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.HistoryEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toHistoryEntity
@@ -56,6 +57,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
@@ -200,7 +202,7 @@ class SongsRepositoryImpl @Inject constructor(
         }
 
         // db
-        if (query.isNullOrBlank() && offset == 0 && Constants.CLEAR_TABLE_AFTER_FETCH) {
+        if (query.isNullOrBlank() && offset == 0 && CLEAR_TABLE_AFTER_FETCH) {
             // if it's just a search, or we were fetching more items (offset > 0) do not clear cache
             dao.clearSongs()
         }
@@ -298,7 +300,8 @@ class SongsRepositoryImpl @Inject constructor(
                     }
                     MainNetwork.StatFilter.frequent -> {
                         // songs are saved already, just fetch them again and emit
-                        emit(Resource.Success(
+                        emit(
+                            Resource.Success(
                             data = dao.getMostPlayedSongs().ifEmpty {
                                 dao.getMostPlayedSongsLocal() }.map { it.toSong() },
                             networkData = songs))
@@ -397,7 +400,7 @@ class SongsRepositoryImpl @Inject constructor(
         response.error?.let { throw(MusicException(it.toError())) }
         val songs = response.songs!!.map { it.toSong() } //will throw exception if artist null
 
-        if (Constants.CLEAR_TABLE_AFTER_FETCH) {
+        if (CLEAR_TABLE_AFTER_FETCH) {
             // if it's just a search do not clear cache
             dao.clearSongs()
         }
@@ -423,7 +426,7 @@ class SongsRepositoryImpl @Inject constructor(
         try { resultSet.addAll(dao.getMostPlayedOfflineSongs().map { it.toSong() }) } catch (e: Exception) { }
         try { resultSet.addAll(dao.getLikedOfflineSongs().map { it.toSong() }) } catch (e: Exception) { }
         try { resultSet.addAll(dao.getHighestRatedOfflineSongs().map { it.toSong() }) } catch (e: Exception) { }
-        if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+        if (resultSet.size < QUICK_PLAY_MIN_SONGS) {
             try { resultSet.addAll(dao.getOfflineSongs().map { it.toSong() }) } catch (e: Exception) { }
         }
         // add cached songs? Too many can cause a crash when saving state
@@ -431,38 +434,38 @@ class SongsRepositoryImpl @Inject constructor(
         // if not big enough start fetching from web
         if (!isOfflineModeEnabled()) {
             // try add cached songs first
-            if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+            if (resultSet.size < QUICK_PLAY_MIN_SONGS) {
                 try { resultSet.addAll(dao.getMostPlayedSongs().map { it.toSong() }) } catch (e: Exception) { }
             }
-            if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+            if (resultSet.size < QUICK_PLAY_MIN_SONGS) {
                 try { resultSet.addAll(dao.getMostPlayedSongsLocal().map { it.toSong() }) } catch (e: Exception) { }
             }
-            if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+            if (resultSet.size < QUICK_PLAY_MIN_SONGS) {
                 try { resultSet.addAll(dao.searchSong("").map { it.toSong() }) } catch (e: Exception) { }
             }
             try {
-                if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                if (resultSet.size < QUICK_PLAY_MIN_SONGS) {
                     // if not enough downloaded songs fetch most played songs
                     val auth = authToken()
                     getSongsStatCall(auth, MainNetwork.StatFilter.frequent)?.map { it.toSong() }?.let { freqSongs ->
                         cacheSongs(freqSongs)
                         resultSet.addAll(freqSongs)
                     }
-                    if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                    if (resultSet.size < QUICK_PLAY_MIN_SONGS) {
                         // if still not enough songs fetch random songs
                         getSongsStatCall(auth, MainNetwork.StatFilter.flagged)?.map { it.toSong() }?.let { flagSongs ->
                             cacheSongs(flagSongs)
                             resultSet.addAll(flagSongs)
                         }
                     }
-                    if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                    if (resultSet.size < QUICK_PLAY_MIN_SONGS) {
                         // if still not enough songs fetch random songs
                         getSongsStatCall(auth, MainNetwork.StatFilter.highest)?.map { it.toSong() }?.let { highestSongs ->
                             cacheSongs(highestSongs)
                             resultSet.addAll(highestSongs)
                         }
                     }
-                    if (resultSet.size < Constants.QUICK_PLAY_MIN_SONGS) {
+                    if (resultSet.size < QUICK_PLAY_MIN_SONGS) {
                         // if still not enough songs fetch random songs
                         getSongsStatCall(auth, MainNetwork.StatFilter.random)?.map { it.toSong() }?.let { randSongs ->
                             cacheSongs(randSongs)

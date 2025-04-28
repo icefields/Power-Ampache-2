@@ -24,21 +24,23 @@ package luci.sixsixsix.powerampache2.domain.models
 import android.os.Parcelable
 import com.google.gson.Gson
 import kotlinx.parcelize.Parcelize
-import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_CITY
-import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_NAME
-import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_STATE
-import luci.sixsixsix.powerampache2.common.Constants.DOGMAZIC_FAKE_USERNAME
-import luci.sixsixsix.powerampache2.common.Constants.MASTODON_URL
-import luci.sixsixsix.powerampache2.common.Constants.NOT_IMPLEMENTED_USER_ID
-import luci.sixsixsix.powerampache2.common.Constants.USER_ID_ERROR
+import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants.DOGMAZIC_FAKE_CITY
+import luci.sixsixsix.powerampache2.domain.common.Constants.DOGMAZIC_FAKE_EMAIL
+import luci.sixsixsix.powerampache2.domain.common.Constants.DOGMAZIC_FAKE_NAME
+import luci.sixsixsix.powerampache2.domain.common.Constants.DOGMAZIC_FAKE_STATE
+import luci.sixsixsix.powerampache2.domain.common.Constants.DOGMAZIC_FAKE_USERNAME
+import luci.sixsixsix.powerampache2.domain.common.Constants.NOT_IMPLEMENTED_USER_ID
+import luci.sixsixsix.powerampache2.domain.common.Constants.USER_ACCESS_DEFAULT
+import luci.sixsixsix.powerampache2.domain.common.Constants.USER_DEFAULT_MASTODON_URL
+import luci.sixsixsix.powerampache2.domain.common.Constants.USER_ID_ERROR
 
 @Parcelize
 data class User(
     val id: String,
     val username: String,
     val email: String = Constants.USER_EMAIL_DEFAULT,
-    val access: Int = Constants.USER_ACCESS_DEFAULT,
+    val access: Int = USER_ACCESS_DEFAULT,
     val streamToken: String = "",
     val fullNamePublic: Int = Constants.USER_FULL_NAME_PUBLIC_DEFAULT,
     val fullName: String = "",
@@ -83,7 +85,7 @@ data class User(
             id = NOT_IMPLEMENTED_USER_ID,
             username = username,
             email = "",
-            access = Constants.USER_ACCESS_DEFAULT,
+            access = USER_ACCESS_DEFAULT,
             streamToken = "",
             fullNamePublic = 0,
             fullName = "",
@@ -100,15 +102,15 @@ data class User(
         fun demoUser(): User = User(
             id = "demoUser",
             username = DOGMAZIC_FAKE_USERNAME,
-            email = Constants.DOGMAZIC_FAKE_EMAIL,
-            access = Constants.USER_ACCESS_DEFAULT,
+            email = DOGMAZIC_FAKE_EMAIL,
+            access = USER_ACCESS_DEFAULT,
             streamToken = "",
             fullNamePublic = 1,
             fullName = DOGMAZIC_FAKE_NAME,
             disabled = false,
             createDate = Constants.ERROR_INT,
             lastSeen = Constants.ERROR_INT,
-            website = MASTODON_URL,
+            website = USER_DEFAULT_MASTODON_URL,
             state = DOGMAZIC_FAKE_STATE,
             city = DOGMAZIC_FAKE_CITY,
             serverUrl = "https://retroscroll.cat/wp-content/",

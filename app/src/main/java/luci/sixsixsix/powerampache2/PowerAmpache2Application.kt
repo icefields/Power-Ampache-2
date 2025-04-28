@@ -34,14 +34,16 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import dagger.hilt.android.HiltAndroidApp
-import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_CONNECTION_S
-import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_READ_S
-import luci.sixsixsix.powerampache2.common.Constants.TIMEOUT_WRITE_S
+import luci.sixsixsix.powerampache2.domain.common.Constants
+
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.di.AmpacheOkHttpClientBuilder
-import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
+import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_CONNECTION_S
+import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_READ_S
+import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_WRITE_S
+import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import org.acra.config.mailSender
 import org.acra.data.StringFormat
@@ -57,6 +59,15 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
 
     @Inject
     lateinit var imageLoaderOkHttpClient: AmpacheOkHttpClientBuilder
+
+    @Inject
+    lateinit var configProvider: ConfigProvider
+
+    override fun onCreate() {
+        super.onCreate()
+        // initialize the default values for the config, new values will be fetched by a network call
+        Constants.config = configProvider.defaultPa2Config()
+    }
 
     override fun attachBaseContext(base:Context) {
         super.attachBaseContext(base)

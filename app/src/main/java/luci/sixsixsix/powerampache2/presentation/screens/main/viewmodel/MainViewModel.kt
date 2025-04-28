@@ -26,7 +26,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Build
 import android.os.IBinder
 import android.widget.Toast
 import androidx.annotation.OptIn
@@ -41,7 +40,6 @@ import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util.startForegroundService
-import androidx.media3.session.MediaSessionService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -73,8 +71,6 @@ import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import java.lang.ref.WeakReference
-import java.net.URLDecoder
-import java.net.URLEncoder
 import javax.inject.Inject
 import kotlin.math.abs
 

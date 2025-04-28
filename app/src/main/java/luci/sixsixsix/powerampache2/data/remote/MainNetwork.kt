@@ -22,11 +22,10 @@
 package luci.sixsixsix.powerampache2.data.remote
 
 import luci.sixsixsix.powerampache2.BuildConfig
-import luci.sixsixsix.powerampache2.common.Constants.CONFIG_URL
-import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_ARTISTS
-import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_HOME
-import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS
-import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_ARTISTS
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
 import luci.sixsixsix.powerampache2.common.isIpAddress
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumDto
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
@@ -483,7 +482,7 @@ interface MainNetwork {
     ): AmpachePreferenceDto
 
     @GET
-    suspend fun getConfig(@Url configUrl: String = CONFIG_URL): Pa2ConfigDto
+    suspend fun getConfig(@Url configUrl: String): Pa2ConfigDto
 
 
     companion object {

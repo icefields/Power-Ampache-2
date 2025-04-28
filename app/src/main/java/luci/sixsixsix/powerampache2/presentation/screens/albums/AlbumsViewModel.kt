@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_ALBUMS
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_ALBUMS
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository

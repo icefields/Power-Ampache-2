@@ -25,8 +25,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.data.common.Constants.CLEAR_TABLE_AFTER_FETCH
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
@@ -136,7 +137,7 @@ class ArtistsRepositoryImpl @Inject constructor(
         val artistsDto = response.artists!! //will throw exception if artist null
         val artists = artistsDto.map { it.toArtist() }
 
-        if (query.isNullOrBlank() && offset == 0 && Constants.CLEAR_TABLE_AFTER_FETCH) {
+        if (query.isNullOrBlank() && offset == 0 && CLEAR_TABLE_AFTER_FETCH) {
             // if it's just a search do not clear cache
             dao.clearArtists()
         }
@@ -191,7 +192,7 @@ class ArtistsRepositoryImpl @Inject constructor(
         response.error?.let { throw(MusicException(it.toError())) }
         val artists = response.artists!!.map { it.toArtist() } //will throw exception if artist null
 
-        if (Constants.CLEAR_TABLE_AFTER_FETCH) {
+        if (CLEAR_TABLE_AFTER_FETCH) {
             // if it's just a search do not clear cache
             dao.clearArtists()
         }
@@ -223,7 +224,8 @@ class ArtistsRepositoryImpl @Inject constructor(
                         name = it.artist.name,
                         artUrl = it.imageUrl,
                         genre = it.genre
-                    ))
+                    )
+                    )
                 }
             }.values.toList()
         } else {

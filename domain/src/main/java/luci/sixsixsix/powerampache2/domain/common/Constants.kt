@@ -1,0 +1,50 @@
+package luci.sixsixsix.powerampache2.domain.common
+
+import luci.sixsixsix.powerampache2.common.Pa2Config
+
+object Constants {
+    const val TIMEOUT_CONNECTION_S = 15L
+    const val TIMEOUT_READ_S = 60L
+    const val TIMEOUT_WRITE_S = 60L
+
+    const val USER_ACCESS_DEFAULT = 25
+    const val USER_EMAIL_DEFAULT = ""
+    const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
+
+    // PLAYER BUFFER CONSTANTS
+    // default values, in milliseconds
+    const val BACK_BUFFER_MS = 30000
+    const val BUFFER_MIN_MS = 60000
+    const val BUFFER_MAX_MS = 120000
+    const val BUFFER_FOR_PLAYBACK_MS = 30000
+    const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 35000
+    // max values, in seconds
+    const val MIN_BUFFER_MAX = 500
+    const val MAX_BUFFER_MAX = 700
+    const val BACK_BUFFER_MAX = 200
+    const val PLAYBACK_BUFFER_MAX = 200
+    const val PLAYBACK_REBUFFER_MAX = 300
+
+    const val PLAYER_CACHE_SIZE_MB = 100
+    const val PLAYER_CACHE_SIZE_MB_MAX = 2000
+    const val PLAYER_CACHE_SIZE_MB_MIN = 20
+
+    // ERROR CONSTANTS
+    const val NOT_IMPLEMENTED_USER_ID = "666"
+    const val ERROR_INT = -1
+    const val ERROR_FLOAT = ERROR_INT.toFloat()
+    const val ERROR_STRING = "ERROR"
+    const val LOADING_STRING = "LOADING"
+    const val USER_ID_ERROR = ERROR_INT
+
+    const val ALWAYS_FETCH_ALL_PLAYLISTS = true
+
+    const val DOGMAZIC_FAKE_EMAIL = "floss.social/@PowerAmpache"
+    const val DOGMAZIC_FAKE_NAME = "Draven Wilhelmine"
+    const val DOGMAZIC_FAKE_USERNAME = "PowerAmpache"
+    const val DOGMAZIC_FAKE_STATE = "Ehime"
+    const val DOGMAZIC_FAKE_CITY = "Aoshima"
+    const val USER_DEFAULT_MASTODON_URL = "https://floss.social/@powerampache"
+
+    lateinit var config: Pa2Config
+}

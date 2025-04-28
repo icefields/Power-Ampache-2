@@ -24,10 +24,9 @@ package luci.sixsixsix.powerampache2.data.remote
 import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
-import luci.sixsixsix.powerampache2.common.Constants.CONFIG_URL
-import luci.sixsixsix.powerampache2.common.Constants.AMPACHE_USER_AGENT
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
+import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.Protocol
@@ -39,11 +38,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDatabase) : Interceptor {
+class AmpacheInterceptor @Inject constructor(
+    private val musicDatabase: MusicDatabase,
+    private val configProvider: ConfigProvider
+) : Interceptor {
 
     private fun isErrorReportUrl(url: String) = url == BuildConfig.URL_ERROR_LOG
     private fun isLogoutUrl(url: String) = url.contains("action=goodbye")
-    private fun isInitUrl(url: String) = url == CONFIG_URL
+    private fun isInitUrl(url: String) = url == configProvider.CONFIG_URL
 
     override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
         var request = requestWithUserAgent(chain.request())
@@ -103,7 +105,7 @@ class AmpacheInterceptor @Inject constructor(private val musicDatabase: MusicDat
     }
 
     private fun requestWithUserAgent(request: Request) = request.newBuilder()
-        .addHeader("User-Agent", AMPACHE_USER_AGENT)
+        .addHeader("User-Agent", configProvider.AMPACHE_USER_AGENT)
         .build()
 }
 

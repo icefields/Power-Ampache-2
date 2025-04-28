@@ -37,10 +37,11 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.Pa2Config
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.sha256
+import luci.sixsixsix.powerampache2.data.common.Constants.CLEAR_TABLE_AFTER_FETCH
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toGenre
@@ -63,10 +64,10 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.User
+import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Instant
@@ -86,7 +87,8 @@ class MusicRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val dateMapper: DateMapper,
     db: MusicDatabase,
-    private val errorHandler: ErrorHandler
+    private val errorHandler: ErrorHandler,
+    private val configProvider: ConfigProvider
 ): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
     private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
@@ -131,10 +133,10 @@ class MusicRepositoryImpl @Inject constructor(
 
     private suspend fun initialize() {
         Constants.config = try {
-            api.getConfig().toPa2Config()
+            api.getConfig(configProvider.CONFIG_URL).toPa2Config()
         } catch (e: Exception) {
             L.e(e)
-            Pa2Config()
+            configProvider.defaultPa2Config()
         }
     }
 
@@ -352,7 +354,7 @@ class MusicRepositoryImpl @Inject constructor(
             api.getTags(authKey = auth).tags!!.map { it.toGenre() }
         }
 
-        if (Constants.CLEAR_TABLE_AFTER_FETCH) {
+        if (CLEAR_TABLE_AFTER_FETCH) {
             dao.clearGenres()
         }
         val cred = getCurrentCredentials()

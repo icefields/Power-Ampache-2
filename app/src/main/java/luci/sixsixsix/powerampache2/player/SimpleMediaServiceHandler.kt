@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackError
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackException
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler

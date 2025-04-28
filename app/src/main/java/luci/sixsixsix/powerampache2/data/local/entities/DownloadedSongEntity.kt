@@ -24,7 +24,7 @@ package luci.sixsixsix.powerampache2.data.local.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.processFlag
 import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
@@ -54,7 +54,7 @@ data class DownloadedSongEntity(
     val time: Int = Constants.ERROR_INT,
     val trackNumber: Int = Constants.ERROR_INT,
     val year: Int = Constants.ERROR_INT,
-    val imageUrl: String = "" ,
+    val imageUrl: String = "",
     val albumArtist: MusicAttribute = MusicAttribute.emptyInstance(),
     val averageRating: Float,
     val preciseRating: Float,

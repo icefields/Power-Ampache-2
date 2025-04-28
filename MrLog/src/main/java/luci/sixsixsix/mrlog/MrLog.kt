@@ -1,20 +1,8 @@
-package luci.sixsixsix.mrlog
-
-import android.util.Log
-import com.google.gson.Gson
-import luci.sixsixsix.powerampache2.BuildConfig
-import luci.sixsixsix.powerampache2.common.Constants
-import org.json.JSONException
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.PrintWriter
-import java.io.StringWriter
-
 /**
  * Created by Antonio Tari
  *
  * Mr.Log, an advanced logger for Android
- * Copyright (C) 2024  Antonio Tari
+ * Copyright (C) 2025  Antonio Tari
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +16,15 @@ import java.io.StringWriter
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http:></http:>//www.gnu.org/licenses/>.
  */
+package luci.sixsixsix.mrlog
+
+import android.util.Log
+import com.google.gson.Gson
+import org.json.JSONException
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.PrintWriter
+import java.io.StringWriter
 
 typealias L = MrLog
 

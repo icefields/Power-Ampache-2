@@ -22,7 +22,7 @@
 package luci.sixsixsix.powerampache2.di
 
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants.AMPACHE_USER_AGENT
+import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -37,7 +37,10 @@ import javax.net.ssl.X509TrustManager
  * Base OkHttp Builder for Ampache, with options to ignore certificates (if defined in settings)
  * and add simple interceptor for the header, if needed.
  */
-class AmpacheOkHttpClientBuilder @Inject constructor(private val sharedPreferencesManager: SharedPreferencesManager) {
+class AmpacheOkHttpClientBuilder @Inject constructor(
+    private val sharedPreferencesManager: SharedPreferencesManager,
+    private val configProvider: ConfigProvider
+) {
 
     operator fun invoke(addDefaultHeaderInterceptor: Boolean = false) = OkHttpClient.Builder().apply {
         if (sharedPreferencesManager.isAllowAllCertificates) {
@@ -75,7 +78,7 @@ class AmpacheOkHttpClientBuilder @Inject constructor(private val sharedPreferenc
             L.w(original.url)
             chain.proceed(
                 original.newBuilder()
-                    .addHeader("User-Agent", AMPACHE_USER_AGENT)
+                    .addHeader("User-Agent", configProvider.AMPACHE_USER_AGENT)
                     .build()
             )
         }
