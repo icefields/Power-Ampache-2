@@ -85,6 +85,9 @@ dependencies {
     // Common functionality used across multiple media libraries
     implementation("androidx.media3:media3-common:$media3Version")
     implementation("androidx.media3:media3-datasource-okhttp:$media3Version")
+    implementation("androidx.media3:media3-session:$media3Version")
+
+    implementation("androidx.work:work-runtime-ktx:2.10.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
