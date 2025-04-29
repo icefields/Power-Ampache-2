@@ -17,6 +17,11 @@ interface ConfigProvider {
     val DOGMAZIC_URL: String
     val CONFIG_URL: String
     val AMPACHE_USER_AGENT: String
+    val API_KEY: String
+    val IS_DEBUG: Boolean
+    val URL_ERROR_LOG: String
+    val SHOW_EMPTY_PLAYLISTS: Boolean
+    val VERSION_CODE: Int
 
     fun defaultPa2Config(): Pa2Config
 }

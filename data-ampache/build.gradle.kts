@@ -46,9 +46,9 @@ val media3Version = "1.6.1"
 
 dependencies {
     implementation(project(":domain"))
+    implementation(project(":MrLog"))
 
     implementation("androidx.core:core-ktx:1.16.0")
-
 
     // --- Dagger Hilt --- //
     implementation("com.google.dagger:hilt-android:2.51.1")

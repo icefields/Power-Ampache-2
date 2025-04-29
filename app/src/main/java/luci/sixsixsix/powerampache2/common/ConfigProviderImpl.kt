@@ -33,6 +33,16 @@ class ConfigProviderImpl: ConfigProvider {
         get() = "https://power.ampache.dev/${BuildConfig.REMOTE_CONFIG_FILE}"
     override val AMPACHE_USER_AGENT: String
         get() = "PowerAmpache2-${BuildConfig.VERSION_NAME}"
+    override val API_KEY: String
+        get() = BuildConfig.API_KEY
+    override val IS_DEBUG: Boolean
+        get() = BuildConfig.DEBUG
+    override val URL_ERROR_LOG: String
+        get() = BuildConfig.URL_ERROR_LOG
+    override val SHOW_EMPTY_PLAYLISTS: Boolean
+        get() = BuildConfig.SHOW_EMPTY_PLAYLISTS
+    override val VERSION_CODE: Int
+        get() = BuildConfig.VERSION_CODE
 
 
     override fun defaultPa2Config() = Pa2Config (

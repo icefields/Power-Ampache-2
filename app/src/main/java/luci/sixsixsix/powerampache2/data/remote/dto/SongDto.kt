@@ -3,10 +3,10 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_FLOAT
 import luci.sixsixsix.powerampache2.data.common.Constants.ERROR_INT
-import luci.sixsixsix.powerampache2.common.processArtUrl
-import luci.sixsixsix.powerampache2.common.processFlag
-import luci.sixsixsix.powerampache2.common.processNumberToFloat
-import luci.sixsixsix.powerampache2.common.processNumberToInt
+import luci.sixsixsix.powerampache2.domain.common.processArtUrl
+import luci.sixsixsix.powerampache2.domain.common.processFlag
+import luci.sixsixsix.powerampache2.domain.common.processNumberToFloat
+import luci.sixsixsix.powerampache2.domain.common.processNumberToInt
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 
@@ -209,7 +209,7 @@ fun SongDto.toSong() = Song(
     albumMbId = albumMbid ?: "",
     artistMbId = artistMbid ?: "",
     albumArtistMbId = albumartistMbid ?: "",
-    rating = processNumberToFloat(rating)?: ERROR_FLOAT,
+    rating = processNumberToFloat(rating) ?: ERROR_FLOAT,
     preciseRating = processNumberToFloat(preciserating) ?: ERROR_FLOAT,
     averageRating = processNumberToFloat(averagerating)
 )

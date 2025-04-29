@@ -68,7 +68,7 @@ import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
-import luci.sixsixsix.powerampache2.data.Servers
+import luci.sixsixsix.powerampache2.common.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadFullVersionButton
 import luci.sixsixsix.powerampache2.presentation.common.ErrorView

@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.data
+package luci.sixsixsix.powerampache2.common
 
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.BuildConfig.DEBUG_LOCAL_DEVELOPMENT_URL

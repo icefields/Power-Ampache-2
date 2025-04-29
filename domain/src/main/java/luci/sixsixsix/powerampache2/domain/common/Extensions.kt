@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.common
+package luci.sixsixsix.powerampache2.domain.common
 
 import android.content.Context
 import android.util.Patterns

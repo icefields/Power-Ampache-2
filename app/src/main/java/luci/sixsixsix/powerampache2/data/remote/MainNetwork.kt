@@ -21,12 +21,11 @@
  */
 package luci.sixsixsix.powerampache2.data.remote
 
-import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_ARTISTS
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
-import luci.sixsixsix.powerampache2.common.isIpAddress
+import luci.sixsixsix.powerampache2.domain.common.isIpAddress
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumDto
 import luci.sixsixsix.powerampache2.data.remote.dto.AlbumsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.AmpachePreferenceDto
@@ -58,7 +57,7 @@ import retrofit2.http.Url
  */
 interface MainNetwork {
     @GET("json.server.php?action=handshake")
-    suspend fun authorize(@Query("auth") apiKey: String = API_KEY): AuthDto
+    suspend fun authorize(@Query("auth") apiKey: String): AuthDto
 
     @GET("json.server.php?action=handshake")
     suspend fun authorize(
@@ -486,7 +485,6 @@ interface MainNetwork {
 
 
     companion object {
-        const val API_KEY = BuildConfig.API_KEY
         const val BASE_URL = "http://localhost/"
 
         /**

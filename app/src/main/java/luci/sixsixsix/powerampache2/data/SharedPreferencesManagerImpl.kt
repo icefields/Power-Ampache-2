@@ -25,7 +25,7 @@ import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-import luci.sixsixsix.powerampache2.common.WeakContext
+import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.Constants.BACK_BUFFER_MS
 import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
