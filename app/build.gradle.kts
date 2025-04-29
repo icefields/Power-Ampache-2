@@ -10,7 +10,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val composeVersion = "1.7.8" // rootProject.extra.get("compose_version") as String
+val composeVersion = "1.8.0" // rootProject.extra.get("compose_version") as String
 val lifecycleVersion = "2.8.7"
 val retrofit2Version = "2.11.0"
 val okhttpVersion = "5.0.0-alpha.14"
@@ -227,12 +227,12 @@ android {
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     buildFeatures {
@@ -251,10 +251,10 @@ android {
     }
 }
 
-composeCompiler {
-    reportsDestination = layout.buildDirectory.dir("compose_compiler")
-    //stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
-}
+//composeCompiler {
+//    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+//    //stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
+//}
 
 dependencies {
     implementation(project(":domain"))
@@ -269,7 +269,7 @@ dependencies {
 
     // --- Compose --- //
     implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     implementation("androidx.compose.material3:material3:1.3.2")
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
