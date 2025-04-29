@@ -50,8 +50,8 @@ import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.common.openLinkInBrowser
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
-import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.settings.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject

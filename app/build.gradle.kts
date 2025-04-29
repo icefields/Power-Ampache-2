@@ -60,8 +60,8 @@ android {
         minSdk = 28
         targetSdk = 35
         versionCode = 80
-        versionName = "1.01-80"
-        val versionQuote = "This version is powered by gold, Fibonacci and Vesuvius"
+        versionName = "1.01-81"
+        val versionQuote = "[Clean Architecture refactor] This version is powered by gold, Fibonacci and Vesuvius"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

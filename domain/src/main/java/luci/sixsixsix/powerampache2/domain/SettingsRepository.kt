@@ -24,8 +24,8 @@ package luci.sixsixsix.powerampache2.domain
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
-import luci.sixsixsix.powerampache2.domain.models.SortMode
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
 
 interface SettingsRepository {
     val settingsLiveData: LiveData<LocalSettings?>

@@ -58,7 +58,7 @@ import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.SortMode
+import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject

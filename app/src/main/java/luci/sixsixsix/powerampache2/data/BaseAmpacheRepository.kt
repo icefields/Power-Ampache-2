@@ -52,7 +52,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toUser
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.NullSessionException
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.User

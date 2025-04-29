@@ -1,7 +1,7 @@
 package luci.sixsixsix.powerampache2.data.local.models
 
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
-import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
+import luci.sixsixsix.powerampache2.domain.models.settings.StreamingQuality
 
 data class SongUrl(
     val authToken: String,
