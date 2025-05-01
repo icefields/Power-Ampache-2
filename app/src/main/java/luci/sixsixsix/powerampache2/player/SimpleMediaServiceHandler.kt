@@ -31,10 +31,12 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource.HttpDataSourceException
 import androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException
 import androidx.media3.exoplayer.ExoPlayer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,7 +51,6 @@ import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
 import javax.inject.Inject
 
 
-@OptIn(DelicateCoroutinesApi::class)
 class SimpleMediaServiceHandler @Inject constructor(
     private val player: ExoPlayer,
     private val playlistManager: MusicPlaylistManager,
@@ -60,6 +61,9 @@ class SimpleMediaServiceHandler @Inject constructor(
     private var job: Job? = null
     private var errorCounter = 0
 
+    // todo: this is available to inject from data layer
+    private val applicationCoroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val mainCoroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     init {
         L("SERVICE- SimpleMediaServiceHandler init")
@@ -246,11 +250,10 @@ class SimpleMediaServiceHandler @Inject constructor(
         _simpleMediaState.value = SimpleMediaState.Loading(isLoading)
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = isPlaying)
         if (isPlaying) {
-            GlobalScope.launch(Dispatchers.Main) {
+            mainCoroutineScope.launch {
                 startProgressUpdate()
             }
         } else {
@@ -270,13 +273,12 @@ class SimpleMediaServiceHandler @Inject constructor(
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = false)
     }
 
-    @androidx.annotation.OptIn(UnstableApi::class)
     override fun onPlayerError(error: PlaybackException) {
         val isUserNotEnabledException =
                 (error.cause is InvalidResponseCodeException) &&
                         (error.cause as InvalidResponseCodeException).responseCode == 403
 
-        GlobalScope.launch {
+        applicationCoroutineScope.launch {
             when (val cause = error.cause) {
                 is HttpDataSourceException -> {
                     // An HTTP error occurred.

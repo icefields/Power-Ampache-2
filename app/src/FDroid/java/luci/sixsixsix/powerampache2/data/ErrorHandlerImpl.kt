@@ -29,6 +29,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.FlowCollector
@@ -36,7 +37,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.BuildConfig.ENABLE_ERROR_LOG
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
@@ -47,24 +47,26 @@ import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
 import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
+import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@OptIn(DelicateCoroutinesApi::class)
 @Singleton
 class ErrorHandlerImpl @Inject constructor(
     private val playlistManager: MusicPlaylistManager,
     private val db: MusicDatabase,
-    private val applicationContext: Application
+    configProvider: ConfigProvider,
+    private val applicationContext: Application,
+    applicationCoroutineScope: CoroutineScope
 ): ErrorHandler {
 
-    private var isErrorHandlingEnabled = ENABLE_ERROR_LOG
+    private var isErrorHandlingEnabled = configProvider.ENABLE_ERROR_LOG
 
     init {
-        GlobalScope.launch {
+        applicationCoroutineScope.launch {
             db.dao.settingsLiveData()
                 .map { it?.enableRemoteLogging }
                 .distinctUntilChanged()

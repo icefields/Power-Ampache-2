@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data
 import android.content.Context
 import android.os.Environment
 import androidx.core.text.isDigitsOnly
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
@@ -86,7 +87,8 @@ class MusicRepositoryImpl @Inject constructor(
     private val dateMapper: DateMapper,
     db: MusicDatabase,
     private val errorHandler: ErrorHandler,
-    private val configProvider: ConfigProvider
+    private val configProvider: ConfigProvider,
+    applicationCoroutineScope: CoroutineScope
 ): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
     private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
@@ -110,7 +112,7 @@ class MusicRepositoryImpl @Inject constructor(
     init {
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
-        GlobalScope.launch {
+        applicationCoroutineScope.launch {
             sessionLiveData.distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
                 // if token has changed or user is null, get user from network
                 if (newToken != currentAuthToken || currentUser == null) {
@@ -124,7 +126,7 @@ class MusicRepositoryImpl @Inject constructor(
             }
         }
 
-        GlobalScope.launch {
+        applicationCoroutineScope.launch {
             initialize()
         }
     }
@@ -190,7 +192,7 @@ class MusicRepositoryImpl @Inject constructor(
                     // TODO Check connection error before making this call crash into the try-catch
                 } catch (e: Exception) {
                     L("aaaa clear session, set the session to null ssss ping()")
-                    dao.clearSession()
+                    clearSession()
                     null
                 } ?.let { se ->
                     if (se.auth != null) {
@@ -369,7 +371,7 @@ class MusicRepositoryImpl @Inject constructor(
         // first clear db then logout to guarantee data is cleared even if the call fails
         // clear credentials after api call, since the api uses base url from credentials
         dao.clearCredentials()
-        dao.clearSession()
+        clearSession()
         dao.clearCachedData()
         dao.clearUser()
 

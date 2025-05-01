@@ -43,6 +43,8 @@ class ConfigProviderImpl: ConfigProvider {
         get() = BuildConfig.SHOW_EMPTY_PLAYLISTS
     override val VERSION_CODE: Int
         get() = BuildConfig.VERSION_CODE
+    override val ENABLE_ERROR_LOG: Boolean
+        get() = BuildConfig.ENABLE_ERROR_LOG
 
 
     override fun defaultPa2Config() = Pa2Config (

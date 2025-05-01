@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.asFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
@@ -67,7 +68,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     db: MusicDatabase,
     private val errorHandler: ErrorHandler,
-    private val configProvider: ConfigProvider
+    private val configProvider: ConfigProvider,
 ): BaseAmpacheRepository(api, db, errorHandler), PlaylistsRepository {
 
     override val playlistsFlow = dao.playlistsLiveData().asFlow().map { entities ->

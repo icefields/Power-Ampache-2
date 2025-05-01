@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.map
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ProducerScope
@@ -87,7 +88,8 @@ class SongsRepositoryImpl @Inject constructor(
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager,
     private val sharedPreferencesManager: SharedPreferencesManager,
-    private val weakContext: WeakContext
+    private val weakContext: WeakContext,
+    applicationCoroutineScope: CoroutineScope
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
     override val offlineSongsLiveData = dao.getDownloadedSongsLiveData().map { entities ->
@@ -97,7 +99,7 @@ class SongsRepositoryImpl @Inject constructor(
     }
 
     init {
-        GlobalScope.launch {
+        applicationCoroutineScope.launch {
             dao.offlineModeEnabled().distinctUntilChanged().collect {
                 if (it != null && it == false) {
                     try {

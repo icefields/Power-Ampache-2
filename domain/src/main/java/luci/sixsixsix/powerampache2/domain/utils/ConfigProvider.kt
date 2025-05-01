@@ -22,6 +22,7 @@ interface ConfigProvider {
     val URL_ERROR_LOG: String
     val SHOW_EMPTY_PLAYLISTS: Boolean
     val VERSION_CODE: Int
+    val ENABLE_ERROR_LOG: Boolean
 
     fun defaultPa2Config(): Pa2Config
 }

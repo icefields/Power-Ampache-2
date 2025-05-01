@@ -61,6 +61,9 @@ dependencies {
     // JSON serialization
     implementation(libs.gson)
 
+    // --- Coil, image-loader --- //
+    implementation(libs.coil.compose)
+
     // --- Room --- //
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)

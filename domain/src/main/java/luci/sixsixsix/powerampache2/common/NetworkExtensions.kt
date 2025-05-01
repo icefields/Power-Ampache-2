@@ -1,4 +1,4 @@
-package luci.sixsixsix.powerampache2.data.remote
+package luci.sixsixsix.powerampache2.common
 
 import java.security.KeyManagementException
 import java.security.NoSuchAlgorithmException

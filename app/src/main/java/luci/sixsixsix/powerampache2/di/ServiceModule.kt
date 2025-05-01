@@ -43,6 +43,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaNotificationManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
@@ -84,5 +85,12 @@ object ServiceModule {
         ).build()
 
     //@ServiceScoped
-
+    @Singleton
+    @Provides
+    fun provideServiceHandler(player: ExoPlayer, playlistManager: MusicPlaylistManager, errorHandler: ErrorHandler) =
+        SimpleMediaServiceHandler(
+            playlistManager = playlistManager,
+            player = player,
+            errorHandler = errorHandler
+        )
 }

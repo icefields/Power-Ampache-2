@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.di
+package luci.sixsixsix.powerampache2.data.remote
 
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider

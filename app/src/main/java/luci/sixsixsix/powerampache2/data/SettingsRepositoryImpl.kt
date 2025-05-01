@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L

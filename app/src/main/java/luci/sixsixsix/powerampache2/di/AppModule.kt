@@ -31,7 +31,6 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
-import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -45,7 +44,6 @@ import luci.sixsixsix.powerampache2.common.ConfigProviderImpl
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import java.io.File
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -60,7 +58,7 @@ object AppModule {
         @ApplicationContext context: Context,
         audioAttributes: AudioAttributes,
         sharedPreferencesManager: SharedPreferencesManager,
-        ampacheOkHttpClientBuilder: AmpacheOkHttpClientBuilder,
+        dataSourceFactory: DefaultDataSource.Factory,
         cache: SimpleCache
     ) = ExoPlayer.Builder(context)
         .setAudioAttributes(audioAttributes, true)
@@ -85,35 +83,13 @@ object AppModule {
                     .setCache(cache)
                     .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
                     .setUpstreamDataSourceFactory(
-                        getDataSourceFactory(
-                            context = context,
-                            useOkHttpForExoPlayer = sharedPreferencesManager.useOkHttpForExoPlayer,
-                            ampacheOkHttpClientBuilder
-                        )
+                        dataSourceFactory
                     )
             )
         )
         .build()
 
-    private fun getDataSourceFactory(
-        @ApplicationContext context: Context,
-        useOkHttpForExoPlayer: Boolean,
-        ampacheOkHttpClientBuilder: AmpacheOkHttpClientBuilder
-    ) = if (useOkHttpForExoPlayer) {
-        OkHttpDataSource.Factory(
-            ampacheOkHttpClientBuilder(addDefaultHeaderInterceptor = true)
-                .retryOnConnectionFailure(true)
-                .followRedirects(true)
-                .connectTimeout(20, TimeUnit.SECONDS)
-                .readTimeout(90, TimeUnit.SECONDS)
-                .writeTimeout(20, TimeUnit.SECONDS)
-                .build()
-        ).let { okHttpFactory ->
-            DefaultDataSource.Factory(context, okHttpFactory)
-        }
-    } else {
-        DefaultDataSource.Factory(context)
-    }
+
 
     @OptIn(UnstableApi::class)
     @Provides
