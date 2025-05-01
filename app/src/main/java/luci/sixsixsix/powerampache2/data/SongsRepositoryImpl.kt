@@ -65,6 +65,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.utils.DownloadWorkerManager
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okio.IOException
@@ -89,7 +90,8 @@ class SongsRepositoryImpl @Inject constructor(
     private val storageManager: StorageManager,
     private val sharedPreferencesManager: SharedPreferencesManager,
     private val weakContext: WeakContext,
-    applicationCoroutineScope: CoroutineScope
+    applicationCoroutineScope: CoroutineScope,
+    private val downloadWorkerManager: DownloadWorkerManager
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
     override val offlineSongsLiveData = dao.getDownloadedSongsLiveData().map { entities ->
@@ -550,7 +552,8 @@ class SongsRepositoryImpl @Inject constructor(
                 context = context,
                 authToken = auth,
                 username = username,
-                song = song
+                song = song,
+                downloadWorkerId = downloadWorkerManager.getDownloadWorkerId()
             )
 
             // add delay to attempt avoiding TooManyRequestsException

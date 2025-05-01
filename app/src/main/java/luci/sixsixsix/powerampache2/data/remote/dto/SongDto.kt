@@ -2,7 +2,7 @@ package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_FLOAT
-import luci.sixsixsix.powerampache2.data.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.domain.common.processArtUrl
 import luci.sixsixsix.powerampache2.domain.common.processFlag
 import luci.sixsixsix.powerampache2.domain.common.processNumberToFloat

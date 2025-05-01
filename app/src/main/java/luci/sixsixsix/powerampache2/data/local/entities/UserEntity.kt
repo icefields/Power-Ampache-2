@@ -24,7 +24,7 @@ package luci.sixsixsix.powerampache2.data.local.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import luci.sixsixsix.powerampache2.data.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
 import luci.sixsixsix.powerampache2.domain.models.User
 

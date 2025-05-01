@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.content.Context
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -31,12 +30,13 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
+import luci.sixsixsix.powerampache2.domain.utils.DownloadWorkerManager
 
-internal fun MainViewModel.observeDownloads(application: Context) {
+internal fun MainViewModel.observeDownloads(application: Context, downloadWorkerManager: DownloadWorkerManager) {
     WorkManager.getInstance(application).pruneWork()
     viewModelScope.launch {
         WorkManager.getInstance(application)
-            .getWorkInfosForUniqueWorkLiveData(SongDownloadWorker.getDownloadWorkerId(application))
+            .getWorkInfosForUniqueWorkLiveData(downloadWorkerManager.getDownloadWorkerId())
             //.getWorkInfosForUniqueWorkFlow(SongDownloadWorker.workerName)
             //.getWorkInfoByIdFlow(requestId).mapNotNull { it.outputData.getString(KEY_RESULT_PATH) }.cancellable()
             .observeForever { workInfoList ->
@@ -102,12 +102,12 @@ internal fun MainViewModel.observeDownloads(application: Context) {
                     ) {
                     // no more work to be done
                     viewModelScope.launch {
-                        L("resetDownloadWorkerId(application) ${SongDownloadWorker.getDownloadWorkerId(application)}")
-                        SongDownloadWorker.resetDownloadWorkerId(application)
+                        L("resetDownloadWorkerId(application) ${downloadWorkerManager.getDownloadWorkerId()}")
+                        downloadWorkerManager.resetDownloadWorkerId()
                         delay(200)
-                        L("resetDownloadWorkerId(application) AFTER REFRESH ${SongDownloadWorker.getDownloadWorkerId(application)}")
+                        L("resetDownloadWorkerId(application) AFTER REFRESH ${downloadWorkerManager.getDownloadWorkerId()}")
 
-                        observeDownloads(application)
+                        observeDownloads(application, downloadWorkerManager)
                     }
                 }
             }

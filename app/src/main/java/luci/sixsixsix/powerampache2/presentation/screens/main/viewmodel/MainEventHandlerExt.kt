@@ -31,12 +31,13 @@ import luci.sixsixsix.powerampache2.common.exportSong
 import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
+import luci.sixsixsix.powerampache2.domain.utils.DownloadWorkerManager
 import luci.sixsixsix.powerampache2.player.PlayerEvent
 
 /**
  * UI ACTIONS AND EVENTS (play, stop, skip, like, download, etc ...)
  */
-fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
+fun MainViewModel.handleEvent(event: MainEvent, context: Context, downloadWorkerManager: DownloadWorkerManager) {
     when(event) {
         is MainEvent.OnSearchQueryChange -> {
             state = state.copy(searchQuery = event.query)
@@ -121,8 +122,8 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         is MainEvent.OnDownloadSongs ->
             downloadSongs(event.songs)
         is MainEvent.OnStopDownloadSongs -> viewModelScope.launch {
-            SongDownloadWorker.stopAllDownloads(context)
-            observeDownloads(context)
+            downloadWorkerManager.stopAllDownloads()
+            observeDownloads(context, downloadWorkerManager)
             state = state.copy(isDownloading = false)
         }
         MainEvent.OnFabPress ->

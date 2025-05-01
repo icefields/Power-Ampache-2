@@ -38,7 +38,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.data.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
@@ -120,34 +120,35 @@ class SongDownloadWorker @AssistedInject constructor(
         private const val KEY_WORKER_PREFERENCE = "${prefix}KEY_WORKER_PREFERENCE"
         private const val KEY_WORKER_PREFERENCE_ID = "${prefix}downloadWorkerId"
 
-        suspend fun getDownloadWorkerId(context: Context):String = context
-            .getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
-            .getString(KEY_WORKER_PREFERENCE_ID, null) ?: run {
-                // if not existent create one now
-                L("resetting worker id")
-                resetDownloadWorkerId(context)
-            }
+//        suspend fun getDownloadWorkerId(context: Context): String = context
+//            .getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
+//            .getString(KEY_WORKER_PREFERENCE_ID, null) ?: run {
+//                // if not existent create one now
+//                L("resetting worker id")
+//                resetDownloadWorkerId(context)
+//            }
+//
+//        suspend fun resetDownloadWorkerId(context: Context) =
+//            writeDownloadWorkerId(context, UUID.randomUUID().toString())
+//
+//        @SuppressLint("ApplySharedPref")
+//        private suspend fun writeDownloadWorkerId(context: Context, newWorkerId: String): String = withContext(Dispatchers.IO) {
+//                val sharedPreferences = context.getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
+//                val editor = sharedPreferences.edit()
+//                editor.apply {
+//                    putString(KEY_WORKER_PREFERENCE_ID, newWorkerId)
+//                    commit()
+//                }
+//            return@withContext newWorkerId
+//        }
 
-        suspend fun resetDownloadWorkerId(context: Context) =
-            writeDownloadWorkerId(context, UUID.randomUUID().toString())
 
-        @SuppressLint("ApplySharedPref")
-        private suspend fun writeDownloadWorkerId(context: Context, newWorkerId: String): String = withContext(Dispatchers.IO) {
-                val sharedPreferences = context.getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
-                val editor = sharedPreferences.edit()
-                editor.apply {
-                    putString(KEY_WORKER_PREFERENCE_ID, newWorkerId)
-                    commit()
-                }
-            return@withContext newWorkerId
-        }
-
-
-        suspend fun startSongDownloadWorker(
+        fun startSongDownloadWorker(
             context: Context,
             authToken: String,
             username: String,
-            song: Song
+            song: Song,
+            downloadWorkerId: String
         ): UUID {
             val request = OneTimeWorkRequestBuilder<SongDownloadWorker>()
                 .setInputData(
@@ -164,14 +165,14 @@ class SongDownloadWorker @AssistedInject constructor(
                     Duration.ofSeconds(10L)
                 ).build()
             WorkManager.getInstance(context)
-                .enqueueUniqueWork(getDownloadWorkerId(context), ExistingWorkPolicy.APPEND, request)
+                .enqueueUniqueWork(downloadWorkerId, ExistingWorkPolicy.APPEND, request)
             return request.id
         }
 
-        suspend fun stopAllDownloads(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(getDownloadWorkerId(context))
-            // change worker name otherwise cannot restart work
-            resetDownloadWorkerId(context)
-        }
+//        suspend fun stopAllDownloads(context: Context) {
+//            WorkManager.getInstance(context).cancelUniqueWork(getDownloadWorkerId(context))
+//            // change worker name otherwise cannot restart work
+//            resetDownloadWorkerId(context)
+//        }
     }
 }

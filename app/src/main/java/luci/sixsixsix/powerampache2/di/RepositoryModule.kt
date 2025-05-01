@@ -37,6 +37,7 @@ import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.local.DatabaseProviderImpl
 import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
+import luci.sixsixsix.powerampache2.data.remote.worker.DownloadWorkerManagerImpl
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.AmpachePreferencesRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
@@ -45,6 +46,7 @@ import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.utils.DatabaseProvider
+import luci.sixsixsix.powerampache2.domain.utils.DownloadWorkerManager
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
@@ -133,17 +135,9 @@ abstract class RepositoryModule {
         databaseProviderImpl: DatabaseProviderImpl
     ): DatabaseProvider
 
-//    @Binds
-//    @Singleton
-//    abstract fun bindIntradayInfoParser(
-//        intradayInfoParser: IntradayInfoParser
-//    ): CSVParser<IntradayInfo>
-//
-//
-//    @Binds
-//    @Singleton
-//    abstract fun bindCompanyListingsParser(
-//        companyListingsParser: CompanyListingsParser
-//    ): CSVParser<CompanyListing>
-
+    @Binds
+    @Singleton
+    abstract fun bindDownloadWorkerManager(
+        downloadWorkerManagerImpl: DownloadWorkerManagerImpl
+    ): DownloadWorkerManager
 }

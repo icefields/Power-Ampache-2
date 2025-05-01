@@ -21,6 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.data.common
 
+import luci.sixsixsix.powerampache2.domain.common.Constants.REQUEST_LIMIT_ALBUMS
+
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
@@ -35,15 +37,9 @@ object Constants {
     const val NETWORK_REQUEST_LIMIT_ARTISTS = 30
     const val NETWORK_REQUEST_LIMIT_SONGS = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
-    const val NETWORK_REQUEST_LIMIT_ALBUMS = 140
 
     const val ADMIN_USERNAME = "PowerAmpache"
 
     // FLAGS
     const val CLEAR_TABLE_AFTER_FETCH = false
-
-    // TODO: remove, this a copy of a const inside domain
-    //  this will cause errors when moving files to modules?
-    const val ERROR_INT = luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
-    const val ERROR_STRING = luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
 }
