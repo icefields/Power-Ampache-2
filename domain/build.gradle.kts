@@ -1,11 +1,11 @@
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
 }
 
 android {
-    namespace = "luci.sixsixsix.powerampache2"
+    namespace = "luci.sixsixsix.powerampache2.domain"
     compileSdk = 35
 
     defaultConfig {
@@ -36,16 +36,14 @@ android {
     }
 }
 
-val media3Version = "1.6.1"
 dependencies {
     implementation(project(":MrLog"))
 
-    implementation("androidx.core:core-ktx:1.16.0")
-    implementation("com.google.code.gson:gson:2.11.0")
-    implementation("androidx.media3:media3-common:$media3Version")
-    implementation("androidx.compose.runtime:runtime-livedata:1.7.8")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.gson)
+    implementation(libs.media3.common)
+    implementation(libs.androidx.runtime.livedata)
 
-
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
 }

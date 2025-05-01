@@ -1,6 +1,6 @@
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -43,15 +43,12 @@ android {
     }
 }
 
-//kotlin {
-//    jvmToolchain(17)
-//}
-
 dependencies {
-    implementation("androidx.core:core-ktx:1.16.0")
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.gson)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    // TEST
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
