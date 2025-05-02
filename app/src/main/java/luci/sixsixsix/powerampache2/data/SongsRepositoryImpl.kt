@@ -24,7 +24,6 @@ package luci.sixsixsix.powerampache2.data
 import androidx.lifecycle.map
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +55,7 @@ import luci.sixsixsix.powerampache2.data.remote.OfflineData.songsToScrobble
 import luci.sixsixsix.powerampache2.data.remote.ScrobbleData
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker.Companion.startSongDownloadWorker
+import luci.sixsixsix.powerampache2.worker.SongDownloadWorker.Companion.startSongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
@@ -65,7 +64,6 @@ import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.utils.DownloadWorkerManager
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okio.IOException
@@ -81,7 +79,6 @@ import kotlin.math.max
  * return/emit data.
  * When breaking a rule please add a comment with a TODO: BREAKING_RULE
  */
-@OptIn(DelicateCoroutinesApi::class)
 @Singleton
 class SongsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
@@ -90,8 +87,7 @@ class SongsRepositoryImpl @Inject constructor(
     private val storageManager: StorageManager,
     private val sharedPreferencesManager: SharedPreferencesManager,
     private val weakContext: WeakContext,
-    applicationCoroutineScope: CoroutineScope,
-    private val downloadWorkerManager: DownloadWorkerManager
+    applicationCoroutineScope: CoroutineScope
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
     override val offlineSongsLiveData = dao.getDownloadedSongsLiveData().map { entities ->
@@ -306,9 +302,9 @@ class SongsRepositoryImpl @Inject constructor(
                         // songs are saved already, just fetch them again and emit
                         emit(
                             Resource.Success(
-                            data = dao.getMostPlayedSongs().ifEmpty {
-                                dao.getMostPlayedSongsLocal() }.map { it.toSong() },
-                            networkData = songs))
+                                data = dao.getMostPlayedSongs().ifEmpty {
+                                    dao.getMostPlayedSongsLocal() }.map { it.toSong() },
+                                networkData = songs))
                     }
                     else -> {
                         emit(Resource.Success(data = songs, networkData = songs))
@@ -319,8 +315,8 @@ class SongsRepositoryImpl @Inject constructor(
             }
             emit(Resource.Loading(false))
         }.catch { e -> errorHandler("getSongsStats()", e, this) }
-    else
-        getSongsStatsDb(statFilter)
+        else
+            getSongsStatsDb(statFilter)
 
     private suspend fun getSongsStatsDb(statFilter: MainNetwork.StatFilter) = flow {
         emit(Resource.Loading(true))
@@ -545,15 +541,13 @@ class SongsRepositoryImpl @Inject constructor(
         }
 
         return weakContext.get()?.let { context ->
-            val auth = getSession()!!.auth
-            val username = getUsername()!!
+            val auth = authToken()
 
             val requestId = startSongDownloadWorker(
                 context = context,
                 authToken = auth,
-                username = username,
-                song = song,
-                downloadWorkerId = downloadWorkerManager.getDownloadWorkerId()
+                username = getCurrentCredentials().username,
+                song = song
             )
 
             // add delay to attempt avoiding TooManyRequestsException

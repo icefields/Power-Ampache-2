@@ -105,9 +105,10 @@ class ArtistsRepositoryImpl @Inject constructor(
         offset: Int
     ): Flow<Resource<List<Artist>>> = flow {
         emit(Resource.Loading(true))
+        val cred = getCurrentCredentials()
 
         if (isOfflineModeEnabled()) {
-            val generatedArtists = dao.generateOfflineArtists(getUsername()!!) //let it go to exception if no username
+            val generatedArtists = dao.generateOfflineArtists(cred.username) //let it go to exception if no username
             //val offlineAlbums = dao.getOfflineAlbums()
             emit(Resource.Success(data = generatedArtists.map { it.toArtist() }))
             emit(Resource.Loading(false))
@@ -142,7 +143,6 @@ class ArtistsRepositoryImpl @Inject constructor(
             dao.clearArtists()
         }
 
-        val cred = getCurrentCredentials()
         dao.insertArtists(artists.map { it.toArtistEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         emit(Resource.Success(data = dao.searchArtist(query).map { it.toArtist() }, networkData = artists))

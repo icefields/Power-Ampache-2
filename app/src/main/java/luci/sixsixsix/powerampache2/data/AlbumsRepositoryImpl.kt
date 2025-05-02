@@ -508,7 +508,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             val cred = getCurrentCredentials()
             api.getAlbumsStats(
                 authToken(),
-                username = getCredentials()?.username,
+                username = getCurrentCredentials().username.ifBlank { null },
                 filter = statFilter,
                 limit = limit
             ).albums?.let { albumsDto ->

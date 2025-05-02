@@ -38,7 +38,7 @@ private const val SUB_DIR = "offline_music"
 
 class StorageManagerImpl @Inject constructor(
     private val weakContext: WeakContext,
-    private val musicRepository: MusicRepository,
+    private val musicRepository: MusicRepository, // TODO replace with use case
 ): StorageManager {
     @Throws(Exception::class)
     override suspend fun saveSong(song: Song, inputStream: InputStream) =

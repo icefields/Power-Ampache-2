@@ -34,10 +34,10 @@ import luci.sixsixsix.powerampache2.data.SettingsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.ShareManagerImpl
 import luci.sixsixsix.powerampache2.data.SharedPreferencesManagerImpl
 import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
-import luci.sixsixsix.powerampache2.data.local.DatabaseProviderImpl
+import luci.sixsixsix.powerampache2.data.local.DbDataSourceImpl
 import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
-import luci.sixsixsix.powerampache2.data.remote.worker.DownloadWorkerManagerImpl
+import luci.sixsixsix.powerampache2.data.remote.NetworkDataSourceImpl
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.AmpachePreferencesRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
@@ -45,8 +45,8 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
-import luci.sixsixsix.powerampache2.domain.utils.DatabaseProvider
-import luci.sixsixsix.powerampache2.domain.utils.DownloadWorkerManager
+import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.NetworkDataSource
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
@@ -131,13 +131,13 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindDatabaseProvider(
-        databaseProviderImpl: DatabaseProviderImpl
-    ): DatabaseProvider
+    abstract fun dbDataSourceProvider(
+        dbDataSourceImpl: DbDataSourceImpl
+    ): DbDataSource
 
     @Binds
     @Singleton
-    abstract fun bindDownloadWorkerManager(
-        downloadWorkerManagerImpl: DownloadWorkerManagerImpl
-    ): DownloadWorkerManager
+    abstract fun networkDataSourceProvider(
+        networkDataSourceImpl: NetworkDataSourceImpl
+    ): NetworkDataSource
 }

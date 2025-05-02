@@ -91,17 +91,20 @@ abstract class BaseAmpacheRepository(
         dao.getCredentials()
 
     suspend fun getUsername(): String? =
-        dao.getUser()?.username ?: getCredentials()?.username
-            .also {
-                // if user doesn't exist, retrieve the object from network
-                if (it == null && !isOfflineModeEnabled()) {
-                    getUserNetwork()
-                }
-            }
+        dao.getUser()?.username ?:
+        getCredentials()?.username ?:
+        if (!isOfflineModeEnabled()) {
+            // if user doesn't exist, retrieve the object from network
+            getUserNetwork()?.username
+        } else null
 
     suspend fun getCurrentCredentials() = getCredentials()?.let {
-        CurrentCredentialsWrapper(username = it.username.lowercase(), serverUrl = it.serverUrl/*.lowercase()*/)
-    } ?: CurrentCredentialsWrapper(username = "", serverUrl = "")
+        CurrentCredentialsWrapper(username = it.username.lowercase(), serverUrl = it.serverUrl)
+    } ?: if (!isOfflineModeEnabled()) {
+        // if user doesn't exist, retrieve the object from network
+        val userNet = getUserNetwork()
+        CurrentCredentialsWrapper(username = userNet?.username ?: "", serverUrl = userNet?.serverUrl ?: "")
+    } else CurrentCredentialsWrapper(username = "", serverUrl = "")
 
     /**
      * updating the user in the database will trigger the user live data.

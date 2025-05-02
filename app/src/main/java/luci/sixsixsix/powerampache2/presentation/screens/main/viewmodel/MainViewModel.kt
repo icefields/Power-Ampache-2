@@ -64,7 +64,6 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
-import luci.sixsixsix.powerampache2.domain.utils.DownloadWorkerManager
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.PlayerEvent
@@ -86,7 +85,6 @@ class MainViewModel @Inject constructor(
     val settingsRepository: SettingsRepository,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
     val shareManager: ShareManager,
-    private val downloadWorkerManager: DownloadWorkerManager,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) /*, MainQueueManager*/ {
     var state by savedStateHandle.saveable { mutableStateOf(MainState()) }
@@ -132,7 +130,7 @@ class MainViewModel @Inject constructor(
         observePlaylistManager()
         observePlayerEvents()
         observeSession()
-        observeDownloads(application, downloadWorkerManager)
+        observeDownloads(application)
     }
 
     fun currentQueue() = playlistManager.currentQueueState
@@ -140,7 +138,7 @@ class MainViewModel @Inject constructor(
     fun currentSong() = playlistManager.currentSongState.value
 
     fun onEvent(event: MainEvent) =
-        weakContext.get()?.applicationContext?.let { handleEvent(event, it, downloadWorkerManager) }
+        weakContext.get()?.applicationContext?.let { handleEvent(event, it) }
 
     fun isOfflineSong(song: Song, callback: (Boolean) -> Unit) = viewModelScope.launch {
         callback(songsRepository.isSongAvailableOffline(song))

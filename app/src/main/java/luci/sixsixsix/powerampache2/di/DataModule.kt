@@ -29,7 +29,7 @@ import luci.sixsixsix.powerampache2.data.remote.AmpacheOkHttpClientBuilder
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork.Companion.BASE_URL
 import luci.sixsixsix.powerampache2.data.remote.PingScheduler
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorkerFactory
+import luci.sixsixsix.powerampache2.worker.SongDownloadWorkerFactory
 import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_CONNECTION_S
 import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_READ_S
 import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_WRITE_S
@@ -178,10 +178,4 @@ object DataModule {
                 .build()
 
         }
-
-    @Provides
-    fun provideWorkManagerConfiguration(workerFactory: SongDownloadWorkerFactory) = Configuration.Builder()
-        .setMinimumLoggingLevel(Log.INFO)
-        .setWorkerFactory(workerFactory)
-        .build()
 }

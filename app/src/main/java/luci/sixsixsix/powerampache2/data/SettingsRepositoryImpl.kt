@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.data
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
@@ -45,6 +44,7 @@ class SettingsRepositoryImpl @Inject constructor(
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager
 ): BaseAmpacheRepository(api, db, errorHandler), SettingsRepository {
+
     override suspend fun getLocalSettings(username: String?) =
         dao.getSettings()?.toLocalSettings()
             ?: LocalSettings.defaultSettings(username)

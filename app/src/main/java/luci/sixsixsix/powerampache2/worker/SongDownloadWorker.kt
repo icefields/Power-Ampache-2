@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.data.remote.worker
+package luci.sixsixsix.powerampache2.worker
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -39,20 +39,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.data.local.MusicDatabase
-import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
-import luci.sixsixsix.powerampache2.data.local.entities.toSong
-import luci.sixsixsix.powerampache2.data.remote.MainNetwork
+import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.NetworkDataSource
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
-import java.net.HttpURLConnection.HTTP_OK
 import java.time.Duration
 import java.util.UUID
 
 @HiltWorker
 class SongDownloadWorker @AssistedInject constructor(
-    private val api: MainNetwork,
-    val db: MusicDatabase,
+    private val api: NetworkDataSource, // TODO replace with use case
+    private val dbDataSource: DbDataSource, // TODO replace with use case
     private val storageManager: StorageManager,
     @Assisted val context: Context,
     @Assisted private val params: WorkerParameters,
@@ -60,10 +57,10 @@ class SongDownloadWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val authKey = params.inputData.getString(KEY_AUTH_TOKEN)
-        val username = params.inputData.getString(KEY_USERNAME)
+        //val username = params.inputData.getString(KEY_USERNAME)
         val songId = params.inputData.getString(KEY_SONG) ?: ERROR_STRING // this will make the following query return null
 
-        db.dao.getSongById(songId)?.toSong()?.let { song ->
+        dbDataSource.getSongById(songId)?.let { song ->
             //val song = db.dao.getSongById(songId).toSong()
 
             val firstUpdate = workDataOf(KEY_PROGRESS to 0, KEY_SONG to "${song.artist.name} - ${song.name}")
@@ -71,36 +68,19 @@ class SongDownloadWorker @AssistedInject constructor(
 
             setProgress(firstUpdate)
 
-            api.downloadSong(
-                authKey = authKey!!,
-                songId = songId
-            ).run {
-                if (code() == HTTP_OK) {
-                    // save file to disk and register in database
-                    body()?.byteStream()?.let { inputStream ->
-                        val filepath = storageManager.saveSong(song, inputStream)
-                        db.dao.addDownloadedSong( // TODO fix double-bang!!
-                            song.toDownloadedSongEntity(
-                                filepath,
-                                username!!.lowercase(),
-                                serverUrl = db.dao.getCredentials()?.serverUrl!!/*.lowercase()*/
-                            )
-                        )
-                        setProgress(lastUpdate)
-                        //if ()
-                        Result.success(workDataOf(KEY_RESULT_SONG to songId))
-                    } ?: Result.failure(
-                        workDataOf(
-                            KEY_RESULT_ERROR to "cannot download/save file, " +
-                                    "body or input stream NULL response code: ${code()}"))
-                } else {
-                    Result.failure(
-                        workDataOf(
-                            KEY_RESULT_ERROR to "cannot download/save file, " +
-                                    "response code: ${code()}, response body: ${body().toString()}"))
-                }
+            try {
+                val inputStream = api.downloadSong(authKey = authKey!!, songId = songId)
+                val filepath = storageManager.saveSong(song, inputStream)
+                dbDataSource.addDownloadedSong(song, filepath)
+                setProgress(lastUpdate)
+                Result.success(workDataOf(KEY_RESULT_SONG to songId))
+            } catch (e: Exception) {
+                Result.failure(
+                    workDataOf(
+                        KEY_RESULT_ERROR to "cannot download/save file, " +
+                                "body or input stream NULL: ${e.printStackTrace()}"))
             }
-        }?: run {
+        } ?: run {
             Result.failure(
                 workDataOf(
                     KEY_RESULT_ERROR to "Song.mediaId, or Song, is null!, songId:$songId"))
@@ -120,35 +100,33 @@ class SongDownloadWorker @AssistedInject constructor(
         private const val KEY_WORKER_PREFERENCE = "${prefix}KEY_WORKER_PREFERENCE"
         private const val KEY_WORKER_PREFERENCE_ID = "${prefix}downloadWorkerId"
 
-//        suspend fun getDownloadWorkerId(context: Context): String = context
-//            .getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
-//            .getString(KEY_WORKER_PREFERENCE_ID, null) ?: run {
-//                // if not existent create one now
-//                L("resetting worker id")
-//                resetDownloadWorkerId(context)
-//            }
-//
-//        suspend fun resetDownloadWorkerId(context: Context) =
-//            writeDownloadWorkerId(context, UUID.randomUUID().toString())
-//
-//        @SuppressLint("ApplySharedPref")
-//        private suspend fun writeDownloadWorkerId(context: Context, newWorkerId: String): String = withContext(Dispatchers.IO) {
-//                val sharedPreferences = context.getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
-//                val editor = sharedPreferences.edit()
-//                editor.apply {
-//                    putString(KEY_WORKER_PREFERENCE_ID, newWorkerId)
-//                    commit()
-//                }
-//            return@withContext newWorkerId
-//        }
+        suspend fun getDownloadWorkerId(context: Context):String = context
+            .getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
+            .getString(KEY_WORKER_PREFERENCE_ID, null) ?: run {
+            // if not existent create one now
+            L("resetting worker id")
+            resetDownloadWorkerId(context)
+        }
 
+        suspend fun resetDownloadWorkerId(context: Context) =
+            writeDownloadWorkerId(context, UUID.randomUUID().toString())
 
-        fun startSongDownloadWorker(
+        @SuppressLint("ApplySharedPref")
+        private suspend fun writeDownloadWorkerId(context: Context, newWorkerId: String): String = withContext(Dispatchers.IO) {
+            val sharedPreferences = context.getSharedPreferences(KEY_WORKER_PREFERENCE, Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.apply {
+                putString(KEY_WORKER_PREFERENCE_ID, newWorkerId)
+                commit()
+            }
+            return@withContext newWorkerId
+        }
+
+        suspend fun startSongDownloadWorker(
             context: Context,
             authToken: String,
             username: String,
-            song: Song,
-            downloadWorkerId: String
+            song: Song
         ): UUID {
             val request = OneTimeWorkRequestBuilder<SongDownloadWorker>()
                 .setInputData(
@@ -165,14 +143,14 @@ class SongDownloadWorker @AssistedInject constructor(
                     Duration.ofSeconds(10L)
                 ).build()
             WorkManager.getInstance(context)
-                .enqueueUniqueWork(downloadWorkerId, ExistingWorkPolicy.APPEND, request)
+                .enqueueUniqueWork(getDownloadWorkerId(context), ExistingWorkPolicy.APPEND, request)
             return request.id
         }
 
-//        suspend fun stopAllDownloads(context: Context) {
-//            WorkManager.getInstance(context).cancelUniqueWork(getDownloadWorkerId(context))
-//            // change worker name otherwise cannot restart work
-//            resetDownloadWorkerId(context)
-//        }
+        suspend fun stopAllDownloads(context: Context) {
+            WorkManager.getInstance(context).cancelUniqueWork(getDownloadWorkerId(context))
+            // change worker name otherwise cannot restart work
+            resetDownloadWorkerId(context)
+        }
     }
 }

@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.content.Context
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -29,14 +30,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
-import luci.sixsixsix.powerampache2.domain.utils.DownloadWorkerManager
+import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 
-internal fun MainViewModel.observeDownloads(application: Context, downloadWorkerManager: DownloadWorkerManager) {
+internal fun MainViewModel.observeDownloads(application: Context) {
     WorkManager.getInstance(application).pruneWork()
     viewModelScope.launch {
         WorkManager.getInstance(application)
-            .getWorkInfosForUniqueWorkLiveData(downloadWorkerManager.getDownloadWorkerId())
+            .getWorkInfosForUniqueWorkLiveData(SongDownloadWorker.getDownloadWorkerId(application))
             //.getWorkInfosForUniqueWorkFlow(SongDownloadWorker.workerName)
             //.getWorkInfoByIdFlow(requestId).mapNotNull { it.outputData.getString(KEY_RESULT_PATH) }.cancellable()
             .observeForever { workInfoList ->
@@ -66,7 +66,7 @@ internal fun MainViewModel.observeDownloads(application: Context, downloadWorker
                     }
                     if (allFailedOrSucceededOrCancelled &&
                         (workInfo.state != WorkInfo.State.FAILED && workInfo.state != WorkInfo.State.SUCCEEDED && workInfo.state != WorkInfo.State.CANCELLED  )
-                        ) {
+                    ) {
                         allFailedOrSucceededOrCancelled = false
                     }
 
@@ -99,15 +99,15 @@ internal fun MainViewModel.observeDownloads(application: Context, downloadWorker
 
                 if(workInfoList.isNotEmpty() &&
                     !atLeastOneRunning && !atLeastOneBlocked && !atLeastOneEnqueued && (allCancelled || allFailed || allFailedOrSucceededOrCancelled)
-                    ) {
+                ) {
                     // no more work to be done
                     viewModelScope.launch {
-                        L("resetDownloadWorkerId(application) ${downloadWorkerManager.getDownloadWorkerId()}")
-                        downloadWorkerManager.resetDownloadWorkerId()
+                        L("resetDownloadWorkerId(application) ${SongDownloadWorker.getDownloadWorkerId(application)}")
+                        SongDownloadWorker.resetDownloadWorkerId(application)
                         delay(200)
-                        L("resetDownloadWorkerId(application) AFTER REFRESH ${downloadWorkerManager.getDownloadWorkerId()}")
+                        L("resetDownloadWorkerId(application) AFTER REFRESH ${SongDownloadWorker.getDownloadWorkerId(application)}")
 
-                        observeDownloads(application, downloadWorkerManager)
+                        observeDownloads(application)
                     }
                 }
             }

@@ -43,7 +43,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
 import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
-import luci.sixsixsix.powerampache2.domain.utils.DatabaseProvider
+import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import retrofit2.HttpException
 import java.io.IOException
@@ -53,7 +53,7 @@ import javax.inject.Singleton
 @Singleton
 class ErrorHandlerImpl @Inject constructor(
     private val playlistManager: MusicPlaylistManager,
-    private val db: DatabaseProvider,
+    private val db: DbDataSource,
     configProvider: ConfigProvider,
     private val applicationContext: Application,
     applicationCoroutineScope: CoroutineScope
