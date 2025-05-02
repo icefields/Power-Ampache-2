@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
@@ -32,7 +33,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.common.processFlag
+import luci.sixsixsix.powerampache2.domain.common.processFlag
 import luci.sixsixsix.powerampache2.common.push
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
@@ -52,7 +53,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toUser
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.NullSessionException
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.User
@@ -277,6 +278,10 @@ abstract class BaseAmpacheRepository(
             return false
         }
         return true
+    }
+
+    suspend fun clearSession() {
+        dao.clearSession()
     }
 }
 

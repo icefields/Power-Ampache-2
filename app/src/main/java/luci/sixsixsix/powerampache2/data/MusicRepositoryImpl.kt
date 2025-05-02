@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data
 import android.content.Context
 import android.os.Environment
 import androidx.core.text.isDigitsOnly
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
@@ -36,11 +37,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.BuildConfig
-import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.Pa2Config
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.common.sha256
+import luci.sixsixsix.powerampache2.domain.common.sha256
+import luci.sixsixsix.powerampache2.data.common.Constants.CLEAR_TABLE_AFTER_FETCH
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toGenre
@@ -63,10 +63,10 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
 import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.User
+import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Instant
@@ -86,7 +86,9 @@ class MusicRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     private val dateMapper: DateMapper,
     db: MusicDatabase,
-    private val errorHandler: ErrorHandler
+    private val errorHandler: ErrorHandler,
+    private val configProvider: ConfigProvider,
+    applicationCoroutineScope: CoroutineScope
 ): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
     private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
@@ -110,7 +112,7 @@ class MusicRepositoryImpl @Inject constructor(
     init {
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
-        GlobalScope.launch {
+        applicationCoroutineScope.launch {
             sessionLiveData.distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
                 // if token has changed or user is null, get user from network
                 if (newToken != currentAuthToken || currentUser == null) {
@@ -124,17 +126,17 @@ class MusicRepositoryImpl @Inject constructor(
             }
         }
 
-        GlobalScope.launch {
+        applicationCoroutineScope.launch {
             initialize()
         }
     }
 
     private suspend fun initialize() {
         Constants.config = try {
-            api.getConfig().toPa2Config()
+            api.getConfig(configProvider.CONFIG_URL).toPa2Config(configProvider)
         } catch (e: Exception) {
             L.e(e)
-            Pa2Config()
+            configProvider.defaultPa2Config()
         }
     }
 
@@ -190,7 +192,7 @@ class MusicRepositoryImpl @Inject constructor(
                     // TODO Check connection error before making this call crash into the try-catch
                 } catch (e: Exception) {
                     L("aaaa clear session, set the session to null ssss ping()")
-                    dao.clearSession()
+                    clearSession()
                     null
                 } ?.let { se ->
                     if (se.auth != null) {
@@ -319,7 +321,7 @@ class MusicRepositoryImpl @Inject constructor(
         } ?: run {
             // do not show anything to the user if in prod mode, log error instead
             errorHandler.logError("there is an error in the logout response.\nLOGOUT $resp")
-            throw Exception(if (BuildConfig.DEBUG) "there is an error registering your account\nIs user registration allowed on the server?" else "")
+            throw Exception(if (configProvider.IS_DEBUG) "there is an error registering your account\nIs user registration allowed on the server?" else "")
         }
 
         emit(Resource.Loading(false))
@@ -352,7 +354,7 @@ class MusicRepositoryImpl @Inject constructor(
             api.getTags(authKey = auth).tags!!.map { it.toGenre() }
         }
 
-        if (Constants.CLEAR_TABLE_AFTER_FETCH) {
+        if (CLEAR_TABLE_AFTER_FETCH) {
             dao.clearGenres()
         }
         val cred = getCurrentCredentials()
@@ -369,7 +371,7 @@ class MusicRepositoryImpl @Inject constructor(
         // first clear db then logout to guarantee data is cleared even if the call fails
         // clear credentials after api call, since the api uses base url from credentials
         dao.clearCredentials()
-        dao.clearSession()
+        clearSession()
         dao.clearCachedData()
         dao.clearUser()
 

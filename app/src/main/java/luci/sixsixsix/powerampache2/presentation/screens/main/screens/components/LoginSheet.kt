@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -56,7 +55,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 
 @OptIn(ExperimentalMaterial3Api::class)

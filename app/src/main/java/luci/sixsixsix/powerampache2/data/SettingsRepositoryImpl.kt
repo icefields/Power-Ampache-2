@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
@@ -31,8 +32,8 @@ import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettingsEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
-import luci.sixsixsix.powerampache2.domain.models.SortMode
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import javax.inject.Inject
 import javax.inject.Singleton

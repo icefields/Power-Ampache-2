@@ -24,7 +24,7 @@ package luci.sixsixsix.powerampache2.data.local
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.WeakContext
+import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager

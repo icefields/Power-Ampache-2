@@ -25,7 +25,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_ERROR_COUNT_TIMEOUT_MS
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackError
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
 import java.util.concurrent.TimeUnit
@@ -81,7 +81,7 @@ fun MainViewModel.observePlayerEvents() {
                         // error count
                         errorJob?.cancel()
                         errorJob = viewModelScope.launch {
-                            delay(Constants.PLAYBACK_ERROR_COUNT_TIMEOUT_MS)
+                            delay(PLAYBACK_ERROR_COUNT_TIMEOUT_MS)
                             playbackErrorCount = 0
                         }
                     }

@@ -43,7 +43,7 @@ import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject

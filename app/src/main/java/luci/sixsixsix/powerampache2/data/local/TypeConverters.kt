@@ -24,8 +24,8 @@ package luci.sixsixsix.powerampache2.data.local
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
-import luci.sixsixsix.powerampache2.domain.models.SortMode
-import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
+import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
+import luci.sixsixsix.powerampache2.domain.models.settings.StreamingQuality
 import java.time.LocalDateTime
 
 object Converters {

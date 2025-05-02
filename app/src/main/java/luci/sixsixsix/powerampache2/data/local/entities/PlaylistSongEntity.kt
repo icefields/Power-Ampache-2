@@ -54,9 +54,9 @@ data class PlaylistSongEntity(
 
         fun newEntries(
             songs: List<Song>,
-                       playlistId: String,
-                       username: String,
-                       serverUrl: String
+            playlistId: String,
+            username: String,
+            serverUrl: String
         ) = mutableListOf<PlaylistSongEntity>().apply {
             songs.map { it.mediaId }.forEachIndexed { position,  songId ->
                 add(newEntry(songId = songId,

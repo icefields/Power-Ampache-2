@@ -38,7 +38,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.data.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong

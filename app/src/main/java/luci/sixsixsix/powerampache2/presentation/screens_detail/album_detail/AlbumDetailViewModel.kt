@@ -47,7 +47,7 @@ import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject

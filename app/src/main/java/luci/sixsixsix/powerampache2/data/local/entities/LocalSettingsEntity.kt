@@ -24,10 +24,10 @@ package luci.sixsixsix.powerampache2.data.local.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
-import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
-import luci.sixsixsix.powerampache2.domain.models.SortMode
-import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.settings.PowerAmpTheme
+import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
+import luci.sixsixsix.powerampache2.domain.models.settings.StreamingQuality
 
 @Entity
 data class LocalSettingsEntity(

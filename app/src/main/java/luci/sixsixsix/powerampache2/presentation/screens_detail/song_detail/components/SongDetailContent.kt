@@ -60,7 +60,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
-import luci.sixsixsix.powerampache2.common.toDebugMap
+import luci.sixsixsix.powerampache2.domain.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog

@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.asFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
@@ -29,11 +30,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.BuildConfig
-import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.common.Constants.ADMIN_USERNAME
-import luci.sixsixsix.powerampache2.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.data.common.Constants.ADMIN_USERNAME
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistSongEntity
@@ -47,12 +45,15 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
+import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -66,7 +67,8 @@ import javax.inject.Singleton
 class PlaylistsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
     db: MusicDatabase,
-    private val errorHandler: ErrorHandler
+    private val errorHandler: ErrorHandler,
+    private val configProvider: ConfigProvider,
 ): BaseAmpacheRepository(api, db, errorHandler), PlaylistsRepository {
 
     override val playlistsFlow = dao.playlistsLiveData().asFlow().map { entities ->
@@ -136,7 +138,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
             }
             dao.insertPlaylists(playlistNetworkEntities)
             // stick to the single source of truth pattern despite performance deterioration
-            emit(Resource.Success(
+            emit(
+                Resource.Success(
                 data = dao.searchPlaylists(query).map { it.toPlaylist() },
                 networkData = playlistNetwork)
             )
@@ -246,7 +249,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
             off += responseSize
 
             val playlists = response.playlist?.let { responsePlaylist ->
-                (if (BuildConfig.SHOW_EMPTY_PLAYLISTS) {
+                (if (configProvider.SHOW_EMPTY_PLAYLISTS) {
                     responsePlaylist // will throw exception if playlist null
                 } else {
                     responsePlaylist.filter { dtoToFilter -> // will throw exception if playlist null
@@ -287,7 +290,8 @@ class PlaylistsRepositoryImpl @Inject constructor(
         val isOfflineMode = isOfflineModeEnabled()
         if (isOfflineMode) {
             // if offline mode enabled, grab all the offline data and emit, then return
-            emit(Resource.Success(
+            emit(
+                Resource.Success(
                 data = dao.getOfflineSongsFromPlaylist(playlistId).map { it.toSong() },
                 networkData = null))
             emit(Resource.Loading(false))
@@ -666,9 +670,10 @@ class PlaylistsRepositoryImpl @Inject constructor(
         if (success != null) {
             val updatedPlaylist = api.getPlaylist(authToken(), playlist.id)
             // check if any of the new songs got added
-            L(updatedPlaylist.items, playlist.items)
+            val playlistItems = playlist.items ?: 0
+            L(updatedPlaylist.items, playlistItems)
             if ((updatedPlaylist.items == null) || (playlist.items == null) ||
-                (updatedPlaylist.items <= playlist.items)) {
+                (updatedPlaylist.items <= playlistItems)) {
                 throw Exception("The size of the edited playlist and the size of the new playlist are the same. Something went wrong")
             }
             updatedPlaylist.toPlaylist()

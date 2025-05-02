@@ -32,7 +32,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import luci.sixsixsix.mrlog.L
 import javax.inject.Inject
 
-@UnstableApi @AndroidEntryPoint
+@UnstableApi
+@AndroidEntryPoint
 class SimpleMediaService: MediaSessionService() {
     @Inject
     lateinit var mediaSession: MediaSession

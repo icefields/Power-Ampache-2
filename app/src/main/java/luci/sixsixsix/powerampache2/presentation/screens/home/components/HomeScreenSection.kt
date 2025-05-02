@@ -47,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,7 +61,6 @@ import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.PlaylistDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
-import luci.sixsixsix.powerampache2.presentation.screens.artists.components.ArtistItem
 import luci.sixsixsix.powerampache2.presentation.screens.home.HomeScreenRowItems
 
 typealias PlaylistColumn = ArrayList<Playlist>

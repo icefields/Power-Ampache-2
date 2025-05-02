@@ -76,7 +76,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.toHslColor
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.donate_btn.DonateButton

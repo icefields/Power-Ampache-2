@@ -22,7 +22,7 @@
 package luci.sixsixsix.powerampache2.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.data.common.Constants
 import luci.sixsixsix.powerampache2.domain.models.ampache.AmpachePreference
 import luci.sixsixsix.powerampache2.domain.models.ampache.AmpachePreferenceType
 

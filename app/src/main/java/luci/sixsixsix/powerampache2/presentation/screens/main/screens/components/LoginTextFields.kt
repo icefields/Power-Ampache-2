@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 
 @Composable

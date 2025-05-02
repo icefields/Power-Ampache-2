@@ -66,9 +66,9 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
-import luci.sixsixsix.powerampache2.data.Servers
+import luci.sixsixsix.powerampache2.common.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadFullVersionButton
 import luci.sixsixsix.powerampache2.presentation.common.ErrorView
@@ -79,7 +79,6 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.LoginDialog
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.SignUpBottomDrawer
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.SignUpDialog
-import luci.sixsixsix.powerampache2.presentation.screens.settings.PlayerSettingsEvent
 import kotlin.system.exitProcess
 
 @Composable
