@@ -1,17 +1,10 @@
 package luci.sixsixsix.powerampache2.di
 
 import android.app.Application
-import android.app.Application.MODE_PRIVATE
 import android.content.Context
-import android.util.Log
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.room.Room
-import androidx.work.Configuration
-import coil.ImageLoader
-import coil.disk.DiskCache
-import coil.memory.MemoryCache
-import coil.request.CachePolicy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,8 +13,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.common.WeakContext
+import luci.sixsixsix.powerampache2.ImageLoaderProviderImpl
 import luci.sixsixsix.powerampache2.data.common.Constants.DB_LOCAL_NAME
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.mapping.AmpacheDateMapper
@@ -29,13 +21,14 @@ import luci.sixsixsix.powerampache2.data.remote.AmpacheOkHttpClientBuilder
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork.Companion.BASE_URL
 import luci.sixsixsix.powerampache2.data.remote.PingScheduler
-import luci.sixsixsix.powerampache2.worker.SongDownloadWorkerFactory
 import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_CONNECTION_S
 import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_READ_S
 import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_WRITE_S
+import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
+import luci.sixsixsix.powerampache2.domain.utils.ImageLoaderProvider
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -146,36 +139,9 @@ object DataModule {
     }
 
     @Provides
-    fun imageLoaderBuilder(
+    @Singleton
+    fun provideImageLoaderProvider(
         @ApplicationContext context: Context,
         imageLoaderOkHttpClient: AmpacheOkHttpClientBuilder
-    ) = ImageLoader(context).newBuilder()
-        .crossfade(200)
-        .placeholder(R.drawable.placeholder_album)
-        .error(R.drawable.placeholder_album)
-        .diskCachePolicy(CachePolicy.ENABLED)
-        .memoryCachePolicy(CachePolicy.ENABLED)
-        .networkCachePolicy(CachePolicy.ENABLED)
-        .okHttpClient(
-            imageLoaderOkHttpClient(true)
-                //.retryOnConnectionFailure(true)
-                .connectTimeout(TIMEOUT_CONNECTION_S, TimeUnit.SECONDS)
-                .readTimeout(TIMEOUT_READ_S, TimeUnit.SECONDS)
-                .writeTimeout(TIMEOUT_WRITE_S, TimeUnit.SECONDS)
-                .build()
-        )
-        //.respectCacheHeaders(false)
-        .memoryCache {
-            MemoryCache.Builder(context)
-                .maxSizePercent(0.08)
-                .strongReferencesEnabled(false)
-                .build()
-        }
-        .diskCache {
-            DiskCache.Builder()
-                .maxSizePercent(0.10)
-                .directory(context.getDir("paimages", MODE_PRIVATE))
-                .build()
-
-        }
+    ): ImageLoaderProvider = ImageLoaderProviderImpl(context, imageLoaderOkHttpClient)
 }

@@ -16,6 +16,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
     }
 
     buildTypes {
@@ -61,7 +65,7 @@ dependencies {
     // JSON serialization
     implementation(libs.gson)
 
-    // --- Coil, image-loader --- //
+//    // --- Coil, image-loader --- //
     implementation(libs.coil.compose)
 
     // --- Room --- //
@@ -70,20 +74,20 @@ dependencies {
     // Kotlin Extensions and Coroutines support for Room
     implementation(libs.room.ktx)
 
-    // ERROR REPORT
-    implementation(libs.acra.mail)
+//    // ERROR REPORT
+//    implementation(libs.acra.mail)
 
-    implementation(libs.media3.exoplayer)
+//    implementation(libs.media3.exoplayer)
     // Common functionality for media database components
-    implementation(libs.media3.database)
+//    implementation(libs.media3.database)
     // Common functionality for loading data
-    implementation(libs.media3.datasource)
+//    implementation(libs.media3.datasource)
     // Common functionality used across multiple media libraries
-    implementation(libs.media3.common)
+//    implementation(libs.media3.common)
     implementation(libs.media3.datasource.okhttp)
-    implementation(libs.media3.session)
+//    implementation(libs.media3.session)
 
-    implementation(libs.androidx.work.runtime.ktx)
+//    implementation(libs.androidx.work.runtime.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

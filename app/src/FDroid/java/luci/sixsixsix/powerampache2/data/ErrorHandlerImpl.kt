@@ -25,7 +25,6 @@ import android.app.Application
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
-import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.collectLatest
@@ -91,7 +90,7 @@ class ErrorHandlerImpl @Inject constructor(
             return
         }
 
-        val exceptionString = try { Gson().toJson(e) } catch (jsonException: Exception) { "$e" }
+        val exceptionString = e.printStackTrace()
 
         var readableMessage: String? = null
         StringBuilder(label)

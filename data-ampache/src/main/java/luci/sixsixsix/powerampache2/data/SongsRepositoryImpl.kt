@@ -23,7 +23,6 @@ package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.map
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -55,7 +54,6 @@ import luci.sixsixsix.powerampache2.data.remote.OfflineData.songsToScrobble
 import luci.sixsixsix.powerampache2.data.remote.ScrobbleData
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
-import luci.sixsixsix.powerampache2.worker.SongDownloadWorker.Companion.startSongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
@@ -66,6 +64,7 @@ import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
+import luci.sixsixsix.powerampache2.domain.utils.WorkerHelper
 import okio.IOException
 import retrofit2.HttpException
 import java.util.UUID
@@ -85,8 +84,8 @@ class SongsRepositoryImpl @Inject constructor(
     db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager,
-    private val sharedPreferencesManager: SharedPreferencesManager,
     private val weakContext: WeakContext,
+    private val workerHelper: WorkerHelper,
     applicationCoroutineScope: CoroutineScope
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
@@ -540,24 +539,11 @@ class SongsRepositoryImpl @Inject constructor(
             return null
         }
 
-        return weakContext.get()?.let { context ->
-            val auth = authToken()
-
-            val requestId = startSongDownloadWorker(
-                context = context,
-                authToken = auth,
-                username = getCurrentCredentials().username,
-                song = song
-            )
-
-            // add delay to attempt avoiding TooManyRequestsException
-            delay(2000)
-
-            L(requestId)
-            requestId
-        } ?: run {
-            throw NullPointerException("startDownloadingSong(), context was null")
-        }
+        return workerHelper.startSongDownloadWorker(
+            authToken = authToken(),
+            username = getCurrentCredentials().username,
+            song = song
+        ).also { requestId -> L("Download worker requestId: $requestId") }
     }
 
     override suspend fun downloadSongs(songs: List<Song>) {

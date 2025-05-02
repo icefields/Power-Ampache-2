@@ -45,6 +45,7 @@ import dagger.hilt.components.SingletonComponent
 import luci.sixsixsix.powerampache2.common.ConfigProviderImpl
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorkerFactory
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
+import luci.sixsixsix.powerampache2.domain.utils.ImageLoaderProvider
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import java.io.File
 import javax.inject.Singleton
@@ -124,4 +125,8 @@ object AppModule {
         .setMinimumLoggingLevel(Log.INFO)
         .setWorkerFactory(workerFactory)
         .build()
+
+    @Provides
+    @Singleton
+    fun provideImageLoaderBuilder(imageLoaderProvider: ImageLoaderProvider) = imageLoaderProvider.getImageLoaderBuilder()
 }

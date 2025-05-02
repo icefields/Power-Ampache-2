@@ -1,4 +1,4 @@
-///**
+package luci.sixsixsix.powerampache2.data///**
 // * Copyright (C) 2024  Antonio Tari
 // *
 // * This file is a part of Power Ampache 2
