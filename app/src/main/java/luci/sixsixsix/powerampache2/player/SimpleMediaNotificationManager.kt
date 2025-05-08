@@ -37,6 +37,7 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.ui.PlayerNotificationManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ServiceScoped
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.MainActivity
@@ -47,9 +48,10 @@ private const val NOTIFICATION_CHANNEL_NAME = "powerAmp.channel.666"
 private const val NOTIFICATION_CHANNEL_ID = "powerAmp.id.666"
 
 @UnstableApi
+@ServiceScoped
 class SimpleMediaNotificationManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val player: ExoPlayer
+    private val playerManager: PlayerManager
 ) {
     private var notificationManager = NotificationManagerCompat.from(context)
 
@@ -80,7 +82,7 @@ class SimpleMediaNotificationManager @Inject constructor(
                 setUseNextActionInCompactView(true)
                 setColorized(true)
                 setPriority(NotificationCompat.PRIORITY_LOW)
-                setPlayer(player)
+                setPlayer(playerManager.player)
             }
     }
 

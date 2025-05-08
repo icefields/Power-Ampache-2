@@ -24,56 +24,47 @@ package luci.sixsixsix.powerampache2.di
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
+import android.util.Log
 import androidx.annotation.OptIn
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
-import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaSession
-import androidx.media3.session.SessionCommand
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
-import dagger.hilt.components.SingletonComponent
-import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.player.PlayerManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaNotificationManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import luci.sixsixsix.powerampache2.presentation.MainActivity
 import javax.inject.Singleton
 
 @Module
-@InstallIn(ServiceComponent::class) // TODO: double check if Singleton is better
-//@InstallIn(SingletonComponent::class)
+@InstallIn(ServiceComponent::class)
 @OptIn(UnstableApi::class)
 object ServiceModule {
 
     @ServiceScoped
-    //@Singleton
     @Provides
     fun provideNotificationManager(
         @ApplicationContext context: Context,
-        player: ExoPlayer
+        playerManager: PlayerManager
     ): SimpleMediaNotificationManager = SimpleMediaNotificationManager(
         context = context,
-        player = player
-    )
+        playerManager = playerManager
+    ).also {
+        Log.e("SERVICE","SERVICE- provideNotificationManager")
+    }
 
-    //@ServiceScoped
-    //@Singleton
+    @ServiceScoped
     @Provides
     fun provideMediaSession(
         @ApplicationContext context: Context,
-        player: ExoPlayer
-    ) = MediaSession.Builder(context, player)
+        playerManager: PlayerManager
+    ) = MediaSession.Builder(context, playerManager.player)
         .setSessionActivity(
             PendingIntent.getActivity(context, 3214,
                 Intent(context.applicationContext, MainActivity::class.java)
@@ -82,15 +73,23 @@ object ServiceModule {
                                 Intent.FLAG_ACTIVITY_NEW_TASK),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-        ).build()
+        ).build().also {
+            Log.e("SERVICE","SERVICE- provideMediaSession")
+        }
 
     //@ServiceScoped
     @Singleton
     @Provides
-    fun provideServiceHandler(player: ExoPlayer, playlistManager: MusicPlaylistManager, errorHandler: ErrorHandler) =
+    fun provideServiceHandler(
+        playerManager: PlayerManager,
+        playlistManager: MusicPlaylistManager,
+        errorHandler: ErrorHandler
+    ) =
         SimpleMediaServiceHandler(
             playlistManager = playlistManager,
-            player = player,
+            playerManager = playerManager,
             errorHandler = errorHandler
-        )
+        ).also {
+            Log.e("SERVICE","SERVICE- provideServiceHandler")
+        }
 }

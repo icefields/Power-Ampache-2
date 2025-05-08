@@ -41,6 +41,9 @@ class SimpleMediaService: MediaSessionService() {
     @Inject
     lateinit var notificationManager: SimpleMediaNotificationManager
 
+    @Inject
+    lateinit var playerManager: PlayerManager
+
     override fun onCreate() {
         super.onCreate()
         L("SERVICE- onCreate")
@@ -63,6 +66,11 @@ class SimpleMediaService: MediaSessionService() {
                 player.seekTo(0)
                 player.playWhenReady = false
                 player.stop()
+            }
+            try {
+                playerManager.releasePlayer()
+            } catch (e: Exception) {
+                L(e)
             }
             release()
         }

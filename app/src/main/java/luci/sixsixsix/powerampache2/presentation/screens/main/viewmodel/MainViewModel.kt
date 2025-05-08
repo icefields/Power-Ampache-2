@@ -381,9 +381,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
+
     private fun unbindFromMediaSessionService() {
-        L("SERVICE- unbindFromMediaSessionService $serviceBound")
+        L("SERVICE- attempt unbindFromMediaSessionService $serviceBound")
         if (serviceBound) {
+            L("SERVICE- unbindFromMediaSessionService")
             weakContext.get()?.applicationContext?.unbindService(connection)
             serviceBound = false
             isServiceRunning = false
@@ -402,7 +404,7 @@ class MainViewModel @Inject constructor(
                         try {
                             applicationContext.bindService(this, connection, Context.BIND_AUTO_CREATE)
                         } catch (e: Exception) {
-                            L.e(e)
+                            L.e("SERVICE- ${e.printStackTrace()}", e)
                             serviceBound = false
                         }
                     }
@@ -433,6 +435,7 @@ class MainViewModel @Inject constructor(
 
         weakContext.get()?.applicationContext?.let { applicationContext ->
             try {
+                L("SERVICE- stopMusicService")
                 applicationContext.stopService(Intent(applicationContext, SimpleMediaService::class.java))
                     .also { isServiceRunning = false }
                 unbindFromMediaSessionService()
