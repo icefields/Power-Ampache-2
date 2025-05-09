@@ -130,7 +130,7 @@ class SimpleMediaServiceHandler @Inject constructor(
         return indexToSeekTo
     }
 
-    private suspend fun play() {
+    private fun play() {
         // TODO check if there is actually songs in the queue before playing
         //  do the same with forceplay?
         if (simpleMediaState.value == SimpleMediaState.Idle ||
@@ -149,7 +149,7 @@ class SimpleMediaServiceHandler @Inject constructor(
         startProgressUpdate()
     }
 
-    suspend fun onPlayerEvent(playerEvent: PlayerEvent) {
+    fun onPlayerEvent(playerEvent: PlayerEvent) {
         L(playerEvent, player().mediaItemCount, player().currentMediaItem?.mediaId, player().currentMediaItem?.mediaMetadata?.title)
         when (playerEvent) {
             PlayerEvent.Backward -> player().seekBack()
@@ -263,19 +263,17 @@ class SimpleMediaServiceHandler @Inject constructor(
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = isPlaying)
         if (isPlaying) {
-            mainCoroutineScope ?: CoroutineScope(Dispatchers.Main + SupervisorJob()).also {
-                mainCoroutineScope = it
-            }.launch {
-                startProgressUpdate()
-            }
+            startProgressUpdate()
         } else {
             stopProgressUpdate()
         }
     }
 
-    private suspend fun startProgressUpdate() {
-        if (job == null) job = Job()
-        job.run {
+    private fun startProgressUpdate() {
+        job?.cancel()
+        job = (mainCoroutineScope ?: CoroutineScope(Dispatchers.Main + SupervisorJob()).also {
+            mainCoroutineScope = it
+        }).launch{
             while (true) {
                 delay(500)
                 _simpleMediaState.value =

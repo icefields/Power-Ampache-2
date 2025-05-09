@@ -21,15 +21,20 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
+import androidx.annotation.OptIn
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_ERROR_COUNT_TIMEOUT_MS
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackError
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+@OptIn(UnstableApi::class)
 fun MainViewModel.observePlayerEvents() {
     viewModelScope.launch {
         simpleMediaServiceHandler.simpleMediaState.collect { mediaState ->
@@ -97,6 +102,7 @@ fun MainViewModel.observePlayerEvents() {
 private var errorJob: Job? = null
 private var playbackErrorCount = 0
 
+@OptIn(UnstableApi::class)
 private fun MainViewModel.calculateProgressValue(currentProgress: Long) {
     if (duration <= 0L) duration = (currentSong()?.time?.toLong() ?: 1) * 1000
     progress = if (currentProgress > 0) (currentProgress.toFloat() / duration) else 0f
@@ -106,5 +112,5 @@ private fun MainViewModel.calculateProgressValue(currentProgress: Long) {
 private fun formatDuration(duration: Long): String {
     val minutes: Long = TimeUnit.MINUTES.convert(duration, TimeUnit.MILLISECONDS)
     val seconds: Long = TimeUnit.SECONDS.convert(duration, TimeUnit.MILLISECONDS) - minutes * TimeUnit.SECONDS.convert(1, TimeUnit.MINUTES)
-    return String.format("%02d:%02d", minutes, seconds)
+    return String.format(Locale.US, "%02d:%02d", minutes, seconds)
 }

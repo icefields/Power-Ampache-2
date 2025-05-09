@@ -47,6 +47,7 @@ import javax.inject.Singleton
 @OptIn(UnstableApi::class)
 object ServiceModule {
 
+    @OptIn(UnstableApi::class)
     @ServiceScoped
     @Provides
     fun provideNotificationManager(
