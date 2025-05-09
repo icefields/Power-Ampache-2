@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.di
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -35,13 +36,16 @@ import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.work.Configuration
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import luci.sixsixsix.powerampache2.common.ConfigProviderImpl
+import luci.sixsixsix.powerampache2.worker.SongDownloadWorkerFactory
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
+import luci.sixsixsix.powerampache2.domain.utils.ImageLoaderProvider
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import java.io.File
 import javax.inject.Singleton
@@ -115,4 +119,14 @@ object AppModule {
     @Provides
     @Singleton
     fun provideConfigProvider(): ConfigProvider = ConfigProviderImpl()
+
+    @Provides
+    fun provideWorkManagerConfiguration(workerFactory: SongDownloadWorkerFactory) = Configuration.Builder()
+        .setMinimumLoggingLevel(Log.INFO)
+        .setWorkerFactory(workerFactory)
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideImageLoaderBuilder(imageLoaderProvider: ImageLoaderProvider) = imageLoaderProvider.getImageLoaderBuilder()
 }

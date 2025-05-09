@@ -30,7 +30,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
+import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 
 internal fun MainViewModel.observeDownloads(application: Context) {
     WorkManager.getInstance(application).pruneWork()
@@ -66,7 +66,7 @@ internal fun MainViewModel.observeDownloads(application: Context) {
                     }
                     if (allFailedOrSucceededOrCancelled &&
                         (workInfo.state != WorkInfo.State.FAILED && workInfo.state != WorkInfo.State.SUCCEEDED && workInfo.state != WorkInfo.State.CANCELLED  )
-                        ) {
+                    ) {
                         allFailedOrSucceededOrCancelled = false
                     }
 
@@ -99,7 +99,7 @@ internal fun MainViewModel.observeDownloads(application: Context) {
 
                 if(workInfoList.isNotEmpty() &&
                     !atLeastOneRunning && !atLeastOneBlocked && !atLeastOneEnqueued && (allCancelled || allFailed || allFailedOrSucceededOrCancelled)
-                    ) {
+                ) {
                     // no more work to be done
                     viewModelScope.launch {
                         L("resetDownloadWorkerId(application) ${SongDownloadWorker.getDownloadWorkerId(application)}")
