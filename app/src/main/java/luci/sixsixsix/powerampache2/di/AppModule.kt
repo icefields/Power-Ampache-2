@@ -28,14 +28,8 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
-import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
-import androidx.media3.exoplayer.DefaultLoadControl
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.work.Configuration
 import dagger.Module
 import dagger.Provides
@@ -43,58 +37,19 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import luci.sixsixsix.powerampache2.common.ConfigProviderImpl
-import luci.sixsixsix.powerampache2.worker.SongDownloadWorkerFactory
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import luci.sixsixsix.powerampache2.domain.utils.ImageLoaderProvider
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
+import luci.sixsixsix.powerampache2.worker.SongDownloadWorkerFactory
 import java.io.File
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-    //@ServiceScoped
-    @OptIn(UnstableApi::class)
-    @Singleton
-    @Provides
-    fun providePlayer(
-        @ApplicationContext context: Context,
-        audioAttributes: AudioAttributes,
-        sharedPreferencesManager: SharedPreferencesManager,
-        dataSourceFactory: DefaultDataSource.Factory,
-        cache: SimpleCache
-    ) = ExoPlayer.Builder(context)
-        .setAudioAttributes(audioAttributes, true)
-        .setHandleAudioBecomingNoisy(true)
-        .setTrackSelector(DefaultTrackSelector(context))
-        .setLoadControl(
-            DefaultLoadControl.Builder()
-                .setPrioritizeTimeOverSizeThresholds(true)
-                .setBackBuffer(sharedPreferencesManager.backBuffer, true)  // Retain back buffer data only up to the last keyframe (not very impactful for audio)
-                //.setTargetBufferBytes(20 * 1024 * 1024)
-                .setBufferDurationsMs(
-                    sharedPreferencesManager.minBufferMs,
-                    sharedPreferencesManager.maxBufferMs,
-                    sharedPreferencesManager.bufferForPlaybackMs,
-                    sharedPreferencesManager.bufferForPlaybackAfterRebufferMs
-                )
-                .build()
-        )
-        .setMediaSourceFactory(
-            DefaultMediaSourceFactory(context).setDataSourceFactory(
-                CacheDataSource.Factory()
-                    .setCache(cache)
-                    .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-                    .setUpstreamDataSourceFactory(
-                        dataSourceFactory
-                    )
-            )
-        )
-        .build()
-
-
-
+    /**
+     * This has to be a Singleton, do not move into ServiceScoped module.
+     */
     @OptIn(UnstableApi::class)
     @Provides
     @Singleton
@@ -107,13 +62,14 @@ object AppModule {
         StandaloneDatabaseProvider(context)
     )
 
-    //@ServiceScoped
     @Singleton
     @Provides
     fun provideAudioAttributes() = AudioAttributes.Builder()
         .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
         .setUsage(C.USAGE_MEDIA)
-        .build()
+        .build().also {
+            Log.e("SERVICE","SERVICE- provideAudioAttributes")
+        }
 
 
     @Provides
@@ -129,4 +85,45 @@ object AppModule {
     @Provides
     @Singleton
     fun provideImageLoaderBuilder(imageLoaderProvider: ImageLoaderProvider) = imageLoaderProvider.getImageLoaderBuilder()
+
+
+
+    //    //@ServiceScoped
+//    @OptIn(UnstableApi::class)
+//    //@Singleton
+//    @Provides
+//    fun providePlayer(
+//        @ApplicationContext context: Context,
+//        audioAttributes: AudioAttributes,
+//        sharedPreferencesManager: SharedPreferencesManager,
+//        dataSourceFactory: DefaultDataSource.Factory,
+//        cache: SimpleCache
+//    ) = ExoPlayer.Builder(context)
+//        .setAudioAttributes(audioAttributes, true)
+//        .setHandleAudioBecomingNoisy(true)
+//        .setTrackSelector(DefaultTrackSelector(context))
+//        .setLoadControl(
+//            DefaultLoadControl.Builder()
+//                .setPrioritizeTimeOverSizeThresholds(true)
+//                .setBackBuffer(sharedPreferencesManager.backBuffer, true)  // Retain back buffer data only up to the last keyframe (not very impactful for audio)
+//                //.setTargetBufferBytes(20 * 1024 * 1024)
+//                .setBufferDurationsMs(
+//                    sharedPreferencesManager.minBufferMs,
+//                    sharedPreferencesManager.maxBufferMs,
+//                    sharedPreferencesManager.bufferForPlaybackMs,
+//                    sharedPreferencesManager.bufferForPlaybackAfterRebufferMs
+//                )
+//                .build()
+//        )
+//        .setMediaSourceFactory(
+//            DefaultMediaSourceFactory(context).setDataSourceFactory(
+//                CacheDataSource.Factory()
+//                    .setCache(cache)
+//                    .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+//                    .setUpstreamDataSourceFactory(
+//                        dataSourceFactory
+//                    )
+//            )
+//        )
+//        .build()
 }

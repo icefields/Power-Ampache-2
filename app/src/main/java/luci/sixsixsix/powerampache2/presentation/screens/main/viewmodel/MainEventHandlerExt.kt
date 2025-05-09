@@ -22,7 +22,9 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.content.Context
+import androidx.annotation.OptIn
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -36,6 +38,7 @@ import luci.sixsixsix.powerampache2.player.PlayerEvent
 /**
  * UI ACTIONS AND EVENTS (play, stop, skip, like, download, etc ...)
  */
+@OptIn(UnstableApi::class)
 fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
     when(event) {
         is MainEvent.OnSearchQueryChange -> {
