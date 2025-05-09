@@ -12,6 +12,8 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,14 +29,19 @@ class PlayerManager @OptIn(UnstableApi::class)
 ) {
     private var _player: ExoPlayer? = null
 
+    private val _playerState = MutableStateFlow<ExoPlayer?>(null)
+    val playerState = _playerState.asStateFlow()
+
     val player: ExoPlayer
         get() {
             if (_player == null) {
                 _player = createPlayer()
+                _playerState.value = _player
             }
             return _player!!
         }
 
+    @OptIn(UnstableApi::class)
     private fun createPlayer() = ExoPlayer.Builder(context)
         .setAudioAttributes(audioAttributes, true)
         .setHandleAudioBecomingNoisy(true)
@@ -67,6 +74,7 @@ class PlayerManager @OptIn(UnstableApi::class)
     fun releasePlayer() {
         _player?.release()
         _player = null
+        _playerState.value = null
     }
 
     fun isPlayerInitialized(): Boolean = _player != null

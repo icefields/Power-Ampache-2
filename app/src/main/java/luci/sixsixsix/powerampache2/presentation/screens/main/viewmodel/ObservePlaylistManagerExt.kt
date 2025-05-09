@@ -21,12 +21,15 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
+import androidx.annotation.OptIn
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 
+@OptIn(UnstableApi::class)
 fun MainViewModel.observePlaylistManager() {
 
     // listen to current-song changes

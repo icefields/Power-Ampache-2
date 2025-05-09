@@ -97,7 +97,8 @@ class SimpleMediaNotificationManager @Inject constructor(
                 }
 
                 override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
-                    mediaSessionService.stopForeground(MediaSessionService.STOP_FOREGROUND_REMOVE)
+                    L("SERVICE- onNotificationCancelled dismissedByUser: $dismissedByUser")
+                    mediaSessionService.stopForeground(MediaSessionService.STOP_FOREGROUND_DETACH)
 //                    mediaSessionService.stopSelf()
                 }
             })
@@ -114,27 +115,27 @@ class SimpleMediaNotificationManager @Inject constructor(
             }
     }
 
-    /**
-     *
-     */
-    @Deprecated("use media notification")
-    private fun startForegroundNotification(mediaSessionService: MediaSessionService) {
-        val notification = Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
-            .setCategory(Notification.CATEGORY_SERVICE)
-            .setContentIntent(
-                PendingIntent.getActivity(
-                    context.applicationContext,
-                    3214,
-                    Intent(context.applicationContext, MainActivity::class.java)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                                    Intent.FLAG_ACTIVITY_NEW_TASK),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            ).build()
-        mediaSessionService.startForeground(NOTIFICATION_ID, notification)
-        L("SERVICE- started ForegroundService")
-    }
+//    /**
+//     *
+//     */
+//    @Deprecated("use media notification")
+//    private fun startForegroundNotification(mediaSessionService: MediaSessionService) {
+//        val notification = Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
+//            .setCategory(Notification.CATEGORY_SERVICE)
+//            .setContentIntent(
+//                PendingIntent.getActivity(
+//                    context.applicationContext,
+//                    3214,
+//                    Intent(context.applicationContext, MainActivity::class.java)
+//                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or
+//                                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
+//                                    Intent.FLAG_ACTIVITY_NEW_TASK),
+//                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//                )
+//            ).build()
+//        mediaSessionService.startForeground(NOTIFICATION_ID, notification)
+//        L("SERVICE- started ForegroundService")
+//    }
 
     fun stopNotificationService(mediaSessionService: MediaSessionService) {
         playerNotificationManager?.setPlayer(null) // Disconnect player

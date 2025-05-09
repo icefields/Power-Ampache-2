@@ -40,7 +40,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackError
@@ -64,11 +67,21 @@ class SimpleMediaServiceHandler @Inject constructor(
 
     // todo: this is available to inject from data layer
     private var applicationCoroutineScope: CoroutineScope? = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var applicationPermanentCoroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var mainCoroutineScope: CoroutineScope? = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     init {
         L("SERVICE- SimpleMediaServiceHandler init")
-        player().addListener(this)
+        applicationPermanentCoroutineScope.launch {
+            playerManager.playerState.filterNotNull().collectLatest {
+                errorHandler.logError("SimpleMediaServiceHandler.init: (SERVICE-) new player received, adding listener")
+                withContext(Dispatchers.Main) {
+                    it.removeListener(this@SimpleMediaServiceHandler) // this shouldn't be necessary
+                    it.addListener(this@SimpleMediaServiceHandler)
+                }
+            }
+        }
+        //player().addListener(this)
     }
 
     private fun player() = playerManager.player
@@ -202,7 +215,7 @@ class SimpleMediaServiceHandler @Inject constructor(
             val qq = playlistManager.currentQueueState.value.filter { it.mediaId == mediaItem?.mediaId }
             if (qq.isNotEmpty()) {
                 val song = qq[0]
-                L("onMediaItemTransition.updateCurrentSong(it)")
+                L("onMediaItemTransition - updateCurrentSong(it)")
                 playlistManager.updateCurrentSong(newSong = song)
 
                 // update media item if url is invalid
