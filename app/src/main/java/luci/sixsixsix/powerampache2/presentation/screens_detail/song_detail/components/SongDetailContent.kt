@@ -62,6 +62,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.common.toDebugMap
+import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
@@ -131,7 +132,7 @@ fun SongDetailContent(
         Box {
             Column {
                 Text(
-                    text = currentSongState?.artist?.name ?: "",
+                    text = currentSongState?.artists?.joinToString { it.name } ?: currentSongState?.artist?.name ?: "",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = fontDimensionResource(id = R.dimen.player_artistName_size),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

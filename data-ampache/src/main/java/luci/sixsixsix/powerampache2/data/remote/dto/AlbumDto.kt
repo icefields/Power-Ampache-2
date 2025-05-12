@@ -22,7 +22,7 @@ data class AlbumDto(
     @SerializedName("artist")
     val artist: MusicAttributeDto?,
 
-    @SerializedName("artists")
+    @SerializedName("songartists")
     val artists: List<MusicAttributeDto>? = listOf(),
 
     @SerializedName("time")
