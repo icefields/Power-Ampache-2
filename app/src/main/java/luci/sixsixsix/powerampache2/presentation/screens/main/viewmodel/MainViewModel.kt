@@ -25,8 +25,6 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.os.IBinder
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.runtime.mutableFloatStateOf
@@ -61,11 +59,11 @@ import luci.sixsixsix.powerampache2.common.Constants.LOCAL_SCROBBLE_TIMEOUT_MS
 import luci.sixsixsix.powerampache2.common.Constants.PLAY_LOAD_TIMEOUT
 import luci.sixsixsix.powerampache2.common.Constants.SERVICE_STOP_TIMEOUT
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
@@ -74,8 +72,6 @@ import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaService
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
-import java.lang.ref.WeakReference
-import java.util.concurrent.Future
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -394,11 +390,10 @@ class MainViewModel @Inject constructor(
     }
 
     @OptIn(UnstableApi::class)
-    fun stopMusicService() = viewModelScope.launch {
-        delay(SERVICE_STOP_TIMEOUT) // safety net, delay stopping the service in case the application just got restored from background
+    private fun stopService() {
         L("SERVICE- stopMusicService isRunning: ${SimpleMediaService.isRunning}")
 
-        if (!SimpleMediaService.isRunning) return@launch
+        if (!SimpleMediaService.isRunning) return
         releaseController()
 
         weakContext.get()?.applicationContext?.let { applicationContext ->
@@ -410,6 +405,17 @@ class MainViewModel @Inject constructor(
                 startMusicServiceCalled = false
                 L.e(e, "SERVICE-")
             }
+        }
+    }
+
+    fun stopMusicService(addDelay: Boolean = true) {
+        if (addDelay) {
+            viewModelScope.launch {
+                delay(SERVICE_STOP_TIMEOUT) // safety net, delay stopping the service in case the application just got restored from background
+                stopService()
+            }
+        } else {
+            stopService()
         }
     }
 
@@ -469,6 +475,18 @@ class MainViewModel @Inject constructor(
         )
 
         releaseController()
+
+        // attempt to stop the service
+//        try {
+//            if (!simpleMediaServiceHandler.isPlaying()) {
+//                stopMusicService(addDelay = false)
+//            }
+//        } catch (e: Exception) {
+//            if (!isPlaying) {
+//                stopMusicService(addDelay = false)
+//            }
+//            L.e(e)
+//        }
 
         super.onCleared()
         logToErrorLogs("onCleared")

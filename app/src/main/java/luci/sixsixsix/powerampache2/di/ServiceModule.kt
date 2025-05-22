@@ -36,6 +36,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.player.NOTIFICATION_INTENT_REQUEST_CODE
 import luci.sixsixsix.powerampache2.player.PlayerManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaNotificationManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
@@ -56,9 +57,7 @@ object ServiceModule {
     ): SimpleMediaNotificationManager = SimpleMediaNotificationManager(
         context = context,
         playerManager = playerManager
-    ).also {
-        Log.e("SERVICE","SERVICE- provideNotificationManager")
-    }
+    )
 
     @ServiceScoped
     @Provides
@@ -66,17 +65,8 @@ object ServiceModule {
         @ApplicationContext context: Context,
         playerManager: PlayerManager
     ) = MediaSession.Builder(context, playerManager.player)
-        .setSessionActivity(
-            PendingIntent.getActivity(context, 3214,
-                Intent(context.applicationContext, MainActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                                Intent.FLAG_ACTIVITY_NEW_TASK),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        ).build().also {
-            Log.e("SERVICE","SERVICE- provideMediaSession")
-        }
+        .setSessionActivity(SimpleMediaNotificationManager.notificationPendingIntent(context))
+        .build()
 
     //@ServiceScoped
     @Singleton
@@ -84,13 +74,13 @@ object ServiceModule {
     fun provideServiceHandler(
         playerManager: PlayerManager,
         playlistManager: MusicPlaylistManager,
-        errorHandler: ErrorHandler
+        errorHandler: ErrorHandler,
+        @ApplicationContext context: Context
     ) =
         SimpleMediaServiceHandler(
             playlistManager = playlistManager,
             playerManager = playerManager,
-            errorHandler = errorHandler
-        ).also {
-            Log.e("SERVICE","SERVICE- provideServiceHandler")
-        }
+            errorHandler = errorHandler,
+            context = context
+        )
 }

@@ -159,6 +159,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
 /**
  * to play albums and playlists
  */
+@UnstableApi
 fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
     startPlayLoading()
     playlistManager.updateCurrentSong(song)

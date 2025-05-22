@@ -21,8 +21,11 @@
  */
 package luci.sixsixsix.powerampache2.player
 
+import android.content.Context
+import android.content.Intent
 import android.media.session.PlaybackState
 import androidx.annotation.OptIn
+import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
@@ -32,6 +35,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource.HttpDataSourceException
 import androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException
 import androidx.media3.exoplayer.ExoPlayer
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -58,7 +62,8 @@ import javax.inject.Singleton
 class SimpleMediaServiceHandler @Inject constructor(
     private val playerManager: PlayerManager,
     private val playlistManager: MusicPlaylistManager,
-    private val errorHandler: ErrorHandler
+    private val errorHandler: ErrorHandler,
+    @ApplicationContext private val context: Context
 ): Player.Listener {
     private val _simpleMediaState = MutableStateFlow<SimpleMediaState>(SimpleMediaState.Initial)
     val simpleMediaState = _simpleMediaState.asStateFlow()
@@ -73,11 +78,11 @@ class SimpleMediaServiceHandler @Inject constructor(
     init {
         L("SERVICE- SimpleMediaServiceHandler init")
         applicationPermanentCoroutineScope.launch {
-            playerManager.playerState.filterNotNull().collectLatest {
+            playerManager.playerState.filterNotNull().collectLatest { pl ->
                 errorHandler.logError("SimpleMediaServiceHandler.init: (SERVICE-) new player received, adding listener")
                 withContext(Dispatchers.Main) {
-                    it.removeListener(this@SimpleMediaServiceHandler) // this shouldn't be necessary
-                    it.addListener(this@SimpleMediaServiceHandler)
+                    pl.removeListener(this@SimpleMediaServiceHandler) // this shouldn't be necessary
+                    pl.addListener(this@SimpleMediaServiceHandler)
                 }
             }
         }
@@ -86,7 +91,7 @@ class SimpleMediaServiceHandler @Inject constructor(
 
     private fun player() = playerManager.player
 
-    fun isPlaying() = playerManager.player.isPlaying
+    fun isPlaying() = player().isPlaying
 
     fun addMediaItem(mediaItem: MediaItem) {
         player().setMediaItem(mediaItem)
@@ -151,13 +156,9 @@ class SimpleMediaServiceHandler @Inject constructor(
             player().playbackState == PlaybackState.STATE_STOPPED ||
             player().playbackState == PlaybackState.STATE_ERROR ||
             player().playbackState == PlaybackState.STATE_NONE) {
-            L("onPlayerEvent !player().isPlaying, PrEPARE")
-
             player().prepare()
         }
-        L("onPlayerEvent !player().isPlaying, play now")
         player().play()
-        L("onPlayerEvent !player().isPlaying, play now -after called play")
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = player().isPlaying)
         startProgressUpdate()
     }
@@ -169,7 +170,6 @@ class SimpleMediaServiceHandler @Inject constructor(
             PlayerEvent.Forward -> player().seekForward()
             PlayerEvent.PlayPause -> {
                 if (player().isPlaying) {
-                    L("onPlayerEvent player().isPlaying, pause now")
                     player().pause()
                     stopProgressUpdate()
                 } else {
@@ -262,6 +262,8 @@ class SimpleMediaServiceHandler @Inject constructor(
     }
 
     private fun stopCoroutines() {
+        dataSourceErrorCountJob?.cancel()
+        dataSourceErrorCountJob = null
         mainCoroutineScope?.cancel()
         mainCoroutineScope = null
         applicationCoroutineScope?.cancel()
@@ -324,7 +326,7 @@ class SimpleMediaServiceHandler @Inject constructor(
                     } else {
                         // Try calling httpError.getCause() to retrieve the underlying cause,
                         // although note that it may be null.
-                        errorHandler<HttpDataSourceException>(label = "onPlayerError HttpDataSourceException", error)
+                        errorHandler<HttpDataSourceException>(label = "onPlayerError HttpDataSourceException cause: ${error.cause ?: "null"}", error)
                     }
                 }
                 else -> {
@@ -333,6 +335,7 @@ class SimpleMediaServiceHandler @Inject constructor(
                 }
             }
         }
+        checkErrorsStop()
 
         // on datasource not available force skip
         retryPlay(forceSkip = Constants.config.forceSkipOnNetworkError && isHttpConnectionError(error.errorCode))
@@ -354,6 +357,34 @@ class SimpleMediaServiceHandler @Inject constructor(
         ))
     }
 
+    private var dataSourceErrorCountJob: Job? = null
+
+    /**
+     * if getting 10 errors in 10 seconds, stop playback
+     */
+    @OptIn(UnstableApi::class)
+    private fun checkErrorsStop() {
+        if (dataSourceErrorCountJob?.isActive == true) return
+
+        dataSourceErrorCountJob?.cancel()
+        dataSourceErrorCountJob = applicationCoroutineScope?.launch {
+            val count = errorCounter
+            L("SERVICE- errorCounter: $errorCounter")
+            delay(5666)
+            L("SERVICE- errorCounter after 5s: $errorCounter")
+
+            withContext(Dispatchers.Main) {
+                if (errorCounter - count > 30 && !player().isPlaying) {
+                    L("SERVICE- stopping player, errors in 5 secs: ${errorCounter - count}")
+                    player().stop()
+                    playlistManager.reset()
+                    //player().release()
+                    //context.stopService(Intent(context, SimpleMediaService::class.java))
+                }
+            }
+        }
+    }
+
     private fun retryPlay(forceSkip: Boolean = false) {
         if (!player().isPlaying &&
             player().playbackState == ExoPlayer.STATE_IDLE
@@ -361,7 +392,8 @@ class SimpleMediaServiceHandler @Inject constructor(
             L("retryPlay STATE")
             player().prepare()
             if ((errorCounter++ % Constants.config.playbackErrorRetries == 0) || forceSkip) {
-                player().seekToNextMediaItem()
+                if (player().hasNextMediaItem())
+                    player().seekToNextMediaItem()
             }
         }
     }

@@ -8,6 +8,7 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
@@ -33,8 +34,9 @@ class PlayerManager @OptIn(UnstableApi::class)
     val playerState = _playerState.asStateFlow()
 
     val player: ExoPlayer
+        @OptIn(UnstableApi::class)
         get() {
-            if (_player == null) {
+            if (_player == null || _player?.isReleased == true) {
                 _player = createPlayer()
                 _playerState.value = _player
             }
@@ -46,6 +48,7 @@ class PlayerManager @OptIn(UnstableApi::class)
         .setAudioAttributes(audioAttributes, true)
         .setHandleAudioBecomingNoisy(true)
         .setTrackSelector(DefaultTrackSelector(context))
+        .setRenderersFactory(DefaultRenderersFactory(context).setEnableDecoderFallback(true))
         .setLoadControl(
             DefaultLoadControl.Builder()
                 .setPrioritizeTimeOverSizeThresholds(true)
