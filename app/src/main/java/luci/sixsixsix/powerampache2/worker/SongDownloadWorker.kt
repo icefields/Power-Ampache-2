@@ -71,7 +71,6 @@ class SongDownloadWorker @AssistedInject constructor(
             try {
                 val inputStream = api.downloadSong(authKey = authKey!!, songId = songId)
                 val filepath = storageManager.saveSong(song, inputStream)
-                L(song.name, filepath)
                 dbDataSource.addDownloadedSong(song, filepath)
                 setProgress(lastUpdate)
                 Result.success(workDataOf(KEY_RESULT_SONG to songId))

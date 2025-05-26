@@ -27,7 +27,6 @@ import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.PLAYBACK_ERROR_COUNT_TIMEOUT_MS
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackError
 import luci.sixsixsix.powerampache2.player.SimpleMediaState
@@ -79,7 +78,6 @@ fun MainViewModel.observePlayerEvents() {
                         // count how many of those errors in the next 30s
                         // if count>30 before 60s stop service
                         if (++playbackErrorCount > 30) {
-                            L("SERVICE- playlistManager.reset() stopMusicService()")
                             playlistManager.reset()
                             stopMusicService()
                         }

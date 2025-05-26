@@ -57,7 +57,6 @@ class SimpleMediaNotificationManager @Inject constructor(
     private var isForegroundService = false
 
     init {
-        L("SERVICE- SimpleMediaNotificationManager init")
         createNotificationChannel()
     }
 
@@ -65,7 +64,6 @@ class SimpleMediaNotificationManager @Inject constructor(
         mediaSessionService: MediaSessionService,
         mediaSession: MediaSession
     ) {
-        L("SERVICE- SimpleMediaNotificationManager startNotificationService")
         buildNotification(mediaSession, mediaSessionService)
         //startForegroundNotification(mediaSessionService)
     }
@@ -85,21 +83,13 @@ class SimpleMediaNotificationManager @Inject constructor(
                     ongoing: Boolean
                 ) {
                     if (ongoing && !isForegroundService) {
-                        L("SERVICE- onNotificationPosted startForeground $notificationId")
                         mediaSessionService.startForeground(notificationId, notification)
                         isForegroundService = true
                     }
-
-//                    if (!ongoing && isForegroundService) {
-//                        L("SERVICE- onNotificationPosted !ongoing && isForegroundService")
-//                        isForegroundService = false
-//                    }
                 }
 
                 override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
-                    L("SERVICE- onNotificationCancelled dismissedByUser: $dismissedByUser")
 //                    mediaSessionService.stopForeground(MediaSessionService.STOP_FOREGROUND_DETACH)
-//                    mediaSessionService.stopSelf()
                     weakMediaService.get()?.stopForeground(MediaSessionService.STOP_FOREGROUND_REMOVE)
                     weakMediaService.get()?.stopSelf()
                     isForegroundService = false
@@ -125,7 +115,6 @@ class SimpleMediaNotificationManager @Inject constructor(
             .setContentIntent(notificationPendingIntent(context))
             .build()
         mediaSessionService.startForeground(NOTIFICATION_ID, notification)
-        L("SERVICE- started ForegroundService")
     }
 
     fun stopNotificationService(mediaSessionService: MediaSessionService) {

@@ -51,11 +51,6 @@ class SimpleMediaService: MediaSessionService() {
         )
     }
 
-//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        L("SERVICE- onStartCommand")
-//        return super.onStartCommand(intent, flags, startId)
-//    }
-
     override fun onDestroy() {
         super.onDestroy()
         L("SERVICE- DESTROY")
