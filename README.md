@@ -111,6 +111,13 @@ Github, PlayStore and Telegram releases are signed by me.
     </th>
     
  </tr>
+<tr>
+	 <th>
+	 <a target="_blank" href="ton://transfer/UQDbJYZyP-kYbRkzg1Wz5Yk-F2v8V2wzBXusZ_QQ0MZ9u1hV?text=donation_1234">
+		       <img height="40" hspace="20" alt=" Donate with TON" src="https://img.shields.io/badge/Donate%20TON-blue?logo=telegram">
+	 </a>
+	</th>
+ </tr>
 </table>
 <hr style="height: 1px; width: 900px;" />
 
