@@ -131,8 +131,13 @@ fun SongDetailContent(
 
         Box {
             Column {
+                val artistName = if (currentSongState?.artists?.isNotEmpty() == true) {
+                    currentSongState?.artists?.joinToString { it.name } ?: currentSongState?.artist?.name
+                } else {
+                    currentSongState?.artist?.name
+                }
                 Text(
-                    text = currentSongState?.artists?.joinToString { it.name } ?: currentSongState?.artist?.name ?: "",
+                    text = artistName ?: "",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = fontDimensionResource(id = R.dimen.player_artistName_size),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
