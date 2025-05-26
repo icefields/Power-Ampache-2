@@ -121,7 +121,7 @@ Github, PlayStore and Telegram releases are signed by me.
   </tr>
   <tr>
     <th>
-      <a target="_blank" href="ton://transfer/UQDbJYZyP-kYbRkzg1Wz5Yk-F2v8V2wzBXusZ_QQ0MZ9u1hV?text=donation_1234">
+      <a target="_blank" href="https://power.ampache.dev/donateton.html">
         <img 
           height="40" 
           hspace="20" 
