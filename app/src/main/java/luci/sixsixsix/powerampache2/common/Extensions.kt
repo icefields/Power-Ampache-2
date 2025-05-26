@@ -26,7 +26,6 @@ import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Patterns
 import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
 import androidx.compose.animation.core.animateFloat
@@ -56,16 +55,8 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.PLAY_STORE_URL
-import luci.sixsixsix.powerampache2.data.common.Constants
-import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_FLOAT
-import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
-import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_TITLE
-import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.io.File
-import java.lang.ref.WeakReference
-import java.security.MessageDigest
 import kotlin.math.absoluteValue
 
 val Int.dpTextUnit: TextUnit
@@ -133,7 +124,7 @@ fun getVersionInfoString(context: Context) = try {
 } catch (e: PackageManager.NameNotFoundException) {
     e.printStackTrace()
     ""
-} + " - DB: ${Constants.DATABASE_VERSION}"
+}// + " - DB: ${Constants.DATABASE_VERSION}"
 
 @Composable
 @ReadOnlyComposable

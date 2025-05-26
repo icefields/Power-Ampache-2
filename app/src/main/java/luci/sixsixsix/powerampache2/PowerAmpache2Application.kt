@@ -29,6 +29,7 @@ import coil.ImageLoaderFactory
 import dagger.hilt.android.HiltAndroidApp
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
+import luci.sixsixsix.powerampache2.domain.utils.ImageLoaderProvider
 import org.acra.config.mailSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
@@ -57,7 +58,8 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
 
         initAcra {
             //core configuration:
-            buildConfigClass = BuildConfig::class.java
+            //buildConfigClass = BuildConfig::class.java
+
             reportFormat = StringFormat.JSON
             //each plugin you chose above can be configured in a block like this:
             mailSender {

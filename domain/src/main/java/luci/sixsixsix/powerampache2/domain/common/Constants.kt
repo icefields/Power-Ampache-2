@@ -29,6 +29,8 @@ object Constants {
     const val PLAYER_CACHE_SIZE_MB_MAX = 2000
     const val PLAYER_CACHE_SIZE_MB_MIN = 20
 
+    const val REQUEST_LIMIT_ALBUMS = 140
+
     // ERROR CONSTANTS
     const val NOT_IMPLEMENTED_USER_ID = "666"
     const val ERROR_INT = -1

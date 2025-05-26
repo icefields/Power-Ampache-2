@@ -61,9 +61,7 @@ android {
             useSupportLibrary = true
         }
 
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
+
 
         buildConfigField("String", "VERSION_QUOTE", "\"$versionQuote\"")
         buildConfigField("String", "ERROR_REPORT_EMAIL", errorReportEmail)
@@ -252,6 +250,7 @@ android {
 dependencies {
     implementation(project(":domain"))
     implementation(project(":MrLog"))
+    implementation(project(":data-ampache"))
 
     implementation(libs.androidx.core.ktx)
 
@@ -303,7 +302,7 @@ dependencies {
     implementation(libs.media3.common)
     implementation(libs.media3.session)
     implementation(libs.media3.ui)
-    implementation(libs.media3.datasource.okhttp)
+// ON DATA LAYER    implementation(libs.media3.datasource.okhttp)
 
     // --- Coil, image-loader --- //
     implementation(libs.coil.compose)
@@ -318,20 +317,17 @@ dependencies {
     //implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
 
     // --- Retrofit --- //
+    // TODO: breaking clean, this doesn't belong here. This is only used to track a NetworkException.
     implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging.interceptor)
-    //implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
 
     // JSON serialization
     implementation(libs.gson)
 
     // --- Room --- //
-    implementation(libs.room.runtime)
-    ksp(libs.room.compiler)
-    // Kotlin Extensions and Coroutines support for Room
-    implementation(libs.room.ktx)
+//    implementation(libs.room.runtime)
+//    ksp(libs.room.compiler)
+//    // Kotlin Extensions and Coroutines support for Room
+//    implementation(libs.room.ktx)
 
     // ERROR REPORT
     implementation(libs.acra.mail)
