@@ -21,8 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.data.common
 
-import luci.sixsixsix.powerampache2.domain.common.Constants.REQUEST_LIMIT_ALBUMS
-
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"

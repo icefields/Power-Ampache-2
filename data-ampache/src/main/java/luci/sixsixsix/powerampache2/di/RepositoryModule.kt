@@ -25,6 +25,14 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import luci.sixsixsix.powerampache2.data.AlbumsRepositoryImpl
+import luci.sixsixsix.powerampache2.data.AmpachePreferencesRepositoryImpl
+import luci.sixsixsix.powerampache2.data.ArtistsRepositoryImpl
+import luci.sixsixsix.powerampache2.data.MusicRepositoryImpl
+import luci.sixsixsix.powerampache2.data.PlaylistsRepositoryImpl
+import luci.sixsixsix.powerampache2.data.SettingsRepositoryImpl
+import luci.sixsixsix.powerampache2.data.SharedPreferencesManagerImpl
+import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.local.DbDataSourceImpl
 import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
@@ -38,7 +46,6 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.NetworkDataSource
-import luci.sixsixsix.powerampache2.domain.utils.ShareManager
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okhttp3.Interceptor
@@ -51,37 +58,37 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindMusicRepository(
-        musicRepositoryImpl: luci.sixsixsix.powerampache2.data.MusicRepositoryImpl
+        musicRepositoryImpl: MusicRepositoryImpl
     ): MusicRepository
 
     @Binds
     @Singleton
     abstract fun bindAlbumsRepository(
-        albumsRepositoryImpl: luci.sixsixsix.powerampache2.data.AlbumsRepositoryImpl
+        albumsRepositoryImpl: AlbumsRepositoryImpl
     ): AlbumsRepository
 
     @Binds
     @Singleton
     abstract fun bindSongsRepository(
-        songsRepositoryImpl: luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
+        songsRepositoryImpl: SongsRepositoryImpl
     ): SongsRepository
 
     @Binds
     @Singleton
     abstract fun bindArtistsRepository(
-        artistsRepository: luci.sixsixsix.powerampache2.data.ArtistsRepositoryImpl
+        artistsRepository: ArtistsRepositoryImpl
     ): ArtistsRepository
 
     @Binds
     @Singleton
     abstract fun bindPlaylistsRepository(
-        playlistsRepositoryImpl: luci.sixsixsix.powerampache2.data.PlaylistsRepositoryImpl
+        playlistsRepositoryImpl: PlaylistsRepositoryImpl
     ): PlaylistsRepository
 
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(
-        settingsRepositoryImpl: luci.sixsixsix.powerampache2.data.SettingsRepositoryImpl
+        settingsRepositoryImpl: SettingsRepositoryImpl
     ): SettingsRepository
 
     @Binds
@@ -111,13 +118,13 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSharedPreferencesManager(
-        sharedPreferencesManagerImpl: luci.sixsixsix.powerampache2.data.SharedPreferencesManagerImpl
+        sharedPreferencesManagerImpl: SharedPreferencesManagerImpl
     ): SharedPreferencesManager
 
     @Binds
     @Singleton
     abstract fun bindAmpachePreferencesRepository(
-        ampachePreferencesRepositoryImpl: luci.sixsixsix.powerampache2.data.AmpachePreferencesRepositoryImpl
+        ampachePreferencesRepositoryImpl: AmpachePreferencesRepositoryImpl
     ): AmpachePreferencesRepository
 
     @Binds

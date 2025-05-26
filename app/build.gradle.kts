@@ -51,9 +51,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 80
+        versionCode = 81
         versionName = "1.01-81"
-        val versionQuote = "[Clean Architecture refactor] This version is powered by gold, Fibonacci and Vesuvius"
+        val versionQuote = "This version is powered by the sum of the digits of its square. [Clean Architecture refactor version]"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

@@ -1,0 +1,6 @@
+— Fixed issues with persistent notifications and player tray widget.
+— Fixed bug where one artist name was showing even on songs with multiple ones.
+— Fixed bug on smart playlists loading where it was showing outdated songs.
+— Updated media3, kotlin, compose libraries.
+— Big structural code changes.
+— Minor bug fixes and adjustments.
