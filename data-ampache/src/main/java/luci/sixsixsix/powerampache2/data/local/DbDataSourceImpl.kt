@@ -4,6 +4,7 @@ import androidx.lifecycle.asFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toLocalSettings
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
@@ -33,10 +34,12 @@ class DbDataSourceImpl @Inject constructor(val db: MusicDatabase): DbDataSource 
 
     @Throws(NullPointerException::class)
     override suspend fun addDownloadedSong(song: Song, filepath: String) {
-        song.toDownloadedSongEntity(
-            filepath,
-            getUsername() ?: throw NullPointerException("Username is null"),
-            serverUrl = getServerUrl() ?: throw NullPointerException("Server Url is null")
+        db.dao.addDownloadedSong(
+            song.toDownloadedSongEntity(
+                filepath,
+                getUsername() ?: throw NullPointerException("Username is null"),
+                serverUrl = getServerUrl() ?: throw NullPointerException("Server Url is null")
+            )
         )
     }
 }

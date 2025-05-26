@@ -25,14 +25,11 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.ui.PlayerNotificationManager
@@ -40,21 +37,26 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.MainActivity
+import java.lang.ref.WeakReference
 import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val NOTIFICATION_ID = 666
+const val NOTIFICATION_INTENT_REQUEST_CODE = 3214
 private const val NOTIFICATION_CHANNEL_NAME = "powerAmp.channel.666"
 private const val NOTIFICATION_CHANNEL_ID = "powerAmp.id.666"
 
+@Singleton
 @UnstableApi
 class SimpleMediaNotificationManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val player: ExoPlayer
+    private val playerManager: PlayerManager
 ) {
     private var notificationManager = NotificationManagerCompat.from(context)
+    private var playerNotificationManager: PlayerNotificationManager? = null
+    private var isForegroundService = false
 
     init {
-        L("SERVICE- SimpleMediaNotificationManager init")
         createNotificationChannel()
     }
 
@@ -62,15 +64,37 @@ class SimpleMediaNotificationManager @Inject constructor(
         mediaSessionService: MediaSessionService,
         mediaSession: MediaSession
     ) {
-        L("SERVICE- SimpleMediaNotificationManager startNotificationService")
-        buildNotification(mediaSession)
-        startForegroundNotification(mediaSessionService)
+        buildNotification(mediaSession, mediaSessionService)
+        //startForegroundNotification(mediaSessionService)
     }
 
-    private fun buildNotification(mediaSession: MediaSession) {
-        PlayerNotificationManager.Builder(context, NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID)
-            .setMediaDescriptionAdapter(SimpleMediaNotificationAdapter(context, mediaSession.sessionActivity))
+    private fun buildNotification(mediaSession: MediaSession, mediaSessionService: MediaSessionService) {
+        val weakMediaService = WeakReference<MediaSessionService>(mediaSessionService)
+        playerNotificationManager = PlayerNotificationManager.Builder(context, NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID)
+            //.setMediaDescriptionAdapter(SimpleMediaNotificationAdapter(context, mediaSession.sessionActivity))
             .setSmallIconResourceId(R.drawable.ic_power_ampache_mono)
+            .setMediaDescriptionAdapter(
+                SimpleMediaNotificationAdapter(context, notificationPendingIntent(context))
+            )
+            .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
+                override fun onNotificationPosted(
+                    notificationId: Int,
+                    notification: Notification,
+                    ongoing: Boolean
+                ) {
+                    if (ongoing && !isForegroundService) {
+                        mediaSessionService.startForeground(notificationId, notification)
+                        isForegroundService = true
+                    }
+                }
+
+                override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
+//                    mediaSessionService.stopForeground(MediaSessionService.STOP_FOREGROUND_DETACH)
+                    weakMediaService.get()?.stopForeground(MediaSessionService.STOP_FOREGROUND_REMOVE)
+                    weakMediaService.get()?.stopSelf()
+                    isForegroundService = false
+                }
+            })
             .build()
             .apply {
                 //setMediaSessionToken(mediaSession.sessionCompatToken)
@@ -80,31 +104,27 @@ class SimpleMediaNotificationManager @Inject constructor(
                 setUseNextActionInCompactView(true)
                 setColorized(true)
                 setPriority(NotificationCompat.PRIORITY_LOW)
-                setPlayer(player)
+                setPlayer(playerManager.player)
             }
     }
 
+    @Deprecated("use media notification")
     private fun startForegroundNotification(mediaSessionService: MediaSessionService) {
         val notification = Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setCategory(Notification.CATEGORY_SERVICE)
-            .setContentIntent(
-                PendingIntent.getActivity(
-                    context.applicationContext,
-                    3214,
-                    Intent(context.applicationContext, MainActivity::class.java)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                                    Intent.FLAG_ACTIVITY_NEW_TASK),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            ).build()
+            .setContentIntent(notificationPendingIntent(context))
+            .build()
         mediaSessionService.startForeground(NOTIFICATION_ID, notification)
     }
 
     fun stopNotificationService(mediaSessionService: MediaSessionService) {
+        isForegroundService = false
+        playerNotificationManager?.setPlayer(null) // Disconnect player
+        playerNotificationManager = null
         mediaSessionService.stopForeground(MediaSessionService.STOP_FOREGROUND_REMOVE)
         notificationManager.cancel(NOTIFICATION_ID)
         notificationManager.cancelAll()
+        mediaSessionService.stopSelf()
     }
 
     private fun createNotificationChannel() = notificationManager.createNotificationChannel(
@@ -114,4 +134,17 @@ class SimpleMediaNotificationManager @Inject constructor(
             NotificationManager.IMPORTANCE_LOW
         )
     )
+
+    companion object {
+        fun notificationPendingIntent(context: Context): PendingIntent = PendingIntent.getActivity(
+            context.applicationContext,
+            NOTIFICATION_INTENT_REQUEST_CODE,
+            Intent(context.applicationContext, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                        Intent.FLAG_ACTIVITY_NEW_TASK
+                ),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
 }

@@ -86,31 +86,50 @@ Github, PlayStore and Telegram releases are signed by me.
 
 <br>
 
-  <h2>Donate to support the project</h2>
-  <table>
+<h2>Donate to support the project</h2>
+<table>
   <tr>
-	<th>
-		<a target="_blank" href="https://buymeacoffee.com/powerampache">
-  <img src="https://github.com/user-attachments/assets/6868a8a5-7fba-4f6c-871d-0a73f1955408" alt="Buy Me a Coffee" width="200" />
-</a> 
+    <th>
+      <a target="_blank" href="https://buymeacoffee.com/powerampache">
+        <img 
+          src="https://github.com/user-attachments/assets/6868a8a5-7fba-4f6c-871d-0a73f1955408" 
+          alt="Buy Me a Coffee" 
+          width="200" />
+      </a> 
     </th>
 	<th>
- <a target="_blank" href="https://www.patreon.com/Icefields">
-      <img width="160" hspace="20" alt="Become a Patreon" 
-         src="https://github.com/user-attachments/assets/c263bc11-3898-44ae-b926-2acd2193de22"></a>
+      <a target="_blank" href="https://www.patreon.com/Icefields">
+        <img 
+          width="160" 
+          hspace="20" 
+          alt="Become a Patreon" 
+          src="https://github.com/user-attachments/assets/c263bc11-3898-44ae-b926-2acd2193de22" >
+      </a>
     </th>
-	  	  </tr>
-	  <tr>
-		  <th>
-	      <a target="_blank" href="https://live.blockcypher.com/btc/address/bc1qm9dvdrukgrqpg5f7466u4cy7tfvwcsc8pqshl4">
-      <img width="200" hspace="20" alt="Donate Bitcoin" src="https://power.ampache.dev/images/banner_bitcoin.png"></a>	
-</th>
-		  <th>
-			  <a target="_blank" href="https://paypal.me/powerampache">
-      <img width="160" hspace="20" alt="Donate - Paypal" src="https://power.ampache.dev/images/banner_paypal.png"></a>
+  </tr>
+  <tr>
+    <th>
+      <a target="_blank" href="https://live.blockcypher.com/btc/address/bc1qm9dvdrukgrqpg5f7466u4cy7tfvwcsc8pqshl4">
+        <img width="200" hspace="20" alt="Donate Bitcoin" src="https://power.ampache.dev/images/banner_bitcoin.png">
+      </a>	
     </th>
-    
- </tr>
+    <th>
+	  <a target="_blank" href="https://paypal.me/powerampache">
+        <img width="160" hspace="20" alt="Donate - Paypal" src="https://power.ampache.dev/images/banner_paypal.png">
+      </a>
+    </th>
+  </tr>
+  <tr>
+    <th>
+      <a target="_blank" href="https://power.ampache.dev/donateton.html">
+        <img 
+          height="40" 
+          hspace="20" 
+          alt=" Donate with TON" 
+          src="https://img.shields.io/badge/Donate%20TON-blue?logo=telegram" >
+	 </a>
+    </th>
+  </tr>
 </table>
 <hr style="height: 1px; width: 900px;" />
 

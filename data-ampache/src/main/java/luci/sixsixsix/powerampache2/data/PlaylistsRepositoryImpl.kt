@@ -52,6 +52,7 @@ import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -281,24 +282,29 @@ class PlaylistsRepositoryImpl @Inject constructor(
      * documentation of this class.
      */
     override suspend fun getSongsFromPlaylist(
-        playlistId: String,
+        playlist: Playlist,
         fetchRemote: Boolean
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
+
+        val playlistId = playlist.id
 
         val isOfflineMode = isOfflineModeEnabled()
         if (isOfflineMode) {
             // if offline mode enabled, grab all the offline data and emit, then return
             emit(
                 Resource.Success(
-                data = dao.getOfflineSongsFromPlaylist(playlistId).map { it.toSong() },
+                data = dao.getOfflineSongsFromPlaylist(playlist.id).map { it.toSong() },
                 networkData = null))
             emit(Resource.Loading(false))
             return@flow
         }
 
-        // emit saved data first
-        val dbData = dao.getSongsFromPlaylist(playlistId).map { it.toSong() }
+        // emit saved data first, only if not a smartlist
+        val dbData = if (playlist.isSmartPlaylist().not())
+            dao.getSongsFromPlaylist(playlistId).map { it.toSong() }
+        else listOf()
+
         emit(Resource.Success(data = dbData, networkData = null))
 
         // if not fetch remote, return
@@ -364,9 +370,10 @@ class PlaylistsRepositoryImpl @Inject constructor(
             emit(Resource.Success(data = songs.toList(), networkData = songs))
         }
 
-        // DO LENGTHY OPERATIONS AFTER EMITTING DATA
+        // DO LENGTHY OPERATIONS AFTER EMITTING DATA, only for non-smartlists
         dao.clearPlaylistSongs(playlistId)
-        dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId, username = cred.username, serverUrl = cred.serverUrl))
+        if (playlist.isSmartPlaylist().not())
+            dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId, username = cred.username, serverUrl = cred.serverUrl))
 
 // commented because: DO LENGTHY OPERATIONS AFTER EMITTING DATA, this has been moved before the db operations
 //        if (!shouldEmitSteps) {
