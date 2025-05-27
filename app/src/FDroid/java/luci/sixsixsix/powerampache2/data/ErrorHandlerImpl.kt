@@ -57,7 +57,6 @@ class ErrorHandlerImpl @Inject constructor(
     private val applicationContext: Application,
     applicationCoroutineScope: CoroutineScope
 ): ErrorHandler {
-
     private var isErrorHandlingEnabled = configProvider.ENABLE_ERROR_LOG
 
     init {
@@ -98,7 +97,6 @@ class ErrorHandlerImpl @Inject constructor(
             .append(
                 when (e) {
                     is UserNotEnabledException -> {
-                        L("aaaa user not enabled $exceptionString")
                         readableMessage = applicationContext.getString(R.string.error_user_notEnabled)
                         "PlaybackException \n $exceptionString"
                     }
