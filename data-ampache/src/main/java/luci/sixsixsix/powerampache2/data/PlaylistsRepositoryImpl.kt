@@ -677,7 +677,6 @@ class PlaylistsRepositoryImpl @Inject constructor(
             val updatedPlaylist = api.getPlaylist(authToken(), playlist.id)
             // check if any of the new songs got added
             val playlistItems = playlist.items ?: 0
-            L(updatedPlaylist.items, playlistItems)
             if ((updatedPlaylist.items == null) || (playlist.items == null) ||
                 (updatedPlaylist.items <= playlistItems)) {
                 throw Exception("The size of the edited playlist and the size of the new playlist are the same. Something went wrong")

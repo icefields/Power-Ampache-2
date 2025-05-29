@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.player
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -30,6 +31,8 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.DefaultMediaNotificationProvider.DEFAULT_CHANNEL_ID
+import androidx.media3.session.DefaultMediaNotificationProvider.DEFAULT_NOTIFICATION_ID
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.ui.PlayerNotificationManager
@@ -40,10 +43,14 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val NOTIFICATION_ID = 666
+// Values from DefaultMediaNotificationProvider TODO: custom notification channels will cause double notification to show
+@SuppressLint("UnsafeOptInUsageError")
+private const val NOTIFICATION_ID = DEFAULT_NOTIFICATION_ID // 666
+@SuppressLint("UnsafeOptInUsageError")
+private const val NOTIFICATION_CHANNEL_ID = DEFAULT_CHANNEL_ID //"default_channel_id" "powerAmp.channel.666"
+
 const val NOTIFICATION_INTENT_REQUEST_CODE = 3214
 private const val NOTIFICATION_CHANNEL_NAME = "powerAmp.channel.666"
-private const val NOTIFICATION_CHANNEL_ID = "powerAmp.id.666"
 
 @Singleton
 @UnstableApi
@@ -72,9 +79,7 @@ class SimpleMediaNotificationManager @Inject constructor(
         playerNotificationManager = PlayerNotificationManager.Builder(context, NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID)
             //.setMediaDescriptionAdapter(SimpleMediaNotificationAdapter(context, mediaSession.sessionActivity))
             .setSmallIconResourceId(R.drawable.ic_power_ampache_mono)
-            .setMediaDescriptionAdapter(
-                SimpleMediaNotificationAdapter(context, notificationPendingIntent(context))
-            )
+            .setMediaDescriptionAdapter(SimpleMediaNotificationAdapter(context, notificationPendingIntent(context)))
             .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
                 override fun onNotificationPosted(
                     notificationId: Int,
@@ -107,8 +112,25 @@ class SimpleMediaNotificationManager @Inject constructor(
             }
     }
 
-    @Deprecated("use media notification")
+
+    /**
+     * this is a placeholder. Media Service requires to call startforeground before 5 seconds
+     * A placeholder while the actual notification appears is used in this case
+     */
+    @Deprecated("not using this anymore")
     private fun startForegroundNotification(mediaSessionService: MediaSessionService) {
+    /*
+        val placeholder = NotificationCompat.Builder(mediaSessionService, NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_power_ampache_mono)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(notificationPendingIntent(context))
+            .setOngoing(true)
+            .setForegroundServiceBehavior(FOREGROUND_SERVICE_IMMEDIATE)
+            .setCategory(Notification.CATEGORY_SERVICE)
+            .setOnlyAlertOnce(true)
+            .build()
+    */
+
         val notification = Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setCategory(Notification.CATEGORY_SERVICE)
             .setContentIntent(notificationPendingIntent(context))

@@ -21,10 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.di
 
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
@@ -36,11 +33,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
-import luci.sixsixsix.powerampache2.player.NOTIFICATION_INTENT_REQUEST_CODE
 import luci.sixsixsix.powerampache2.player.PlayerManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaNotificationManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
-import luci.sixsixsix.powerampache2.presentation.MainActivity
 import javax.inject.Singleton
 
 @Module
