@@ -104,6 +104,7 @@ fun ArtistInfoSection(
 
         Spacer(modifier = Modifier.height(12.dp))
         if (!artist.summary.isNullOrBlank()) {
+            val artistSummary = artist.summary ?: ""
             Text( // name
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,7 +112,7 @@ fun ArtistInfoSection(
                     .clickable {
                         summaryOpen.value = !summaryOpen.value
                     },
-                text = artist.summary,
+                text = artistSummary,
                 fontWeight = FontWeight.Normal,
                 fontSize = 15.sp,
                 maxLines = if (summaryOpen.value) { 150 } else { 5 },

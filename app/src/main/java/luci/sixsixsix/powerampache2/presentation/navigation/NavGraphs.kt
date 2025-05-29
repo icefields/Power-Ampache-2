@@ -3,7 +3,6 @@ package luci.sixsixsix.powerampache2.presentation.navigation
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
 

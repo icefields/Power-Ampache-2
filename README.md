@@ -86,31 +86,50 @@ Github, PlayStore and Telegram releases are signed by me.
 
 <br>
 
-  <h2>Donate to support the project</h2>
-  <table>
+<h2>Donate to support the project</h2>
+<table>
   <tr>
-	<th>
-		<a target="_blank" href="https://buymeacoffee.com/powerampache">
-  <img src="https://github.com/user-attachments/assets/6868a8a5-7fba-4f6c-871d-0a73f1955408" alt="Buy Me a Coffee" width="200" />
-</a> 
+    <th>
+      <a target="_blank" href="https://buymeacoffee.com/powerampache">
+        <img 
+          src="https://github.com/user-attachments/assets/6868a8a5-7fba-4f6c-871d-0a73f1955408" 
+          alt="Buy Me a Coffee" 
+          width="200" />
+      </a> 
     </th>
 	<th>
- <a target="_blank" href="https://www.patreon.com/Icefields">
-      <img width="160" hspace="20" alt="Become a Patreon" 
-         src="https://github.com/user-attachments/assets/c263bc11-3898-44ae-b926-2acd2193de22"></a>
+      <a target="_blank" href="https://www.patreon.com/Icefields">
+        <img 
+          width="160" 
+          hspace="20" 
+          alt="Become a Patreon" 
+          src="https://github.com/user-attachments/assets/c263bc11-3898-44ae-b926-2acd2193de22" >
+      </a>
     </th>
-	  	  </tr>
-	  <tr>
-		  <th>
-	      <a target="_blank" href="https://live.blockcypher.com/btc/address/bc1qm9dvdrukgrqpg5f7466u4cy7tfvwcsc8pqshl4">
-      <img width="200" hspace="20" alt="Donate Bitcoin" src="https://power.ampache.dev/images/banner_bitcoin.png"></a>	
-</th>
-		  <th>
-			  <a target="_blank" href="https://paypal.me/powerampache">
-      <img width="160" hspace="20" alt="Donate - Paypal" src="https://power.ampache.dev/images/banner_paypal.png"></a>
+  </tr>
+  <tr>
+    <th>
+      <a target="_blank" href="https://live.blockcypher.com/btc/address/bc1qm9dvdrukgrqpg5f7466u4cy7tfvwcsc8pqshl4">
+        <img width="200" hspace="20" alt="Donate Bitcoin" src="https://power.ampache.dev/images/banner_bitcoin.png">
+      </a>	
     </th>
-    
- </tr>
+    <th>
+	  <a target="_blank" href="https://paypal.me/powerampache">
+        <img width="160" hspace="20" alt="Donate - Paypal" src="https://power.ampache.dev/images/banner_paypal.png">
+      </a>
+    </th>
+  </tr>
+  <tr>
+    <th>
+      <a target="_blank" href="https://power.ampache.dev/donateton.html">
+        <img 
+          height="40" 
+          hspace="20" 
+          alt=" Donate with TON" 
+          src="https://img.shields.io/badge/Donate%20TON-blue?logo=telegram" >
+	 </a>
+    </th>
+  </tr>
 </table>
 <hr style="height: 1px; width: 900px;" />
 
@@ -231,11 +250,11 @@ The app is currently translated in the following languages:
 Non-English translations are usually not complete, since I keep adding new features all the time.
 <br>
 In the future I will automate translation contributions, right now you have the following options.<br>
-- Use this tool I made (source code in my Ampache Helper Scripts repo): https://powerampache-translations.tiiny.io . For new translations, start with English and edit one by one all the strings. When done, click on the save-button to export the newly created xml file. Please send it to me afterwards. For existing languages, scroll to the bottom (that's usually where new strings are located), translate and then save the file and send it to me.
 - If you're an Android developer just create the resource directories and files and open a PR (`strings.xml` is where translatable strings are located).
 - If you're not familiar with Android development and don't know how to create translation resources, but you are able to edit XML files: you can just grab `strings.xml`, edit it and send it back to me. I'll review it and will include it in the app in the next release.
   Example (italian translation):
 - If you're not familiar with Android development and also not sure how to edit xml files, just send me a text document with the translations and I will take care of it.
+- currently not working ~~Use this tool I made (source code in my Ampache Helper Scripts repo): https://powerampache-translations.tiiny.io . For new translations, start with English and edit one by one all the strings. When done, click on the save-button to export the newly created xml file. Please send it to me afterwards. For existing languages, scroll to the bottom (that's usually where new strings are located), translate and then save the file and send it to me.~~
 
 * * *
 

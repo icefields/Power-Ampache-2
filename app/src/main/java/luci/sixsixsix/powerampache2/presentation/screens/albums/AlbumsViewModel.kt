@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants.NETWORK_REQUEST_LIMIT_ALBUMS
+import luci.sixsixsix.powerampache2.domain.common.Constants.REQUEST_LIMIT_ALBUMS
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
@@ -108,7 +108,7 @@ class AlbumsViewModel @Inject constructor(
         query: String = state.searchQuery.lowercase(),
         fetchRemote: Boolean = true,
         offset: Int = 0,
-        limit: Int = NETWORK_REQUEST_LIMIT_ALBUMS,
+        limit: Int = REQUEST_LIMIT_ALBUMS,
         sort: AlbumSortOrder = state.sort,
         order: SortOrder = state.order
     ) = viewModelScope.launch {

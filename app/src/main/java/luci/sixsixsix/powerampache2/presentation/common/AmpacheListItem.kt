@@ -71,8 +71,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_INT
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel

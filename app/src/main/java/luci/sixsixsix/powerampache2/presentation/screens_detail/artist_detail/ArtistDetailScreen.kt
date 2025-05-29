@@ -77,7 +77,6 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
-import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.AlbumDetailEvent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistInfoEvent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components.ArtistInfoSection

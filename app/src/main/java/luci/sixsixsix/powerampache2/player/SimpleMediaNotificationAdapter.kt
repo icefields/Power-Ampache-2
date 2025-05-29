@@ -28,7 +28,7 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerNotificationManager
-import coil.ImageLoader
+import coil.imageLoader
 import coil.request.ImageRequest
 
 @UnstableApi
@@ -45,7 +45,7 @@ class SimpleMediaNotificationAdapter(
         player: Player,
         callback: PlayerNotificationManager.BitmapCallback
     ): Bitmap? {
-        val loader = ImageLoader(context)
+        val loader = context.imageLoader
         val req = ImageRequest.Builder(context)
             .data(player.mediaMetadata.artworkUri)
             .target { result ->

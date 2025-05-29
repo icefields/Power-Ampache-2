@@ -18,4 +18,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Power Ampache 2"
 include(":app")
- 
+include(":domain")
+include(":data-ampache")
+include(":MrLog")

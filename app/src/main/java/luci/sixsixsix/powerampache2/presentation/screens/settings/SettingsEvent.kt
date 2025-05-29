@@ -21,8 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.settings
 
-import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
-import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
+import luci.sixsixsix.powerampache2.domain.models.settings.PowerAmpTheme
+import luci.sixsixsix.powerampache2.domain.models.settings.StreamingQuality
 
 sealed class SettingsEvent {
     data class OnEnableRemoteLoggingSwitch(val newValue: Boolean): SettingsEvent()

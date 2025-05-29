@@ -68,7 +68,7 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.WeakContext
+import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.presentation.common.PlayButton

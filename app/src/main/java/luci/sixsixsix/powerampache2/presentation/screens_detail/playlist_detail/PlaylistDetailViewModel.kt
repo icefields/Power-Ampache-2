@@ -58,7 +58,7 @@ import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.SortMode
+import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject
@@ -126,7 +126,7 @@ class PlaylistDetailViewModel @Inject constructor(
             is RecentPlaylist -> getRecentSongs(fetchRemote = true)
             is FlaggedPlaylist -> getFlaggedSongs(fetchRemote = true)
             is FrequentPlaylist -> getFrequentSongs(fetchRemote = true)
-            else -> getSongsFromPlaylist(playlistId = playlist.id, fetchRemote = true)
+            else -> getSongsFromPlaylist(playlistId = playlist, fetchRemote = true)
         }
     }
 
@@ -197,7 +197,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 editPlaylist(newList = newList)
             }
             is PlaylistDetailsEditEvent.OnRemoveSong ->
-                removeSongFromPlaylist(playlistId = playlistStateFlow.value.id, songId = event.song.mediaId)
+                removeSongFromPlaylist(playlist = playlistStateFlow.value, songId = event.song.mediaId)
             PlaylistDetailsEditEvent.OnRemoveSongDismiss -> { }
             is PlaylistDetailsEditEvent.OnSongSelected -> {
                 editState = editState.copy(selectedSongs = editState.selectedSongs.toMutableList().apply {
@@ -255,7 +255,7 @@ class PlaylistDetailViewModel @Inject constructor(
         } else Pair("", "")
 
 
-    private fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true) {
+    private fun getSongsFromPlaylist(playlistId: Playlist, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             playlistsRepository
                 .getSongsFromPlaylist(playlistId, fetchRemote)
@@ -303,7 +303,7 @@ class PlaylistDetailViewModel @Inject constructor(
                     is Resource.Success -> {
                         result.data?.let {
                             // fetch songs without network request
-                            getSongsFromPlaylist(playlist.id, false)
+                            getSongsFromPlaylist(playlist, false)
                         }
                     }
                     is Resource.Error ->
@@ -314,13 +314,13 @@ class PlaylistDetailViewModel @Inject constructor(
             }
     }
 
-    private fun removeSongFromPlaylist(playlistId: String, songId: String) = viewModelScope.launch {
+    private fun removeSongFromPlaylist(playlist: Playlist, songId: String) = viewModelScope.launch {
         playlistsRepository
-            .removeSongFromPlaylist(playlistId = playlistId, songId = songId).collect { result ->
+            .removeSongFromPlaylist(playlistId = playlist.id, songId = songId).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {
-                            getSongsFromPlaylist(playlistId, true)
+                            getSongsFromPlaylist(playlist, true)
                         }
                     }
                     is Resource.Error ->

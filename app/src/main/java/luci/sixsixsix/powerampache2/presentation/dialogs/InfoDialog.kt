@@ -47,8 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import luci.sixsixsix.powerampache2.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.common.toDebugMap
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.domain.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 @Composable

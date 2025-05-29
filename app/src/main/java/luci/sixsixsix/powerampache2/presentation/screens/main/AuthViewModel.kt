@@ -42,8 +42,8 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.common.sha256
-import luci.sixsixsix.powerampache2.data.remote.disableSSLCertificateVerify
+import luci.sixsixsix.powerampache2.domain.common.sha256
+import luci.sixsixsix.powerampache2.common.disableSSLCertificateVerify
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager

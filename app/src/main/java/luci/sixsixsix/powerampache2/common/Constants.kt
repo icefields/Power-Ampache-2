@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024  Antonio Tari
+ * Copyright (C) 2025  Antonio Tari
  *
  * This file is a part of Power Ampache 2
  * Ampache Android client application
@@ -22,37 +22,12 @@
 package luci.sixsixsix.powerampache2.common
 
 import luci.sixsixsix.powerampache2.BuildConfig
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
 
-
+// UI constants
 object Constants {
-    // LOCAL DB
-    const val DB_LOCAL_NAME = "musicdb.db"
-    const val DATABASE_VERSION = 83
-
-    const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
-
     const val IS_AMPACHE_DATA = BuildConfig.IS_AMPACHE_DATA
-
     const val AMPACHE_PREFERENCE_UNDO_VISIBLE = false
-
-    // NETWORK
-    const val AMPACHE_USER_AGENT = "PowerAmpache2-${BuildConfig.VERSION_NAME}"
-    const val TIMEOUT_CONNECTION_S = 15L
-    const val TIMEOUT_READ_S = 60L
-    const val TIMEOUT_WRITE_S = 60L
-    const val NETWORK_REQUEST_LIMIT_HOME = 40
-    const val NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE = 40
-    const val DATABASE_LIMIT_ELEMENTS = 66
-    const val QUICK_PLAY_MIN_SONGS = 50
-    const val USER_ACCESS_DEFAULT = 25
-    const val USER_EMAIL_DEFAULT = ""
-    const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
-    const val NETWORK_REQUEST_LIMIT_ARTISTS = 30
-    const val NETWORK_REQUEST_LIMIT_SONGS = 40
-    const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
-    const val NETWORK_REQUEST_LIMIT_ALBUMS = 140
-
-    const val ADMIN_USERNAME = "PowerAmpache"
 
     // TIMEOUTS (non-network)
     const val LOCAL_SCROBBLE_TIMEOUT_MS = 20000L
@@ -62,36 +37,6 @@ object Constants {
     const val HOME_LOADING_TIMEOUT = 1000L
     const val SERVICE_STOP_TIMEOUT = 2000L
     const val SEARCH_TIMEOUT = 1200L    // allow user to type before starting search
-
-    // PLAYER BUFFER CONSTANTS
-    // default values, in milliseconds
-    const val BACK_BUFFER_MS = 30000
-    const val BUFFER_MIN_MS = 60000
-    const val BUFFER_MAX_MS = 120000
-    const val BUFFER_FOR_PLAYBACK_MS = 30000
-    const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 35000
-    // max values, in seconds
-    const val MIN_BUFFER_MAX = 500
-    const val MAX_BUFFER_MAX = 700
-    const val BACK_BUFFER_MAX = 200
-    const val PLAYBACK_BUFFER_MAX = 200
-    const val PLAYBACK_REBUFFER_MAX = 300
-
-    const val PLAYER_CACHE_SIZE_MB = 100
-    const val PLAYER_CACHE_SIZE_MB_MAX = 2000
-    const val PLAYER_CACHE_SIZE_MB_MIN = 20
-
-    // ERROR CONSTANTS
-    const val NOT_IMPLEMENTED_USER_ID = "666"
-    const val ERROR_INT = -1
-    const val ERROR_FLOAT = ERROR_INT.toFloat()
-    const val ERROR_STRING = "ERROR"
-    const val LOADING_STRING = "LOADING"
-    const val USER_ID_ERROR = ERROR_INT
-
-    // FLAGS
-    const val CLEAR_TABLE_AFTER_FETCH = false
-    const val ALWAYS_FETCH_ALL_PLAYLISTS = true
 
     // DEBUG VALUES
     const val ERROR_TITLE = ERROR_STRING
@@ -114,14 +59,4 @@ object Constants {
     const val PATREON_IMG_URL = "https://github.com/user-attachments/assets/3318ab05-3c7e-42dd-8784-f12129c0915d"
     const val PATREON_URL = "https://www.patreon.com/Icefields"
     const val BUYMEACOFFEE_URL = "https://buymeacoffee.com/powerampache"
-
-    const val DOGMAZIC_FAKE_EMAIL = "floss.social/@PowerAmpache"
-    const val DOGMAZIC_FAKE_NAME = "Draven Wilhelmine"
-    const val DOGMAZIC_FAKE_USERNAME = "PowerAmpache"
-    const val DOGMAZIC_FAKE_STATE = "Ehime"
-    const val DOGMAZIC_FAKE_CITY = "Aoshima"
-
-    // fetch this from remote config or initialize locally
-    const val CONFIG_URL = "https://power.ampache.dev/${BuildConfig.REMOTE_CONFIG_FILE}"
-    var config = Pa2Config()
 }

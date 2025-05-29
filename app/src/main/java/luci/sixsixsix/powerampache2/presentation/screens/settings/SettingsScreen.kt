@@ -72,14 +72,17 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
-import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
+import luci.sixsixsix.powerampache2.common.Constants.IS_AMPACHE_DATA
+import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.domain.models.settings.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
-import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
+import luci.sixsixsix.powerampache2.domain.models.settings.StreamingQuality
 import luci.sixsixsix.powerampache2.domain.models.User
-import luci.sixsixsix.powerampache2.domain.models.streamQualityDropdownItems
-import luci.sixsixsix.powerampache2.domain.models.themesDropDownItems
-import luci.sixsixsix.powerampache2.domain.models.toPowerAmpacheDropdownItem
+import luci.sixsixsix.powerampache2.ui.getTitleRes
+import luci.sixsixsix.powerampache2.ui.isThemeAvailable
+import luci.sixsixsix.powerampache2.ui.streamQualityDropdownItems
+import luci.sixsixsix.powerampache2.ui.themesDropDownItems
+import luci.sixsixsix.powerampache2.ui.toPowerAmpacheDropdownItem
 import luci.sixsixsix.powerampache2.presentation.common.DonateConsider
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpCheckBox
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
@@ -422,7 +425,7 @@ fun SettingsScreenContent(
                     onCheckedChange = onMonoValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
-                9 -> if (Constants.IS_AMPACHE_DATA) {
+                9 -> if (IS_AMPACHE_DATA) {
                     AmpacheSettingsListItem(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -579,7 +582,7 @@ fun ThemesRadioGroup(
                     horizontalArrangement = Arrangement.Start
                 ) {
                     RadioButton(
-                        enabled = item.isEnabled,
+                        enabled = item.isThemeAvailable(),
                         selected = selected == item,
                         onClick = {
                             setSelected(item)
@@ -589,7 +592,7 @@ fun ThemesRadioGroup(
                         )
                     )
                     Text(
-                        text = stringResource(id = item.title),
+                        text = stringResource(id = item.getTitleRes()),
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                 }
@@ -655,7 +658,7 @@ fun SettingsThemeSelector(
             shape = RoundedCornerShape(10.dp)
         ) {
             Text(
-                text = "Theme Selector\n(${stringResource(id = selected.title)})",
+                text = "Theme Selector\n(${stringResource(id = selected.getTitleRes())})",
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 17.sp,

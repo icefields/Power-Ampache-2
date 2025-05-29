@@ -56,11 +56,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
-import luci.sixsixsix.powerampache2.common.toDebugMap
+import luci.sixsixsix.powerampache2.domain.common.toDebugMap
+import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
@@ -71,6 +73,7 @@ import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDetailContent(
@@ -128,8 +131,13 @@ fun SongDetailContent(
 
         Box {
             Column {
+                val artistName = if (currentSongState?.artists?.isNotEmpty() == true) {
+                    currentSongState?.artists?.joinToString { it.name } ?: currentSongState?.artist?.name
+                } else {
+                    currentSongState?.artist?.name
+                }
                 Text(
-                    text = currentSongState?.artist?.name ?: "",
+                    text = artistName ?: "",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = fontDimensionResource(id = R.dimen.player_artistName_size),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

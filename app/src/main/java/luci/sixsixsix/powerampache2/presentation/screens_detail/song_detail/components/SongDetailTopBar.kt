@@ -49,7 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_TITLE
 import luci.sixsixsix.powerampache2.presentation.common.StarRatingButton
 import luci.sixsixsix.powerampache2.presentation.common.TopBarCircularProgress
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
@@ -88,14 +88,14 @@ fun SongDetailTopBar(
         ) {
             Text(
                 modifier = Modifier.basicMarquee(),
-                text = currentSongState?.title ?: Constants.ERROR_TITLE,
+                text = currentSongState?.title ?: ERROR_TITLE,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 maxLines = 1,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
-            val albumYear = "${currentSongState?.album?.name ?: Constants.ERROR_TITLE} (${currentSongState?.year ?: ""})"
+            val albumYear = "${currentSongState?.album?.name ?: ERROR_TITLE} (${currentSongState?.year ?: ""})"
             Text(
                 modifier = Modifier.basicMarquee(),
                 text = albumYear,

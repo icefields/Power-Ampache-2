@@ -21,7 +21,11 @@
  */
 package luci.sixsixsix.powerampache2.player
 
+import android.content.Context
+import android.content.Intent
 import android.media.session.PlaybackState
+import androidx.annotation.OptIn
+import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
@@ -31,92 +35,112 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource.HttpDataSourceException
 import androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException
 import androidx.media3.exoplayer.ExoPlayer
-import kotlinx.coroutines.DelicateCoroutinesApi
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackError
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackException
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.PlaybackError
 import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
 import javax.inject.Inject
+import javax.inject.Singleton
 
-
-@OptIn(DelicateCoroutinesApi::class)
+@Singleton
 class SimpleMediaServiceHandler @Inject constructor(
-    private val player: ExoPlayer,
+    private val playerManager: PlayerManager,
     private val playlistManager: MusicPlaylistManager,
-    private val errorHandler: ErrorHandler
+    private val errorHandler: ErrorHandler,
+    @ApplicationContext private val context: Context
 ): Player.Listener {
     private val _simpleMediaState = MutableStateFlow<SimpleMediaState>(SimpleMediaState.Initial)
     val simpleMediaState = _simpleMediaState.asStateFlow()
     private var job: Job? = null
     private var errorCounter = 0
 
+    // todo: this is available to inject from data layer
+    private var applicationCoroutineScope: CoroutineScope? = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var applicationPermanentCoroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var mainCoroutineScope: CoroutineScope? = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     init {
         L("SERVICE- SimpleMediaServiceHandler init")
-        player.addListener(this)
-        job = Job()
+        applicationPermanentCoroutineScope.launch {
+            playerManager.playerState.filterNotNull().collectLatest { pl ->
+                errorHandler.logError("SimpleMediaServiceHandler.init: (SERVICE-) new player received, adding listener")
+                withContext(Dispatchers.Main) {
+                    pl.removeListener(this@SimpleMediaServiceHandler) // this shouldn't be necessary
+                    pl.addListener(this@SimpleMediaServiceHandler)
+                }
+            }
+        }
+        //player().addListener(this)
     }
 
-    fun isPlaying() = player.isPlaying
+    private fun player() = playerManager.player
+
+    fun isPlaying() = player().isPlaying
 
     fun addMediaItem(mediaItem: MediaItem) {
-        player.setMediaItem(mediaItem)
-        player.prepare()
+        player().setMediaItem(mediaItem)
+        player().prepare()
     }
 
     fun addMediaItem(index: Int, mediaItem: MediaItem) {
-        player.addMediaItem(index, mediaItem)
-        player.prepare()
+        player().addMediaItem(index, mediaItem)
+        player().prepare()
     }
 
-    fun getMediaItemCount() = player.mediaItemCount
+    fun getMediaItemCount() = player().mediaItemCount
 
     fun addMediaItemList(mediaItems: List<MediaItem>) {
-        if(mediaItems.isNullOrEmpty() && player.mediaItemCount == 0) return
-        if (player.mediaItemCount > 0 &&
-            playlistManager.currentSongState.value?.mediaId == player.currentMediaItem?.mediaId) {
+        if(mediaItems.isNullOrEmpty() && player().mediaItemCount == 0) return
+        if (player().mediaItemCount > 0 &&
+            playlistManager.currentSongState.value?.mediaId == player().currentMediaItem?.mediaId) {
             // if the current song of the playlist (if playlist is not empty) corresponds to the current
             // player song, ie. there is a song playing or paused and that song is inside both lists:
             // find current item in the list
             // split current list in 2, before and after current element
             // remove everything from mediaItems except the current
-            player.removeMediaItems(0, player.currentMediaItemIndex)
-            player.removeMediaItems(player.currentMediaItemIndex + 1, player.mediaItemCount)
+            player().removeMediaItems(0, player().currentMediaItemIndex)
+            player().removeMediaItems(player().currentMediaItemIndex + 1, player().mediaItemCount)
 
-            val indexInQueue = mediaItems.map { mediaItem ->  mediaItem.mediaId }.indexOf(player.currentMediaItem?.mediaId)
+            val indexInQueue = mediaItems.map { mediaItem ->  mediaItem.mediaId }.indexOf(player().currentMediaItem?.mediaId)
             if (!isPlaying() && indexInQueue > -1) {
-                player.addMediaItem(indexInQueue, mediaItems[indexInQueue])
+                player().addMediaItem(indexInQueue, mediaItems[indexInQueue])
             }
             if (indexInQueue >= 0 && indexInQueue < mediaItems.size) {
-                player.addMediaItems(0, mediaItems.subList(0, indexInQueue))
-                player.addMediaItems(
-                    player.currentMediaItemIndex + 1,
+                player().addMediaItems(0, mediaItems.subList(0, indexInQueue))
+                player().addMediaItems(
+                    player().currentMediaItemIndex + 1,
                     mediaItems.subList(indexInQueue + 1, mediaItems.size)
                 )
             } else {
-                player.setMediaItems(mediaItems)
+                player().setMediaItems(mediaItems)
             }
         } else {
-            player.setMediaItems(mediaItems)
+            player().setMediaItems(mediaItems)
         }
-        player.prepare()
+        player().prepare()
     }
 
     private fun indexOfSong(mediaId: String): Int {
         var indexToSeekTo = -1
         var i = 0
-        while(indexToSeekTo == -1 && i < player.mediaItemCount) {
-            if (player.getMediaItemAt(i).mediaId == mediaId) {
+        while(indexToSeekTo == -1 && i < player().mediaItemCount) {
+            if (player().getMediaItemAt(i).mediaId == mediaId) {
                 indexToSeekTo = i
             }
             ++i
@@ -124,68 +148,63 @@ class SimpleMediaServiceHandler @Inject constructor(
         return indexToSeekTo
     }
 
-    private suspend fun play() {
+    private fun play() {
         // TODO check if there is actually songs in the queue before playing
         //  do the same with forceplay?
         if (simpleMediaState.value == SimpleMediaState.Idle ||
             simpleMediaState.value == SimpleMediaState.Ended ||
-            player.playbackState == PlaybackState.STATE_STOPPED ||
-            player.playbackState == PlaybackState.STATE_ERROR ||
-            player.playbackState == PlaybackState.STATE_NONE) {
-            L("onPlayerEvent !player.isPlaying, PrEPARE")
-
-            player.prepare()
+            player().playbackState == PlaybackState.STATE_STOPPED ||
+            player().playbackState == PlaybackState.STATE_ERROR ||
+            player().playbackState == PlaybackState.STATE_NONE) {
+            player().prepare()
         }
-        L("onPlayerEvent !player.isPlaying, play now")
-        player.play()
-        L("onPlayerEvent !player.isPlaying, play now -after called play")
-        _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = player.isPlaying)
+        player().play()
+        _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = player().isPlaying)
         startProgressUpdate()
     }
 
-    suspend fun onPlayerEvent(playerEvent: PlayerEvent) {
-        L(playerEvent, player.mediaItemCount, player.currentMediaItem?.mediaId, player.currentMediaItem?.mediaMetadata?.title)
+    fun onPlayerEvent(playerEvent: PlayerEvent) {
+        L(playerEvent, player().mediaItemCount, player().currentMediaItem?.mediaId, player().currentMediaItem?.mediaMetadata?.title)
         when (playerEvent) {
-            PlayerEvent.Backward -> player.seekBack()
-            PlayerEvent.Forward -> player.seekForward()
+            PlayerEvent.Backward -> player().seekBack()
+            PlayerEvent.Forward -> player().seekForward()
             PlayerEvent.PlayPause -> {
-                if (player.isPlaying) {
-                    L("onPlayerEvent player.isPlaying, pause now")
-                    player.pause()
+                if (player().isPlaying) {
+                    player().pause()
                     stopProgressUpdate()
                 } else {
                     play()
                 }
             }
             is PlayerEvent.Stop -> stopProgressUpdate()
-            is PlayerEvent.Progress -> player.seekTo((player.duration * playerEvent.newProgress).toLong())
-            PlayerEvent.SkipBack -> player.seekToPreviousMediaItem()
-            PlayerEvent.SkipForward -> player.seekToNextMediaItem()
+            is PlayerEvent.Progress -> player().seekTo((player().duration * playerEvent.newProgress).toLong())
+            PlayerEvent.SkipBack -> player().seekToPreviousMediaItem()
+            PlayerEvent.SkipForward -> player().seekToNextMediaItem()
             is PlayerEvent.ForcePlay -> {
                 val indexToSeekTo = indexOfSong(playerEvent.mediaItem.mediaId)
                 if (indexToSeekTo >= 0) {
                     // check if the url is the same
-                    val media = player.getMediaItemAt(indexToSeekTo)
+                    val media = player().getMediaItemAt(indexToSeekTo)
                     if (media.localConfiguration?.uri != playerEvent.mediaItem.localConfiguration?.uri) {
                         L("not equals!! ${media.localConfiguration?.uri} ${playerEvent.mediaItem.localConfiguration?.uri}")
-                        player.replaceMediaItem(indexToSeekTo, media)
+                        player().replaceMediaItem(indexToSeekTo, media)
                     }
 
-                    player.seekTo(indexToSeekTo, 0)
+                    player().seekTo(indexToSeekTo, 0)
                 } else {
                     addMediaItem(0, playerEvent.mediaItem)
-                    player.seekTo(0, 0)
+                    player().seekTo(0, 0)
                 }
 
                 play()
             }
-            is PlayerEvent.RepeatToggle -> player.repeatMode =
+            is PlayerEvent.RepeatToggle -> player().repeatMode =
                 when(playerEvent.repeatMode) {
                     RepeatMode.OFF -> Player.REPEAT_MODE_OFF
                     RepeatMode.ONE -> Player.REPEAT_MODE_ONE
                     RepeatMode.ALL -> Player.REPEAT_MODE_ALL
                 }
-            is PlayerEvent.ShuffleToggle -> player.shuffleModeEnabled = playerEvent.shuffleOn
+            is PlayerEvent.ShuffleToggle -> player().shuffleModeEnabled = playerEvent.shuffleOn
         }
     }
 
@@ -196,7 +215,7 @@ class SimpleMediaServiceHandler @Inject constructor(
             val qq = playlistManager.currentQueueState.value.filter { it.mediaId == mediaItem?.mediaId }
             if (qq.isNotEmpty()) {
                 val song = qq[0]
-                L("onMediaItemTransition.updateCurrentSong(it)")
+                L("onMediaItemTransition - updateCurrentSong(it)")
                 playlistManager.updateCurrentSong(newSong = song)
 
                 // update media item if url is invalid
@@ -228,17 +247,27 @@ class SimpleMediaServiceHandler @Inject constructor(
             }
             ExoPlayer.STATE_BUFFERING -> {
                 L("STATE_BUFFERING")
-                _simpleMediaState.value = SimpleMediaState.Buffering(player.currentPosition, player.isPlaying)
+                _simpleMediaState.value = SimpleMediaState.Buffering(player().currentPosition, player().isPlaying)
             }
             ExoPlayer.STATE_READY -> {
-                _simpleMediaState.value = SimpleMediaState.Ready(player.duration)
+                _simpleMediaState.value = SimpleMediaState.Ready(player().duration)
                 L("STATE_READY")
             }
             ExoPlayer.STATE_ENDED -> {
                 _simpleMediaState.value = SimpleMediaState.Ended
                 L("STATE_ENDED")
+                stopCoroutines()
             }
         }
+    }
+
+    private fun stopCoroutines() {
+        dataSourceErrorCountJob?.cancel()
+        dataSourceErrorCountJob = null
+        mainCoroutineScope?.cancel()
+        mainCoroutineScope = null
+        applicationCoroutineScope?.cancel()
+        applicationCoroutineScope = null
     }
 
     override fun onIsLoadingChanged(isLoading: Boolean) {
@@ -246,37 +275,43 @@ class SimpleMediaServiceHandler @Inject constructor(
         _simpleMediaState.value = SimpleMediaState.Loading(isLoading)
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = isPlaying)
         if (isPlaying) {
-            GlobalScope.launch(Dispatchers.Main) {
-                startProgressUpdate()
-            }
+            startProgressUpdate()
         } else {
             stopProgressUpdate()
         }
     }
 
-    private suspend fun startProgressUpdate() = job.run {
-        while(true) {
-            delay(500)
-            _simpleMediaState.value = SimpleMediaState.Progress(player.currentPosition, player.isPlaying)
+    private fun startProgressUpdate() {
+        job?.cancel()
+        job = (mainCoroutineScope ?: CoroutineScope(Dispatchers.Main + SupervisorJob()).also {
+            mainCoroutineScope = it
+        }).launch{
+            while (true) {
+                delay(500)
+                _simpleMediaState.value =
+                    SimpleMediaState.Progress(player().currentPosition, player().isPlaying)
+            }
         }
     }
 
     private fun stopProgressUpdate() {
         job?.cancel()
+        job = null
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = false)
     }
 
-    @androidx.annotation.OptIn(UnstableApi::class)
+    @OptIn(UnstableApi::class)
     override fun onPlayerError(error: PlaybackException) {
         val isUserNotEnabledException =
                 (error.cause is InvalidResponseCodeException) &&
                         (error.cause as InvalidResponseCodeException).responseCode == 403
 
-        GlobalScope.launch {
+        applicationCoroutineScope ?: CoroutineScope(Dispatchers.IO + SupervisorJob()).also {
+            applicationCoroutineScope = it
+        }.launch {
             when (val cause = error.cause) {
                 is HttpDataSourceException -> {
                     // An HTTP error occurred.
@@ -291,7 +326,7 @@ class SimpleMediaServiceHandler @Inject constructor(
                     } else {
                         // Try calling httpError.getCause() to retrieve the underlying cause,
                         // although note that it may be null.
-                        errorHandler<HttpDataSourceException>(label = "onPlayerError HttpDataSourceException", error)
+                        errorHandler<HttpDataSourceException>(label = "onPlayerError HttpDataSourceException cause: ${error.cause ?: "null"}", error)
                     }
                 }
                 else -> {
@@ -300,6 +335,7 @@ class SimpleMediaServiceHandler @Inject constructor(
                 }
             }
         }
+        checkErrorsStop()
 
         // on datasource not available force skip
         retryPlay(forceSkip = Constants.config.forceSkipOnNetworkError && isHttpConnectionError(error.errorCode))
@@ -321,14 +357,43 @@ class SimpleMediaServiceHandler @Inject constructor(
         ))
     }
 
+    private var dataSourceErrorCountJob: Job? = null
+
+    /**
+     * if getting 10 errors in 10 seconds, stop playback
+     */
+    @OptIn(UnstableApi::class)
+    private fun checkErrorsStop() {
+        if (dataSourceErrorCountJob?.isActive == true) return
+
+        dataSourceErrorCountJob?.cancel()
+        dataSourceErrorCountJob = applicationCoroutineScope?.launch {
+            val count = errorCounter
+            L("SERVICE- errorCounter: $errorCounter")
+            delay(5666)
+            L("SERVICE- errorCounter after 5s: $errorCounter")
+
+            withContext(Dispatchers.Main) {
+                if (errorCounter - count > 30 && !player().isPlaying) {
+                    L("SERVICE- stopping player, errors in 5 secs: ${errorCounter - count}")
+                    player().stop()
+                    playlistManager.reset()
+                    //player().release()
+                    //context.stopService(Intent(context, SimpleMediaService::class.java))
+                }
+            }
+        }
+    }
+
     private fun retryPlay(forceSkip: Boolean = false) {
-        if (!player.isPlaying &&
-            player.playbackState == ExoPlayer.STATE_IDLE
-            /*&& !player.isLoading  && !isUserNotEnabledException*/) {
+        if (!player().isPlaying &&
+            player().playbackState == ExoPlayer.STATE_IDLE
+            /*&& !player().isLoading  && !isUserNotEnabledException*/) {
             L("retryPlay STATE")
-            player.prepare()
+            player().prepare()
             if ((errorCounter++ % Constants.config.playbackErrorRetries == 0) || forceSkip) {
-                player.seekToNextMediaItem()
+                if (player().hasNextMediaItem())
+                    player().seekToNextMediaItem()
             }
         }
     }

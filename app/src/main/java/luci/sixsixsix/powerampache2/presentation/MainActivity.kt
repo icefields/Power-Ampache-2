@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
-import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
+import luci.sixsixsix.powerampache2.domain.models.settings.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager.Companion.parseDeepLinkIntent
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.MainScreen
@@ -129,7 +129,9 @@ class MainActivity : ComponentActivity() {
     override fun onRestart() {
         super.onRestart()
         // refresh token or autologin every time the app resumes
-        authViewModel.pingServer()
+        if (this::authViewModel.isInitialized) {
+            authViewModel.pingServer()
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
