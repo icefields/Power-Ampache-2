@@ -78,7 +78,7 @@ class SimpleMediaNotificationManager @Inject constructor(
         val weakMediaService = WeakReference<MediaSessionService>(mediaSessionService)
         playerNotificationManager = PlayerNotificationManager.Builder(context, NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID)
             //.setMediaDescriptionAdapter(SimpleMediaNotificationAdapter(context, mediaSession.sessionActivity))
-            .setSmallIconResourceId(R.drawable.ic_power_ampache_mono)
+            .setSmallIconResourceId(R.drawable.ic_notification_exo_play) //TODO restore when solve the notification issue(R.drawable.ic_power_ampache_mono)
             .setMediaDescriptionAdapter(SimpleMediaNotificationAdapter(context, notificationPendingIntent(context)))
             .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
                 override fun onNotificationPosted(
