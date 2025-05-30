@@ -63,9 +63,9 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
-import luci.sixsixsix.powerampache2.presentation.common.SongItem
-import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
-import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItem
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
@@ -204,7 +204,7 @@ fun OfflineSongsMainContent(
                 mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(songToRemove))
             },
             dialogTitle = stringResource(id = R.string.warning_song_remove_title),
-            dialogText = "Delete ${songToRemove.name} from downloaded songs?"
+            dialogText = stringResource(id = R.string.warning_song_remove_subtitle, songToRemove.name) //"Delete ${songToRemove.name} from downloaded songs?"
         )
     }
 

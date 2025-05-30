@@ -152,6 +152,11 @@ class MusicPlaylistManager @Inject constructor() {
         checkCurrentSong()
     }
 
+    fun replaceQueuePlaySong(newQueue: List<Song>, songToPlay: Song) {
+        _currentQueueState.value = newQueue.filterNotNull()
+        _currentSongState.value = songToPlay
+    }
+
     /**
      * add a list of song to the queue state
      * if no song is currently set as state, automatically set the first song of the queue

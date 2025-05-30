@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
@@ -50,13 +49,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.common.Constants.ERROR_TITLE
 import luci.sixsixsix.powerampache2.presentation.common.StarRatingButton
 import luci.sixsixsix.powerampache2.presentation.common.TopBarCircularProgress
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongDetailTopBar(
     modifier: Modifier = Modifier,
@@ -90,17 +88,17 @@ fun SongDetailTopBar(
         ) {
             Text(
                 modifier = Modifier.basicMarquee(),
-                text = currentSongState?.title ?: Constants.ERROR_TITLE,
+                text = currentSongState?.title ?: ERROR_TITLE,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 maxLines = 1,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier
-                .width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
+            Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
+            val albumYear = "${currentSongState?.album?.name ?: ERROR_TITLE} (${currentSongState?.year ?: ""})"
             Text(
                 modifier = Modifier.basicMarquee(),
-                text = currentSongState?.artist?.name ?: Constants.ERROR_TITLE,
+                text = albumYear,
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
                 maxLines = 1,

@@ -37,11 +37,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import luci.sixsixsix.powerampache2.domain.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import javax.inject.Inject
 
@@ -91,7 +91,7 @@ class PlaylistsViewModel @Inject constructor(
 //    }
 
     fun isCurrentUserOwner(playlist: Playlist) =
-        currentUsername == playlist.owner
+        currentUsername.lowercase() == playlist.owner?.lowercase()
 
     fun onEvent(event: PlaylistEvent) {
         when (event) {
@@ -105,7 +105,7 @@ class PlaylistsViewModel @Inject constructor(
 
             is PlaylistEvent.OnBottomListReached ->
                 // right now we are fetching all the playlists available on the server
-                if (!Constants.ALWAYS_FETCH_ALL_PLAYLISTS && !state.isFetchingMore && !isEndOfDataReached) {
+                if (!ALWAYS_FETCH_ALL_PLAYLISTS && !state.isFetchingMore && !isEndOfDataReached) {
                     L("PlaylistEvent.OnBottomListReached")
                     state = state.copy(isFetchingMore = true)
                     getPlaylists(fetchRemote = true, offset = playlistsStateFlow.value.size)

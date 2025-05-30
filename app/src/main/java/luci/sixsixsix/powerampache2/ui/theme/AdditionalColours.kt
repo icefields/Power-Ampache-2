@@ -77,7 +77,7 @@ var ColorScheme.additionalColours: AdditionalColours
 val AdditionalDarkColours
 @Composable
 get() = AdditionalColours(
-        surfaceDim = Color(0xFF1B1F1D),
+        surfaceDim = colorResource(id = R.color.surfaceDark),
         surfaceBright = Color(0xFF3F4745),
         surfaceContainerLowest  = Color(0xFF161918),
         surfaceContainerLow = Color(0xFF1F2422),
@@ -85,7 +85,7 @@ get() = AdditionalColours(
         surfaceContainerHigh = colorResource(id = R.color.surfaceContainerHighDark),
         surfaceContainerHighest = Color(0xFF38403D),
         shadow = Color(0xFF0B0D0C),
-        queueHandle = Color(0xFF1B1F1D)
+        queueHandle = colorResource(id = R.color.surfaceContainerHighDark)
     )
 
 val AdditionalLightColours
@@ -99,16 +99,5 @@ val AdditionalLightColours
         surfaceContainerHigh = colorResource(id = R.color.surfaceContainerHighLight),
         surfaceContainerHighest = Color(0xFFDFE5E3),
         shadow = Color(0xFF0B0D0C),
-        queueHandle = Color(0xFFD9D9D9)
+        queueHandle = colorResource(id = R.color.surfaceContainerHighLight)
     )
-
-//data class AdditionalColours2(
-//    val surfaceContainer: Color,
-//    val surfaceDim: Color,
-//    val surfaceBright: Color,
-//    val surfaceContainerLowest: Color,
-//    val surfaceContainerLow: Color,
-//    val surfaceContainerHigh: Color,
-//    val surfaceContainerHighest: Color,
-//    val shadow: Color
-//)

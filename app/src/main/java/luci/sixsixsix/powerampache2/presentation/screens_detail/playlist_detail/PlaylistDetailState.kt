@@ -26,14 +26,14 @@ import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
-import luci.sixsixsix.powerampache2.domain.models.LocalSettings
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.SortMode
-import luci.sixsixsix.powerampache2.domain.models.defaultPlaylistSort
+import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
+import luci.sixsixsix.powerampache2.domain.models.settings.defaultPlaylistSort
 import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
-import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 
 @Parcelize
 data class PlaylistDetailState (

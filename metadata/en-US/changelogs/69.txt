@@ -1,0 +1,7 @@
+- improved Czech translations
+- updated SDK, Compose, Kotlin libraries
+- added options to download music on the SD card
+- improved performance overall
+- UI improvements
+- increased buffer sizes for music player
+- image in the memory cache are now held with a weak reference, for improved memory performance

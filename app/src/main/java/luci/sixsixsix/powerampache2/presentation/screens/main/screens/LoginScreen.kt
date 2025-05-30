@@ -23,13 +23,12 @@ package luci.sixsixsix.powerampache2.presentation.screens.main.screens
 
 import android.os.Build
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,16 +39,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PersonAddAlt
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,18 +60,18 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
-import luci.sixsixsix.powerampache2.data.Servers
+import luci.sixsixsix.powerampache2.common.Servers
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadFullVersionButton
+import luci.sixsixsix.powerampache2.presentation.common.ErrorView
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.LoginBottomDrawer
@@ -81,6 +79,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.LoginDialog
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.SignUpBottomDrawer
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.SignUpDialog
+import kotlin.system.exitProcess
 
 @Composable
 @Destination(start = false)
@@ -90,6 +89,7 @@ fun LoginScreen(
 ) {
     val state = viewModel.state
     val error by viewModel.messagesStateFlow.collectAsState()
+    val isAllowAllCerts by viewModel.isAllowAllCerts.collectAsState()
 
     LoginScreenContent(
         username = state.username,
@@ -100,7 +100,8 @@ fun LoginScreen(
         onEvent = {
             viewModel.onEvent(it)
         },
-        modifier = modifier
+        modifier = modifier,
+        isAllowAllCerts = isAllowAllCerts
     )
 }
 
@@ -112,6 +113,7 @@ fun LoginScreenContent(
     url: String,
     authToken: String,
     error: String,
+    isAllowAllCerts: Boolean,
     onEvent: (AuthEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -120,6 +122,17 @@ fun LoginScreenContent(
     val isSignUpSheetOpen = remember { mutableStateOf(false) }
     var isDebugButtonsSheetOpen by remember { mutableStateOf(false) }
     val authTokenLoginEnabled = remember { mutableStateOf(false) }
+    var isKillDialogOpen by remember { mutableStateOf(false) }
+
+    AnimatedVisibility(isKillDialogOpen) {
+        if(isKillDialogOpen) {
+            KillAppDialog(confirm = {
+                exitProcess(0)
+            }) {
+                isKillDialogOpen = false
+            }
+        }
+    }
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -130,7 +143,6 @@ fun LoginScreenContent(
     ) {
         Image(
             modifier = Modifier
-                //.fillMaxWidth(0.8f)
                 .fillMaxHeight(0.4f)
                 .padding(horizontal = 20.dp)
                 .padding(top = 40.dp)
@@ -155,7 +167,7 @@ fun LoginScreenContent(
 
         if (!error.isNullOrBlank()) {
             ErrorView(
-                error = error,
+                errorString = error,
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
@@ -217,7 +229,11 @@ fun LoginScreenContent(
                 sheetState = sheetState,
                 isLoginSheetOpen = isLoginSheetOpen,
                 authTokenLoginEnabled = authTokenLoginEnabled,
-                onEvent = onEvent
+                isAllowAllCerts = isAllowAllCerts,
+                onEvent = {
+                    isKillDialogOpen = (it is AuthEvent.OnAllowAllCerts && it.allow)
+                    onEvent(it)
+                }
             )
         } else {
             LoginDialog(
@@ -227,7 +243,11 @@ fun LoginScreenContent(
                 authToken = authToken,
                 isLoginSheetOpen = isLoginSheetOpen,
                 authTokenLoginEnabled = authTokenLoginEnabled,
-                onEvent = onEvent
+                isAllowAllCerts = isAllowAllCerts,
+                onEvent = {
+                    isKillDialogOpen = (it is AuthEvent.OnAllowAllCerts && it.allow)
+                    onEvent(it)
+                }
             )
         }
     }
@@ -363,50 +383,14 @@ fun DebugLoginButton(
 }
 
 @Composable
-fun AuthTokenCheckBox(
-    authTokenLoginEnabled: MutableState<Boolean>,
-   // onCheckedChange: ((Boolean) -> Unit),
-    modifier: Modifier = Modifier
-) {
-    //var authTokenCheckBoxChecked by remember { mutableStateOf(authTokenLoginEnabled) }
-
-    Row(
-        modifier = modifier.padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal)),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = authTokenLoginEnabled.value,
-            onCheckedChange = {
-                authTokenLoginEnabled.value = it
-                //onCheckedChange(it)
-            },
-            enabled = true
-        )
-        Text(text = stringResource(id = R.string.loginScreen_useAuthToken))
-    }
-}
-
-@Composable
-fun ErrorView(
-    error: String,
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier
-        .wrapContentHeight()
-        .background(MaterialTheme.colorScheme.errorContainer)
-    ) {
-        Text(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
-            text = error,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onErrorContainer,
-            fontSize = fontDimensionResource(id = R.dimen.button_login_text_size)
-        )
-    }
+fun KillAppDialog(confirm: () -> Unit, deny: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {  },
+        title = { Text(stringResource(R.string.loginScreen_killDialog_title)) },
+        text = { Text(stringResource(R.string.loginScreen_killDialog_subtitle)) },
+        confirmButton = { Button(onClick = confirm) { Text(stringResource(android.R.string.yes)) } },
+        dismissButton = { Button(onClick = deny) { Text(stringResource(android.R.string.no)) } }
+    )
 }
 
 @Composable
@@ -421,6 +405,7 @@ fun LoginScreenPreview() {
         onEvent = {},
         //isLoginSheetOpen = true,
         //isSignUpSheetOpen = false,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        isAllowAllCerts = true
     )
 }

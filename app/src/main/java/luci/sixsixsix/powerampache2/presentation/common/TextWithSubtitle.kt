@@ -48,27 +48,41 @@ fun TextWithSubtitle(
     trailingIconContentDescription: String? = null,
     enabled: Boolean = true,
     onClick: () -> Unit = { }
+) = TextWithSubtitle(
+    modifier = modifier,
+    title = stringResource(id = title),
+    subtitle = subtitle?.let { stringResource(id = subtitle) },
+    trailingIcon = trailingIcon,
+    trailingIconContentDescription = trailingIconContentDescription,
+    enabled = enabled,
+    onClick = onClick
+)
+
+@Composable
+fun TextWithSubtitle(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    title: String,
+    subtitle: String? = null,
+    trailingIcon: ImageVector? = null,
+    trailingIconContentDescription: String? = null,
+    enabled: Boolean = true,
+    onClick: () -> Unit = { }
 ) {
     Row(
         modifier = modifier
             .clickable { onClick() }
-            .alpha(
-                if (!enabled) {
-                    0.5f
-                } else {
-                    1f
-                }
-            ),
+            .alpha(if (!enabled) { 0.5f } else { 1f }),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
             Text(
-                text = stringResource(id = title),
+                text = title,
                 fontSize = 14.sp,
+                lineHeight = 14.sp
             )
             subtitle?.let { subtitle ->
                 Text(
-                    text = stringResource(id = subtitle),
+                    text = subtitle,
                     fontSize = 12.sp,
                     lineHeight = 12.sp,
                     fontWeight = FontWeight.Light

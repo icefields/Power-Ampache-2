@@ -22,13 +22,15 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.content.Context
+import androidx.annotation.OptIn
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.SEARCH_TIMEOUT
 import luci.sixsixsix.powerampache2.common.exportSong
-import luci.sixsixsix.powerampache2.data.remote.worker.SongDownloadWorker
+import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
 import luci.sixsixsix.powerampache2.player.PlayerEvent
@@ -36,6 +38,7 @@ import luci.sixsixsix.powerampache2.player.PlayerEvent
 /**
  * UI ACTIONS AND EVENTS (play, stop, skip, like, download, etc ...)
  */
+@OptIn(UnstableApi::class)
 fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
     when(event) {
         is MainEvent.OnSearchQueryChange -> {
@@ -67,6 +70,8 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
             addSongsToQueueAndPlay(event.song, event.songList)
         is MainEvent.PlaySong ->
             playSong(event.song)
+        is MainEvent.PlaySongReplacePlaylist ->
+            playSongReplacePlaylist(event.song, event.songList)
         is MainEvent.PlaySongAddToQueueTop ->
             playSongAddToQueueTop(event.song, event.songList)
         is MainEvent.AddSongsToQueueAndPlayShuffled ->
@@ -154,6 +159,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
 /**
  * to play albums and playlists
  */
+@UnstableApi
 fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
     startPlayLoading()
     playlistManager.updateCurrentSong(song)
@@ -168,6 +174,16 @@ fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
 private fun MainViewModel.playSongAddToQueueTop(song: Song, songList: List<Song>) {
     startPlayLoading()
     playlistManager.addToCurrentQueueUpdateTopSong(song, songList)
+    play(song)
+}
+
+/**
+ * select a single song, play, and put it on the top of the queue
+ * the song list is just for verification (TODO: should that be optional?)
+ */
+private fun MainViewModel.playSongReplacePlaylist(song: Song, songList: List<Song>) {
+    startPlayLoading()
+    playlistManager.replaceQueuePlaySong(songList, song)
     play(song)
 }
 

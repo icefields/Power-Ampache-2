@@ -21,31 +21,42 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main.screens.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
-import luci.sixsixsix.powerampache2.presentation.screens.main.screens.AuthTokenCheckBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +66,7 @@ fun LoginBottomDrawer(
     url: String,
     authToken: String,
     sheetState: SheetState,
+    isAllowAllCerts: Boolean,
     isLoginSheetOpen: MutableState<Boolean>,
     authTokenLoginEnabled: MutableState<Boolean>,
     onEvent: (AuthEvent) -> Unit
@@ -71,6 +83,7 @@ fun LoginBottomDrawer(
             authToken = authToken,
             isLoginSheetOpen = isLoginSheetOpen,
             authTokenLoginEnabled = authTokenLoginEnabled,
+            isAllowAllCerts = isAllowAllCerts,
             onEvent = onEvent
         )
     }
@@ -82,6 +95,7 @@ fun LoginDialog(
     password: String,
     url: String,
     authToken: String,
+    isAllowAllCerts: Boolean,
     isLoginSheetOpen: MutableState<Boolean>,
     authTokenLoginEnabled: MutableState<Boolean>,
     onEvent: (AuthEvent) -> Unit
@@ -112,6 +126,7 @@ fun LoginDialog(
                 authToken = authToken,
                 isLoginSheetOpen = isLoginSheetOpen,
                 authTokenLoginEnabled = authTokenLoginEnabled,
+                isAllowAllCerts = isAllowAllCerts,
                 onEvent = {
                     onEvent(it)
                 }
@@ -126,6 +141,7 @@ private fun LoginForm(
     password: String,
     url: String,
     authToken: String,
+    isAllowAllCerts: Boolean,
     isLoginSheetOpen: MutableState<Boolean>,
     authTokenLoginEnabled: MutableState<Boolean>,
     onEvent: (AuthEvent) -> Unit
@@ -150,6 +166,12 @@ private fun LoginForm(
         if (Constants.config.enableTokenLogin) {
             AuthTokenCheckBox(authTokenLoginEnabled = authTokenLoginEnabled)
         }
+        AllowAllCertsCheckBox(
+            isAllowAllCerts = isAllowAllCerts,
+        ) { newValue ->
+            onEvent(AuthEvent.OnAllowAllCerts(newValue))
+        }
+
         Spacer(modifier = Modifier.height(10.dp))
         LoginButton(
             onEvent = {
@@ -158,4 +180,57 @@ private fun LoginForm(
             }
         )
     }
+}
+
+@Composable
+fun AuthTokenCheckBox(
+    authTokenLoginEnabled: MutableState<Boolean>,
+    // onCheckedChange: ((Boolean) -> Unit),
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal)),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = authTokenLoginEnabled.value,
+            onCheckedChange = { authTokenLoginEnabled.value = it },
+            enabled = true
+        )
+        Text(text = stringResource(id = R.string.loginScreen_useAuthToken))
+    }
+}
+
+@Composable
+fun AllowAllCertsCheckBox(
+    isAllowAllCerts: Boolean,
+    modifier: Modifier = Modifier,
+    onCheckedChange: ((Boolean) -> Unit)
+    ) {
+    Row(
+        modifier = modifier.padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal)),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Switch(checked = isAllowAllCerts, onCheckedChange = onCheckedChange)
+        Spacer(Modifier.width(10.dp))
+        Text(text = stringResource(id = R.string.loginScreen_acceptAllCertificates))
+    }
+}
+
+@SuppressLint("UnrememberedMutableState")
+@Composable
+@Preview(heightDp = 500)
+fun LoginFormPreview() {
+    LoginForm(
+        username = "state.username",
+        password = "state.password",
+        url = "state.url",
+        authToken = "state.authToken",
+        onEvent = {},
+        isAllowAllCerts = true,
+        isLoginSheetOpen = mutableStateOf(true),
+        authTokenLoginEnabled = mutableStateOf(true)
+    )
 }

@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomSheetScaffold
@@ -37,26 +36,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.hasLyrics
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailContent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailQueueDragHandle
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.TabbedSongDetailView
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDetailScreen(
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
+    songDetailViewModel: SongDetailViewModel = hiltViewModel(),
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val song by viewModel.currentSongStateFlow().collectAsState()
+    val lyrics by songDetailViewModel.lyrics.collectAsStateWithLifecycle()
+    song?.let { songDetailViewModel.getSongLyrics(it) }
+
     val scaffoldState = rememberBottomSheetScaffoldState()
     val pagerState = rememberPagerState(initialPage = 0) {
-        if (song?.hasLyrics() == true) { 2 } else { 1 }
+        if (lyrics != "") { 2 } else { 1 }
     }
     val selectedTabIndex = remember { mutableIntStateOf(0) }
 
@@ -65,7 +68,7 @@ fun SongDetailScreen(
         scaffoldState = scaffoldState,
         sheetContent = {
             TabbedSongDetailView(
-                song = song,
+                lyrics = lyrics,
                 pagerState = pagerState,
                 mainScaffoldState = mainScaffoldState,
                 mainViewModel = viewModel
@@ -74,6 +77,7 @@ fun SongDetailScreen(
         sheetDragHandle = {
             SongDetailQueueDragHandle(
                 song = song,
+                lyrics = lyrics,
                 scaffoldState = scaffoldState,
                 selectedTabIndex = selectedTabIndex,
                 pagerState = pagerState)

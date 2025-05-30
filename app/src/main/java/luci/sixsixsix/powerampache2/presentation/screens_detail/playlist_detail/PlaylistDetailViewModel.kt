@@ -55,10 +55,12 @@ import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
-import luci.sixsixsix.powerampache2.domain.models.SortMode
+import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
-import luci.sixsixsix.powerampache2.presentation.common.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject
 
 @HiltViewModel
@@ -73,7 +75,11 @@ class PlaylistDetailViewModel @Inject constructor(
     private val playlistManager: MusicPlaylistManager
 ) : AndroidViewModel(application = application) {
     var state by mutableStateOf(PlaylistDetailState())
+    var editState by mutableStateOf(PlaylistEditState(listOf()))
 
+//    val isNextcloudState = musicRepository.serverInfoStateFlow.filterNotNull().map { serverInfo ->
+//        serverInfo.isNextcloud
+//    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     val playlistStateFlow: StateFlow<Playlist> =
         savedStateHandle.getStateFlow<Playlist?>("playlist", null)
@@ -85,7 +91,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 state = state.copy(
                     isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
                     isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),
-                    isUserOwner = user.username == playlist.owner
+                    isUserOwner = user.username.lowercase() == playlist.owner?.lowercase()
                 )
                 playlist
             }.flatMapConcat { playlist ->
@@ -120,7 +126,7 @@ class PlaylistDetailViewModel @Inject constructor(
             is RecentPlaylist -> getRecentSongs(fetchRemote = true)
             is FlaggedPlaylist -> getFlaggedSongs(fetchRemote = true)
             is FrequentPlaylist -> getFrequentSongs(fetchRemote = true)
-            else -> getSongsFromPlaylist(playlistId = playlist.id, fetchRemote = true)
+            else -> getSongsFromPlaylist(playlistId = playlist, fetchRemote = true)
         }
     }
 
@@ -136,8 +142,6 @@ class PlaylistDetailViewModel @Inject constructor(
                 fetchPlaylistSongs(event.playlist)
             PlaylistDetailEvent.OnSharePlaylist ->
                 sharePlaylist(playlistId = playlistStateFlow.value.id)
-            is PlaylistDetailEvent.OnRemoveSong ->
-                removeSongFromPlaylist(playlistId = playlistStateFlow.value.id, songId = event.song.mediaId)
             PlaylistDetailEvent.OnToggleSort -> viewModelScope.launch {
                 if (state.isNotStatPlaylist) {
                     // if not a stat playlist change global sort
@@ -163,9 +167,50 @@ class PlaylistDetailViewModel @Inject constructor(
             is PlaylistDetailEvent.OnSongSelected -> { }
             PlaylistDetailEvent.OnPlayPlaylist -> { }
             PlaylistDetailEvent.OnShufflePlaylist -> { }
-            PlaylistDetailEvent.OnRemoveSongDismiss -> { }
         }
     }
+
+    fun onEditEvent(event: PlaylistDetailsEditEvent) {
+        when(event) {
+            PlaylistDetailsEditEvent.OnDeleteSelectedSongs -> {
+                val newList = state.getSongList().toMutableList().apply {
+                    removeAll(editState.selectedSongs)
+                }.toList()
+                editPlaylist(newList = newList)
+            }
+            is PlaylistDetailsEditEvent.OnMoveDownSong -> {
+                val newList = state.getSongList().toMutableList().apply {
+                    indexOf(event.song).takeIf { it < (size - 1) }?.let { i ->
+                        remove(event.song)
+                        add(i+1, event.song)
+                    }
+                }.toList()
+                editPlaylist(newList = newList)
+            }
+            is PlaylistDetailsEditEvent.OnMoveUpSong -> {
+                val newList = state.getSongList().toMutableList().apply {
+                    indexOf(event.song).takeIf { it > 0 }?.let { i ->
+                        remove(event.song)
+                        add(i-1, event.song)
+                    }
+                }.toList()
+                editPlaylist(newList = newList)
+            }
+            is PlaylistDetailsEditEvent.OnRemoveSong ->
+                removeSongFromPlaylist(playlist = playlistStateFlow.value, songId = event.song.mediaId)
+            PlaylistDetailsEditEvent.OnRemoveSongDismiss -> { }
+            is PlaylistDetailsEditEvent.OnSongSelected -> {
+                editState = editState.copy(selectedSongs = editState.selectedSongs.toMutableList().apply {
+                    if (event.isSelected) { add(event.song) } else { remove(event.song) }
+                })
+            }
+            PlaylistDetailsEditEvent.OnConfirmEdit -> {
+
+            }
+        }
+    }
+
+    fun isEditSongSelected(song: Song): Boolean = editState.selectedSongs.contains(song)
 
     private fun ratePlaylist(playlist: Playlist, rate: Int) = viewModelScope.launch {
         playlistsRepository.ratePlaylist(playlist.id, rate).collect { result ->
@@ -210,10 +255,10 @@ class PlaylistDetailViewModel @Inject constructor(
         } else Pair("", "")
 
 
-    private fun getSongsFromPlaylist(playlistId: String, fetchRemote: Boolean = true) {
+    private fun getSongsFromPlaylist(playlistId: Playlist, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             playlistsRepository
-                .getSongsFromPlaylist(playlistId)
+                .getSongsFromPlaylist(playlistId, fetchRemote)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
@@ -224,7 +269,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                         SongWrapper(
                                         song = song,
                                         isOffline = songsRepository.isSongAvailableOffline(song)
-                                    ))
+                                    )
+                                    )
                                 }
                                 state = state.copy(
                                     songs = songWrapperList.apply {
@@ -241,13 +287,40 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
-    private fun removeSongFromPlaylist(playlistId: String, songId: String) = viewModelScope.launch {
+    private fun editPlaylist(
+        playlist: Playlist = playlistStateFlow.value,
+        newList: List<Song> = state.getSongList()
+    ) = viewModelScope.launch {
         playlistsRepository
-            .removeSongFromPlaylist(playlistId = playlistId, songId = songId).collect { result ->
+            .editPlaylist(
+                playlistId = playlist.id,
+                playlistName = playlist.name,
+                items = newList,
+                owner = playlist.owner,
+                playlistType = playlist.type ?: PlaylistType.private
+            ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {
-                            getSongsFromPlaylist(playlistId, true)
+                            // fetch songs without network request
+                            getSongsFromPlaylist(playlist, false)
+                        }
+                    }
+                    is Resource.Error ->
+                        state = state.copy(isPlaylistRemoveLoading = false)
+                    is Resource.Loading ->
+                        state = state.copy(isPlaylistRemoveLoading = result.isLoading)
+                }
+            }
+    }
+
+    private fun removeSongFromPlaylist(playlist: Playlist, songId: String) = viewModelScope.launch {
+        playlistsRepository
+            .removeSongFromPlaylist(playlistId = playlist.id, songId = songId).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        result.data?.let {
+                            getSongsFromPlaylist(playlist, true)
                         }
                     }
                     is Resource.Error ->
@@ -265,8 +338,10 @@ class PlaylistDetailViewModel @Inject constructor(
                     result.data?.let { songs ->
                         val songWrapperList = mutableListOf<SongWrapper>()
                         songs.forEach { song ->
-                            songWrapperList.add(SongWrapper(song = song,
-                                isOffline = songsRepository.isSongAvailableOffline(song)))
+                            songWrapperList.add(
+                                SongWrapper(song = song,
+                                isOffline = songsRepository.isSongAvailableOffline(song))
+                            )
                         }
                         state = state.copy(songs = songWrapperList)
                         L("PlaylistDetailViewModel.getRecentSongs size ${state.songs.size}")
@@ -284,7 +359,7 @@ class PlaylistDetailViewModel @Inject constructor(
     }
 
 
-    private fun getFlaggedSongs(fetchRemote: Boolean = true, ) {
+    private fun getFlaggedSongs(fetchRemote: Boolean = true) {
         viewModelScope.launch {
             songsRepository
                 .getFlaggedSongs()
@@ -298,7 +373,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                         SongWrapper(
                                             song = song,
                                             isOffline = songsRepository.isSongAvailableOffline(song)
-                                        ))
+                                        )
+                                    )
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getFlaggedSongs size ${state.songs.size}")
@@ -331,7 +407,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                         SongWrapper(
                                             song = song,
                                             isOffline = songsRepository.isSongAvailableOffline(song = song)
-                                        ))
+                                        )
+                                    )
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getFrequentSongs size ${state.songs.size}")
@@ -364,7 +441,8 @@ class PlaylistDetailViewModel @Inject constructor(
                                         SongWrapper(
                                             song = song,
                                             isOffline = songsRepository.isSongAvailableOffline(song)
-                                        ))
+                                        )
+                                    )
                                 }
                                 state = state.copy(songs = songWrapperList)
                                 L("PlaylistDetailViewModel.getHighestSongs size ${state.songs.size}")

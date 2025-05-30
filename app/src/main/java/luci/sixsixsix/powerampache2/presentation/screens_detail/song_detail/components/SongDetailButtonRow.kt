@@ -25,11 +25,9 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Album
@@ -47,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -54,7 +53,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
-import luci.sixsixsix.powerampache2.domain.models.Song
 
 enum class SongDetailButtonEvents {
     SHARE_SONG,
@@ -73,17 +71,23 @@ fun SongDetailButtonRow(
     isOffline: Boolean,
     eventListener: (albumInfoViewEvents: SongDetailButtonEvents) -> Unit
 ) {
+    val totalButtons = 7
+    val screenW = LocalConfiguration.current.screenWidthDp.toFloat()
+    val btnModifier = Modifier.width((screenW/totalButtons).dp)
+
+
     Row(
         modifier = modifier
             .padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding))
             .padding(bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Absolute.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceAround
     ) {
         PlayerButton(
             text = R.string.player_buttonText_add,
             icon = Icons.Outlined.AddBox,
-            tint = tint
+            tint = tint,
+            modifier = btnModifier
         ) {
             eventListener(SongDetailButtonEvents.ADD_SONG_TO_PLAYLIST_OR_QUEUE)
         }
@@ -93,7 +97,8 @@ fun SongDetailButtonRow(
                 Icons.Outlined.DownloadForOffline
             else
                 Icons.Outlined.OfflinePin,
-            tint = tint
+            tint = tint,
+            modifier = btnModifier
         ) {
             if (!isOffline) {
                 eventListener(SongDetailButtonEvents.DOWNLOAD_SONG)
@@ -104,28 +109,32 @@ fun SongDetailButtonRow(
         PlayerButton(
             text = R.string.player_buttonText_share,
             icon = Icons.Outlined.Share,
-            tint = tint
+            tint = tint,
+            modifier = btnModifier
         ) {
             eventListener(SongDetailButtonEvents.SHARE_SONG)
         }
         PlayerButton(
             text = R.string.player_buttonText_info,
             icon = Icons.Outlined.Info,
-            tint = tint
+            tint = tint,
+            modifier = btnModifier
         ) {
             eventListener(SongDetailButtonEvents.SHOW_INFO)
         }
         PlayerButton(
             text = R.string.player_buttonText_album,
             icon = Icons.Outlined.Album,
-            tint = tint
+            tint = tint,
+            modifier = btnModifier
         ) {
             eventListener(SongDetailButtonEvents.GO_TO_ALBUM)
         }
         PlayerButton(
             text = R.string.player_buttonText_artist,
             icon = Icons.Outlined.Audiotrack,
-            tint = tint
+            tint = tint,
+            modifier = btnModifier
         ) {
             eventListener(SongDetailButtonEvents.GO_TO_ARTIST)
         }
@@ -134,6 +143,7 @@ fun SongDetailButtonRow(
 
 @Composable
 fun PlayerButton(
+    modifier: Modifier,
     @StringRes text: Int,
     icon: ImageVector,
     tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -141,6 +151,7 @@ fun PlayerButton(
     onClick: () -> Unit
 ) {
     Column(
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -163,6 +174,7 @@ fun PlayerButtonText(
         text = stringResource(id = text),
         fontSize = fontDimensionResource(id = R.dimen.player_buttonTitle_fontSize),
         fontWeight = FontWeight.SemiBold,
+        maxLines = 1,
         color = tint
     )
 }
@@ -184,7 +196,7 @@ fun PlayerButtonIcon(
 }
 
 @Composable
-@Preview
+@Preview(widthDp = 400, heightDp = 200)
 fun PreviewSongDetailButtonRow() {
     SongDetailButtonRow(
         modifier = Modifier.fillMaxWidth(),

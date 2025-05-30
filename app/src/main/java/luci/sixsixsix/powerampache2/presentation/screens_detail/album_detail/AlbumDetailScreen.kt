@@ -67,10 +67,10 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
-import luci.sixsixsix.powerampache2.presentation.common.SongInfoThirdRow
-import luci.sixsixsix.powerampache2.presentation.common.SongItem
-import luci.sixsixsix.powerampache2.presentation.common.SongItemEvent
-import luci.sixsixsix.powerampache2.presentation.common.SubtitleString
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongInfoThirdRow
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItem
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.common.songitem.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
@@ -200,16 +200,8 @@ fun AlbumDetailScreen(
                     AlbumInfoSection(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(
-                                max = if (infoVisibility) {
-                                    470.dp // any big number
-                                } else {
-                                    0.dp
-                                }
-                            )
-                            .padding(
-                                dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)
-                            ),
+                            .heightIn(max = if (infoVisibility) { 470.dp /*any big number*/ } else { 0.dp })
+                            .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         album = album,
                         isPlayLoading = mainViewModel.isPlayLoading(),
                         isBuffering = mainViewModel.isBuffering,
@@ -299,7 +291,7 @@ fun AlbumDetailScreen(
                                         .fillMaxWidth()
                                         .clickable {
                                             mainViewModel.onEvent(
-                                                MainEvent.PlaySongAddToQueueTop(
+                                                MainEvent.PlaySongReplacePlaylist(
                                                     song,
                                                     state.getSongList()
                                                 )

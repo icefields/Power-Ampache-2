@@ -1,0 +1,8 @@
+— [NEW] Added functionality to play all albums of an artist
+— [NEW] Improved random albums on home screen
+— [NEW] added extra info on song screen
+— [Nextcloud] enabled playlist editor
+— localized remaining strings
+— UI fixes
+— Minor bug fixes and adjustments
+— Intro web dialog for important communications and updates

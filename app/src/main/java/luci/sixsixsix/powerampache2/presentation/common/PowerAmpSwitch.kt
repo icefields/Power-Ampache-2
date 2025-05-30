@@ -42,6 +42,7 @@ fun PowerAmpSwitch(
     @StringRes subtitle: Int? = null,
     checked: Boolean,
     enabled: Boolean = true,
+    clickActionOnText: Boolean = true,
     onCheckedChange: ((Boolean) -> Unit),
 ) {
     Row(
@@ -54,7 +55,42 @@ fun PowerAmpSwitch(
             modifier = Modifier.weight(1f),
             title = title,
             subtitle = subtitle,
-            onClick = { onCheckedChange(!checked) }
+            onClick = {
+                if (clickActionOnText) onCheckedChange(!checked)
+            }
+        )
+        Switch(
+            modifier = Modifier.padding(start = 10.dp),
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = true
+        )
+    }
+}
+
+@Composable
+fun PowerAmpSwitch(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String?,
+    checked: Boolean,
+    enabled: Boolean = true,
+    clickActionOnText: Boolean = true,
+    onCheckedChange: ((Boolean) -> Unit),
+) {
+    Row(
+        modifier = modifier
+            .alpha(if (!enabled) { 0.5f } else { 1f }),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextWithSubtitle(
+            modifier = Modifier.weight(1f),
+            title = title,
+            subtitle = subtitle,
+            onClick = {
+                if (clickActionOnText) onCheckedChange(!checked)
+            }
         )
         Switch(
             modifier = Modifier.padding(start = 10.dp),

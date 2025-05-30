@@ -107,7 +107,8 @@ fun AlbumInfoButtonsRow(
 
 @Composable @Preview
 fun AlbumInfoButtonsRowPreview() {
-    AlbumInfoButtonsRow(Album.mock(),
+    AlbumInfoButtonsRow(
+        Album.mock(),
         isPlayingAlbum = true,
         false,
         isDownloading = false,

@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +56,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -67,14 +67,14 @@ import androidx.core.text.HtmlCompat
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.hasLyrics
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 fun SongDetailQueueDragHandle(
     song: Song?,
+    lyrics: String,
     scaffoldState: BottomSheetScaffoldState,
     selectedTabIndex: MutableIntState,
     pagerState: PagerState
@@ -103,6 +103,7 @@ fun SongDetailQueueDragHandle(
             if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
                 SongDetailQueueTopBar(
                     song = song,
+                    lyrics = lyrics,
                     scaffoldState = scaffoldState,
                     pagerState = pagerState,
                     selectedTabIndex = selectedTabIndex
@@ -110,6 +111,7 @@ fun SongDetailQueueDragHandle(
             } else {
                 SongDetailQueueTopBar(
                     song = song,
+                    lyrics = lyrics,
                     scaffoldState = scaffoldState,
                     showCloseIcon = false,
                     pagerState = pagerState,
@@ -120,10 +122,11 @@ fun SongDetailQueueDragHandle(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDetailQueueTopBar(
     song: Song?,
+    lyrics: String,
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     scaffoldState: BottomSheetScaffoldState,
@@ -139,10 +142,7 @@ fun SongDetailQueueTopBar(
         ),
         modifier = modifier.fillMaxWidth()
     ) {
-        Row(
-            //contentAlignment = Alignment.CenterStart,
-            //modifier = Modifier.padding(vertical = 5.dp, horizontal = 8.dp)
-        ) {
+        Row {
             AnimatedVisibility(visible = showCloseIcon) {
                 DragArrowIcon(modifier = modifier.width(arrowWidth), showCloseIcon)
             }
@@ -153,6 +153,7 @@ fun SongDetailQueueTopBar(
             SongHandleTabRow(
                 modifier = Modifier.weight(1f),
                 song = song,
+                lyrics = lyrics,
                 scaffoldState = scaffoldState,
                 pagerState = pagerState,
                 selectedTabIndex = selectedTabIndex
@@ -179,10 +180,10 @@ fun DragArrowIcon(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TabbedSongDetailView(
-    song: Song?,
+    lyrics: String,
     pagerState: PagerState,
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
@@ -197,17 +198,15 @@ fun TabbedSongDetailView(
         ) { index ->
             when(index) {
                 1 -> {
-                    song?.lyrics?.let { lyrics ->
-                        val spannedText = HtmlCompat.fromHtml(lyrics, 0)
-                        Text(
-                            fontSize = 20.sp,
-                            text = spannedText.toString(),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp, vertical = 6.dp)
-                                .verticalScroll(rememberScrollState())
-                        )
-                    }
+                    val spannedText = HtmlCompat.fromHtml(lyrics, 0)
+                    Text(
+                        fontSize = 20.sp,
+                        text = spannedText.toString(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                            .verticalScroll(rememberScrollState())
+                    )
                 }
                 else -> {
                     SongDetailQueueScreenContent(
@@ -220,12 +219,12 @@ fun TabbedSongDetailView(
     }
 }
 
-
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongHandleTabRow(
     modifier: Modifier = Modifier,
     song: Song?,
+    lyrics: String,
     scaffoldState: BottomSheetScaffoldState,
     pagerState: PagerState,
     selectedTabIndex: MutableIntState
@@ -248,7 +247,7 @@ fun SongHandleTabRow(
         modifier = modifier,
         selectedTabIndex = selectedTabIndex.value,
         contentColor = textColour,
-        containerColor = MaterialTheme.colorScheme.additionalColours.queueHandle
+        containerColor = Color.Transparent
     ) {
         Tab(
             unselectedContentColor = textColour.copy(alpha = 0.66f),
@@ -276,7 +275,7 @@ fun SongHandleTabRow(
                 )
             }
         )
-        if (song?.hasLyrics() == true) {
+        if (lyrics != "") {
             Tab(
                 unselectedContentColor = textColour.copy(alpha = 0.66f),
                 selected = selectedTabIndex.value == 1,

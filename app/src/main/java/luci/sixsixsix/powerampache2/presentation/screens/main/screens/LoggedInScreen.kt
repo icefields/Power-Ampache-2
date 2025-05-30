@@ -40,6 +40,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
@@ -52,6 +55,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
+import luci.sixsixsix.powerampache2.presentation.dialogs.IntroDialog
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.SheetDragHandle
@@ -67,7 +71,6 @@ fun LoggedInScreen(
     mainViewModel: MainViewModel,
     authViewModel: AuthViewModel,
     settingsViewModel: SettingsViewModel
-    //homeScreenViewModel: HomeScreenViewModel
 ) {
     val state = mainViewModel.state
     val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
@@ -107,6 +110,15 @@ fun LoggedInScreen(
             } catch (e: Exception) {
                 L.e(e)
             }
+        }
+    }
+
+    var introDialogVisible by remember { mutableStateOf(settingsViewModel.shouldShowIntroDialog()) }
+
+    AnimatedVisibility(introDialogVisible) {
+        IntroDialog {
+            introDialogVisible = false
+            settingsViewModel.onDismissIntroDialog()
         }
     }
 

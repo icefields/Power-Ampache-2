@@ -4,26 +4,18 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
-            <option value="/mnt/6402E00302DFD7DE/Code/Android/PowerAmpache2" />
-            <option value="/mnt/6402E00302DFD7DE/Code/Android/PowerAmpache2/app" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/MrLog" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/data-ampache" />
+            <option value="$PROJECT_DIR$/domain" />
           </set>
         </option>
-        <option name="resolveExternalAnnotations" value="false" />
-      </GradleProjectSettings>
-      <GradleProjectSettings>
-        <option name="externalProjectPath" value="/mnt/6402E00302DFD7DE/Code/Android/PowerAmpache2" />
-        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
-        <option name="modules">
-          <set>
-            <option value="/mnt/6402E00302DFD7DE/Code/Android/PowerAmpache2" />
-            <option value="/mnt/6402E00302DFD7DE/Code/Android/PowerAmpache2/app" />
-          </set>
-        </option>
-        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

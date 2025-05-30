@@ -22,7 +22,9 @@
 package luci.sixsixsix.powerampache2.presentation.screens.settings
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +40,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.OpenInNew
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -66,21 +72,27 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.PowerAmpTheme
+import luci.sixsixsix.powerampache2.common.Constants.IS_AMPACHE_DATA
+import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.domain.models.settings.PowerAmpTheme
 import luci.sixsixsix.powerampache2.domain.models.ServerInfo
-import luci.sixsixsix.powerampache2.domain.models.StreamingQuality
+import luci.sixsixsix.powerampache2.domain.models.settings.StreamingQuality
 import luci.sixsixsix.powerampache2.domain.models.User
-import luci.sixsixsix.powerampache2.domain.models.streamQualityDropdownItems
-import luci.sixsixsix.powerampache2.domain.models.themesDropDownItems
-import luci.sixsixsix.powerampache2.domain.models.toPowerAmpacheDropdownItem
-import luci.sixsixsix.powerampache2.presentation.common.DonateButton
-import luci.sixsixsix.powerampache2.presentation.common.DonateButtonContent
+import luci.sixsixsix.powerampache2.ui.getTitleRes
+import luci.sixsixsix.powerampache2.ui.isThemeAvailable
+import luci.sixsixsix.powerampache2.ui.streamQualityDropdownItems
+import luci.sixsixsix.powerampache2.ui.themesDropDownItems
+import luci.sixsixsix.powerampache2.ui.toPowerAmpacheDropdownItem
 import luci.sixsixsix.powerampache2.presentation.common.DonateConsider
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpCheckBox
 import luci.sixsixsix.powerampache2.presentation.common.PowerAmpSwitch
 import luci.sixsixsix.powerampache2.presentation.common.TextWithSubtitle
+import luci.sixsixsix.powerampache2.presentation.common.donate_btn.DonateButton
+import luci.sixsixsix.powerampache2.presentation.common.donate_btn.DonateButtonContent
+import luci.sixsixsix.powerampache2.presentation.destinations.AmpacheUserPreferencesScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.DebugLogsScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
+import luci.sixsixsix.powerampache2.presentation.screens.settings.components.PlayerSettingsView
 import luci.sixsixsix.powerampache2.presentation.screens.settings.components.SettingsDropDownMenu
 
 private const val IS_MONO_SWITCH_ENABLED = false
@@ -89,6 +101,7 @@ private const val IS_OFFLINE_MODE_SWITCH_ENABLED = true
 private const val IS_SMART_DOWNLOADS_SWITCH_ENABLED = false
 private const val IS_AUTO_UPDATE_ENABLED = true
 private const val IS_EQUALIZER_BTN_ENABLED = true
+private const val MAX_VISIBLE_ITEMS = 15
 
 @Composable
 @Destination
@@ -100,6 +113,26 @@ fun SettingsScreen(
     val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
     val user by settingsViewModel.userStateFlow.collectAsState()
     val serverInfo by settingsViewModel.serverInfoStateFlow.collectAsState(ServerInfo())
+    val playerSettingsState by settingsViewModel.playerSettingsStateFlow.collectAsState()
+
+    var showKillDialog by remember { mutableStateOf(false) }
+
+    if (showKillDialog) {
+        AlertDialog(
+            onDismissRequest = { showKillDialog = false },
+            title = { Text(stringResource(R.string.settings_player_killDialog_title)) },
+            confirmButton = {
+                Button(onClick = {
+                    showKillDialog = false
+                    settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnKillApp)
+                }) { Text(stringResource(android.R.string.yes)) }
+            },
+            dismissButton = {
+                Button(onClick = { showKillDialog = false }) {
+                    Text(stringResource(android.R.string.no)) }
+            }
+        )
+    }
 
     SettingsScreenContent(
         modifier = Modifier
@@ -117,6 +150,7 @@ fun SettingsScreen(
         isSmartDownloadsEnabled = localSettingsState.isSmartDownloadsEnabled,
         isAutoCheckUpdatesEnabled = localSettingsState.enableAutoUpdates,
         isOfflineModeEnabled = offlineModeState,
+        isDownloadSdCard = localSettingsState.isDownloadsSdCard,
         onThemeSelected = {
             settingsViewModel.onEvent(SettingsEvent.OnThemeChange(it))
         },
@@ -138,6 +172,9 @@ fun SettingsScreen(
         onDebugLogsButtonPress = {
             navigator.navigate(DebugLogsScreenDestination())
         },
+        onAmpachePreferencesButtonPress = {
+            navigator.navigate(AmpacheUserPreferencesScreenDestination())
+        },
         onDeleteDownloadsPress = {
             settingsViewModel.onEvent(SettingsEvent.DeleteDownloads)
         },
@@ -156,16 +193,67 @@ fun SettingsScreen(
         onOfflineModeValueChange = {
             settingsViewModel.onEvent(SettingsEvent.OnOfflineToggle)
         },
-        donateButton = { SettingsDonationButtonView() {
-            settingsViewModel.onEvent(SettingsEvent.goToWebsite)
-        } }
+        onSdCardDownloadValueChange = {
+            settingsViewModel.onEvent(SettingsEvent.OnDownloadsSdCardValueChange(it))
+        },
+        onBufferForPlaybackChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnBufferForPlaybackChange(it))
+        },
+        onMaxBufferChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnMaxBufferMsChange(it))
+        },
+        onMinBufferChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnMinBufferChange(it))
+        },
+        onBackBufferChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnBackBufferChange(it))
+        },
+        onBufferForPlaybackAfterRebufferChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnBufferForPlaybackAfterRebufferChange(it))
+        },
+        onCacheChange = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnPlayerCacheSizeChange(it))
+        },
+        donateButton = {
+            SettingsDonationButtonView() {
+                settingsViewModel.onEvent(SettingsEvent.GoToWebsite)
+            }
+        },
+        onResetValuesClick = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnResetDefaults)
+        },
+        onKillAppClick = {
+            showKillDialog = true
+        },
+        onUseOkHttpExoPlayer = {
+            settingsViewModel.onPlayerEvent(PlayerSettingsEvent.OnUseOkHttpExoPlayer(newValue = it))
+        },
+        backBuffer = playerSettingsState.backBuffer,
+        minBuffer = playerSettingsState.minBuffer,
+        maxBuffer = playerSettingsState.maxBuffer,
+        bufferForPlayback = playerSettingsState.bufferForPlayback,
+        bufferForPlaybackAfterRebuffer = playerSettingsState.bufferForPlaybackAfterRebuffer,
+        cache = playerSettingsState.cacheSizeMb,
+        isUseOkHttpPlayer = playerSettingsState.useOkHttpExoplayer
     )
 }
 
 @Composable
 fun SettingsDonationButtonView(onClick: () -> Unit) {
     if (BuildConfig.HIDE_DONATION) {
-        DonateConsider(onClick = onClick)
+        val showDonationBtn = BuildConfig.HIDE_DONATION.not()
+        DonateButton(
+            isExpanded = true,
+            isTransparent = false,
+            showPaypal = showDonationBtn,
+            showBTC = showDonationBtn,
+            showBmac = true
+        )
+        DonateConsider(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onClick,
+            showLink = true
+        )
     } else {
         DonateButton(isExpanded = true, isTransparent = false)
     }
@@ -184,8 +272,16 @@ fun SettingsScreenContent(
     isSmartDownloadsEnabled: Boolean,
     isAutoCheckUpdatesEnabled: Boolean,
     isOfflineModeEnabled: Boolean,
+    isDownloadSdCard: Boolean,
     powerAmpTheme: PowerAmpTheme,
     streamingQuality: StreamingQuality,
+    backBuffer: Int,
+    minBuffer: Int,
+    maxBuffer: Int,
+    cache: Int,
+    bufferForPlayback: Int,
+    bufferForPlaybackAfterRebuffer: Int,
+    isUseOkHttpPlayer: Boolean,
     onThemeSelected: (selected: PowerAmpTheme) -> Unit,
     onStreamingQualitySelected: (selected: StreamingQuality) -> Unit,
     onEnableLoggingValueChange: (newValue: Boolean) -> Unit,
@@ -195,10 +291,21 @@ fun SettingsScreenContent(
     onSmartDownloadValueChange: (newValue: Boolean) -> Unit,
     onAutoCheckUpdatesValueChange: (newValue: Boolean) -> Unit,
     onOfflineModeValueChange: (newValue: Boolean) -> Unit,
+    onSdCardDownloadValueChange: (newValue: Boolean) -> Unit,
     onEqualizerPress: () -> Unit,
     onCheckUpdatesNowPress: () -> Unit,
     onDeleteDownloadsPress: () -> Unit,
     onDebugLogsButtonPress: () -> Unit,
+    onAmpachePreferencesButtonPress: () -> Unit,
+    onBackBufferChange: (newValue: Int) -> Unit,
+    onMinBufferChange: (newValue: Int) -> Unit,
+    onMaxBufferChange: (newValue: Int) -> Unit,
+    onCacheChange: (newValue: Int) -> Unit,
+    onBufferForPlaybackChange: (newValue: Int) -> Unit,
+    onBufferForPlaybackAfterRebufferChange: (newValue: Int) -> Unit,
+    onUseOkHttpExoPlayer: (newValue: Boolean) -> Unit,
+    onResetValuesClick: () -> Unit,
+    onKillAppClick: () -> Unit,
     modifier: Modifier = Modifier,
     donateButton: @Composable () -> Unit = { DonateButton(isExpanded = true, isTransparent = false) }
 ) {
@@ -244,20 +351,8 @@ fun SettingsScreenContent(
                     items = streamQualityDropdownItems,
                     onItemSelected = onStreamingQualitySelected
                 )
-                // EQUALIZER BUTTON
-                3 -> TextWithSubtitle(
-                    enabled = IS_EQUALIZER_BTN_ENABLED,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = paddingHorizontalItem)
-                        .padding(top = paddingVerticalItem * 2, bottom = paddingVerticalItem),
-                    title = R.string.settings_equalizer,
-                    subtitle = R.string.coming_soon,
-                    trailingIcon = Icons.Default.KeyboardArrowRight,
-                    onClick = onEqualizerPress
-                )
-                // OFFLINE MODE VOLUME SWITCH
-                4 -> PowerAmpSwitch(
+                // OFFLINE MODE SWITCH
+                3 -> PowerAmpSwitch(
                     enabled = IS_OFFLINE_MODE_SWITCH_ENABLED,
                     title = R.string.settings_offlineMode_title,
                     subtitle = R.string.settings_offlineMode_subtitle,
@@ -265,70 +360,17 @@ fun SettingsScreenContent(
                     onCheckedChange = onOfflineModeValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
-                // NORMALIZE VOLUME SWITCH
-                5 -> PowerAmpSwitch(
-                    enabled = IS_NORMALIZE_SWITCH_ENABLED,
-                    title = R.string.settings_normalizeVolume_title,
-                    subtitle = R.string.settings_normalizeVolume_subtitle,
-                    checked = isNormalizeVolumeEnabled,
-                    onCheckedChange = onNormalizeValueChange,
+                // DOWNLOADS ON SD CARD VS INTERNAL STORAGE
+                4 -> PowerAmpSwitch(
+                    enabled = Constants.config.isDownloadsSdCardOptionEnabled,
+                    title = R.string.settings_downloadsSdCard_title,
+                    subtitle = R.string.settings_downloadsSdCard_subtitle,
+                    checked = isDownloadSdCard,
+                    onCheckedChange = onSdCardDownloadValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
-                // MONO SWITCH
-                6 -> PowerAmpSwitch(
-                    enabled = IS_MONO_SWITCH_ENABLED,
-                    title = R.string.settings_monoAudio_title,
-                    subtitle = R.string.settings_monoAudio_subtitle,
-                    checked = isMonoAudioEnabled,
-                    onCheckedChange = onMonoValueChange,
-                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
-                )
-                // SMART DOWNLOADS SWITCH
-                7 -> PowerAmpSwitch(
-                    enabled = IS_SMART_DOWNLOADS_SWITCH_ENABLED,
-                    title = R.string.settings_smartDownloads_title,
-                    subtitle = R.string.settings_smartDownloads_subtitle,
-                    checked = isSmartDownloadsEnabled,
-                    onCheckedChange = onSmartDownloadValueChange,
-                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
-                )
-                // CHECK UPDATES NOW BUTTON
-                9 -> TextWithSubtitle(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = paddingHorizontalItem)
-                        .padding(top = paddingVerticalItem * 2, bottom = paddingVerticalItem),
-                    title = R.string.settings_checkUpdatesNow_title,
-                    subtitle = R.string.coming_soon,
-                    onClick = onCheckUpdatesNowPress
-                )
-                // AUTO UPDATE CHECKBOX
-                10 -> PowerAmpCheckBox(
-                    enabled = IS_AUTO_UPDATE_ENABLED,
-                    modifier = Modifier
-                        .padding(vertical = paddingVerticalItem)
-                        .padding(start = paddingHorizontalItem),
-                    checked = isAutoCheckUpdatesEnabled,
-                    onCheckedChange = onAutoCheckUpdatesValueChange,
-                    title = R.string.settings_autoCheckUpdates_title,
-                    subtitle = R.string.coming_soon,
-                )
-                11 -> TextWithSubtitle(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem),
-                    title = R.string.settings_debugLogs_title,
-                    trailingIcon = Icons.Outlined.OpenInNew,
-                    onClick = onDebugLogsButtonPress
-                )
-                12 -> PowerAmpSwitch(
-                    title = R.string.settings_enableDebugLogging_title,
-                    subtitle = R.string.settings_enableDebugLogging_subtitle,
-                    checked = remoteLoggingEnabled,
-                    onCheckedChange = onEnableLoggingValueChange,
-                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
-                )
-                8 -> TextWithSubtitle(
+                // DELETE ALL DOWNLOADS
+                5 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
@@ -341,14 +383,82 @@ fun SettingsScreenContent(
                         showDeleteDownloadsDialog = true
                     }
                 )
-                13 -> donateButton()
-                14 -> if (!BuildConfig.HIDE_DONATION) {
+                6 -> PlayerSettingsView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            vertical = paddingVerticalItem,
+                            horizontal = paddingHorizontalItem
+                        ),
+                    onBackBufferChange = onBackBufferChange,
+                    onMinBufferChange = onMinBufferChange,
+                    onMaxBufferChange = onMaxBufferChange,
+                    onBufferForPlaybackChange = onBufferForPlaybackChange,
+                    onBufferForPlaybackAfterRebufferChange = onBufferForPlaybackAfterRebufferChange,
+                    backBuffer = backBuffer,
+                    minBuffer = minBuffer,
+                    maxBuffer = maxBuffer,
+                    cache = cache,
+                    bufferForPlayback = bufferForPlayback,
+                    bufferForPlaybackAfterRebuffer = bufferForPlaybackAfterRebuffer,
+                    onResetValuesClick = onResetValuesClick,
+                    onKillAppClick = onKillAppClick,
+                    onCacheChange = onCacheChange,
+                    onUseOkHttpPlayer = onUseOkHttpExoPlayer,
+                    isUseOkHttpPlayer = isUseOkHttpPlayer
+                )
+                // NORMALIZE VOLUME SWITCH
+                7 -> PowerAmpSwitch(
+                    enabled = IS_NORMALIZE_SWITCH_ENABLED,
+                    title = R.string.settings_normalizeVolume_title,
+                    subtitle = R.string.settings_normalizeVolume_subtitle,
+                    checked = isNormalizeVolumeEnabled,
+                    onCheckedChange = onNormalizeValueChange,
+                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
+                )
+                // MONO SWITCH
+                8 -> PowerAmpSwitch(
+                    enabled = IS_MONO_SWITCH_ENABLED,
+                    title = R.string.settings_monoAudio_title,
+                    subtitle = R.string.settings_monoAudio_subtitle,
+                    checked = isMonoAudioEnabled,
+                    onCheckedChange = onMonoValueChange,
+                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
+                )
+                9 -> if (IS_AMPACHE_DATA) {
+                    AmpacheSettingsListItem(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem),
+                        onClick = onAmpachePreferencesButtonPress
+                    )
+                }
+                10 -> PowerAmpSwitch(
+                    title = R.string.settings_enableDebugLogging_title,
+                    subtitle = R.string.settings_enableDebugLogging_subtitle,
+                    checked = remoteLoggingEnabled,
+                    onCheckedChange = onEnableLoggingValueChange,
+                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
+                )
+                11 -> TextWithSubtitle(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem),
+                    title = R.string.settings_debugLogs_title,
+                    trailingIcon = Icons.Outlined.OpenInNew,
+                    onClick = onDebugLogsButtonPress
+                )
+
+                12 -> donateButton()
+                13 -> if (!BuildConfig.HIDE_DONATION) {
                     PowerAmpCheckBox(title = R.string.settings_hideDonationButtonsMenu_title,
                         checked = hideDonationButtons,
                         onCheckedChange = onHideDonateValueChange,
                         modifier = Modifier.padding(start = paddingHorizontalItem))
                 }
-                17 -> Text(
+
+                // Anything above MAX_VISIBLE_ITEMS is not visible
+                27 -> Text(
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth(),
@@ -358,7 +468,7 @@ fun SettingsScreenContent(
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontSize = 16.sp
                 )
-                18 -> Text(
+                28 -> Text(
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth(),
@@ -368,8 +478,48 @@ fun SettingsScreenContent(
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontSize = 16.sp
                 )
-                //10 -> userState?.let { user -> UserInfoSection(user = user) }
-                //11 -> WorkInProgressStrip()
+                // CHECK UPDATES NOW BUTTON
+                30 -> TextWithSubtitle(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = paddingHorizontalItem)
+                        .padding(top = paddingVerticalItem * 2, bottom = paddingVerticalItem),
+                    title = R.string.settings_checkUpdatesNow_title,
+                    subtitle = R.string.coming_soon,
+                    onClick = onCheckUpdatesNowPress
+                )
+                // AUTO UPDATE CHECKBOX
+                31 -> PowerAmpCheckBox(
+                    enabled = IS_AUTO_UPDATE_ENABLED,
+                    modifier = Modifier
+                        .padding(vertical = paddingVerticalItem)
+                        .padding(start = paddingHorizontalItem),
+                    checked = isAutoCheckUpdatesEnabled,
+                    onCheckedChange = onAutoCheckUpdatesValueChange,
+                    title = R.string.settings_autoCheckUpdates_title,
+                    subtitle = R.string.coming_soon,
+                )
+                // SMART DOWNLOADS SWITCH
+                32 -> PowerAmpSwitch(
+                    enabled = IS_SMART_DOWNLOADS_SWITCH_ENABLED,
+                    title = R.string.settings_smartDownloads_title,
+                    subtitle = R.string.settings_smartDownloads_subtitle,
+                    checked = isSmartDownloadsEnabled,
+                    onCheckedChange = onSmartDownloadValueChange,
+                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
+                )
+                // EQUALIZER BUTTON
+                33 -> TextWithSubtitle(
+                    enabled = IS_EQUALIZER_BTN_ENABLED,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = paddingHorizontalItem)
+                        .padding(top = paddingVerticalItem * 2, bottom = paddingVerticalItem),
+                    title = R.string.settings_equalizer,
+                    subtitle = R.string.coming_soon,
+                    trailingIcon = Icons.Default.KeyboardArrowRight,
+                    onClick = onEqualizerPress
+                )
                 else -> { }
             }
         }
@@ -379,6 +529,37 @@ fun SettingsScreenContent(
 @Composable
 fun SettingsHeader() { }
 
+@Composable
+fun AmpacheSettingsListItem(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    trailingIconContentDescription: String? = null,
+    onClick: () -> Unit = { }
+) {
+    Row(
+        modifier = modifier
+            .clickable { onClick() },
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                text = stringResource(R.string.settings_ampachePreferences_title),
+                fontSize = 14.sp,
+                lineHeight = 14.sp
+            )
+            Text(
+                text = stringResource(R.string.settings_ampachePreferences_subtitle),
+                fontSize = 12.sp,
+                lineHeight = 12.sp,
+                fontWeight = FontWeight.Light
+            )
+        }
+        Image(
+            painterResource(R.drawable.ampache_flat_mono),
+            contentDescription = trailingIconContentDescription,
+            modifier = Modifier.size(42.dp)
+        )
+    }
+}
 
 @Composable
 fun ThemesRadioGroup(
@@ -401,7 +582,7 @@ fun ThemesRadioGroup(
                     horizontalArrangement = Arrangement.Start
                 ) {
                     RadioButton(
-                        enabled = item.isEnabled,
+                        enabled = item.isThemeAvailable(),
                         selected = selected == item,
                         onClick = {
                             setSelected(item)
@@ -411,7 +592,7 @@ fun ThemesRadioGroup(
                         )
                     )
                     Text(
-                        text = stringResource(id = item.title),
+                        text = stringResource(id = item.getTitleRes()),
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                 }
@@ -477,7 +658,7 @@ fun SettingsThemeSelector(
             shape = RoundedCornerShape(10.dp)
         ) {
             Text(
-                text = "Theme Selector\n(${stringResource(id = selected.title)})",
+                text = "Theme Selector\n(${stringResource(id = selected.getTitleRes())})",
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 17.sp,
@@ -526,19 +707,42 @@ fun PreviewSettingsScreen() {
         isSmartDownloadsEnabled = false,
         isAutoCheckUpdatesEnabled = false,
         isOfflineModeEnabled = true,
+        isDownloadSdCard = true,
         onHideDonateValueChange = { },
         onThemeSelected = { },
         onStreamingQualitySelected = { },
         onEnableLoggingValueChange = { },
-        donateButton = { DonateButtonContent(isExpanded = true, isTransparent = false) },
+        donateButton = { DonateButtonContent(
+            isExpanded = true,
+            isTransparent = false,
+            onDonateBmacButtonClick = {},
+            onDonateBtcButtonClick =  {},
+            onDonatePaypalButtonClick =  {}
+        )},
         onAutoCheckUpdatesValueChange = { },
-        onCheckUpdatesNowPress = {},
-        onDebugLogsButtonPress = {},
-        onDeleteDownloadsPress = {},
+        onCheckUpdatesNowPress = { },
+        onDebugLogsButtonPress = { },
+        onDeleteDownloadsPress = { },
+        onAmpachePreferencesButtonPress = { },
         onEqualizerPress = {},
         onMonoValueChange = {},
         onNormalizeValueChange = {},
         onSmartDownloadValueChange = {},
-        onOfflineModeValueChange = {}
+        onOfflineModeValueChange = {},
+        onSdCardDownloadValueChange = {},
+        onBufferForPlaybackChange = {},
+        onMinBufferChange = {},
+        onBackBufferChange = {},
+        onBufferForPlaybackAfterRebufferChange = {},
+        backBuffer = 34,
+        minBuffer = 22,
+        maxBuffer = 55,
+        bufferForPlayback = 129,
+        bufferForPlaybackAfterRebuffer = 400,
+        onMaxBufferChange = {},
+        onResetValuesClick = {},
+        onCacheChange = {},
+        cache = 100,
+        onKillAppClick = {}, isUseOkHttpPlayer = true, onUseOkHttpExoPlayer = {}
     )
 }

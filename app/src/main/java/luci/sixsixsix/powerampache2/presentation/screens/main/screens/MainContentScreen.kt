@@ -84,7 +84,6 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
-import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.User
@@ -92,7 +91,6 @@ import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
 import luci.sixsixsix.powerampache2.presentation.destinations.NotificationsScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.QueueScreenDestination
-
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.albums.AlbumsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.artists.ArtistsScreen
@@ -377,7 +375,7 @@ fun MainSearchBar(
             mainViewModel.onEvent(MainEvent.OnSearchQueryChange(it))
         },
         placeholder = {
-            Text(text = stringResource(id = R.string.topBar_search_hint))
+            Text(text = stringResource(id = R.string.topBar_search_hint), maxLines = 1)
         },
         enabled = true,
         onSearch = {
@@ -399,7 +397,6 @@ fun MainSearchBar(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TabbedLibraryView(
     navigator: DestinationsNavigator,
