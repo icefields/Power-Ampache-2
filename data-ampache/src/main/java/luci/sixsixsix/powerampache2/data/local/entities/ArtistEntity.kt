@@ -25,6 +25,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 
@@ -42,7 +43,9 @@ data class ArtistEntity(
     val yearFormed: Int = 0,
     val placeFormed: String? = null,
     @ColumnInfo(name = "multiUserId", defaultValue = "")
-    val multiUserId: String = ""
+    val multiUserId: String = "",
+    @ColumnInfo(name = "searchName", defaultValue = "")
+    val searchName: String = ""
 )
 
 fun ArtistEntity.toArtist() = Artist(
@@ -71,5 +74,6 @@ fun Artist.toArtistEntity(username: String, serverUrl: String) = ArtistEntity(
     time = time ?: 0,
     yearFormed = yearFormed,
     placeFormed = placeFormed.toString(),
-    multiUserId = multiuserDbKey(username = username, serverUrl = serverUrl)
+    multiUserId = multiuserDbKey(username = username, serverUrl = serverUrl),
+    searchName = name.normalizeForSearch()
 )

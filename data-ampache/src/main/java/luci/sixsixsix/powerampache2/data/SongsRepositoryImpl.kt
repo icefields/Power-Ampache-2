@@ -56,13 +56,13 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import luci.sixsixsix.powerampache2.domain.utils.WorkerHelper
 import okio.IOException
@@ -143,7 +143,7 @@ class SongsRepositoryImpl @Inject constructor(
         // also get songs from network
         val isSearch = query.isNotBlank()
         val songsDb = //if (query.isNullOrBlank())
-            dao.searchSong(query)
+            dao.searchSong(query.normalizeForSearch())
         //else listOf()
         // always check network in case of search, if online
         if (isSearch || songsDb.size < minDbSongs) { // will always be less if it's a search

@@ -40,6 +40,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Artist
@@ -106,6 +107,7 @@ class ArtistsRepositoryImpl @Inject constructor(
     ): Flow<Resource<List<Artist>>> = flow {
         emit(Resource.Loading(true))
         val cred = getCurrentCredentials()
+        val normalizedQuery = query.normalizeForSearch()
 
         if (isOfflineModeEnabled()) {
             val generatedArtists = dao.generateOfflineArtists(cred.username) //let it go to exception if no username
@@ -116,7 +118,7 @@ class ArtistsRepositoryImpl @Inject constructor(
         }
 
         if (offset == 0) {
-            val localArtists = dao.searchArtist(query)
+            val localArtists = dao.searchArtist(normalizedQuery)
             val isDbEmpty = localArtists.isEmpty() && query.isEmpty()
             if (!isDbEmpty) {
                 emit(Resource.Success(data = localArtists.map { it.toArtist() }))
@@ -145,7 +147,7 @@ class ArtistsRepositoryImpl @Inject constructor(
 
         dao.insertArtists(artists.map { it.toArtistEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
-        emit(Resource.Success(data = dao.searchArtist(query).map { it.toArtist() }, networkData = artists))
+        emit(Resource.Success(data = dao.searchArtist(normalizedQuery).map { it.toArtist() }, networkData = artists))
 
         // add albums (if present) to database
         if (fetchAlbumsWithArtist) {

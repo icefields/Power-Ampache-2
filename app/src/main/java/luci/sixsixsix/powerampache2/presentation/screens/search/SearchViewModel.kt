@@ -291,7 +291,9 @@ class SearchViewModel @Inject constructor(
     fun onEvent(event: SearchViewEvent) {
         when (event) {
             is SearchViewEvent.OnSearchQueryChange ->
-                if (event.query.isBlank() && state.searchQuery.isBlank()) { } else {
+                if (event.query.isBlank() && state.searchQuery.isBlank()) {
+                    // TODO
+                } else {
                     state = state.copy(searchQuery = event.query)
                     search()
                 }

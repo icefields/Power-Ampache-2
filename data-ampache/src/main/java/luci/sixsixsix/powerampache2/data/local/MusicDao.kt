@@ -118,9 +118,14 @@ interface MusicDao {
     @RawQuery(observedEntities = [AlbumEntity::class])
     fun getAlbums(query: SupportSQLiteQuery): List<AlbumEntity>
 
-    @Query("""SELECT * FROM albumentity WHERE 
-        (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == LOWER(artistName))
-        AND $multiUserCondition""")
+    @Query("""SELECT * FROM albumentity WHERE (
+            LOWER(searchName) LIKE '%' || LOWER(:query) || '%' OR 
+            LOWER(:query) == LOWER(searchName) OR 
+            LOWER(name) LIKE '%' || LOWER(:query) || '%' OR 
+            LOWER(:query) == LOWER(name) OR 
+            LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR 
+            LOWER(:query) == LOWER(artistName)
+        ) AND $multiUserCondition""")
     suspend fun searchAlbum(query: String): List<AlbumEntity>
 
     @Query("""SELECT * FROM albumentity WHERE (LOWER(artistId) == LOWER(:artistId) OR LOWER(artists) LIKE '%' || '"' || LOWER(:artistId) || '"' || '%' )
@@ -184,10 +189,18 @@ interface MusicDao {
     @Query("DELETE FROM songentity")
     suspend fun clearSongs()
 
-    @Query("""SELECT * FROM songentity 
-            WHERE (LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName)
-            AND $multiUserCondition
-            order by (LOWER(title) LIKE '%' || LOWER(:query) || '%') DESC, flag DESC, rating DESC, playCount DESC LIMIT 666""")
+    @Query("""SELECT * FROM songentity WHERE (
+        LOWER(:query) == searchTitle OR
+        LOWER(searchTitle) LIKE '%' || LOWER(:query) || '%' OR 
+        LOWER(:query) == title OR 
+        LOWER(title) LIKE '%' || LOWER(:query) || '%' OR 
+        LOWER(:query) == name OR 
+        LOWER(name) LIKE '%' || LOWER(:query) || '%' OR 
+        LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR 
+        LOWER(:query) == artistName OR 
+        LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR 
+        LOWER(:query) == albumName) AND $multiUserCondition
+        order by (LOWER(title) LIKE '%' || LOWER(:query) || '%') DESC, flag DESC, rating DESC, playCount DESC LIMIT 666""")
     suspend fun searchSong(query: String): List<SongEntity>
 
     @Query("""SELECT * FROM songentity WHERE playCount > 0 AND $multiUserCondition order by playCount DESC, flag DESC, rating DESC LIMIT :limit""")
@@ -217,7 +230,12 @@ interface MusicDao {
     @Query("DELETE FROM artistentity")
     suspend fun clearArtists()
 
-    @Query("""SELECT * FROM artistentity WHERE (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name) AND $multiUserCondition order by name""")
+    @Query("""SELECT * FROM artistentity WHERE ( 
+            LOWER(searchName) LIKE '%' || LOWER(:query) || '%' OR 
+            LOWER(:query) == LOWER(searchName) OR 
+            LOWER(name) LIKE '%' || LOWER(:query) || '%' OR 
+            LOWER(:query) == LOWER(name) 
+        ) AND $multiUserCondition order by name""")
     suspend fun searchArtist(query: String): List<ArtistEntity>
 
     @Query("""SELECT * FROM artistentity WHERE LOWER(genre) LIKE '%' || LOWER(:genre) || '%' OR LOWER(:genre) == LOWER(genre) order by name""")
@@ -321,15 +339,24 @@ interface MusicDao {
     @Query("""SELECT  song.*, songIds.position FROM downloadedsongentity as song, (SELECT * FROM playlistsongentity WHERE :playlistId == playlistId) as songIds WHERE song.mediaId == songIds.songId""")
     suspend fun getOfflineSongsFromPlaylist(playlistId: String): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE 
-        (LOWER(title) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name OR LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == artistName OR LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == albumName) 
-        AND $multiUserCondition""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE (
+             LOWER(:query) == LOWER(searchTitle) OR 
+             LOWER(searchTitle) LIKE '%' || LOWER(:query) || '%' OR
+             LOWER(title) LIKE '%' || LOWER(:query) || '%' OR 
+             LOWER(:query) == LOWER(title) OR
+             LOWER(searchArtist) LIKE '%' || LOWER(:query) || '%' OR 
+             LOWER(artistName) LIKE '%' || LOWER(:query) || '%' OR 
+             LOWER(:query) == LOWER(searchArtist) OR 
+             LOWER(albumName) LIKE '%' || LOWER(:query) || '%' OR 
+             LOWER(searchAlbum) LIKE '%' || LOWER(:query) || '%' OR 
+             LOWER(:query) == LOWER(searchAlbum)
+        ) AND $multiUserCondition""")
     suspend fun searchOfflineSongs(query: String): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE year > 1000 AND $multiUserCondition order by year DESC LIMIT 66""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE year > 1000 AND $multiUserCondition order by year DESC LIMIT 444""")
     suspend fun getRecentlyReleasedOfflineSongs(): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE flag == 1 AND $multiUserCondition LIMIT 222""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE flag == 1 AND $multiUserCondition LIMIT 444""")
     suspend fun getLikedOfflineSongs(): List<DownloadedSongEntity>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE rating > 0 AND $multiUserCondition order by rating DESC""")
@@ -354,30 +381,30 @@ interface MusicDao {
     /**
      * generates artist entities using only the info available in DownloadedSongEntity
      */
-    @Query("""SELECT count(artistId) as songCount, artistId as id, artistName as name, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed, multiUserId FROM DownloadedSongEntity as song WHERE LOWER(owner) == LOWER(:owner) GROUP BY artistId ORDER BY artistName""")
+    @Query("""SELECT count(artistId) as songCount, artistId as id, artistName as name, genre, imageUrl as artUrl, searchArtist as searchName, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed, multiUserId FROM DownloadedSongEntity as song WHERE LOWER(owner) == LOWER(:owner) GROUP BY artistId ORDER BY artistName""")
     suspend fun generateOfflineArtists(owner: String): List<ArtistEntity>
 
     /**
      * generates album entities using only the info available in DownloadedSongEntity
      */
-    @Query("""SELECT count(albumId) as songCount, albumId as id, multiUserId, albumName as name, albumName as basename, artistId, '{"attr":[' || albumArtist ||']}' as artists, artistName, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE LOWER(owner) == LOWER(:owner) GROUP BY albumId ORDER BY albumName""")
+    @Query("""SELECT count(albumId) as songCount, albumId as id, multiUserId, albumName as name, albumName as basename, artistId, '{"attr":[' || albumArtist ||']}' as artists, artistName, genre, imageUrl as artUrl, -1 as 'time', searchAlbum as searchName, 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE LOWER(owner) == LOWER(:owner) GROUP BY albumId ORDER BY albumName""")
     suspend fun generateOfflineAlbums(owner: String): List<AlbumEntity>
 
-    @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, multiUserId, albumName as basename, artistId, '{"attr":[' || albumArtist ||']}' as artists, artistName, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE artistId = LOWER(:artistId) GROUP BY albumId ORDER BY albumName""")
+    @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, multiUserId, albumName as basename, artistId, '{"attr":[' || albumArtist ||']}' as artists, artistName, searchAlbum as searchName, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE artistId = LOWER(:artistId) GROUP BY albumId ORDER BY albumName""")
     suspend fun getOfflineAlbumsByArtist(artistId: String): List<AlbumEntity>
 
-    @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, multiUserId, albumName as basename, artistId, artistName, '{"attr":[' || albumArtist ||']}' as artists, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE :albumId == id GROUP BY albumId""")
+    @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, multiUserId, albumName as basename, artistId, artistName, '{"attr":[' || albumArtist ||']}' as artists, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, searchAlbum as searchName, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE :albumId == id GROUP BY albumId""")
     suspend fun generateOfflineAlbum(albumId: String): AlbumEntity?
 
-    @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, multiUserId, albumName as basename, artistId, artistName, '{"attr":[' || albumArtist ||']}' as artists, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE :albumId == id GROUP BY albumId""")
+    @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, searchAlbum as searchName, multiUserId, albumName as basename, artistId, artistName, '{"attr":[' || albumArtist ||']}' as artists, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE :albumId == id GROUP BY albumId""")
     fun generateOfflineAlbumFlow(albumId: String): Flow<AlbumEntity?>
 
-    @Query("""SELECT count(artistId) as songCount, artistId as id, artistName as name, multiUserId, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed FROM DownloadedSongEntity as song WHERE LOWER(id) == LOWER(:artistId) GROUP BY artistId""")
+    @Query("""SELECT count(artistId) as songCount, artistId as id, artistName as name, multiUserId, genre, searchArtist as searchName, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed FROM DownloadedSongEntity as song WHERE LOWER(id) == LOWER(:artistId) GROUP BY artistId""")
     suspend fun generateOfflineArtist(artistId: String): ArtistEntity?
 
     @Query("""SELECT SUM(playCount) AS acount, artist.* FROM songentity AS song, 
               (
-                SELECT count(artistId) as songCount, artistId as id, multiUserId, artistName as name, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed FROM DownloadedSongEntity as song 
+                SELECT count(artistId) as songCount, artistId as id, searchArtist as searchName, multiUserId, artistName as name, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed FROM DownloadedSongEntity as song 
                 WHERE LOWER(owner) == (SELECT username FROM credentialsentity WHERE primaryKey == 'power-ampache-2-credentials')
                 GROUP BY artistId ORDER BY artistName
               ) AS artist

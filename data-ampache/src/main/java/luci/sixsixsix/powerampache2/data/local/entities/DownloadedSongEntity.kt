@@ -27,6 +27,7 @@ import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.processFlag
 import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 
@@ -67,7 +68,13 @@ data class DownloadedSongEntity(
     @ColumnInfo(name = "flag", defaultValue = "false")
     val flag: Boolean,
     @ColumnInfo(name = "multiUserId", defaultValue = "")
-    val multiUserId: String
+    val multiUserId: String,
+    @ColumnInfo(name = "searchTitle", defaultValue = "")
+    val searchTitle: String,
+    @ColumnInfo(name = "searchAlbum", defaultValue = "")
+    val searchAlbum: String,
+    @ColumnInfo(name = "searchArtist", defaultValue = "")
+    val searchArtist: String,
 )
 
 fun Song.toDownloadedSongEntity(downloadedSongUri: String, owner: String, serverUrl: String) = DownloadedSongEntity(
@@ -99,7 +106,10 @@ fun Song.toDownloadedSongEntity(downloadedSongUri: String, owner: String, server
     relativePath = filename,
     owner = owner,
     flag = flag == 1,
-    multiUserId = multiuserDbKey(username = owner, serverUrl = serverUrl)
+    multiUserId = multiuserDbKey(username = owner, serverUrl = serverUrl),
+    searchArtist = artist.name.normalizeForSearch(),
+    searchAlbum = album.name.normalizeForSearch(),
+    searchTitle = title.normalizeForSearch()
 )
 
 fun DownloadedSongEntity.toSong() = Song(

@@ -42,6 +42,7 @@ import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
@@ -124,6 +125,8 @@ class AlbumsRepositoryImpl @Inject constructor(
     //            return@flow
     //        }
 
+            val normalizedQuery = query.normalizeForSearch()
+
             val albumsSet = TreeSet<Album> { a1, a2 ->
                 val comparison = if (order == SortOrder.DESC) {
                     when(sort) {
@@ -155,7 +158,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             }
 
             //val localAlbums = mutableListOf<Album>()
-            albumsSet.addAll(dao.searchAlbum(query).map { it.toAlbum() })
+            albumsSet.addAll(dao.searchAlbum(normalizedQuery).map { it.toAlbum() })
 
             if (offset == 0) {
                 //localAlbums.addAll(dao.searchAlbum(query).map { it.toAlbum() })

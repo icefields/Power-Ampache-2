@@ -47,11 +47,12 @@ class SongDetailViewModel @Inject constructor(
         if (lyrics.value.isNotBlank() && song.id == songId) return
         songId = song.id
         viewModelScope.launch {
+            // if the lyrics from the Song object are blank, and we're using a Nextcloud backend, the lyrics need to be fetched
             if (song.lyrics.isBlank() && musicRepository.serverInfoStateFlow.first().isNextcloud) {
                 songsRepository.getSongFromId(song.id, true)?.let {
-                    if (it.lyrics != "") {
+                    //if (it.lyrics != "") {
                         _lyrics.value = it.lyrics.replace("\r\n", "<br>")
-                    }
+                    //}
                 }
             } else {
                 // If lyrics are already attached to the song object, there is no need to fetch.
