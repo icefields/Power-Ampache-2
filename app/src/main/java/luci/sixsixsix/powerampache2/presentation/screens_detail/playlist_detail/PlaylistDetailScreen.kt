@@ -22,6 +22,8 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
 import android.content.res.Configuration
+import android.graphics.drawable.Drawable
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -68,6 +71,10 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.Delay
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.FlaggedPlaylist
 import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
@@ -85,6 +92,7 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigateToArtist
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
@@ -179,7 +187,26 @@ fun PlaylistDetailScreen(
         }
     }
 
-    val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
+    var songToShare: Song? by remember { mutableStateOf(null) }
+    AnimatedVisibility(songToShare != null) {
+        songToShare?.let { songS ->
+            ShareDialog(
+                onShareWeb = {
+                    mainViewModel.onEvent(MainEvent.OnShareSongWebUrl(songS))
+                    songToShare = null
+                },
+                onSharePowerAmpache = {
+                    mainViewModel.onEvent(MainEvent.OnShareSong(songS))
+                    songToShare = null
+                },
+                onDismissRequest = {
+                    songToShare = null
+                }
+            )
+        }
+    }
+
+    val placeholder = painterResource(id = R.drawable.placeholder_album)
     Box(modifier = modifier) {
         AsyncImage(
             modifier = Modifier
@@ -187,6 +214,7 @@ fun PlaylistDetailScreen(
                 .align(Alignment.TopCenter),
             model = randomBackgroundTop,
             placeholder = placeholder,
+            error = placeholder,
             contentScale = ContentScale.Crop,
             contentDescription = playlist.name
         )
@@ -196,6 +224,7 @@ fun PlaylistDetailScreen(
                 .align(Alignment.TopCenter),
             model = randomBackgroundBottom,
             placeholder = placeholder,
+            error = placeholder,
             contentScale = ContentScale.FillWidth,
             contentDescription = playlist.name,
         )
@@ -256,7 +285,11 @@ fun PlaylistDetailScreen(
                             .fillMaxWidth()
                             .heightIn(
                                 max = if (infoVisibility) {
-                                    470.dp /* any big number */ } else { 0.dp })
+                                    470.dp /* any big number */
+                                } else {
+                                    0.dp
+                                }
+                            )
                             .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         playlist = currentPlaylistState,
                         isLoading = state.isLoading,
@@ -356,8 +389,9 @@ fun PlaylistDetailScreen(
                                         when(event) {
                                             SongItemEvent.PLAY_NEXT ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                                            SongItemEvent.SHARE_SONG ->
-                                                mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                                            SongItemEvent.SHARE_SONG -> {
+                                                songToShare = song
+                                            }
                                             SongItemEvent.DOWNLOAD_SONG ->
                                                 mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                                             SongItemEvent.EXPORT_DOWNLOADED_SONG ->
@@ -377,7 +411,12 @@ fun PlaylistDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            mainViewModel.onEvent(MainEvent.PlaySongReplacePlaylist(song, state.getSongList()))
+                                            mainViewModel.onEvent(
+                                                MainEvent.PlaySongReplacePlaylist(
+                                                    song,
+                                                    state.getSongList()
+                                                )
+                                            )
                                         },
                                     subtitleString = SubtitleString.ARTIST,
                                     songInfoThirdRow = SongInfoThirdRow.Time,

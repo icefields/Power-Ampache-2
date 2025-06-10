@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.queue.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,6 +49,7 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -97,6 +99,27 @@ fun QueueScreenContent(
         )
     }
 
+    var songToShare: Song? by remember { mutableStateOf(null) }
+
+    AnimatedVisibility(songToShare != null) {
+        songToShare?.let { songS ->
+            ShareDialog(
+                onShareWeb = {
+                    mainViewModel.onEvent(MainEvent.OnShareSongWebUrl(songS))
+                    songToShare = null
+                },
+                onSharePowerAmpache = {
+                    mainViewModel.onEvent(MainEvent.OnShareSong(songS))
+                    songToShare = null
+                },
+                onDismissRequest = {
+                    songToShare = null
+                }
+            )
+        }
+
+    }
+
     LazyColumn(modifier = modifier.fillMaxSize()) {
         itemsIndexed(
             items = queue,
@@ -108,8 +131,9 @@ fun QueueScreenContent(
                     when(event) {
                         SongItemEvent.PLAY_NEXT ->
                             mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                        SongItemEvent.SHARE_SONG ->
-                            mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                        SongItemEvent.SHARE_SONG -> {
+                            songToShare = song
+                        }
                         SongItemEvent.DOWNLOAD_SONG ->
                             mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                         SongItemEvent.EXPORT_DOWNLOADED_SONG ->

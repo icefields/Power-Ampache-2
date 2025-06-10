@@ -28,15 +28,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.usecase.ServerInfoStateFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.SongFromIdUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class SongDetailViewModel @Inject constructor(
-    private val musicRepository: MusicRepository,
-    private val songsRepository: SongsRepository
+    private val serverInfoStateFlowUseCase: ServerInfoStateFlowUseCase,
+    private val songFromIdUseCase: SongFromIdUseCase
 ) : ViewModel() {
     private val _lyrics = MutableStateFlow("")
     val lyrics = _lyrics.asStateFlow()
@@ -48,8 +48,8 @@ class SongDetailViewModel @Inject constructor(
         songId = song.id
         viewModelScope.launch {
             // if the lyrics from the Song object are blank, and we're using a Nextcloud backend, the lyrics need to be fetched
-            if (song.lyrics.isBlank() && musicRepository.serverInfoStateFlow.first().isNextcloud) {
-                songsRepository.getSongFromId(song.id, true)?.let {
+            if (song.lyrics.isBlank() && serverInfoStateFlowUseCase().first().isNextcloud) {
+                songFromIdUseCase(songId)?.let {
                     //if (it.lyrics != "") {
                         _lyrics.value = it.lyrics.replace("\r\n", "<br>")
                     //}

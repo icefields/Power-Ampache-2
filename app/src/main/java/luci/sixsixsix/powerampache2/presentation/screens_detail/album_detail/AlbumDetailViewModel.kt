@@ -48,6 +48,10 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject
@@ -58,23 +62,21 @@ class AlbumDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
+    offlineModeFlowUseCase: OfflineModeFlowUseCase,
+    localSettingsFlowUseCase: LocalSettingsFlowUseCase,
+    private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
+    private val toggleGlobalShuffleUseCase: ToggleGlobalShuffleUseCase,
     private val songsRepository: SongsRepository,
     private val albumsRepository: AlbumsRepository,
-    private val settingsRepository: SettingsRepository,
     private val playlistManager: MusicPlaylistManager,
 ) : AndroidViewModel(application) {
     var state by mutableStateOf(AlbumDetailState())
 
-    val offlineModeStateFlow = settingsRepository.offlineModeFlow
+    val offlineModeStateFlow = offlineModeFlowUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
-    val globalShuffleStateFlow = settingsRepository.settingsLiveData
-        .distinctUntilChanged()
-        .asFlow()
-        .filterNotNull()
-        .map {
-            it.isGlobalShuffleEnabled
-        }
+    val globalShuffleStateFlow = localSettingsFlowUseCase()
+        .map { it.isGlobalShuffleEnabled }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE)
 
@@ -123,7 +125,7 @@ class AlbumDetailViewModel @Inject constructor(
             }
             AlbumDetailEvent.OnShufflePlaylistToggle -> viewModelScope.launch {
                 try {
-                    settingsRepository.toggleGlobalShuffle()
+                    toggleGlobalShuffleUseCase()
                 } catch (e: Exception) {
                     playlistManager.updateErrorLogMessage(e.stackTraceToString())
                 }
@@ -206,7 +208,7 @@ class AlbumDetailViewModel @Inject constructor(
                                     songWrapperList.add(
                                         SongWrapper(
                                         song = song,
-                                        isOffline = songsRepository.isSongAvailableOffline(song)
+                                        isOffline = isSongAvailableOfflineUseCase(song)
                                     )
                                     )
                                 }

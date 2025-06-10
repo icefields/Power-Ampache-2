@@ -21,19 +21,19 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.settings
 
-import android.app.Application
+import android.content.Context
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asFlow
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -43,15 +43,22 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.common.openLinkInBrowser
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.settings.PowerAmpTheme
+import luci.sixsixsix.powerampache2.domain.usecase.ServerInfoStateFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.DeleteAllDownloadedSongsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.GetLocalSettingsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.SaveLocalSettingsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleOfflineModeUseCase
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
@@ -61,13 +68,19 @@ import kotlin.system.exitProcess
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val application: Context,
     private val savedStateHandle: SavedStateHandle,
-    private val application: Application,
-    private val settingsRepository: SettingsRepository,
-    private val musicRepository: MusicRepository,
+    private val saveLocalSettingsUseCase: SaveLocalSettingsUseCase,
+    private val getLocalSettingsUseCase: GetLocalSettingsUseCase,
+    private val toggleOfflineMode: ToggleOfflineModeUseCase,
+    private val deleteAllDownloadedSongs: DeleteAllDownloadedSongsUseCase,
+    localSettingsFlow: LocalSettingsFlowUseCase,
+    offlineModeFlowUseCase: OfflineModeFlowUseCase,
+    userFlowUseCase: UserFlowUseCase,
+    serverInfoStateFlowUseCase: ServerInfoStateFlowUseCase,
     private val playlistManager: MusicPlaylistManager,
     private val sharedPreferencesManager: SharedPreferencesManager
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     var state by savedStateHandle.saveable {
         mutableStateOf(SettingsState(appVersionInfoStr = getVersionInfoString(application)))
@@ -98,24 +111,18 @@ class SettingsViewModel @Inject constructor(
         }
     )
 
-    val offlineModeStateFlow = settingsRepository.offlineModeFlow
-        .map {
+    val offlineModeStateFlow = offlineModeFlowUseCase().map {
             playlistManager.updateUserMessage("")
             it
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
-    val localSettingsStateFlow = settingsRepository.settingsLiveData
-        .asFlow()
-        .filterNotNull()
-        .distinctUntilChanged()
+    val localSettingsStateFlow = localSettingsFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.defaultSettings())
 
-    val userStateFlow = musicRepository.userLiveData
-        .filterNotNull().distinctUntilChanged()
+    val userStateFlow = userFlowUseCase().filterNotNull().distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
-    val serverInfoStateFlow = musicRepository.serverInfoStateFlow.filterNotNull()
+    val serverInfoStateFlow = serverInfoStateFlowUseCase().filterNotNull()
 
     init {
         // collect all the logs
@@ -123,8 +130,12 @@ class SettingsViewModel @Inject constructor(
             playlistManager.errorLogMessageState.collect { errorState ->
                 errorState.errorMessage?.let {
                     // do not allow the error log to take too much space
-                    if (logs.size > 66) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                        logs.removeLast()
+                    if (logs.size > 66) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                            logs.removeLast()
+                        } else {
+                            // TODO: remove legacy
+                        }
                     }
                     logs.add(0, it)
                 }
@@ -229,67 +240,82 @@ class SettingsViewModel @Inject constructor(
     fun onEvent(event: SettingsEvent) {
         when(event) {
             is SettingsEvent.OnEnableRemoteLoggingSwitch -> viewModelScope.launch {
-                settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
                         .copy(enableRemoteLogging = event.newValue)
                 )
             }
             is SettingsEvent.OnHideDonationButtonSwitch -> viewModelScope.launch {
-                settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
                         .copy(hideDonationButton = event.newValue)
                 )
             }
             is SettingsEvent.OnStreamingQualityChange -> viewModelScope.launch {
-                settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
                         .copy(streamingQuality = event.newValue)
                 )
             }
             is SettingsEvent.OnThemeChange -> setTheme(event.newValue)
             SettingsEvent.DeleteDownloads -> deleteAllDownloads()
             is SettingsEvent.OnMonoValueChange -> viewModelScope.launch {
-                settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
                         .copy(isMonoAudioEnabled = event.isMono))
             }
             is SettingsEvent.OnNormalizeValueChange -> viewModelScope.launch {
-                settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
                         .copy(isNormalizeVolumeEnabled = event.isVolumeNormalized))
             }
             is SettingsEvent.OnSmartDownloadValueChange -> viewModelScope.launch {
-                settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
                         .copy(isSmartDownloadsEnabled = event.isSmartDownloadEnabled)
                 )
             }
             SettingsEvent.UpdateNow -> { }
             is SettingsEvent.OnAutomaticUpdateValueChange -> viewModelScope.launch {
-                settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
                         .copy(enableAutoUpdates = event.isAutoUpdate)
                 )
             }
 
             SettingsEvent.OnOfflineToggle ->  viewModelScope.launch {
-                settingsRepository.toggleOfflineMode()
+                toggleOfflineMode()
             }
 
             SettingsEvent.GoToWebsite ->
                 application.openLinkInBrowser(application.getString(R.string.website))
 
             is SettingsEvent.OnDownloadsSdCardValueChange -> viewModelScope.launch {
-                settingsRepository.saveLocalSettings(
-                    settingsRepository.getLocalSettings(userStateFlow.value?.username)
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
                         .copy(isDownloadsSdCard = event.isDownloadsSdCard)
                 )
+            }
+
+            is SettingsEvent.OnDownloadAfterPlayChange -> viewModelScope.launch {
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
+                        .copy(saveSongAfterPlayback = event.isDownload)
+                )
+            }
+
+            is SettingsEvent.OnDownloadFavouriteAfterPlayChange -> viewModelScope.launch {
+                saveLocalSettingsUseCase(
+                    getLocalSettingsUseCase(userStateFlow.value?.username)
+                        .copy(saveFavouriteSongAfterPlayback = event.isDownloadFavourite)
+                )
+                println("aaaaa switch ${event.isDownloadFavourite} ${ getLocalSettingsUseCase(userStateFlow.value?.username).saveFavouriteSongAfterPlayback}")
             }
         }
     }
 
     private fun deleteAllDownloads() = viewModelScope.launch {
-        settingsRepository.deleteAllDownloadedSongs().collect { result -> when(result) {
+        deleteAllDownloadedSongs().collect { result -> when(result) {
             is Resource.Success -> { result.data?.let {
                 Toast.makeText(application, R.string.settings_deleteDownloads_success, Toast.LENGTH_LONG).show() } }
             is Resource.Error ->
@@ -302,8 +328,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             // colours are static and depend on the hash of the object, reset if changing theme
             RandomThemeBackgroundColour.resetColours()
-            settingsRepository.saveLocalSettings(
-                settingsRepository.getLocalSettings(userStateFlow.value?.username).copy(theme = theme)
+            saveLocalSettingsUseCase(
+                getLocalSettingsUseCase(userStateFlow.value?.username).copy(theme = theme)
             )
         }
     }

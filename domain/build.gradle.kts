@@ -41,6 +41,10 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.gson)
+
+    implementation(libs.hilt.android)
+
+
     implementation(libs.media3.common) // TODO: this is is not supposed to be in the domain
     implementation(libs.androidx.runtime.livedata)
     // --- Coil, image-loader --- //

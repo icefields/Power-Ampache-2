@@ -144,7 +144,7 @@ fun ArtistDetailScreen(
     val artUrlTop = generateArtistArtUrl(state.artist, state.albums)
     val artUrlBottom = generateArtistArtUrl(state.artist, state.albums)
 
-    val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
+    //val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
         AsyncImage(
             modifier = Modifier
@@ -152,7 +152,7 @@ fun ArtistDetailScreen(
                 .align(Alignment.TopCenter),
             model = artUrlBottom,
             contentScale = ContentScale.Crop,
-            placeholder = placeholder,
+//            placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name
         )
@@ -162,7 +162,7 @@ fun ArtistDetailScreen(
                 .align(Alignment.TopCenter),
             model = artUrlTop,
             contentScale = ContentScale.FillWidth,
-            placeholder = placeholder,
+//            placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name,
         )

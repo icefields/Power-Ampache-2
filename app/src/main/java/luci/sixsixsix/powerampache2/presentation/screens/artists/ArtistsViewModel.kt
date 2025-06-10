@@ -13,18 +13,18 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class ArtistsViewModel @Inject constructor(
     private val artistsRepository: ArtistsRepository,
-    settingsRepository: SettingsRepository
+    offlineModeFlow: OfflineModeFlowUseCase
 ) : ViewModel() {
     var state by mutableStateOf(ArtistsState())
     private var isEndOfDataReached: Boolean = false
 
-    val offlineModeStateFlow = settingsRepository.offlineModeFlow
+    val offlineModeStateFlow = offlineModeFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     init {

@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
@@ -63,12 +64,14 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.InfoDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -110,6 +113,25 @@ fun SongDetailContent(
     }
 
     var isOffline by remember { mutableStateOf(false) }
+
+    var songToShare: Song? by remember { mutableStateOf(null) }
+    AnimatedVisibility(songToShare != null) {
+        songToShare?.let { songS ->
+            ShareDialog(
+                onShareWeb = {
+                    mainViewModel.onEvent(MainEvent.OnShareSongWebUrl(songS))
+                    songToShare = null
+                },
+                onSharePowerAmpache = {
+                    mainViewModel.onEvent(MainEvent.OnShareSong(songS))
+                    songToShare = null
+                },
+                onDismissRequest = {
+                    songToShare = null
+                }
+            )
+        }
+    }
 
     Column(
         modifier = modifier
@@ -183,8 +205,9 @@ fun SongDetailContent(
                 tint = buttonsTint
             ) { event ->
                 when(event) {
-                    SongDetailButtonEvents.SHARE_SONG ->
-                        mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                    SongDetailButtonEvents.SHARE_SONG -> {
+                        songToShare = song
+                    }
                     SongDetailButtonEvents.DOWNLOAD_SONG ->
                         mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                     SongDetailButtonEvents.ADD_SONG_TO_PLAYLIST_OR_QUEUE ->

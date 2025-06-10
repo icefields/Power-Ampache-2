@@ -44,6 +44,7 @@ data class LocalSettings(
     val isDownloadsSdCard: Boolean,
     val sleepTimerMinutes: Int,
     val saveSongAfterPlayback: Boolean,
+    val saveFavouriteSongAfterPlayback: Boolean
 ): Parcelable {
     companion object {
         // defaults
@@ -58,6 +59,7 @@ data class LocalSettings(
         const val SETTINGS_DEFAULTS_OFFLINE_MODE = false
         const val SETTINGS_DEFAULTS_DOWNLOADS_SD_CARD = false
         const val SETTINGS_DEFAULTS_SAVE_AFTER_PLAY = false
+        const val SETTINGS_DEFAULTS_SAVE_FAVOURITE_AFTER_PLAY = false
         const val SETTINGS_DEFAULTS_SMART_DOWNLOADS = false
         const val SETTINGS_DEFAULTS_STREAMING_QUALITY = BITRATE_VERY_HIGH
         const val SETTINGS_DEFAULTS_PLAYLIST_SORT = SORT_MODE_ASC // ascending is the default. if ascending do not change the list
@@ -78,7 +80,8 @@ data class LocalSettings(
                 playlistSongsSorting = defaultPlaylistSort,
                 isDownloadsSdCard = SETTINGS_DEFAULTS_DOWNLOADS_SD_CARD,
                 sleepTimerMinutes = 0,
-                saveSongAfterPlayback = SETTINGS_DEFAULTS_SAVE_AFTER_PLAY
+                saveSongAfterPlayback = SETTINGS_DEFAULTS_SAVE_AFTER_PLAY,
+                saveFavouriteSongAfterPlayback = SETTINGS_DEFAULTS_SAVE_FAVOURITE_AFTER_PLAY,
             )
     }
 
@@ -130,6 +133,9 @@ data class LocalSettings(
 
         sbThis.append(this.saveSongAfterPlayback)
         sbOthe.append(othe.saveSongAfterPlayback)
+
+        sbThis.append(this.saveFavouriteSongAfterPlayback)
+        sbOthe.append(othe.saveFavouriteSongAfterPlayback)
 
         return sbThis.toString() == sbOthe.toString()
     }

@@ -24,7 +24,7 @@ package luci.sixsixsix.powerampache2.data.common
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
-    const val DATABASE_VERSION = 84
+    const val DATABASE_VERSION = 85
 
     const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 

@@ -76,8 +76,8 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         AutoMigration(from = 81, to = 83),
 
         AutoMigration(from = 82, to = 83),
-
         AutoMigration(from = 83, to = 84),
+        AutoMigration(from = 84, to = 85),
 
     ],
     exportSchema = true

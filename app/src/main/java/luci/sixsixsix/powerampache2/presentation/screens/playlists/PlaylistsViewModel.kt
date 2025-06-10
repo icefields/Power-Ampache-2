@@ -27,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -40,55 +39,31 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistsViewModel @Inject constructor(
     private val repository: PlaylistsRepository,
-    settingsRepository: SettingsRepository,
-    musicRepository: MusicRepository
+    offlineModeFlow: OfflineModeFlowUseCase,
+    userFlowUseCase: UserFlowUseCase
 ) : ViewModel() {
     var state by mutableStateOf(PlaylistsState())
     private var isEndOfDataReached: Boolean = false
     private lateinit var currentUsername: String
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val playlistsStateFlow: StateFlow<List<Playlist>> =
-        settingsRepository.offlineModeFlow
+        offlineModeFlow()
             .flatMapLatest { repository.playlistsFlow }
             .filterNotNull()
             .distinctUntilChanged()
-            .combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlists, user ->
+            .combine(userFlowUseCase().filterNotNull().distinctUntilChanged()) { playlists, user ->
                 currentUsername = user.username
                 playlists
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
-
-
-//    init {
-//        musicRepository.userLiveData.observeForever {
-//            it?.let {
-//                currentUsername = it.username
-//                getPlaylists()
-////                viewModelScope.launch {
-////                    playlistManager.currentSearchQuery.collect { query ->
-////                        L("PlaylistsViewModel collect" , query)
-////                        onEvent(PlaylistEvent.OnSearchQueryChange(query))
-////                    }
-////                }
-//                // playlists can change or be edited, make sure to always listen to the latest version
-//                repository.playlistsLiveData.observeForever { playlists ->
-//                    L("viewmodel.getPlaylists observed playlist change", state.playlists.size)
-//                    if (playlists.isNotEmpty() && state.searchQuery.isBlank() && state.playlists != playlists) {
-//                        L("viewmodel.getPlaylists playlists are different, update", playlists.size, state.playlists.size)
-//                        state = state.copy(playlists = playlists)
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     fun isCurrentUserOwner(playlist: Playlist) =
         currentUsername.lowercase() == playlist.owner?.lowercase()

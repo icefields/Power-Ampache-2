@@ -21,14 +21,15 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main
 
-import android.app.Application
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,9 +43,11 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.common.sha256
 import luci.sixsixsix.powerampache2.common.disableSSLCertificateVerify
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.common.sha256
+import luci.sixsixsix.powerampache2.domain.usecase.SessionFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
@@ -54,12 +57,14 @@ import javax.inject.Inject
 @OptIn(SavedStateHandleSaveableApi::class)
 class AuthViewModel @Inject constructor(
     private val repository: MusicRepository,
+    userFlowUseCase: UserFlowUseCase,
+    sessionFlowUseCase: SessionFlowUseCase,
     private val playlistManager: MusicPlaylistManager,
     private val sharedPreferencesManager: SharedPreferencesManager,
     pingScheduler: AlarmScheduler,
-    private val application: Application,
+    @ApplicationContext private val application: Context,
     savedStateHandle: SavedStateHandle
-) : AndroidViewModel(application) {
+) : ViewModel() {
     var state by savedStateHandle.saveable { mutableStateOf(AuthState()) }
 
     private val _isLoginCompletedStateFlow = MutableStateFlow(false)
@@ -68,11 +73,11 @@ class AuthViewModel @Inject constructor(
     var isAllowAllCerts = sharedPreferencesManager.isAllowAllCertificatesFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), sharedPreferencesManager.isAllowAllCertificates)
         private set
 
-    val sessionStateFlow = repository.sessionLiveData
+    val sessionStateFlow = sessionFlowUseCase()
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), state.savedSession)
 
-    val userStateFlow = repository.userLiveData
+    val userStateFlow = userFlowUseCase()
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
@@ -89,7 +94,7 @@ class AuthViewModel @Inject constructor(
         // Listen to changes of the session table from the database
         viewModelScope.launch {
             pingServerSync()
-            repository.sessionLiveData.distinctUntilChanged().collect { session ->
+            sessionFlowUseCase().distinctUntilChanged().collect { session ->
                 if (session == null) {
                     _isLoginCompletedStateFlow.value = false
                     // setting the session to null will show the login screen, but the autologin call

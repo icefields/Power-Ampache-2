@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data
 import android.content.Context
 import android.os.Environment
 import androidx.core.text.isDigitsOnly
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -79,7 +80,6 @@ import javax.inject.Singleton
  * return/emit data.
  * When breaking a rule please add a comment with a TODO: BREAKING_RULE
  */
-@OptIn(DelicateCoroutinesApi::class)
 @Singleton
 class MusicRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
@@ -87,16 +87,17 @@ class MusicRepositoryImpl @Inject constructor(
     db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val configProvider: ConfigProvider,
-    applicationCoroutineScope: CoroutineScope
+    applicationCoroutineScope: CoroutineScope,
+    @ApplicationContext private val context: Context
 ): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
     private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
 
     val serverVersionStateFlow = serverInfoStateFlow.mapNotNull { it.version }.distinctUntilChanged()
 
-    override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
+    override val sessionFlow = dao.getSessionLiveData().map { it?.toSession() }
 
-    override val userLiveData: Flow<User?> = dao.getUserLiveData().map {
+    override val userFlow: Flow<User?> = dao.getUserLiveData().map {
         val cred = getCurrentCredentials()
         if (cred.username.isNotBlank()) {
             val userEntity = it ?: dao.getUser(cred.username)
@@ -112,7 +113,7 @@ class MusicRepositoryImpl @Inject constructor(
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
         applicationCoroutineScope.launch {
-            sessionLiveData.distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
+            sessionFlow.distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
                 // if token has changed or user is null, get user from network
                 if (newToken != currentAuthToken || currentUser == null) {
                     currentAuthToken = newToken
@@ -405,7 +406,7 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("logout()", e, this) }
 
-    override suspend fun getStorageLocation(context: Context): String =
+    override suspend fun getStorageLocation(): String =
         if (dao.getSettings()?.toLocalSettings()?.isDownloadsSdCard == true) {
             context.getExternalFilesDir(Environment.DIRECTORY_MUSIC)?.absolutePath ?: context.filesDir.absolutePath
         } else {

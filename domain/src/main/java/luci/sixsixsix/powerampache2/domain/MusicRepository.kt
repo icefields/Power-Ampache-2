@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.domain
 
-import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.powerampache2.common.Resource
@@ -31,8 +30,8 @@ import luci.sixsixsix.powerampache2.domain.models.Session
 import luci.sixsixsix.powerampache2.domain.models.User
 
 interface MusicRepository {
-    val sessionLiveData: Flow<Session?>
-    val userLiveData: Flow<User?>
+    val sessionFlow: Flow<Session?>
+    val userFlow: Flow<User?>
     val serverInfoStateFlow: StateFlow<ServerInfo>
 
     suspend fun ping(): Resource<Pair<ServerInfo, Session?>>
@@ -43,6 +42,5 @@ interface MusicRepository {
     suspend fun register(serverUrl: String, username: String, password: String, email: String, fullName: String? = null): Flow<Resource<Any>>
     suspend fun getGenres(fetchRemote: Boolean): Flow<Resource<List<Genre>>>
 
-    // TODO: do not pass context here
-    suspend fun getStorageLocation(context: Context): String
+    suspend fun getStorageLocation(): String
 }

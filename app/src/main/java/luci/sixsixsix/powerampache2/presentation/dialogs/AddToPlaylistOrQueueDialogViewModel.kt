@@ -41,6 +41,7 @@ import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import java.util.UUID
 import javax.inject.Inject
@@ -48,7 +49,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
-    private val musicRepository: MusicRepository,
+    userFlowUseCase: UserFlowUseCase,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(AddToPlaylistOrQueueDialogState())
@@ -56,7 +57,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
 
     val playlistsStateFlow: StateFlow<List<Playlist>> =
         playlistsRepository.playlistsFlow.filterNotNull().distinctUntilChanged()
-            .combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlists, user ->
+            .combine(userFlowUseCase().filterNotNull().distinctUntilChanged()) { playlists, user ->
                 playlists.filter { it.owner?.lowercase() == user.username.lowercase() }
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 

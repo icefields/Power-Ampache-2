@@ -104,6 +104,8 @@ data class Song(
 
 fun Song.hasLyrics() = lyrics.isNotBlank()
 
+fun Song.isFavourite() = flag != 0
+
 fun Song.totalTime(): String {
     val minutes = time / 60
     val seconds = time % 60

@@ -45,7 +45,6 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Artist
@@ -54,6 +53,7 @@ import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,7 +61,7 @@ class HomeScreenViewModel @Inject constructor(
     private val albumsRepository: AlbumsRepository,
     private val playlistsRepository: PlaylistsRepository,
     private val artistsRepository: ArtistsRepository,
-    settingsRepository: SettingsRepository
+    offlineModeFlowUseCase: OfflineModeFlowUseCase
 ) : ViewModel() {
     var state by mutableStateOf(HomeScreenState())
     private var _recentNetwork: MutableStateFlow<List<AmpacheModel>> = MutableStateFlow(listOf())
@@ -85,7 +85,7 @@ class HomeScreenViewModel @Inject constructor(
     private val offsetNewest = (0..2).random()
     private val offsetRandom = (0..2).random()
 
-    val offlineModeStateFlow = settingsRepository.offlineModeFlow.distinctUntilChanged()
+    val offlineModeStateFlow = offlineModeFlowUseCase().distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     val playlistsStateFlow = playlistsRepository.playlistsFlow.distinctUntilChanged()
