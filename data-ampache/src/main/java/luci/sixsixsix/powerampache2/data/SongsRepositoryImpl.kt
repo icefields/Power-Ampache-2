@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data
 
 import androidx.lifecycle.map
+import androidx.work.ListenableWorker.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.delay
@@ -56,13 +57,15 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
+import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.NetworkDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import luci.sixsixsix.powerampache2.domain.utils.WorkerHelper
 import okio.IOException
@@ -86,6 +89,8 @@ class SongsRepositoryImpl @Inject constructor(
     private val storageManager: StorageManager,
     private val weakContext: WeakContext,
     private val workerHelper: WorkerHelper,
+    private val dbDataSource: DbDataSource,
+    private val networkDataSource: NetworkDataSource,
     applicationCoroutineScope: CoroutineScope
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
@@ -143,7 +148,7 @@ class SongsRepositoryImpl @Inject constructor(
         // also get songs from network
         val isSearch = query.isNotBlank()
         val songsDb = //if (query.isNullOrBlank())
-            dao.searchSong(query)
+            dao.searchSong(query.normalizeForSearch())
         //else listOf()
         // always check network in case of search, if online
         if (isSearch || songsDb.size < minDbSongs) { // will always be less if it's a search
@@ -559,6 +564,18 @@ class SongsRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    @Throws(Exception::class)
+    override suspend fun downloadSongAndAddToDb(songId: String): Song? =
+        dbDataSource.getSongById(songId)?.let { song ->
+            if (!isSongAvailableOffline(song)) {
+                val inputStream = networkDataSource.downloadSong(authKey = authToken(), songId = songId)
+                val filepath = storageManager.saveSong(song, inputStream)
+                dbDataSource.addDownloadedSong(song, filepath)
+            }
+            song
+        }
+
 
     private suspend fun emitDownloadSuccess(fc: ProducerScope<Resource<Any>>){
         fc.send(Resource.Success(data = Any(), networkData = Any()))

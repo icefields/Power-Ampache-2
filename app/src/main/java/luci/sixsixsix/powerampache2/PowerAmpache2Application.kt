@@ -78,8 +78,9 @@ class PowerAmpache2Application : Application(), ImageLoaderFactory, Configuratio
     }
 
     override fun newImageLoader(): ImageLoader = imageLoaderBuilder
-        .placeholder(R.drawable.placeholder_album)
-        .error(R.drawable.placeholder_album)
+        //.placeholder(R.drawable.placeholder_album_transp)
+        .fallback(R.drawable.placeholder_album_transp)
+        //.error(R.drawable.placeholder_album)
         .build()
 
     override val workManagerConfiguration: Configuration

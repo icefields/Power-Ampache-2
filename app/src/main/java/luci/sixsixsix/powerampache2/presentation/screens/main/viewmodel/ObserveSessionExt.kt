@@ -28,7 +28,7 @@ import luci.sixsixsix.powerampache2.domain.common.Constants
 
 fun MainViewModel.observeSession() {
     viewModelScope.launch {
-        musicRepository.sessionLiveData.distinctUntilChanged().collect {
+        sessionFlowUseCase().distinctUntilChanged().collect {
             synchronized(mainLock) {
                 val oldToken = authToken
                 authToken = it?.auth ?: ""

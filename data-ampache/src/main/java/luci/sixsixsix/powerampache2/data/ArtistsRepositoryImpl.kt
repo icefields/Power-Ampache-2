@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.common.Constants
@@ -39,7 +40,14 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
+import luci.sixsixsix.powerampache2.di.LocalDataSource
+import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
+import luci.sixsixsix.powerampache2.di.RemoteDataSource
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
+import luci.sixsixsix.powerampache2.domain.datasource.ArtistsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.ArtistsOfflineModeDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.ArtistsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Artist
@@ -57,9 +65,20 @@ import javax.inject.Singleton
 @Singleton
 class ArtistsRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
-    private val db: MusicDatabase,
+    db: MusicDatabase,
+    @RemoteDataSource private val artistsRemoteDataSource: ArtistsRemoteDataSource,
+    @LocalDataSource private val artistsDbDataSource: ArtistsDbDataSource,
+    @OfflineModeDataSource private val artistsOfflineDataSource: ArtistsOfflineModeDataSource,
     private val errorHandler: ErrorHandler
 ): BaseAmpacheRepository(api, db, errorHandler), ArtistsRepository {
+
+    override val recommendedFlow: Flow<List<Artist>> = offlineModeFlow.flatMapLatest { isOffline ->
+            if (isOffline)
+                artistsOfflineDataSource.recommendedFlow
+            else
+                artistsDbDataSource.recommendedFlow
+        }
+
     override suspend fun getArtist(
         artistId: String,
         fetchRemote: Boolean,
@@ -106,6 +125,7 @@ class ArtistsRepositoryImpl @Inject constructor(
     ): Flow<Resource<List<Artist>>> = flow {
         emit(Resource.Loading(true))
         val cred = getCurrentCredentials()
+        val normalizedQuery = query.normalizeForSearch()
 
         if (isOfflineModeEnabled()) {
             val generatedArtists = dao.generateOfflineArtists(cred.username) //let it go to exception if no username
@@ -116,7 +136,7 @@ class ArtistsRepositoryImpl @Inject constructor(
         }
 
         if (offset == 0) {
-            val localArtists = dao.searchArtist(query)
+            val localArtists = dao.searchArtist(normalizedQuery)
             val isDbEmpty = localArtists.isEmpty() && query.isEmpty()
             if (!isDbEmpty) {
                 emit(Resource.Success(data = localArtists.map { it.toArtist() }))
@@ -145,7 +165,7 @@ class ArtistsRepositoryImpl @Inject constructor(
 
         dao.insertArtists(artists.map { it.toArtistEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
-        emit(Resource.Success(data = dao.searchArtist(query).map { it.toArtist() }, networkData = artists))
+        emit(Resource.Success(data = dao.searchArtist(normalizedQuery).map { it.toArtist() }, networkData = artists))
 
         // add albums (if present) to database
         if (fetchAlbumsWithArtist) {
@@ -167,6 +187,40 @@ class ArtistsRepositoryImpl @Inject constructor(
 
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getArtists()", e, this) }
+
+    override suspend fun getRecommendedArtists(
+        fetchRemote: Boolean,
+        baseArtistId: String,
+        offset: Int
+    ): Flow<Resource<List<Artist>>> = flow {
+        emit(Resource.Loading(true))
+
+        if (isOfflineModeEnabled()) {
+            emit(Resource.Success(
+                data = artistsOfflineDataSource.getRecommendedArtists(baseArtistId)))
+            return@flow
+        }
+
+        if (!fetchRemote) {
+            // for this specific call, only emit initial db data if fetchRemote is false
+            emit(Resource.Success(
+                data = artistsDbDataSource.getRecommendedArtists(baseArtistId)))
+            return@flow
+        }
+
+        val remoteArtists = artistsRemoteDataSource.getRecommendedArtists(
+            auth = authToken(), baseArtistId = baseArtistId
+        )
+        val cred = getCurrentCredentials()
+        artistsDbDataSource.saveRecommendedArtistsToDb(
+            cred.username,
+            serverUrl = cred.serverUrl,
+            baseArtistId = baseArtistId,
+            artists = remoteArtists
+        )
+        emit(Resource.Success(data = artistsDbDataSource.getRecommendedArtists(baseArtistId)))
+        emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getRecommendedArtists()", e, this) }
 
     override suspend fun getArtistsByGenre(
         genre: Genre,
@@ -232,24 +286,16 @@ class ArtistsRepositoryImpl @Inject constructor(
             mostPlayedArtistsDb.map { it.toArtist() }
         }
 
-    override suspend fun getSongsFromArtist(
-        artistId: String,
-        fetchRemote: Boolean
-    ): Flow<Resource<List<Song>>> = flow {
+    override suspend fun getSongsFromArtist(artistId: String, fetchRemote: Boolean) = flow {
         emit(Resource.Loading(true))
         val isOfflineMode = isOfflineModeEnabled()
         val localSongs = getDbSongsFromArtist(artistId, isOfflineMode)
-        if (
-            !checkEmitCacheData(localSongs, fetchRemote, this) ||
-            isOfflineMode
-        ) {
+        if (!checkEmitCacheData(localSongs, fetchRemote, this) || isOfflineMode) {
             emit(Resource.Loading(false))
             return@flow
         }
 
-        val response = api.getSongsFromArtist(authToken(), artistId = artistId)
-        response.error?.let { throw(MusicException(it.toError())) }
-        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
+        val songs = artistsRemoteDataSource.getSongsFromArtist(authToken(), artistId = artistId) //response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
         cacheSongs(songs)
         emit(Resource.Success(data = getDbSongsFromArtist(artistId, isOfflineMode), networkData = songs))
         emit(Resource.Loading(false))
@@ -257,9 +303,8 @@ class ArtistsRepositoryImpl @Inject constructor(
 
     private suspend fun getDbSongsFromArtist(artistId: String, isOfflineModeEnabled: Boolean ): List<Song> =
         if (isOfflineModeEnabled) {
-            dao.getOfflineSongsFromArtist(artistId).map { it.toSong() }
+            artistsOfflineDataSource.getSongsFromArtist(artistId)
         } else {
-            dao.getSongsFromArtist(artistId).map { it.toSong() }
+            artistsDbDataSource.getSongsFromArtist(artistId)
         }
 }
-

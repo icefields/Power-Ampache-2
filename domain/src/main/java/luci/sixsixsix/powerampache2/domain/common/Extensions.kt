@@ -29,6 +29,7 @@ import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import java.lang.ref.WeakReference
 import java.security.MessageDigest
+import java.text.Normalizer
 
 typealias WeakContext = WeakReference<Context>
 
@@ -44,6 +45,14 @@ fun String.isIpAddress(): Boolean =
     //InetAddresses.isNumericAddress(this) // requires min Q
     Patterns.IP_ADDRESS.matcher(this).matches()
 //("(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])").toRegex().matches(this)
+
+fun String.normalizeForSearch(): String = if (this.isNotBlank())
+    Normalizer.normalize(this, Normalizer.Form.NFD)
+        .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "") // strip accents
+        .replace("[\\p{Punct}]".toRegex(), " ") // replace punctuation like ()[]{}!?. with space
+        .replace("\\s+".toRegex(), " ") // collapse multiple spaces
+        .trim()
+    else ""
 
 private fun hashString(input: String, algorithm: String): String {
     return MessageDigest

@@ -91,6 +91,9 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         is MainEvent.OnShareSong -> viewModelScope.launch {
             shareManager.shareSongDeepLink(context, event.song)
         }
+        is MainEvent.OnShareSongWebUrl -> viewModelScope.launch {
+            shareManager.shareSongWeb(context, event.song)
+        }
         is MainEvent.Repeat -> viewModelScope.launch {
             val nextRepeatMode = nextRepeatMode()
             simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.RepeatToggle(nextRepeatMode))
@@ -151,7 +154,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         }
 
         MainEvent.OnEnableOfflineMode -> viewModelScope.launch {
-            settingsRepository.toggleOfflineMode()
+            toggleOfflineMode()
         }
     }
 }
@@ -181,6 +184,7 @@ private fun MainViewModel.playSongAddToQueueTop(song: Song, songList: List<Song>
  * select a single song, play, and put it on the top of the queue
  * the song list is just for verification (TODO: should that be optional?)
  */
+@OptIn(UnstableApi::class)
 private fun MainViewModel.playSongReplacePlaylist(song: Song, songList: List<Song>) {
     startPlayLoading()
     playlistManager.replaceQueuePlaySong(songList, song)

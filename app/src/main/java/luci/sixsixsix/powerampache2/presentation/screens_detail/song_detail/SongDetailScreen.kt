@@ -55,7 +55,11 @@ fun SongDetailScreen(
 ) {
     val song by viewModel.currentSongStateFlow().collectAsState()
     val lyrics by songDetailViewModel.lyrics.collectAsStateWithLifecycle()
-    song?.let { songDetailViewModel.getSongLyrics(it) }
+
+    song?.let {
+        songDetailViewModel.getSongLyrics(it)
+        songDetailViewModel.getRecommendedArtists(it)
+    }
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val pagerState = rememberPagerState(initialPage = 0) {

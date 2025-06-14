@@ -39,18 +39,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
-import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
-import luci.sixsixsix.powerampache2.domain.datasource.NetworkDataSource
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.utils.StorageManager
+import luci.sixsixsix.powerampache2.domain.usecase.DownloadSongUseCase
 import java.time.Duration
 import java.util.UUID
 
 @HiltWorker
 class SongDownloadWorker @AssistedInject constructor(
-    private val api: NetworkDataSource, // TODO replace with use case
-    private val dbDataSource: DbDataSource, // TODO replace with use case
-    private val storageManager: StorageManager,
+    private val downloadSongUseCase: DownloadSongUseCase,
     @Assisted val context: Context,
     @Assisted private val params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
@@ -60,31 +56,50 @@ class SongDownloadWorker @AssistedInject constructor(
         //val username = params.inputData.getString(KEY_USERNAME)
         val songId = params.inputData.getString(KEY_SONG) ?: ERROR_STRING // this will make the following query return null
 
-        dbDataSource.getSongById(songId)?.let { song ->
-            //val song = db.dao.getSongById(songId).toSong()
-
-            val firstUpdate = workDataOf(KEY_PROGRESS to 0, KEY_SONG to "${song.artist.name} - ${song.name}")
-            val lastUpdate = workDataOf(KEY_PROGRESS to 100, KEY_SONG to "${song.artist.name} - ${song.name}")
-
-            setProgress(firstUpdate)
-
-            try {
-                val inputStream = api.downloadSong(authKey = authKey!!, songId = songId)
-                val filepath = storageManager.saveSong(song, inputStream)
-                dbDataSource.addDownloadedSong(song, filepath)
+        //val firstUpdate = workDataOf(KEY_PROGRESS to 0, KEY_SONG to "${song.artist.name} - ${song.name}")
+        try {
+            downloadSongUseCase(songId)?.let { song ->
+                val lastUpdate = workDataOf(KEY_PROGRESS to 100, KEY_SONG to "${song.artist.name} - ${song.name}")
                 setProgress(lastUpdate)
                 Result.success(workDataOf(KEY_RESULT_SONG to songId))
-            } catch (e: Exception) {
+            } ?: run {
                 Result.failure(
                     workDataOf(
-                        KEY_RESULT_ERROR to "cannot download/save file, " +
-                                "body or input stream NULL: ${e.printStackTrace()}"))
+                        KEY_RESULT_ERROR to "Song.mediaId, or Song, is null!, songId:$songId"))
             }
-        } ?: run {
+        } catch (e: Exception) {
             Result.failure(
                 workDataOf(
-                    KEY_RESULT_ERROR to "Song.mediaId, or Song, is null!, songId:$songId"))
+                    KEY_RESULT_ERROR to "cannot download/save file, " +
+                            "body or input stream NULL: ${e.printStackTrace()}"))
         }
+
+//
+//        dbDataSource.getSongById(songId)?.let { song ->
+//            //val song = db.dao.getSongById(songId).toSong()
+//
+//            val firstUpdate = workDataOf(KEY_PROGRESS to 0, KEY_SONG to "${song.artist.name} - ${song.name}")
+//            val lastUpdate = workDataOf(KEY_PROGRESS to 100, KEY_SONG to "${song.artist.name} - ${song.name}")
+//
+//            setProgress(firstUpdate)
+//
+//            try {
+//                val inputStream = api.downloadSong(authKey = authKey!!, songId = songId)
+//                val filepath = storageManager.saveSong(song, inputStream)
+//                dbDataSource.addDownloadedSong(song, filepath)
+//                setProgress(lastUpdate)
+//                Result.success(workDataOf(KEY_RESULT_SONG to songId))
+//            } catch (e: Exception) {
+//                Result.failure(
+//                    workDataOf(
+//                        KEY_RESULT_ERROR to "cannot download/save file, " +
+//                                "body or input stream NULL: ${e.printStackTrace()}"))
+//            }
+//        } ?: run {
+//            Result.failure(
+//                workDataOf(
+//                    KEY_RESULT_ERROR to "Song.mediaId, or Song, is null!, songId:$songId"))
+//        }
     }
 
     companion object {

@@ -191,7 +191,6 @@ private fun isSquare(threshold: Float = 1.4f): Boolean =
 @Composable
 fun LoadingView(modifier: Modifier = Modifier) {
     Card(
-        //colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         modifier = modifier
             .wrapContentSize()
     ) {

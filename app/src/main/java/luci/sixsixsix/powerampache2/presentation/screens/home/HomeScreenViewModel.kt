@@ -37,15 +37,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandler
+import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandlerImpl
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Artist
@@ -54,15 +55,25 @@ import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
+import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.usecase.albums.RecommendedAlbumsFlow
+import luci.sixsixsix.powerampache2.domain.usecase.artists.MostPlayedArtistsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsFlow
+import luci.sixsixsix.powerampache2.domain.usecase.artists.SongsFromArtistUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val albumsRepository: AlbumsRepository,
     private val playlistsRepository: PlaylistsRepository,
-    private val artistsRepository: ArtistsRepository,
-    settingsRepository: SettingsRepository
-) : ViewModel() {
+    private val mostPlayedArtistsUseCase: MostPlayedArtistsUseCase,
+    recommendedArtistsFlow: RecommendedArtistsFlow,
+    recommendedAlbumsFlow: RecommendedAlbumsFlow,
+    offlineModeFlowUseCase: OfflineModeFlowUseCase,
+    songsFromArtistUseCase: SongsFromArtistUseCase
+) : ViewModel(), FetchArtistSongsHandler by FetchArtistSongsHandlerImpl(songsFromArtistUseCase) {
+
     var state by mutableStateOf(HomeScreenState())
     private var _recentNetwork: MutableStateFlow<List<AmpacheModel>> = MutableStateFlow(listOf())
     private var recentNetwork: StateFlow<List<AmpacheModel>> = _recentNetwork
@@ -80,13 +91,29 @@ class HomeScreenViewModel @Inject constructor(
     private var recentJob: Job? = null
     private var randomJob: Job? = null
 
+    private var fetchSongsArtistJob: Job? = null
+
     private val offsetRecent = (0..2).random()
     private val offsetFrequent = (0..2).random()
     private val offsetNewest = (0..2).random()
     private val offsetRandom = (0..2).random()
 
-    val offlineModeStateFlow = settingsRepository.offlineModeFlow.distinctUntilChanged()
+    val offlineModeStateFlow = offlineModeFlowUseCase().distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
+    val artistsRecommendedFlow: StateFlow<List<AmpacheModel>> =
+        recommendedArtistsFlow().map { artists ->
+            // resize albums to 1/3 of the artist list?
+            val albums = recommendedAlbumsFlow().first()//.subList(0, artists.size/3)
+
+            mutableListOf<AmpacheModel>().apply {
+                addAll(artists)
+                for (album in albums) {
+                    // insert at random spots
+                    add((4..<size).random(), album)
+                }
+            }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     val playlistsStateFlow = playlistsRepository.playlistsFlow.distinctUntilChanged()
         .filter { !AmpacheModel.listsEqual(it, currentPlaylists, true) }
@@ -136,14 +163,7 @@ class HomeScreenViewModel @Inject constructor(
         .distinctUntilChanged()
         .debounce(1000) // wait a second to allow other calls to complete and avoid the flickering
         .map { albumsDb ->
-//        if (offlineModeStateFlow.value) {
-//            // remove non offline albums from before
-//            currentRandomAlbums.clear()
-//        }
-//        if (currentRandomAlbums.size < 200) {
-//            AmpacheModel.appendToList(albumsDb.toMutableList(), mainList = currentRandomAlbums)
-//        }
-        injectArtists(albumsDb, offsetRandom)
+            injectArtists(albumsDb, offsetRandom)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf<AmpacheModel>())
 
     val flaggedAlbumsStateFlow = albumsRepository.flaggedAlbumsFlow.distinctUntilChanged().map { albumsDb ->
@@ -461,7 +481,7 @@ class HomeScreenViewModel @Inject constructor(
         }
 
     private suspend fun mergeFrequentItems(albums: List<AmpacheModel>): List<AmpacheModel> =
-    artistsRepository.getMostPlayedArtists().let { artistsMostPlayed ->
+        mostPlayedArtistsUseCase().let { artistsMostPlayed ->
         if (artistsMostPlayed.isNotEmpty()) {
             albums.toMutableList<AmpacheModel>().apply {
                 addArtistsToAlbumList(
@@ -473,6 +493,24 @@ class HomeScreenViewModel @Inject constructor(
             }
         } else {
             injectArtists(albums, offsetFrequent)
+        }
+    }
+
+    fun fetchSongsFromArtist(
+        artist: Artist,
+        fetchRemote: Boolean = true,
+        songsCallback: (List<Song>) -> Unit
+    ) {
+        fetchSongsArtistJob?.cancel()
+        fetchSongsArtistJob = viewModelScope.launch {
+            getSongsFromArtist(
+                artistId = artist.id,
+                fetchRemote = fetchRemote,
+                isOfflineMode = offlineModeStateFlow.value,
+                songsCallback = songsCallback,
+                loadingCallback = { state = state.copy(currentArtistPlayLoading = if (it) artist else null) },
+                errorCallback = { state.copy(currentArtistPlayLoading = null) }
+            )
         }
     }
 

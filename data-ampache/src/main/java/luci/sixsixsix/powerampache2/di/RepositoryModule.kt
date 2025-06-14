@@ -35,8 +35,13 @@ import luci.sixsixsix.powerampache2.data.SharedPreferencesManagerImpl
 import luci.sixsixsix.powerampache2.data.SongsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.local.DbDataSourceImpl
 import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
+import luci.sixsixsix.powerampache2.data.local.datasource.AlbumsDbDataSourceImpl
+import luci.sixsixsix.powerampache2.data.local.datasource.ArtistsDbDataSourceImpl
+import luci.sixsixsix.powerampache2.data.offlinemode.AlbumsOfflineDataSourceImpl
+import luci.sixsixsix.powerampache2.data.offlinemode.ArtistsOfflineDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
 import luci.sixsixsix.powerampache2.data.remote.NetworkDataSourceImpl
+import luci.sixsixsix.powerampache2.data.remote.datasource.ArtistsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.AmpachePreferencesRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
@@ -44,11 +49,16 @@ import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.domain.datasource.AlbumsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.ArtistsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.ArtistsOfflineModeDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.ArtistsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.NetworkDataSource
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import okhttp3.Interceptor
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -139,9 +149,56 @@ abstract class RepositoryModule {
         networkDataSourceImpl: NetworkDataSourceImpl
     ): NetworkDataSource
 
+    @Binds
+    @Singleton
+    @RemoteDataSource
+    abstract fun artistsRemoteDataSourceProvider(
+        artistsRemoteDataSourceImpl: ArtistsRemoteDataSourceImpl
+    ): ArtistsRemoteDataSource
+
+    @Binds
+    @Singleton
+    @LocalDataSource
+    abstract fun artistsDbDataSourceProvider(
+        artistsDbDataSourceImpl: ArtistsDbDataSourceImpl
+    ): ArtistsDbDataSource
+
+    @Binds
+    @Singleton
+    @OfflineModeDataSource
+    abstract fun artistsOfflineDataSourceProvider(
+        artistsOfflineDataSourceImpl: ArtistsOfflineDataSourceImpl
+    ): ArtistsOfflineModeDataSource
+
+    @Binds
+    @Singleton
+    @LocalDataSource
+    abstract fun albumsDbDataSourceProvider(
+        albumsDbDataSourceImpl: AlbumsDbDataSourceImpl
+    ): AlbumsDbDataSource
+
+    @Binds
+    @Singleton
+    @OfflineModeDataSource
+    abstract fun albumsOfflineDataSourceProvider(
+        albumsOfflineDataSourceImpl: AlbumsOfflineDataSourceImpl
+    ): AlbumsDbDataSource
+
 //    @Binds
 //    @Singleton
 //    abstract fun imageLoaderProviderProvider(
 //        imageLoaderProviderImpl: ImageLoaderProviderImpl
 //    ): ImageLoaderProvider
 }
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class RemoteDataSource
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class LocalDataSource
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class OfflineModeDataSource

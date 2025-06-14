@@ -34,25 +34,25 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.domain.common.Constants.REQUEST_LIMIT_ALBUMS
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import luci.sixsixsix.powerampache2.domain.common.Constants.REQUEST_LIMIT_ALBUMS
 import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class AlbumsViewModel @Inject constructor(
     private val repository: AlbumsRepository,
-    settingsRepository: SettingsRepository
+    offlineModeFlowUseCase: OfflineModeFlowUseCase
 ) : ViewModel() {
     private var fetchMoreJob: Job? = null
     private var fetchJob: Job? = null
     var state by mutableStateOf(AlbumsState())
     private var isEndOfDataList: Boolean = false
 
-    val offlineModeStateFlow = settingsRepository.offlineModeFlow
+    val offlineModeStateFlow = offlineModeFlowUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     init {
