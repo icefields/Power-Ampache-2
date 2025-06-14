@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
@@ -287,24 +286,16 @@ class ArtistsRepositoryImpl @Inject constructor(
             mostPlayedArtistsDb.map { it.toArtist() }
         }
 
-    override suspend fun getSongsFromArtist(
-        artistId: String,
-        fetchRemote: Boolean
-    ): Flow<Resource<List<Song>>> = flow {
+    override suspend fun getSongsFromArtist(artistId: String, fetchRemote: Boolean) = flow {
         emit(Resource.Loading(true))
         val isOfflineMode = isOfflineModeEnabled()
         val localSongs = getDbSongsFromArtist(artistId, isOfflineMode)
-        if (
-            !checkEmitCacheData(localSongs, fetchRemote, this) ||
-            isOfflineMode
-        ) {
+        if (!checkEmitCacheData(localSongs, fetchRemote, this) || isOfflineMode) {
             emit(Resource.Loading(false))
             return@flow
         }
 
-        val response = api.getSongsFromArtist(authToken(), artistId = artistId)
-        response.error?.let { throw(MusicException(it.toError())) }
-        val songs = response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
+        val songs = artistsRemoteDataSource.getSongsFromArtist(authToken(), artistId = artistId) //response.songs!!.map { songDto -> songDto.toSong() } // will throw exception if songs null
         cacheSongs(songs)
         emit(Resource.Success(data = getDbSongsFromArtist(artistId, isOfflineMode), networkData = songs))
         emit(Resource.Loading(false))
@@ -312,9 +303,8 @@ class ArtistsRepositoryImpl @Inject constructor(
 
     private suspend fun getDbSongsFromArtist(artistId: String, isOfflineModeEnabled: Boolean ): List<Song> =
         if (isOfflineModeEnabled) {
-            dao.getOfflineSongsFromArtist(artistId).map { it.toSong() }
+            artistsOfflineDataSource.getSongsFromArtist(artistId)
         } else {
-            dao.getSongsFromArtist(artistId).map { it.toSong() }
+            artistsDbDataSource.getSongsFromArtist(artistId)
         }
 }
-

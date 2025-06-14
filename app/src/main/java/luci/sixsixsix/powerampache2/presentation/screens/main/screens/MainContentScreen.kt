@@ -80,6 +80,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.util.UnstableApi
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -119,6 +120,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.settings.subscreens.Abo
 import luci.sixsixsix.powerampache2.presentation.screens.songs.SongsListScreen
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
 @Destination(start = true)
@@ -264,7 +266,12 @@ fun MainContentScreen(
                        when (val menuItem = MainContentMenuItem.toMainContentMenuItem(currentScreen)) {
                            is MainContentMenuItem.Home -> HomeScreen(
                                navigator = navigator,
-                               viewModel = homeScreenViewModel
+                               viewModel = homeScreenViewModel,
+                               onArtistPlayPressed = { artist ->
+                                   homeScreenViewModel.fetchSongsFromArtist(artist) { songs ->
+                                       mainViewModel.onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(songs))
+                                   }
+                               }
                            ).also { barTitle = appName }
                            is MainContentMenuItem.Library -> TabbedLibraryView(
                                navigator = navigator,
@@ -319,12 +326,13 @@ fun MainFloatingButton(
                     .fillMaxSize()
                     .padding(16.dp))
         } else {
-            Icon(modifier = Modifier
-                .size(floatingButtonSize)
-                .padding(4.dp)
-                .clickable {
-                    onClick()
-                },
+            Icon(
+                modifier = Modifier
+                    .size(floatingButtonSize)
+                    .padding(4.dp)
+                    .clickable {
+                        onClick()
+                    },
                 painter = painterResource(id = R.drawable.ic_tune_spinner),
                 //imageVector = Icons.Default.PlayArrow,
                 contentDescription = "Quick Play",

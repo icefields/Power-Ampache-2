@@ -49,6 +49,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.screens.home.components.HomeScreenSection
@@ -75,7 +76,8 @@ sealed class HomeScreenRowItems(@StringRes val title: Int, val items: List<Ampac
 fun HomeScreen(
     navigator: DestinationsNavigator,
     viewModel: HomeScreenViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onArtistPlayPressed: (Artist) -> Unit
 ) {
     val state = viewModel.state
     val playlists by viewModel.playlistsStateFlow.collectAsState()
@@ -130,7 +132,9 @@ fun HomeScreen(
                         HomeScreenSection(
                             navigator = navigator,
                             itemsRow = it,
-                            text = stringResource(it.title)
+                            text = stringResource(it.title),
+                            onArtistPlayPressed = onArtistPlayPressed,
+                            currentArtistPlayLoading = state.currentArtistPlayLoading
                         )
                     }
                 }

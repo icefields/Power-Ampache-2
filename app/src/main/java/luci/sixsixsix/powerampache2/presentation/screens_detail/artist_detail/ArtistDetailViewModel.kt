@@ -36,11 +36,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandler
+import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandlerImpl
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.usecase.artists.SongsFromArtistUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
@@ -55,12 +58,16 @@ class ArtistDetailViewModel @Inject constructor(
     private val artistsRepository: ArtistsRepository,
     settingsFlow: LocalSettingsFlowUseCase,
     offlineModeFlowUseCase: OfflineModeFlowUseCase,
+    songsFromArtistUseCase: SongsFromArtistUseCase,
     private val toggleGlobalShuffle: ToggleGlobalShuffleUseCase,
     private val playlistManager: MusicPlaylistManager
-) : ViewModel() {
+) : ViewModel(), FetchArtistSongsHandler by FetchArtistSongsHandlerImpl(songsFromArtistUseCase) {
 
     var state by mutableStateOf(ArtistDetailState())
-    private var isOfflineModeState by mutableStateOf(false)
+    //private var isOfflineModeState by mutableStateOf(false)
+    val isOfflineModeState = offlineModeFlowUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
 
     val globalShuffleStateFlow = settingsFlow()
         .map { it.isGlobalShuffleEnabled }
@@ -76,11 +83,11 @@ class ArtistDetailViewModel @Inject constructor(
             } ?: getArtist(id)
         }
 
-        viewModelScope.launch {
-            offlineModeFlowUseCase().collectLatest {
-                isOfflineModeState = it
-            }
-        }
+//        viewModelScope.launch {
+//            offlineModeFlowUseCase().collectLatest {
+//                isOfflineModeState = it
+//            }
+//        }
     }
 
     fun onEvent(event: ArtistDetailEvent) {
@@ -141,34 +148,48 @@ class ArtistDetailViewModel @Inject constructor(
         }
     }
 
-    fun getSongsFromArtist(
+    fun fetchSongsFromArtist(
         artistId: String = state.artist.id,
         fetchRemote: Boolean = true,
         songsCallback: (List<Song>) -> Unit
-    ) {
-        viewModelScope.launch {
-            artistsRepository
-                .getSongsFromArtist(artistId, fetchRemote = fetchRemote)
-                .collect { result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            //L("viewmodel.getSongsFromArtist size ${isOfflineModeState} ${result.data?.size} network: ${result.networkData?.size}")
-
-                            if (result.networkData != null || isOfflineModeState) {
-                                // only get the data when a network response is returned
-                                // check against network data but use db data.
-                                // OR if in offline mode
-                                result.data?.let { songs ->
-                                    songsCallback(songs)
-                                }
-                            }
-                        }
-                        is Resource.Error -> state = state.copy(isLoading = false)
-                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
-                    }
-                }
-        }
+    ) = viewModelScope.launch {
+        getSongsFromArtist(
+            artistId = artistId, fetchRemote = fetchRemote,
+            isOfflineMode = isOfflineModeState.value,
+            songsCallback = songsCallback,
+            loadingCallback = { state = state.copy(isLoading = it) },
+            errorCallback = { state.copy(isLoading = false) }
+        )
     }
+
+//    fun getSongsFromArtist(
+//        artistId: String = state.artist.id,
+//        fetchRemote: Boolean = true,
+//        songsCallback: (List<Song>) -> Unit
+//    ) {
+//        viewModelScope.launch {
+//            artistsRepository
+//                .getSongsFromArtist(artistId, fetchRemote = fetchRemote)
+//                .collect { result ->
+//                    when(result) {
+//                        is Resource.Success -> {
+//                            //L("viewmodel.getSongsFromArtist size ${isOfflineModeState} ${result.data?.size} network: ${result.networkData?.size}")
+//
+//                            if (result.networkData != null || isOfflineModeState) {
+//                                // only get the data when a network response is returned
+//                                // check against network data but use db data.
+//                                // OR if in offline mode
+//                                result.data?.let { songs ->
+//                                    songsCallback(songs)
+//                                }
+//                            }
+//                        }
+//                        is Resource.Error -> state = state.copy(isLoading = false)
+//                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+//                    }
+//                }
+//        }
+//    }
 
     private fun getArtist(artistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {

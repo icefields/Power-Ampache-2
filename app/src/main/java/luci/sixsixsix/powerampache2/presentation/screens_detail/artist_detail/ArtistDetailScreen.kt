@@ -217,7 +217,7 @@ fun ArtistDetailScreen(
                                 ArtistInfoEvent.PLAY_ARTIST -> {
                                     if (state.isLoading) return@ArtistInfoSection
 
-                                    viewModel.getSongsFromArtist { songs ->
+                                    viewModel.fetchSongsFromArtist { songs ->
                                         // fetch songs, then play
                                         if (!isGlobalShuffleOn) {
                                             // add next to the list and skip to the top of the album (which is next)
@@ -230,7 +230,7 @@ fun ArtistDetailScreen(
                                 ArtistInfoEvent.SHUFFLE_PLAY_ARTIST -> viewModel.onEvent(
                                     ArtistDetailEvent.OnShufflePlaylistToggle)
                                 ArtistInfoEvent.ADD_ARTIST_TO_PLAYLIST -> {
-                                    viewModel.getSongsFromArtist { songs ->
+                                    viewModel.fetchSongsFromArtist { songs ->
                                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(
                                             isOpen = true,
                                             songs = songs

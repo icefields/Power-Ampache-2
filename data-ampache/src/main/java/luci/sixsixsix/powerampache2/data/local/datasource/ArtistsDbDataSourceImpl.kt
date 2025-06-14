@@ -27,6 +27,7 @@ import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toArtist
 import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toRecommendedArtistEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.di.LocalDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsDbDataSource
 import luci.sixsixsix.powerampache2.domain.models.Artist
@@ -65,9 +66,8 @@ class ArtistsDbDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getSongsFromArtist(artistId: String): List<Song> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getSongsFromArtist(artistId: String): List<Song> =
+        dao.getSongsFromArtist(artistId).map { it.toSong() }
 
     override suspend fun getRecommendedArtists(baseArtistId: String): List<Artist> =
         dao.getRecommendedArtists(baseArtistId).map { it.toArtist() }

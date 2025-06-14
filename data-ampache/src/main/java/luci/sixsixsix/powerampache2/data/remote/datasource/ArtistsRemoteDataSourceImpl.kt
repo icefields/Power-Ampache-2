@@ -5,6 +5,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toArtist
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
+import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.NullDataException
@@ -42,9 +43,13 @@ class ArtistsRemoteDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getSongsFromArtist(auth: String, artistId: String): List<Song> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getSongsFromArtist(auth: String, artistId: String): List<Song> =
+        api.getSongsFromArtist(auth, artistId = artistId).let { response ->
+            response.error?.let { error -> throw MusicException(error.toError()) }
+            response.songs?.let { songsDto ->
+                songsDto.map { songDto -> songDto.toSong() }
+            } ?: throw NullDataException("getSongsFromArtist")
+        }
 
     @Throws(MusicException::class, NullDataException::class, NullPointerException::class)
     override suspend fun getRecommendedArtists(auth: String, baseArtistId: String, offset: Int): List<Artist> =

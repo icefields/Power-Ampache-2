@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toArtist
+import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsOfflineModeDataSource
 import luci.sixsixsix.powerampache2.domain.models.Artist
@@ -41,9 +42,8 @@ class ArtistsOfflineDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getSongsFromArtist(artistId: String): List<Song> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getSongsFromArtist(artistId: String): List<Song> =
+        dao.getOfflineSongsFromArtist(artistId).map { it.toSong() }
 
     override suspend fun getRecommendedArtists(baseArtistId: String): List<Artist> =
         dao.getRecommendedOfflineArtists(baseArtistId).map { it.toArtist() }
