@@ -22,15 +22,18 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 
 import android.app.Application
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,6 +51,7 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
@@ -58,7 +62,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
-    private val application: Application,
+    @ApplicationContext private val application: Context,
     private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
     // in the view model directly without passing them from the UI or the previos view model, we
     // need this because we're passing the symbol around
@@ -66,10 +70,11 @@ class AlbumDetailViewModel @Inject constructor(
     localSettingsFlowUseCase: LocalSettingsFlowUseCase,
     private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
     private val toggleGlobalShuffleUseCase: ToggleGlobalShuffleUseCase,
+    private val recommendedArtistsUseCase: RecommendedArtistsUseCase,
     private val songsRepository: SongsRepository,
     private val albumsRepository: AlbumsRepository,
     private val playlistManager: MusicPlaylistManager,
-) : AndroidViewModel(application) {
+) : ViewModel() {
     var state by mutableStateOf(AlbumDetailState())
 
     val offlineModeStateFlow = offlineModeFlowUseCase()
@@ -168,26 +173,6 @@ class AlbumDetailViewModel @Inject constructor(
             }
     }
 
-   /* private fun getAlbumInfo(albumId: String, fetchRemote: Boolean = true) {
-        viewModelScope.launch {
-            albumsRepository
-                .getAlbum(albumId, fetchRemote)
-                .collect { result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            // TODO why am I using network data here? please comment
-                            result.networkData?.let { album ->
-                                state = state.copy(album = album)
-                                L("AlbumDetailViewModel.getAlbumInfo size ${result.data} network: ${result.networkData}")
-                            }
-                        }
-                        is Resource.Error -> state = state.copy(isLoading = false)
-                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
-                    }
-                }
-        }
-    }*/
-
     private fun isAlbumDownloaded(songs: List<SongWrapper>): Boolean {
         songs.forEach {
             if (!it.isOffline) return false
@@ -214,6 +199,25 @@ class AlbumDetailViewModel @Inject constructor(
                                 }
                                 state = state.copy(songs = songWrapperList, isAlbumDownloaded = isAlbumDownloaded(songWrapperList))
                                 L("AlbumDetailViewModel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)
+                            }
+                        }
+
+                        is Resource.Error -> state = state.copy(isLoading = false)
+                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
+                    }
+                }
+        }
+    }
+
+    private fun getRecommendedArtists(artistId: String, fetchRemote: Boolean = true) {
+        viewModelScope.launch {
+            recommendedArtistsUseCase(baseArtistId =  artistId, fetchRemote = fetchRemote)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            result.data?.let { artists ->
+                                state = state.copy(recommendedArtists = artists)
+                                L("AlbumDetailViewModel.getRecommendedArtists size", result.data?.size, "network", result.networkData?.size)
                             }
                         }
 

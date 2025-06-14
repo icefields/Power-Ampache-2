@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
 
 interface AlbumsRepository {
@@ -33,6 +34,7 @@ interface AlbumsRepository {
     val highestRatedAlbumsFlow: Flow<List<Album>>
     val randomAlbumsFlow: Flow<List<Album>>
     val frequentAlbumsFlow: Flow<List<Album>>
+    val recommendedFlow: Flow<List<Album>>
 
     suspend fun getAlbums(fetchRemote: Boolean = true, query: String = "", offset: Int = 0, limit: Int = 0, sort: AlbumSortOrder = AlbumSortOrder.NAME, order: SortOrder = SortOrder.ASC): Flow<Resource<List<Album>>>
     suspend fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Album>>>

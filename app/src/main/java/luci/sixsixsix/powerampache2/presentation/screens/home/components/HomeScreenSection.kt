@@ -132,15 +132,18 @@ fun SectionRow(
             else -> {
                 LazyRow(modifier = Modifier.fillMaxWidth()) {
                     items(itemsRow) { item: AmpacheModel ->
+                        val imageSize = if (albumsRowItems is HomeScreenRowItems.Recent ||
+                            albumsRowItems is HomeScreenRowItems.Recommended)
+                            dimensionResource(id = R.dimen.home_album_item_image_size_recent)
+                        else dimensionResource(id = R.dimen.home_album_item_image_size_default)
+
                         when(item) {
                             is Album -> AlbumItemSquare(
                                 modifier = itemModifier
                                     .clickable {
                                         navigator.navigate(AlbumDetailScreenDestination(item.id, item))
                                     },
-                                imageSize = if (albumsRowItems is HomeScreenRowItems.Recent)
-                                        dimensionResource(id = R.dimen.home_album_item_image_size_recent)
-                                    else dimensionResource(id = R.dimen.home_album_item_image_size_default),
+                                imageSize = imageSize,
                                 album = item
                             )
                             is Artist -> ArtistItemSquare(
@@ -148,9 +151,7 @@ fun SectionRow(
                                     .clickable {
                                         Ampache2NavGraphs.navigateToArtist(item.id, item)
                                     },
-                                imageSize = if (albumsRowItems is HomeScreenRowItems.Recent)
-                                        dimensionResource(id = R.dimen.home_album_item_image_size_recent)
-                                    else dimensionResource(id = R.dimen.home_album_item_image_size_default),
+                                imageSize = imageSize,
                                 item = item
                             )
                         }

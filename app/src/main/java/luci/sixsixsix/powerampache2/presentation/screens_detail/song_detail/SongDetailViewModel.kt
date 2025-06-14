@@ -26,21 +26,45 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.usecase.ServerInfoStateFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.SongFromIdUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class SongDetailViewModel @Inject constructor(
     private val serverInfoStateFlowUseCase: ServerInfoStateFlowUseCase,
-    private val songFromIdUseCase: SongFromIdUseCase
+    private val songFromIdUseCase: SongFromIdUseCase,
+    private val recommendedArtistsUseCase: RecommendedArtistsUseCase
 ) : ViewModel() {
+    private val _recommendedArtistsStateFlow = MutableStateFlow<List<Artist>>(listOf())
+    val recommendedArtistsStateFlow = _recommendedArtistsStateFlow.asStateFlow()
     private val _lyrics = MutableStateFlow("")
     val lyrics = _lyrics.asStateFlow()
     private var songId: String = ""
+
+    fun getRecommendedArtists(song: Song) {
+        viewModelScope.launch {
+            recommendedArtistsUseCase(song.artist.id).collectLatest { result ->
+                when(result) {
+                    is Resource.Error -> {}
+                    is Resource.Loading -> {}
+                    is Resource.Success -> {
+                        result.data?.let { artists ->
+                            _recommendedArtistsStateFlow.value = artists
+                        }
+                    }
+                }
+
+            }
+        }
+    }
 
     fun getSongLyrics(song: Song) {
         // if we already have lyrics, for a song with the same id there is no need to fetch again

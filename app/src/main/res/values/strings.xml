@@ -32,6 +32,7 @@
     <string name="loginScreen_warning">To connect to your own server, download the full version of Power Ampache 2</string>
 
     <string name="home_section_title_recent">Recently Played</string>
+    <string name="home_section_title_recommended">Recommended</string>
     <string name="home_section_title_flagged">Favourites</string>
     <string name="home_section_title_frequent">Frequently Played</string>
     <string name="home_section_title_highest">Highest Rated</string>

@@ -41,12 +41,17 @@ import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
+import luci.sixsixsix.powerampache2.di.LocalDataSource
+import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
+import luci.sixsixsix.powerampache2.domain.datasource.AlbumsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.ArtistsDbDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
@@ -64,6 +69,8 @@ import kotlin.math.max
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class AlbumsRepositoryImpl @Inject constructor(
+    @LocalDataSource private val albumsDbDataSource: AlbumsDbDataSource,
+    @OfflineModeDataSource private val albumsOfflineDataSource: AlbumsDbDataSource,
     private val api: MainNetwork,
     private val db: MusicDatabase,
     private val errorHandler: ErrorHandler
@@ -442,6 +449,14 @@ class AlbumsRepositoryImpl @Inject constructor(
         }.map { albums ->
             albums.map { it.toAlbum() }
         }
+
+
+    override val recommendedFlow: Flow<List<Album>> = offlineModeFlow.flatMapLatest { isOffline ->
+        if (isOffline)
+            albumsOfflineDataSource.recommendedFlow
+        else
+            albumsDbDataSource.recommendedFlow
+    }
 
 
     private suspend fun isAlbumOffline(album: Album) =

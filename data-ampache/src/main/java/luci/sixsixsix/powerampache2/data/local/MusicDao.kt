@@ -28,6 +28,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
+import androidx.room.Transaction
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
@@ -45,6 +46,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.MultiUserEntity
 import luci.sixsixsix.powerampache2.data.local.entities.MultiUserSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.RecommendedArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SESSION_PRIMARY_KEY
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
@@ -253,6 +255,54 @@ interface MusicDao {
         GROUP BY s.artistId ORDER BY acount DESC LIMIT 20""")
     suspend fun getMostPlayedArtists(): List<ArtistEntity>
 
+
+// --- ARTISTS RECOMMENDATIONS ---
+
+    @Query("""SELECT recommended.baseArtistId, artist.* from recommendedartistentity as recommended, artistentity as artist 
+            WHERE LOWER(recommended.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+            AND LOWER(:baseArtistId) == LOWER(recommended.baseArtistId)
+            AND recommended.recommendedArtistId == artist.id
+            GROUP BY artist.id
+            order by timestamp DESC LIMIT 66""")
+    suspend fun getRecommendedArtists(baseArtistId: String): List<ArtistEntity>
+
+    @Query("""SELECT recommended.baseArtistId, artist.* from recommendedartistentity as recommended, artistentity as artist 
+            WHERE LOWER(recommended.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+            AND recommended.recommendedArtistId == artist.id
+            GROUP BY artist.id
+            order by timestamp DESC LIMIT 166""")
+    fun getRecommendedArtists(): Flow<List<ArtistEntity>>
+
+    // TODO move to albums section
+    @Query("""SELECT recommended.baseArtistId, album.* from recommendedartistentity as recommended, artistentity as artist , albumentity as album 
+            WHERE LOWER(recommended.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+            AND recommended.recommendedArtistId == artist.id
+            AND album.artistId == artist.id
+            GROUP BY album.artistId
+            order by timestamp DESC LIMIT 166""")
+    fun getRecommendedAlbums(): Flow<List<AlbumEntity>>
+
+    @Query("SELECT COUNT(*) FROM recommendedartistentity")
+    suspend fun getRecommendedCount(): Int
+
+    @Query("""DELETE FROM recommendedartistentity WHERE id IN (
+        SELECT id FROM recommendedartistentity ORDER BY timestamp ASC LIMIT :rowsToDelete)""")
+    suspend fun deleteOldestRecommended(rowsToDelete: Int)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRecommendedArtistsDb(artists: List<RecommendedArtistEntity>)
+
+    @Transaction
+    suspend fun insertRecommendedArtists(artists: List<RecommendedArtistEntity>) {
+        val count = getRecommendedCount()
+        val maxRows = 166
+        if (count >= maxRows) {
+            deleteOldestRecommended(count - maxRows)
+        }
+        insertRecommendedArtistsDb(artists)
+    }
+
+
 // --- PLAYLISTS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylists(companyListingEntities: List<PlaylistEntity>)
@@ -262,7 +312,20 @@ interface MusicDao {
         WHERE LOWER(song.mediaId) == LOWER(songIds.songId) 
         AND LOWER(song.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))
         GROUP BY LOWER(song.mediaId) ORDER BY songIds.position""")
-    suspend fun getSongsFromPlaylist(playlistId: String): List<SongEntity>
+    suspend fun getSongsFromPlaylistOld(playlistId: String): List<SongEntity>
+
+    @Query("""SELECT song.*, songIds.position FROM songentity as song, 
+        (SELECT * FROM playlistsongentity WHERE LOWER(:playlistId) == LOWER(playlistId)) as songIds 
+        WHERE LOWER(song.mediaId) == LOWER(songIds.songId) 
+        AND LOWER(song.multiUserId) == LOWER(:multiUserId)
+        GROUP BY LOWER(song.mediaId) ORDER BY songIds.position""")
+    suspend fun getSongsFromPlaylist(multiUserId: String, playlistId: String): List<SongEntity>
+
+    @Transaction
+    suspend fun getSongsFromPlaylist(playlistId: String): List<SongEntity> {
+        val multiUserId = getCurrentMultiuserId()
+        return getSongsFromPlaylist(multiUserId = multiUserId, playlistId = playlistId)
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylistSongs(companyListingEntities: List<PlaylistSongEntity>)
@@ -420,6 +483,30 @@ interface MusicDao {
     @Query("DELETE FROM downloadedsongentity")
     suspend fun deleteAllDownloadedSong()
 
+
+// --- OFFLINE ARTISTS RECOMMENDATIONS ---
+
+    @Query("""SELECT recommended.baseArtistId, 
+            count(song.artistId) as songCount, song.artistId as id, song.searchArtist as searchName, song.multiUserId as multiUserId, song.artistName as name, song.genre as genre, song.imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed
+            from recommendedartistentity as recommended, downloadedsongentity as song 
+            WHERE LOWER(recommended.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+            AND LOWER(:baseArtistId) == LOWER(recommended.baseArtistId)
+            AND recommended.recommendedArtistId == song.artistId
+            GROUP BY song.artistId
+            order by timestamp DESC LIMIT 66""")
+    suspend fun getRecommendedOfflineArtists(baseArtistId: String): List<ArtistEntity>
+
+
+    //@Query("""SELECT * from recommendedartistentity WHERE $multiUserCondition order by timestamp DESC""")
+    @Query("""SELECT recommended.baseArtistId, 
+            count(song.artistId) as songCount, song.artistId as id, song.searchArtist as searchName, song.multiUserId as multiUserId, song.artistName as name, song.genre as genre, song.imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed
+            from recommendedartistentity as recommended, downloadedsongentity as song 
+            WHERE LOWER(recommended.multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) 
+            AND recommended.recommendedArtistId == song.artistId
+            GROUP BY song.artistId
+            order by timestamp DESC LIMIT 166""")
+    fun getRecommendedOfflineArtists(): Flow<List<ArtistEntity>>
+
 // --- SETTINGS ---
 
     @Query("""SELECT * FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
@@ -476,6 +563,9 @@ interface MusicDao {
 
     @Query("""SELECT * FROM multiuserentity WHERE LOWER(:multiUserKey) == LOWER(primaryKey)""")
     suspend fun getMultiUserUser(multiUserKey: String): MultiUserEntity?
+
+    @Query("""SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'""")
+    suspend fun getCurrentMultiuserId(): String
 
     @Query("""SELECT * FROM multiusercredentialentity WHERE LOWER(:multiUserKey) == LOWER(primaryKey)""")
     suspend fun getMultiUserCredentials(multiUserKey: String): MultiUserCredentialEntity?

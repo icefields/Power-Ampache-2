@@ -24,7 +24,7 @@ package luci.sixsixsix.powerampache2.data.common
 object Constants {
     // LOCAL DB
     const val DB_LOCAL_NAME = "musicdb.db"
-    const val DATABASE_VERSION = 85
+    const val DATABASE_VERSION = 86
 
     const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 
@@ -33,6 +33,7 @@ object Constants {
     const val NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE = 40
     const val QUICK_PLAY_MIN_SONGS = 50
     const val NETWORK_REQUEST_LIMIT_ARTISTS = 30
+    const val NETWORK_REQUEST_LIMIT_SIMILAR = 30
     const val NETWORK_REQUEST_LIMIT_SONGS = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
 
