@@ -46,6 +46,7 @@ import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.datasource.AlbumsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.AlbumsOfflineDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsDbDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -70,7 +71,7 @@ import kotlin.math.max
 @Singleton
 class AlbumsRepositoryImpl @Inject constructor(
     @LocalDataSource private val albumsDbDataSource: AlbumsDbDataSource,
-    @OfflineModeDataSource private val albumsOfflineDataSource: AlbumsDbDataSource,
+    @OfflineModeDataSource private val albumsOfflineDataSource: AlbumsOfflineDataSource,
     private val api: MainNetwork,
     private val db: MusicDatabase,
     private val errorHandler: ErrorHandler

@@ -32,7 +32,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -142,17 +144,28 @@ class MusicRepositoryImpl @Inject constructor(
 
     private suspend fun setSession(se: Session) {
         val previousCleanDate = getSession()?.clean ?: LocalDateTime.MAX
+        val previousUpdateDate = getSession()?.update ?: LocalDateTime.MAX
 
         dao.updateSession(se.toSessionEntity())
         val cred = getCurrentCredentials()
         dao.insertMultiUserSession(se.toMultiUserSessionEntity(username = cred.username, serverUrl = cred.serverUrl))
 
-
         // if a new clean is performed on server, empty library cache
-        if (Constants.config.clearLibraryOnCatalogClean && se.clean.isAfter(previousCleanDate)) {
+        if (Constants.config.clearLibraryOnCatalogClean) {
             // TODO: this has to be refactored for multi-user, right now every time a new sessions
             //  has an updated clean date, ALL the cache is emptied
-            dao.clearCachedLibraryData()
+            if(serverInfoStateFlow.value.isNextcloud == false) {
+                if (se.clean.isAfter(previousCleanDate)) {
+                    dao.clearCachedLibraryData()
+                    L("aaaa clearing data! ${se.clean} ${previousCleanDate}")
+                }
+            } else if(serverInfoStateFlow.value.isNextcloud == true) {
+                // NEXTCLOUD is not returning valid dates for clean, use update instead
+                if (se.update.isAfter(previousUpdateDate)) {
+                    L("aaaa clearing data! ${se.update} ${previousUpdateDate}")
+                    dao.clearCachedLibraryData()
+                }
+            }
         }
     }
 
@@ -204,7 +217,7 @@ class MusicRepositoryImpl @Inject constructor(
 
             // server info always available
             val servInfo = pingResponse.toServerInfo()
-            L("aaa setting live data for server info ${servInfo.version}")
+            L("aaaa setting live data for server info ${servInfo.version}")
             _serverInfoStateFlow.value = servInfo
             Resource.Success(Pair(servInfo, getSession()))
         } catch (e: IOException) {

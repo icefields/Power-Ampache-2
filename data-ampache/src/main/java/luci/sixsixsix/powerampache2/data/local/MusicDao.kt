@@ -444,8 +444,14 @@ interface MusicDao {
     /**
      * generates artist entities using only the info available in DownloadedSongEntity
      */
-    @Query("""SELECT count(artistId) as songCount, artistId as id, artistName as name, genre, imageUrl as artUrl, searchArtist as searchName, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed, multiUserId FROM DownloadedSongEntity as song WHERE LOWER(owner) == LOWER(:owner) GROUP BY artistId ORDER BY artistName""")
-    suspend fun generateOfflineArtists(owner: String): List<ArtistEntity>
+    @Query("""SELECT count(artistId) as songCount, artistId as id, artistName as name, genre, imageUrl as artUrl, searchArtist as searchName, -1 as 'time', 0 as flag, -1 as albumCount, -1 as yearFormed, multiUserId 
+            FROM DownloadedSongEntity as song 
+            WHERE LOWER(owner) == LOWER(:owner)
+            AND (LOWER(:query) LIKE '%' || LOWER(searchArtist) || '%'
+                OR LOWER(searchArtist) LIKE '%' || LOWER(:query) || '%'
+                )
+            GROUP BY artistId ORDER BY artistName""")
+    suspend fun generateOfflineArtists(owner: String, query: String): List<ArtistEntity>
 
     /**
      * generates album entities using only the info available in DownloadedSongEntity

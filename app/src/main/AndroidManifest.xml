@@ -6,10 +6,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
 
-    <!-- Needed for accessing external storage directories with SAF -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <application
         android:name=".PowerAmpache2Application"
         android:allowBackup="true"

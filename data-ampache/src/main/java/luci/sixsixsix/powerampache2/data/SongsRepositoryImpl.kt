@@ -55,11 +55,14 @@ import luci.sixsixsix.powerampache2.data.remote.OfflineData.songsToScrobble
 import luci.sixsixsix.powerampache2.data.remote.ScrobbleData
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
+import luci.sixsixsix.powerampache2.di.LocalDataSource
+import luci.sixsixsix.powerampache2.di.RemoteDataSource
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
-import luci.sixsixsix.powerampache2.domain.datasource.NetworkDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.SongsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.SongsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
@@ -87,10 +90,10 @@ class SongsRepositoryImpl @Inject constructor(
     db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager,
-    private val weakContext: WeakContext,
     private val workerHelper: WorkerHelper,
     private val dbDataSource: DbDataSource,
-    private val networkDataSource: NetworkDataSource,
+    @LocalDataSource private val songsDbDataSource: SongsDbDataSource,
+    @RemoteDataSource private val networkDataSource: SongsRemoteDataSource,
     applicationCoroutineScope: CoroutineScope
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 

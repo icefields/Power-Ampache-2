@@ -1,0 +1,5 @@
+— [New Feature] Recommendations, and play directly from home screen.
+— [New Feature] Save song after play option.
+— Fixed search with special characters.
+— Optimized fetching and loading for albums and playlists.
+— Other bug fixes and optimizations

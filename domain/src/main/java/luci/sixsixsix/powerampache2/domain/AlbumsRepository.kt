@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
-import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
 
 interface AlbumsRepository {

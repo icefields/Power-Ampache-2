@@ -36,11 +36,12 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Genre
+import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsByGenreUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
@@ -48,7 +49,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
-    private val artistsRepository: ArtistsRepository,
+    private val artistsByGenreUseCase: ArtistsByGenreUseCase,
+    private val artistsUseCase: ArtistsUseCase,
     private val albumsRepository: AlbumsRepository,
     private val playlistsRepository: PlaylistsRepository,
     private val songsRepository: SongsRepository,
@@ -137,7 +139,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private suspend fun fetchArtistsByGenre(genre: Genre) =
-        artistsRepository.getArtistsByGenre(genre).collect { result ->
+        artistsByGenreUseCase(genre).collect { result ->
             when (result) {
                 is Resource.Success ->
                     result.data?.let { artists ->
@@ -246,7 +248,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun searchArtists() = viewModelScope.launch {
-        artistsRepository.getArtists(true, state.searchQuery).collect { result ->
+        artistsUseCase(fetchRemote = true, query = state.searchQuery).collect { result ->
             when (result) {
                 is Resource.Success ->
                     result.data?.let { artists ->

@@ -72,7 +72,7 @@ class SongDetailViewModel @Inject constructor(
         songId = song.id
         viewModelScope.launch {
             // if the lyrics from the Song object are blank, and we're using a Nextcloud backend, the lyrics need to be fetched
-            if (song.lyrics.isBlank() && serverInfoStateFlowUseCase().first().isNextcloud) {
+            if (song.lyrics.isBlank() && serverInfoStateFlowUseCase().first().isNextcloud == true) {
                 songFromIdUseCase(songId)?.let {
                     //if (it.lyrics != "") {
                         _lyrics.value = it.lyrics.replace("\r\n", "<br>")

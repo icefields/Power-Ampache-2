@@ -88,7 +88,6 @@ fun AuthDto.toServerInfo(): ServerInfo = ServerInfo(
     compatible = compatible,
     isNextcloud = server?.lowercase()?.contains("nextcloud music") == true ||
             server?.lowercase()?.contains("owncloud music") == true
-
 )
 
 fun AuthDto.toSession(dateMapper: DateMapper): Session = Session(

@@ -22,15 +22,14 @@
 package luci.sixsixsix.powerampache2.presentation.screens.artists
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,6 +50,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
+import luci.sixsixsix.powerampache2.presentation.screens.albums.LoadingView
 import luci.sixsixsix.powerampache2.presentation.screens.artists.components.ArtistItem
 
 const val GRID_ITEMS_ROW = 3
@@ -106,9 +107,7 @@ fun ArtistsScreenContent(
         LoadingScreen()
     }
 
-    Column(
-        modifier = modifier
-    ) {
+    Box(modifier = modifier) {
         SwipeRefresh(
             swipeEnabled = swipeToRefreshEnabled,
             state = swipeRefreshState,
@@ -138,14 +137,7 @@ fun ArtistsScreenContent(
             }
         }
         if(isLoading) {
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                )
-            }
+            LoadingView(modifier = Modifier.align(Alignment.BottomCenter).background(Color.Transparent))
         }
     }
 }

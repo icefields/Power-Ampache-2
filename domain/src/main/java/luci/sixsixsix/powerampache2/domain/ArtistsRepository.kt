@@ -36,5 +36,10 @@ interface ArtistsRepository {
     suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun getMostPlayedArtists(): List<Artist>
     suspend fun getSongsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
-    suspend fun getRecommendedArtists(fetchRemote: Boolean = true, baseArtistId: String, offset: Int = 0): Flow<Resource<List<Artist>>>
+    suspend fun getRecommendedArtists(
+        fetchRemote: Boolean = true,
+        shouldGenerateIfEmpty: Boolean = false,
+        baseArtistId: String,
+        offset: Int = 0
+    ): Flow<Resource<List<Artist>>>
 }

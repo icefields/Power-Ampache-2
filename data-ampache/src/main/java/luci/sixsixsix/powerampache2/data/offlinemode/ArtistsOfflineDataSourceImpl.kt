@@ -16,19 +16,16 @@ import javax.inject.Inject
 class ArtistsOfflineDataSourceImpl @Inject constructor(
     db: MusicDatabase,
 ): ArtistsOfflineModeDataSource {
-
     private val dao = db.dao
 
     override val recommendedFlow: Flow<List<Artist>>
         get() = dao.getRecommendedOfflineArtists().mapNotNull { list -> list.map { it.toArtist() } }
 
-    override suspend fun getArtist(artistId: String): Artist {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getArtist(artistId: String): Artist? =
+        dao.generateOfflineArtist(artistId)?.toArtist()
 
-    override suspend fun getArtists(query: String): List<Artist> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getArtists(owner: String, query: String): List<Artist> =
+        dao.generateOfflineArtists(owner, query).map { it.toArtist() }
 
     override suspend fun getArtistsByGenre(genreId: Genre): List<Artist> {
         TODO("Not yet implemented")
@@ -38,9 +35,8 @@ class ArtistsOfflineDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMostPlayedArtists(): List<Artist> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getMostPlayedArtists(): List<Artist> =
+        dao.getMostPlayedOfflineArtists().map { it.toArtist() }
 
     override suspend fun getSongsFromArtist(artistId: String): List<Song> =
         dao.getOfflineSongsFromArtist(artistId).map { it.toSong() }

@@ -8,8 +8,8 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 interface ArtistsOfflineModeDataSource {
     val recommendedFlow: Flow<List<Artist>>
 
-    suspend fun getArtist(artistId: String): Artist
-    suspend fun getArtists(query: String = ""): List<Artist>
+    suspend fun getArtist(artistId: String): Artist?
+    suspend fun getArtists(owner: String, query: String = ""): List<Artist>
     suspend fun getArtistsByGenre(genreId: Genre): List<Artist>
     suspend fun likeArtist(id: String, like: Boolean): Boolean
     suspend fun getMostPlayedArtists(): List<Artist>

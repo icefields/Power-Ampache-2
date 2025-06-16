@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -104,13 +105,17 @@ class HomeScreenViewModel @Inject constructor(
     val artistsRecommendedFlow: StateFlow<List<AmpacheModel>> =
         recommendedArtistsFlow().map { artists ->
             // resize albums to 1/3 of the artist list?
-            val albums = recommendedAlbumsFlow().first()//.subList(0, artists.size/3)
+            L("aaaa recommendedArtistsFlow ${artists.size}")
+            val albums: List<Album> = recommendedAlbumsFlow().first() //.subList(0, artists.size/3)
 
             mutableListOf<AmpacheModel>().apply {
                 addAll(artists)
                 for (album in albums) {
                     // insert at random spots
-                    add((4..<size).random(), album)
+                    if (size > 5)
+                        add((4..<size).random(), album)
+                    else
+                        add(album)
                 }
             }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())

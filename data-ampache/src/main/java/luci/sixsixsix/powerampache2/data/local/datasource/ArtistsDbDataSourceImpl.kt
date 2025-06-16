@@ -29,9 +29,9 @@ import luci.sixsixsix.powerampache2.data.local.entities.toArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toRecommendedArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.di.LocalDataSource
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsDbDataSource
 import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -46,25 +46,21 @@ class ArtistsDbDataSourceImpl @Inject constructor(
     override val recommendedFlow: Flow<List<Artist>> =
         dao.getRecommendedArtists().mapNotNull { list -> list.map { it.toArtist() } }
 
-    override suspend fun getArtist(artistId: String): Artist {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getArtist(artistId: String): Artist? =
+        dao.getArtist(artistId)?.toArtist()
 
-    override suspend fun getArtists(query: String): List<Artist> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getArtists(query: String): List<Artist> =
+        dao.searchArtist(query.normalizeForSearch()).map { it.toArtist() }
 
-    override suspend fun getArtistsByGenre(genreId: Genre): List<Artist> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getArtistsByGenre(genreName: String): List<Artist> =
+        dao.searchArtistByGenre(genreName).map { it.toArtist() }
 
     override suspend fun likeArtist(id: String, like: Boolean): Boolean {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMostPlayedArtists(): List<Artist> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getMostPlayedArtists(): List<Artist> =
+        dao.getMostPlayedArtists().map { it.toArtist() }
 
     override suspend fun getSongsFromArtist(artistId: String): List<Song> =
         dao.getSongsFromArtist(artistId).map { it.toSong() }
