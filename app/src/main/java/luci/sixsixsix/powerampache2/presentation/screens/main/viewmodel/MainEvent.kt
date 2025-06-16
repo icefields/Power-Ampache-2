@@ -47,6 +47,7 @@ sealed class MainEvent {
     data class OnAddSongToPlaylist(val song: Song): MainEvent()
     data class OnAddSongToQueueNext(val song: Song): MainEvent()
     data class OnShareSong(val song: Song): MainEvent()
+    data class OnShareSongWebUrl(val song: Song): MainEvent()
     data class OnRateSong(val song: Song, val rate: Int): MainEvent()
     data class OnDownloadSong(val song: Song): MainEvent()
     data class OnDownloadSongs(val songs: List<Song>): MainEvent()

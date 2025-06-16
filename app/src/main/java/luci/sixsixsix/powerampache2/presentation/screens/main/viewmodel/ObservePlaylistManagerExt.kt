@@ -34,10 +34,11 @@ fun MainViewModel.observePlaylistManager() {
 
     // listen to current-song changes
     viewModelScope.launch {
-        playlistManager.currentSongState.collectLatest { songState ->
-            songState?.let { songState ->
+        playlistManager.currentSongState.collectLatest {
+            it?.let { songState ->
                 startMusicServiceIfNecessary()
                 scrobble(songState)
+                downloadAfterPlayback(songState)
             } ?: stopMusicService()
         }
     }
@@ -46,7 +47,7 @@ fun MainViewModel.observePlaylistManager() {
         playlistManager.logMessageUserReadableState.collectLatest { logMessageState ->
             logMessageState.logMessage?.let { logMessage ->
                 // do not show errors in offline mode unless in cases specified above
-                val isOfflineModeEnabled = settingsRepository.isOfflineModeEnabled()
+                val isOfflineModeEnabled = isOfflineModeEnabledUseCase()
                 if (!isOfflineModeEnabled) {
                     state = state.copy(errorMessage = logMessage)
                 } else if (logMessage == weakContext.get()?.resources?.getString(R.string.logout_offline_warning)) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2025  Antonio Tari
+ * Copyright (C) 2024  Antonio Tari
  *
  * This file is a part of Power Ampache 2
  * Ampache Android client application
@@ -19,12 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.domain.datasource
+package luci.sixsixsix.powerampache2.domain.usecase
 
-import java.io.InputStream
+import luci.sixsixsix.powerampache2.domain.MusicRepository
+import javax.inject.Inject
 
-interface NetworkDataSource {
-
-    @Throws(Exception::class)
-    suspend fun downloadSong(songId: String, authKey: String): InputStream
+class UsernameUseCase @Inject constructor(
+    private val musicRepository: MusicRepository
+) {
+    suspend operator fun invoke() = musicRepository.getUsername()
 }

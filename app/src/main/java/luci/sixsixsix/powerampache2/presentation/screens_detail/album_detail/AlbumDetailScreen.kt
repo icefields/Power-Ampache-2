@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -66,6 +67,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItem
@@ -74,6 +76,7 @@ import luci.sixsixsix.powerampache2.presentation.common.songitem.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -112,6 +115,27 @@ fun AlbumDetailScreen(
             .collect { orientation = it }
     }
 
+    var songToShare: Song? by remember { mutableStateOf(null) }
+
+    AnimatedVisibility(songToShare != null) {
+        songToShare?.let { songS ->
+            ShareDialog(
+                onShareWeb = {
+                    mainViewModel.onEvent(MainEvent.OnShareSongWebUrl(songS))
+                    songToShare = null
+                },
+                onSharePowerAmpache = {
+                    mainViewModel.onEvent(MainEvent.OnShareSong(songS))
+                    songToShare = null
+                },
+                onDismissRequest = {
+                    songToShare = null
+                }
+            )
+        }
+
+    }
+
     val isLandscape = when (orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> {
             //infoVisibility = false
@@ -139,7 +163,7 @@ fun AlbumDetailScreen(
         }
     }
 
-    val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
+    //val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
         AsyncImage(
             modifier = Modifier
@@ -147,7 +171,7 @@ fun AlbumDetailScreen(
                 .align(Alignment.TopCenter),
             model = album.artUrl,
             contentScale = ContentScale.Crop,
-            placeholder = placeholder,
+            //placeholder = placeholder,
             contentDescription = album.name
         )
         AsyncImage(
@@ -156,7 +180,7 @@ fun AlbumDetailScreen(
                 .align(Alignment.TopCenter),
             model = album.artUrl,
             contentScale = ContentScale.FillWidth,
-            placeholder = placeholder,
+            //placeholder = placeholder,
             contentDescription = album.name,
         )
         // full screen view to add a transparent black layer on top
@@ -270,8 +294,9 @@ fun AlbumDetailScreen(
                                         when(event) {
                                             SongItemEvent.PLAY_NEXT ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                                            SongItemEvent.SHARE_SONG ->
-                                                mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                                            SongItemEvent.SHARE_SONG -> {
+                                                songToShare = song
+                                            }
                                             SongItemEvent.DOWNLOAD_SONG ->
                                                 mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                                             SongItemEvent.EXPORT_DOWNLOADED_SONG ->

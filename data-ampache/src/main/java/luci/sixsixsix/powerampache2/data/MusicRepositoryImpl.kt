@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data
 import android.content.Context
 import android.os.Environment
 import androidx.core.text.isDigitsOnly
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +32,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -79,7 +82,6 @@ import javax.inject.Singleton
  * return/emit data.
  * When breaking a rule please add a comment with a TODO: BREAKING_RULE
  */
-@OptIn(DelicateCoroutinesApi::class)
 @Singleton
 class MusicRepositoryImpl @Inject constructor(
     private val api: MainNetwork,
@@ -87,16 +89,17 @@ class MusicRepositoryImpl @Inject constructor(
     db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val configProvider: ConfigProvider,
-    applicationCoroutineScope: CoroutineScope
+    applicationCoroutineScope: CoroutineScope,
+    @ApplicationContext private val context: Context
 ): BaseAmpacheRepository(api, db, errorHandler), MusicRepository {
     private val _serverInfoStateFlow = MutableStateFlow(ServerInfo())
     override val serverInfoStateFlow: StateFlow<ServerInfo> = _serverInfoStateFlow
 
     val serverVersionStateFlow = serverInfoStateFlow.mapNotNull { it.version }.distinctUntilChanged()
 
-    override val sessionLiveData = dao.getSessionLiveData().map { it?.toSession() }
+    override val sessionFlow = dao.getSessionLiveData().map { it?.toSession() }
 
-    override val userLiveData: Flow<User?> = dao.getUserLiveData().map {
+    override val userFlow: Flow<User?> = dao.getUserLiveData().map {
         val cred = getCurrentCredentials()
         if (cred.username.isNotBlank()) {
             val userEntity = it ?: dao.getUser(cred.username)
@@ -112,7 +115,7 @@ class MusicRepositoryImpl @Inject constructor(
         // Things to do when we get new or different session
         // user will itself emit a user object to observe
         applicationCoroutineScope.launch {
-            sessionLiveData.distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
+            sessionFlow.distinctUntilChanged().mapNotNull { it?.auth }.distinctUntilChanged().collect { newToken ->
                 // if token has changed or user is null, get user from network
                 if (newToken != currentAuthToken || currentUser == null) {
                     currentAuthToken = newToken
@@ -141,17 +144,28 @@ class MusicRepositoryImpl @Inject constructor(
 
     private suspend fun setSession(se: Session) {
         val previousCleanDate = getSession()?.clean ?: LocalDateTime.MAX
+        val previousUpdateDate = getSession()?.update ?: LocalDateTime.MAX
 
         dao.updateSession(se.toSessionEntity())
         val cred = getCurrentCredentials()
         dao.insertMultiUserSession(se.toMultiUserSessionEntity(username = cred.username, serverUrl = cred.serverUrl))
 
-
         // if a new clean is performed on server, empty library cache
-        if (Constants.config.clearLibraryOnCatalogClean && se.clean.isAfter(previousCleanDate)) {
+        if (Constants.config.clearLibraryOnCatalogClean) {
             // TODO: this has to be refactored for multi-user, right now every time a new sessions
             //  has an updated clean date, ALL the cache is emptied
-            dao.clearCachedLibraryData()
+            if(serverInfoStateFlow.value.isNextcloud == false) {
+                if (se.clean.isAfter(previousCleanDate)) {
+                    dao.clearCachedLibraryData()
+                    L("aaaa clearing data! ${se.clean} ${previousCleanDate}")
+                }
+            } else if(serverInfoStateFlow.value.isNextcloud == true) {
+                // NEXTCLOUD is not returning valid dates for clean, use update instead
+                if (se.update.isAfter(previousUpdateDate)) {
+                    L("aaaa clearing data! ${se.update} ${previousUpdateDate}")
+                    dao.clearCachedLibraryData()
+                }
+            }
         }
     }
 
@@ -203,7 +217,7 @@ class MusicRepositoryImpl @Inject constructor(
 
             // server info always available
             val servInfo = pingResponse.toServerInfo()
-            L("aaa setting live data for server info ${servInfo.version}")
+            L("aaaa setting live data for server info ${servInfo.version}")
             _serverInfoStateFlow.value = servInfo
             Resource.Success(Pair(servInfo, getSession()))
         } catch (e: IOException) {
@@ -405,7 +419,7 @@ class MusicRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("logout()", e, this) }
 
-    override suspend fun getStorageLocation(context: Context): String =
+    override suspend fun getStorageLocation(): String =
         if (dao.getSettings()?.toLocalSettings()?.isDownloadsSdCard == true) {
             context.getExternalFilesDir(Environment.DIRECTORY_MUSIC)?.absolutePath ?: context.filesDir.absolutePath
         } else {

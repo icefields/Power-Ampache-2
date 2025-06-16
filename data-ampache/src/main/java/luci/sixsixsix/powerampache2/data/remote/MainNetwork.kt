@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.data.remote
 
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_ARTISTS
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SIMILAR
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
 import luci.sixsixsix.powerampache2.domain.common.isIpAddress
@@ -141,6 +142,18 @@ interface MainNetwork {
         @Query("album_artist") albumArtist: Int = 1,
         @Query("offset") offset: Int = 0,
         @Query("include") include: String? = null, // albums, songs (includes track list)
+    ): ArtistsResponse
+
+    /**
+     * Return similar artist id's or similar song ids compared to the input filter.
+     */
+    @GET("json.server.php?action=get_similar")
+    suspend fun getSimilarArtists(
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_SIMILAR,
+        @Query("filter") filter: String,
+        @Query("type") _type: Type = Type.artist,
+        @Query("offset") offset: Int = 0
     ): ArtistsResponse
 
     @GET("json.server.php?action=playlists")

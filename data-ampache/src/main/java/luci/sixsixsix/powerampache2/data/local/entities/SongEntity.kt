@@ -26,6 +26,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 
@@ -78,7 +79,9 @@ data class SongEntity(
     val preciseRating: Float,
     val rating: Float,
     @ColumnInfo(name = "multiUserId", defaultValue = "")
-    val multiUserId: String
+    val multiUserId: String,
+    @ColumnInfo(name = "searchTitle", defaultValue = "")
+    val searchTitle: String = ""
 )
 
 fun SongEntity.toSong() = Song(
@@ -175,5 +178,6 @@ fun Song.toSongEntity(username: String, serverUrl: String) = SongEntity(
     preciseRating = preciseRating,
     averageRating = averageRating,
     rating = rating,
-    multiUserId = multiuserDbKey(username, serverUrl)
+    multiUserId = multiuserDbKey(username, serverUrl),
+    searchTitle = title.normalizeForSearch()
 )

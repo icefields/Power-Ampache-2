@@ -24,7 +24,6 @@ package luci.sixsixsix.powerampache2.data.local
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
@@ -36,10 +35,7 @@ import javax.inject.Inject
 private const val BUFFER_SIZE = 4 * 1024
 private const val SUB_DIR = "offline_music"
 
-class StorageManagerImpl @Inject constructor(
-    private val weakContext: WeakContext,
-    private val musicRepository: MusicRepository, // TODO replace with use case
-): StorageManager {
+class StorageManagerImpl @Inject constructor(private val musicRepository: MusicRepository): StorageManager {
     @Throws(Exception::class)
     override suspend fun saveSong(song: Song, inputStream: InputStream) =
         withContext(Dispatchers.IO) {
@@ -127,5 +123,5 @@ class StorageManagerImpl @Inject constructor(
                 .toString()
         }
 
-    private suspend fun getStorage() = musicRepository.getStorageLocation(weakContext.get()!!)
+    private suspend fun getStorage() = musicRepository.getStorageLocation()
 }
