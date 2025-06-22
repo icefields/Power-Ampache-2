@@ -270,12 +270,7 @@ fun OfflineSongsMainContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            mainViewModel.onEvent(
-                                MainEvent.PlaySongAddToQueueTop(
-                                    song,
-                                    state.songs
-                                )
-                            )
+                            mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.songs))
 //                            viewModel.onEvent(OfflineSongsEvent.OnSongSelected(song))
 //                            mainViewModel.onEvent(MainEvent.Play(song))
                         },

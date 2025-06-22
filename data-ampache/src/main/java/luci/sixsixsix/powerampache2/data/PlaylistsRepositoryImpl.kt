@@ -43,11 +43,18 @@ import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
+import luci.sixsixsix.powerampache2.di.LocalDataSource
+import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
+import luci.sixsixsix.powerampache2.di.RemoteDataSource
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
+import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsOfflineDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
+import luci.sixsixsix.powerampache2.domain.errors.NullDataException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
@@ -65,6 +72,9 @@ import javax.inject.Singleton
  */
 @Singleton
 class PlaylistsRepositoryImpl @Inject constructor(
+    @LocalDataSource private val playlistsDbDataSource: PlaylistsDbDataSource,
+    @OfflineModeDataSource private val playlistsOfflineDataSource: PlaylistsOfflineDataSource,
+    @RemoteDataSource private val playlistsRemoteDataSource: PlaylistsRemoteDataSource,
     private val api: MainNetwork,
     db: MusicDatabase,
     private val errorHandler: ErrorHandler,
@@ -275,47 +285,31 @@ class PlaylistsRepositoryImpl @Inject constructor(
         dao.getOfflineSongsFromPlaylist(playlistId).isNotEmpty()
 
     /**
-     * TODO BREAKING_RULE (is this an old comment?): Implement cache for playlist songs
-     *  There is currently no way to get songs given the playlistId
-     *  Songs are cached regardless for quick access from SongsScreen and Albums
-     * This method only fetches from the network, breaking one of the rules defined in the
-     * documentation of this class.
+     * There is currently no way to get songs given the playlistId
+     * Songs are cached for quick access from SongsScreen and Albums
      */
     override suspend fun getSongsFromPlaylist(
         playlist: Playlist,
         fetchRemote: Boolean
     ): Flow<Resource<List<Song>>> = flow {
         emit(Resource.Loading(true))
-
         val playlistId = playlist.id
 
-        val isOfflineMode = isOfflineModeEnabled()
-        if (isOfflineMode) {
-            // if offline mode enabled, grab all the offline data and emit, then return
-            emit(
-                Resource.Success(
-                data = dao.getOfflineSongsFromPlaylist(playlist.id).map { it.toSong() },
-                networkData = null))
+        if (isOfflineModeEnabled()) {
+            emit(Resource.Success(data = playlistsOfflineDataSource.getSongsFromPlaylist(playlistId), networkData = null))
             emit(Resource.Loading(false))
             return@flow
         }
 
-        // emit saved data first, only if not a smartlist
-        val dbData = if (playlist.isSmartPlaylist().not())
-            dao.getSongsFromPlaylist(playlistId).map { it.toSong() }
-        else listOf()
-
+        val dbData = playlistsDbDataSource.getSongsFromPlaylist(playlist)
         emit(Resource.Success(data = dbData, networkData = null))
 
-        // if not fetch remote, return
         if (!fetchRemote) {
             emit(Resource.Loading(false))
             return@flow
         }
 
         val shouldEmitSteps = dbData.size < Constants.config.playlistSongsFetchLimit
-
-        //else
         val cred = getCurrentCredentials()
         val songs = mutableListOf<Song>()
         var isFinished = false
@@ -323,69 +317,49 @@ class PlaylistsRepositoryImpl @Inject constructor(
         var offset = 0
         var lastException: MusicException? = null
         do {
-            val response = try {
-                api.getSongsFromPlaylist(
-                    authToken(),
-                    albumId = playlistId,
+            try {
+                val partialResponse = playlistsRemoteDataSource.getSongsFromPlaylist(authToken(),
+                    playlistId = playlistId,
                     limit = limit,
                     offset = offset
                 )
-            } catch (e: Exception) {
-                errorHandler.logError(e)
-                SongsResponse(songs = null).also {
-                    // for partial recovery:in case a subset of songs fails, reduce the limit to
-                    // try and fetch at least part of the songs in the next iteration
-                    limit /= 2
-                }
-            }
 
-            // save the exception if any
-            response.error?.let { lastException = MusicException(it.toError()) }
-            // a response exists
-            response.songs?.let { songsDto ->
-                val partialResponse = songsDto.map { songDto -> songDto.toSong() }
                 if (partialResponse.isNotEmpty()) {
                     songs.addAll(partialResponse)
                     if (shouldEmitSteps) {
                         emit(Resource.Success(data = songs, networkData = partialResponse))
                     }
-
                     // if the result is smaller than then limit, there is no more data to fetch
                     isFinished = partialResponse.size < limit
-                } else {
-                    // if no more items to fetch finish
+                } else { // if no more items to fetch finish
                     isFinished = true
                 }
-            } ?: run {
-                // a response DOES NOT exist
-                // if there's an error and so songs retrieved just finish
+            } catch (me: MusicException) {
+                lastException = me
+                errorHandler.logError(me)
+                // for partial recovery:in case a subset of songs fails, reduce the limit to
+                // try and fetch at least part of the songs in the next iteration
+                SongsResponse(songs = null).also { limit /= 2 }
+            } catch (nde: NullDataException) {
+                // A NullDataException is thrown when data is null, and no MusicException is thrown.
                 isFinished = true
+                errorHandler.logError(nde)
             }
             offset += limit
         } while (!isFinished)
 
         if (!shouldEmitSteps) {
-            // TODO: BREAKING_RULE(single source of truth), emitting network data to avoid slow
-            //  db operations before getting a result on the UI
+            // TODO: BREAKING_RULE(single source of truth). Playlists can be very large, emitting
+            //  network data to avoid slow db operations blocking the UI
             emit(Resource.Success(data = songs.toList(), networkData = songs))
         }
 
-        // DO LENGTHY OPERATIONS AFTER EMITTING DATA, only for non-smartlists
-        dao.clearPlaylistSongs(playlistId)
-        if (playlist.isSmartPlaylist().not())
-            dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId, username = cred.username, serverUrl = cred.serverUrl))
-
-// commented because: DO LENGTHY OPERATIONS AFTER EMITTING DATA, this has been moved before the db operations
-//        if (!shouldEmitSteps) {
-//            emit(Resource.Success(
-//                data = dao.getSongsFromPlaylist(playlistId).map { it.toSong() },
-//                networkData = songs)
-//            )
-//        }
-        
+        // DO LENGTHY OPERATIONS AFTER EMITTING DATA
+        // Save playlists songs to db, including smartlists, smartlists only to be used in offline mode.
+        playlistsDbDataSource.savePlaylistSongsToDb(songs, playlistId, username = cred.username, serverUrl = cred.serverUrl)
         emit(Resource.Loading(false))
-        // cache songs after emitting success
-        // Songs are cached regardless for quick access from SongsScreen and Albums
+        // Save songs after emitting success and stop loading. Songs are saved regardless for quick
+        // access from SongsScreen and Albums.
         cacheSongs(songs)
     }.catch { e -> errorHandler("getSongsFromPlaylist()", e, this) }
 

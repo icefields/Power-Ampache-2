@@ -37,12 +37,15 @@ import luci.sixsixsix.powerampache2.data.local.DbDataSourceImpl
 import luci.sixsixsix.powerampache2.data.local.StorageManagerImpl
 import luci.sixsixsix.powerampache2.data.local.datasource.AlbumsDbDataSourceImpl
 import luci.sixsixsix.powerampache2.data.local.datasource.ArtistsDbDataSourceImpl
+import luci.sixsixsix.powerampache2.data.local.datasource.PlaylistsDbDataSourceImpl
 import luci.sixsixsix.powerampache2.data.local.datasource.SongsDbDataSourceImpl
 import luci.sixsixsix.powerampache2.data.offlinemode.AlbumsOfflineDataSourceImpl
 import luci.sixsixsix.powerampache2.data.offlinemode.ArtistsOfflineDataSourceImpl
+import luci.sixsixsix.powerampache2.data.offlinemode.PlaylistsOfflineDataSourceImpl
 import luci.sixsixsix.powerampache2.data.offlinemode.SongsOfflineDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
 import luci.sixsixsix.powerampache2.data.remote.datasource.ArtistsRemoteDataSourceImpl
+import luci.sixsixsix.powerampache2.data.remote.datasource.PlaylistsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.datasource.SongsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.AmpachePreferencesRepository
@@ -57,6 +60,9 @@ import luci.sixsixsix.powerampache2.domain.datasource.ArtistsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsOfflineModeDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsOfflineDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsOfflineDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsRemoteDataSource
@@ -203,6 +209,27 @@ abstract class RepositoryModule {
     abstract fun songsRemoteDataSourceProvider(
         songsRemoteDataSourceImpl: SongsRemoteDataSourceImpl
     ): SongsRemoteDataSource
+
+    @Binds
+    @Singleton
+    @LocalDataSource
+    abstract fun playlistsDbDataSourceProvider(
+        playlistsDbDataSourceImpl: PlaylistsDbDataSourceImpl
+    ): PlaylistsDbDataSource
+
+    @Binds
+    @Singleton
+    @OfflineModeDataSource
+    abstract fun playlistsOfflineDataSourceProvider(
+        playlistsOfflineDataSourceImpl: PlaylistsOfflineDataSourceImpl
+    ): PlaylistsOfflineDataSource
+
+    @Binds
+    @Singleton
+    @RemoteDataSource
+    abstract fun playlistsRemoteDataSourceProvider(
+        playlistsRemoteDataSourceImpl: PlaylistsRemoteDataSourceImpl
+    ): PlaylistsRemoteDataSource
 }
 
 @Qualifier

@@ -57,6 +57,7 @@ import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.playlists.SongsFromPlaylistUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ChangeSortModeUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
@@ -74,6 +75,7 @@ class PlaylistDetailViewModel @Inject constructor(
     private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
     private val songsRepository: SongsRepository,
     private val playlistsRepository: PlaylistsRepository,
+    private val songsFromPlaylistUseCase: SongsFromPlaylistUseCase,
     private val changeSortModeUseCase: ChangeSortModeUseCase,
     private val playlistManager: MusicPlaylistManager,
     userFlowUseCase: UserFlowUseCase
@@ -259,8 +261,7 @@ class PlaylistDetailViewModel @Inject constructor(
 
     private fun getSongsFromPlaylist(playlistId: Playlist, fetchRemote: Boolean = true) {
         viewModelScope.launch {
-            playlistsRepository
-                .getSongsFromPlaylist(playlistId, fetchRemote)
+            songsFromPlaylistUseCase(playlistId, fetchRemote)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {

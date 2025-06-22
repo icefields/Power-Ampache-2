@@ -26,7 +26,9 @@ import android.util.Patterns
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_FLOAT
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.domain.common.Constants.MAX_QUEUE_SIZE
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
+import luci.sixsixsix.powerampache2.domain.models.Song
 import java.lang.ref.WeakReference
 import java.security.MessageDigest
 import java.text.Normalizer
@@ -197,3 +199,8 @@ fun Any.toDebugMap() = LinkedHashMap<String, String>().also { map ->
         }
     }
 }
+
+/**
+ * Limit queue size to MAX_QUEUE_SIZE, to avoid overflows with the media player
+ */
+fun List<Song>.reduceList() = if (size > MAX_QUEUE_SIZE) { subList(0, MAX_QUEUE_SIZE) } else this

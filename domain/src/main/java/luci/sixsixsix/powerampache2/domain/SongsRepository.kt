@@ -21,14 +21,13 @@
  */
 package luci.sixsixsix.powerampache2.domain
 
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface SongsRepository {
-    val offlineSongsLiveData: LiveData<List<Song>>
+    val offlineSongsFlow: Flow<List<Song>>
 
     suspend fun getSongs(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Song>>>
     suspend fun getSongFromId(songId: String, forceRemote: Boolean = false): Song?

@@ -71,7 +71,7 @@ class SimpleMediaNotificationManager @Inject constructor(
         mediaSession: MediaSession
     ) {
         buildNotification(mediaSession, mediaSessionService)
-        //startForegroundNotification(mediaSessionService)
+        startForegroundNotification(mediaSessionService)
     }
 
     private fun buildNotification(mediaSession: MediaSession, mediaSessionService: MediaSessionService) {

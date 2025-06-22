@@ -62,6 +62,7 @@ fun ArtistInfoSection(
     isPlayLoading: Boolean,
     isPlaylistEditLoading: Boolean,
     isGlobalShuffleOn: Boolean,
+    isDownloading: Boolean,
     eventListener: (albumInfoViewEvents: ArtistInfoEvent) -> Unit
 ) {
     Column(modifier = modifier) {
@@ -125,6 +126,7 @@ fun ArtistInfoSection(
             isPlayLoading = isPlayLoading,
             isBuffering = isBuffering,
             isGlobalShuffleOn = isGlobalShuffleOn,
+            isDownloading = isDownloading,
             modifier = Modifier.fillMaxWidth(),
             eventListener
         )
@@ -144,6 +146,7 @@ fun ArtistInfoSectionPreview() {
         isPlayLoading = false,
         isPlaylistEditLoading = false,
         isGlobalShuffleOn = true,
+        isDownloading = true,
         summaryOpen = remember { mutableStateOf(true) }
     )
 }

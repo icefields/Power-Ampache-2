@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.player
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.domain.common.reduceList
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -112,7 +113,6 @@ class MusicPlaylistManager @Inject constructor() {
      * set as state, automatically set the first song of the queue
      */
     fun addToCurrentQueueUpdateTopSong(newSong: Song, newQueue: List<Song>) {
-        L( "MusicPlaylistManager addToCurrentQueueUpdateTopSong", newQueue.size)
         // add the current song on top of the queue
         val updatedQueue = ArrayList(_currentQueueState.value).apply {
             remove(newSong)
@@ -123,7 +123,7 @@ class MusicPlaylistManager @Inject constructor() {
                 add(0, newSong)
             }
         }
-        _currentQueueState.value = LinkedHashSet(updatedQueue).apply { addAll(newQueue) }.toList()
+        _currentQueueState.value = LinkedHashSet(updatedQueue).apply { addAll(newQueue.reduceList()) }.toList()
         _currentSongState.value = newSong
 
         checkCurrentSong()
@@ -148,12 +148,12 @@ class MusicPlaylistManager @Inject constructor() {
 
     fun replaceCurrentQueue(newQueue: List<Song>) {
         L( "MusicPlaylistManager replaceCurrentQueue", newQueue.size)
-        _currentQueueState.value = newQueue.filterNotNull()
+        _currentQueueState.value = newQueue.filterNotNull().reduceList()
         checkCurrentSong()
     }
 
     fun replaceQueuePlaySong(newQueue: List<Song>, songToPlay: Song) {
-        _currentQueueState.value = newQueue.filterNotNull()
+        _currentQueueState.value = newQueue.filterNotNull().reduceList()
         _currentSongState.value = songToPlay
     }
 
@@ -166,6 +166,7 @@ class MusicPlaylistManager @Inject constructor() {
         _currentQueueState.value = LinkedHashSet(_currentQueueState.value)
             .apply { addAll(newQueue) }
             .toList()
+            .reduceList()
         checkCurrentSong()
     }
 

@@ -31,7 +31,7 @@ object Constants {
     // NETWORK
     const val NETWORK_REQUEST_LIMIT_HOME = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE = 40
-    const val QUICK_PLAY_MIN_SONGS = 50
+    const val QUICK_PLAY_MIN_SONGS = 250
     const val NETWORK_REQUEST_LIMIT_ARTISTS = 30
     const val NETWORK_REQUEST_LIMIT_SIMILAR = 30
     const val NETWORK_REQUEST_LIMIT_SONGS = 40

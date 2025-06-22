@@ -1,5 +1,8 @@
 — [New Feature] Recommendations, and play directly from home screen.
 — [New Feature] Save song after play option.
+— [New Feature] Download entire artist discography.
 — Fixed search with special characters.
 — Optimized fetching and loading for albums and playlists.
+— Fixed Export-Song when using SD Card
+— Fixed track order for offline albums
 — Other bug fixes and optimizations

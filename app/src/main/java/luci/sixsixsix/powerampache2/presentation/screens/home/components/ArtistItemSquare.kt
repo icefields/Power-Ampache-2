@@ -24,17 +24,16 @@ package luci.sixsixsix.powerampache2.presentation.screens.home.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material.icons.sharp.PlayArrow
+import androidx.compose.material.icons.sharp.PlayCircleOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -86,19 +85,19 @@ fun ArtistItemSquare(
                 } else {
                     IconButton(
                         modifier = Modifier
-                            .height(55.dp).padding(0.dp).aspectRatio(1f / 1f),
+                            .height(50.dp).padding(0.dp).aspectRatio(1f / 1f),
                         onClick = { onPlayPressed(item) },
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surface
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
                         )
                     ) {
                         Icon(
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
                             modifier = Modifier
-                                .height(55.dp)
+                                .height(42.dp)
                                 .aspectRatio(1f / 1f)
                             /*.padding(13.dp)*/,
-                            imageVector = Icons.Rounded.PlayCircle,
+                            imageVector = Icons.Sharp.PlayArrow,//.Sharp.PlayCircle,
                             contentDescription = "Play/Pause button"
                         )
                     }
@@ -119,5 +118,7 @@ fun ArtistItemSquare(
 @Composable
 @Preview
 fun ArtistItemSquarePreview() {
-    ArtistItemSquare(item = Artist.mockArtist(), currentArtistPlayLoading = null) {}
+    ArtistItemSquare(
+        showPlayButton = true,
+        item = Artist.mockArtist(), currentArtistPlayLoading = null) {}
 }

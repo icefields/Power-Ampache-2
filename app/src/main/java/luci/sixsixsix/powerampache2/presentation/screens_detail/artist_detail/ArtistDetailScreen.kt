@@ -209,6 +209,7 @@ fun ArtistDetailScreen(
                         isPlayLoading = mainViewModel.isPlayLoading(),
                         isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading || state.isLoading,
                         isGlobalShuffleOn = isGlobalShuffleOn,
+                        isDownloading = mainViewModel.state.isDownloading,
                         eventListener = { event ->
                             when(event) {
                                 ArtistInfoEvent.SHARE_ARTIST -> { }
@@ -227,8 +228,8 @@ fun ArtistDetailScreen(
                                         }
                                     }
                                 }
-                                ArtistInfoEvent.SHUFFLE_PLAY_ARTIST -> viewModel.onEvent(
-                                    ArtistDetailEvent.OnShufflePlaylistToggle)
+                                ArtistInfoEvent.SHUFFLE_PLAY_ARTIST ->
+                                    viewModel.onEvent(ArtistDetailEvent.OnShufflePlaylistToggle)
                                 ArtistInfoEvent.ADD_ARTIST_TO_PLAYLIST -> {
                                     viewModel.fetchSongsFromArtist { songs ->
                                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(
@@ -237,6 +238,15 @@ fun ArtistDetailScreen(
                                         )
                                     }
                                 }
+
+                                ArtistInfoEvent.DOWNLOAD_ARTIST -> {
+                                    viewModel.fetchSongsFromArtist { songs ->
+                                        mainViewModel.onEvent(MainEvent.OnDownloadSongs(songs))
+                                    }
+                                }
+
+                                ArtistInfoEvent.STOP_DOWNLOAD_ARTIST ->
+                                    mainViewModel.onEvent(MainEvent.OnStopDownloadSongs)
                             }
                         }
                     )

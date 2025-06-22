@@ -25,33 +25,32 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import luci.sixsixsix.powerampache2.domain.SongsRepository
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class OfflineSongsViewModel @Inject constructor(
-    private val repository: SongsRepository,
-    private val playlistManager: MusicPlaylistManager
+    private val offlineSongsFlow: OfflineSongsFlow
 ) : ViewModel() {
     var state by mutableStateOf(OfflineSongsState())
 
+//    val songsStateFlow = repository.offlineSongsFlow
+//        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
+
     init {
         state = state.copy(isLoading = true)
-        repository.offlineSongsLiveData.observeForever { songs ->
-            state = state.copy(songs = songs, isLoading = false)
-            // TODO check consistency of downloaded songs and database entries every time, delete data accordingly
+        viewModelScope.launch {
+            offlineSongsFlow().collect { songs ->
+                state = state.copy(songs = songs, isLoading = false)
+                // TODO check consistency of downloaded songs and database entries every time,
+                //  delete data accordingly
+            }
         }
     }
 
-    fun onEvent(event: OfflineSongsEvent) {
-        when(event) {
-            is OfflineSongsEvent.OnSongSelected -> {
-                // playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.songs)
-            }
-//                playlistManager.addToCurrentQueue(state.songs)
-//                playlistManager.updateTopSong(event.song) }
-        }
-    }
+    // empty, remove!
+    fun onEvent(event: OfflineSongsEvent) { when(event) {is OfflineSongsEvent.OnSongSelected -> {} } }
 }

@@ -32,6 +32,8 @@ object Constants {
     const val USER_EMAIL_DEFAULT = ""
     const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
 
+    const val MAX_QUEUE_SIZE = 666
+
     // PLAYER BUFFER CONSTANTS
     // default values, in milliseconds
     const val BACK_BUFFER_MS = 30000

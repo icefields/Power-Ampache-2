@@ -388,12 +388,12 @@ interface MusicDao {
     suspend fun getDownloadedSongById(songId: String): DownloadedSongEntity?
 
     @Query("""SELECT * FROM downloadedsongentity WHERE $multiUserCondition""")
-    fun getDownloadedSongsLiveData(): LiveData<List<DownloadedSongEntity>>
+    fun downloadedSongsFlow(): Flow<List<DownloadedSongEntity>>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE $multiUserCondition""")
     suspend fun getOfflineSongs(): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:albumId) == LOWER(albumId) AND $multiUserCondition""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:albumId) == LOWER(albumId) AND $multiUserCondition ORDER BY trackNumber""")
     suspend fun getOfflineSongsFromAlbum(albumId: String): List<DownloadedSongEntity>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:artistId) == LOWER(artistId) AND $multiUserCondition""")

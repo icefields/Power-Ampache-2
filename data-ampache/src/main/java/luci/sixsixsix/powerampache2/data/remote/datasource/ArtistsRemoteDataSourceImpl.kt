@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2025  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.data.remote.datasource
 
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
@@ -23,6 +44,7 @@ class ArtistsRemoteDataSourceImpl @Inject constructor(
     override suspend fun getArtist(auth: String, artistId: String): Artist =
         api.getArtistInfo(authKey = auth, artistId = artistId).toArtist()
 
+    @Throws(MusicException::class, NullDataException::class, NullPointerException::class)
     override suspend fun getArtists(
         auth: String,
         query: String,
@@ -53,6 +75,7 @@ class ArtistsRemoteDataSourceImpl @Inject constructor(
         } catch (saveAlbumsException: Exception) { saveAlbumsException.printStackTrace() }
     }
 
+    @Throws(MusicException::class, NullDataException::class, NullPointerException::class)
     override suspend fun getArtistsByGenre(
         auth: String,
         genreId: String,

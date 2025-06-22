@@ -22,8 +22,11 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.common.ButtonDownload
 import luci.sixsixsix.powerampache2.presentation.common.ButtonWithLoadingIndicator
 import luci.sixsixsix.powerampache2.presentation.common.PlayButton
 import luci.sixsixsix.powerampache2.presentation.common.ShuffleToggleButton
@@ -44,6 +49,7 @@ fun ArtistInfoButtonsRow(
     isPlayLoading: Boolean,
     isBuffering: Boolean,
     isGlobalShuffleOn: Boolean,
+    isDownloading: Boolean,
     modifier: Modifier = Modifier,
     eventListener: (artistInfoEvent: ArtistInfoEvent) -> Unit
 ) {
@@ -63,6 +69,13 @@ fun ArtistInfoButtonsRow(
             eventListener(ArtistInfoEvent.ADD_ARTIST_TO_PLAYLIST)
         }
 
+        ButtonDownload(
+            isDownloaded = false,
+            isDownloading = isDownloading,
+            onStartDownloadClick = { eventListener(ArtistInfoEvent.DOWNLOAD_ARTIST) },
+            onStopDownloadClick = { eventListener(ArtistInfoEvent.STOP_DOWNLOAD_ARTIST) }
+        )
+
         PlayButton(
             isPlayLoading = isPlayLoading,
             isPlaying = false,
@@ -75,6 +88,9 @@ fun ArtistInfoButtonsRow(
         ShuffleToggleButton(isGlobalShuffleOn = isGlobalShuffleOn) {
             eventListener(ArtistInfoEvent.SHUFFLE_PLAY_ARTIST)
         }
+
+        // empty space for balance
+        Box(modifier = Modifier.size(48.dp).padding(8.dp).wrapContentSize())
     }
 }
 
@@ -84,5 +100,6 @@ fun ArtistInfoButtonsRowPreview() {
         isGlobalShuffleOn = true,
         isPlayLoading = true,
         isBuffering = false,
+        isDownloading = false,
         isPlaylistEditLoading = true) { }
 }

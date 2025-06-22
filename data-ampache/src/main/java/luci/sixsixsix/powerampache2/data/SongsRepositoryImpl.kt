@@ -21,26 +21,22 @@
  */
 package luci.sixsixsix.powerampache2.data
 
-import androidx.lifecycle.map
-import androidx.work.ListenableWorker.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.domain.common.Constants
-import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_SEARCH
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.SONGS_DEFAULT_LIMIT_FETCH
-import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.common.hasMore
 import luci.sixsixsix.powerampache2.common.pop
 import luci.sixsixsix.powerampache2.data.common.Constants.CLEAR_TABLE_AFTER_FETCH
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_SEARCH
 import luci.sixsixsix.powerampache2.data.common.Constants.QUICK_PLAY_MIN_SONGS
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.HistoryEntity
@@ -56,12 +52,16 @@ import luci.sixsixsix.powerampache2.data.remote.ScrobbleData
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.di.LocalDataSource
+import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
 import luci.sixsixsix.powerampache2.di.RemoteDataSource
 import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.domain.common.Constants.MAX_QUEUE_SIZE
 import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.SongsOfflineDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
@@ -92,16 +92,13 @@ class SongsRepositoryImpl @Inject constructor(
     private val storageManager: StorageManager,
     private val workerHelper: WorkerHelper,
     private val dbDataSource: DbDataSource,
+    @OfflineModeDataSource private val songsOfflineDataSource: SongsOfflineDataSource,
     @LocalDataSource private val songsDbDataSource: SongsDbDataSource,
     @RemoteDataSource private val networkDataSource: SongsRemoteDataSource,
     applicationCoroutineScope: CoroutineScope
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
-    override val offlineSongsLiveData = dao.getDownloadedSongsLiveData().map { entities ->
-        entities.map {
-            it.toSong()
-        }
-    }
+    override val offlineSongsFlow = songsOfflineDataSource.offlineSongsFlow
 
     init {
         applicationCoroutineScope.launch {
@@ -487,7 +484,7 @@ class SongsRepositoryImpl @Inject constructor(
                 // do not fail in case of IOException, just return offline songs
             }
         }
-        val shuffledSongList = resultSet.toList().shuffled()
+        val shuffledSongList = resultSet.toList().shuffled().subList(0, MAX_QUEUE_SIZE)
         emit(Resource.Success(data = shuffledSongList, networkData = shuffledSongList))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }
