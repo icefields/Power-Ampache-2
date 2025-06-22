@@ -484,7 +484,10 @@ class SongsRepositoryImpl @Inject constructor(
                 // do not fail in case of IOException, just return offline songs
             }
         }
-        val shuffledSongList = resultSet.toList().shuffled().subList(0, MAX_QUEUE_SIZE)
+        val shuffledSongList = resultSet.toList().shuffled().apply {
+            if (size > MAX_QUEUE_SIZE)
+                subList(0, MAX_QUEUE_SIZE)
+        }
         emit(Resource.Success(data = shuffledSongList, networkData = shuffledSongList))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }

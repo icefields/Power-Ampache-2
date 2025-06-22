@@ -27,6 +27,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.di.LocalDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsDbDataSource
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistSongItem
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
 import javax.inject.Inject
@@ -45,6 +46,23 @@ class PlaylistsDbDataSourceImpl @Inject constructor(db: MusicDatabase): Playlist
     ) {
         dao.clearPlaylistSongs(playlistId)
         dao.insertPlaylistSongs(PlaylistSongEntity.newEntries(songs, playlistId, username = username, serverUrl = serverUrl))
+    }
+
+    override suspend fun savePlaylistSongRefsToDb(
+        songRefs: List<PlaylistSongItem>,
+        playlistId: String,
+        username: String,
+        serverUrl: String
+    ) {
+        dao.clearPlaylistSongs(playlistId)
+        dao.insertPlaylistSongs(
+            PlaylistSongEntity.newEntriesFromPlaylistSongItems(
+                songRefs,
+                playlistId,
+                username = username,
+                serverUrl = serverUrl
+            )
+        )
     }
 
     /**

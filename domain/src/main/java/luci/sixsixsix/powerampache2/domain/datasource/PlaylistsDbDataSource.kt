@@ -22,9 +22,11 @@
 package luci.sixsixsix.powerampache2.domain.datasource
 
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistSongItem
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface PlaylistsDbDataSource {
     suspend fun savePlaylistSongsToDb(songs: List<Song>, playlistId: String, username: String, serverUrl: String)
+    suspend fun savePlaylistSongRefsToDb(songRefs: List<PlaylistSongItem>, playlistId: String, username: String, serverUrl: String)
     suspend fun getSongsFromPlaylist(playlist: Playlist): List<Song>
 }

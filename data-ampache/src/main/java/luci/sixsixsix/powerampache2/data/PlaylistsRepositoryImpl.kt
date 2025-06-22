@@ -153,6 +153,19 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 data = dao.searchPlaylists(query).map { it.toPlaylist() },
                 networkData = playlistNetwork)
             )
+
+            // insert song references in db
+            playlistNetwork.forEach { pl ->
+                println("aaaa playlist size ${pl.items} -- songRefs size: ${pl.songRefs.size}")
+                if (pl.songRefs.isNotEmpty()) {
+                    playlistsDbDataSource.savePlaylistSongRefsToDb(
+                        songRefs = pl.songRefs,
+                        playlistId = pl.id,
+                        username = cred.username,
+                        serverUrl = cred.serverUrl
+                    )
+                }
+            }
         } else {
             Constants.config.run {
                 smartlistsUserFetch || playlistsUserFetch || playlistsAdminFetch || smartlistsAdminFetch
@@ -258,17 +271,17 @@ class PlaylistsRepositoryImpl @Inject constructor(
             } ?: Int.MAX_VALUE
             off += responseSize
 
-            val playlists = response.playlist?.let { responsePlaylist ->
+            val playlists = response.playlist?.map { it.toPlaylist() }?.let { responsePlaylists ->
                 (if (configProvider.SHOW_EMPTY_PLAYLISTS) {
-                    responsePlaylist // will throw exception if playlist null
+                    responsePlaylists // will throw exception if playlist null
                 } else {
-                    responsePlaylist.filter { dtoToFilter -> // will throw exception if playlist null
-                        dtoToFilter.items?.let { itemsCount ->
-                            itemsCount > 0 || dtoToFilter.owner?.lowercase() == username.lowercase() // edge-case default behaviour, user==null and owner==null will show the playlist
-                        } ?: (dtoToFilter.owner?.lowercase() == username.lowercase()) // if the count is null fallback to show the playlist if the user is the owner
+                    responsePlaylists.filter { toFilter -> // will throw exception if playlist null
+                        toFilter.items?.let { itemsCount ->
+                            itemsCount > 0 || toFilter.owner?.lowercase() == username.lowercase() // edge-case default behaviour, user==null and owner==null will show the playlist
+                        } ?: (toFilter.owner?.lowercase() == username.lowercase()) // if the count is null fallback to show the playlist if the user is the owner
                     }
                 })
-            }?.map { it.toPlaylist() } ?: listOf()
+            } ?: listOf()
 
             //dao.insertPlaylists(playlists.map { it.toPlaylistEntity(username = username, serverUrl = getCurrentCredentials().serverUrl) })
             addAll(playlists)
@@ -648,14 +661,14 @@ class PlaylistsRepositoryImpl @Inject constructor(
     ).run {
         error?.let { throw(MusicException(it.toError())) }
         if (success != null) {
-            val updatedPlaylist = api.getPlaylist(authToken(), playlist.id)
+            val updatedPlaylist = api.getPlaylist(authToken(), playlist.id).toPlaylist()
             // check if any of the new songs got added
             val playlistItems = playlist.items ?: 0
             if ((updatedPlaylist.items == null) || (playlist.items == null) ||
                 (updatedPlaylist.items <= playlistItems)) {
                 throw Exception("The size of the edited playlist and the size of the new playlist are the same. Something went wrong")
             }
-            updatedPlaylist.toPlaylist()
+            updatedPlaylist
         } else {
             throw Exception("error getting a response from editPlaylist call")
         }

@@ -88,13 +88,13 @@ fun ArtistItemSquare(
                             .height(50.dp).padding(0.dp).aspectRatio(1f / 1f),
                         onClick = { onPlayPressed(item) },
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
                         )
                     ) {
                         Icon(
-                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier
-                                .height(42.dp)
+                                .height(36.dp)
                                 .aspectRatio(1f / 1f)
                             /*.padding(13.dp)*/,
                             imageVector = Icons.Sharp.PlayArrow,//.Sharp.PlayCircle,

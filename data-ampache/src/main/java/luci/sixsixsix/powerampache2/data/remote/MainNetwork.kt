@@ -163,6 +163,7 @@ interface MainNetwork {
         @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
+        @Query("include") include: String? = "songs",
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
         @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true, ignore 'api_hide_dupe_searches' setting)
     ): PlaylistsResponse
@@ -430,6 +431,15 @@ interface MainNetwork {
         @Query("id") songId: String,
         @Query("type") type: Type = Type.song, // song, podcast_episode, search, playlist
         @Query("format") format: String = "raw", // mp3, ogg, raw, etc (raw returns the original format)
+    ): Response<ResponseBody>
+
+    @Streaming
+    @GET("json.server.php?action=get_art")
+    suspend fun getArt(
+        @Query("auth") authKey: String,
+        @Query("id") songId: String,
+        @Query("type") type: Type = Type.song, // song, podcast_episode, search, playlist
+        @Query("size") size: String = "'400x400'", // mp3, ogg, raw, etc (raw returns the original format)
     ): Response<ResponseBody>
 
     /**

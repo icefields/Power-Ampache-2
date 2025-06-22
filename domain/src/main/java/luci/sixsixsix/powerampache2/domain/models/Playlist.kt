@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.domain.models
 
 import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -29,7 +30,8 @@ open class Playlist(
     override val id: String,
     val name: String,
     val owner: String? = null,
-    val items: Int? = 0,
+    val items: Int = 0,
+    val songRefs: List<PlaylistSongItem> = listOf(),
     val type: PlaylistType? = null,
     val artUrl: String? = null,
     val flag: Int = 0,
@@ -39,6 +41,7 @@ open class Playlist(
 ): Parcelable, AmpacheModel {
     companion object {
         fun empty() = Playlist("", "")
+
         fun mock(): Playlist = Playlist(
             id = "2",
             name = "2023-techdeath",
@@ -53,6 +56,12 @@ open class Playlist(
         )
     }
 }
+
+@Parcelize
+data class PlaylistSongItem (
+    val songId: String,
+    val playlistTrack: Int
+): Parcelable
 
 enum class PlaylistType { public, private }
 

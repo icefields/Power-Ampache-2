@@ -36,9 +36,19 @@ class SongsRemoteDataSourceImpl @Inject constructor(private val api: MainNetwork
         val response = api.downloadSong(authKey = authKey, songId = songId)
         if (response.code() == HTTP_OK) {
             // save file to disk and register in database
-            return response.body()?.byteStream() ?: throw Exception("byteStream null}")
+            return response.body()?.byteStream() ?: throw Exception("downloadSong, byteStream null}")
         } else {
-            throw Exception("Cannot download received code ${response.code()}")
+            throw Exception("Cannot download song $songId, received code ${response.code()}")
+        }
+    }
+
+    override suspend fun downloadArt(songId: String, authKey: String): InputStream {
+        val response = api.getArt(authKey = authKey, songId = songId)
+        if (response.code() == HTTP_OK) {
+            // save file to disk and register in database
+            return response.body()?.byteStream() ?: throw Exception("downloadArt, byteStream null}")
+        } else {
+            throw Exception("Cannot download art, received code ${response.code()}")
         }
     }
 }
