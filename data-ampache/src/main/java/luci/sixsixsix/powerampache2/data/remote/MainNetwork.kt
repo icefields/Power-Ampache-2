@@ -174,6 +174,7 @@ interface MainNetwork {
         @Query("limit") limit: Int = 0,
         @Query("user") user: String? = null,
         @Query("filter") filter: String? = null,
+        @Query("include") include: String? = "songs",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
@@ -186,6 +187,7 @@ interface MainNetwork {
         @Query("limit") limit: Int = 0,
         @Query("user") user: String? = null,
         @Query("filter") filter: String? = null,
+        @Query("include") include: String? = "songs",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
@@ -439,7 +441,7 @@ interface MainNetwork {
         @Query("auth") authKey: String,
         @Query("id") songId: String,
         @Query("type") type: Type = Type.song, // song, podcast_episode, search, playlist
-        @Query("size") size: String = "'400x400'", // mp3, ogg, raw, etc (raw returns the original format)
+        @Query("size") size: String = "666x666", // mp3, ogg, raw, etc (raw returns the original format)
     ): Response<ResponseBody>
 
     /**

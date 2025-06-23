@@ -184,9 +184,12 @@ class ArtistsRepositoryImpl @Inject constructor(
             .getRecommendedArtists(authToken(), baseArtistId)
             .ifEmpty {
                 mutableListOf<Artist>().apply {
-                    if (shouldGenerateIfEmpty) {
                         val generatedList = generateRecommendedArtistsFromGenres(baseArtistId)
+                    if (shouldGenerateIfEmpty) {
                         addAll(if (generatedList.size > 11) generatedList.subList(0, 10) else generatedList)
+                    } else {
+                        // only add a couple of recommendations if shouldGenerateIfEmpty is false
+                        addAll(if (generatedList.size > 3) generatedList.subList(0, 2) else generatedList)
                     }
                 }
             }
@@ -196,6 +199,9 @@ class ArtistsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getRecommendedArtists()", e, this) }
 
+    /**
+     * Usually used when no recommendations are available from the backend.
+     */
     private suspend fun generateRecommendedArtistsFromGenres(baseArtistId: String) =
         mutableListOf<Artist>().apply {
             artistsDbDataSource.getArtist(baseArtistId)?.genre?.let { genres ->

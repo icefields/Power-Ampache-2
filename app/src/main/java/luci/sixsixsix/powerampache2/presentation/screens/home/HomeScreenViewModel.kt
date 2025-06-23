@@ -61,14 +61,17 @@ import luci.sixsixsix.powerampache2.domain.usecase.albums.RecommendedAlbumsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.artists.MostPlayedArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.artists.SongsFromArtistUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
+import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val albumsRepository: AlbumsRepository,
-    private val playlistsRepository: PlaylistsRepository,
     private val mostPlayedArtistsUseCase: MostPlayedArtistsUseCase,
+    private val playlistsUseCase: PlaylistsUseCase,
+    playlistsFlow: PlaylistsFlow,
     recommendedArtistsFlow: RecommendedArtistsFlow,
     recommendedAlbumsFlow: RecommendedAlbumsFlow,
     offlineModeFlowUseCase: OfflineModeFlowUseCase,
@@ -120,7 +123,7 @@ class HomeScreenViewModel @Inject constructor(
             }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
-    val playlistsStateFlow = playlistsRepository.playlistsFlow.distinctUntilChanged()
+    val playlistsStateFlow = playlistsFlow().distinctUntilChanged()
         .filter { !AmpacheModel.listsEqual(it, currentPlaylists, true) }
         .map { playlists ->
             currentPlaylists.clear()
@@ -242,8 +245,7 @@ class HomeScreenViewModel @Inject constructor(
 
 // ---- PLAYLISTS
     private suspend fun getPlaylists(fetchRemote: Boolean = true) {
-        playlistsRepository
-            .getPlaylists(fetchRemote)
+        playlistsUseCase(fetchRemote = fetchRemote)
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {

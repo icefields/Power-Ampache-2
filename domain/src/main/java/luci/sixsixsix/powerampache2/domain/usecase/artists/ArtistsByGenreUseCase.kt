@@ -1,3 +1,4 @@
+
 package luci.sixsixsix.powerampache2.domain.usecase.artists
 
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository

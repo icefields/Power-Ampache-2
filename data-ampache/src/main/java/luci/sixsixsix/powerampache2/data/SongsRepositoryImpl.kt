@@ -102,7 +102,7 @@ class SongsRepositoryImpl @Inject constructor(
 
     init {
         applicationCoroutineScope.launch {
-            dao.offlineModeEnabled().distinctUntilChanged().collect {
+            dao.offlineModeEnabledFlow().distinctUntilChanged().collect {
                 if (it != null && it == false) {
                     try {
                         backOnlineActions()
@@ -574,7 +574,9 @@ class SongsRepositoryImpl @Inject constructor(
             if (!isSongAvailableOffline(song)) {
                 val inputStream = networkDataSource.downloadSong(authKey = authToken(), songId = songId)
                 val filepath = storageManager.saveSong(song, inputStream)
-                dbDataSource.addDownloadedSong(song, filepath)
+                val inputStreamImage = networkDataSource.downloadArt(song.id, authKey = authToken())
+                val filepathImage = storageManager.saveImage(song, inputStreamImage)
+                dbDataSource.addDownloadedSong(song.copy(imageUrl = filepathImage), filepath)
             }
             song
         }

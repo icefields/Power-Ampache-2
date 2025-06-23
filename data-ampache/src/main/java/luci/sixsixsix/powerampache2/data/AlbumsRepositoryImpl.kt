@@ -95,7 +95,8 @@ class AlbumsRepositoryImpl @Inject constructor(
             dao.generateOfflineAlbums(getCurrentCredentials().username).forEach { dae ->
                 albumsList.add(
                     if (dbAlbumsHash.containsKey(dae.id)) {
-                        (dbAlbumsHash[dae.id] ?: dae)
+                        // keep the offline art url, even when using album object from non-downloaded album table
+                        (dbAlbumsHash[dae.id]?.copy(artUrl = dae.artUrl) ?: dae)
                     } else { dae }.toAlbum()
                 )
             }

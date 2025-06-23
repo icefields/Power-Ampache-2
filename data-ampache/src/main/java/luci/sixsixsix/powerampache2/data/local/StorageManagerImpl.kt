@@ -64,6 +64,34 @@ class StorageManagerImpl @Inject constructor(private val musicRepository: MusicR
         }
 
     @Throws(Exception::class)
+    override suspend fun saveImage(song: Song, inputStream: InputStream) =
+        withContext(Dispatchers.IO) {
+            val absoluteDirPath = getAbsolutePathDir(song)
+            val directory = File(absoluteDirPath)
+            if (!directory.exists()) {
+                directory.mkdirs()
+            }
+            val absolutePath = StringBuffer(absoluteDirPath).append("/").append(song.album.id).append(".png").toString()
+
+            try {
+                val fos = FileOutputStream(absolutePath)
+                fos.use { output ->
+                    val buffer = ByteArray(BUFFER_SIZE)
+                    var read: Int
+                    while (inputStream.read(buffer).also { read = it } != -1) {
+                        output.write(buffer, 0, read)
+                    }
+                    output.flush()
+                }
+                return@withContext absolutePath
+            } catch (e: Exception) {
+                throw e
+            } finally {
+                inputStream.close()
+            }
+        }
+
+    @Throws(Exception::class)
     override suspend fun deleteSong(song: Song): Boolean = withContext(Dispatchers.IO) {
         val relativePath = song.filename
         val fileName = relativePath.substring(relativePath.lastIndexOf("/") + 1)
@@ -92,6 +120,7 @@ class StorageManagerImpl @Inject constructor(private val musicRepository: MusicR
      */
     @Throws(Exception::class)
     override suspend fun deleteAll() = withContext(Dispatchers.IO) {
+        // TODO: also delete the non-selected storage.
         File(StringBuffer(getStorage())
             .append("/")
             .append(SUB_DIR)

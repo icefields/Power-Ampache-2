@@ -57,6 +57,7 @@ import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistFlow
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.SongsFromPlaylistUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ChangeSortModeUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
@@ -72,6 +73,7 @@ class PlaylistDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val toggleGlobalShuffle: ToggleGlobalShuffleUseCase,
     localSettingsFlowUseCase: LocalSettingsFlowUseCase,
+    playlistFlow: PlaylistFlow,
     private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
     private val songsRepository: SongsRepository,
     private val playlistsRepository: PlaylistsRepository,
@@ -102,7 +104,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 playlist
             }.flatMapConcat { playlist ->
                 if (PlaylistDetailState.isNotStatPlaylist(playlist)) {
-                    playlistsRepository.getPlaylist(playlist.id)
+                    playlistFlow(playlist.id)
                 } else {
                     flow { emit(playlist) }
                 }

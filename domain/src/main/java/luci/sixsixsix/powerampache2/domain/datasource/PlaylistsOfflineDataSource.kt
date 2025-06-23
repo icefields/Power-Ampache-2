@@ -21,8 +21,13 @@
  */
 package luci.sixsixsix.powerampache2.domain.datasource
 
+import kotlinx.coroutines.flow.Flow
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface PlaylistsOfflineDataSource {
+    val playlistsFlow: Flow<List<Playlist>>
+
+    suspend fun getPlaylists(query: String): List<Playlist>
     suspend fun getSongsFromPlaylist(playlistId: String): List<Song>
 }

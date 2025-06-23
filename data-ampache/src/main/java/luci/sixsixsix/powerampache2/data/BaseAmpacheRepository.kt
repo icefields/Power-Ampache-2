@@ -70,11 +70,10 @@ abstract class BaseAmpacheRepository(
         }
 
     val offlineModeFlow: Flow<Boolean>
-        get() =  dao.offlineModeEnabled()
+        get() =  dao.offlineModeEnabledFlow()
             .distinctUntilChanged()
-            .map {
-                it ?: false
-            }.distinctUntilChanged()
+            .map { it == true }
+            .distinctUntilChanged()
 
     suspend fun isOfflineModeEnabled(): Boolean =
         dao.getSettings()?.toLocalSettings()?.isOfflineModeEnabled == true

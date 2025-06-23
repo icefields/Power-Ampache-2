@@ -309,7 +309,6 @@ class SettingsViewModel @Inject constructor(
                     getLocalSettingsUseCase(userStateFlow.value?.username)
                         .copy(saveFavouriteSongAfterPlayback = event.isDownloadFavourite)
                 )
-                println("aaaaa switch ${event.isDownloadFavourite} ${ getLocalSettingsUseCase(userStateFlow.value?.username).saveFavouriteSongAfterPlayback}")
             }
         }
     }

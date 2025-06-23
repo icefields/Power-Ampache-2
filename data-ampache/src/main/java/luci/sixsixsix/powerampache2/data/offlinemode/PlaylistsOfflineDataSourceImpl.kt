@@ -21,18 +21,35 @@
  */
 package luci.sixsixsix.powerampache2.data.offlinemode
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsOfflineDataSource
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
+import kotlin.collections.map
+import kotlin.collections.mapNotNull
 
 @OfflineModeDataSource
 class PlaylistsOfflineDataSourceImpl @Inject constructor(
     db: MusicDatabase,
 ): PlaylistsOfflineDataSource {
     private val dao = db.dao
+
+    override val playlistsFlow: Flow<List<Playlist>> = dao.playlistsFlow().map { entities ->
+        entities.filter { isPlaylistOffline(it.id) }
+    }.mapNotNull { list -> list.map { it.toPlaylist() } }
+
+    override suspend fun getPlaylists(query: String) =
+        dao.searchPlaylists(query).filter { isPlaylistOffline(it.id) }.map { it.toPlaylist() }
+
+    private suspend fun isPlaylistOffline(playlistId: String) =
+        dao.getOfflineSongsFromPlaylist(playlistId).isNotEmpty()
 
     override suspend fun getSongsFromPlaylist(playlistId: String): List<Song> =
         dao.getOfflineSongsFromPlaylist(playlistId).map { it.toSong() }

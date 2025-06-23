@@ -23,11 +23,15 @@ package luci.sixsixsix.powerampache2.data.remote.datasource
 
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
+import luci.sixsixsix.powerampache2.data.remote.dto.toPlaylist
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.di.RemoteDataSource
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.NullDataException
+import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
 
@@ -35,6 +39,33 @@ import javax.inject.Inject
 class PlaylistsRemoteDataSourceImpl @Inject constructor(
     private val api: MainNetwork
 ) : PlaylistsRemoteDataSource {
+
+    override suspend fun getPlaylists(
+        authToken: String,
+        query: String,
+        offset: Int,
+        limit: Int,
+        include: String?
+    ) = api.getPlaylists(authToken,
+        filter = query,
+        offset = offset,
+        limit = Constants.config.playlistFetchLimit,
+        include = include
+    ).let { playlistsResponse ->
+        playlistsResponse.error?.let { error -> throw MusicException(error.toError()) }
+        playlistsResponse.playlist?.let { playlistsDto ->
+            val totalCount = playlistsResponse.totalCount?.let { tot ->
+                // if this field is null or empty in the response, return max possible value
+                if (tot > 0) {
+                    tot
+                } else {
+                    Int.MAX_VALUE
+                }
+            } ?: Int.MAX_VALUE
+
+            Pair(playlistsDto.map { songDto -> songDto.toPlaylist() }, totalCount)
+        } ?: throw NullDataException("getPlaylists")
+    }
 
     @Throws(MusicException::class, NullDataException::class)
     override suspend fun getSongsFromPlaylist(
@@ -51,5 +82,19 @@ class PlaylistsRemoteDataSourceImpl @Inject constructor(
         songsResponse.songs?.let { songsDto ->
             songsDto.map { songDto -> songDto.toSong() }
         } ?: throw NullDataException("getSongsFromPlaylist")
+    }
+
+    @Throws(MusicException::class, NullPointerException::class)
+    override suspend fun createNewPlaylist(
+        authToken: String,
+        name: String,
+        playlistType: PlaylistType
+    ): Playlist = api.createNewPlaylist(
+        authKey = authToken,
+        name = name,
+        playlistType = playlistType
+    ).let { playlistResponse ->
+        playlistResponse.error?.let { error -> throw MusicException(error.toError()) }
+        playlistResponse.toPlaylist() // might trow NullPointerException
     }
 }

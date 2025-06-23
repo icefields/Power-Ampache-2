@@ -60,6 +60,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -101,6 +102,7 @@ fun AlbumDetailScreen(
     val isGlobalShuffleOn by viewModel.globalShuffleStateFlow.collectAsState()
     val songs = viewModel.state.getSongList()
     val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+    val isOffline by viewModel.offlineModeStateFlow.collectAsStateWithLifecycle()
 
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -163,26 +165,36 @@ fun AlbumDetailScreen(
         }
     }
 
+    val artUrl = if (isOffline != null && isOffline == true && songs.isNotEmpty()) {
+        songs[0].imageUrl
+    } else if(album.artUrl.isNotBlank()) {
+        album.artUrl
+    } else null
+
+
     //val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            model = album.artUrl,
-            contentScale = ContentScale.Crop,
-            //placeholder = placeholder,
-            contentDescription = album.name
-        )
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            model = album.artUrl,
-            contentScale = ContentScale.FillWidth,
-            //placeholder = placeholder,
-            contentDescription = album.name,
-        )
+        if (artUrl != null) {
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+                model = artUrl,
+                contentScale = ContentScale.Crop,
+                //placeholder = placeholder,
+                contentDescription = album.name
+            )
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+                model = artUrl,
+                contentScale = ContentScale.FillWidth,
+                //placeholder = placeholder,
+                contentDescription = album.name,
+            )
+        }
+
         // full screen view to add a transparent black layer on top
         // of the images for readability
         Box(

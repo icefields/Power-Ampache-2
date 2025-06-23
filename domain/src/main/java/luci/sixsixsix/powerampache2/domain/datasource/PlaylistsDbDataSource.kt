@@ -21,11 +21,17 @@
  */
 package luci.sixsixsix.powerampache2.domain.datasource
 
+import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistSongItem
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface PlaylistsDbDataSource {
+    val playlistsFlow: Flow<List<Playlist>>
+
+    suspend fun getPlaylists(query: String): List<Playlist>
+    fun getPlaylist(id: String): Flow<Playlist>
+    suspend fun savePlaylistsToDb(playlists: List<Playlist>, username: String, serverUrl: String, shouldClearBeforeAdding: Boolean)
     suspend fun savePlaylistSongsToDb(songs: List<Song>, playlistId: String, username: String, serverUrl: String)
     suspend fun savePlaylistSongRefsToDb(songRefs: List<PlaylistSongItem>, playlistId: String, username: String, serverUrl: String)
     suspend fun getSongsFromPlaylist(playlist: Playlist): List<Song>

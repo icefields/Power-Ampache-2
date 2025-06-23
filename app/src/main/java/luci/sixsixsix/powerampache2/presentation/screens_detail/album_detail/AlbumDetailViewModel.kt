@@ -78,7 +78,7 @@ class AlbumDetailViewModel @Inject constructor(
     var state by mutableStateOf(AlbumDetailState())
 
     val offlineModeStateFlow = offlineModeFlowUseCase()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     val globalShuffleStateFlow = localSettingsFlowUseCase()
         .map { it.isGlobalShuffleEnabled }

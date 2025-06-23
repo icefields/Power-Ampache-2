@@ -21,22 +21,59 @@
  */
 package luci.sixsixsix.powerampache2.data.local.datasource
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import luci.sixsixsix.mrlog.MrLog
+import luci.sixsixsix.mrlog.MrLog.invoke
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylist
+import luci.sixsixsix.powerampache2.data.local.entities.toPlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.di.LocalDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsDbDataSource
+import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistSongItem
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.map
 
 @LocalDataSource
 @Singleton
 class PlaylistsDbDataSourceImpl @Inject constructor(db: MusicDatabase): PlaylistsDbDataSource {
     private val dao = db.dao
+
+    override val playlistsFlow: Flow<List<Playlist>>
+        get() = dao.playlistsFlow().filterNotNull().mapNotNull { list -> list.map { it.toPlaylist() } }
+
+    override suspend fun getPlaylists(query: String): List<Playlist> =
+        dao.searchPlaylists(query).map { it.toPlaylist() }
+
+    override fun getPlaylist(id: String) =
+        dao.playlistFlow(id).filterNotNull().mapNotNull { it.toPlaylist() }
+
+    override suspend fun savePlaylistsToDb(
+        playlists: List<Playlist>,
+        username: String,
+        serverUrl: String,
+        shouldClearBeforeAdding: Boolean
+    ) {
+        if (shouldClearBeforeAdding) {
+            println("aaaa lists don't have same elements")
+            // avoid clearing if lists are equal, insert will already replace the old versions
+            dao.clearPlaylists()
+        }
+
+        dao.insertPlaylists(
+            playlists.map { it.toPlaylistEntity(username = username, serverUrl = serverUrl) }
+        )
+    }
 
     override suspend fun savePlaylistSongsToDb(
         songs: List<Song>,

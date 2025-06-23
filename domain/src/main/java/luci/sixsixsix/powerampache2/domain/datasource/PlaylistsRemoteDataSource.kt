@@ -21,8 +21,22 @@
  */
 package luci.sixsixsix.powerampache2.domain.datasource
 
+import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
 
+typealias TotalCount = Int
+
 interface PlaylistsRemoteDataSource {
+    suspend fun getPlaylists(
+        authToken: String,
+        query: String,
+        offset: Int,
+        limit: Int = Constants.config.playlistFetchLimit,
+        include: String? = "songs"
+    ): Pair<List<Playlist>, TotalCount>
+
     suspend fun getSongsFromPlaylist(authToken: String, playlistId: String, limit: Int, offset: Int): List<Song>
+    suspend fun createNewPlaylist(authToken: String, name: String, playlistType: PlaylistType): Playlist
 }

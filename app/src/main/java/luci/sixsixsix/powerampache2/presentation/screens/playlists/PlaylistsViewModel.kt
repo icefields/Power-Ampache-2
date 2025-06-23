@@ -37,19 +37,22 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
+import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistsViewModel @Inject constructor(
     private val repository: PlaylistsRepository,
+    private val playlistsUseCase: PlaylistsUseCase,
     offlineModeFlow: OfflineModeFlowUseCase,
-    userFlowUseCase: UserFlowUseCase
+    userFlowUseCase: UserFlowUseCase,
+    playlistsFlow: PlaylistsFlow,
 ) : ViewModel() {
     var state by mutableStateOf(PlaylistsState())
     private var isEndOfDataReached: Boolean = false
@@ -57,7 +60,7 @@ class PlaylistsViewModel @Inject constructor(
 
     val playlistsStateFlow: StateFlow<List<Playlist>> =
         offlineModeFlow()
-            .flatMapLatest { repository.playlistsFlow }
+            .flatMapLatest { playlistsFlow() }
             .filterNotNull()
             .distinctUntilChanged()
             .combine(userFlowUseCase().filterNotNull().distinctUntilChanged()) { playlists, user ->
@@ -102,8 +105,7 @@ class PlaylistsViewModel @Inject constructor(
         offset: Int = 0
     ) {
         viewModelScope.launch {
-            repository
-                .getPlaylists(fetchRemote, query, offset)
+            playlistsUseCase(fetchRemote = fetchRemote, query = query, offset = offset)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {

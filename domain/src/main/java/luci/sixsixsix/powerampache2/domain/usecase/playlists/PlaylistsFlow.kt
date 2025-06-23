@@ -19,13 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.domain.usecase.settings
+package luci.sixsixsix.powerampache2.domain.usecase.playlists
 
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class DeleteAllDownloadedSongsUseCase @Inject constructor(
-    private val settingsRepository: SettingsRepository,
-) {
-    suspend operator fun invoke() = settingsRepository.deleteAllDownloadedSongs()
+@Singleton
+class PlaylistsFlow @Inject constructor(private val repository: PlaylistsRepository) {
+    operator fun invoke() = repository.playlistsFlow
 }

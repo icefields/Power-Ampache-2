@@ -359,13 +359,13 @@ interface MusicDao {
     suspend fun searchPlaylists(query: String): List<PlaylistEntity>
 
     @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
-    fun playlistsLiveData(): LiveData<List<PlaylistEntity>>
+    fun playlistsFlow(): Flow<List<PlaylistEntity>>
 
     @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, id DESC""")
     suspend fun getAllPlaylists(): List<PlaylistEntity>
 
     @Query("""SELECT * FROM playlistentity WHERE id == :playlistId AND $multiUserCondition""")
-    fun playlistLiveData(playlistId: String): Flow<PlaylistEntity?>
+    fun playlistFlow(playlistId: String): Flow<PlaylistEntity?>
 
     // get only playlists user owns
     @Query("""SELECT * FROM playlistentity WHERE LOWER(owner) = LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) order by rating DESC, id DESC""")
@@ -456,7 +456,10 @@ interface MusicDao {
     /**
      * generates album entities using only the info available in DownloadedSongEntity
      */
-    @Query("""SELECT count(albumId) as songCount, albumId as id, multiUserId, albumName as name, albumName as basename, artistId, '{"attr":[' || albumArtist ||']}' as artists, artistName, genre, imageUrl as artUrl, -1 as 'time', searchAlbum as searchName, 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE LOWER(owner) == LOWER(:owner) GROUP BY albumId ORDER BY albumName""")
+    @Query("""SELECT count(albumId) as songCount, albumId as id, multiUserId, albumName as name, albumName as basename, artistId, '{"attr":[' || albumArtist ||']}' as artists, artistName, genre, imageUrl as artUrl, -1 as 'time', searchAlbum as searchName, 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating 
+                FROM DownloadedSongEntity as song 
+                WHERE LOWER(owner) == LOWER(:owner) 
+                GROUP BY albumId ORDER BY albumName""")
     suspend fun generateOfflineAlbums(owner: String): List<AlbumEntity>
 
     @Query("""SELECT count(albumId) as songCount, albumId as id, albumName as name, multiUserId, albumName as basename, artistId, '{"attr":[' || albumArtist ||']}' as artists, artistName, searchAlbum as searchName, genre, imageUrl as artUrl, -1 as 'time', 0 as flag, -1 as albumCount, -1 as year, -1 as diskCount, 0 as rating, 0 as averageRating FROM DownloadedSongEntity as song WHERE artistId = LOWER(:artistId) GROUP BY albumId ORDER BY albumName""")
@@ -525,7 +528,7 @@ interface MusicDao {
     suspend fun writeSettings(localSettingsEntity: LocalSettingsEntity)
 
     @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
-    fun offlineModeEnabled(): Flow<Boolean?>
+    fun offlineModeEnabledFlow(): Flow<Boolean?>
 
     @Query("""SELECT isOfflineModeEnabled FROM localsettingsentity WHERE LOWER(username) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))""")
     fun isOfflineModeEnabled(): Boolean?
