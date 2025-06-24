@@ -38,6 +38,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -66,6 +67,7 @@ fun AlbumItem(album: Album, modifier: Modifier = Modifier) {
         shape = RoundedCornerShape(dimensionResource(R.dimen.albumItem_card_cornerRadius))
     ) {
         Box(modifier = Modifier.background(brush = albumBackgroundGradient)) {
+            //val rememberedUrl = remember(album.artUrl) { album.artUrl }
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize()
