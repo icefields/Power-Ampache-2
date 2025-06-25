@@ -307,6 +307,7 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylists(companyListingEntities: List<PlaylistEntity>)
 
+    @Deprecated("user other method with same name")
     @Query("""SELECT song.*, songIds.position FROM songentity as song, 
         (SELECT * FROM playlistsongentity WHERE LOWER(:playlistId) == LOWER(playlistId)) as songIds 
         WHERE LOWER(song.mediaId) == LOWER(songIds.songId) 
@@ -315,10 +316,16 @@ interface MusicDao {
     suspend fun getSongsFromPlaylistOld(playlistId: String): List<SongEntity>
 
     @Query("""SELECT song.*, songIds.position FROM songentity as song, 
-        (SELECT * FROM playlistsongentity WHERE LOWER(:playlistId) == LOWER(playlistId)) as songIds 
-        WHERE LOWER(song.mediaId) == LOWER(songIds.songId) 
-        AND LOWER(song.multiUserId) == LOWER(:multiUserId)
-        GROUP BY LOWER(song.mediaId) ORDER BY songIds.position""")
+        (SELECT * FROM playlistsongentity WHERE :playlistId == playlistId) as songIds 
+        WHERE song.mediaId == songIds.songId
+        AND song.multiUserId == :multiUserId
+        GROUP BY song.mediaId ORDER BY songIds.position""")
+    suspend fun getSongsFromPlaylist2(multiUserId: String, playlistId: String): List<SongEntity>
+
+    @Query("""SELECT song.*, ps.position FROM songentity AS song
+    INNER JOIN playlistsongentity AS ps ON song.mediaId = ps.songId
+    WHERE song.multiUserId = :multiUserId AND ps.playlistId = :playlistId
+    ORDER BY ps.position""")
     suspend fun getSongsFromPlaylist(multiUserId: String, playlistId: String): List<SongEntity>
 
     @Transaction

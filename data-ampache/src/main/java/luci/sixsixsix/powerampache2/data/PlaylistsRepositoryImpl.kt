@@ -357,11 +357,13 @@ class PlaylistsRepositoryImpl @Inject constructor(
                 errorHandler.logError(nde)
             }
             offset += limit
+            limit = (limit + 66) * 2
         } while (!isFinished)
 
         if (!shouldEmitSteps) {
             // TODO: BREAKING_RULE(single source of truth). Playlists can be very large, emitting
-            //  network data to avoid slow db operations blocking the UI
+            //  network data to avoid slow db operations blocking the UI.
+            //  also there is no pagination for db calls
             emit(Resource.Success(data = songs.toList(), networkData = songs))
         }
 
@@ -566,7 +568,7 @@ class PlaylistsRepositoryImpl @Inject constructor(
         }
 
         // Get old version of the playlist
-        val existingSongs = LinkedHashSet(dao.getSongsFromPlaylist(playlist.id).map { songDb -> songDb.toSong() })
+        val existingSongs = LinkedHashSet(playlistsDbDataSource.getSongsFromPlaylist(playlist))
             .ifEmpty {
                 L.e("addSongsToPlaylist() list of songs from db is empty")
                 // if playlist not stored locally, fetch a new version
