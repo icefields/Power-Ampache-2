@@ -61,6 +61,7 @@ object Constants {
     const val ERROR_STRING = "ERROR"
     const val LOADING_STRING = "LOADING"
     const val USER_ID_ERROR = ERROR_INT
+    const val DEFAULT_NO_IMAGE = ""
 
     const val ALWAYS_FETCH_ALL_PLAYLISTS = true
 

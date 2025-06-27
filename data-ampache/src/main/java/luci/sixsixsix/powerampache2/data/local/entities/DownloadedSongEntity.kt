@@ -55,7 +55,7 @@ data class DownloadedSongEntity(
     val time: Int = Constants.ERROR_INT,
     val trackNumber: Int = Constants.ERROR_INT,
     val year: Int = Constants.ERROR_INT,
-    val imageUrl: String = "",
+    val imageUrl: String = Constants.DEFAULT_NO_IMAGE,
     val albumArtist: MusicAttribute = MusicAttribute.emptyInstance(),
     val averageRating: Float,
     val preciseRating: Float,
@@ -77,7 +77,12 @@ data class DownloadedSongEntity(
     val searchArtist: String,
 )
 
-fun Song.toDownloadedSongEntity(downloadedSongUri: String, owner: String, serverUrl: String) = DownloadedSongEntity(
+fun Song.toDownloadedSongEntity(
+    downloadedSongUri: String,
+    downloadedImageUri: String,
+    owner: String,
+    serverUrl: String
+) = DownloadedSongEntity(
     mediaId = mediaId,
     title = title,
     artistId = artist.id,
@@ -98,7 +103,7 @@ fun Song.toDownloadedSongEntity(downloadedSongUri: String, owner: String, server
     time = time,
     trackNumber = trackNumber,
     year = year,
-    imageUrl = imageUrl,
+    imageUrl = downloadedImageUri,
     albumArtist = albumArtist,
     averageRating = averageRating,
     preciseRating = preciseRating,

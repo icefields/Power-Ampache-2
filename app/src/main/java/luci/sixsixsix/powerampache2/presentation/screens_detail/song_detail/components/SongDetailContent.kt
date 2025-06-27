@@ -24,12 +24,14 @@ package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.com
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -133,25 +135,31 @@ fun SongDetailContent(
         }
     }
 
+    var isImageScaleFit by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = dimensionResource(id = R.dimen.player_screen_padding))
+            //.padding(horizontal = dimensionResource(id = R.dimen.player_screen_padding))
     ) {
         SongAlbumCoverArt(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
+                .fillMaxWidth().clickable {
+                    isImageScaleFit = !isImageScaleFit
+                },
             artUrl = currentSongState?.imageUrl,
             contentDescription = currentSongState?.title,
+            isImageScaleFit = isImageScaleFit,
             onSwipeLeft = { mainViewModel.onEvent(MainEvent.SkipNext) },
             onSwipeRight = { mainViewModel.onEvent(MainEvent.SkipPrevious) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Box {
+        // Title and artist, like button
+        Box(Modifier.padding(horizontal = dimensionResource(id = R.dimen.player_screen_title_padding))) {
             Column {
                 val artistName = if (currentSongState?.artists?.isNotEmpty() == true) {
                     currentSongState?.artists?.joinToString { it.name } ?: currentSongState?.artist?.name
@@ -200,7 +208,9 @@ fun SongDetailContent(
                 isOffline = it
             }
             SongDetailButtonRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = dimensionResource(id = R.dimen.player_screen_padding)),
                 isOffline = isOffline,
                 tint = buttonsTint
             ) { event ->
@@ -251,6 +261,7 @@ fun SongDetailContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
+                .padding(horizontal = dimensionResource(id = R.dimen.player_screen_title_padding))
         ) { event ->
             mainViewModel.onEvent(event)
         }
@@ -266,6 +277,7 @@ fun SongAlbumCoverArt(
     contentDescription: String?,
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit,
+    isImageScaleFit: Boolean = true
 ) {
     var currentPage by remember { mutableIntStateOf(1500) }
     val pagerState = rememberPagerState(
@@ -292,7 +304,7 @@ fun SongAlbumCoverArt(
                 //.weight(1f)
                 .fillMaxWidth(),
             model = artUrl,
-            contentScale = ContentScale.Fit,
+            contentScale = if (isImageScaleFit) ContentScale.Fit else ContentScale.Crop,
             placeholder = painterResource(id = R.drawable.placeholder_album),
             error = painterResource(id = R.drawable.placeholder_album),
             contentDescription = contentDescription,

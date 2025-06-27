@@ -50,6 +50,8 @@ fun String.isIpAddress(): Boolean =
 
 fun String.normalizeForSearch(): String = if (this.isNotBlank())
     Normalizer.normalize(this, Normalizer.Form.NFD)
+        .replace("þ", "p")
+        .replace("æ", "ae")
         .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "") // strip accents
         .replace("[\\p{Punct}]".toRegex(), " ") // replace punctuation like ()[]{}!?. with space
         .replace("\\s+".toRegex(), " ") // collapse multiple spaces

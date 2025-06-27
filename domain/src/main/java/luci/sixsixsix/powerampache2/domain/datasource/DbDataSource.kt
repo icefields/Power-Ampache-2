@@ -10,6 +10,6 @@ interface DbDataSource {
     suspend fun clearSession()
     suspend fun getUsername(): String?
     suspend fun getServerUrl(): String?
-    suspend fun addDownloadedSong(song: Song, filepath: String)
+    suspend fun addDownloadedSong(song: Song, filepath: String, imageFilePath: String)
     suspend fun getSongById(songId: String): Song?
 }
