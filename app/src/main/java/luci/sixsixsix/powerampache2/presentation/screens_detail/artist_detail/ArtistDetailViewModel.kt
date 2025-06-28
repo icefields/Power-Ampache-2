@@ -26,25 +26,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.ArtistsRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandler
+import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandlerImpl
 import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.usecase.albums.AlbumsFromArtistUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.artists.LikeArtistUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.artists.SongsFromArtistUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 import kotlin.math.abs
@@ -52,54 +57,49 @@ import kotlin.math.abs
 @HiltViewModel
 class ArtistDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val repository: AlbumsRepository,
-    private val artistsRepository: ArtistsRepository,
-    private val settingsRepository: SettingsRepository,
+    private val albumsFromArtistUseCase: AlbumsFromArtistUseCase,
+    private val likeArtistUseCase: LikeArtistUseCase,
+    settingsFlow: LocalSettingsFlowUseCase,
+    val offlineModeFlowUseCase: OfflineModeFlowUseCase,
+    songsFromArtistUseCase: SongsFromArtistUseCase,
+    private val artistUseCase: ArtistUseCase,
+    private val toggleGlobalShuffle: ToggleGlobalShuffleUseCase,
     private val playlistManager: MusicPlaylistManager
-) : ViewModel() {
+) : ViewModel(), FetchArtistSongsHandler by FetchArtistSongsHandlerImpl(songsFromArtistUseCase) {
 
     var state by mutableStateOf(ArtistDetailState())
-    private var isOfflineModeState by mutableStateOf(false)
-
-    val globalShuffleStateFlow = settingsRepository.settingsLiveData
-        .distinctUntilChanged()
-        .asFlow()
-        .filterNotNull()
+//    private val isOfflineModeState = offlineModeFlowUseCase()
+//        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+    val globalShuffleStateFlow = settingsFlow()
         .map { it.isGlobalShuffleEnabled }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE)
 
     init {
-        savedStateHandle.get<String>("artistId")?.let {id ->
+        savedStateHandle.get<String>("artistId")?.let { id ->
             getAlbumsFromArtist(id)
 
             savedStateHandle.get<Artist>("artist")?.let { artist ->
+                // if artist provided, first check if there's an entry in the db, if not use the provided
+                // as fallback. This is important, because there is not certainty that the album is
+                // in the internal db
                 state = state.copy(artist = artist)
-            } ?: getArtist(id)
-        }
-
-        viewModelScope.launch {
-            settingsRepository.offlineModeFlow.collectLatest {
-                isOfflineModeState = it
-            }
+                getArtist(id, fetchRemote = false)
+            } ?: getArtist(id, fetchRemote = true)
         }
     }
 
     fun onEvent(event: ArtistDetailEvent) {
         when(event) {
-            is ArtistDetailEvent.Refresh -> {
-                state.artist?.let {
-                    getAlbumsFromArtist(artistId = it.id, fetchRemote = true)
-                }
-            }
-            is ArtistDetailEvent.Fetch -> {
+            is ArtistDetailEvent.Refresh ->
+                getAlbumsFromArtist(artistId = state.artist.id, fetchRemote = true)
+            is ArtistDetailEvent.Fetch ->
                 getAlbumsFromArtist(artistId = event.albumId, fetchRemote = true)
-            }
-
-            ArtistDetailEvent.OnFavouriteArtist -> favouriteArtist()
+            ArtistDetailEvent.OnFavouriteArtist ->
+                favouriteArtist()
             ArtistDetailEvent.OnShufflePlaylistToggle -> viewModelScope.launch {
                 try {
-                    settingsRepository.toggleGlobalShuffle()
+                    toggleGlobalShuffle()
                 } catch (e: Exception) {
                     playlistManager.updateErrorLogMessage(e.stackTraceToString())
                 }
@@ -108,7 +108,7 @@ class ArtistDetailViewModel @Inject constructor(
     }
 
     private fun favouriteArtist(artistId: String = state.artist.id) = viewModelScope.launch {
-        artistsRepository.likeArtist(artistId, (state.artist.flag != 1))
+        likeArtistUseCase(artistId, (state.artist.flag != 1))
             .collect { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -125,8 +125,7 @@ class ArtistDetailViewModel @Inject constructor(
 
     private fun getAlbumsFromArtist(artistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
-            repository
-                .getAlbumsFromArtist(artistId, fetchRemote = fetchRemote)
+            albumsFromArtistUseCase(artistId, fetchRemote = fetchRemote)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
@@ -143,39 +142,23 @@ class ArtistDetailViewModel @Inject constructor(
         }
     }
 
-    fun getSongsFromArtist(
+    fun fetchSongsFromArtist(
         artistId: String = state.artist.id,
         fetchRemote: Boolean = true,
         songsCallback: (List<Song>) -> Unit
-    ) {
-        viewModelScope.launch {
-            artistsRepository
-                .getSongsFromArtist(artistId, fetchRemote = fetchRemote)
-                .collect { result ->
-                    when(result) {
-                        is Resource.Success -> {
-                            //L("viewmodel.getSongsFromArtist size ${isOfflineModeState} ${result.data?.size} network: ${result.networkData?.size}")
-
-                            if (result.networkData != null || isOfflineModeState) {
-                                // only get the data when a network response is returned
-                                // check against network data but use db data.
-                                // OR if in offline mode
-                                result.data?.let { songs ->
-                                    songsCallback(songs)
-                                }
-                            }
-                        }
-                        is Resource.Error -> state = state.copy(isLoading = false)
-                        is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
-                    }
-                }
-        }
+    ) = viewModelScope.launch {
+        getSongsFromArtist(
+            artistId = artistId, fetchRemote = fetchRemote,
+            isOfflineMode = offlineModeFlowUseCase().first(),
+            songsCallback = songsCallback,
+            loadingCallback = { state = state.copy(isLoading = it) },
+            errorCallback = { state.copy(isLoading = false) }
+        )
     }
 
     private fun getArtist(artistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
-            artistsRepository
-                .getArtist(artistId, fetchRemote = fetchRemote)
+            artistUseCase(artistId, fetchRemote = fetchRemote)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {

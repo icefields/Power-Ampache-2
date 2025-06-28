@@ -29,9 +29,9 @@ class ServerInfo (
     var server: String? = null,
     var version: String? = null,
     var compatible: String? = null,
-    var isNextcloud: Boolean = false
+    var isNextcloud: Boolean? = null
 ): Parcelable
 
-fun ServerInfo.nextcloudMusicVersion() = if (isNextcloud)
+fun ServerInfo.nextcloudMusicVersion() = if (isNextcloud == true)
     server?.split(" ")?.last()
 else null

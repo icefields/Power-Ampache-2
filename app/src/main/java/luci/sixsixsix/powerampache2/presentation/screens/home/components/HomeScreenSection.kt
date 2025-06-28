@@ -69,12 +69,19 @@ typealias PlaylistColumn = ArrayList<Playlist>
 fun HomeScreenSection(
     navigator: DestinationsNavigator,
     itemsRow: HomeScreenRowItems,
-    text: String
+    text: String,
+    onArtistPlayPressed: (Artist) -> Unit,
+    currentArtistPlayLoading: Artist? = null
 ) {
     if (itemsRow.isNotEmpty()) {
         Column {
             SectionTitle(text = text)
-            SectionRow(navigator = navigator, albumsRowItems = itemsRow)
+            SectionRow(
+                navigator = navigator,
+                albumsRowItems = itemsRow,
+                onArtistPlayPressed = onArtistPlayPressed,
+                currentArtistPlayLoading = currentArtistPlayLoading
+            )
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.home_row_spacing)))
         }
     } else if ( (itemsRow is HomeScreenRowItems.Nothing) && itemsRow.isLoading) {
@@ -97,66 +104,85 @@ fun SectionTitle(text: String) {
 fun SectionRow(
     navigator: DestinationsNavigator,
     albumsRowItems: HomeScreenRowItems,
+    onArtistPlayPressed: (Artist) -> Unit,
+    currentArtistPlayLoading: Artist? = null,
 ) {
     val itemsRow = albumsRowItems.items
     val itemModifier = getItemModifier(albumsRowItems = albumsRowItems)
     if(itemsRow.isNotEmpty()) {
         when (albumsRowItems) {
             is HomeScreenRowItems.Playlists -> {
-                LazyRow(modifier = Modifier.fillMaxWidth()) {
-                    val elementsPerColumn = 2
-                    val lists = ArrayList<PlaylistColumn>()
-                    var currentColumn = PlaylistColumn()
-                    for (el in itemsRow) {
-                        if (currentColumn.size == elementsPerColumn) {
-                            lists.add(currentColumn)
-                            currentColumn = PlaylistColumn() // reset
-                        }
-                        currentColumn.add(el as Playlist)
-                    }
-                    // add the last one
-                    if (currentColumn.size <= elementsPerColumn) {
-                        lists.add(currentColumn)
-                    }
-
-                    items(lists) { column ->
-                        PlaylistItemSquare(
-                            modifier = itemModifier,
-                            playlistColumn = column
-                        ) {
-                            navigator.navigate(PlaylistDetailScreenDestination(playlist = it))
-                        }
-                    }
+                PlaylistSectionRow(itemsRow, itemModifier) {
+                    navigator.navigate(PlaylistDetailScreenDestination(playlist = it))
                 }
             }
             else -> {
                 LazyRow(modifier = Modifier.fillMaxWidth()) {
                     items(itemsRow) { item: AmpacheModel ->
+                        val imageSize = if (albumsRowItems is HomeScreenRowItems.Recent ||
+                            albumsRowItems is HomeScreenRowItems.Recommended)
+                            dimensionResource(id = R.dimen.home_album_item_image_size_recent)
+                        else dimensionResource(id = R.dimen.home_album_item_image_size_default)
+
                         when(item) {
                             is Album -> AlbumItemSquare(
                                 modifier = itemModifier
                                     .clickable {
                                         navigator.navigate(AlbumDetailScreenDestination(item.id, item))
                                     },
-                                imageSize = if (albumsRowItems is HomeScreenRowItems.Recent)
-                                        dimensionResource(id = R.dimen.home_album_item_image_size_recent)
-                                    else dimensionResource(id = R.dimen.home_album_item_image_size_default),
+                                imageSize = imageSize,
                                 album = item
                             )
-                            is Artist -> ArtistItemSquare(
-                                modifier = Modifier
-                                    .clickable {
-                                        Ampache2NavGraphs.navigateToArtist(item.id, item)
-                                    },
-                                imageSize = if (albumsRowItems is HomeScreenRowItems.Recent)
-                                        dimensionResource(id = R.dimen.home_album_item_image_size_recent)
-                                    else dimensionResource(id = R.dimen.home_album_item_image_size_default),
-                                item = item
-                            )
+                            is Artist -> {
+                                val showPlayButton = albumsRowItems is HomeScreenRowItems.Recommended
+                                ArtistItemSquare(
+                                    modifier = Modifier
+                                        .clickable {
+                                            Ampache2NavGraphs.navigateToArtist(item.id, item)
+                                        },
+                                    imageSize = imageSize,
+                                    item = item,
+                                    showSubLabel = !showPlayButton,
+                                    showPlayButton = showPlayButton,
+                                    currentArtistPlayLoading = currentArtistPlayLoading,
+                                    onPlayPressed = onArtistPlayPressed
+                                )
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun PlaylistSectionRow(
+    itemsRow: List<AmpacheModel>,
+    itemModifier: Modifier,
+    onPlaylistClick: (Playlist) -> Unit
+) {
+    LazyRow(modifier = Modifier.fillMaxWidth()) {
+        val elementsPerColumn = 2
+        val lists = ArrayList<PlaylistColumn>()
+        var currentColumn = PlaylistColumn()
+        for (el in itemsRow) {
+            if (currentColumn.size == elementsPerColumn) {
+                lists.add(currentColumn)
+                currentColumn = PlaylistColumn() // reset
+            }
+            currentColumn.add(el as Playlist)
+        }
+        // add the last one
+        if (currentColumn.size <= elementsPerColumn) {
+            lists.add(currentColumn)
+        }
+
+        items(lists) { column ->
+            PlaylistItemSquare(
+                modifier = itemModifier,
+                playlistColumn = column
+            ) { onPlaylistClick(it) }
         }
     }
 }

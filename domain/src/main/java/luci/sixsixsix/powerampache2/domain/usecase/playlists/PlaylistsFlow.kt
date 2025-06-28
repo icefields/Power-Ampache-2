@@ -19,26 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.data.remote
+package luci.sixsixsix.powerampache2.domain.usecase.playlists
 
-import luci.sixsixsix.powerampache2.domain.datasource.NetworkDataSource
-import java.io.InputStream
-import java.net.HttpURLConnection.HTTP_OK
+import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * TODO: this is the network data source, add all the api calls.
- */
 @Singleton
-class NetworkDataSourceImpl @Inject constructor(private val api: MainNetwork): NetworkDataSource {
-    override suspend fun downloadSong(songId: String, authKey: String): InputStream {
-        val response = api.downloadSong(authKey = authKey, songId = songId)
-        if (response.code() == HTTP_OK) {
-                // save file to disk and register in database
-            return response.body()?.byteStream() ?: throw Exception("byteStream null}")
-        } else {
-            throw Exception("Cannot download received code ${response.code()}")
-        }
-    }
+class PlaylistsFlow @Inject constructor(private val repository: PlaylistsRepository) {
+    operator fun invoke() = repository.playlistsFlow
 }

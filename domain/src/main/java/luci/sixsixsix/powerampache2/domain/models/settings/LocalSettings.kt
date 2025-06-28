@@ -42,7 +42,10 @@ data class LocalSettings(
     val isOfflineModeEnabled: Boolean,
     val playlistSongsSorting: SortMode,
     val isDownloadsSdCard: Boolean,
-    ): Parcelable {
+    val sleepTimerMinutes: Int,
+    val saveSongAfterPlayback: Boolean,
+    val saveFavouriteSongAfterPlayback: Boolean
+): Parcelable {
     companion object {
         // defaults
         private const val SETTINGS_DEFAULTS_USERNAME = "luci.sixsixsix.powerampache2.user.db.pa_default_user"
@@ -55,6 +58,8 @@ data class LocalSettings(
         const val SETTINGS_DEFAULTS_GLOBAL_SHUFFLE = false
         const val SETTINGS_DEFAULTS_OFFLINE_MODE = false
         const val SETTINGS_DEFAULTS_DOWNLOADS_SD_CARD = false
+        const val SETTINGS_DEFAULTS_SAVE_AFTER_PLAY = false
+        const val SETTINGS_DEFAULTS_SAVE_FAVOURITE_AFTER_PLAY = false
         const val SETTINGS_DEFAULTS_SMART_DOWNLOADS = false
         const val SETTINGS_DEFAULTS_STREAMING_QUALITY = BITRATE_VERY_HIGH
         const val SETTINGS_DEFAULTS_PLAYLIST_SORT = SORT_MODE_ASC // ascending is the default. if ascending do not change the list
@@ -73,7 +78,10 @@ data class LocalSettings(
                 isGlobalShuffleEnabled = SETTINGS_DEFAULTS_GLOBAL_SHUFFLE,
                 isOfflineModeEnabled = SETTINGS_DEFAULTS_OFFLINE_MODE,
                 playlistSongsSorting = defaultPlaylistSort,
-                isDownloadsSdCard = SETTINGS_DEFAULTS_DOWNLOADS_SD_CARD
+                isDownloadsSdCard = SETTINGS_DEFAULTS_DOWNLOADS_SD_CARD,
+                sleepTimerMinutes = 0,
+                saveSongAfterPlayback = SETTINGS_DEFAULTS_SAVE_AFTER_PLAY,
+                saveFavouriteSongAfterPlayback = SETTINGS_DEFAULTS_SAVE_FAVOURITE_AFTER_PLAY,
             )
     }
 
@@ -119,6 +127,15 @@ data class LocalSettings(
 
         sbThis.append(this.isDownloadsSdCard)
         sbOthe.append(othe.isDownloadsSdCard)
+
+        sbThis.append(this.sleepTimerMinutes)
+        sbOthe.append(othe.sleepTimerMinutes)
+
+        sbThis.append(this.saveSongAfterPlayback)
+        sbOthe.append(othe.saveSongAfterPlayback)
+
+        sbThis.append(this.saveFavouriteSongAfterPlayback)
+        sbOthe.append(othe.saveFavouriteSongAfterPlayback)
 
         return sbThis.toString() == sbOthe.toString()
     }

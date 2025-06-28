@@ -30,9 +30,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.domain.common.Constants
-import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
@@ -41,7 +40,13 @@ import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
+import luci.sixsixsix.powerampache2.di.LocalDataSource
+import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
+import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
+import luci.sixsixsix.powerampache2.domain.datasource.AlbumsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.AlbumsOfflineDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
@@ -63,6 +68,8 @@ import kotlin.math.max
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class AlbumsRepositoryImpl @Inject constructor(
+    @LocalDataSource private val albumsDbDataSource: AlbumsDbDataSource,
+    @OfflineModeDataSource private val albumsOfflineDataSource: AlbumsOfflineDataSource,
     private val api: MainNetwork,
     private val db: MusicDatabase,
     private val errorHandler: ErrorHandler
@@ -88,7 +95,8 @@ class AlbumsRepositoryImpl @Inject constructor(
             dao.generateOfflineAlbums(getCurrentCredentials().username).forEach { dae ->
                 albumsList.add(
                     if (dbAlbumsHash.containsKey(dae.id)) {
-                        (dbAlbumsHash[dae.id] ?: dae)
+                        // keep the offline art url, even when using album object from non-downloaded album table
+                        (dbAlbumsHash[dae.id]?.copy(artUrl = dae.artUrl) ?: dae)
                     } else { dae }.toAlbum()
                 )
             }
@@ -124,6 +132,8 @@ class AlbumsRepositoryImpl @Inject constructor(
     //            return@flow
     //        }
 
+            val normalizedQuery = query.normalizeForSearch()
+
             val albumsSet = TreeSet<Album> { a1, a2 ->
                 val comparison = if (order == SortOrder.DESC) {
                     when(sort) {
@@ -155,7 +165,7 @@ class AlbumsRepositoryImpl @Inject constructor(
             }
 
             //val localAlbums = mutableListOf<Album>()
-            albumsSet.addAll(dao.searchAlbum(query).map { it.toAlbum() })
+            albumsSet.addAll(dao.searchAlbum(normalizedQuery).map { it.toAlbum() })
 
             if (offset == 0) {
                 //localAlbums.addAll(dao.searchAlbum(query).map { it.toAlbum() })
@@ -439,6 +449,14 @@ class AlbumsRepositoryImpl @Inject constructor(
         }.map { albums ->
             albums.map { it.toAlbum() }
         }
+
+
+    override val recommendedFlow: Flow<List<Album>> = offlineModeFlow.flatMapLatest { isOffline ->
+        if (isOffline)
+            albumsOfflineDataSource.recommendedFlow
+        else
+            albumsDbDataSource.recommendedFlow
+    }
 
 
     private suspend fun isAlbumOffline(album: Album) =

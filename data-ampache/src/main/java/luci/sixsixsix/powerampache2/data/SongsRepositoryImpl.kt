@@ -21,25 +21,22 @@
  */
 package luci.sixsixsix.powerampache2.data
 
-import androidx.lifecycle.map
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
-import luci.sixsixsix.powerampache2.domain.common.Constants
-import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_SEARCH
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.SONGS_DEFAULT_LIMIT_FETCH
-import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.common.hasMore
 import luci.sixsixsix.powerampache2.common.pop
 import luci.sixsixsix.powerampache2.data.common.Constants.CLEAR_TABLE_AFTER_FETCH
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_SEARCH
 import luci.sixsixsix.powerampache2.data.common.Constants.QUICK_PLAY_MIN_SONGS
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.HistoryEntity
@@ -54,15 +51,24 @@ import luci.sixsixsix.powerampache2.data.remote.OfflineData.songsToScrobble
 import luci.sixsixsix.powerampache2.data.remote.ScrobbleData
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
+import luci.sixsixsix.powerampache2.di.LocalDataSource
+import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
+import luci.sixsixsix.powerampache2.di.RemoteDataSource
 import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
+import luci.sixsixsix.powerampache2.domain.common.Constants.MAX_QUEUE_SIZE
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
+import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.SongsDbDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.SongsOfflineDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.SongsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import luci.sixsixsix.powerampache2.domain.utils.WorkerHelper
 import okio.IOException
@@ -84,20 +90,19 @@ class SongsRepositoryImpl @Inject constructor(
     db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager,
-    private val weakContext: WeakContext,
     private val workerHelper: WorkerHelper,
+    private val dbDataSource: DbDataSource,
+    @OfflineModeDataSource private val songsOfflineDataSource: SongsOfflineDataSource,
+    @LocalDataSource private val songsDbDataSource: SongsDbDataSource,
+    @RemoteDataSource private val networkDataSource: SongsRemoteDataSource,
     applicationCoroutineScope: CoroutineScope
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
-    override val offlineSongsLiveData = dao.getDownloadedSongsLiveData().map { entities ->
-        entities.map {
-            it.toSong()
-        }
-    }
+    override val offlineSongsFlow = songsOfflineDataSource.offlineSongsFlow
 
     init {
         applicationCoroutineScope.launch {
-            dao.offlineModeEnabled().distinctUntilChanged().collect {
+            dao.offlineModeEnabledFlow().distinctUntilChanged().collect {
                 if (it != null && it == false) {
                     try {
                         backOnlineActions()
@@ -143,7 +148,7 @@ class SongsRepositoryImpl @Inject constructor(
         // also get songs from network
         val isSearch = query.isNotBlank()
         val songsDb = //if (query.isNullOrBlank())
-            dao.searchSong(query)
+            dao.searchSong(query.normalizeForSearch())
         //else listOf()
         // always check network in case of search, if online
         if (isSearch || songsDb.size < minDbSongs) { // will always be less if it's a search
@@ -479,7 +484,10 @@ class SongsRepositoryImpl @Inject constructor(
                 // do not fail in case of IOException, just return offline songs
             }
         }
-        val shuffledSongList = resultSet.toList().shuffled()
+        val shuffledSongList = resultSet.toList().shuffled().apply {
+            if (size > MAX_QUEUE_SIZE)
+                subList(0, MAX_QUEUE_SIZE)
+        }
         emit(Resource.Success(data = shuffledSongList, networkData = shuffledSongList))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getSongsForQuickPlay()", e, this) }
@@ -559,6 +567,25 @@ class SongsRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    @Throws(Exception::class)
+    override suspend fun downloadSongAndAddToDb(songId: String): Song? =
+        dbDataSource.getSongById(songId)?.let { song ->
+            if (!isSongAvailableOffline(song)) {
+                val inputStream = networkDataSource.downloadSong(authKey = authToken(), songId = songId)
+                val filepath = storageManager.saveSong(song, inputStream)
+                val filepathImage = try {
+                    val inputStreamImage = networkDataSource.downloadArt(song.id, authKey = authToken())
+                    storageManager.saveImage(song, inputStreamImage)
+                } catch (e: Exception) {
+                    // in case of error downloading, fallback to song image url
+                    song.imageUrl
+                }
+                dbDataSource.addDownloadedSong(song, filepath = filepath, imageFilePath = filepathImage)
+            }
+            song
+        }
+
 
     private suspend fun emitDownloadSuccess(fc: ProducerScope<Resource<Any>>){
         fc.send(Resource.Success(data = Any(), networkData = Any()))

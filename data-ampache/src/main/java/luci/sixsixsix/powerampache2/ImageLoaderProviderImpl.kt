@@ -6,6 +6,7 @@ import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
+import coil.util.DebugLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import luci.sixsixsix.powerampache2.data.remote.AmpacheOkHttpClientBuilder
 import luci.sixsixsix.powerampache2.domain.common.Constants.TIMEOUT_CONNECTION_S
@@ -23,6 +24,7 @@ class ImageLoaderProviderImpl constructor(
         .diskCachePolicy(CachePolicy.ENABLED)
         .memoryCachePolicy(CachePolicy.ENABLED)
         .networkCachePolicy(CachePolicy.ENABLED)
+        //.logger(DebugLogger())
         .okHttpClient(
             imageLoaderOkHttpClient(true)
                 //.retryOnConnectionFailure(true)

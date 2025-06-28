@@ -24,8 +24,10 @@ package luci.sixsixsix.powerampache2.common
 import android.content.Context
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.usecase.songs.GetSongsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.SongFromIdUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.SongShareLinkUseCase
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
 import java.lang.StringBuilder
 import java.net.URLEncoder
@@ -34,7 +36,9 @@ import javax.inject.Singleton
 
 @Singleton
 class ShareManagerImpl @Inject constructor(
-    val songsRepository: SongsRepository
+    private val getSongFromIdUseCase: SongFromIdUseCase,
+    private val getSongShareLinkUseCase: SongShareLinkUseCase,
+    private val searchSongsUseCase: GetSongsUseCase
 ): ShareManager {
     override suspend fun shareSongDeepLink(context: Context, song: Song) {
         StringBuilder("https://")
@@ -46,7 +50,7 @@ class ShareManagerImpl @Inject constructor(
             .append("/${URLEncoder.encode(song.album.name,"UTF-8")}")
             .append("/${URLEncoder.encode(song.artist.name,"UTF-8")}")
             .apply {
-                songsRepository.getSongShareLink(song).collect { result ->
+                getSongShareLinkUseCase(song).collect { result ->
                     if (result is Resource.Success) {
                         result.data?.let { webShareLink ->
                             append("/${URLEncoder.encode(webShareLink,"UTF-8")}")
@@ -58,7 +62,7 @@ class ShareManagerImpl @Inject constructor(
     }
 
     override suspend fun shareSongWeb(context: Context, song: Song)  {
-        songsRepository.getSongShareLink(song).collect { result ->
+        getSongShareLinkUseCase(song).collect { result ->
             when (result) {
                 is Resource.Success -> result.data?.let {
                     context.shareLink(it)
@@ -77,11 +81,11 @@ class ShareManagerImpl @Inject constructor(
         songsCallback: (songs: List<Song>) -> Unit,
         errorCallback: () -> Unit
     ) {
-        val song = songsRepository.getSongFromId(id)
+        val song = getSongFromIdUseCase(id)
         L("aaaa parse intent",id, title, artist, song?.id, song?.title, song?.album?.name, song?.artist?.name)
 
         if (song == null || title != song.title || artist != song.artist.name) {
-            songsRepository.getSongs(query = title).collect { result ->
+            searchSongsUseCase(query = title).collect { result ->
                 when (result) {
                     is Resource.Success -> result.networkData?.let {
                         if (it.isNotEmpty()) {

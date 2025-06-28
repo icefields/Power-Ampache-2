@@ -144,7 +144,7 @@ fun ArtistDetailScreen(
     val artUrlTop = generateArtistArtUrl(state.artist, state.albums)
     val artUrlBottom = generateArtistArtUrl(state.artist, state.albums)
 
-    val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
+    //val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
         AsyncImage(
             modifier = Modifier
@@ -152,7 +152,7 @@ fun ArtistDetailScreen(
                 .align(Alignment.TopCenter),
             model = artUrlBottom,
             contentScale = ContentScale.Crop,
-            placeholder = placeholder,
+//            placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name
         )
@@ -162,7 +162,7 @@ fun ArtistDetailScreen(
                 .align(Alignment.TopCenter),
             model = artUrlTop,
             contentScale = ContentScale.FillWidth,
-            placeholder = placeholder,
+//            placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
             contentDescription = state.artist.name,
         )
@@ -209,6 +209,7 @@ fun ArtistDetailScreen(
                         isPlayLoading = mainViewModel.isPlayLoading(),
                         isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading || state.isLoading,
                         isGlobalShuffleOn = isGlobalShuffleOn,
+                        isDownloading = mainViewModel.state.isDownloading,
                         eventListener = { event ->
                             when(event) {
                                 ArtistInfoEvent.SHARE_ARTIST -> { }
@@ -217,7 +218,7 @@ fun ArtistDetailScreen(
                                 ArtistInfoEvent.PLAY_ARTIST -> {
                                     if (state.isLoading) return@ArtistInfoSection
 
-                                    viewModel.getSongsFromArtist { songs ->
+                                    viewModel.fetchSongsFromArtist { songs ->
                                         // fetch songs, then play
                                         if (!isGlobalShuffleOn) {
                                             // add next to the list and skip to the top of the album (which is next)
@@ -227,16 +228,25 @@ fun ArtistDetailScreen(
                                         }
                                     }
                                 }
-                                ArtistInfoEvent.SHUFFLE_PLAY_ARTIST -> viewModel.onEvent(
-                                    ArtistDetailEvent.OnShufflePlaylistToggle)
+                                ArtistInfoEvent.SHUFFLE_PLAY_ARTIST ->
+                                    viewModel.onEvent(ArtistDetailEvent.OnShufflePlaylistToggle)
                                 ArtistInfoEvent.ADD_ARTIST_TO_PLAYLIST -> {
-                                    viewModel.getSongsFromArtist { songs ->
+                                    viewModel.fetchSongsFromArtist { songs ->
                                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(
                                             isOpen = true,
                                             songs = songs
                                         )
                                     }
                                 }
+
+                                ArtistInfoEvent.DOWNLOAD_ARTIST -> {
+                                    viewModel.fetchSongsFromArtist { songs ->
+                                        mainViewModel.onEvent(MainEvent.OnDownloadSongs(songs))
+                                    }
+                                }
+
+                                ArtistInfoEvent.STOP_DOWNLOAD_ARTIST ->
+                                    mainViewModel.onEvent(MainEvent.OnStopDownloadSongs)
                             }
                         }
                     )

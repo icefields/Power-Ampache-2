@@ -25,6 +25,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
+import luci.sixsixsix.powerampache2.domain.models.PlaylistSongItem
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 @Entity
@@ -62,6 +63,22 @@ data class PlaylistSongEntity(
                 add(newEntry(songId = songId,
                     playlistId = playlistId,
                     position = position,
+                    username = username,
+                    serverUrl = serverUrl)
+                )
+            }
+        }
+
+        fun newEntriesFromPlaylistSongItems(
+            songRefs: List<PlaylistSongItem>,
+            playlistId: String,
+            username: String,
+            serverUrl: String
+        ) = mutableListOf<PlaylistSongEntity>().apply {
+            songRefs.forEach {
+                add(newEntry(songId = it.songId,
+                    playlistId = playlistId,
+                    position = it.playlistTrack,
                     username = username,
                     serverUrl = serverUrl)
                 )

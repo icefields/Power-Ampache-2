@@ -21,10 +21,14 @@
  */
 package luci.sixsixsix.powerampache2.data.remote.dto
 
+import com.google.gson.Gson
+import com.google.gson.JsonElement
 import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
 import luci.sixsixsix.powerampache2.domain.common.processArtUrl
 import luci.sixsixsix.powerampache2.domain.common.processFlag
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.PlaylistSongItem
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 
 data class PlaylistDto(
@@ -35,7 +39,7 @@ data class PlaylistDto(
     @SerializedName("owner")
     val owner: String? = null,
     @SerializedName("items")
-    val items: Int? = null,
+    val items: JsonElement? = null,
     @SerializedName("type")
     val type: String? = null,
     @SerializedName("art")
@@ -52,6 +56,18 @@ data class PlaylistDto(
     val hasArt: Any? = null
 ) : AmpacheBaseResponse()
 
+data class PlaylistSongItemDto (
+    @SerializedName("id")
+    val id: String,
+    @SerializedName("playlisttrack")
+    val playlistTrack: Int? = null
+)
+
+fun PlaylistSongItemDto.toPlaylistSongItem() = PlaylistSongItem(
+    songId = id,
+    playlistTrack = playlistTrack ?: 0
+)
+
 data class PlaylistsResponse(
     @SerializedName("total_count") val totalCount: Int? = 0,
     @SerializedName("playlist") val playlist: List<PlaylistDto>?,
@@ -62,13 +78,31 @@ fun PlaylistDto.toPlaylist() = Playlist(
     name = name ?: "ERROR no name",
     owner = owner ?: "ERROR no owner",
     artUrl = processArtUrl(hasArt, art),
-    items = items ?: 0,
+    items = parsePlaylistItemCount(items),
+    songRefs = parsePlaylistItems(items).map { it.toPlaylistSongItem() },
     type = fromStringToPlaylistType(type),
     flag = processFlag(flag),
     preciseRating = preciserating,
     rating = rating,
     averageRating = averagerating
 )
+
+private fun parsePlaylistItemCount(items: JsonElement?): Int = items?.let { item ->
+    if (item.isJsonPrimitive && item.asJsonPrimitive.isNumber) {
+        item.asInt
+    } else parsePlaylistItems(items).size
+} ?: 0
+
+private fun parsePlaylistItems(items: JsonElement?): List<PlaylistSongItemDto> = items?.let { item ->
+    when {
+        item.isJsonArray ->
+            Gson().fromJson(item, object : TypeToken<List<PlaylistSongItemDto>>() { }.type)
+        item.isJsonPrimitive && item.asJsonPrimitive.isNumber ->
+            listOf()
+        else ->
+            listOf()
+    }
+} ?: listOf()
 
 fun fromStringToPlaylistType(type: String?): PlaylistType? = try {
     PlaylistType.valueOf(type ?: "")

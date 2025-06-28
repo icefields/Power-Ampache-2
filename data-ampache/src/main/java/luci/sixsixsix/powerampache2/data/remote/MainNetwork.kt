@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.data.remote
 
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_ARTISTS
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SIMILAR
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE
 import luci.sixsixsix.powerampache2.domain.common.isIpAddress
@@ -143,6 +144,18 @@ interface MainNetwork {
         @Query("include") include: String? = null, // albums, songs (includes track list)
     ): ArtistsResponse
 
+    /**
+     * Return similar artist id's or similar song ids compared to the input filter.
+     */
+    @GET("json.server.php?action=get_similar")
+    suspend fun getSimilarArtists(
+        @Query("auth") authKey: String,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_SIMILAR,
+        @Query("filter") filter: String,
+        @Query("type") _type: Type = Type.artist,
+        @Query("offset") offset: Int = 0
+    ): ArtistsResponse
+
     @GET("json.server.php?action=playlists")
     suspend fun getPlaylists(
         @Query("auth") authKey: String,
@@ -150,6 +163,7 @@ interface MainNetwork {
         @Query("filter") filter: String? = null,
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
+        @Query("include") include: String? = "songs",
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
         @Query("show_dupes") showDupes: Int = 1, // 0, 1 (if true, ignore 'api_hide_dupe_searches' setting)
     ): PlaylistsResponse
@@ -160,6 +174,7 @@ interface MainNetwork {
         @Query("limit") limit: Int = 0,
         @Query("user") user: String? = null,
         @Query("filter") filter: String? = null,
+        @Query("include") include: String? = "songs",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
@@ -172,6 +187,7 @@ interface MainNetwork {
         @Query("limit") limit: Int = 0,
         @Query("user") user: String? = null,
         @Query("filter") filter: String? = null,
+        @Query("include") include: String? = "songs",
         @Query("exact") exact: Int = 0,
         @Query("offset") offset: Int = 0,
         @Query("hide_search") hideSearch: Int = 0, // 0, 1 (if true do not include searches/smartlists in the result)
@@ -417,6 +433,15 @@ interface MainNetwork {
         @Query("id") songId: String,
         @Query("type") type: Type = Type.song, // song, podcast_episode, search, playlist
         @Query("format") format: String = "raw", // mp3, ogg, raw, etc (raw returns the original format)
+    ): Response<ResponseBody>
+
+    @Streaming
+    @GET("json.server.php?action=get_art")
+    suspend fun getArt(
+        @Query("auth") authKey: String,
+        @Query("id") songId: String,
+        @Query("type") type: Type = Type.song, // song, podcast_episode, search, playlist
+        @Query("size") size: String = "666x666", // mp3, ogg, raw, etc (raw returns the original format)
     ): Response<ResponseBody>
 
     /**

@@ -32,6 +32,8 @@ object Constants {
     const val USER_EMAIL_DEFAULT = ""
     const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
 
+    const val MAX_QUEUE_SIZE = 666
+
     // PLAYER BUFFER CONSTANTS
     // default values, in milliseconds
     const val BACK_BUFFER_MS = 30000
@@ -59,6 +61,7 @@ object Constants {
     const val ERROR_STRING = "ERROR"
     const val LOADING_STRING = "LOADING"
     const val USER_ID_ERROR = ERROR_INT
+    const val DEFAULT_NO_IMAGE = ""
 
     const val ALWAYS_FETCH_ALL_PLAYLISTS = true
 

@@ -39,12 +39,13 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AmpachePreferencesRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.models.ampache.AmpachePreference
+import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class AmpacheUserPreferencesViewModel @Inject constructor(
     private val repository: AmpachePreferencesRepository,
-    private val musicRepository: MusicRepository,
+    userFlowUseCase: UserFlowUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
     var state by mutableStateOf(AmpachePreferencesState())
@@ -57,7 +58,7 @@ class AmpacheUserPreferencesViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            musicRepository.userLiveData.filterNotNull().first().let { user ->
+            userFlowUseCase().filterNotNull().first().let { user ->
                 getUserPreferences()
                 getSystemPreferences()
             }
