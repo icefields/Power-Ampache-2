@@ -164,7 +164,6 @@ class PlaylistsRepositoryImpl @Inject constructor(
         val cred = getCurrentCredentials()
         // insert song references in db
         playlistNetwork.forEach { pl ->
-            println("aaaa playlist size ${pl.items} -- songRefs size: ${pl.songRefs.size}")
             if (pl.songRefs.isNotEmpty()) {
                 playlistsDbDataSource.savePlaylistSongRefsToDb(
                     songRefs = pl.songRefs,

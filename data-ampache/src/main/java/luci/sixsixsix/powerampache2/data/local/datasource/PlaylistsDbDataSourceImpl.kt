@@ -65,7 +65,6 @@ class PlaylistsDbDataSourceImpl @Inject constructor(db: MusicDatabase): Playlist
         shouldClearBeforeAdding: Boolean
     ) {
         if (shouldClearBeforeAdding) {
-            println("aaaa lists don't have same elements")
             // avoid clearing if lists are equal, insert will already replace the old versions
             dao.clearPlaylists()
         }

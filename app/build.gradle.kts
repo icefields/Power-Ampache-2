@@ -53,7 +53,7 @@ android {
         targetSdk = 35
         versionCode = 82
         versionName = "1.01-82"
-        val versionQuote = "This version is powered by the sum of the digits of its square. [Clean Architecture refactor version]"
+        val versionQuote = "This version is powered by the sum of 2 primes, lead and atomic stability"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

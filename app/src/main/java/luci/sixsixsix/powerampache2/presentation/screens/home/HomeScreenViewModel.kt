@@ -108,7 +108,6 @@ class HomeScreenViewModel @Inject constructor(
     val artistsRecommendedFlow: StateFlow<List<AmpacheModel>> =
         recommendedArtistsFlow().map { artists ->
             // resize albums to 1/3 of the artist list?
-            L("aaaa recommendedArtistsFlow ${artists.size}")
             val albums: List<Album> = recommendedAlbumsFlow().first() //.subList(0, artists.size/3)
 
             mutableListOf<AmpacheModel>().apply {
