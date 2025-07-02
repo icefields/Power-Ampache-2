@@ -19,12 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.domain.datasource
+package luci.sixsixsix.powerampache2.domain.usecase.settings
 
-import java.io.InputStream
+import luci.sixsixsix.powerampache2.domain.SettingsRepository
+import javax.inject.Inject
 
-interface NetworkDataSource {
-
-    @Throws(Exception::class)
-    suspend fun downloadSong(songId: String, authKey: String): InputStream
+class DeleteAllDownloadedSongsUseCase @Inject constructor(
+    private val settingsRepository: SettingsRepository,
+) {
+    suspend operator fun invoke() = settingsRepository.deleteAllDownloadedSongs()
 }

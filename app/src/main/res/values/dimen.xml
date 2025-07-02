@@ -55,7 +55,8 @@
     <dimen name="playlistItem_icon_size">24dp</dimen>
 
     <dimen name="player_artistName_size">14sp</dimen>
-    <dimen name="player_screen_padding">24dp</dimen>
+    <dimen name="player_screen_padding">16dp</dimen>
+    <dimen name="player_screen_title_padding">24dp</dimen>
     <dimen name="player_songTitle_size">18sp</dimen>
     <dimen name="starRating_button_cornerRadius">66dp</dimen>
     <dimen name="player_buttonTitle_fontSize">11dp</dimen>

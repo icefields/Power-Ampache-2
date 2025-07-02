@@ -25,6 +25,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import luci.sixsixsix.powerampache2.data.local.multiuserDbKey
+import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 
@@ -46,7 +47,9 @@ data class AlbumEntity(
     val rating: Int = 0,
     val averageRating: Float = 0.0f,
     @ColumnInfo(name = "multiUserId", defaultValue = "")
-    val multiUserId: String
+    val multiUserId: String,
+    @ColumnInfo(name = "searchName", defaultValue = "")
+    val searchName: String = ""
 )
 
 fun AlbumEntity.toAlbum() = Album(
@@ -78,5 +81,6 @@ fun Album.toAlbumEntity(username: String, serverUrl: String) = AlbumEntity(
     time = time,
     year = year,
     genre = genre,
-    multiUserId = multiuserDbKey(username = username, serverUrl = serverUrl)
+    multiUserId = multiuserDbKey(username = username, serverUrl = serverUrl),
+    searchName = name.normalizeForSearch()
 )

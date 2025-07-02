@@ -21,6 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.songs
 
+import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.util.UnstableApi
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItemEvent
@@ -49,10 +53,12 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
+@OptIn(UnstableApi::class)
 @Composable
 @Destination(start = false)
 fun SongsListScreen(
@@ -81,6 +87,25 @@ fun SongsListScreen(
         }
     }
 
+    var songToShare: Song? by remember { mutableStateOf(null) }
+    AnimatedVisibility(songToShare != null) {
+        songToShare?.let { songS ->
+            ShareDialog(
+                onShareWeb = {
+                    mainViewModel.onEvent(MainEvent.OnShareSongWebUrl(songS))
+                    songToShare = null
+                },
+                onSharePowerAmpache = {
+                    mainViewModel.onEvent(MainEvent.OnShareSong(songS))
+                    songToShare = null
+                },
+                onDismissRequest = {
+                    songToShare = null
+                }
+            )
+        }
+    }
+
     Box(modifier = modifier) {
         if (state.isLoading && state.songs.isEmpty()) {
             LoadingScreen()
@@ -90,7 +115,7 @@ fun SongsListScreen(
                 state = swipeRefreshState,
                 onRefresh = { viewModel.onEvent(SongsEvent.Refresh) }
             ) {
-                LazyColumn(modifier = Modifier.fillMaxSize(),) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(
                         state.songs.size,
                         //key = { i -> state.songs[i].mediaId }
@@ -103,8 +128,9 @@ fun SongsListScreen(
                                 when(event) {
                                     SongItemEvent.PLAY_NEXT ->
                                         mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                                    SongItemEvent.SHARE_SONG ->
-                                        mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                                    SongItemEvent.SHARE_SONG -> {
+                                        songToShare = song
+                                    }
                                     SongItemEvent.DOWNLOAD_SONG ->
                                         mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                                     SongItemEvent.EXPORT_DOWNLOADED_SONG ->
@@ -125,7 +151,12 @@ fun SongsListScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.getSongList()))
+                                    mainViewModel.onEvent(
+                                        MainEvent.PlaySongAddToQueueTop(
+                                            song,
+                                            state.getSongList()
+                                        )
+                                    )
                                 }
                         )
                         // TODO decide to include or not this

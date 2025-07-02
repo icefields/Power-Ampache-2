@@ -36,11 +36,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
+import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import java.util.UUID
 import javax.inject.Inject
@@ -48,15 +50,17 @@ import javax.inject.Inject
 @HiltViewModel
 class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private val playlistsRepository: PlaylistsRepository,
-    private val musicRepository: MusicRepository,
+    userFlowUseCase: UserFlowUseCase,
+    playlistsFlow: PlaylistsFlow,
+    private val playlistsUseCase: PlaylistsUseCase,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(AddToPlaylistOrQueueDialogState())
     private var isEndOfDataReached: Boolean = false
 
     val playlistsStateFlow: StateFlow<List<Playlist>> =
-        playlistsRepository.playlistsFlow.filterNotNull().distinctUntilChanged()
-            .combine(musicRepository.userLiveData.filterNotNull().distinctUntilChanged()) { playlists, user ->
+        playlistsFlow().filterNotNull().distinctUntilChanged()
+            .combine(userFlowUseCase().filterNotNull().distinctUntilChanged()) { playlists, user ->
                 playlists.filter { it.owner?.lowercase() == user.username.lowercase() }
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
@@ -84,8 +88,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
         offset: Int = 0
     ) {
         viewModelScope.launch {
-            playlistsRepository
-                .getPlaylists(fetchRemote, "", offset)
+            playlistsUseCase(fetchRemote = fetchRemote, query = "", offset = offset)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {

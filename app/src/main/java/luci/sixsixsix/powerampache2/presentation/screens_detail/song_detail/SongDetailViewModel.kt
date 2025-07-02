@@ -26,32 +26,57 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.usecase.ServerInfoStateFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.SongFromIdUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class SongDetailViewModel @Inject constructor(
-    private val musicRepository: MusicRepository,
-    private val songsRepository: SongsRepository
+    private val serverInfoStateFlowUseCase: ServerInfoStateFlowUseCase,
+    private val songFromIdUseCase: SongFromIdUseCase,
+    private val recommendedArtistsUseCase: RecommendedArtistsUseCase
 ) : ViewModel() {
+    private val _recommendedArtistsStateFlow = MutableStateFlow<List<Artist>>(listOf())
+    val recommendedArtistsStateFlow = _recommendedArtistsStateFlow.asStateFlow()
     private val _lyrics = MutableStateFlow("")
     val lyrics = _lyrics.asStateFlow()
     private var songId: String = ""
+
+    fun getRecommendedArtists(song: Song) {
+        viewModelScope.launch {
+            recommendedArtistsUseCase(song.artist.id).collectLatest { result ->
+                when(result) {
+                    is Resource.Error -> {}
+                    is Resource.Loading -> {}
+                    is Resource.Success -> {
+                        result.data?.let { artists ->
+                            _recommendedArtistsStateFlow.value = artists
+                        }
+                    }
+                }
+
+            }
+        }
+    }
 
     fun getSongLyrics(song: Song) {
         // if we already have lyrics, for a song with the same id there is no need to fetch again
         if (lyrics.value.isNotBlank() && song.id == songId) return
         songId = song.id
         viewModelScope.launch {
-            if (song.lyrics.isBlank() && musicRepository.serverInfoStateFlow.first().isNextcloud) {
-                songsRepository.getSongFromId(song.id, true)?.let {
-                    if (it.lyrics != "") {
+            // if the lyrics from the Song object are blank, and we're using a Nextcloud backend, the lyrics need to be fetched
+            if (song.lyrics.isBlank() && serverInfoStateFlowUseCase().first().isNextcloud == true) {
+                songFromIdUseCase(songId)?.let {
+                    //if (it.lyrics != "") {
                         _lyrics.value = it.lyrics.replace("\r\n", "<br>")
-                    }
+                    //}
                 }
             } else {
                 // If lyrics are already attached to the song object, there is no need to fetch.

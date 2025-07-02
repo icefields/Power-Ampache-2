@@ -25,37 +25,37 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Genre
+import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsByGenreUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
-    private val artistsRepository: ArtistsRepository,
+    private val artistsByGenreUseCase: ArtistsByGenreUseCase,
+    private val artistsUseCase: ArtistsUseCase,
     private val albumsRepository: AlbumsRepository,
-    private val playlistsRepository: PlaylistsRepository,
+    private val playlistsUseCase: PlaylistsUseCase,
     private val songsRepository: SongsRepository,
-    private val settingsRepository: SettingsRepository,
+    private val settingsFlow: LocalSettingsFlowUseCase,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(SearchScreenState())
@@ -67,12 +67,7 @@ class SearchViewModel @Inject constructor(
     private var searchArtistsDeferred: Deferred<Job>? = null
     private var fetchByGenreJob: Job? = null
 
-    private val offlineModeFlow = settingsRepository.settingsLiveData
-        .distinctUntilChanged()
-        .asFlow()
-        .filterNotNull()
-        .map { it.isOfflineModeEnabled }
-        //.map { it?.isOfflineModeEnabled == true }
+    private val offlineModeFlow = settingsFlow().map { it.isOfflineModeEnabled }
 
     init {
         fetchGenres()
@@ -145,7 +140,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private suspend fun fetchArtistsByGenre(genre: Genre) =
-        artistsRepository.getArtistsByGenre(genre).collect { result ->
+        artistsByGenreUseCase(genre).collect { result ->
             when (result) {
                 is Resource.Success ->
                     result.data?.let { artists ->
@@ -254,7 +249,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun searchArtists() = viewModelScope.launch {
-        artistsRepository.getArtists(true, state.searchQuery).collect { result ->
+        artistsUseCase(fetchRemote = true, query = state.searchQuery).collect { result ->
             when (result) {
                 is Resource.Success ->
                     result.data?.let { artists ->
@@ -269,7 +264,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun searchPlaylists() = viewModelScope.launch {
-        playlistsRepository.getPlaylists(true, state.searchQuery).collect { result ->
+        playlistsUseCase(fetchRemote = true, query = state.searchQuery).collect { result ->
             when (result) {
                 is Resource.Success ->
                     result.data?.let { playlists ->
@@ -291,7 +286,9 @@ class SearchViewModel @Inject constructor(
     fun onEvent(event: SearchViewEvent) {
         when (event) {
             is SearchViewEvent.OnSearchQueryChange ->
-                if (event.query.isBlank() && state.searchQuery.isBlank()) { } else {
+                if (event.query.isBlank() && state.searchQuery.isBlank()) {
+                    // TODO
+                } else {
                     state = state.copy(searchQuery = event.query)
                     search()
                 }

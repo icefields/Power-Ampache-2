@@ -49,6 +49,7 @@ import luci.sixsixsix.powerampache2.data.remote.OfflineData
 import luci.sixsixsix.powerampache2.data.remote.RateData
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toUser
+import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.errors.NullSessionException
@@ -70,11 +71,10 @@ abstract class BaseAmpacheRepository(
         }
 
     val offlineModeFlow: Flow<Boolean>
-        get() =  dao.offlineModeEnabled()
+        get() =  dao.offlineModeEnabledFlow()
             .distinctUntilChanged()
-            .map {
-                it ?: false
-            }.distinctUntilChanged()
+            .map { it == true }
+            .distinctUntilChanged()
 
     suspend fun isOfflineModeEnabled(): Boolean =
         dao.getSettings()?.toLocalSettings()?.isOfflineModeEnabled == true
@@ -143,9 +143,12 @@ abstract class BaseAmpacheRepository(
         dao.insertSongs(songs.map { it.toSongEntity(username = credentials.username, serverUrl = credentials.serverUrl) })
         songs.forEach { song ->
             dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.let { downloadedSong ->
+                val imageUrl = if (downloadedSong.imageUrl == Constants.DEFAULT_NO_IMAGE)
+                    song.imageUrl else downloadedSong.imageUrl
                 dao.addDownloadedSong(
                     song.toDownloadedSongEntity(
-                        downloadedSong.songUri,
+                        downloadedSongUri = downloadedSong.songUri,
+                        downloadedImageUri = imageUrl,
                         owner = downloadedSong.owner.lowercase(),
                         serverUrl = credentials.serverUrl
                     )

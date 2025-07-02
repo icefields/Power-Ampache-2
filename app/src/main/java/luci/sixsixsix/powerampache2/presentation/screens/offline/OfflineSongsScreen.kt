@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.offline
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -71,6 +72,7 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -208,6 +210,27 @@ fun OfflineSongsMainContent(
         )
     }
 
+    var songToShare: Song? by remember { mutableStateOf(null) }
+
+    AnimatedVisibility(songToShare != null) {
+        songToShare?.let { songS ->
+            ShareDialog(
+                onShareWeb = {
+                    mainViewModel.onEvent(MainEvent.OnShareSongWebUrl(songS))
+                    songToShare = null
+                },
+                onSharePowerAmpache = {
+                    mainViewModel.onEvent(MainEvent.OnShareSong(songS))
+                    songToShare = null
+                },
+                onDismissRequest = {
+                    songToShare = null
+                }
+            )
+        }
+
+    }
+
     Box(modifier = modifier) {
         if (state.isLoading && state.songs.isEmpty()) {
             LoadingScreen()
@@ -225,8 +248,9 @@ fun OfflineSongsMainContent(
                         when(event) {
                             SongItemEvent.PLAY_NEXT ->
                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                            SongItemEvent.SHARE_SONG ->
-                                mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                            SongItemEvent.SHARE_SONG -> {
+                                songToShare = song
+                            }
                             SongItemEvent.DOWNLOAD_SONG -> { } // DO NOTHING
                             SongItemEvent.EXPORT_DOWNLOADED_SONG ->
                                 mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
@@ -246,12 +270,7 @@ fun OfflineSongsMainContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            mainViewModel.onEvent(
-                                MainEvent.PlaySongAddToQueueTop(
-                                    song,
-                                    state.songs
-                                )
-                            )
+                            mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(song, state.songs))
 //                            viewModel.onEvent(OfflineSongsEvent.OnSongSelected(song))
 //                            mainViewModel.onEvent(MainEvent.Play(song))
                         },

@@ -54,10 +54,11 @@ class DbDataSourceImpl @Inject constructor(val db: MusicDatabase): DbDataSource 
     override suspend fun getServerUrl() = db.dao.getCredentials()?.serverUrl
 
     @Throws(NullPointerException::class)
-    override suspend fun addDownloadedSong(song: Song, filepath: String) {
+    override suspend fun addDownloadedSong(song: Song, filepath: String, imageFilePath: String) {
         db.dao.addDownloadedSong(
             song.toDownloadedSongEntity(
-                filepath,
+                downloadedSongUri = filepath,
+                downloadedImageUri = imageFilePath,
                 getUsername() ?: throw NullPointerException("Username is null"),
                 serverUrl = getServerUrl() ?: throw NullPointerException("Server Url is null")
             )

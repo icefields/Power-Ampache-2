@@ -61,11 +61,18 @@ import luci.sixsixsix.powerampache2.common.Constants.SERVICE_STOP_TIMEOUT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.isFavourite
 import luci.sixsixsix.powerampache2.domain.models.toMediaItem
+import luci.sixsixsix.powerampache2.domain.usecase.DownloadSongUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.SessionFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.GetLocalSettingsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.IsOfflineModeEnabledUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleOfflineModeUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.PlayerEvent
@@ -82,9 +89,15 @@ class MainViewModel @Inject constructor(
     application: Application,
     val weakContext: WeakContext,
     val playlistManager: MusicPlaylistManager,
+    val downloadSongUseCase: DownloadSongUseCase,
+    val localSettingsUseCase: GetLocalSettingsUseCase,
+    val isOfflineModeEnabledUseCase: IsOfflineModeEnabledUseCase,
+    val toggleOfflineMode: ToggleOfflineModeUseCase,
+    val offlineModeFlowUseCase: OfflineModeFlowUseCase,
+    val sessionFlowUseCase: SessionFlowUseCase,
+    val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
     val musicRepository: MusicRepository,
     val songsRepository: SongsRepository,
-    val settingsRepository: SettingsRepository,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
     val shareManager: ShareManager,
     savedStateHandle: SavedStateHandle
@@ -111,6 +124,7 @@ class MainViewModel @Inject constructor(
     private var playLoadingJob: Job? = null
     var searchJob: Job? = null
     private var scrobbleJob: Job? = null
+    private var downloadAfterPlaybackJob: Job? = null
     private var deepLinkJob: Job? = null
 
     private var startMusicServiceCalled = false // ensure called only once
@@ -168,7 +182,7 @@ class MainViewModel @Inject constructor(
         weakContext.get()?.applicationContext?.let { handleEvent(event, it) }
 
     fun isOfflineSong(song: Song, callback: (Boolean) -> Unit) = viewModelScope.launch {
-        callback(songsRepository.isSongAvailableOffline(song))
+        callback(isSongAvailableOfflineUseCase(song))
     }
 
     /**
@@ -246,7 +260,7 @@ class MainViewModel @Inject constructor(
             deepLinkJob = viewModelScope.launch {
                 // wait for a session
                 // TODO: is this the best way? (probably not)
-                musicRepository.sessionLiveData.filterNotNull().first()
+                sessionFlowUseCase().filterNotNull().first()
                 when (type) {
                     "song" -> {
 
@@ -325,7 +339,7 @@ class MainViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            if (settingsRepository.isOfflineModeEnabled()) {
+            if (isOfflineModeEnabledUseCase()) {
                 L(" isOfflineModeEnabled")
                 playlistManager.updateUserMessage(weakContext.get()?.resources?.getString(R.string.logout_offline_warning))
             } else {
@@ -427,21 +441,35 @@ class MainViewModel @Inject constructor(
         }
 
     fun scrobble(song: Song) {
-        viewModelScope.launch {
-            // scrobble offline songs
-            songsRepository.scrobble(song).collect { response ->
-                when (response) {
-                    is Resource.Error -> {}
-                    is Resource.Loading -> {}
-                    is Resource.Success -> {}
-                }
-            }
-        }
-
         scrobbleJob?.cancel()
         scrobbleJob = viewModelScope.launch {
             delay(LOCAL_SCROBBLE_TIMEOUT_MS) // add song to history after 30s
             songsRepository.addToHistory(song)
+
+            // send scrobble to backend
+            songsRepository.scrobble(song).collect { response ->
+                when (response) {
+                    is Resource.Error -> { }
+                    is Resource.Loading -> { }
+                    is Resource.Success -> { }
+                }
+            }
+        }
+    }
+
+    fun downloadAfterPlayback(song: Song) {
+        // do not cancel, let the previous finish download // downloadAfterPlaybackJob?.cancel()
+        downloadAfterPlaybackJob = viewModelScope.launch {
+            // start downloading half way
+            delay((song.time.toLong() * 1000L) / 2) // add song to history after 30s
+
+            localSettingsUseCase().let { settings ->
+                if (settings.saveSongAfterPlayback) {
+                    if (!settings.saveFavouriteSongAfterPlayback || song.isFavourite()) {
+                        downloadSongUseCase(song.mediaId)
+                    }
+                }
+            }
         }
     }
 

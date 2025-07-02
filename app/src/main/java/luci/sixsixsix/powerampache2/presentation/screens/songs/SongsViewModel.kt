@@ -14,17 +14,21 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
+import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.GetSongsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
 import javax.inject.Inject
 
 @HiltViewModel
 class SongsViewModel @Inject constructor(
-    private val repository: SongsRepository,
-    settingsRepository: SettingsRepository
+    private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
+    private val getSongsUseCase: GetSongsUseCase,
+    offlineModeFlow: OfflineModeFlowUseCase
 ) : ViewModel() {
     var state by mutableStateOf(SongsState())
 
-    val offlineModeStateFlow = settingsRepository.offlineModeFlow
+    val offlineModeStateFlow = offlineModeFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     init {
@@ -69,8 +73,7 @@ class SongsViewModel @Inject constructor(
         offset: Int = 0
     ) {
         viewModelScope.launch {
-            repository
-                .getSongs(fetchRemote, query, offset)
+            getSongsUseCase(fetchRemote, query, offset)
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
@@ -80,7 +83,7 @@ class SongsViewModel @Inject constructor(
                                     songWrapperList.add(
                                         SongWrapper(
                                         song = song,
-                                        isOffline = repository.isSongAvailableOffline(song)
+                                        isOffline = isSongAvailableOfflineUseCase(song)
                                     )
                                     )
                                 }

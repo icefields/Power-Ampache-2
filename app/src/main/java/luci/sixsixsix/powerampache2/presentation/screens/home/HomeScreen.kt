@@ -49,6 +49,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
+import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.screens.home.components.HomeScreenSection
@@ -56,6 +57,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.home.components.HomeScr
 sealed class HomeScreenRowItems(@StringRes val title: Int, val items: List<AmpacheModel> = listOf()) {
     data class Playlists(val list: List<Playlist>): HomeScreenRowItems(title = R.string.home_section_title_playlists, items = list)
     data class Recent(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_recent, items = list)
+    data class Recommended(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_recommended, items = list)
     data class Favourite(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_flagged, items = list)
     data class Frequent(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_frequent, items = list)
     data class Highest(val list: List<AmpacheModel>): HomeScreenRowItems(title = R.string.home_section_title_highest, items = list)
@@ -74,7 +76,8 @@ sealed class HomeScreenRowItems(@StringRes val title: Int, val items: List<Ampac
 fun HomeScreen(
     navigator: DestinationsNavigator,
     viewModel: HomeScreenViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onArtistPlayPressed: (Artist) -> Unit
 ) {
     val state = viewModel.state
     val playlists by viewModel.playlistsStateFlow.collectAsState()
@@ -84,12 +87,15 @@ fun HomeScreen(
     val offlineModeState by viewModel.offlineModeStateFlow.collectAsState()
     val highestAlbums by viewModel.highestRatedAlbumsStateFlow.collectAsState()
     val randomAlbums by viewModel.randomAlbumsStateFlow.collectAsStateWithLifecycle()
+    val recommendedArtists by viewModel.artistsRecommendedFlow.collectAsStateWithLifecycle()
+
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     var emptyViewVisible by remember { mutableStateOf(false) }
 
     val homeScreenRowItems = listOf(
         HomeScreenRowItems.Recent(recentAlbums),
         HomeScreenRowItems.Playlists(playlists),
+        HomeScreenRowItems.Recommended(recommendedArtists),
         HomeScreenRowItems.Favourite(flaggedAlbums),
         HomeScreenRowItems.Frequent(frequentAlbums),
         HomeScreenRowItems.Highest(highestAlbums),
@@ -126,7 +132,9 @@ fun HomeScreen(
                         HomeScreenSection(
                             navigator = navigator,
                             itemsRow = it,
-                            text = stringResource(it.title)
+                            text = stringResource(it.title),
+                            onArtistPlayPressed = onArtistPlayPressed,
+                            currentArtistPlayLoading = state.currentArtistPlayLoading
                         )
                     }
                 }

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <files-path name="offline_songs" path="."/>
+    <external-files-path name="offline_songs_external" path="."/>
 </paths>

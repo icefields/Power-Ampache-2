@@ -28,10 +28,18 @@ import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface ArtistsRepository {
+    val recommendedFlow: Flow<List<Artist>>
+
     suspend fun getArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<Artist>>
     suspend fun getArtists(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Artist>>>
     suspend fun getArtistsByGenre(genreId: Genre, fetchRemote: Boolean = true, offset: Int = 0): Flow<Resource<List<Artist>>>
     suspend fun likeArtist(id: String, like: Boolean): Flow<Resource<Any>>
     suspend fun getMostPlayedArtists(): List<Artist>
     suspend fun getSongsFromArtist(artistId: String, fetchRemote: Boolean = true): Flow<Resource<List<Song>>>
+    suspend fun getRecommendedArtists(
+        fetchRemote: Boolean = true,
+        shouldGenerateIfEmpty: Boolean = false,
+        baseArtistId: String,
+        offset: Int = 0
+    ): Flow<Resource<List<Artist>>>
 }

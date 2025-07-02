@@ -40,6 +40,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -143,6 +144,8 @@ fun SettingsScreen(
         versionInfo = settingsViewModel.state.appVersionInfoStr,
         powerAmpTheme = localSettingsState.theme,
         streamingQuality = localSettingsState.streamingQuality,
+        isDownloadAfterPlayEnabled = localSettingsState.saveSongAfterPlayback,
+        isDownloadFavouriteAfterPlayEnabled = localSettingsState.saveFavouriteSongAfterPlayback,
         remoteLoggingEnabled = localSettingsState.enableRemoteLogging,
         hideDonationButtons = localSettingsState.hideDonationButton,
         isNormalizeVolumeEnabled = localSettingsState.isNormalizeVolumeEnabled,
@@ -180,6 +183,12 @@ fun SettingsScreen(
         },
         onEqualizerPress = {
             // TODO navigate to equalizer screen
+        },
+        onDownloadAfterPlayChange = {
+            settingsViewModel.onEvent(SettingsEvent.OnDownloadAfterPlayChange(it))
+        },
+        onDownloadFavouriteAfterPlayChange = {
+            settingsViewModel.onEvent(SettingsEvent.OnDownloadFavouriteAfterPlayChange(it))
         },
         onMonoValueChange = {
             settingsViewModel.onEvent(SettingsEvent.OnMonoValueChange(it))
@@ -272,6 +281,8 @@ fun SettingsScreenContent(
     isSmartDownloadsEnabled: Boolean,
     isAutoCheckUpdatesEnabled: Boolean,
     isOfflineModeEnabled: Boolean,
+    isDownloadAfterPlayEnabled: Boolean,
+    isDownloadFavouriteAfterPlayEnabled: Boolean,
     isDownloadSdCard: Boolean,
     powerAmpTheme: PowerAmpTheme,
     streamingQuality: StreamingQuality,
@@ -288,6 +299,8 @@ fun SettingsScreenContent(
     onHideDonateValueChange: (newValue: Boolean) -> Unit,
     onNormalizeValueChange: (newValue: Boolean) -> Unit,
     onMonoValueChange: (newValue: Boolean) -> Unit,
+    onDownloadAfterPlayChange: (newValue: Boolean) -> Unit,
+    onDownloadFavouriteAfterPlayChange: (newValue: Boolean) -> Unit,
     onSmartDownloadValueChange: (newValue: Boolean) -> Unit,
     onAutoCheckUpdatesValueChange: (newValue: Boolean) -> Unit,
     onOfflineModeValueChange: (newValue: Boolean) -> Unit,
@@ -369,8 +382,23 @@ fun SettingsScreenContent(
                     onCheckedChange = onSdCardDownloadValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
+                5 -> PowerAmpSwitch(
+                    enabled = true,
+                    title = R.string.settings_downloadAfterPlay_title,
+                    subtitle = R.string.settings_downloadAfterPlay_subtitle,
+                    checked = isDownloadAfterPlayEnabled,
+                    onCheckedChange = onDownloadAfterPlayChange,
+                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
+                )
+                6 -> PowerAmpSwitch(
+                    enabled = isDownloadAfterPlayEnabled,
+                    title = R.string.settings_downloadAfterPlay_onlyFavourites_title,
+                    checked = isDownloadFavouriteAfterPlayEnabled,
+                    onCheckedChange = onDownloadFavouriteAfterPlayChange,
+                    modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
+                )
                 // DELETE ALL DOWNLOADS
-                5 -> TextWithSubtitle(
+                7 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
@@ -383,7 +411,7 @@ fun SettingsScreenContent(
                         showDeleteDownloadsDialog = true
                     }
                 )
-                6 -> PlayerSettingsView(
+                8 -> PlayerSettingsView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
@@ -408,7 +436,7 @@ fun SettingsScreenContent(
                     isUseOkHttpPlayer = isUseOkHttpPlayer
                 )
                 // NORMALIZE VOLUME SWITCH
-                7 -> PowerAmpSwitch(
+                9 -> PowerAmpSwitch(
                     enabled = IS_NORMALIZE_SWITCH_ENABLED,
                     title = R.string.settings_normalizeVolume_title,
                     subtitle = R.string.settings_normalizeVolume_subtitle,
@@ -417,7 +445,7 @@ fun SettingsScreenContent(
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
                 // MONO SWITCH
-                8 -> PowerAmpSwitch(
+                10 -> PowerAmpSwitch(
                     enabled = IS_MONO_SWITCH_ENABLED,
                     title = R.string.settings_monoAudio_title,
                     subtitle = R.string.settings_monoAudio_subtitle,
@@ -425,7 +453,7 @@ fun SettingsScreenContent(
                     onCheckedChange = onMonoValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
-                9 -> if (IS_AMPACHE_DATA) {
+                11 -> if (IS_AMPACHE_DATA) {
                     AmpacheSettingsListItem(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -433,14 +461,14 @@ fun SettingsScreenContent(
                         onClick = onAmpachePreferencesButtonPress
                     )
                 }
-                10 -> PowerAmpSwitch(
+                12 -> PowerAmpSwitch(
                     title = R.string.settings_enableDebugLogging_title,
                     subtitle = R.string.settings_enableDebugLogging_subtitle,
                     checked = remoteLoggingEnabled,
                     onCheckedChange = onEnableLoggingValueChange,
                     modifier = Modifier.padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem)
                 )
-                11 -> TextWithSubtitle(
+                13 -> TextWithSubtitle(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = paddingVerticalItem, horizontal = paddingHorizontalItem),
@@ -449,8 +477,8 @@ fun SettingsScreenContent(
                     onClick = onDebugLogsButtonPress
                 )
 
-                12 -> donateButton()
-                13 -> if (!BuildConfig.HIDE_DONATION) {
+                14 -> donateButton()
+                15 -> if (!BuildConfig.HIDE_DONATION) {
                     PowerAmpCheckBox(title = R.string.settings_hideDonationButtonsMenu_title,
                         checked = hideDonationButtons,
                         onCheckedChange = onHideDonateValueChange,
@@ -737,12 +765,16 @@ fun PreviewSettingsScreen() {
         backBuffer = 34,
         minBuffer = 22,
         maxBuffer = 55,
+        isDownloadAfterPlayEnabled = true,
+        onDownloadAfterPlayChange = {},
         bufferForPlayback = 129,
         bufferForPlaybackAfterRebuffer = 400,
         onMaxBufferChange = {},
         onResetValuesClick = {},
         onCacheChange = {},
         cache = 100,
+        isDownloadFavouriteAfterPlayEnabled = true,
+        onDownloadFavouriteAfterPlayChange = {},
         onKillAppClick = {}, isUseOkHttpPlayer = true, onUseOkHttpExoPlayer = {}
     )
 }

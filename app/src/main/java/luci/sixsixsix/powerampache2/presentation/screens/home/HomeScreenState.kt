@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.presentation.screens.home
 
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
+import luci.sixsixsix.powerampache2.domain.models.Artist
 
 data class HomeScreenState (
     val newestAlbums: List<AmpacheModel> = emptyList(),
@@ -33,7 +34,8 @@ data class HomeScreenState (
     val isFlaggedAlbumsLoading: Boolean = false,
     val isRandomAlbumsLoading: Boolean = false,
     val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false
+    val isRefreshing: Boolean = false,
+    val currentArtistPlayLoading: Artist? = null
 )
 
 //val playlists: List<Playlist> = emptyList(),

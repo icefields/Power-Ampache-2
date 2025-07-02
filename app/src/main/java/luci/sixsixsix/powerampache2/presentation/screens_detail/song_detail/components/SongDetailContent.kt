@@ -21,14 +21,17 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -63,12 +66,14 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
+import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.InfoDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -111,25 +116,50 @@ fun SongDetailContent(
 
     var isOffline by remember { mutableStateOf(false) }
 
+    var songToShare: Song? by remember { mutableStateOf(null) }
+    AnimatedVisibility(songToShare != null) {
+        songToShare?.let { songS ->
+            ShareDialog(
+                onShareWeb = {
+                    mainViewModel.onEvent(MainEvent.OnShareSongWebUrl(songS))
+                    songToShare = null
+                },
+                onSharePowerAmpache = {
+                    mainViewModel.onEvent(MainEvent.OnShareSong(songS))
+                    songToShare = null
+                },
+                onDismissRequest = {
+                    songToShare = null
+                }
+            )
+        }
+    }
+
+    var isImageScaleFit by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = dimensionResource(id = R.dimen.player_screen_padding))
+            //.padding(horizontal = dimensionResource(id = R.dimen.player_screen_padding))
     ) {
         SongAlbumCoverArt(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
+                .fillMaxWidth().clickable {
+                    isImageScaleFit = !isImageScaleFit
+                },
             artUrl = currentSongState?.imageUrl,
             contentDescription = currentSongState?.title,
+            isImageScaleFit = isImageScaleFit,
             onSwipeLeft = { mainViewModel.onEvent(MainEvent.SkipNext) },
             onSwipeRight = { mainViewModel.onEvent(MainEvent.SkipPrevious) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Box {
+        // Title and artist, like button
+        Box(Modifier.padding(horizontal = dimensionResource(id = R.dimen.player_screen_title_padding))) {
             Column {
                 val artistName = if (currentSongState?.artists?.isNotEmpty() == true) {
                     currentSongState?.artists?.joinToString { it.name } ?: currentSongState?.artist?.name
@@ -178,13 +208,16 @@ fun SongDetailContent(
                 isOffline = it
             }
             SongDetailButtonRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = dimensionResource(id = R.dimen.player_screen_padding)),
                 isOffline = isOffline,
                 tint = buttonsTint
             ) { event ->
                 when(event) {
-                    SongDetailButtonEvents.SHARE_SONG ->
-                        mainViewModel.onEvent(MainEvent.OnShareSong(song))
+                    SongDetailButtonEvents.SHARE_SONG -> {
+                        songToShare = song
+                    }
                     SongDetailButtonEvents.DOWNLOAD_SONG ->
                         mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                     SongDetailButtonEvents.ADD_SONG_TO_PLAYLIST_OR_QUEUE ->
@@ -228,6 +261,7 @@ fun SongDetailContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
+                .padding(horizontal = dimensionResource(id = R.dimen.player_screen_title_padding))
         ) { event ->
             mainViewModel.onEvent(event)
         }
@@ -243,6 +277,7 @@ fun SongAlbumCoverArt(
     contentDescription: String?,
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit,
+    isImageScaleFit: Boolean = true
 ) {
     var currentPage by remember { mutableIntStateOf(1500) }
     val pagerState = rememberPagerState(
@@ -269,7 +304,7 @@ fun SongAlbumCoverArt(
                 //.weight(1f)
                 .fillMaxWidth(),
             model = artUrl,
-            contentScale = ContentScale.Fit,
+            contentScale = if (isImageScaleFit) ContentScale.Fit else ContentScale.Crop,
             placeholder = painterResource(id = R.drawable.placeholder_album),
             error = painterResource(id = R.drawable.placeholder_album),
             contentDescription = contentDescription,
