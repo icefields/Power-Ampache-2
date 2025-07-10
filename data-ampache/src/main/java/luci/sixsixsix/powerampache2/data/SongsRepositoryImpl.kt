@@ -69,6 +69,7 @@ import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.plugin.LyricsPluginDataSource
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import luci.sixsixsix.powerampache2.domain.utils.WorkerHelper
 import okio.IOException
@@ -95,7 +96,8 @@ class SongsRepositoryImpl @Inject constructor(
     @OfflineModeDataSource private val songsOfflineDataSource: SongsOfflineDataSource,
     @LocalDataSource private val songsDbDataSource: SongsDbDataSource,
     @RemoteDataSource private val networkDataSource: SongsRemoteDataSource,
-    applicationCoroutineScope: CoroutineScope
+    applicationCoroutineScope: CoroutineScope,
+    private val lyricsPluginDataSource: LyricsPluginDataSource
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
     override val offlineSongsFlow = songsOfflineDataSource.offlineSongsFlow
@@ -681,4 +683,13 @@ class SongsRepositoryImpl @Inject constructor(
 //            error?.let { throw (ScrobbleException(it.toError())) }
 //            (success != null)
 //        }
+
+    override fun isLyricsPluginInstalled() =
+        lyricsPluginDataSource.isLyricsPluginInstalled()
+
+    override suspend fun lyricsUrlFromGenius(
+        songTitle: String,
+        albumTitle: String,
+        artistName: String
+    ): String = lyricsPluginDataSource.getLyricsUrl(songTitle, albumTitle, artistName)
 }

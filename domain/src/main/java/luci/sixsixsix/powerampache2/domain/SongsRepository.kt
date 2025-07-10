@@ -52,4 +52,8 @@ interface SongsRepository {
     suspend fun scrobble(song: Song): Flow<Resource<Any>>
     suspend fun addToHistory(song: Song): Boolean
     suspend fun getSongsByGenre(genreId: Genre, fetchRemote: Boolean = true, offset: Int = 0): Flow<Resource<List<Song>>>
+
+    // TODO: create separate repo for plugin?
+    fun isLyricsPluginInstalled(): Boolean
+    suspend fun lyricsUrlFromGenius(songTitle: String, albumTitle: String, artistName: String): String
 }

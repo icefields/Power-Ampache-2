@@ -21,6 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -63,12 +65,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
+import java.net.MalformedURLException
+import java.net.URL
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -198,15 +203,21 @@ fun TabbedSongDetailView(
         ) { index ->
             when(index) {
                 1 -> {
-                    val spannedText = HtmlCompat.fromHtml(lyrics, 0)
-                    Text(
-                        fontSize = 20.sp,
-                        text = spannedText.toString(),
-                        modifier = Modifier
+                    if (isValidUrl(lyrics)) {
+                        WebPageView(lyrics, modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                            .verticalScroll(rememberScrollState())
-                    )
+                            .verticalScroll(rememberScrollState()))
+                    } else {
+                        val spannedText = HtmlCompat.fromHtml(lyrics, 0)
+                        Text(
+                            fontSize = 20.sp,
+                            text = spannedText.toString(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp, vertical = 6.dp)
+                                .verticalScroll(rememberScrollState())
+                        )
+                    }
                 }
                 else -> {
                     SongDetailQueueScreenContent(
@@ -217,6 +228,26 @@ fun TabbedSongDetailView(
             }
         }
     }
+}
+
+private fun isValidUrl(url: String): Boolean = try {
+    URL(url)
+    true
+} catch (e: MalformedURLException) { false }
+
+
+@Composable
+fun WebPageView(url: String, modifier: Modifier = Modifier) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            WebView(context).apply {
+                webViewClient = WebViewClient()
+                settings.javaScriptEnabled = false
+                loadUrl(url)
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

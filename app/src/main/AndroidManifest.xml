@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <uses-permission android:name="luci.sixsixsix.powerampache2.permission.BIND_LYRICS_PLUGIN" />
 
     <application
         android:name=".PowerAmpache2Application"
