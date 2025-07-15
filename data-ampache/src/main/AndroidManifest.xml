@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="luci.sixsixsix.powerampache2.permission.BIND_LYRICS_PLUGIN" />
+    <uses-permission android:name="luci.sixsixsix.powerampache2.permission.BIND_INFO_PLUGIN" />
 </manifest>

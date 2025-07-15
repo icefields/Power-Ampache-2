@@ -43,10 +43,13 @@ import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandlerImpl
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.plugin.lyrics.getAvailableLyrics
 import luci.sixsixsix.powerampache2.domain.usecase.albums.AlbumsFromArtistUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.LikeArtistUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.SongsFromArtistUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.ArtistDataFromPluginUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsInfoPluginInstalled
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
@@ -64,6 +67,8 @@ class ArtistDetailViewModel @Inject constructor(
     songsFromArtistUseCase: SongsFromArtistUseCase,
     private val artistUseCase: ArtistUseCase,
     private val toggleGlobalShuffle: ToggleGlobalShuffleUseCase,
+    private val isInfoPluginInstalled: IsInfoPluginInstalled,
+    private val artistDataFromPluginUseCase: ArtistDataFromPluginUseCase,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel(), FetchArtistSongsHandler by FetchArtistSongsHandlerImpl(songsFromArtistUseCase) {
 
@@ -84,6 +89,11 @@ class ArtistDetailViewModel @Inject constructor(
                 // as fallback. This is important, because there is not certainty that the album is
                 // in the internal db
                 state = state.copy(artist = artist)
+
+//                viewModelScope.launch {
+//                    getArtistInfoFromPlugin(artist)
+//                }
+
                 getArtist(id, fetchRemote = false)
             } ?: getArtist(id, fetchRemote = true)
         }
@@ -165,12 +175,23 @@ class ArtistDetailViewModel @Inject constructor(
                             result.data?.let { artist ->
                                 state = state.copy(artist = artist)
                                 L("viewmodel.getArtist size ${result.data} network: ${result.networkData}")
+                                getArtistInfoFromPlugin(artist)
                             }
                         }
                         is Resource.Error -> state = state.copy(isLoading = false)
                         is Resource.Loading -> state = state.copy(isLoading = result.isLoading)
                     }
                 }
+        }
+    }
+
+    private suspend fun getArtistInfoFromPlugin(artist: Artist) {
+        // only fetch if no lyrics already present
+        if (isInfoPluginInstalled() && (state.infoPluginArtist == null || state.infoPluginArtist?.id != artist.id)) {
+            artistDataFromPluginUseCase(artist = artist)?.let { pluginData ->
+                println("aaaa getArtistInfoFromPlugin ${pluginData.description}")
+                state = state.copy(infoPluginArtist = pluginData)
+            }
         }
     }
 }

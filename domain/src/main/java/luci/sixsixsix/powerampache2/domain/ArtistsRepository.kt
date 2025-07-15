@@ -26,6 +26,8 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginArtistData
 
 interface ArtistsRepository {
     val recommendedFlow: Flow<List<Artist>>
@@ -42,4 +44,8 @@ interface ArtistsRepository {
         baseArtistId: String,
         offset: Int = 0
     ): Flow<Resource<List<Artist>>>
+
+    // PLUGIN
+    suspend fun getPluginArtistData(artistId: String, artistMbId: String, artistName: String): PluginArtistData?
 }
+

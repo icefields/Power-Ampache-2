@@ -6,8 +6,10 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.*
+import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
+import luci.sixsixsix.powerampache2.domain.plugin.lyrics.PluginSongLyrics
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,10 +18,13 @@ import kotlin.coroutines.resume
 const val PLUGIN_LYRICS_ID = "luci.sixsixsix.powerampache2.lyricsplugin"
 const val PLUGIN_LYRICS_SERVICE_ID = "luci.sixsixsix.powerampache2.lyricsplugin.LyricsFetcherService"
 
+
+
 @Singleton
 class LyricsPluginClient @Inject constructor(
     @ApplicationContext private val context: Context
 ): ServiceConnection {
+    private val gson = Gson()
     private var serviceMessenger: Messenger? = null
     private var isBound = false
 
@@ -54,7 +59,7 @@ class LyricsPluginClient @Inject constructor(
         songTitle: String,
         albumTitle: String,
         artistName: String
-    ): String = suspendCancellableCoroutine { continuation ->
+    ): PluginSongLyrics? = suspendCancellableCoroutine { continuation ->
         if (!isBound) {
             bindIfInstalled()
             // if service not bound this will create the bind. The first lyric will be skipped
@@ -62,14 +67,17 @@ class LyricsPluginClient @Inject constructor(
         }
 
         if (serviceMessenger == null) {
-            continuation.resume("")
+            // this usually means that the service is not initialed
+            continuation.resume(null)
             return@suspendCancellableCoroutine
         }
 
         val incomingHandler = Handler(Looper.getMainLooper()) { msg ->
-            val json = msg.data.getString("json") ?: return@Handler true
-            val response = JSONObject(json)
-            val lyrics = response.optString("lyricsUrl", "")
+            val json = msg.data.getString(KEY_REQUEST_JSON) ?: return@Handler true
+            // val response = JSONObject(json)
+            //response.optString("lyricsUrl", "")
+            println("aaaa "+json)
+            val lyrics = gson.fromJson<PluginSongLyrics>(json, PluginSongLyrics::class.java)
             continuation.resume(lyrics)
             true
         }
@@ -77,15 +85,15 @@ class LyricsPluginClient @Inject constructor(
         val replyMessenger = Messenger(incomingHandler)
 
         val requestJson = JSONObject().apply {
-            put("songTitle", songTitle)
-            put("albumTitle", albumTitle)
-            put("artistName", artistName)
+            put(KEY_REQUEST_SONG_TITLE, songTitle)
+            put(KEY_REQUEST_ALBUM_TITLE, albumTitle)
+            put(KEY_REQUEST_ARTIST_NAME, artistName)
         }
 
         val msg = Message.obtain().apply {
             replyTo = replyMessenger
             data = Bundle().apply {
-                putString("json", requestJson.toString())
+                putString(KEY_REQUEST_JSON, requestJson.toString())
             }
         }
 

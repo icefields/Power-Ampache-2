@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.animation.AnimatedVisibility
@@ -56,7 +57,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
@@ -238,13 +241,21 @@ private fun isValidUrl(url: String): Boolean = try {
 
 @Composable
 fun WebPageView(url: String, modifier: Modifier = Modifier) {
+    val currentUrl by rememberUpdatedState(newValue = url)
     AndroidView(
         modifier = modifier,
         factory = { context ->
             WebView(context).apply {
                 webViewClient = WebViewClient()
                 settings.javaScriptEnabled = false
+                settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK // Uses cache if available, else network
+                settings.domStorageEnabled = true // Enables DOM storage API (optional but recommended)
                 loadUrl(url)
+            }
+        },
+        update = {
+            if (currentUrl.isNotBlank() && it.url?.toString() != currentUrl) {
+                it.loadUrl(currentUrl)
             }
         }
     )

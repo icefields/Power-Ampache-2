@@ -46,16 +46,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.HtmlCompat
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Artist
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginArtistData
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AttributeText
+import org.acra.log.info
 
 @Composable
 fun ArtistInfoSection(
     modifier: Modifier,
     artist: Artist,
+    infoPluginArtist: PluginArtistData?,
     summaryOpen: MutableState<Boolean>,
     isLikeLoading: Boolean,
     isBuffering: Boolean,
@@ -104,8 +108,21 @@ fun ArtistInfoSection(
         }
 
         Spacer(modifier = Modifier.height(12.dp))
-        if (!artist.summary.isNullOrBlank()) {
-            val artistSummary = artist.summary ?: ""
+        val isSummaryAvailable = !artist.summary.isNullOrBlank()
+        val isInfoPluginAvailable = infoPluginArtist != null && infoPluginArtist.description.isNotBlank()
+        if (isSummaryAvailable || isInfoPluginAvailable) {
+            val artistSummary = if (isSummaryAvailable)
+                artist.summary
+            else
+                //HtmlCompat.fromHtml(
+                    infoPluginArtist?.description
+                        //?: "", 0).toString()
+                    ?.replace("youtube | facebook | bandcamp", "")
+                    ?.replace("youtube", "")
+                    ?.replace("facebook", "")
+                    ?.replace("bandcamp", "")
+                    ?.replace("| |", "")
+
             Text( // name
                 modifier = Modifier
                     .fillMaxWidth()
@@ -113,10 +130,10 @@ fun ArtistInfoSection(
                     .clickable {
                         summaryOpen.value = !summaryOpen.value
                     },
-                text = artistSummary,
+                text = artistSummary ?: "",
                 fontWeight = FontWeight.Normal,
                 fontSize = 15.sp,
-                maxLines = if (summaryOpen.value) { 150 } else { 5 },
+                maxLines = if (summaryOpen.value) { 300 } else { 5 },
                 lineHeight = 17.sp
             )
         }
@@ -147,6 +164,7 @@ fun ArtistInfoSectionPreview() {
         isPlaylistEditLoading = false,
         isGlobalShuffleOn = true,
         isDownloading = true,
+        infoPluginArtist = null,
         summaryOpen = remember { mutableStateOf(true) }
     )
 }

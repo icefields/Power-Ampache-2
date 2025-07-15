@@ -21,9 +21,12 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,22 +34,31 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.domain.common.toDebugString
+import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.plugin.lyrics.getAvailableLyrics
 import luci.sixsixsix.powerampache2.domain.usecase.ServerInfoStateFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.AlbumDataFromPluginUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsInfoPluginInstalled
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsLyricsPluginInstalledUseCase
-import luci.sixsixsix.powerampache2.domain.usecase.plugin.LyricsUrlFromGeniusUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.LyricsFromPluginUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.SongDataFromPluginUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.SongFromIdUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class SongDetailViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val serverInfoStateFlowUseCase: ServerInfoStateFlowUseCase,
     private val songFromIdUseCase: SongFromIdUseCase,
     private val recommendedArtistsUseCase: RecommendedArtistsUseCase,
     private val isLyricsPluginInstalledUseCase: IsLyricsPluginInstalledUseCase,
-    private val getLyricsUrlFromPluginUseCase: LyricsUrlFromGeniusUseCase
+    private val getLyricsUrlFromPluginUseCase: LyricsFromPluginUseCase,
+    private val isInfoPluginInstalled: IsInfoPluginInstalled,
+    private val getSongInfoPluginUseCase: SongDataFromPluginUseCase,
 ) : ViewModel() {
     private val _recommendedArtistsStateFlow = MutableStateFlow<List<Artist>>(listOf())
     val recommendedArtistsStateFlow = _recommendedArtistsStateFlow.asStateFlow()
@@ -56,6 +68,7 @@ class SongDetailViewModel @Inject constructor(
     val pluginLyrics = _pluginLyrics.asStateFlow()
     private var songId: String = ""
     private var lyricsJob: Job? = null
+    private var songInfoJob: Job? = null
 
     private suspend fun getRecommendedArtists(song: Song) {
             recommendedArtistsUseCase(song.artist.id).collectLatest { result ->
@@ -72,13 +85,16 @@ class SongDetailViewModel @Inject constructor(
             }
     }
 
-
-
     fun onNewSong(song: Song) {
         lyricsJob?.cancel()
         lyricsJob = viewModelScope.launch {
             getSongLyrics(song)
             getSongLyricsFromPlugin(song)
+        }
+
+        songInfoJob?.cancel()
+        songInfoJob = viewModelScope.launch {
+            getSongInfoFromPlugin(song)
         }
 
         viewModelScope.launch {
@@ -88,11 +104,13 @@ class SongDetailViewModel @Inject constructor(
 
     private suspend fun getSongLyricsFromPlugin(song: Song) {
         _pluginLyrics.value = ""
-        println("aaaa ${song.title}")
-
-        // only fetch if not lyrics already present
+        // only fetch if no lyrics already present
         if (lyrics.value.isBlank() && isLyricsPluginInstalledUseCase()) {
-            _pluginLyrics.value = getLyricsUrlFromPluginUseCase(song.title, song.album.name, song.artist.name)
+            _pluginLyrics.value = getLyricsUrlFromPluginUseCase(
+                songTitle = song.title,
+                albumTitle = song.album.name,
+                artistName = song.artist.name
+            ).getAvailableLyrics()
         }
     }
 
@@ -109,6 +127,14 @@ class SongDetailViewModel @Inject constructor(
         } else {
             // If lyrics are already attached to the song object, there is no need to fetch.
             _lyrics.value = song.lyrics
+        }
+    }
+
+    private suspend fun getSongInfoFromPlugin(song: Song) {
+        // only fetch if no lyrics already present
+        if (isInfoPluginInstalled()) {
+            val songPlugin = getSongInfoPluginUseCase(song)
+            Toast.makeText(context, songPlugin.toDebugString(), Toast.LENGTH_LONG).show()
         }
     }
 }

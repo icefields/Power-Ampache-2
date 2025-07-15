@@ -54,6 +54,8 @@ import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
+import luci.sixsixsix.powerampache2.domain.plugin.info.InfoPluginDataSource
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
 import java.util.TreeSet
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -70,6 +72,7 @@ import kotlin.math.max
 class AlbumsRepositoryImpl @Inject constructor(
     @LocalDataSource private val albumsDbDataSource: AlbumsDbDataSource,
     @OfflineModeDataSource private val albumsOfflineDataSource: AlbumsOfflineDataSource,
+    private val pluginDataSource: InfoPluginDataSource,
     private val api: MainNetwork,
     private val db: MusicDatabase,
     private val errorHandler: ErrorHandler
@@ -575,4 +578,13 @@ class AlbumsRepositoryImpl @Inject constructor(
 
     override suspend fun likeAlbum(id: String, like: Boolean) =
         like(id, like, MainNetwork.Type.album)
+
+    override suspend fun getPluginAlbumData(
+        albumId: String,
+        albumMbId: String,
+        albumTitle: String,
+        artistName: String
+    ): PluginAlbumData? =
+        pluginDataSource.getAlbumInfo(albumId = albumId,
+            musicBrainzId = albumMbId, albumTitle = albumTitle, artistName = artistName)
 }

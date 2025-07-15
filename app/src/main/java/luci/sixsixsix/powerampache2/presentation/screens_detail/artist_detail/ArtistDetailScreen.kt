@@ -204,6 +204,7 @@ fun ArtistDetailScreen(
                             .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         artist = state.artist,
                         summaryOpen = summaryOpen,
+                        infoPluginArtist = state.infoPluginArtist,
                         isLikeLoading = state.isLikeLoading,
                         isBuffering = mainViewModel.isBuffering,
                         isPlayLoading = mainViewModel.isPlayLoading(),

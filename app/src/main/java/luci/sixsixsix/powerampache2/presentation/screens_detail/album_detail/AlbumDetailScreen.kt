@@ -56,7 +56,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -67,6 +66,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
@@ -77,6 +77,8 @@ import luci.sixsixsix.powerampache2.presentation.common.songitem.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.InfoDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.InfoDialogAlbum
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
@@ -99,6 +101,7 @@ fun AlbumDetailScreen(
 ) {
     val state = viewModel.state
     val album by viewModel.albumStateFlow.collectAsState()
+    val pluginAlbum by viewModel.infoPluginArtistStateFlow.collectAsStateWithLifecycle()
     val isGlobalShuffleOn by viewModel.globalShuffleStateFlow.collectAsState()
     val songs = viewModel.state.getSongList()
     val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
@@ -106,7 +109,7 @@ fun AlbumDetailScreen(
 
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    var infoVisibility by remember { mutableStateOf(true) }
+    var infoVisibility by remember { mutableStateOf(false) }
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
     var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
     val configuration = LocalConfiguration.current
@@ -165,6 +168,10 @@ fun AlbumDetailScreen(
         }
     }
 
+    if (infoVisibility) {
+        InfoDialogAlbum(album, pluginAlbum) { infoVisibility = false }
+    }
+
     val artUrl = if (isOffline != null && isOffline == true && songs.isNotEmpty()) {
         songs[0].imageUrl
     } else if(album.artUrl.isNotBlank()) {
@@ -215,6 +222,7 @@ fun AlbumDetailScreen(
                 AlbumDetailTopBar(
                     navigator = navigator,
                     album = album,
+                    showInfoIcon = pluginAlbum != null,
                     isLoading = mainViewModel.isLoading,
                     isEditingPlaylist = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
                     scrollBehavior = scrollBehavior,
@@ -236,7 +244,7 @@ fun AlbumDetailScreen(
                     AlbumInfoSection(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = if (infoVisibility) { 470.dp /*any big number*/ } else { 0.dp })
+                            //.heightIn(max = if (infoVisibility) { 470.dp /*any big number*/ } else { 0.dp })
                             .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         album = album,
                         isPlayLoading = mainViewModel.isPlayLoading(),

@@ -21,9 +21,9 @@
  */
 package luci.sixsixsix.powerampache2.data
 
-import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import luci.sixsixsix.powerampache2.data.local.delegates.SharedPreferenceDelegateImpl
 
 import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.common.Constants
@@ -33,11 +33,11 @@ import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_FOR_PLAYBACK_
 import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_MAX_MS
 import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_MIN_MS
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLAYER_CACHE_SIZE_MB
+import luci.sixsixsix.powerampache2.domain.delegates.SharedPreferenceDelegate
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val KEY_SETTINGS_PREFERENCE = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE"
 private const val KEY_BACK_BUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.backBuffer"
 private const val KEY_MIN_BUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.minBufferMs"
 private const val KEY_MAX_BUFFER = "luci.sixsixsix.powerampache2.data.KEY_SETTINGS_PREFERENCE.maxBufferMs"
@@ -51,42 +51,11 @@ private const val KEY_INTRO_DIALOG_CONTENT = "luci.sixsixsix.powerampache2.data.
 @Singleton
 class SharedPreferencesManagerImpl @Inject constructor(
     private val weakContext: WeakContext,
-): SharedPreferencesManager {
+): SharedPreferencesManager, SharedPreferenceDelegate by SharedPreferenceDelegateImpl(weakContext)  {
 
     // every time isAllowAllCertificates changes, this flow is triggered
     private val _isAllowAllCertificatesFlow = MutableStateFlow(isAllowAllCertificates)
     override val isAllowAllCertificatesFlow: StateFlow<Boolean> = _isAllowAllCertificatesFlow
-
-    private fun getSharedPreferences() =
-        weakContext.get()?.getSharedPreferences(KEY_SETTINGS_PREFERENCE, Context.MODE_PRIVATE)
-
-    private fun getInt(key: String, defaultValue: Int) = getSharedPreferences()?.let { sp ->
-        sp.getInt(key, defaultValue)
-    } ?: defaultValue
-
-    private fun setInt(key: String, value: Int) = getSharedPreferences()?.edit()?.run {
-        putInt(key, value)
-        apply()
-    } ?: Unit
-
-    private fun getString(key: String, defaultValue: String) = getSharedPreferences()?.let { sp ->
-        sp.getString(key, defaultValue)
-    } ?: defaultValue
-
-    private fun setString(key: String, value: String) = getSharedPreferences()?.edit()?.run {
-        putString(key, value)
-        apply()
-    } ?: Unit
-
-    private fun getBool(key: String, defaultValue: Boolean) = getSharedPreferences()?.let { sp ->
-        sp.getBoolean(key, defaultValue)
-    } ?: defaultValue
-
-    private fun setBool(key: String, value: Boolean) = getSharedPreferences()?.edit()?.run {
-        putBoolean(key, value)
-        apply()
-    } ?: Unit
-
 
     override var backBuffer: Int
         get() = getInt(KEY_BACK_BUFFER, BACK_BUFFER_MS)
