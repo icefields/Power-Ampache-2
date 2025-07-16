@@ -1,15 +1,11 @@
-package luci.sixsixsix.powerampache2.presentation.dialogs
+package luci.sixsixsix.powerampache2.presentation.dialogs.info
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -17,34 +13,22 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.capitalizeWords
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDialogText
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDialogTextHorizontal
 
-/*
-    val language: String,
-    val url: String,
-    val imageArtist: String,
-    val urlArtist: String,
-    val tracks: List<AlbumTrack>
-
-    val tracks: List<Song> = listOf(),
-    val songCount: Int = 0,
- */
 @Composable
 fun InfoDialogAlbum(album: Album, albumPlugin: PluginAlbumData?, onDismissRequest: () -> Unit) {
     Dialog(
@@ -88,10 +72,10 @@ fun InfoDialogAlbum(album: Album, albumPlugin: PluginAlbumData?, onDismissReques
 
                 val tags: HashSet<String> = hashSetOf<String>().apply {
                     album.genre.forEach {
-                        add(it.name)
+                        add(it.name.capitalizeWords())
                     }
-                    albumPlugin?.tags?.let { tagList ->
-                        addAll(tagList)
+                    albumPlugin?.tags?.forEach { t ->
+                        add(t.capitalizeWords())
                     }
                 }
                 val name = albumPlugin?.albumName?.ifBlank { album.name } ?: album.name
@@ -128,55 +112,5 @@ fun InfoDialogAlbum(album: Album, albumPlugin: PluginAlbumData?, onDismissReques
 
             }
         }
-    }
-}
-
-@Composable
-fun InfoDialogTextHorizontal(key: String? = null, text: String, modifier: Modifier = Modifier) {
-    Row(modifier = modifier.padding(vertical = 4.dp, horizontal = 4.dp)) {
-        key?.let {
-            Text(
-                text = it,
-                modifier = Modifier
-                    .wrapContentSize(Alignment.CenterStart),
-                textAlign = TextAlign.Start,
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp
-            )
-            Spacer(Modifier.width(6.dp))
-        }
-        Text(
-            text = text,
-            modifier = Modifier
-                .wrapContentSize(Alignment.CenterStart),
-            textAlign = TextAlign.Start,
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp
-        )
-    }
-}
-
-@Composable
-fun InfoDialogText(key: String? = null, text: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.padding(vertical = 4.dp, horizontal = 6.dp)) {
-        key?.let {
-            Text(
-                text = it,
-                modifier = Modifier
-                    .wrapContentSize(Alignment.CenterStart),
-                textAlign = TextAlign.Start,
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp
-            )
-            Spacer(Modifier.width(6.dp))
-        }
-        Text(
-            text = text,
-            modifier = Modifier
-                .wrapContentSize(Alignment.CenterStart),
-            textAlign = TextAlign.Start,
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp
-        )
     }
 }

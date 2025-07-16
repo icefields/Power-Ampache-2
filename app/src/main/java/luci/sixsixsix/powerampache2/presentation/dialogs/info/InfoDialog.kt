@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.dialogs
+package luci.sixsixsix.powerampache2.presentation.dialogs.info
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
@@ -50,6 +50,7 @@ import androidx.compose.ui.window.DialogProperties
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.domain.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.dialogs.textPaddingVertical
 
 @Composable
 fun InfoDialog(

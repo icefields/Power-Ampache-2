@@ -114,14 +114,7 @@ fun ArtistInfoSection(
             val artistSummary = if (isSummaryAvailable)
                 artist.summary
             else
-                //HtmlCompat.fromHtml(
-                    infoPluginArtist?.description
-                        //?: "", 0).toString()
-                    ?.replace("youtube | facebook | bandcamp", "")
-                    ?.replace("youtube", "")
-                    ?.replace("facebook", "")
-                    ?.replace("bandcamp", "")
-                    ?.replace("| |", "")
+                infoPluginArtist?.description
 
             Text( // name
                 modifier = Modifier

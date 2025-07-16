@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,7 +56,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -66,7 +64,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
@@ -77,8 +74,7 @@ import luci.sixsixsix.powerampache2.presentation.common.songitem.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
-import luci.sixsixsix.powerampache2.presentation.dialogs.InfoDialog
-import luci.sixsixsix.powerampache2.presentation.dialogs.InfoDialogAlbum
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogAlbum
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
@@ -222,7 +218,7 @@ fun AlbumDetailScreen(
                 AlbumDetailTopBar(
                     navigator = navigator,
                     album = album,
-                    showInfoIcon = pluginAlbum != null,
+                    showInfoIcon = true,//pluginAlbum != null,
                     isLoading = mainViewModel.isLoading,
                     isEditingPlaylist = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
                     scrollBehavior = scrollBehavior,

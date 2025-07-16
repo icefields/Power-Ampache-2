@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -57,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -74,6 +76,8 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogAlbum
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogArtist
 import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -97,9 +101,10 @@ fun ArtistDetailScreen(
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val infoPluginArtistState = state.infoPluginArtist
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    val summaryOpen = remember { mutableStateOf(false) }
+    var summaryOpen by remember { mutableStateOf(false) }
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
     val isGlobalShuffleOn by viewModel.globalShuffleStateFlow.collectAsState()
     var cardsPerRow by remember {
@@ -139,6 +144,10 @@ fun ArtistDetailScreen(
                 }
             )
         }
+    }
+
+    if (summaryOpen) {
+        InfoDialogArtist(state.artist, infoPluginArtistState) { summaryOpen = false }
     }
 
     val artUrlTop = generateArtistArtUrl(state.artist, state.albums)
@@ -186,7 +195,7 @@ fun ArtistDetailScreen(
                     artist = state.artist,
                     isLoading = state.isLoading,
                     scrollBehavior = scrollBehavior
-                ) { summaryOpen.value = !summaryOpen.value }
+                ) { summaryOpen = !summaryOpen }
             }
         ) {
             Surface(
@@ -203,7 +212,7 @@ fun ArtistDetailScreen(
                             .heightIn(max = 666.dp) // any big number
                             .padding(dimensionResource(R.dimen.albumDetailScreen_infoSection_padding)),
                         artist = state.artist,
-                        summaryOpen = summaryOpen,
+                        summaryOpen = remember { mutableStateOf(false)},// TODO FIX!! do not pass mutable state!!
                         infoPluginArtist = state.infoPluginArtist,
                         isLikeLoading = state.isLikeLoading,
                         isBuffering = mainViewModel.isBuffering,

@@ -7,7 +7,6 @@ data class PluginArtistData(
     val shortDescription: String,
     val mbId: String = "",
     val language: String = "",
-    val lyrics: String = "",
     val imageUrl: String = "",
     val year: String,
 
@@ -28,7 +27,6 @@ data class PluginArtistData(
             shortDescription = "",
             mbId = artistMbId,
             language = "",
-            lyrics = "",
             imageUrl = "",
             year = "",
             url = "",
