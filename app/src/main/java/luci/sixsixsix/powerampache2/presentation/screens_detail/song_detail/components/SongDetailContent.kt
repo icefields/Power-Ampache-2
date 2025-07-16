@@ -66,12 +66,14 @@ import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.domain.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.totalTime
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -83,6 +85,7 @@ fun SongDetailContent(
     mainScaffoldState: BottomSheetScaffoldState,
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
+    pluginSong: PluginSongData?,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
     val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
@@ -104,12 +107,17 @@ fun SongDetailContent(
 
     var infoDialogOpen by remember { mutableStateOf(false) }
     if (infoDialogOpen) {
-            InfoDialog(
-                info = currentSongState?.toDebugMap() ?: mapOf(),
-                onDismissRequest = {
-                    infoDialogOpen = false
-                }
-            )
+        currentSongState?.let { song ->
+            InfoDialogSong(song = song, pluginSong) {
+                infoDialogOpen = false
+            }
+        }
+//            InfoDialog(
+//                info = currentSongState?.toDebugMap() ?: mapOf(),
+//                onDismissRequest = {
+//                    infoDialogOpen = false
+//                }
+//            )
     }
 
     var isOffline by remember { mutableStateOf(false) }

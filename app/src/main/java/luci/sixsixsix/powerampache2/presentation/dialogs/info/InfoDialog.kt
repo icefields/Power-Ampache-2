@@ -62,56 +62,62 @@ fun InfoDialog(
             dismissOnBackPress = true,
             dismissOnClickOutside = true
         ),
-        onDismissRequest = { onDismissRequest() }
+        onDismissRequest = onDismissRequest
+    ) { InfoContent(info, onDismissRequest) }
+}
+
+@Composable
+fun InfoContent(
+    info: Map<String, String>,
+    onDismissRequest: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        modifier = Modifier
+            .padding(16.dp),
+        shape = RoundedCornerShape(4.dp),
     ) {
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-            modifier = Modifier
-                .padding(16.dp),
-            shape = RoundedCornerShape(4.dp),
-        ) {
-            LazyColumn(modifier = Modifier
-                .padding(horizontal = 12.dp, vertical = 6.dp)) {
-                items(info.keys.toList()) {
-                        LazyRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            items(3) { iRow ->
-                                when(iRow) {
-                                    0 -> Text(
-                                        text = it,
-                                        modifier = Modifier
-                                            .padding(horizontal = 4.dp)
-                                            .clickable {
-                                                onDismissRequest()
-                                            },
-                                        textAlign = TextAlign.Start,
-                                        maxLines = 1,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 19.sp
-                                    )
-                                    1 -> Spacer(modifier = Modifier.width(6.dp))
-                                    2 -> Text(
-                                        text = info[it] ?: ERROR_STRING,
-                                        modifier = Modifier
-                                            .padding(horizontal = 4.dp)
-                                            .clickable {
-                                                onDismissRequest()
-                                            },
-                                        textAlign = TextAlign.Start,
-                                        maxLines = 1,
-                                        fontWeight = FontWeight.Light,
-                                        fontSize = 16.sp
-                                    )
-                                }
-                            }
+        LazyColumn(modifier = Modifier
+            .padding(horizontal = 12.dp, vertical = 6.dp)) {
+            items(info.keys.toList()) {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    items(3) { iRow ->
+                        when(iRow) {
+                            0 -> Text(
+                                text = it,
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .clickable {
+                                        onDismissRequest()
+                                    },
+                                textAlign = TextAlign.Start,
+                                maxLines = 1,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 19.sp
+                            )
+                            1 -> Spacer(modifier = Modifier.width(6.dp))
+                            2 -> Text(
+                                text = info[it] ?: ERROR_STRING,
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .clickable {
+                                        onDismissRequest()
+                                    },
+                                textAlign = TextAlign.Start,
+                                maxLines = 1,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 16.sp
+                            )
                         }
+                    }
                 }
             }
         }

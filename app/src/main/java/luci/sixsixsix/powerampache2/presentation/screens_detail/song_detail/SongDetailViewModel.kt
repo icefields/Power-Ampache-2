@@ -38,6 +38,7 @@ import luci.sixsixsix.powerampache2.domain.common.toDebugString
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
 import luci.sixsixsix.powerampache2.domain.plugin.lyrics.getAvailableLyrics
 import luci.sixsixsix.powerampache2.domain.usecase.ServerInfoStateFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsUseCase
@@ -62,10 +63,16 @@ class SongDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private val _recommendedArtistsStateFlow = MutableStateFlow<List<Artist>>(listOf())
     val recommendedArtistsStateFlow = _recommendedArtistsStateFlow.asStateFlow()
+
+    private val _pluginInfo = MutableStateFlow<PluginSongData?>(null)
+    val pluginInfo = _pluginInfo.asStateFlow()
+
     private val _lyrics = MutableStateFlow("")
     val lyrics = _lyrics.asStateFlow()
+
     private val _pluginLyrics = MutableStateFlow("")
     val pluginLyrics = _pluginLyrics.asStateFlow()
+
     private var songId: String = ""
     private var lyricsJob: Job? = null
     private var songInfoJob: Job? = null
@@ -133,8 +140,7 @@ class SongDetailViewModel @Inject constructor(
     private suspend fun getSongInfoFromPlugin(song: Song) {
         // only fetch if no lyrics already present
         if (isInfoPluginInstalled()) {
-            val songPlugin = getSongInfoPluginUseCase(song)
-            Toast.makeText(context, songPlugin.toDebugString(), Toast.LENGTH_LONG).show()
+            _pluginInfo.value = getSongInfoPluginUseCase(song)
         }
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,14 +21,15 @@ fun InfoDialogText(key: String? = null, text: String, modifier: Modifier = Modif
     Column(modifier = modifier.padding(vertical = 4.dp, horizontal = 6.dp)) {
         key?.let {
             Text(
+                color = MaterialTheme.colorScheme.secondary,
                 text = it,
                 modifier = Modifier
                     .wrapContentSize(Alignment.CenterStart),
                 textAlign = TextAlign.Start,
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.sp
+                fontSize = 17.sp
             )
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(4.dp))
         }
         Text(
             text = text,
@@ -35,7 +37,7 @@ fun InfoDialogText(key: String? = null, text: String, modifier: Modifier = Modif
                 .wrapContentSize(Alignment.CenterStart),
             textAlign = TextAlign.Start,
             fontWeight = FontWeight.Normal,
-            fontSize = 16.sp
+            fontSize = 17.sp
         )
     }
 }

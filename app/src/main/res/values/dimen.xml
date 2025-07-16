@@ -74,4 +74,6 @@
     <dimen name="home_row_spacing">16dp</dimen>
     <dimen name="genre_title_fontSize">16sp</dimen>
     <dimen name="genre_title_lineHeight">16sp</dimen>
+
+    <dimen name="separator_height_dialogInfoImage">5dp</dimen>
 </resources>

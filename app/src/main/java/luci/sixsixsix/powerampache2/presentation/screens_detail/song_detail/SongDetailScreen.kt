@@ -60,6 +60,7 @@ fun SongDetailScreen(
     val song by viewModel.currentSongStateFlow().collectAsState()
     val lyricsTag by songDetailViewModel.lyrics.collectAsStateWithLifecycle()
     val pluginLyrics by songDetailViewModel.pluginLyrics.collectAsStateWithLifecycle()
+    val pluginInfo by songDetailViewModel.pluginInfo.collectAsStateWithLifecycle()
 
     var rememberSongId by remember { mutableStateOf(song?.id ?: "") }
 
@@ -107,6 +108,7 @@ fun SongDetailScreen(
             mainScaffoldState = mainScaffoldState,
             modifier = Modifier.padding(paddingValues = it),
             mainViewModel = viewModel,
+            pluginSong = pluginInfo,
             addToPlaylistOrQueueDialogViewModel = addToPlaylistOrQueueDialogViewModel
         )
     }
