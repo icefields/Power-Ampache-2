@@ -22,6 +22,9 @@
 package luci.sixsixsix.powerampache2.presentation.dialogs.info
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -36,10 +39,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,10 +52,38 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.domain.common.toDebugMap
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.dialogs.textPaddingVertical
+
+@Composable
+fun InfoDialogBase(onDismissRequest: () -> Unit, content: @Composable (ColumnScope.() -> Unit)) {
+    Dialog(
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false
+        ),
+        onDismissRequest = { onDismissRequest() }
+    ) {
+        Surface(
+            shape = RoundedCornerShape(dimensionResource(R.dimen.dialogInfo_roundedCorner_radius)),
+            tonalElevation = 2.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(dimensionResource(R.dimen.dialogInfo_padding)),
+        ) {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Top,
+                content = content
+            )
+        }
+    }
+}
 
 @Composable
 fun InfoDialog(

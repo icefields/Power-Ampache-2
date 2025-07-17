@@ -76,4 +76,13 @@
     <dimen name="genre_title_lineHeight">16sp</dimen>
 
     <dimen name="separator_height_dialogInfoImage">5dp</dimen>
+    <dimen name="dialogInfo_padding">20dp</dimen>
+    <dimen name="dialogInfo_padding_text_horizontal">4dp</dimen>
+    <dimen name="dialogInfo_padding_divider_vertical">4dp</dimen>
+    <dimen name="dialogInfo_roundedCorner_radius">6dp</dimen>
+    <dimen name="dialogInfo_padding_chip_vertical">8dp</dimen>
+
+
+
+
 </resources>

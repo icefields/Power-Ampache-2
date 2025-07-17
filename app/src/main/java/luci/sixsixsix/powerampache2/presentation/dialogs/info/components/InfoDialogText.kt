@@ -27,17 +27,17 @@ fun InfoDialogText(key: String? = null, text: String, modifier: Modifier = Modif
                     .wrapContentSize(Alignment.CenterStart),
                 textAlign = TextAlign.Start,
                 fontWeight = FontWeight.Bold,
-                fontSize = 17.sp
+                fontSize = 18.sp
             )
             Spacer(Modifier.width(4.dp))
         }
         Text(
             text = text,
-            modifier = Modifier
+            modifier = Modifier.padding(start = if (key == null || key.isBlank() == true) 0.dp else 16.dp)
                 .wrapContentSize(Alignment.CenterStart),
             textAlign = TextAlign.Start,
             fontWeight = FontWeight.Normal,
-            fontSize = 17.sp
+            fontSize = 18.sp
         )
     }
 }
