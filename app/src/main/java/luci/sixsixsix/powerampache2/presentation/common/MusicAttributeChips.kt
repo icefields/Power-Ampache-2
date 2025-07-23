@@ -82,3 +82,43 @@ fun MusicAttributeChips(
         }
     }
 }
+
+@Composable
+fun MusicChips(
+    modifier: Modifier = Modifier,
+    attributes: List<String>,
+    containerColor: Color = Color(red = 0, blue = 0, green = 0, alpha = 180),
+    onMusicAttributeClick: (String) -> Unit
+) {
+    LazyRow(modifier = modifier
+        .padding(
+            horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_chipsRow_padding)
+        )) {
+        items(attributes) {
+            if (it.isNotBlank()) {
+                Row {
+                    Card(
+                        modifier = Modifier.clickable {
+                            onMusicAttributeClick(it)
+                        },
+                        colors = CardDefaults.cardColors(
+                            containerColor = containerColor
+                        ),
+                        shape = RoundedCornerShape(dimensionResource(R.dimen.albumDetail_chip_radius)),
+                        elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.albumDetail_chip_elevation))
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.CenterHorizontally),
+                            text = it,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                }
+            }
+        }
+    }
+}

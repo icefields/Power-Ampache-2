@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
@@ -69,6 +68,10 @@ import luci.sixsixsix.powerampache2.domain.errors.ScrobbleException
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.plugin.info.InfoPluginDataSource
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
+import luci.sixsixsix.powerampache2.domain.plugin.lyrics.LyricsPluginDataSource
+import luci.sixsixsix.powerampache2.domain.plugin.lyrics.PluginSongLyrics
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import luci.sixsixsix.powerampache2.domain.utils.WorkerHelper
 import okio.IOException
@@ -95,7 +98,9 @@ class SongsRepositoryImpl @Inject constructor(
     @OfflineModeDataSource private val songsOfflineDataSource: SongsOfflineDataSource,
     @LocalDataSource private val songsDbDataSource: SongsDbDataSource,
     @RemoteDataSource private val networkDataSource: SongsRemoteDataSource,
-    applicationCoroutineScope: CoroutineScope
+    applicationCoroutineScope: CoroutineScope,
+    private val lyricsPluginDataSource: LyricsPluginDataSource,
+    private val infoPluginDataSource: InfoPluginDataSource
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
     override val offlineSongsFlow = songsOfflineDataSource.offlineSongsFlow
@@ -681,4 +686,24 @@ class SongsRepositoryImpl @Inject constructor(
 //            error?.let { throw (ScrobbleException(it.toError())) }
 //            (success != null)
 //        }
+
+    override suspend fun getPluginSongLyrics(
+        songTitle: String,
+        albumTitle: String,
+        artistName: String
+    ): PluginSongLyrics = lyricsPluginDataSource.getLyrics(songTitle, albumTitle, artistName)
+
+    override suspend fun getPluginSongData(
+        songId: String,
+        songMbId: String,
+        songTitle: String,
+        albumTitle: String,
+        artistName: String
+    ): PluginSongData = infoPluginDataSource.getSongInfo(
+        songId = songId,
+        musicBrainzId = songMbId,
+        songTitle = songTitle,
+        albumTitle = albumTitle,
+        artistName = artistName
+    )
 }

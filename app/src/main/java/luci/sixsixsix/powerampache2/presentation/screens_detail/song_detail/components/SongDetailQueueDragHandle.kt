@@ -21,6 +21,9 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components
 
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -54,7 +57,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
@@ -63,12 +68,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
+import java.net.MalformedURLException
+import java.net.URL
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -198,15 +206,21 @@ fun TabbedSongDetailView(
         ) { index ->
             when(index) {
                 1 -> {
-                    val spannedText = HtmlCompat.fromHtml(lyrics, 0)
-                    Text(
-                        fontSize = 20.sp,
-                        text = spannedText.toString(),
-                        modifier = Modifier
+                    if (isValidUrl(lyrics)) {
+                        WebPageView(lyrics, modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                            .verticalScroll(rememberScrollState())
-                    )
+                            .verticalScroll(rememberScrollState()))
+                    } else {
+                        val spannedText = HtmlCompat.fromHtml(lyrics, 0)
+                        Text(
+                            fontSize = 20.sp,
+                            text = spannedText.toString(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp, vertical = 6.dp)
+                                .verticalScroll(rememberScrollState())
+                        )
+                    }
                 }
                 else -> {
                     SongDetailQueueScreenContent(
@@ -217,6 +231,34 @@ fun TabbedSongDetailView(
             }
         }
     }
+}
+
+private fun isValidUrl(url: String): Boolean = try {
+    URL(url)
+    true
+} catch (e: MalformedURLException) { false }
+
+
+@Composable
+fun WebPageView(url: String, modifier: Modifier = Modifier) {
+    val currentUrl by rememberUpdatedState(newValue = url)
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            WebView(context).apply {
+                webViewClient = WebViewClient()
+                settings.javaScriptEnabled = false
+                settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK // Uses cache if available, else network
+                settings.domStorageEnabled = true // Enables DOM storage API (optional but recommended)
+                loadUrl(url)
+            }
+        },
+        update = {
+            if (currentUrl.isNotBlank() && it.url?.toString() != currentUrl) {
+                it.loadUrl(currentUrl)
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

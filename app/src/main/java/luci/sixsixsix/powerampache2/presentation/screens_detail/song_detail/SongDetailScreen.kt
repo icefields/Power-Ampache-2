@@ -31,12 +31,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.util.UnstableApi
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -44,6 +47,7 @@ import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.comp
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailQueueDragHandle
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.TabbedSongDetailView
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDetailScreen(
@@ -54,12 +58,22 @@ fun SongDetailScreen(
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
 ) {
     val song by viewModel.currentSongStateFlow().collectAsState()
-    val lyrics by songDetailViewModel.lyrics.collectAsStateWithLifecycle()
+    val lyricsTag by songDetailViewModel.lyrics.collectAsStateWithLifecycle()
+    val pluginLyrics by songDetailViewModel.pluginLyrics.collectAsStateWithLifecycle()
+    val pluginInfo by songDetailViewModel.pluginInfo.collectAsStateWithLifecycle()
+
+    var rememberSongId by remember { mutableStateOf(song?.id ?: "") }
 
     song?.let {
-        songDetailViewModel.getSongLyrics(it)
-        songDetailViewModel.getRecommendedArtists(it)
+        val isNewSong = rememberSongId != it.id
+        if (isNewSong) {
+            rememberSongId = it.id
+            songDetailViewModel.onNewSong(it)
+        }
     }
+
+    // if tagged lyrics are present they take priority over plugin lyrics
+    val lyrics = if (lyricsTag.isNotBlank()) lyricsTag else pluginLyrics
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val pagerState = rememberPagerState(initialPage = 0) {
@@ -94,6 +108,7 @@ fun SongDetailScreen(
             mainScaffoldState = mainScaffoldState,
             modifier = Modifier.padding(paddingValues = it),
             mainViewModel = viewModel,
+            pluginSong = pluginInfo,
             addToPlaylistOrQueueDialogViewModel = addToPlaylistOrQueueDialogViewModel
         )
     }

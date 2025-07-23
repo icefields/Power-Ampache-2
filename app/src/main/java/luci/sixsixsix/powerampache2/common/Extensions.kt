@@ -137,6 +137,13 @@ fun String.toHslColor(saturation: Float = 0.5f, lightness: Float = 0.4f): Int {
     return ColorUtils.HSLToColor(floatArrayOf(hue.absoluteValue.toFloat(), saturation, lightness))
 }
 
+fun String.capitalizeWords(): String {
+    return this.split(" ").joinToString(" ") { word ->
+        word.lowercase().replaceFirstChar { it.uppercase() }
+    }
+}
+
+
 fun Modifier.shimmer(): Modifier = composed {
     var size by remember { mutableStateOf(IntSize.Zero) }
     val transition = rememberInfiniteTransition(label = "")

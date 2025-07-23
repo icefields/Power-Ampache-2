@@ -21,16 +21,12 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 
-import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -47,11 +43,12 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.AlbumDataFromPluginUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsInfoPluginInstalled
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
@@ -71,6 +68,8 @@ class AlbumDetailViewModel @Inject constructor(
     private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
     private val toggleGlobalShuffleUseCase: ToggleGlobalShuffleUseCase,
     private val recommendedArtistsUseCase: RecommendedArtistsUseCase,
+    private val isInfoPluginInstalled: IsInfoPluginInstalled,
+    private val getAlbumInfoPluginUseCase: AlbumDataFromPluginUseCase,
     private val songsRepository: SongsRepository,
     private val albumsRepository: AlbumsRepository,
     private val playlistManager: MusicPlaylistManager,
@@ -94,6 +93,10 @@ class AlbumDetailViewModel @Inject constructor(
                 albumsRepository
                     .getAlbum(albumId)
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Album())
+
+    val infoPluginArtistStateFlow = albumStateFlow.map { album ->
+        getAlbumInfoFromPlugin(album)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     init {
         viewModelScope.launch {
@@ -239,4 +242,8 @@ class AlbumDetailViewModel @Inject constructor(
             }
         }
     }
+
+    private suspend fun getAlbumInfoFromPlugin(album: Album) = if (isInfoPluginInstalled()) {
+        getAlbumInfoPluginUseCase(album)
+    } else null
 }

@@ -26,6 +26,7 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
 
 interface AlbumsRepository {
     val recentlyPlayedAlbumsFlow: Flow<List<Album>>
@@ -48,4 +49,12 @@ interface AlbumsRepository {
     suspend fun getAlbumShareLink(albumId: String): Flow<Resource<String>>
     suspend fun rateAlbum(albumId: String, rate: Int): Flow<Resource<Any>>
     suspend fun likeAlbum(id: String, like: Boolean): Flow<Resource<Any>>
+
+    // PLUGIN
+    suspend fun getPluginAlbumData(
+        albumId: String,
+        albumMbId: String,
+        albumTitle: String,
+        artistName: String
+    ): PluginAlbumData?
 }

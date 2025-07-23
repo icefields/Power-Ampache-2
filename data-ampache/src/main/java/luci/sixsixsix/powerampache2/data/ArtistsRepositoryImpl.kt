@@ -51,6 +51,8 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.plugin.info.InfoPluginDataSource
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginArtistData
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -68,6 +70,7 @@ class ArtistsRepositoryImpl @Inject constructor(
     @LocalDataSource private val songsDbDataSource: SongsDbDataSource,
     @OfflineModeDataSource private val artistsOfflineDataSource: ArtistsOfflineModeDataSource,
     @OfflineModeDataSource private val songsOfflineDataSource: SongsOfflineDataSource,
+    private val infoPluginDataSource: InfoPluginDataSource,
     api: MainNetwork,
     db: MusicDatabase,
     private val errorHandler: ErrorHandler
@@ -307,4 +310,15 @@ class ArtistsRepositoryImpl @Inject constructor(
             artists = remoteArtists
         )
     }
+
+    override suspend fun getPluginArtistData(
+        artistId: String,
+        artistMbId: String,
+        artistName: String
+    ): PluginArtistData? =
+        infoPluginDataSource.getArtistInfo(
+            artistId = artistId,
+            musicBrainzId = artistMbId,
+            artistName = artistName
+        )
 }

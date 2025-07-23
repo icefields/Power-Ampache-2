@@ -51,9 +51,9 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 82
-        versionName = "1.01-82"
-        val versionQuote = "This version is powered by the sum of 2 primes, lead and atomic stability"
+        versionCode = 85
+        versionName = "1.01-83"
+        val versionQuote = "This version is powered by the 23rd prime number summed by other consecutive primes, Bismuth and overall the best year ever"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

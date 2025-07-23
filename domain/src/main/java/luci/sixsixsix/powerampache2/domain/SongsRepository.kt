@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
+import luci.sixsixsix.powerampache2.domain.plugin.lyrics.PluginSongLyrics
 
 interface SongsRepository {
     val offlineSongsFlow: Flow<List<Song>>
@@ -52,4 +54,7 @@ interface SongsRepository {
     suspend fun scrobble(song: Song): Flow<Resource<Any>>
     suspend fun addToHistory(song: Song): Boolean
     suspend fun getSongsByGenre(genreId: Genre, fetchRemote: Boolean = true, offset: Int = 0): Flow<Resource<List<Song>>>
+
+    suspend fun getPluginSongLyrics(songTitle: String, albumTitle: String, artistName: String): PluginSongLyrics
+    suspend fun getPluginSongData(songId: String, songMbId: String, songTitle: String, albumTitle: String, artistName: String): PluginSongData
 }

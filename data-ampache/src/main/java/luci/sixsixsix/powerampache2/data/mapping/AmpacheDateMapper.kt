@@ -39,8 +39,12 @@ class AmpacheDateMapper: DateMapper {
      * YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
      * val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssO")//("YYYY-MM-DD'T'hh:mm:ss'T'ZD")
      */
-    override fun isoStringToLocalDateTime(timestamp: String): LocalDateTime =
+    override fun isoStringToLocalDateTime(timestamp: String): LocalDateTime = try {
         LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_ZONED_DATE_TIME)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        LocalDateTime.MIN
+    }
 
 
     // ----- DATABASE CONVERTERS
