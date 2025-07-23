@@ -9,6 +9,7 @@ import android.os.*
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
+import luci.sixsixsix.mrlog.BuildConfig
 import luci.sixsixsix.powerampache2.domain.plugin.lyrics.PluginSongLyrics
 import org.json.JSONObject
 import javax.inject.Inject
@@ -105,7 +106,7 @@ class LyricsPluginClient @Inject constructor(
             context.packageManager.getPackageInfo(PLUGIN_LYRICS_ID, 0)
             true
         } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
+            if (BuildConfig.DEBUG) e.printStackTrace()
             false
         }
     }

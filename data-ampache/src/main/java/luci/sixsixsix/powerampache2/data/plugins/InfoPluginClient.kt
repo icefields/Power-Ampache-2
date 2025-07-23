@@ -14,6 +14,7 @@ import android.os.Messenger
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
+import luci.sixsixsix.mrlog.BuildConfig
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginArtistData
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
@@ -203,7 +204,7 @@ class InfoPluginClient @Inject constructor(
             context.packageManager.getPackageInfo(PLUGIN_INFO_ID, 0)
             true
         } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
+            if (BuildConfig.DEBUG) e.printStackTrace()
             false
         }
     }
