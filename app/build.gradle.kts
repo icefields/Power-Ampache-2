@@ -53,7 +53,7 @@ android {
         targetSdk = 35
         versionCode = 85
         versionName = "1.01-83"
-        val versionQuote = "This version is powered by the sum of 2 primes, lead and atomic stability"
+        val versionQuote = "This version is powered by the best year ever"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

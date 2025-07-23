@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2025  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.dialogs.info
 
 import androidx.compose.foundation.background
@@ -22,7 +43,9 @@ import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.capitalizeWords
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.totalTime
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
+import luci.sixsixsix.powerampache2.domain.plugin.info.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.MusicChips
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDialogText
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDialogTextHorizontal
@@ -66,25 +89,22 @@ fun InfoDialogAlbum(album: Album, albumPlugin: PluginAlbumData?, onDismissReques
         val name = albumPlugin?.albumName?.ifBlank { album.name } ?: album.name
         val artist = albumPlugin?.artistName?.ifBlank { album.artist.name } ?: album.artist.name
         val duration = albumPlugin?.duration?.let { dur ->
-            if (dur > 0) dur else album.time
-        } ?: album.time
+            if (dur > 0) albumPlugin.totalTime() else album.totalTime()
+        } ?: album.totalTime()
         val description = albumPlugin?.description?.ifBlank { albumPlugin.shortDescription } ?: albumPlugin?.shortDescription ?: ""
         val playCount = albumPlugin?.playCount ?: 0
         val listeners = albumPlugin?.listeners ?: 0
         val rank = albumPlugin?.rank ?: 0
+        val year = albumPlugin?.year?.ifBlank { album.year.toString() } ?: album.year.toString()
 
         InfoDialogTextHorizontal("$artist - $name", "")
         Divider(modifier = Modifier.fillMaxWidth().padding(vertical = dimensionResource(R.dimen.dialogInfo_padding_divider_vertical)))
-        InfoDialogTextHorizontal("Duration", duration.toString())
-        InfoDialogTextHorizontal("Year", albumPlugin?.year?.ifBlank { album.year.toString() } ?: album.year.toString())
-        if (album.diskCount > 0)
-            InfoDialogTextHorizontal("Disc Count", album.diskCount.toString())
-        if (playCount > 0)
-            InfoDialogTextHorizontal("Play Count", playCount.toString())
-        if (listeners > 0)
-            InfoDialogTextHorizontal("Listeners", listeners.toString())
-        if (rank > 0)
-            InfoDialogTextHorizontal("Rank", rank.toString())
+        if (duration.isNotBlank()) InfoDialogTextHorizontal("Duration", duration)
+        if (year.isNotBlank() && year != "0" ) InfoDialogTextHorizontal("Year", year)
+        if (album.diskCount > 0) InfoDialogTextHorizontal("Disc Count", album.diskCount.toString())
+        if (playCount > 0) InfoDialogTextHorizontal("Play Count", playCount.toString())
+        if (listeners > 0) InfoDialogTextHorizontal("Listeners", listeners.toString())
+        if (rank > 0) InfoDialogTextHorizontal("Rank", rank.toString())
         if (description.isNotBlank()) {
             Divider(modifier = Modifier.fillMaxWidth().padding(vertical = dimensionResource(R.dimen.dialogInfo_padding_divider_vertical)))
             InfoDialogText(null, description)
@@ -101,13 +121,12 @@ fun InfoDialogAlbum(album: Album, albumPlugin: PluginAlbumData?, onDismissReques
         }
         if (tags.isNotEmpty()) {
             Divider(modifier = Modifier.fillMaxWidth().padding(vertical = dimensionResource(R.dimen.dialogInfo_padding_divider_vertical)))
-
-            //InfoDialogText("Tags", tags.joinToString("\n"))
             InfoDialogTitleText(modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.dialogInfo_padding_text_horizontal)), "Tags")
             MusicChips(
                 modifier = Modifier.padding(vertical = dimensionResource(R.dimen.dialogInfo_padding_chip_vertical), horizontal = dimensionResource(R.dimen.dialogInfo_padding_text_horizontal)),
                 attributes = tags.toList()
             ) { /* onClick */ }
+            //InfoDialogText("Tags", tags.joinToString("\n"))
         }
     }
 }

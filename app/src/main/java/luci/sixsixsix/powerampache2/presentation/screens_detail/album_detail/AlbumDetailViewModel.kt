@@ -21,17 +21,12 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 
-import android.app.Application
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -40,7 +35,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -49,12 +43,9 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
-import luci.sixsixsix.powerampache2.domain.plugin.info.PluginArtistData
-import luci.sixsixsix.powerampache2.domain.plugin.lyrics.getAvailableLyrics
 import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.AlbumDataFromPluginUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsInfoPluginInstalled

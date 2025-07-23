@@ -1,0 +1,5 @@
+— New Metadata views for Artists, Albums and Songs.
+— Bug fixes and improvements.
+— Implemented host for lyrics plugin.
+— Implemented host for metadata plugin.
+— Implemented protocols and interfaces for plugin.

@@ -126,11 +126,12 @@ fun AlbumDetailTopBar(
         },
         scrollBehavior = scrollBehavior,
         actions = {
+            TopBarCircularProgress(isLoading)
+
             if (showInfoIcon) {
                 IconButton(onClick = onRightIconClick) { Icon(imageVector = Icons.Outlined.Info,
                     contentDescription = "show hide album info") }
             }
-            TopBarCircularProgress(isLoading)
             StarRatingButton(
                 currentRating = album.rating,
                 onRate = onRate
