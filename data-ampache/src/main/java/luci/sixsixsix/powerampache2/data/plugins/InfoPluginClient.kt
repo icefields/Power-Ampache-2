@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2025  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.data.plugins
 
 import android.content.ComponentName
@@ -51,7 +72,6 @@ class InfoPluginClient @Inject constructor(
     }
 
     override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        println("aaaa InfoPluginClient service bound")
         isBound = true
         serviceMessenger = Messenger(service)
     }
@@ -80,7 +100,6 @@ class InfoPluginClient @Inject constructor(
 
         val incomingHandler = Handler(Looper.getMainLooper()) { msg ->
             val json = msg.data.getString(KEY_REQUEST_JSON) ?: return@Handler true
-            println("aaaa artist "+json)
             val artistData = gson.fromJson<PluginArtistData>(json, PluginArtistData::class.java)
             continuation.resume(artistData)
             true
@@ -125,7 +144,6 @@ class InfoPluginClient @Inject constructor(
 
         val incomingHandler = Handler(Looper.getMainLooper()) { msg ->
             val json = msg.data.getString(KEY_REQUEST_JSON) ?: return@Handler true
-            println("aaaa "+json)
             val albumData = gson.fromJson<PluginAlbumData>(json, PluginAlbumData::class.java)
             continuation.resume(albumData)
             true
@@ -172,7 +190,6 @@ class InfoPluginClient @Inject constructor(
 
         val incomingHandler = Handler(Looper.getMainLooper()) { msg ->
             val json = msg.data.getString(KEY_REQUEST_JSON) ?: return@Handler true
-            println("aaaa "+json)
             val songData = gson.fromJson<PluginSongData>(json, PluginSongData::class.java)
             continuation.resume(songData)
             true

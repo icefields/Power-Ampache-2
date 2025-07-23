@@ -110,12 +110,6 @@ fun SongDetailContent(
                 infoDialogOpen = false
             }
         }
-//            InfoDialog(
-//                info = currentSongState?.toDebugMap() ?: mapOf(),
-//                onDismissRequest = {
-//                    infoDialogOpen = false
-//                }
-//            )
     }
 
     var isOffline by remember { mutableStateOf(false) }

@@ -40,7 +40,6 @@ class AmpacheDateMapper: DateMapper {
      * val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssO")//("YYYY-MM-DD'T'hh:mm:ss'T'ZD")
      */
     override fun isoStringToLocalDateTime(timestamp: String): LocalDateTime = try {
-        println(timestamp+" aaaab")
         LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_ZONED_DATE_TIME)
     } catch (e: Exception) {
         e.printStackTrace()

@@ -89,11 +89,6 @@ class ArtistDetailViewModel @Inject constructor(
                 // as fallback. This is important, because there is not certainty that the album is
                 // in the internal db
                 state = state.copy(artist = artist)
-
-//                viewModelScope.launch {
-//                    getArtistInfoFromPlugin(artist)
-//                }
-
                 getArtist(id, fetchRemote = false)
             } ?: getArtist(id, fetchRemote = true)
         }
@@ -189,7 +184,6 @@ class ArtistDetailViewModel @Inject constructor(
         // only fetch if no lyrics already present
         if (isInfoPluginInstalled() && (state.infoPluginArtist == null || state.infoPluginArtist?.id != artist.id)) {
             artistDataFromPluginUseCase(artist = artist)?.let { pluginData ->
-                println("aaaa getArtistInfoFromPlugin ${pluginData.description}")
                 state = state.copy(infoPluginArtist = pluginData)
             }
         }

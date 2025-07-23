@@ -3,3 +3,4 @@
 — Implemented host for lyrics plugin.
 — Implemented host for metadata plugin.
 — Implemented protocols and interfaces for plugin.
+— Various libraries updates.
