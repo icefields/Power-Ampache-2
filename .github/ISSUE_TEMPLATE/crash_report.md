@@ -44,9 +44,10 @@ When did this crash happen?
 - App Version & Build: (e.g. 2.3.1, build 142)
 - Rooted Device: [Yes / No]
 - Installed From:
+  - [ ] GitHub Releases
+  - [ ] FDroid
+  - [ ] Telegram
   - [ ] Play Store
-  - [ ] Internal Testing / GitHub
-  - [ ] Sideloaded APK
 
 ---
 
@@ -54,4 +55,21 @@ When did this crash happen?
 
 Paste **relevant Logcat or crash trace** below, or attach as a `.txt` file:
 
+---
 
+## 📸 Screenshots / Video (if applicable)
+
+---
+
+## 💬 Additional Context
+
+Include any notes that might help reproduce or fix the crash.
+
+---
+
+## ✅ Checklist
+
+- [ ] I’ve provided full device and app version info
+- [ ] I’ve included a log or crash trace
+- [ ] I’ve explained what I was doing before the crash
+- [ ] This issue is reproducible or clearly explained
