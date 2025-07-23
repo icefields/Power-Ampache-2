@@ -51,7 +51,7 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 85
+        versionCode = 89
         versionName = "1.01-83"
         val versionQuote = "This version is powered by the 23rd prime number summed by other consecutive primes, Bismuth and overall the best year ever"
 
@@ -60,8 +60,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-
 
         buildConfigField("String", "VERSION_QUOTE", "\"$versionQuote\"")
         buildConfigField("String", "ERROR_REPORT_EMAIL", errorReportEmail)

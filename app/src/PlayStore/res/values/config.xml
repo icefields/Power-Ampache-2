@@ -2,4 +2,11 @@
 <resources>
     <string name="sharing_provider_authority_release" translatable="false">luci.sixsixsix.powerampache2.provider.playstore</string>
     <string name="sharing_provider_authority_debug" translatable="false">luci.sixsixsix.powerampache2.provider.debug.playstore</string>
+
+    <string name="permission_plugin_info_release" translatable="false">luci.sixsixsix.powerampache2.playstore.plugin.permission.BIND_INFO_PLUGIN</string>
+    <string name="permission_plugin_info_debug" translatable="false">luci.sixsixsix.powerampache2.playstore.debug.plugin.permission.BIND_INFO_PLUGIN</string>
+
+    <string name="permission_plugin_lyrics_release" translatable="false">luci.sixsixsix.powerampache2.playstore.plugin.permission.BIND_LYRICS_PLUGIN</string>
+    <string name="permission_plugin_lyrics_debug" translatable="false">luci.sixsixsix.powerampache2.playstore.debug.plugin.permission.BIND_LYRICS_PLUGIN</string>
+
 </resources>

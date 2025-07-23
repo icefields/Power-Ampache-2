@@ -2,16 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <permission android:name="luci.sixsixsix.powerampache2.permission.BIND_INFO_PLUGIN"
-        android:protectionLevel="normal" />
-    <permission android:name="luci.sixsixsix.powerampache2.permission.BIND_LYRICS_PLUGIN"
-        android:protectionLevel="normal" />
+<!--    <permission android:name="@string/permission_plugin_info" android:protectionLevel="normal" />-->
+<!--    <permission android:name="@string/permission_plugin_lyrics" android:protectionLevel="normal" />-->
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
-    <uses-permission android:name="luci.sixsixsix.powerampache2.permission.BIND_LYRICS_PLUGIN" />
-    <uses-permission android:name="luci.sixsixsix.powerampache2.permission.BIND_INFO_PLUGIN" />
+<!--    <uses-permission android:name="@string/permission_plugin_info" />-->
+<!--    <uses-permission android:name="@string/permission_plugin_lyrics" />-->
+
+    <queries>
+        <package android:name="luci.sixsixsix.powerampache2.infoplugin" />
+        <package android:name="luci.sixsixsix.powerampache2.lyricsplugin" />
+    </queries>
 
     <application
         android:name=".PowerAmpache2Application"
