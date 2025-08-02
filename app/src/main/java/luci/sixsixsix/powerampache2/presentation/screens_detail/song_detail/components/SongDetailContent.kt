@@ -135,6 +135,10 @@ fun SongDetailContent(
 
     var isImageScaleFit by remember { mutableStateOf(false) }
 
+    val coverImage = currentSongState?.imageUrl ?: pluginSong?.imageUrl?.let { imageUrl ->
+        imageUrl.ifBlank { pluginSong.imageAlbum.ifBlank { pluginSong.imageArtist } }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -147,7 +151,7 @@ fun SongDetailContent(
                 .fillMaxWidth().clickable {
                     isImageScaleFit = !isImageScaleFit
                 },
-            artUrl = currentSongState?.imageUrl,
+            artUrl = coverImage,
             contentDescription = currentSongState?.title,
             isImageScaleFit = isImageScaleFit,
             onSwipeLeft = { mainViewModel.onEvent(MainEvent.SkipNext) },

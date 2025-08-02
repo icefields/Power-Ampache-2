@@ -22,8 +22,14 @@
 package luci.sixsixsix.powerampache2.domain.datasource
 
 import kotlinx.coroutines.flow.Flow
+import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
+import luci.sixsixsix.powerampache2.domain.models.SortOrder
 
 interface AlbumsOfflineDataSource {
     val recommendedFlow: Flow<List<Album>>
+
+    suspend fun getAlbums(username: String, query: String, sort: AlbumSortOrder, order: SortOrder): List<Album>
+    suspend fun getAlbumFromId(id: String): Album
 }

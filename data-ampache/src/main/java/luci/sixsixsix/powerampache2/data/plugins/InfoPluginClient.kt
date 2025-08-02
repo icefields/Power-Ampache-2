@@ -36,6 +36,8 @@ import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import luci.sixsixsix.mrlog.BuildConfig
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ID
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_SERVICE_ID
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginArtistData
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
@@ -43,9 +45,6 @@ import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
-
-const val PLUGIN_INFO_ID = "luci.sixsixsix.powerampache2.infoplugin"
-const val PLUGIN_INFO_SERVICE_ID = "${PLUGIN_INFO_ID}.InfoFetcherService"
 
 @Singleton
 class InfoPluginClient @Inject constructor(

@@ -30,9 +30,9 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.SEARCH_TIMEOUT
 import luci.sixsixsix.powerampache2.common.exportSong
+import luci.sixsixsix.powerampache2.common.toMediaItem
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.toMediaItem
 import luci.sixsixsix.powerampache2.player.PlayerEvent
 
 /**

@@ -38,6 +38,7 @@ import luci.sixsixsix.powerampache2.data.local.entities.toSong
 import luci.sixsixsix.powerampache2.data.remote.MainNetwork
 import luci.sixsixsix.powerampache2.di.LocalDataSource
 import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
+import luci.sixsixsix.powerampache2.di.PluginDataSource
 import luci.sixsixsix.powerampache2.di.RemoteDataSource
 import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
@@ -70,7 +71,7 @@ class ArtistsRepositoryImpl @Inject constructor(
     @LocalDataSource private val songsDbDataSource: SongsDbDataSource,
     @OfflineModeDataSource private val artistsOfflineDataSource: ArtistsOfflineModeDataSource,
     @OfflineModeDataSource private val songsOfflineDataSource: SongsOfflineDataSource,
-    private val infoPluginDataSource: InfoPluginDataSource,
+    @PluginDataSource private val infoPluginDataSource: InfoPluginDataSource,
     api: MainNetwork,
     db: MusicDatabase,
     private val errorHandler: ErrorHandler

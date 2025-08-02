@@ -21,6 +21,9 @@
  */
 package luci.sixsixsix.powerampache2.data.offlinemode
 
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
@@ -35,8 +38,13 @@ class SongsOfflineDataSourceImpl @Inject constructor(
 ): SongsOfflineDataSource {
     private val dao = db.dao
 
-    override val offlineSongsFlow = dao.downloadedSongsFlow().map { entities ->
-        entities.map { it.toSong() }
+    override val offlineSongsFlow = dao.getCurrentMultiuserIdFlow()
+        .flatMapLatest { multiUserId ->
+            if (multiUserId == null) emptyFlow()
+            else
+                dao.downloadedSongsFromIdFlow(multiUserId).map { entities ->
+                    entities.map { it.toSong() }
+                }
     }
 
     override suspend fun getRecentSongs(): List<Song> =

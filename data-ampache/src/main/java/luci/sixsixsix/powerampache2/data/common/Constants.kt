@@ -41,4 +41,5 @@ object Constants {
 
     // FLAGS
     const val CLEAR_TABLE_AFTER_FETCH = false
+    const val REMOVE_DUPLICATES = true
 }

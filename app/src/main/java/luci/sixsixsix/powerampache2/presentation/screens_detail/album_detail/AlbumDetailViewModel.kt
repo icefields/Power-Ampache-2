@@ -46,6 +46,7 @@ import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
+import luci.sixsixsix.powerampache2.domain.usecase.albums.AlbumFromIdUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.AlbumDataFromPluginUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsInfoPluginInstalled
@@ -70,6 +71,7 @@ class AlbumDetailViewModel @Inject constructor(
     private val recommendedArtistsUseCase: RecommendedArtistsUseCase,
     private val isInfoPluginInstalled: IsInfoPluginInstalled,
     private val getAlbumInfoPluginUseCase: AlbumDataFromPluginUseCase,
+    private val albumFromIdUseCase: AlbumFromIdUseCase,
     private val songsRepository: SongsRepository,
     private val albumsRepository: AlbumsRepository,
     private val playlistManager: MusicPlaylistManager,
@@ -90,8 +92,7 @@ class AlbumDetailViewModel @Inject constructor(
             .filterNotNull()
             .flatMapConcat { albumId ->
                 getSongsFromAlbum(albumId)
-                albumsRepository
-                    .getAlbum(albumId)
+                albumFromIdUseCase(albumId)
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Album())
 
     val infoPluginArtistStateFlow = albumStateFlow.map { album ->
@@ -243,7 +244,8 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getAlbumInfoFromPlugin(album: Album) = if (isInfoPluginInstalled()) {
+    private suspend fun getAlbumInfoFromPlugin(album: Album) =
+        if (isInfoPluginInstalled() && (album.name.isNotBlank() || album.artist.name.isNotBlank())) {
         getAlbumInfoPluginUseCase(album)
     } else null
 }

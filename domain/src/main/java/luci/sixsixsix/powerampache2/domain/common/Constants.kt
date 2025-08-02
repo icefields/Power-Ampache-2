@@ -72,5 +72,15 @@ object Constants {
     const val DOGMAZIC_FAKE_CITY = "Aoshima"
     const val USER_DEFAULT_MASTODON_URL = "https://floss.social/@powerampache"
 
+    // PLUGINS - LYRICS
+    const val PLUGIN_LYRICS_ID = "luci.sixsixsix.powerampache2.lyricsplugin"
+    const val PLUGIN_LYRICS_SERVICE_ID = "luci.sixsixsix.powerampache2.lyricsplugin.LyricsFetcherService"
+    const val PLUGIN_LYRICS_ACTIVITY_ID = "luci.sixsixsix.powerampache2.lyricsplugin.MainActivity"
+
+    // PLUGINS - METADATA
+    const val PLUGIN_INFO_ID = "luci.sixsixsix.powerampache2.infoplugin"
+    const val PLUGIN_INFO_SERVICE_ID = "${PLUGIN_INFO_ID}.InfoFetcherService"
+    const val PLUGIN_INFO_ACTIVITY_ID = "${PLUGIN_INFO_ID}.MainActivity"
+
     lateinit var config: Pa2Config
 }

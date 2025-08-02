@@ -60,12 +60,12 @@ import luci.sixsixsix.powerampache2.common.Constants.PLAY_LOAD_TIMEOUT
 import luci.sixsixsix.powerampache2.common.Constants.SERVICE_STOP_TIMEOUT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.shareLink
+import luci.sixsixsix.powerampache2.common.toMediaItem
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.isFavourite
-import luci.sixsixsix.powerampache2.domain.models.toMediaItem
 import luci.sixsixsix.powerampache2.domain.usecase.DownloadSongUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.SessionFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.GetLocalSettingsUseCase
