@@ -35,11 +35,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
-import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Genre
+import luci.sixsixsix.powerampache2.domain.usecase.albums.AlbumsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsByGenreUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
@@ -52,7 +51,7 @@ class SearchViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
     private val artistsByGenreUseCase: ArtistsByGenreUseCase,
     private val artistsUseCase: ArtistsUseCase,
-    private val albumsRepository: AlbumsRepository,
+    private val albumsUseCase: AlbumsUseCase,
     private val playlistsUseCase: PlaylistsUseCase,
     private val songsRepository: SongsRepository,
     private val settingsFlow: LocalSettingsFlowUseCase,
@@ -234,7 +233,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun searchAlbums() = viewModelScope.launch {
-        albumsRepository.getAlbums(true, state.searchQuery).collect { result ->
+        albumsUseCase(true, state.searchQuery).collect { result ->
             when (result) {
                 is Resource.Success ->
                     result.data?.let { albums ->

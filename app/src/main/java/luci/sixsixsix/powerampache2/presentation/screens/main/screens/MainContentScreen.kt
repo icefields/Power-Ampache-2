@@ -110,6 +110,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEven
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsMainContent
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.plugins.PluginsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.search.SearchViewEvent
 import luci.sixsixsix.powerampache2.presentation.screens.search.SearchViewModel
@@ -290,6 +291,10 @@ fun MainContentScreen(
                                // already handled by the drawer header
                            }
                            MainContentMenuItem.About -> AboutScreen(
+                               navigator = navigator,
+                               settingsViewModel = settingsViewModel
+                           ).also { barTitle = stringResource(id = menuItem.title) }
+                           MainContentMenuItem.Plugins -> PluginsScreen(
                                navigator = navigator,
                                settingsViewModel = settingsViewModel
                            ).also { barTitle = stringResource(id = menuItem.title) }

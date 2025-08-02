@@ -63,6 +63,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -88,6 +89,7 @@ import luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail.co
 private const val GRID_ITEMS_ROW = 2
 private const val GRID_ITEMS_ROW_LAND = 5
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Destination
@@ -150,31 +152,65 @@ fun ArtistDetailScreen(
         InfoDialogArtist(state.artist, infoPluginArtistState) { summaryOpen = false }
     }
 
-    val artUrlTop = generateArtistArtUrl(state.artist, state.albums)
-    val artUrlBottom = generateArtistArtUrl(state.artist, state.albums)
+    var artUrlTop = generateArtistArtUrl(state.artist, state.albums).ifBlank {
+        infoPluginArtistState?.imageUrl
+    }
+    var artUrlBottom = generateArtistArtUrl(state.artist, state.albums).ifBlank {
+        infoPluginArtistState?.imageUrl
+    }
+
+    var imageTopError by remember { mutableStateOf(false) }
+    var imageBottomError by remember { mutableStateOf(false) }
+
+
+    if (imageBottomError) {
+        infoPluginArtistState?.imageUrl?.let { imgUrl ->
+            // fallback to previous
+            imgUrl.ifBlank { generateArtistArtUrl(state.artist, state.albums) }
+        }
+    }
+
+    if (imageTopError) {
+        artUrlTop = infoPluginArtistState?.imageUrl?.let { imgUrl ->
+            imgUrl.ifBlank { generateArtistArtUrl(state.artist, state.albums) }
+        }
+    }
 
     //val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            model = artUrlBottom,
-            contentScale = ContentScale.Crop,
+        if (artUrlBottom != null && artUrlBottom.isNotBlank()) {
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+                model = artUrlBottom,
+                contentScale = ContentScale.Crop,
 //            placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
-            contentDescription = state.artist.name
-        )
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            model = artUrlTop,
-            contentScale = ContentScale.FillWidth,
+                contentDescription = state.artist.name,
+                onError = { imageBottomError = true },
+                onSuccess = {
+                    imageBottomError = false
+                }
+            )
+        }
+
+        if (artUrlTop != null && artUrlTop.isNotBlank()) {
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+                model = artUrlTop,
+                contentScale = ContentScale.FillWidth,
 //            placeholder = placeholder,
 //            error = painterResource(id = R.drawable.ic_image),
-            contentDescription = state.artist.name,
-        )
+                contentDescription = state.artist.name,
+                onError = { imageTopError = true },
+                onSuccess = {
+                    imageBottomError = false
+                }
+            )
+        }
         // full screen view to add a transparent black layer on top
         // of the images for readability
         Box(modifier = Modifier

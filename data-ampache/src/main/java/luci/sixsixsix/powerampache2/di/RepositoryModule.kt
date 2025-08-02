@@ -47,6 +47,7 @@ import luci.sixsixsix.powerampache2.data.offlinemode.SongsOfflineDataSourceImpl
 import luci.sixsixsix.powerampache2.data.plugins.InfoPluginDataSourceImpl
 import luci.sixsixsix.powerampache2.data.plugins.LyricsPluginDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
+import luci.sixsixsix.powerampache2.data.remote.datasource.AlbumsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.datasource.ArtistsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.datasource.PlaylistsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.datasource.SongsRemoteDataSourceImpl
@@ -60,6 +61,7 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.datasource.AlbumsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.AlbumsOfflineDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.AlbumsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsOfflineModeDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsRemoteDataSource
@@ -203,6 +205,13 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    @RemoteDataSource
+    abstract fun albumsRemoteDataSourceProvider(
+        albumsRemoteDataSourceImpl: AlbumsRemoteDataSourceImpl
+    ): AlbumsRemoteDataSource
+
+    @Binds
+    @Singleton
     @LocalDataSource
     abstract fun songsDbDataSourceProvider(
         songsDbDataSourceImpl: SongsDbDataSourceImpl
@@ -244,11 +253,13 @@ abstract class RepositoryModule {
     ): PlaylistsRemoteDataSource
 
     @Binds
+    @PluginDataSource
     abstract fun lyricsPluginDataSourceProvider(
         lyricsPluginDataSourceImpl: LyricsPluginDataSourceImpl
     ): LyricsPluginDataSource
 
     @Binds
+    @PluginDataSource
     abstract fun infoPluginDataSourceProvider(
         infoPluginDataSourceImpl: InfoPluginDataSourceImpl
     ): InfoPluginDataSource
@@ -265,3 +276,7 @@ annotation class LocalDataSource
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class OfflineModeDataSource
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class PluginDataSource

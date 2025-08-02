@@ -31,16 +31,13 @@ import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import luci.sixsixsix.mrlog.BuildConfig
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_LYRICS_ID
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_LYRICS_SERVICE_ID
 import luci.sixsixsix.powerampache2.domain.plugin.lyrics.PluginSongLyrics
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
-
-const val PLUGIN_LYRICS_ID = "luci.sixsixsix.powerampache2.lyricsplugin"
-const val PLUGIN_LYRICS_SERVICE_ID = "luci.sixsixsix.powerampache2.lyricsplugin.LyricsFetcherService"
-
-
 
 @Singleton
 class LyricsPluginClient @Inject constructor(

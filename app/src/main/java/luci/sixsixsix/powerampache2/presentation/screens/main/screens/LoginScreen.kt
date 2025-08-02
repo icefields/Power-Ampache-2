@@ -287,13 +287,28 @@ fun LoginScreenFooter(
 
 @Composable
 fun DebugLoginButtons(
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit,
+    onEvent: (AuthEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         DebugLoginButton(
             server = Servers.RemoteDebug,
             buttonText = R.string.loginScreen_remote_server,
+            onEvent = onEvent
+        )
+        DebugLoginButton(
+            server = Servers.RemoteDebug2,
+            buttonText = R.string.loginScreen_remote_server2,
+            onEvent = onEvent
+        )
+        DebugLoginButton(
+            server = Servers.RemoteDebug3,
+            buttonText = R.string.loginScreen_remote_server3,
+            onEvent = onEvent
+        )
+        DebugLoginButton(
+            server = Servers.LocalDev,
+            buttonText = R.string.loginScreen_local_server,
             onEvent = onEvent
         )
         DebugLoginButton(
@@ -304,11 +319,6 @@ fun DebugLoginButtons(
         DebugLoginButton(
             server = Servers.AmpacheDemo,
             buttonText = R.string.loginScreen_demo_server,
-            onEvent = onEvent
-        )
-        DebugLoginButton(
-            server = Servers.LocalDev,
-            buttonText = R.string.loginScreen_local_server,
             onEvent = onEvent
         )
     }

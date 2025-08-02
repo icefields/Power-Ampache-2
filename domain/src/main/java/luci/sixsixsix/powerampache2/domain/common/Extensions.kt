@@ -27,6 +27,7 @@ import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_FLOAT
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
 import luci.sixsixsix.powerampache2.domain.common.Constants.MAX_QUEUE_SIZE
+import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.lang.ref.WeakReference
@@ -206,3 +207,20 @@ fun Any.toDebugMap() = LinkedHashMap<String, String>().also { map ->
  * Limit queue size to MAX_QUEUE_SIZE, to avoid overflows with the media player
  */
 fun List<Song>.reduceList() = if (size > MAX_QUEUE_SIZE) { subList(0, MAX_QUEUE_SIZE) } else this
+
+fun List<Song>.removeDuplicates() =
+    this.associateByTo(LinkedHashMap()) { it.name.lowercase().trim() }.values.toList()
+
+fun List<Album>.removeAlbumDuplicates() = this.filter { it.songCount > 0 } // remove empty albums
+    .associateByTo(LinkedHashMap()) { it.name.lowercase().trim() }.values.toList()
+
+fun sanitizeSortTerm(term: String) = term.replace("!","")
+    .replace("\"","")
+    .replace("'","")
+    .replace("`","")
+    .replace("(","")
+    .replace("[","")
+    .replace("{","")
+    .replace(".","")
+    .replace(",","")
+    .lowercase()
