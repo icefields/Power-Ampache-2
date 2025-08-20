@@ -36,6 +36,7 @@ import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import luci.sixsixsix.mrlog.BuildConfig
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_SERVICE_ID
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
@@ -220,7 +221,7 @@ class InfoPluginClient @Inject constructor(
             context.packageManager.getPackageInfo(PLUGIN_INFO_ID, 0)
             true
         } catch (e: PackageManager.NameNotFoundException) {
-            if (BuildConfig.DEBUG) e.printStackTrace()
+            if (BuildConfig.DEBUG) { L("Info Plugin not installed, caught ${e.localizedMessage}") }
             false
         }
     }

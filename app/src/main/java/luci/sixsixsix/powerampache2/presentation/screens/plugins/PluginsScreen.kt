@@ -1,8 +1,28 @@
+/**
+ * Copyright (C) 2025  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.presentation.screens.plugins
 
 import android.content.Intent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,26 +35,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ACTIVITY_ID
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ACTIVITY_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_LYRICS_ACTIVITY_ID
@@ -56,6 +74,7 @@ fun PluginsScreen(
         isLoading = state.isLoading,
         isLyricsPluginInstalled = state.isLyricsPluginInstalled,
         isAndroidAutoPluginInstalled = state.isAndroidAutoPluginInstalled,
+        isChromecastPluginInstalled = state.isChromecastPluginInstalled,
         isMetadataPluginInstalled = state.isMetadataPluginInstalled,
         isExternalDataSourcePluginInstalled = state.isExternalDataSourcePluginInstalled
     )
@@ -115,7 +134,9 @@ fun PluginsScreenContent(
         PluginListItem (isInstalled = isChromecastPluginInstalled,
             title = "Chromecast",
             description = "Plugin to connect to Chromecast"
-        ) { }
+        ) { context.startActivity(Intent()
+            .setClassName(PLUGIN_CHROMECAST_ID, PLUGIN_CHROMECAST_ACTIVITY_ID)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
 
         Spacer(modifier = Modifier.fillMaxWidth().height(spacerH))
         PluginListItem (isInstalled = isAndroidAutoPluginInstalled,

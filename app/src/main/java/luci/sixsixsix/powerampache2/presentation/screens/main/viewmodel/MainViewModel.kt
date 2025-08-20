@@ -68,6 +68,8 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.isFavourite
 import luci.sixsixsix.powerampache2.domain.usecase.DownloadSongUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.SessionFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsChromecastPluginInstalled
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.SendQueueToChromecastUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.GetLocalSettingsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.IsOfflineModeEnabledUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
@@ -96,6 +98,8 @@ class MainViewModel @Inject constructor(
     val offlineModeFlowUseCase: OfflineModeFlowUseCase,
     val sessionFlowUseCase: SessionFlowUseCase,
     val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
+    val isChromecastPluginInstalled: IsChromecastPluginInstalled,
+    val sendQueueToChromecastUseCase: SendQueueToChromecastUseCase,
     val musicRepository: MusicRepository,
     val songsRepository: SongsRepository,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
@@ -472,6 +476,8 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
+    fun chromecastPluginInstalled() = isChromecastPluginInstalled()
 
     /**
      * updates the error log, accessible via settings

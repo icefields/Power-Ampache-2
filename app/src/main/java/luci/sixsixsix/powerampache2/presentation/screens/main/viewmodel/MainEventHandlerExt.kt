@@ -22,6 +22,8 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.UnstableApi
@@ -31,9 +33,12 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Constants.SEARCH_TIMEOUT
 import luci.sixsixsix.powerampache2.common.exportSong
 import luci.sixsixsix.powerampache2.common.toMediaItem
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ACTIVITY_ID
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ID
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.PlayerEvent
+import luci.sixsixsix.powerampache2.player.PlayerEvent.*
 
 /**
  * UI ACTIONS AND EVENTS (play, stop, skip, like, download, etc ...)
@@ -96,11 +101,11 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         }
         is MainEvent.Repeat -> viewModelScope.launch {
             val nextRepeatMode = nextRepeatMode()
-            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.RepeatToggle(nextRepeatMode))
+            simpleMediaServiceHandler.onPlayerEvent(RepeatToggle(nextRepeatMode))
             repeatMode = nextRepeatMode
         }
         is MainEvent.Shuffle -> viewModelScope.launch {
-            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.ShuffleToggle(event.shuffleOn))
+            simpleMediaServiceHandler.onPlayerEvent(ShuffleToggle(event.shuffleOn))
             shuffleOn = event.shuffleOn
         }
         is MainEvent.SkipNext -> viewModelScope.launch {
@@ -111,7 +116,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         }
         is MainEvent.UpdateProgress -> viewModelScope.launch {
             progress = event.newProgress
-            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Progress(event.newProgress))
+            simpleMediaServiceHandler.onPlayerEvent(Progress(event.newProgress))
         }
         MainEvent.Backwards -> viewModelScope.launch {
             simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Backward)
@@ -155,6 +160,28 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
 
         MainEvent.OnEnableOfflineMode -> viewModelScope.launch {
             toggleOfflineMode()
+        }
+
+        MainEvent.OnCastPress -> {
+            // check if queue is empty before going to chromecast
+            if (currentQueue().value.isEmpty()) {
+                // TODO: localize string
+                Toast.makeText(context, "Your Queue is Empty", Toast.LENGTH_LONG).show()
+                return
+            }
+
+            // send queue to cast plugin
+            if (isChromecastPluginInstalled()) {
+                viewModelScope.launch {
+                    sendQueueToChromecastUseCase(currentQueue().value)
+                }
+            }
+
+            // TODO: create extension for intent (it's used twice)
+            context.startActivity(Intent()
+                .setClassName(PLUGIN_CHROMECAST_ID, PLUGIN_CHROMECAST_ACTIVITY_ID)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (isPlaying) playPauseSong()
         }
     }
 }

@@ -14,6 +14,7 @@
     <queries>
         <package android:name="luci.sixsixsix.powerampache2.infoplugin" />
         <package android:name="luci.sixsixsix.powerampache2.lyricsplugin" />
+        <package android:name="luci.sixsixsix.powerampache2.chromecastplugin" />
     </queries>
 
     <application

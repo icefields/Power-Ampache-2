@@ -31,14 +31,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.lastOrNull
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
@@ -49,7 +43,6 @@ import luci.sixsixsix.powerampache2.common.pop
 import luci.sixsixsix.powerampache2.data.common.Constants.CLEAR_TABLE_AFTER_FETCH
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS_SEARCH
 import luci.sixsixsix.powerampache2.data.common.Constants.QUICK_PLAY_MIN_SONGS
-import luci.sixsixsix.powerampache2.data.common.Constants.REMOVE_DUPLICATES
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.HistoryEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toHistoryEntity
@@ -70,7 +63,6 @@ import luci.sixsixsix.powerampache2.di.RemoteDataSource
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
-import luci.sixsixsix.powerampache2.domain.common.Constants.MAX_QUEUE_SIZE
 import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
 import luci.sixsixsix.powerampache2.domain.common.removeDuplicates
 import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
@@ -126,10 +118,7 @@ class SongsRepositoryImpl @Inject constructor(
             // before the very first emission.
             delay(5_000)
             emitAll(songsOfflineDataSource.offlineSongsFlow)
-        }
-        //songsOfflineDataSource.offlineSongsFlow
-            .onEach { println("aaaa offlineSongsFlow ${it.size}") }
-            .stateIn(
+        }.stateIn(
             scope = applicationCoroutineScope,
             started = SharingStarted.Eagerly, //SharingStarted.WhileSubscribed(60 * 1000),
             initialValue = listOf()
@@ -137,7 +126,6 @@ class SongsRepositoryImpl @Inject constructor(
 
     // TODO FIXME: this is initially null because the settings table is empty
     val songUrlDataStateFlow = dao.getSongUrlData()
-        .onEach { println("aaaa songUrlDataStateFlow TOKEN: ${it?.authToken ?: "NULL"}") }
         .stateIn(
         scope = applicationCoroutineScope,
         started = SharingStarted.Eagerly,
@@ -328,7 +316,7 @@ class SongsRepositoryImpl @Inject constructor(
     }.catch { e -> errorHandler("getSongsFromAlbum()", e, this) }
 
     private fun removeDuplicates(songs: List<Song>) =
-        if (REMOVE_DUPLICATES) songs.removeDuplicates() else songs
+        if (Constants.config.removeDuplicateSongs) songs.removeDuplicates() else songs
 
     private suspend fun getSongsStats(statFilter: MainNetwork.StatFilter, fetchRemote: Boolean = true) =
         if (!isOfflineModeEnabled()) flow {
@@ -546,8 +534,8 @@ class SongsRepositoryImpl @Inject constructor(
             }
         }
         val shuffledSongList = resultSet.toList().shuffled().apply {
-            if (size > MAX_QUEUE_SIZE)
-                subList(0, MAX_QUEUE_SIZE)
+            if (size > Constants.config.queueSizeLimit)
+                subList(0, Constants.config.queueSizeLimit)
         }
         emit(Resource.Success(data = shuffledSongList, networkData = shuffledSongList))
         emit(Resource.Loading(false))
@@ -569,13 +557,11 @@ class SongsRepositoryImpl @Inject constructor(
      */
     private suspend fun buildSongUrl(song: Song) = songUrlDataStateFlow.first()?.run { /*dao.getSongUrlData()*/
         getUrl(song.mediaId)
-            //.also { println("aaaa buildSongUrl ${song.title}") }
     } ?: getSession()?.auth ?.let { auth ->
         SongUrl(
             authToken = auth,
             serverUrl = getCredentials()!!.serverUrl
         ).getUrl(song.mediaId)
-            //.also { println("aaaa buildSongUrl FLOW WAS NULL, FALLBACK 1 ${song.title}") }
     } ?: song.songUrl
 
     override suspend fun isSongAvailableOffline(song: Song): Boolean =

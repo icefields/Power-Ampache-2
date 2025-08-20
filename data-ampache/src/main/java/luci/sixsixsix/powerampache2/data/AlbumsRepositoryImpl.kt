@@ -25,6 +25,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -32,7 +33,6 @@ import kotlinx.coroutines.flow.map
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
-import luci.sixsixsix.powerampache2.data.common.Constants.REMOVE_DUPLICATES
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
@@ -84,7 +84,7 @@ class AlbumsRepositoryImpl @Inject constructor(
 ): BaseAmpacheRepository(api, db, errorHandler), AlbumsRepository {
 
     private fun removeDuplicates(albums: List<Album>) =
-        if (REMOVE_DUPLICATES) albums.removeAlbumDuplicates() else albums
+        if (Constants.config.removeDuplicateAlbums) albums.removeAlbumDuplicates() else albums
 
     override suspend fun getAlbums(
         fetchRemote: Boolean,
@@ -380,12 +380,11 @@ class AlbumsRepositoryImpl @Inject constructor(
     override val highestRatedAlbumsFlow: Flow<List<Album>>
         get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
             dao.getHighestRatedAlbumsFlow()
+                .map { it.filter { it.rating >= Constants.config.hideAlbumsRatedBelow } } // assumes 0 as no-rating
                 .map { it.map { ent -> ent.toAlbum() } }
-                .map { albums ->
-                    if (isOfflineModeEnabled) {
+                .map { albums -> if (isOfflineModeEnabled) {
                         albums.filter { album -> isAlbumOffline(album) }
-                    } else
-                        albums
+                    } else albums
                 }
         }
 
