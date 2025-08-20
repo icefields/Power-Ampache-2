@@ -168,33 +168,53 @@ fun AlbumDetailScreen(
         InfoDialogAlbum(album, pluginAlbum) { infoVisibility = false }
     }
 
+    var imageUrl: String? by remember { mutableStateOf(null) }
+    var imageError by remember { mutableStateOf(false) }
+
     val artUrl = if (isOffline != null && isOffline == true && songs.isNotEmpty()) {
+        // in offline mode, grab url from a song
         songs[0].imageUrl
     } else if(album.artUrl.isNotBlank()) {
         album.artUrl
-    } else null
+    } else { //if (pluginAlbum != null) {
+        // try with the plugin art
+        pluginAlbum?.imageUrl.let {
+            it?.ifBlank { pluginAlbum?.imageArtist }
+        }
+    }?.ifBlank {
+        // try with the plugin art
+        pluginAlbum?.imageUrl.let {
+            it?.ifBlank { pluginAlbum?.imageArtist }
+        }
+    }
 
+    imageUrl = if (imageError) {
+        pluginAlbum?.imageUrl ?: artUrl
+    } else
+        artUrl
 
     //val placeholder = painterResource(id = R.drawable.img_album_detail_placeholder)
     Box(modifier = modifier) {
-        if (artUrl != null) {
+        if (imageUrl != null) {
             AsyncImage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopCenter),
-                model = artUrl,
+                model = imageUrl,
                 contentScale = ContentScale.Crop,
                 //placeholder = placeholder,
-                contentDescription = album.name
+                contentDescription = album.name,
+                onError = { imageError = true }
             )
             AsyncImage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopCenter),
-                model = artUrl,
+                model = imageUrl,
                 contentScale = ContentScale.FillWidth,
                 //placeholder = placeholder,
                 contentDescription = album.name,
+                onError = { imageError = true }
             )
         }
 

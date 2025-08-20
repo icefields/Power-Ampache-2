@@ -25,10 +25,13 @@ const val ALBUM_HIGHEST_FETCH_LIMIT = 500
 const val PLAYLIST_SONGS_FETCH_LIMIT = 100
 const val PLAYBACK_ERRORS_RETRIES = 16
 const val PLAYLIST_FETCH_LIMIT = 0
+const val QUEUE_SIZE_LIMIT = 666
 const val PLAYLIST_ADD_NEW_ENABLE = true
 const val API_RECORD_PLAY_ENABLE = true
 const val SETTINGS_IS_DOWNLOAD_SDCARD = true
 const val FORCE_SKIP_NETWORK_ERROR = false
+const val REMOVE_DUPLICATE_SONGS = false
+const val REMOVE_DUPLICATE_ALBUMS = false
 
 const val CLEAR_LIBRARY_ON_CATALOG_CLEAN = true
 const val FETCH_ALBUMS_WITH_ARTISTS = true
@@ -109,6 +112,18 @@ data class Pa2Config(
     val songsFrequentFetchLimit: Int = SONGS_FREQUENT_LIMIT_FETCH,
     val songsRecentFetchLimit: Int = SONGS_RECENT_LIMIT_FETCH,
 
+    val queueSizeLimit: Int = QUEUE_SIZE_LIMIT,
+    val removeDuplicateSongs: Boolean = REMOVE_DUPLICATE_SONGS,
+    val removeDuplicateAlbums: Boolean = REMOVE_DUPLICATE_ALBUMS,
+    val hideAlbumsRatedBelow: Float = 0.0f,
+
     // override the limit with the size of the local data, expensive on network on the long term
     val useIncrementalLimitForAlbums: Boolean,// = USE_INCREMENTAL_LIMIT_ALBUMS
 )
+
+fun Pa2Config.isIntroMessageUserString() = shouldShowIntroMessage &&
+        !isIntroMessageLocal &&
+        (introMessage != INTRO_MESSAGE_REMOTE_VERSION) &&
+        (!introMessage.endsWith(".html")) &&
+        (!introMessage.endsWith(".htm")) &&
+        (!introMessage.endsWith(".txt"))

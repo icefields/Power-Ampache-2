@@ -32,6 +32,7 @@ import androidx.room.Transaction
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapConcat
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
@@ -59,11 +60,12 @@ private const val multiUserCondition = " LOWER(multiUserId) == LOWER((SELECT mul
 
 @Dao
 interface MusicDao {
+    // TODO FIXME: this is initially null because the settings table is empty
     @Query("""SELECT session.auth AS authToken, credentials.serverUrl, settings.streamingQuality as bitrate, credentials.username as user FROM
         (SELECT * FROM sessionentity WHERE primaryKey == '$SESSION_PRIMARY_KEY') AS session, 
         (SELECT * FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY') AS credentials,
         (SELECT * FROM localsettingsentity WHERE LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) == LOWER(username)) AS settings""")
-    suspend fun getSongUrlData(): SongUrl?
+    fun getSongUrlData(): Flow<SongUrl?>
 
 // --- SESSION ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -394,13 +396,23 @@ interface MusicDao {
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(mediaId) == LOWER(:songId) AND $multiUserCondition""")
     suspend fun getDownloadedSongById(songId: String): DownloadedSongEntity?
 
+    @Deprecated("USE downloadedSongsFlow()")
     @Query("""SELECT * FROM downloadedsongentity WHERE $multiUserCondition""")
+    fun downloadedSongsFlowOld(): Flow<List<DownloadedSongEntity>>
+
+    @Query("""SELECT * FROM downloadedsongentity WHERE multiUserId == :multiUserId""")
+    fun downloadedSongsFromIdFlow(multiUserId: String): Flow<List<DownloadedSongEntity>>
+
+    @Transaction
+    @Query("""SELECT d.* FROM downloadedsongentity d
+        JOIN credentialsentity c ON d.multiUserId = c.multiUserId COLLATE NOCASE
+        WHERE c.primaryKey = '$CREDENTIALS_PRIMARY_KEY'""")
     fun downloadedSongsFlow(): Flow<List<DownloadedSongEntity>>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE $multiUserCondition""")
     suspend fun getOfflineSongs(): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:albumId) == LOWER(albumId) AND $multiUserCondition ORDER BY trackNumber""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE :albumId == albumId AND $multiUserCondition ORDER BY trackNumber""")
     suspend fun getOfflineSongsFromAlbum(albumId: String): List<DownloadedSongEntity>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:artistId) == LOWER(artistId) AND $multiUserCondition""")
@@ -582,6 +594,9 @@ interface MusicDao {
 
     @Query("""SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'""")
     suspend fun getCurrentMultiuserId(): String
+
+    @Query("""SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'""")
+    fun getCurrentMultiuserIdFlow(): Flow<String?>
 
     @Query("""SELECT * FROM multiusercredentialentity WHERE LOWER(:multiUserKey) == LOWER(primaryKey)""")
     suspend fun getMultiUserCredentials(multiUserKey: String): MultiUserCredentialEntity?

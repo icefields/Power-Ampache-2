@@ -29,6 +29,8 @@ object Constants {
     const val DB_EMPTY_ATTRIBUTE = "{\"attr\":[]}" // "{\"attr\":[{\"id\":\"209\",\"name\":\"Overkill\"}]}
 
     // NETWORK
+    const val LOCAL_CONFIG_PATH = "/powerampache/config.json"
+    const val ALLOW_LOCAL_CONFIG = true
     const val NETWORK_REQUEST_LIMIT_HOME = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_BY_GENRE = 40
     const val QUICK_PLAY_MIN_SONGS = 250

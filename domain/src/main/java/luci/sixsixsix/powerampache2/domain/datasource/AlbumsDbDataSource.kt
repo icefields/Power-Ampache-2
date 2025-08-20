@@ -23,10 +23,15 @@ package luci.sixsixsix.powerampache2.domain.datasource
 
 import kotlinx.coroutines.flow.Flow
 import luci.sixsixsix.powerampache2.domain.models.Album
+import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
 import luci.sixsixsix.powerampache2.domain.models.Artist
+import luci.sixsixsix.powerampache2.domain.models.SortOrder
 
 interface AlbumsDbDataSource {
     val recommendedFlow: Flow<List<Album>>
 
     suspend fun saveAlbumsToDb(username: String, serverUrl: String, albums: List<Album>)
+    suspend fun getAlbums(query: String, sort: AlbumSortOrder, order: SortOrder): List<Album>
+    suspend fun getAlbumFromId(id: String): Album
+    suspend fun getAlbumFromIdFlow(id: String): Flow<Album>
 }

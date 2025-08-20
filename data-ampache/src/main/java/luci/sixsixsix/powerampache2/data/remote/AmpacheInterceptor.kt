@@ -23,6 +23,7 @@ package luci.sixsixsix.powerampache2.data.remote
 
 import kotlinx.coroutines.runBlocking
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.data.common.Constants.LOCAL_CONFIG_PATH
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.domain.errors.ServerUrlNotInitializedException
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
@@ -44,7 +45,7 @@ class AmpacheInterceptor @Inject constructor(
 
     private fun isErrorReportUrl(url: String) = url == configProvider.URL_ERROR_LOG
     private fun isLogoutUrl(url: String) = url.contains("action=goodbye")
-    private fun isInitUrl(url: String) = url == configProvider.CONFIG_URL
+    private fun isInitUrl(url: String) = (url == configProvider.CONFIG_URL || url.contains(LOCAL_CONFIG_PATH))
 
     override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
         var request = requestWithUserAgent(chain.request())

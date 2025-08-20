@@ -55,4 +55,5 @@ sealed class MainEvent {
     data class OnDownloadedSongDelete(val song: Song): MainEvent()
     data class OnExportDownloadedSong(val song: Song): MainEvent()
     data object OnFabPress: MainEvent()
+    data object OnCastPress: MainEvent()
 }

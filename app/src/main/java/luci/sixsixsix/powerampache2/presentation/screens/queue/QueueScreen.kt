@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.presentation.screens.queue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlaylistAdd
@@ -100,46 +101,29 @@ fun QueueScreen(
                     containerColor = Color.Transparent,
                     scrolledContainerColor = MaterialTheme.colorScheme.surface,
                 ),
-                title = {
-                    Text(
-                        text = stringResource(R.string.queue),
-                        maxLines = 1,
-                        fontWeight = FontWeight.Normal,
-                    )
+                title = { Text(text = stringResource(R.string.queue),
+                    maxLines = 1,
+                    fontWeight = FontWeight.Normal,)
                 },
-                navigationIcon = {
-                    CircleBackButton {
-                        navigator.navigateUp()
-                    }
-                },
+                navigationIcon = { CircleBackButton { navigator.navigateUp() } },
                 scrollBehavior = scrollBehavior,
                 actions = {
+                    if (mainViewModel.chromecastPluginInstalled()) {
+                        IconButton(onClick = { mainViewModel.onEvent(MainEvent.OnCastPress) }) {
+                            Icon(imageVector = Icons.Default.Cast, contentDescription = "Cast")
+                        }
+                    }
                     ButtonWithLoadingIndicator(
                         imageVector = Icons.Default.PlaylistAdd,
                         imageContentDescription = "add all songs in queue to playlist",
                         isLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading
-                    ) {
-                        playlistsDialogOpen =
-                            AddToPlaylistOrQueueDialogOpen(true, queueState)
+                    ) { playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, queueState) }
+                    IconButton(onClick = { queueViewModel.onEvent(QueueEvent.OnClearQueue) }) {
+                        Icon(imageVector = Icons.Default.PlaylistRemove, contentDescription = "clear playlist")
                     }
-                    IconButton(
-                        onClick = {
-                            queueViewModel.onEvent(QueueEvent.OnClearQueue)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlaylistRemove,
-                            contentDescription = "clear playlist"
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            mainViewModel.onEvent(MainEvent.PlayPauseCurrent)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = if (!mainViewModel.isPlaying)
-                                Icons.Default.PlayArrow else Icons.Default.Pause,
+                    IconButton(onClick = { mainViewModel.onEvent(MainEvent.PlayPauseCurrent) }) {
+                        Icon(imageVector = if (!mainViewModel.isPlaying)
+                            Icons.Default.PlayArrow else Icons.Default.Pause,
                             contentDescription = stringResource(id = R.string.search_content_description)
                         )
                     }

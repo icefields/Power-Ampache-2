@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main.screens
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -73,6 +74,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -87,6 +89,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ACTIVITY_ID
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ID
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.DownloadProgressView
@@ -110,6 +114,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEven
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsMainContent
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
+import luci.sixsixsix.powerampache2.presentation.screens.plugins.PluginsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.search.SearchResultsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.search.SearchViewEvent
 import luci.sixsixsix.powerampache2.presentation.screens.search.SearchViewModel
@@ -209,6 +214,7 @@ fun MainContentScreen(
                     isFabLoading = mainViewModel.state.isFabLoading,
                     title = barTitle,
                     isGenreSubScreen = isGenreSubScreen,
+                    isChromecastPluginInstalled = false, // force no cast button on main screen (too busy) // mainViewModel.chromecastPluginInstalled(),
                     onOfflineModeSwitch = {
                         settingsViewModel.onEvent(SettingsEvent.OnOfflineToggle)
                     },
@@ -217,7 +223,7 @@ fun MainContentScreen(
                     },
                     onGenreScreenBackClick = {
                         searchViewModel.onEvent(SearchViewEvent.Clear)
-                    }
+                    },
                 ) { event ->
                     when(event) {
                         // OPEN-CLOSE drawer
@@ -226,11 +232,15 @@ fun MainContentScreen(
                                 if (isClosed) open() else close()
                             }
                         }
+
                         MainContentTopAppBarEvent.OnPlaylistIconClick ->
                             navigator.navigate(QueueScreenDestination)
 
                         MainContentTopAppBarEvent.OnNotificationsIconClick ->
                             navigator.navigate(NotificationsScreenDestination)
+
+                        MainContentTopAppBarEvent.OnChromecastIconClick ->
+                            mainViewModel.onEvent(MainEvent.OnCastPress)
                     }
                 }
             },
@@ -290,6 +300,10 @@ fun MainContentScreen(
                                // already handled by the drawer header
                            }
                            MainContentMenuItem.About -> AboutScreen(
+                               navigator = navigator,
+                               settingsViewModel = settingsViewModel
+                           ).also { barTitle = stringResource(id = menuItem.title) }
+                           MainContentMenuItem.Plugins -> PluginsScreen(
                                navigator = navigator,
                                settingsViewModel = settingsViewModel
                            ).also { barTitle = stringResource(id = menuItem.title) }

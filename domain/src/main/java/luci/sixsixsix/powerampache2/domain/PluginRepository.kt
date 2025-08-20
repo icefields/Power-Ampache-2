@@ -21,7 +21,11 @@
  */
 package luci.sixsixsix.powerampache2.domain
 
+import luci.sixsixsix.powerampache2.domain.models.Song
+
 interface PluginRepository {
     fun isLyricsPluginInstalled(): Boolean
     fun isInfoPluginInstalled(): Boolean
+    fun isChromecastPluginInstalled(): Boolean
+    suspend fun sendQueueToChromecast(queue: List<Song>)
 }

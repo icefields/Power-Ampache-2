@@ -88,6 +88,7 @@ val drawerItems = listOf(
     MainContentMenuItem.Library,
     MainContentMenuItem.Offline,
     MainContentMenuItem.Genres,
+    MainContentMenuItem.Plugins,
     MainContentMenuItem.Settings,
     MainContentMenuItem.About,
     //MainContentMenuItem.Logout

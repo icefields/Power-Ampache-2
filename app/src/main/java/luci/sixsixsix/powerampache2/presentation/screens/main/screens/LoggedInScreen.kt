@@ -47,12 +47,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.common.capitalizeWords
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
 import luci.sixsixsix.powerampache2.presentation.dialogs.IntroDialog
@@ -63,6 +65,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEven
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.SongDetailScreen
+import java.util.Locale
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,10 +89,11 @@ fun LoggedInScreen(
 
     // disable snackbar errors in offline mode
     if (state.errorMessage != "") {
+        val offlineModeStr = stringResource(R.string.offlineMode).uppercase()//.capitalize(Locale.getDefault()
         LaunchedEffect(scaffoldState.snackbarHostState, state.errorMessage) {
             scaffoldState.snackbarHostState.showSnackbar(
                 message = state.errorMessage,
-                actionLabel = if (state.errorMessage == errorMessageOffline) "OFFLINE MODE" else null,
+                actionLabel = if (state.errorMessage == errorMessageOffline) offlineModeStr else null,
                 withDismissAction = true,
                 duration = showSnackBarShowDuration
             ).apply {

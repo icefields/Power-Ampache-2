@@ -30,8 +30,7 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 
 @Entity
 data class PlaylistSongEntity(
-    @PrimaryKey
-    val id: String,
+    @PrimaryKey val id: String,
     val songId: String,
     val playlistId: String,
     val position: Int,

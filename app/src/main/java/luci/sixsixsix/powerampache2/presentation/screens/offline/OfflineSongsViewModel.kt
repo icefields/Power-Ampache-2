@@ -46,7 +46,7 @@ class OfflineSongsViewModel @Inject constructor(
             offlineSongsFlow().collect { songs ->
                 state = state.copy(songs = songs, isLoading = false)
                 // TODO check consistency of downloaded songs and database entries every time,
-                //  delete data accordingly
+                //  delete data accordingly. Do this in data layer
             }
         }
     }

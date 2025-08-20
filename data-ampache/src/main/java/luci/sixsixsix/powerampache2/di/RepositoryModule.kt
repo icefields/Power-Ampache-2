@@ -44,9 +44,11 @@ import luci.sixsixsix.powerampache2.data.offlinemode.AlbumsOfflineDataSourceImpl
 import luci.sixsixsix.powerampache2.data.offlinemode.ArtistsOfflineDataSourceImpl
 import luci.sixsixsix.powerampache2.data.offlinemode.PlaylistsOfflineDataSourceImpl
 import luci.sixsixsix.powerampache2.data.offlinemode.SongsOfflineDataSourceImpl
+import luci.sixsixsix.powerampache2.data.plugins.ChromecastPluginDataSourceImpl
 import luci.sixsixsix.powerampache2.data.plugins.InfoPluginDataSourceImpl
 import luci.sixsixsix.powerampache2.data.plugins.LyricsPluginDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
+import luci.sixsixsix.powerampache2.data.remote.datasource.AlbumsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.datasource.ArtistsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.datasource.PlaylistsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.datasource.SongsRemoteDataSourceImpl
@@ -60,6 +62,7 @@ import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.datasource.AlbumsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.AlbumsOfflineDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.AlbumsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsOfflineModeDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.ArtistsRemoteDataSource
@@ -70,6 +73,7 @@ import luci.sixsixsix.powerampache2.domain.datasource.PlaylistsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsOfflineDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsRemoteDataSource
+import luci.sixsixsix.powerampache2.domain.plugin.chromecast.ChromecastPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.info.InfoPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.lyrics.LyricsPluginDataSource
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
@@ -203,6 +207,13 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    @RemoteDataSource
+    abstract fun albumsRemoteDataSourceProvider(
+        albumsRemoteDataSourceImpl: AlbumsRemoteDataSourceImpl
+    ): AlbumsRemoteDataSource
+
+    @Binds
+    @Singleton
     @LocalDataSource
     abstract fun songsDbDataSourceProvider(
         songsDbDataSourceImpl: SongsDbDataSourceImpl
@@ -244,14 +255,22 @@ abstract class RepositoryModule {
     ): PlaylistsRemoteDataSource
 
     @Binds
+    @PluginDataSource
     abstract fun lyricsPluginDataSourceProvider(
         lyricsPluginDataSourceImpl: LyricsPluginDataSourceImpl
     ): LyricsPluginDataSource
 
     @Binds
+    @PluginDataSource
     abstract fun infoPluginDataSourceProvider(
         infoPluginDataSourceImpl: InfoPluginDataSourceImpl
     ): InfoPluginDataSource
+
+    @Binds
+    @PluginDataSource
+    abstract fun chromecastPluginDataSourceProvider(
+        chromecastPluginDataSourceImpl: ChromecastPluginDataSourceImpl
+    ): ChromecastPluginDataSource
 }
 
 @Qualifier
@@ -265,3 +284,7 @@ annotation class LocalDataSource
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class OfflineModeDataSource
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class PluginDataSource

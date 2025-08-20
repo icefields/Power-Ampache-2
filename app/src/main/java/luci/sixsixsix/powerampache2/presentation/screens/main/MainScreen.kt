@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main
 
+import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.delay
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.LOGIN_SCREEN_TIMEOUT
@@ -53,6 +55,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainView
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsEvent
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 
+@OptIn(UnstableApi::class)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,

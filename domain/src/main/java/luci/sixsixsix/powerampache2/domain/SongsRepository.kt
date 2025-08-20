@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.domain
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Song
@@ -29,7 +30,7 @@ import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
 import luci.sixsixsix.powerampache2.domain.plugin.lyrics.PluginSongLyrics
 
 interface SongsRepository {
-    val offlineSongsFlow: Flow<List<Song>>
+    val offlineSongsFlow: StateFlow<List<Song>>
 
     suspend fun getSongs(fetchRemote: Boolean = true, query: String = "", offset: Int = 0): Flow<Resource<List<Song>>>
     suspend fun getSongFromId(songId: String, forceRemote: Boolean = false): Song?

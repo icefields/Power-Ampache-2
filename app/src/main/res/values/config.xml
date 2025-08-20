@@ -8,7 +8,9 @@
 
     <!-- Debug String, only used for development -->
     <string name="loginScreen_local_server" translatable="false">Local Development Server</string>
-    <string name="loginScreen_remote_server" translatable="false">Remote Debug Server</string>
+    <string name="loginScreen_remote_server" translatable="false">Remote Debug Server 1</string>
+    <string name="loginScreen_remote_server2" translatable="false">Remote Debug Server 2</string>
+    <string name="loginScreen_remote_server3" translatable="false">Remote Debug Server 3</string>
     <string name="loginScreen_local_nextcloud" translatable="false">Local Nextcloud Server</string>
     <string name="intent_filter_ampache_deeplink" translatable="false">Share with Power Ampache 2</string>
     <string name="intent_filter_ampache_deeplink_https" translatable="false">Share with Power Ampache 2</string>
