@@ -55,6 +55,8 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.ColorUtils
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.PLAY_STORE_URL
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ACTIVITY_ID
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ID
 import luci.sixsixsix.powerampache2.domain.models.Song
 import java.io.File
 import kotlin.math.absoluteValue
@@ -116,6 +118,12 @@ fun Context.exportSong(song: Song, offlineUri: String) {
     }
 }
 
+/**
+ * Starts the Cast plugin activity.
+ */
+fun Context.startCastPluginActivity() = startActivity(Intent()
+    .setClassName(PLUGIN_CHROMECAST_ID, PLUGIN_CHROMECAST_ACTIVITY_ID)
+    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
 fun getVersionInfoString(context: Context) = try {
     val pInfo: PackageInfo =

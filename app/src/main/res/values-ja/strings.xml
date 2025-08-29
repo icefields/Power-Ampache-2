@@ -253,4 +253,18 @@
     <string name="settings_playerCache_subtitle">Amount of disc cache for the player, in MB</string>
     <string name="settings_player_unit_seconds">Seconds</string>
     <string name="settings_player_unit_mb">MB</string>
+
+    <!-- PLUGINS -->
+    <string name="plugin_cast_queueEmpty_warning">Your Queue is Empty</string>
+    <string name="plugin_cast_queueTooLarge_error">Queue too large, cannot send to the Cast plugin</string>
+
+    <string name="share_link_pa2">Share To Power Ampache 2</string>
+    <string name="share_link_web">Share Url</string>
+    <string name="menu_drawer_plugins">Plugins</string>
+    <string name="settings_downloadAfterPlay_title">Download Song After Play</string>
+    <string name="settings_downloadAfterPlay_onlyFavourites_title">Only Download Favourite Song After Play</string>
+    <string name="settings_downloadAfterPlay_subtitle">Songs will be saved to storage after playback.</string>
+    <string name="offlineMode">Offline Mode</string>
+    <string name="home_section_title_recommended">Recommended</string>
+
 </resources>

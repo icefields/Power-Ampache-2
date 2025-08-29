@@ -51,8 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ACTIVITY_ID
-import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ID
+import luci.sixsixsix.powerampache2.common.startCastPluginActivity
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ACTIVITY_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_LYRICS_ACTIVITY_ID
@@ -134,9 +133,7 @@ fun PluginsScreenContent(
         PluginListItem (isInstalled = isChromecastPluginInstalled,
             title = "Chromecast",
             description = "Plugin to connect to Chromecast"
-        ) { context.startActivity(Intent()
-            .setClassName(PLUGIN_CHROMECAST_ID, PLUGIN_CHROMECAST_ACTIVITY_ID)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+        ) { context.startCastPluginActivity() }
 
         Spacer(modifier = Modifier.fillMaxWidth().height(spacerH))
         PluginListItem (isInstalled = isAndroidAutoPluginInstalled,

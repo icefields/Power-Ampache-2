@@ -73,9 +73,9 @@ fun MainViewModel.observePlaylistManager() {
             }
             L("**** observing playlist change queue (before Load song data) :", queue.size)
             loadSongData()
-            if (isChromecastPluginInstalled()) {
-                sendQueueToChromecastUseCase(queue)
-            }
+//            if (isChromecastPluginInstalled()) {
+//                sendQueueToChromecastUseCase(queue)
+//            }
         }
     }
 }

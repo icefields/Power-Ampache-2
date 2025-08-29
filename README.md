@@ -211,6 +211,11 @@ Before starting any contribution, read the above document and if necessary conta
 - [x] Improve Notifications Screen
 <br>
 
+<br>
+## Roadmap document
+https://github.com/icefields/Power-Ampache-2/discussions/212
+<br>
+
 <!--
 [<img src="https://s1.ax1x.com/2023/01/12/pSu1a36.png" alt="Get it on GitHub" height="80">](https://github.com/icefields/Power-Ampache-2/releases)
 

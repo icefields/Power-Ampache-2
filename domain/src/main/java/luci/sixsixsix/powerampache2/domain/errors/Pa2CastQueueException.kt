@@ -19,20 +19,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.data.plugins
+package luci.sixsixsix.powerampache2.domain.errors
 
-const val KEY_REQUEST_JSON = "json"
-const val KEY_ACTION = "action"
-const val ACTION_SONG = "song"
-const val ACTION_ALBUM = "album"
-const val ACTION_ARTIST = "artist"
-const val KEY_MBID = "mbid"
-const val KEY_ID = "id"
-const val KEY_REQUEST_SONG_TITLE = "songTitle"
-const val KEY_REQUEST_ALBUM_TITLE = "albumTitle"
-const val KEY_REQUEST_ARTIST_NAME = "artistName"
-const val KEY_RESPONSE_SUCCESS = "success"
-
-// Avoid android.os.TransactionTooLargeException: data parcel size xxx bytes by
-// reducing the size of the queue to MAX_CAST_QUEUE.
-const val MAX_CAST_QUEUE = 100
+class Pa2CastQueueException(e: Throwable): Exception(e)

@@ -88,7 +88,7 @@ class ChromecastPluginClient @Inject constructor(
         }
 
         val incomingHandler = Handler(Looper.getMainLooper()) { msg ->
-            continuation.resume(msg.data.getBoolean("success") ?: return@Handler true)
+            continuation.resume(msg.data.getBoolean(KEY_RESPONSE_SUCCESS))
             true
         }
 
@@ -97,12 +97,25 @@ class ChromecastPluginClient @Inject constructor(
         val msg = Message.obtain().apply {
             replyTo = replyMessenger
             data = Bundle().apply {
-                putString(KEY_REQUEST_JSON, gson.toJson(PluginChromecastQueue(queue)))
+                // Avoid android.os.TransactionTooLargeException: data parcel size xxx bytes by
+                // reducing the size of the queue to MAX_CAST_QUEUE.
+                val queueNoLyrics = removeLyricsFromQueue(queue)
+                putString(KEY_REQUEST_JSON, gson.toJson(
+                    PluginChromecastQueue(
+                        if (queueNoLyrics.size > MAX_CAST_QUEUE) queueNoLyrics.subList(0,MAX_CAST_QUEUE) else queueNoLyrics
+                    )
+                ))
             }
         }
 
         serviceMessenger?.send(msg)
     }
+
+    /**
+     * Will remove the lyrics from the songs in the cast queue, to reduce the amount of data sent
+     * to the plugin.
+     */
+    private fun removeLyricsFromQueue(queue: List<Song>) = queue.map { it.copy(lyrics = "") }
 
     fun isChromecastPluginInstalled(): Boolean {
         return try {

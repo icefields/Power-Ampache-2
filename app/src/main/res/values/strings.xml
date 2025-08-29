@@ -272,4 +272,8 @@
     <string name="albums_sortOrder_averageRating">Average Rating</string>
 
     <string name="albums_emptyView_warning">No Albums to Show</string>
+
+    <!-- PLUGINS -->
+    <string name="plugin_cast_queueEmpty_warning">Your Queue is Empty</string>
+    <string name="plugin_cast_queueTooLarge_error">Queue too large, cannot send to the Cast plugin</string>
 </resources>

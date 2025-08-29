@@ -21,9 +21,12 @@
  */
 package luci.sixsixsix.powerampache2.data.plugins
 
+import android.os.TransactionTooLargeException
+import luci.sixsixsix.powerampache2.domain.errors.Pa2CastQueueException
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.plugin.chromecast.ChromecastPluginDataSource
 import javax.inject.Inject
+import kotlin.jvm.Throws
 
 class ChromecastPluginDataSourceImpl @Inject constructor(
     private val chromecastPluginClient: ChromecastPluginClient
@@ -31,7 +34,12 @@ class ChromecastPluginDataSourceImpl @Inject constructor(
     override fun isChromecastPluginInstalled(): Boolean =
         chromecastPluginClient.isChromecastPluginInstalled()
 
+    @Throws(Pa2CastQueueException::class)
     override suspend fun sendQueueToChromecast(queue: List<Song>) {
-        chromecastPluginClient.sendQueueToPlugin(queue)
+        try {
+            chromecastPluginClient.sendQueueToPlugin(queue)
+        } catch (e: TransactionTooLargeException) {
+            throw Pa2CastQueueException(e)
+        }
     }
 }

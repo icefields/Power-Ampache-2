@@ -21,10 +21,20 @@
  */
 package luci.sixsixsix.powerampache2.domain.usecase.plugin
 
+import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.PluginRepository
+import luci.sixsixsix.powerampache2.domain.errors.Pa2CastQueueException
 import luci.sixsixsix.powerampache2.domain.models.Song
 import javax.inject.Inject
 
 class SendQueueToChromecastUseCase @Inject constructor(
     private val pluginRepository: PluginRepository
-) { suspend operator fun invoke(queue: List<Song>) = pluginRepository.sendQueueToChromecast(queue) }
+) {
+    suspend operator fun invoke(queue: List<Song>) = try {
+        pluginRepository.sendQueueToChromecast(queue)
+        true
+    } catch (e: Pa2CastQueueException) {
+        L.e("SendQueueToChromecastUseCase Exception", e)
+        false
+    }
+}

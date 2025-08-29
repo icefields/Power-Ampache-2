@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.lifecycle.viewModelScope
@@ -30,11 +29,11 @@ import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.SEARCH_TIMEOUT
 import luci.sixsixsix.powerampache2.common.exportSong
+import luci.sixsixsix.powerampache2.common.startCastPluginActivity
 import luci.sixsixsix.powerampache2.common.toMediaItem
-import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ACTIVITY_ID
-import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ID
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.PlayerEvent
@@ -165,22 +164,28 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         MainEvent.OnCastPress -> {
             // check if queue is empty before going to chromecast
             if (currentQueue().value.isEmpty()) {
-                // TODO: localize string
-                Toast.makeText(context, "Your Queue is Empty", Toast.LENGTH_LONG).show()
+                // TODO: showing toast from view model, violating Clean Architecture?
+                Toast.makeText(context, context.getString(R.string.plugin_cast_queueEmpty_warning), Toast.LENGTH_LONG).show()
                 return
             }
 
             // send queue to cast plugin
             if (isChromecastPluginInstalled()) {
                 viewModelScope.launch {
-                    sendQueueToChromecastUseCase(currentQueue().value)
+                    sendQueueToChromecastUseCase(currentQueue().value).also { isSuccess ->
+                        if (!isSuccess) {
+                            // this is just a safety net, the error should never happen because
+                            //  the queue has been reduced before sending it to the Cast plugin.
+                            Toast.makeText(context,
+                                context.getString(R.string.plugin_cast_queueTooLarge_error),
+                                Toast.LENGTH_LONG
+                            ).show()
+                            // TODO: showing toast from view model, violating Clean Architecture?
+                        }
+                    }
                 }
             }
-
-            // TODO: create extension for intent (it's used twice)
-            context.startActivity(Intent()
-                .setClassName(PLUGIN_CHROMECAST_ID, PLUGIN_CHROMECAST_ACTIVITY_ID)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            context.startCastPluginActivity()
             if (isPlaying) playPauseSong()
         }
     }
