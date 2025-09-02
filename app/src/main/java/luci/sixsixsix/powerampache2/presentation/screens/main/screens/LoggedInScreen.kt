@@ -89,7 +89,7 @@ fun LoggedInScreen(
 
     // disable snackbar errors in offline mode
     if (state.errorMessage != "") {
-        val offlineModeStr = stringResource(R.string.offlineMode).uppercase()//.capitalize(Locale.getDefault()
+        val offlineModeStr = stringResource(R.string.offlineMode).uppercase()
         LaunchedEffect(scaffoldState.snackbarHostState, state.errorMessage) {
             scaffoldState.snackbarHostState.showSnackbar(
                 message = state.errorMessage,
