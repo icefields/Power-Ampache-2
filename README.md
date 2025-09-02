@@ -215,6 +215,7 @@ Before starting any contribution, read the above document and if necessary conta
 
 ## Roadmap document
 
+Find the Roadmap Discussion here: 
 https://github.com/icefields/Power-Ampache-2/discussions/212
 
 <br>
