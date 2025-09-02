@@ -1,0 +1,4 @@
+— Improved performance on queue loading by more than 10X.
+— Bug fixes and improvements.
+— Implemented protocol for Chromecast plugin.
+— Various libraries updates.
