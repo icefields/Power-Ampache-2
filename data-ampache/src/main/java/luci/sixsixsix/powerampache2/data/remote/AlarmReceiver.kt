@@ -25,8 +25,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.MusicRepository
@@ -42,16 +43,35 @@ class AlarmReceiver: BroadcastReceiver() {
     @Inject
     lateinit var errorHandler: ErrorHandler
 
+    @Inject
+    lateinit var applicationCoroutineScope: CoroutineScope
+
+
+    private var pingJob: Job? = null
+    private var sleepTimerJob: Job? = null
+
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context?, intent: Intent?) {
         try {
-            val message = intent?.getStringExtra("MESSAGE")
-            L(message)
+            //val message = intent?.getStringExtra("MESSAGE")
+            //L("AlarmReceiver.onReceive", intent?.action ?: "intent or action NULL")
+
+            when(intent?.action) {
+                ACTION_SLEEP_TIMER ->
+                    println("aaaa SLEEP TIMER TRIGGERED ----***------***-----")
+                ACTION_PING -> performPing()
+            }
         } catch (e: Exception) {
             L.e(e)
         }
-        // ping to refresh token
-        GlobalScope.launch {
+    }
+
+    /**
+     * Ping action will refresh the auth token.
+     */
+    private fun performPing() {
+        pingJob?.cancel()
+        pingJob = applicationCoroutineScope.launch {
             L("PING from AlarmReceiver")
             val ping = musicRepository.ping()
             //errorHandler.logError(Gson().toJson(ping))

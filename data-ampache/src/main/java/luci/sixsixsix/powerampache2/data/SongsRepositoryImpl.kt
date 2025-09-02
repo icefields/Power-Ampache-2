@@ -116,7 +116,7 @@ class SongsRepositoryImpl @Inject constructor(
         flow {
             // The query for offline songs could be heavy, give enough time for the app to load
             // before the very first emission.
-            delay(5_000)
+            delay(2_000)
             emitAll(songsOfflineDataSource.offlineSongsFlow)
         }.stateIn(
             scope = applicationCoroutineScope,
@@ -135,16 +135,6 @@ class SongsRepositoryImpl @Inject constructor(
     private suspend fun getOfflineSongList(): List<Song> =
         offlineSongsFlow.value.takeIf { it.isNotEmpty() }
             ?: offlineSongsFlow.first().takeIf { it.isNotEmpty() } ?: emptyList()
-
-//    private suspend fun getOfflineSongList1(): List<Song> {
-//        val currentList = offlineSongsStateFlow.value
-//        return if (currentList.isNotEmpty()) {
-//            currentList
-//        } else {
-//            // Wait for the first actual emission (even if it's empty)
-//            offlineSongsFlow.first().takeIf { it.isNotEmpty() } ?: emptyList()
-//        }
-//    }
 
     init {
         println("aaaa init SongsRepositoryImpl")

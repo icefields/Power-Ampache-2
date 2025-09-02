@@ -24,4 +24,7 @@ package luci.sixsixsix.powerampache2.domain.utils
 interface AlarmScheduler {
     fun schedule()
     fun cancel()
+
+    fun scheduleSleepTimer(minutesInterval: Int)
+    fun cancelSleepTimer()
 }
