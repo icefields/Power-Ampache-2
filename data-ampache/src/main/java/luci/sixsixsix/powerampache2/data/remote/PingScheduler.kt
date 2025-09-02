@@ -31,46 +31,56 @@ import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import javax.inject.Inject
 import javax.inject.Singleton
 
+const val REQUEST_CODE_PING = 665012
+const val ACTION_PING = "luci.sixsixsix.powerampache2.alarm.action.PING"
+const val REQUEST_CODE_SLEEP_TIMER = 6665419
+const val ACTION_SLEEP_TIMER = "luci.sixsixsix.powerampache2.alarm.action.SLEEP_TIMER"
+
 @Singleton
-class PingScheduler @Inject constructor(
-    context: Context
-): AlarmScheduler {
+class PingScheduler @Inject constructor(context: Context): AlarmScheduler {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
-    private val pendingIntent = PendingIntent.getBroadcast(
-        context,
-        665,
+
+    private val pingPendingIntent = PendingIntent.getBroadcast(context,
+        REQUEST_CODE_PING,
         Intent(context, AlarmReceiver::class.java).apply {
+            action = ACTION_PING
             putExtra("MESSAGE", "PING")
         },
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
-    private var isScheduled = false
+    private var isPingScheduled = false
+
+    private val sleepTimerPendingIntent = PendingIntent.getBroadcast(context,
+        REQUEST_CODE_SLEEP_TIMER,
+        Intent(context, AlarmReceiver::class.java).apply { action = ACTION_SLEEP_TIMER },
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
 
     override fun schedule() {
         L("schedule alarm ping")
-        if (isScheduled) return
+        if (isPingScheduled) return
 
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+        alarmManager.setInexactRepeating(
+            AlarmManager.RTC_WAKEUP,
             System.currentTimeMillis() + INTERVAL_HOUR,
-            INTERVAL_HOUR * 2,
-            pendingIntent
+            INTERVAL_HOUR,
+            pingPendingIntent
         )
 
-        isScheduled = true
-
-//        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-//            System.currentTimeMillis() + 10000,
-//        PendingIntent.getBroadcast(
-//            context,
-//            665,
-//            intent,
-//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//        ))
-
+        isPingScheduled = true
     }
 
-    override fun cancel() {
-        isScheduled = false
-        alarmManager.cancel(pendingIntent)
+    override fun cancel() = alarmManager.cancel(pingPendingIntent).also { isPingScheduled = false }
+
+    override fun scheduleSleepTimer(minutesInterval: Int) {
+        alarmManager.cancel(sleepTimerPendingIntent)
+
+        val millis = (minutesInterval * 60) * 1000
+        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + millis,
+            sleepTimerPendingIntent
+        )
     }
+
+    override fun cancelSleepTimer() = alarmManager.cancel(sleepTimerPendingIntent)
 }

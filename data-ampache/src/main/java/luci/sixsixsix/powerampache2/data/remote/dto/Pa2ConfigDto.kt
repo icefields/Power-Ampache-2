@@ -35,6 +35,9 @@ import luci.sixsixsix.powerampache2.common.PLAYLIST_FETCH_LIMIT
 import luci.sixsixsix.powerampache2.common.PLAYLIST_SONGS_FETCH_LIMIT
 
 import luci.sixsixsix.powerampache2.common.Pa2Config
+import luci.sixsixsix.powerampache2.common.QUEUE_SIZE_LIMIT
+import luci.sixsixsix.powerampache2.common.REMOVE_DUPLICATE_ALBUMS
+import luci.sixsixsix.powerampache2.common.REMOVE_DUPLICATE_SONGS
 import luci.sixsixsix.powerampache2.common.SETTINGS_IS_DOWNLOAD_SDCARD
 import luci.sixsixsix.powerampache2.common.SONGS_FLAGGED_LIMIT_FETCH
 import luci.sixsixsix.powerampache2.common.SONGS_FREQUENT_LIMIT_FETCH
@@ -109,11 +112,22 @@ data class Pa2ConfigDto(
     val songsFrequentFetchLimit: Int? = null,
     @SerializedName("songsRecentFetchLimit")
     val songsRecentFetchLimit: Int? = null,
+    @SerializedName("hideAlbumsRatedBelow")
+    val hideAlbumsRatedBelow: Float? = null,
 
+    @SerializedName("queueSizeLimit")
+    val queueSizeLimit: Int? = null,
+    @SerializedName("removeDuplicateSongs")
+    val removeDuplicateSongs: Boolean? = null,
+    @SerializedName("removeDuplicateAlbums")
+    val removeDuplicateAlbums: Boolean? = null,
     @SerializedName("useIncrementalLimitForAlbums")
     val useIncrementalLimitForAlbums: Boolean? = null
 )
 
+/**
+ * ConfigProvider provides BuildConfig variable defaults. Other default constant are in Pa2Config.
+ */
 fun Pa2ConfigDto.toPa2Config(configProvider: ConfigProvider) = Pa2Config(
     playlistAddNewEnable = playlistAddNewEnable ?: PLAYLIST_ADD_NEW_ENABLE,
     queueResetOnNewSession = queueResetOnNewSession ?: configProvider.RESET_QUEUE_ON_NEW_SESSION,
@@ -142,7 +156,11 @@ fun Pa2ConfigDto.toPa2Config(configProvider: ConfigProvider) = Pa2Config(
     songsFlaggedFetchLimit = songsFlaggedFetchLimit ?: SONGS_FLAGGED_LIMIT_FETCH,
     songsFrequentFetchLimit = songsFrequentFetchLimit ?: SONGS_FREQUENT_LIMIT_FETCH,
     songsRecentFetchLimit = songsRecentFetchLimit ?: SONGS_RECENT_LIMIT_FETCH,
-    useIncrementalLimitForAlbums = useIncrementalLimitForAlbums ?: configProvider.USE_INCREMENTAL_LIMIT_ALBUMS
+    useIncrementalLimitForAlbums = useIncrementalLimitForAlbums ?: configProvider.USE_INCREMENTAL_LIMIT_ALBUMS,
+    removeDuplicateSongs = removeDuplicateSongs ?: REMOVE_DUPLICATE_SONGS,
+    removeDuplicateAlbums = removeDuplicateAlbums ?: REMOVE_DUPLICATE_ALBUMS,
+    queueSizeLimit = queueSizeLimit ?: QUEUE_SIZE_LIMIT,
+    hideAlbumsRatedBelow = hideAlbumsRatedBelow ?: 0.0f
 )
 
 /**

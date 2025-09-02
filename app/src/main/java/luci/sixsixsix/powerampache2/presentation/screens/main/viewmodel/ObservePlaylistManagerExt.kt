@@ -71,10 +71,7 @@ fun MainViewModel.observePlaylistManager() {
             } else if (queue.isNullOrEmpty() && currentSong() == null) {
                 stopMusicService()
             }
-
             L("**** observing playlist change queue (before Load song data) :", queue.size)
-            // this is used to update the UI
-            // state = state.copy(queue = queue)
             loadSongData()
         }
     }

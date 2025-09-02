@@ -47,7 +47,6 @@ import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.getVersionInfoString
 import luci.sixsixsix.powerampache2.common.openLinkInBrowser
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.settings.PowerAmpTheme
@@ -98,18 +97,7 @@ class SettingsViewModel @Inject constructor(
 
     var playerSettingsStateFlow = MutableStateFlow(playerBuffersInitialState())
         private set
-
-    val logs by mutableStateOf(
-        if (BuildConfig.DEBUG) {
-            try {
-                mutableListOf<String>(GsonBuilder().setPrettyPrinting().create().toJson(Constants.config))
-            } catch (e: Exception) {
-                mutableListOf<String>()
-            }
-        } else {
-            mutableListOf<String>()
-        }
-    )
+    val logs by mutableStateOf(mutableListOf<String>())
 
     val offlineModeStateFlow = offlineModeFlowUseCase().map {
             playlistManager.updateUserMessage("")
@@ -128,6 +116,12 @@ class SettingsViewModel @Inject constructor(
         // collect all the logs
         viewModelScope.launch {
             playlistManager.errorLogMessageState.collect { errorState ->
+                // refresh config every time since initialize() might be late.
+                try {
+                    logs.remove(getConfigPrettyPrint())
+                    logs.add(getConfigPrettyPrint())
+                } catch (e: Exception) { }
+
                 errorState.errorMessage?.let {
                     // do not allow the error log to take too much space
                     if (logs.size > 66) {
@@ -142,6 +136,15 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
+    private fun getConfigPrettyPrint() =
+        if (BuildConfig.DEBUG) {
+            try {
+                GsonBuilder().setPrettyPrinting().create().toJson(Constants.config)
+            } catch (e: Exception) {
+                "Cannot Print Config Json, exception: ${e.stackTraceToString()}"
+            }
+        } else ""
 
     fun onPlayerEvent(event: PlayerSettingsEvent) {
         when(event) {

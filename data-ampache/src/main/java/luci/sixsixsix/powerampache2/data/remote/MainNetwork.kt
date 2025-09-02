@@ -514,6 +514,7 @@ interface MainNetwork {
 
         /**
          * get baseUrl from musicDatabase.dao.getCredentials()?.serverUrl
+         * TODO: code not DRY, same code partly repeats in MusicRepositoryImpl.
          */
         fun buildServerUrl(baseUrl: String): String {
             val sb = StringBuilder()

@@ -23,11 +23,17 @@ package luci.sixsixsix.powerampache2.data
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
@@ -52,12 +58,13 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.data.remote.dto.toSong
 import luci.sixsixsix.powerampache2.di.LocalDataSource
 import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
+import luci.sixsixsix.powerampache2.di.PluginDataSource
 import luci.sixsixsix.powerampache2.di.RemoteDataSource
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
-import luci.sixsixsix.powerampache2.domain.common.Constants.MAX_QUEUE_SIZE
 import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
+import luci.sixsixsix.powerampache2.domain.common.removeDuplicates
 import luci.sixsixsix.powerampache2.domain.datasource.DbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsOfflineDataSource
@@ -99,13 +106,38 @@ class SongsRepositoryImpl @Inject constructor(
     @LocalDataSource private val songsDbDataSource: SongsDbDataSource,
     @RemoteDataSource private val networkDataSource: SongsRemoteDataSource,
     applicationCoroutineScope: CoroutineScope,
-    private val lyricsPluginDataSource: LyricsPluginDataSource,
-    private val infoPluginDataSource: InfoPluginDataSource
+    @PluginDataSource private val lyricsPluginDataSource: LyricsPluginDataSource,
+    @PluginDataSource private val infoPluginDataSource: InfoPluginDataSource
 ): BaseAmpacheRepository(api, db, errorHandler), SongsRepository {
 
-    override val offlineSongsFlow = songsOfflineDataSource.offlineSongsFlow
+    //override val offlineSongsFlow = songsOfflineDataSource.offlineSongsFlow
+
+    override val offlineSongsFlow: StateFlow<List<Song>> =
+        flow {
+            // The query for offline songs could be heavy, give enough time for the app to load
+            // before the very first emission.
+            delay(2_000)
+            emitAll(songsOfflineDataSource.offlineSongsFlow)
+        }.stateIn(
+            scope = applicationCoroutineScope,
+            started = SharingStarted.Eagerly, //SharingStarted.WhileSubscribed(60 * 1000),
+            initialValue = listOf()
+        )
+
+    // TODO FIXME: this is initially null because the settings table is empty
+    val songUrlDataStateFlow = dao.getSongUrlData()
+        .stateIn(
+        scope = applicationCoroutineScope,
+        started = SharingStarted.Eagerly,
+        initialValue = null
+    )
+
+    private suspend fun getOfflineSongList(): List<Song> =
+        offlineSongsFlow.value.takeIf { it.isNotEmpty() }
+            ?: offlineSongsFlow.first().takeIf { it.isNotEmpty() } ?: emptyList()
 
     init {
+        println("aaaa init SongsRepositoryImpl")
         applicationCoroutineScope.launch {
             dao.offlineModeEnabledFlow().distinctUntilChanged().collect {
                 if (it != null && it == false) {
@@ -255,8 +287,7 @@ class SongsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
         val isOfflineMode = isOfflineModeEnabled()
         val localSongs = getDbSongs(albumId, isOfflineMode)
-        //val localSongs = dao.getSongFromAlbum(albumId).map { it.toSong() }
-        if (!checkEmitCacheData(localSongs, fetchRemote, this) || isOfflineMode) {
+        if (!checkEmitCacheData(removeDuplicates(localSongs), fetchRemote, this) || isOfflineMode) {
             emit(Resource.Loading(false))
             return@flow
         }
@@ -267,12 +298,15 @@ class SongsRepositoryImpl @Inject constructor(
         L("getSongsFromAlbum songs from web", songs.size)
 
         // TODO BREAKING_RULE single source of truth. (see function doc)
-        emit(Resource.Success(data = songs, networkData = songs))
+        emit(Resource.Success(data = removeDuplicates(songs), networkData = removeDuplicates(songs)))
         emit(Resource.Loading(false))
 
         // cache songs after emitting success because the result of this is not used right now
         cacheSongs(songs)
     }.catch { e -> errorHandler("getSongsFromAlbum()", e, this) }
+
+    private fun removeDuplicates(songs: List<Song>) =
+        if (Constants.config.removeDuplicateSongs) songs.removeDuplicates() else songs
 
     private suspend fun getSongsStats(statFilter: MainNetwork.StatFilter, fetchRemote: Boolean = true) =
         if (!isOfflineModeEnabled()) flow {
@@ -490,8 +524,8 @@ class SongsRepositoryImpl @Inject constructor(
             }
         }
         val shuffledSongList = resultSet.toList().shuffled().apply {
-            if (size > MAX_QUEUE_SIZE)
-                subList(0, MAX_QUEUE_SIZE)
+            if (size > Constants.config.queueSizeLimit)
+                subList(0, Constants.config.queueSizeLimit)
         }
         emit(Resource.Success(data = shuffledSongList, networkData = shuffledSongList))
         emit(Resource.Loading(false))
@@ -501,7 +535,7 @@ class SongsRepositoryImpl @Inject constructor(
      * Attempts to get the song URI from downloaded songs first, if not present, build a remote Url.
      */
     override suspend fun getSongUri(song: Song) =
-        dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri
+        getOfflineSongList().firstOrNull { it.mediaId == song.mediaId }?.songUrl //dao.getDownloadedSong(song.mediaId, song.artist.id, song.album.id)?.songUri
             ?: buildSongUrl(song)
 
     /**
@@ -511,7 +545,7 @@ class SongsRepositoryImpl @Inject constructor(
      * &type=song
      * &id=8895
      */
-    private suspend fun buildSongUrl(song: Song) = dao.getSongUrlData()?.run {
+    private suspend fun buildSongUrl(song: Song) = songUrlDataStateFlow.first()?.run { /*dao.getSongUrlData()*/
         getUrl(song.mediaId)
     } ?: getSession()?.auth ?.let { auth ->
         SongUrl(

@@ -45,6 +45,14 @@ const val DEBUG_REMOTE_DEMO_URL = BuildConfig.AMPACHE_URL
 const val AMPACHE_DEMO_URL = "demo.ampache.dev"
 const val AMPACHE_DEMO_APIKEY = "demodemo"
 
+const val DEBUG_REMOTE_URL_2 = BuildConfig.AMPACHE_URL_2
+const val DEBUG_REMOTE_USER_2 = BuildConfig.AMPACHE_USER_2
+const val DEBUG_REMOTE_PASSWORD_2 = BuildConfig.AMPACHE_PASSWORD_2
+
+const val DEBUG_REMOTE_URL_3 = BuildConfig.AMPACHE_URL_3
+const val DEBUG_REMOTE_USER_3 = BuildConfig.AMPACHE_USER_3
+const val DEBUG_REMOTE_PASSWORD_3 = BuildConfig.AMPACHE_PASSWORD_3
+
 sealed class Servers(
     val url: String,
     val user: String = "",
@@ -67,6 +75,24 @@ sealed class Servers(
         url = DEBUG_REMOTE_DEMO_URL,
         user = DEBUG_REMOTE_USER,
         password = DEBUG_PASSWORD
+    )
+
+    /**
+     * remote ip server for testing 6.2
+     */
+    data object RemoteDebug2: Servers(
+        url = DEBUG_REMOTE_URL_2,
+        user = DEBUG_REMOTE_USER_2,
+        password = DEBUG_REMOTE_PASSWORD_2
+    )
+
+    /**
+     * remote ip server for testing 6.2
+     */
+    data object RemoteDebug3: Servers(
+        url = DEBUG_REMOTE_URL_3,
+        user = DEBUG_REMOTE_USER_3,
+        password = DEBUG_REMOTE_PASSWORD_3
     )
 
     /**

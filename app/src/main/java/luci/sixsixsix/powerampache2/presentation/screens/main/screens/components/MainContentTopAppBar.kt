@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.NotificationImportant
 import androidx.compose.material.icons.filled.NotificationsNone
@@ -75,6 +76,7 @@ fun MainContentTopAppBar(
     isNotificationQueueEmpty: Boolean,
     isFabLoading: Boolean,
     isGenreSubScreen: Boolean,
+    isChromecastPluginInstalled: Boolean,
     floatingActionVisible: Boolean,
     onGenreScreenBackClick: () -> Unit,
     onMagicPlayClick: () -> Unit,
@@ -149,6 +151,18 @@ fun MainContentTopAppBar(
         },
         scrollBehavior = scrollBehavior,
         actions = {
+            if (isChromecastPluginInstalled) {
+                IconButton(
+                    onClick = {
+                        onNavigationIconClick(MainContentTopAppBarEvent.OnChromecastIconClick)
+                    }) {
+                    Icon(
+                        imageVector = Icons.Default.Cast,
+                        contentDescription = "Cast",
+                    )
+                }
+            }
+
             AnimatedVisibility(!isNotificationQueueEmpty) {
                 IconButton(
                     onClick = {
@@ -219,4 +233,5 @@ sealed class MainContentTopAppBarEvent {
     data object OnLeftDrawerIconClick: MainContentTopAppBarEvent()
     data object OnPlaylistIconClick: MainContentTopAppBarEvent()
     data object OnNotificationsIconClick: MainContentTopAppBarEvent()
+    data object OnChromecastIconClick: MainContentTopAppBarEvent()
 }

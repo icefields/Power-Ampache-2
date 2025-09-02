@@ -36,8 +36,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -135,24 +141,42 @@ fun SongDetailContent(
 
     var isImageScaleFit by remember { mutableStateOf(false) }
 
+    val coverImage = currentSongState?.imageUrl ?: pluginSong?.imageUrl?.let { imageUrl ->
+        imageUrl.ifBlank { pluginSong.imageAlbum.ifBlank { pluginSong.imageArtist } }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-            //.padding(horizontal = dimensionResource(id = R.dimen.player_screen_padding))
     ) {
-        SongAlbumCoverArt(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth().clickable {
-                    isImageScaleFit = !isImageScaleFit
-                },
-            artUrl = currentSongState?.imageUrl,
-            contentDescription = currentSongState?.title,
-            isImageScaleFit = isImageScaleFit,
-            onSwipeLeft = { mainViewModel.onEvent(MainEvent.SkipNext) },
-            onSwipeRight = { mainViewModel.onEvent(MainEvent.SkipPrevious) }
-        )
+        Box(modifier = Modifier.weight(1f).fillMaxWidth(),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            SongAlbumCoverArt(
+                modifier = Modifier
+                    //.weight(1f)
+                    .fillMaxWidth()
+                    .clickable { isImageScaleFit = !isImageScaleFit },
+                artUrl = coverImage,
+                contentDescription = currentSongState?.title,
+                isImageScaleFit = isImageScaleFit,
+                onSwipeLeft = { mainViewModel.onEvent(MainEvent.SkipNext) },
+                onSwipeRight = { mainViewModel.onEvent(MainEvent.SkipPrevious) }
+            )
+
+            if (mainViewModel.chromecastPluginInstalled()) {
+                IconButton(
+                    modifier = Modifier.padding(8.dp),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        contentColor = MaterialTheme.colorScheme.background
+                    ),
+                    onClick = { mainViewModel.onEvent(MainEvent.OnCastPress) }) {
+                    Icon(imageVector = Icons.Default.Cast, contentDescription = "Cast")
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

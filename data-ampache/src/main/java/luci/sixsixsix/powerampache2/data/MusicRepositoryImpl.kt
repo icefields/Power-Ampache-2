@@ -26,23 +26,22 @@ import android.os.Environment
 import androidx.core.text.isDigitsOnly
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.data.common.Constants.ALLOW_LOCAL_CONFIG
 import luci.sixsixsix.powerampache2.domain.common.sha256
 import luci.sixsixsix.powerampache2.data.common.Constants.CLEAR_TABLE_AFTER_FETCH
+import luci.sixsixsix.powerampache2.data.common.Constants.LOCAL_CONFIG_PATH
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toGenre
@@ -62,6 +61,7 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toPa2Config
 import luci.sixsixsix.powerampache2.data.remote.dto.toServerInfo
 import luci.sixsixsix.powerampache2.data.remote.dto.toSession
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.common.isIpAddress
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.mappers.DateMapper
@@ -135,12 +135,36 @@ class MusicRepositoryImpl @Inject constructor(
 
     private suspend fun initialize() {
         Constants.config = try {
-            api.getConfig(configProvider.CONFIG_URL).toPa2Config(configProvider)
+            getLocalConfigUrl()?.let { configUrl ->
+                // try with local config first
+                api.getConfig(configUrl).toPa2Config(configProvider)
+            } ?: api.getConfig(configProvider.CONFIG_URL).toPa2Config(configProvider)
         } catch (e: Exception) {
             L.e(e)
-            configProvider.defaultPa2Config()
+            try {
+                api.getConfig(configProvider.CONFIG_URL).toPa2Config(configProvider)
+            } catch (ee: Exception) {
+                L.e(ee)
+                configProvider.defaultPa2Config()
+            }
         }
     }
+
+    /**
+     * TODO: code not DRY, same code partly repeats in MainNetwork.
+     *  also, use takeIf {
+     */
+    private suspend fun getLocalConfigUrl() = if (ALLOW_LOCAL_CONFIG) {
+        dao.getCredentials()?.serverUrl?.let { baseUrl ->
+            val sb = StringBuilder()
+            if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+                if (baseUrl.isIpAddress()) { sb.append("http://") } else { sb.append("https://") }
+            }
+            sb.append(baseUrl)
+            sb.append(LOCAL_CONFIG_PATH)
+            sb.toString()
+        }
+    } else null
 
     private suspend fun setSession(se: Session) {
         val previousCleanDate = getSession()?.clean ?: LocalDateTime.MAX

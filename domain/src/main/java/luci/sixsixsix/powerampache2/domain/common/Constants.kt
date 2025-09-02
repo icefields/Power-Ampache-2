@@ -32,8 +32,6 @@ object Constants {
     const val USER_EMAIL_DEFAULT = ""
     const val USER_FULL_NAME_PUBLIC_DEFAULT = 0
 
-    const val MAX_QUEUE_SIZE = 666
-
     // PLAYER BUFFER CONSTANTS
     // default values, in milliseconds
     const val BACK_BUFFER_MS = 30000
@@ -71,6 +69,21 @@ object Constants {
     const val DOGMAZIC_FAKE_STATE = "Ehime"
     const val DOGMAZIC_FAKE_CITY = "Aoshima"
     const val USER_DEFAULT_MASTODON_URL = "https://floss.social/@powerampache"
+
+    // PLUGINS - LYRICS
+    const val PLUGIN_LYRICS_ID = "luci.sixsixsix.powerampache2.lyricsplugin"
+    const val PLUGIN_LYRICS_SERVICE_ID = "luci.sixsixsix.powerampache2.lyricsplugin.LyricsFetcherService"
+    const val PLUGIN_LYRICS_ACTIVITY_ID = "luci.sixsixsix.powerampache2.lyricsplugin.MainActivity"
+
+    // PLUGINS - METADATA
+    const val PLUGIN_INFO_ID = "luci.sixsixsix.powerampache2.infoplugin"
+    const val PLUGIN_INFO_SERVICE_ID = "${PLUGIN_INFO_ID}.InfoFetcherService"
+    const val PLUGIN_INFO_ACTIVITY_ID = "${PLUGIN_INFO_ID}.MainActivity"
+
+    // PLUGINS - CHROMECAST
+    const val PLUGIN_CHROMECAST_ID = "luci.sixsixsix.powerampache2.chromecastplugin"
+    const val PLUGIN_CHROMECAST_SERVICE_ID = "${PLUGIN_CHROMECAST_ID}.QueueFetchService"
+    const val PLUGIN_CHROMECAST_ACTIVITY_ID = "${PLUGIN_CHROMECAST_ID}.MainActivity"
 
     lateinit var config: Pa2Config
 }

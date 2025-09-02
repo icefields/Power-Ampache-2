@@ -82,3 +82,10 @@ data class PluginSongData(
         )
     }
 }
+
+fun PluginSongData.totalTime(): String {
+    val time = duration / 1000
+    val minutes = time / 60
+    val seconds = time % 60
+    return "${minutes}m ${seconds}s"
+}

@@ -31,6 +31,12 @@ android {
     val ampacheUser = properties.getProperty("AMPACHE_USER")
     val ampachePass = properties.getProperty("AMPACHE_PASSWORD")
     val ampacheUrl = properties.getProperty("AMPACHE_URL")
+    val ampacheUser2 = properties.getProperty("AMPACHE_USER_2")
+    val ampachePass2 = properties.getProperty("AMPACHE_PASSWORD_2")
+    val ampacheUrl2 = properties.getProperty("AMPACHE_URL_2")
+    val ampacheUser3 = properties.getProperty("AMPACHE_USER_3")
+    val ampachePass3 = properties.getProperty("AMPACHE_PASSWORD_3")
+    val ampacheUrl3 = properties.getProperty("AMPACHE_URL_3")
     val ampacheUrlLocal = properties.getProperty("LOCAL_STABLE_URL")
     val dogmazicUrl = properties.getProperty("DOGMAZIC_URL")
     val dogmazicPass = properties.getProperty("DOGMAZIC_PASSWORD")
@@ -51,8 +57,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35
-        versionCode = 89
-        versionName = "1.01-83"
+        versionCode = 90
+        versionName = "1.01-84"
         val versionQuote = "This version is powered by the 23rd prime number summed by other consecutive primes, Bismuth and overall the best year ever"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -106,6 +112,15 @@ android {
             buildConfigField("String", "AMPACHE_USER", ampacheUser)
             buildConfigField("String", "AMPACHE_PASSWORD", ampachePass)
             buildConfigField("String", "AMPACHE_URL", ampacheUrl)
+
+            buildConfigField("String", "AMPACHE_USER_2", ampacheUser2)
+            buildConfigField("String", "AMPACHE_PASSWORD_2", ampachePass2)
+            buildConfigField("String", "AMPACHE_URL_2", ampacheUrl2)
+
+            buildConfigField("String", "AMPACHE_USER_3", ampacheUser3)
+            buildConfigField("String", "AMPACHE_PASSWORD_3", ampachePass3)
+            buildConfigField("String", "AMPACHE_URL_3", ampacheUrl3)
+
             buildConfigField("String", "API_KEY", apikey)
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)
@@ -137,6 +152,15 @@ android {
             buildConfigField("String", "AMPACHE_USER", "\"\"")
             buildConfigField("String", "AMPACHE_PASSWORD", "\"\"")
             buildConfigField("String", "AMPACHE_URL", "\"\"")
+
+            buildConfigField("String", "AMPACHE_USER_2", "\"\"")
+            buildConfigField("String", "AMPACHE_PASSWORD_2", "\"\"")
+            buildConfigField("String", "AMPACHE_URL_2", "\"\"")
+
+            buildConfigField("String", "AMPACHE_USER_3", "\"\"")
+            buildConfigField("String", "AMPACHE_PASSWORD_3", "\"\"")
+            buildConfigField("String", "AMPACHE_URL_3", "\"\"")
+
             buildConfigField("String", "API_KEY", "\"\"")
             buildConfigField("String", "DOGMAZIC_PASSWORD", dogmazicPass)
             buildConfigField("String", "DOGMAZIC_USER", dogmazicUser)

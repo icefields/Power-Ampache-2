@@ -25,6 +25,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -33,7 +34,6 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
-import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
@@ -42,11 +42,15 @@ import luci.sixsixsix.powerampache2.data.remote.dto.toAlbum
 import luci.sixsixsix.powerampache2.data.remote.dto.toError
 import luci.sixsixsix.powerampache2.di.LocalDataSource
 import luci.sixsixsix.powerampache2.di.OfflineModeDataSource
+import luci.sixsixsix.powerampache2.di.PluginDataSource
+import luci.sixsixsix.powerampache2.di.RemoteDataSource
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
-import luci.sixsixsix.powerampache2.domain.common.normalizeForSearch
+import luci.sixsixsix.powerampache2.domain.common.removeAlbumDuplicates
+import luci.sixsixsix.powerampache2.domain.common.sanitizeSortTerm
 import luci.sixsixsix.powerampache2.domain.datasource.AlbumsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.AlbumsOfflineDataSource
+import luci.sixsixsix.powerampache2.domain.datasource.AlbumsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.MusicException
 import luci.sixsixsix.powerampache2.domain.models.Album
@@ -72,11 +76,15 @@ import kotlin.math.max
 class AlbumsRepositoryImpl @Inject constructor(
     @LocalDataSource private val albumsDbDataSource: AlbumsDbDataSource,
     @OfflineModeDataSource private val albumsOfflineDataSource: AlbumsOfflineDataSource,
-    private val pluginDataSource: InfoPluginDataSource,
+    @RemoteDataSource private val albumsRemoteDataSource: AlbumsRemoteDataSource,
+    @PluginDataSource private val pluginDataSource: InfoPluginDataSource,
     private val api: MainNetwork,
-    private val db: MusicDatabase,
+    db: MusicDatabase,
     private val errorHandler: ErrorHandler
 ): BaseAmpacheRepository(api, db, errorHandler), AlbumsRepository {
+
+    private fun removeDuplicates(albums: List<Album>) =
+        if (Constants.config.removeDuplicateAlbums) albums.removeAlbumDuplicates() else albums
 
     override suspend fun getAlbums(
         fetchRemote: Boolean,
@@ -85,150 +93,97 @@ class AlbumsRepositoryImpl @Inject constructor(
         limit: Int,
         sort: AlbumSortOrder,
         order: SortOrder
-    ): Flow<Resource<List<Album>>> =
-        if (isOfflineModeEnabled()) flow {
-            // TRY using cached data instead of downloaded song info if available
-            val albumsList = mutableListOf<Album>()
-            val dbAlbumsHash = HashMap<String, AlbumEntity>().apply {
-                dao.getOfflineAlbums().forEach { ae ->
-                    put(ae.id, ae)
-                }
-            }
+    ): Flow<Resource<List<Album>>> = if (isOfflineModeEnabled()) flow {
+        val albumsList = albumsOfflineDataSource.getAlbums(
+            username = getCurrentCredentials().username,
+            query = query,
+            sort = sort,
+            order = order
+        )
+        emit(Resource.Success(data = albumsList))
+        emit(Resource.Loading(false))
+    }.catch { e ->
+        errorHandler("getOfflineModeAlbums", e, this)
+    } else flow {
+        emit(Resource.Loading(true))
+        val albumsSet = orderedAlbumSet(sort, order)
+        // get all saved albums and add to set
+        albumsSet.addAll(albumsDbDataSource.getAlbums(query, sort, order))
 
-            dao.generateOfflineAlbums(getCurrentCredentials().username).forEach { dae ->
-                albumsList.add(
-                    if (dbAlbumsHash.containsKey(dae.id)) {
-                        // keep the offline art url, even when using album object from non-downloaded album table
-                        (dbAlbumsHash[dae.id]?.copy(artUrl = dae.artUrl) ?: dae)
-                    } else { dae }.toAlbum()
-                )
-            }
+        if (offset == 0) {
+            L("albumsSet size1 ${albumsSet.size}")
+            val isDbEmpty = albumsSet.isEmpty() && query.isEmpty()
+            if (!isDbEmpty)
+                emit(Resource.Success(data = removeDuplicates(albumsSet.toList())))
 
-            sortAlbums(albumsList, sort, order)
-
-            emit(Resource.Success(data = albumsList.toList()))
-            emit(Resource.Loading(false))
-        }.catch { e -> errorHandler("getOfflineModeAlbums", e, this) } else flow {
-            emit(Resource.Loading(true))
-            L("getAlbums - repo getSongs offset $offset")
-            val cred = getCurrentCredentials()
-
-    //        if (isOfflineModeEnabled()) {
-    //            // TRY using cached data instead of downloaded song info if available
-    //            val albumsList = mutableListOf<Album>()
-    //            val dbAlbumsHash = HashMap<String, AlbumEntity>().apply {
-    //                dao.getOfflineAlbums().forEach { ae ->
-    //                    put(ae.id, ae)
-    //                }
-    //            }
-    //
-    //            dao.generateOfflineAlbums(cred.username).forEach { dae ->
-    //                albumsList.add(
-    //                    if (dbAlbumsHash.containsKey(dae.id)) {
-    //                        (dbAlbumsHash[dae.id] ?: dae)
-    //                    } else { dae }.toAlbum()
-    //                )
-    //            }
-    //
-    //            emit(Resource.Success(data = albumsList.toList()))
-    //            emit(Resource.Loading(false))
-    //            return@flow
-    //        }
-
-            val normalizedQuery = query.normalizeForSearch()
-
-            val albumsSet = TreeSet<Album> { a1, a2 ->
-                val comparison = if (order == SortOrder.DESC) {
-                    when(sort) {
-                        AlbumSortOrder.NAME -> sanitizeSortTerm(a2.name).compareTo(sanitizeSortTerm(a1.name))
-                        AlbumSortOrder.YEAR -> a2.year.compareTo(a1.year)
-                        AlbumSortOrder.ARTIST -> a2.artist.name.lowercase().compareTo(a1.artist.name.lowercase())
-                        AlbumSortOrder.RATING -> a2.rating.compareTo(a1.rating)
-                        AlbumSortOrder.AVERAGE_RATING -> a2.rating.compareTo(a1.averageRating)
-                    }
-                } else {
-                    when(sort) {
-                        AlbumSortOrder.NAME -> sanitizeSortTerm(a1.name).compareTo(sanitizeSortTerm(a2.name))
-                        AlbumSortOrder.YEAR -> a1.year.compareTo(a2.year)
-                        AlbumSortOrder.ARTIST -> a1.artist.name.lowercase().compareTo(a2.artist.name.lowercase())
-                        AlbumSortOrder.RATING -> a1.rating.compareTo(a2.rating)
-                        AlbumSortOrder.AVERAGE_RATING -> a1.rating.compareTo(a2.averageRating)
-                    }
-                }
-
-                if (comparison != 0) {
-                    comparison
-                } else {
-                    if (order == SortOrder.DESC) {
-                        a2.id.compareTo(a1.id)
-                    } else {
-                        a1.id.compareTo(a2.id)
-                    }
-                }
-            }
-
-            //val localAlbums = mutableListOf<Album>()
-            albumsSet.addAll(dao.searchAlbum(normalizedQuery).map { it.toAlbum() })
-
-            if (offset == 0) {
-                //localAlbums.addAll(dao.searchAlbum(query).map { it.toAlbum() })
-                L("albumsSet size1 ${albumsSet.size}")
-                val isDbEmpty = albumsSet.isEmpty() && query.isEmpty()
-                if (!isDbEmpty) {
-                    //sortAlbums(localAlbums, sort, order)
-                    emit(Resource.Success(data = albumsSet.toList()))
-                }
-                val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
+            (!isDbEmpty && !fetchRemote).let { shouldLoadCacheOnly ->
                 if(shouldLoadCacheOnly) {
                     emit(Resource.Loading(false))
                     return@flow
                 }
             }
-            val realLimit = if (Constants.config.useIncrementalLimitForAlbums) {
-                max(albumsSet.size, limit)
-            } else limit
-            val response = api.getAlbums(authToken(), filter = query, offset = offset, limit = realLimit, sort = "${sort.columnName},${order.order}")
-            response.error?.let { throw(MusicException(it.toError())) }
-            val albums = response.albums!!.map { it.toAlbum() } // will throw exception if songs null
-            albumsSet.addAll(albums)
-            L("albumsSet size2 ${albumsSet.size}")
-
-            emit(Resource.Success(data = albumsSet.toList(), networkData = albums))
-            emit(Resource.Loading(false))
-
-            dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
-            // stick to the single source of truth pattern despite performance deterioration
-            // append to the initial list to avoid ui flickering
-            //val updatedDbAlbums = dao.searchAlbum(query).map { it.toAlbum() }.toMutableList()
-            ////AmpacheModel.appendToList(updatedDbAlbums, localAlbums)
-            ////emit(Resource.Success(data = localAlbums, networkData = albums))
-            //sortAlbums(updatedDbAlbums, sort, order)
-            // emit(Resource.Success(data = updatedDbAlbums, networkData = albums))
-            //emit(Resource.Loading(false))
-        }.catch { e -> errorHandler("getAlbums()", e, this) }
-
-    private fun sortAlbums(albumsList: MutableList<Album>, sort: AlbumSortOrder, order: SortOrder) {
-        when(sort) {
-            AlbumSortOrder.NAME -> albumsList.sortBy { sanitizeSortTerm(it.name) }
-            AlbumSortOrder.YEAR -> albumsList.sortBy { it.year }
-            AlbumSortOrder.ARTIST -> albumsList.sortBy { sanitizeSortTerm(it.artist.name.lowercase()) }
-            AlbumSortOrder.RATING -> albumsList.sortBy { it.rating }
-            AlbumSortOrder.AVERAGE_RATING -> albumsList.sortBy { it.averageRating }
         }
 
-        if (order == SortOrder.DESC) { albumsList.reverse() }
-    }
+        val realLimit = if (Constants.config.useIncrementalLimitForAlbums) max(albumsSet.size, limit) else limit
+        val albums = albumsRemoteDataSource.getAlbums(
+            authToken(),
+            query = query,
+            offset = offset,
+            limit = realLimit,
+            sort = sort,
+            order = order
+        ) //response.albums!!.map { it.toAlbum() } // will throw exception if songs null
+        albumsSet.addAll(albums)
+        L("albumsSet size2 ${albumsSet.size}")
 
-    private fun sanitizeSortTerm(term: String) = term.replace("!","")
-        .replace("\"","")
-        .replace("'","")
-        .replace("`","")
-        .replace("(","")
-        .replace("[","")
-        .replace("{","")
-        .replace(".","")
-        .replace(",","")
-        .lowercase()
+        emit(Resource.Success(data = removeDuplicates(albumsSet.toList()), networkData = removeDuplicates(albums)))
+        emit(Resource.Loading(false))
+
+        saveAlbumsToDb(albums)
+
+        // stick to the single source of truth pattern despite performance deterioration
+        // append to the initial list to avoid ui flickering
+        //val updatedDbAlbums = dao.searchAlbum(query).map { it.toAlbum() }.toMutableList()
+        ////AmpacheModel.appendToList(updatedDbAlbums, localAlbums)
+        ////emit(Resource.Success(data = localAlbums, networkData = albums))
+        //sortAlbums(updatedDbAlbums, sort, order)
+        // emit(Resource.Success(data = updatedDbAlbums, networkData = albums))
+        //emit(Resource.Loading(false))
+    }.catch { e -> errorHandler("getAlbums()", e, this) }
+
+    /**
+     * Generates a tree set where the order and sort is determined by the arguments passed.
+     */
+    private fun orderedAlbumSet(sort: AlbumSortOrder, order: SortOrder) =
+        TreeSet<Album> { a1, a2 ->
+            val comparison = if (order == SortOrder.DESC) {
+                when(sort) {
+                    AlbumSortOrder.NAME -> sanitizeSortTerm(a2.name).compareTo(sanitizeSortTerm(a1.name))
+                    AlbumSortOrder.YEAR -> a2.year.compareTo(a1.year)
+                    AlbumSortOrder.ARTIST -> a2.artist.name.lowercase().compareTo(a1.artist.name.lowercase())
+                    AlbumSortOrder.RATING -> a2.rating.compareTo(a1.rating)
+                    AlbumSortOrder.AVERAGE_RATING -> a2.rating.compareTo(a1.averageRating)
+                }
+            } else {
+                when(sort) {
+                    AlbumSortOrder.NAME -> sanitizeSortTerm(a1.name).compareTo(sanitizeSortTerm(a2.name))
+                    AlbumSortOrder.YEAR -> a1.year.compareTo(a2.year)
+                    AlbumSortOrder.ARTIST -> a1.artist.name.lowercase().compareTo(a2.artist.name.lowercase())
+                    AlbumSortOrder.RATING -> a1.rating.compareTo(a2.rating)
+                    AlbumSortOrder.AVERAGE_RATING -> a1.rating.compareTo(a2.averageRating)
+                }
+            }
+
+            if (comparison != 0) {
+                comparison
+            } else {
+                if (order == SortOrder.DESC) {
+                    a2.id.compareTo(a1.id)
+                } else {
+                    a1.id.compareTo(a2.id)
+                }
+            }
+        }
 
     override suspend fun getAlbumsFromArtist(
         artistId: String,
@@ -247,7 +202,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         val localAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
         val isDbEmpty = localAlbums.isEmpty()
         if (!isDbEmpty) {
-            emit(Resource.Success(data = localAlbums))
+            emit(Resource.Success(data = removeDuplicates(localAlbums)))
         }
         val shouldLoadCacheOnly = !isDbEmpty && !fetchRemote
         if(shouldLoadCacheOnly) {
@@ -280,7 +235,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         dao.insertAlbums(albums.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
         // stick to the single source of truth pattern despite performance deterioration
         val dbUpdatedAlbums = dao.getAlbumsFromArtist(artistId).map { it.toAlbum() }
-        emit(Resource.Success(data = dbUpdatedAlbums, networkData = albums))
+        emit(Resource.Success(data = removeDuplicates(dbUpdatedAlbums), networkData = removeDuplicates(albums)))
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getAlbumsFromArtist()", e, this) }
 
@@ -291,8 +246,8 @@ class AlbumsRepositoryImpl @Inject constructor(
         emit(Resource.Loading(true))
 
         if (isOfflineModeEnabled()) {
-            dao.generateOfflineAlbum(albumId)?.let { albumEntity ->
-                emit(Resource.Success(data = albumEntity.toAlbum(), networkData = albumEntity.toAlbum()))
+            getOfflineAlbumFromId(albumId)?.let { albumEntity ->
+                emit(Resource.Success(data = albumEntity, networkData = albumEntity))
                 emit(Resource.Loading(false))
                 return@flow
             } ?: throw Exception("OFFLINE ALBUM does not exist")
@@ -320,26 +275,18 @@ class AlbumsRepositoryImpl @Inject constructor(
     }.catch { e -> errorHandler("getAlbum()", e, this) }
 
     override suspend fun getAlbum(albumId: String): Flow<Album> {
-        if (dao.getAlbum(albumId) == null) {
-            dao.generateOfflineAlbum(albumId)?.let {
-                dao.insertAlbums(listOf(it))
+        if (!isDbAlbumExist(albumId)) {
+            // album does not exist in the db, check if it's available in offline mode.
+            getOfflineAlbumFromId(albumId)?.let { offlineAlbum ->
+                saveAlbumToDb(offlineAlbum) // save to db if exists in offline mode.
             } ?: run {
-                try {
-                    val cred = getCurrentCredentials()
-                    //will throw exception if session null
-                    dao.insertAlbums(listOf(
-                        api.getAlbumInfo(
-                            authKey = authToken(),
-                            albumId = albumId
-                        ).toAlbum().toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl))
-                    )
-                } catch (e: Exception) {
-                    // TODO handle no album in playlist
+                // if not exist in offline mode too, fetch it from remote, and save to db.
+                getRemoteAlbumFromId(albumId = albumId)?.let { remoteAlbum ->
+                    saveAlbumToDb(remoteAlbum)
                 }
-
             }
         }
-        return dao.getAlbumFlow(albumId).filterNotNull().map { it.toAlbum() }
+        return albumsDbDataSource.getAlbumFromIdFlow(albumId)
     }
 
     // --- HOME PAGE data ---
@@ -433,12 +380,11 @@ class AlbumsRepositoryImpl @Inject constructor(
     override val highestRatedAlbumsFlow: Flow<List<Album>>
         get() = offlineModeFlow.flatMapLatest { isOfflineModeEnabled ->
             dao.getHighestRatedAlbumsFlow()
+                .map { it.filter { it.rating >= Constants.config.hideAlbumsRatedBelow } } // assumes 0 as no-rating
                 .map { it.map { ent -> ent.toAlbum() } }
-                .map { albums ->
-                    if (isOfflineModeEnabled) {
+                .map { albums -> if (isOfflineModeEnabled) {
                         albums.filter { album -> isAlbumOffline(album) }
-                    } else
-                        albums
+                    } else albums
                 }
         }
 
@@ -587,4 +533,28 @@ class AlbumsRepositoryImpl @Inject constructor(
     ): PluginAlbumData? =
         pluginDataSource.getAlbumInfo(albumId = albumId,
             musicBrainzId = albumMbId, albumTitle = albumTitle, artistName = artistName)
+
+
+    private suspend fun saveAlbumsToDb(albums: List<Album>) {
+        val cred = getCurrentCredentials()
+        albumsDbDataSource.saveAlbumsToDb(username = cred.username, serverUrl = cred.serverUrl, albums)
+    }
+    private suspend fun saveAlbumToDb(album: Album) {
+        saveAlbumsToDb(listOf(album))
+    }
+
+    private suspend fun getOfflineAlbumFromId(albumId: String) =
+        try { albumsOfflineDataSource.getAlbumFromId(albumId) } catch (e: Exception) { null }
+
+    private suspend fun getRemoteAlbumFromId(albumId: String) =
+        try { albumsRemoteDataSource.getAlbumFromId(auth = authToken(), albumId = albumId) } catch (e: Exception) { null }
+
+    private suspend fun isDbAlbumExist(albumId: String) = try {
+        albumsDbDataSource.getAlbumFromId(albumId)
+        println("aaaa album exists in db")
+        true
+    } catch (e: Exception) {
+        println("aaaa album not exists in db ${e.stackTraceToString()}")
+        false
+    }
 }
