@@ -79,6 +79,8 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.LoginDialog
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.SignUpBottomDrawer
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.SignUpDialog
+import luci.sixsixsix.powerampache2.ui.theme.onBackgroundDark
+import luci.sixsixsix.powerampache2.ui.theme.surfaceDark
 import kotlin.system.exitProcess
 
 @Composable
@@ -139,7 +141,7 @@ fun LoginScreenContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxSize()
-            .background(colorResource(id = R.color.surfaceDark))
+            .background(surfaceDark)
     ) {
         Image(
             modifier = Modifier
@@ -157,7 +159,7 @@ fun LoginScreenContent(
         )
 
         Icon(
-            tint = colorResource(id = R.color.onBackgroundDark),
+            tint = onBackgroundDark,
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .padding(top = 1.dp, bottom = 10.dp),

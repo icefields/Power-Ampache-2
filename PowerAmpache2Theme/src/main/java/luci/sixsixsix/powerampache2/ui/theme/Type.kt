@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.ui.R
 
 object AppFont {
     val LatoFont = FontFamily(

@@ -25,16 +25,19 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.ui.theme.errorDark
+import luci.sixsixsix.powerampache2.ui.theme.onBackgroundDark
+import luci.sixsixsix.powerampache2.ui.theme.onSurfaceVariantDark
+import luci.sixsixsix.powerampache2.ui.theme.surfaceContainerDark
 
 @Composable fun LoginTextField(
     @StringRes label: Int,
@@ -59,12 +62,12 @@ import luci.sixsixsix.powerampache2.R
         trailingIcon = trailingIcon,
         singleLine = true,
         colors = TextFieldDefaults.colors(
-            focusedTextColor = colorResource(R.color.onBackgroundDark),
-            unfocusedTextColor = colorResource(R.color.onSurfaceVariantDark),
-            unfocusedLabelColor = colorResource(R.color.onSurfaceVariantDark),
-            errorTextColor = colorResource(R.color.errorDark),
-            focusedContainerColor = colorResource(R.color.surfaceContainerDark),
-            unfocusedContainerColor = colorResource(R.color.surfaceContainerDark)
+            focusedTextColor = onBackgroundDark,
+            unfocusedTextColor = onSurfaceVariantDark,
+            unfocusedLabelColor = onSurfaceVariantDark,
+            errorTextColor = errorDark,
+            focusedContainerColor = surfaceContainerDark,
+            unfocusedContainerColor = surfaceContainerDark
         )
     )
 }

@@ -38,13 +38,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.core.view.WindowCompat
-import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.ui.R
 
 private val DarkColorScheme: ColorScheme
     @Composable
     get() = darkColorScheme(
-        primary = colorResource(R.color.primaryDark), //Color(0xFF70CCCC),
-        onPrimary = colorResource(R.color.onPrimaryDark), //Color(0xFF122E2E),
+        primary = primaryDark, //Color(0xFF70CCCC),
+        onPrimary = onPrimaryDark, //Color(0xFF122E2E),
         primaryContainer = Color(0xFF1F4C4C),
         onPrimaryContainer = Color(0xFF9DE0E0),
         inversePrimary = Color(0xFF1B6B6B),
@@ -57,15 +57,15 @@ private val DarkColorScheme: ColorScheme
         tertiaryContainer = Color(0xFF6E2A00),
         onTertiaryContainer = Color(0xFFF7C9A1),
         background = Color(0xFF282E2C),
-        onBackground = colorResource(R.color.onBackgroundDark), //Color(0xFFDFE5E3),
-        surface =  colorResource(R.color.surfaceDark),
+        onBackground = onBackgroundDark, //Color(0xFFDFE5E3),
+        surface = surfaceDark,
         onSurface = colorResource(R.color.onSurfaceDark), //Color(0xFFDFE5E3),
         surfaceVariant = colorResource(R.color.surfaceVariantDark), //Color(0xFF4E5359),
-        onSurfaceVariant = colorResource(R.color.onSurfaceVariantDark), //Color(0xFFCBCED1),
+        onSurfaceVariant = onSurfaceVariantDark, //Color(0xFFCBCED1),
         surfaceTint = Color(0xFFF2A591),
         inverseSurface = Color(0xFFDFE5E3),
         inverseOnSurface = Color(0xFF333B38),
-        error = colorResource(R.color.errorDark), //Color(0xFFF593AB),
+        error = errorDark, //Color(0xFFF593AB),
         onError = Color(0xFF520417),
         errorContainer = Color(0xFF800322),
         onErrorContainer = Color(0xFFFAB4C5),

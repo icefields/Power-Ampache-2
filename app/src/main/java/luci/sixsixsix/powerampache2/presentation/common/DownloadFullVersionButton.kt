@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.common.goToPlayStore
+import luci.sixsixsix.powerampache2.ui.theme.onPrimaryDark
+import luci.sixsixsix.powerampache2.ui.theme.primaryDark
 import java.lang.ref.WeakReference
 
 @Composable
@@ -59,8 +61,8 @@ fun DownloadFullVersionButton() {
             )
             .fillMaxWidth(),
         colours = ButtonDefaults.buttonColors(
-            containerColor = colorResource(id = R.color.primaryDark),
-            contentColor = colorResource(id = R.color.onPrimaryDark)
+            containerColor = primaryDark,
+            contentColor = onPrimaryDark
         ),
         onClick = {
             context.get()?.goToPlayStore()

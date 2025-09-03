@@ -51,6 +51,7 @@ import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
+import luci.sixsixsix.powerampache2.ui.theme.onSurfaceVariantDark
 
 @Composable
 fun LoginTextFields(
@@ -84,7 +85,7 @@ fun LoginTextFields(
             fontSize = 14.sp,
             lineHeight = 14.sp,
             fontWeight = FontWeight.Light,
-            color = colorResource(id = R.color.onSurfaceVariantDark)
+            color = onSurfaceVariantDark
         )
 
         if (serverUrlVisible) {

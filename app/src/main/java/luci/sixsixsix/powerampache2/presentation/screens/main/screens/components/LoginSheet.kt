@@ -57,6 +57,8 @@ import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
+import luci.sixsixsix.powerampache2.ui.theme.surfaceContainerDark
+import luci.sixsixsix.powerampache2.ui.theme.surfaceDark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +76,7 @@ fun LoginBottomDrawer(
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = { isLoginSheetOpen.value = false },
-        containerColor = colorResource(id = R.color.surfaceContainerDark)
+        containerColor = surfaceContainerDark
     ) {
         LoginForm(
             username = username,
@@ -114,7 +116,7 @@ fun LoginDialog(
 //            ),
             modifier = Modifier,
             colors = CardDefaults.cardColors(
-                containerColor = colorResource(id = R.color.surfaceDark)
+                containerColor = surfaceDark
             ),
             elevation = CardDefaults.cardElevation(5.dp),
             shape = RoundedCornerShape(10.dp)
@@ -148,7 +150,7 @@ private fun LoginForm(
 ) {
     Column(
         modifier = Modifier
-            .background(color = colorResource(id = R.color.surfaceDark))
+            .background(color = surfaceDark)
             .padding(top = 6.dp, bottom = 16.dp)
     ) {
         LoginTextFields(

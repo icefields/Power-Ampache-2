@@ -67,18 +67,22 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
 import luci.sixsixsix.powerampache2.presentation.common.DefaultFullWidthButton
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent
+import luci.sixsixsix.powerampache2.ui.theme.onPrimaryDark
+import luci.sixsixsix.powerampache2.ui.theme.primaryDark
+import luci.sixsixsix.powerampache2.ui.theme.surfaceContainerDark
+import luci.sixsixsix.powerampache2.ui.theme.surfaceDark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpBottomDrawer(
     sheetState: SheetState,
     isSignUpSheetOpen: MutableState<Boolean>,
-    onEvent: (luci.sixsixsix.powerampache2.presentation.screens.main.AuthEvent) -> Unit
+    onEvent: (AuthEvent) -> Unit
 ) {
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = { isSignUpSheetOpen.value = false },
-        containerColor = colorResource(id = R.color.surfaceContainerDark)
+        containerColor = surfaceContainerDark
     ) {
         SignUpBottomSheet(
             onEvent = onEvent,
@@ -104,7 +108,7 @@ fun SignUpDialog(
         Card(
             //border = BorderStroke( width = 0.dp, color = MaterialTheme.colorScheme.onSurface),
             colors = CardDefaults.cardColors(
-                containerColor = colorResource(id = R.color.surfaceContainerDark)
+                containerColor = surfaceContainerDark
             ),
             elevation = CardDefaults.cardElevation(5.dp),
             shape = RoundedCornerShape(10.dp)
@@ -146,7 +150,7 @@ fun SignUpBottomSheet(
 
     LazyColumn(
         modifier = modifier
-            .background(color = colorResource(id = R.color.surfaceDark))
+            .background(color = surfaceDark)
             .padding(horizontal = dimensionResource(id = R.dimen.bottomDrawer_login_padding_horizontal))
     ) {
         items(10) { index ->
@@ -329,8 +333,8 @@ fun SignUpBottomSheet(
                         .padding(vertical = 10.dp)
                         .fillMaxWidth(),
                     colours = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(id = R.color.primaryDark),
-                        contentColor = colorResource(id = R.color.onPrimaryDark)
+                        containerColor = primaryDark,
+                        contentColor = onPrimaryDark
                     ),
                     onClick = {
                         val isError =

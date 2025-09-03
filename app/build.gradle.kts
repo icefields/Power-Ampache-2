@@ -270,6 +270,7 @@ android {
 //}
 
 dependencies {
+    implementation(project(":PowerAmpache2Theme"))
     implementation(project(":domain"))
     implementation(project(":MrLog"))
     implementation(project(":data-ampache"))

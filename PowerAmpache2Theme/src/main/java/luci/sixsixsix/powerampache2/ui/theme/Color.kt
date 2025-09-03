@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024  Antonio Tari
+ * Copyright (C) 2025  Antonio Tari
  *
  * This file is a part of Power Ampache 2
  * Ampache Android client application
@@ -21,7 +21,20 @@
  */
 package luci.sixsixsix.powerampache2.ui.theme
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import luci.sixsixsix.powerampache2.ui.R
+
+val primaryDark @Composable get() = colorResource(R.color.primaryDark)
+val onPrimaryDark @Composable get() = colorResource(R.color.onPrimaryDark)
+val surfaceDark @Composable get() = colorResource(R.color.surfaceDark)
+val onBackgroundDark @Composable get() = colorResource(R.color.onBackgroundDark)
+val surfaceContainerDark @Composable get() = colorResource(R.color.surfaceContainerDark)
+val onSurfaceVariantDark @Composable get() = colorResource(R.color.onSurfaceVariantDark)
+val errorDark @Composable get() = colorResource(R.color.errorDark)
+
+internal val surfaceContainerHighDark @Composable get() = colorResource(R.color.surfaceContainerHighDark)
 
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)

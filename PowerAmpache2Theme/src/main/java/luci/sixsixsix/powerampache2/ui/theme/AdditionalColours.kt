@@ -30,7 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.ui.R
 
 @Stable
 class AdditionalColours(
@@ -77,15 +77,15 @@ var ColorScheme.additionalColours: AdditionalColours
 val AdditionalDarkColours
 @Composable
 get() = AdditionalColours(
-        surfaceDim = colorResource(id = R.color.surfaceDark),
+        surfaceDim = surfaceDark,
         surfaceBright = Color(0xFF3F4745),
         surfaceContainerLowest  = Color(0xFF161918),
         surfaceContainerLow = Color(0xFF1F2422),
-        surfaceContainer = colorResource(id = R.color.surfaceContainerDark),
-        surfaceContainerHigh = colorResource(id = R.color.surfaceContainerHighDark),
+        surfaceContainer = surfaceContainerDark,
+        surfaceContainerHigh = surfaceContainerHighDark,
         surfaceContainerHighest = Color(0xFF38403D),
         shadow = Color(0xFF0B0D0C),
-        queueHandle = colorResource(id = R.color.surfaceContainerHighDark)
+        queueHandle = surfaceContainerHighDark
     )
 
 val AdditionalLightColours

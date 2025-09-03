@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TODO: rename those colours to their colour-names, like "white600", "blue", "purple540" ...-->
+    <color name="onSurfaceVariantLight">#FF4E5359</color>
+    <color name="onSurfaceVariantDark">#FFCBCED1</color>
+    <color name="surfaceDark">#FF1B1F1D</color>
+    <color name="surfaceLight">#FFF2FAF7</color>
+    <color name="backgroundLight">@color/surfaceLight</color>
+    <color name="surfaceVariantDark">#FF4E5359</color>
+    <color name="surfaceContainerLight">#E9F0ED</color>
+    <color name="surfaceContainerDark">#FF242927</color>
+    <color name="onPrimaryDark">#FF122E2E</color>
+    <color name="primaryDark">#FF70CCCC</color>
+    <color name="tertiaryDark">#FFFABA82</color>
+    <color name="onTertiaryDark">#FF421900</color>
+    <color name="onBackgroundDark">#FFDFE5E3</color>
+    <color name="onBackgroundLight">#1F2124</color>
+    <color name="onSurfaceLight">@color/onBackgroundLight</color>
+    <color name="tertiaryLight">#A14300</color>
+    <color name="onSurfaceDark">#FFDFE5E3</color>
+
+    <color name="secondaryContainerDark">#FF41444C</color>
+    <color name="onSecondaryContainerDark">#FFCFD8E5</color>
+
+    <color name="errorDark">#FFF593AB</color>
+    <color name="outlineDark">#FFA5A9AD</color>
+    <color name="surfaceContainerHighLight">#FFE4EBE8</color>
+    <color name="surfaceContainerHighDark">#FF282E2C</color>
+
+    <!-- theme colours, dark version must be provided -->
+    <color name="onSurfaceVariant">@color/onSurfaceVariantLight</color>
+</resources>
