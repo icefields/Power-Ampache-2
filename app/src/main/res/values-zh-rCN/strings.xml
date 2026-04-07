@@ -1,0 +1,308 @@
+<resources>
+    <string name="notification_channel_description">显示当前播放的音乐</string>
+    <string name="coming_soon">即将推出</string>
+
+    <string name="albumDetailScreen_infoSection_year">年份</string>
+    <string name="albumDetailScreen_infoSection_songs">歌曲数</string>
+    <string name="albumDetailScreen_infoSection_time">总时长</string>
+    <string name="playlistDetailScreen_infoSection_avgRating">平均评分</string>
+    <string name="playlistItem_songCount">%s首歌曲</string>
+    <string name="topBar_search_hint">搜索歌曲、专辑、歌手、歌单</string>
+    <string name="main_tab_title_albums">专辑</string>
+    <string name="main_tab_title_home">主页</string>
+    <string name="main_tab_title_songs">歌曲</string>
+    <string name="main_tab_title_artists">歌手</string>
+    <string name="main_tab_title_playlists">歌单</string>
+    <string name="loginScreen_username">用户名</string>
+    <string name="loginScreen_signUp_email">电子邮箱</string>
+    <string name="loginScreen_fullname">全名（可选）</string>
+    <string name="loginScreen_password">密码</string>
+    <string name="loginScreen_password_repeat">确认密码</string>
+    <string name="loginScreen_register_success">用户注册成功\n您现在可以使用您的凭证登录\n如果服务器要求，请确认您的电子邮件</string>
+    <string name="loginScreen_server_url">服务器URL</string>
+    <string name="loginScreen_signUp_requiredField">此为必填字段</string>
+    <string name="loginScreen_auth_token">认证令牌</string>
+    <string name="loginScreen_auth_token_warning">认证令牌登录适用于服务器6.4及以上版本</string>
+    <string name="loginScreen_login">登录</string>
+    <string name="loginScreen_signup">注册</string>
+    <string name="loginScreen_demo_server">Demo</string>
+    <string name="loginScreen_loading_authenticating">正在连接……</string>
+    <string name="loginScreen_dogmazic_server">Dogmazic 音乐服务器 （预览版）</string>
+    <string name="loginScreen_textFields_warning">兼容服务器4及以上版本。\n已在服务器版本6上测试</string>
+    <string name="loginScreen_warning">若要连接到您自己的服务器，请下载完整版的 Power Ampache 2</string>
+
+    <string name="home_section_title_recent">最近播放</string>
+    <string name="home_section_title_recommended">推荐</string>
+    <string name="home_section_title_flagged">收藏</string>
+    <string name="home_section_title_frequent">最常播放</string>
+    <string name="home_section_title_highest">最高评分</string>
+    <string name="home_section_title_newest">最新添加</string>
+    <string name="home_section_title_playlists">歌单</string>
+    <string name="home_section_title_moreAlbums">更多专辑</string>
+    <string name="home_section_title_loading">加载中</string>
+    <string name="home_artist_subtitle_item">歌手</string>
+
+    <!-- content description strings-->
+    <string name="back_content_description">返回</string>
+    <string name="search_content_description">搜索</string>
+    <string name="menu_content_description">下拉菜单</string>
+
+    <!-- ERROR messages-->
+    <string name="error_io_exception">无法加载数据，是否已连接到网络？\n如果问题仍然存在，请尝试关闭并重新打开应用程序</string>
+    <string name="error_cannotEditPreference">无法编辑设置</string>
+    <string name="error_http_exception">无法加载数据，是否已连接到网络？\n如果问题仍然存在，请尝试关闭并重新打开应用程序</string>
+    <string name="error_empty_result">没有结果可显示。或您正尝试添加或删除服务器上未找到的内容。</string>
+    <string name="error_duplicate">重复条目</string>
+    <string name="error_user_fetch">从服务器检索您的用户信息时出现问题</string>
+
+    <string name="error_playback_exception">播放此曲目时出现问题。</string>
+    <string name="share_song_cannot_find">找不到共享的歌曲</string>
+
+
+    <string name="crash_mail_subject">崩溃报告</string>
+    <string name="crash_mail_body">崩溃报告的数据。感谢！</string>
+
+    <string name="error_offline">无法连接到服务器</string>
+
+
+    <string name="offlineMode">离线模式</string>
+    <string name="offlineMode_switch_title">离线模式</string>
+
+    <!-- SETTINGS -->
+    <string name="quality_veryHigh_title">极高音质</string>
+    <string name="quality_veryHigh_subtitle">320kbps或flac（无转码）</string>
+    <string name="quality_high_title">高音质</string>
+    <string name="quality_high_subtitle">256kbps</string>
+    <string name="quality_medium_title">中音质</string>
+    <string name="quality_medium_subtitle">192kbps</string>
+    <string name="quality_mediumLow_title">中低音质</string>
+    <string name="quality_mediumLow_subtitle">128kbps</string>
+    <string name="quality_low_title">低音质</string>
+    <string name="quality_low_subtitle">96kbps</string>
+    <string name="theme_system_title">系统主题</string>
+    <string name="theme_dark_title">深色</string>
+    <string name="theme_light_title">浅色</string>
+    <string name="theme_system_materialYou_title">MaterialYou 系统</string>
+    <string name="theme_dark_materialYou_title">MaterialYou 深色</string>
+    <string name="theme_light_materialYou_title">MaterialYou 浅色</string>
+    <string name="settings_equalizer">均衡器</string>
+    <string name="settings_normalizeVolume_title">音量均衡</string>
+    <string name="settings_offlineMode_title">离线模式</string>
+    <string name="settings_downloadAfterPlay_title">播放后下载歌曲</string>
+    <string name="settings_downloadAfterPlay_onlyFavourites_title">播放后仅下载收藏歌曲</string>
+    <string name="settings_offlineMode_subtitle">启用离线模式</string>
+    <string name="settings_downloadAfterPlay_subtitle">歌曲将在播放后存储到设备中。</string>
+    <string name="settings_downloadsSdCard_title">下载到SD卡</string>
+    <string name="settings_downloadsSdCard_subtitle">当SD卡挂载为系统存储时生效</string>
+    <string name="settings_normalizeVolume_subtitle">强制所有曲目音量一致</string>
+    <string name="settings_monoAudio_title">单声道音频</string>
+    <string name="settings_monoAudio_subtitle">左右扬声器将播放相同音频</string>
+    <string name="settings_smartDownloads_title">智能下载</string>
+    <string name="settings_smartDownloads_subtitle">手机空闲时自动下载播放最多的歌曲</string>
+    <string name="settings_checkUpdatesNow_title">立即检查更新</string>
+    <string name="settings_autoCheckUpdates_title">自动检查更新</string>
+    <string name="settings_debugLogs_title">调试日志</string>
+    <string name="settings_enableDebugLogging_title">启用匿名调试日志E</string>
+    <string name="settings_enableDebugLogging_subtitle">将发送崩溃和错误堆栈跟踪给开发者以修复应用问题</string>
+    <string name="settings_deleteDownloads_title">删除所有下载内容</string>
+    <string name="settings_deleteDownloads_subtitle">这将删除您下载的所有歌曲</string>
+    <string name="settings_deleteDownloads_success">您的所有离线音乐已删除</string>
+    <string name="settings_deleteDownloads_fail">删除您的离线音乐时出现问题，如果问题仍然存在，请联系开发者修复错误</string>
+    <string name="settings_hideDonationButtonsMenu_title">隐藏菜单中的捐赠按钮</string>
+    <string name="settings_ampachePreferences_title">Ampache 设置</string>
+    <string name="settings_ampachePreferences_subtitle">您的 Ampache 服务器设置</string>
+
+    <string name="settings_serverInfo_title">服务器</string>
+    <string name="settings_serverInfo_version">版本</string>
+    <string name="settings_serverInfo_compatible">兼容</string>
+    <string name="settings_userInfo_username">用户名</string>
+    <string name="settings_userInfo_fullName">全名</string>
+    <string name="settings_userInfo_email">电子邮箱</string>
+    <string name="settings_userInfo_website">网站</string>
+    <string name="settings_userInfo_state">省份</string>
+    <string name="settings_userInfo_city">城市</string>
+    <string name="settings_userInfo_id">ID</string>
+    <string name="player_buttonText_artist">歌手</string>
+    <string name="player_buttonText_album">专辑</string>
+    <string name="player_buttonText_add">添加</string>
+    <string name="download">下载</string>
+    <string name="player_buttonText_download">@string/download</string>
+    <string name="player_buttonText_share">分享</string>
+    <string name="player_buttonText_info">信息</string>
+    <string name="player_queue_upNext">即将播放</string>
+    <string name="player_queue_lyrics">歌词</string>
+    <string name="logout_offline_warning">请在登出前关闭离线模式</string>
+    <string name="offline_noData_warning">您还没有下载任何歌曲</string>
+    <string name="sleepTimer_title">睡眠定时器</string>
+    <string name="sleepTimer_subtitle">设置睡眠定时器，在指定时间后停止音乐。</string>
+    <string name="sleepTimer_time_set">将在大约%s时停止音乐</string>
+    <string name="sleepTimer_time_unset">未设置定时器</string>
+    <string name="sleepTimer_waitEnd">播放完当前歌曲后再停止播放。</string>
+    <string name="settings_player_unit_seconds">秒</string>
+    <string name="settings_player_unit_minutes">分钟</string>
+    <string name="settings_storagePermission_dialog_title">选择下载文件夹</string>
+    <string name="settings_storagePermission_dialog_text">应用无法再访问您之前选择的文件夹。\n如果系统权限在设备设置中被重置或更改，可能会发生这种情况。\n\n请重新选择文件夹，以便应用可以继续保存音乐。</string>
+    <string name="settings_storagePermission_dialog_confirm">选择文件夹</string>
+    <string name="settings_customFolder_title">选择自定义离线模式文件夹</string>
+    <string name="settings_customFolder_subtitle">当前选中的文件夹: %s</string>
+    <string name="settings_customFolder_warning_title">警告 - 请阅读</string>
+    <string name="settings_customFolder_warning_descr">选择自定义文件夹会将应用文件暴露给您和您的文件管理器应用。如果您移动、修改、重命名这些文件，或执行任何可能破坏应用功能的操作（包括卸载SD卡），您将管理这些文件并为其负责。\n\n您可以随时更改存储位置，应用将继续与先前选择位置中存储的文件无缝切换；但是，在应用内删除文件可能无法影响磁盘上的数据。请务必使用文件管理器检查以确保删除成功。</string>
+    <string name="settings_customFolder_reset">重置</string>
+
+
+    <!-- SETTINGS PLAYER -->
+    <string name="settings_playerAdvancedSettings_title">播放器高级设置（需重启应用）</string>
+    <string name="settings_playerAdvancedSettings_subtitle">若您遇到播放问题，如卡顿、歌曲中断、曲目启动延迟等，请调整这些设置</string>
+    <string name="settings_playerAdvancedSettings_warning">若要应用缓冲区设置，请重启应用。</string>
+    <string name="settings_backBuffer_title">回退缓冲区</string>
+    <string name="settings_backBuffer_subtitle">调整播放前预先缓冲的内容量，以秒为单位。它可以防止中断，尤其是在网络延迟期间。</string>
+    <string name="settings_minBuffer_title">最小缓冲区</string>
+    <string name="settings_minBuffer_subtitle">播放器将尝试确保缓冲的最小媒体持续时间，以秒为单位。</string>
+    <string name="settings_bufferForPlayback_title">播放缓冲区</string>
+    <string name="settings_bufferForPlayback_subtitle">播放开始或在用户操作（如拖动进度条）后恢复播放所必须缓冲的媒体持续时间，以秒为单位。</string>
+    <string name="settings_maxBuffer_title">最大缓冲区</string>
+    <string name="settings_maxBuffer_subtitle">播放器将尝试缓冲的最大媒体持续时间，以秒为单位。</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_title">重新缓冲后播放缓冲区</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_subtitle">重新缓冲后恢复播放所必须缓冲的默认媒体持续时间，以秒为单位。重新缓冲是由缓冲区耗尽而非用户操作引起的。</string>
+    <string name="settings_playerCache_title">播放器缓存（单位为MB）</string>
+    <string name="settings_playerCache_subtitle">播放器的磁盘缓存量（单位为MB）</string>
+    <string name="settings_player_unit_mb">MB</string>
+    <string name="settings_player_unit_bytes">字节</string>
+    <string name="settings_playerBufferSizeBytes_title">目标缓冲区大小</string>
+    <string name="settings_playerBufferSizeBytes_subtitle">设置目标缓冲区大小（如果遇到内存不足问题，请减小此值）</string>
+
+    <string name="settings_player_button_resetDefaults">重置默认值</string>
+    <string name="settings_player_button_killApp">点击关闭应用\n（应用播放器设置）</string>
+    <string name="settings_player_killDialog_title">现在关闭应用以应用设置？</string>
+
+    <!--- DIALOGS -->
+    <string name="miniPlayer_reset_alert_message">长按停止音乐播放并重置队列</string>
+    <string name="miniPlayer_reset_alert_title">停止/重置</string>
+    <string name="dialog_create">创建</string>
+    <string name="warning_playlist_download">请等待歌单完全加载后再下载</string>
+    <string name="warning_playlist_server">正在添加歌曲，如果您的服务器版本低于6.3，此操作可能需要一分钟左右</string>
+    <string name="warning_playlist_adding">歌曲正在添加到您的歌单。\n离开此屏幕将中断操作</string>
+    <string name="warning_playlist_adding_title">离开屏幕？</string>
+    <string name="warning_playlist_adding_stay">停留</string>
+    <string name="warning_playlist_adding_leave">仍然离开</string>
+    <string name="warning_song_remove_title">移除歌曲</string>
+    <string name="warning_album_songList_remove_title">移除下载的歌曲</string>
+    <string name="warning_album_songList_remove_subtitle">这将移除专辑中所有已下载的歌曲。确定要继续吗？</string>
+
+    <!-- Song Dropdown Menu -->
+    <string name="dropdownMenu_item_download">下载</string>
+    <string name="dropdownMenu_item_export">导出已下载歌曲</string>
+    <string name="dropdownMenu_item_playNext">下一首播放</string>
+    <string name="dropdownMenu_item_addToQueue">添加到队列</string>
+    <string name="dropdownMenu_item_addToPlaylist">添加到歌单</string>
+    <string name="dropdownMenu_item_goToAlbum">查看专辑</string>
+    <string name="dropdownMenu_item_goToArtist">查看歌手</string>
+    <string name="dropdownMenu_item_share">分享</string>
+
+    <!---...-->
+    <string name="about_flavour">版本类型</string>
+    <string name="version_quote_title">版本语录</string>
+    <string name="about_appVersion_title">应用版本</string>
+    <string name="about_license_title">许可证</string>
+    <string name="about_contact_title">在 Telegram 和 Mastodon 上联系我</string>
+    <string name="about_sourceCode_title">源代码</string>
+    <string name="about_considerDonating">通过捐赠支持项目！\n网站上的链接：</string>
+
+    <!---Main Menu Items-->
+    <string name="menu_drawer_settings">设置</string>
+    <string name="menu_drawer_library">媒体库</string>
+    <string name="menu_drawer_genres">流派</string>
+    <string name="menu_drawer_home">主页</string>
+    <string name="menu_drawer_about">关于</string>
+    <string name="menu_drawer_plugins">插件</string>
+    <string name="menu_drawer_logout">登出</string>
+    <string name="menu_drawer_offline">离线歌曲</string>
+
+    <string name="settings_theme_title">选择您的主题</string>
+    <string name="settings_quality_title">流媒体音质</string>
+    <string name="loginScreen_useAuthToken">使用认证令牌</string>
+    <string name="queue">队列</string>
+    <!-- the following Playlist title has to be all caps -->
+    <string name="addToPlaylistOrQueueDialog_playlists">歌单</string>
+    <string name="addToPlaylistOrQueueDialog_createNew">新建</string>
+    <string name="addToPlaylistOrQueueDialog_addQueue">添加到当前队列</string>
+    <string name="downloaded_snackbar_title">已下载%s</string>
+
+    <string name="downloaded_delete_snackbar_songs">已删除%d首歌曲。</string>
+    <string name="downloaded_delete_snackbar_song">已从下载中删除%s</string>
+    <string name="downloaded_delete_snackbar_song_error">删除%s时出错</string>
+
+    <string name="home_playlist_highest_title">高分歌曲</string>
+    <string name="home_playlist_frequent_title">常播歌曲</string>
+    <string name="home_playlist_recent_title">最近播放</string>
+    <string name="home_playlist_favourites_title">收藏歌曲</string>
+
+    <string name="dialog_deletePlaylist_title">删除歌单</string>
+    <string name="dialog_deletePlaylist_text">删除%s？</string>
+
+    <!-- NEW STRINGS -->
+    <string name="item_title_album">专辑</string>
+    <string name="item_title_playlist">歌单</string>
+    <string name="item_title_artist">歌手</string>
+
+    <string name="loginScreen_acceptAllCertificates">接受所有证书（包括自签名）</string>
+    <string name="loginScreen_killDialog_title">要应用此选项，请重启应用</string>
+    <string name="loginScreen_killDialog_subtitle">现在关闭应用以应用？</string>
+
+    <string name="settings_player_useOkHttp_title">使用高级播放器进行音乐流式传输（使用 OkHttp）</string>
+    <string name="settings_player_useOkHttp_subtitle">在播放过程中遇到连接错误或302网络响应时使用。此选项需要重启应用。</string>
+
+    <string name="settings_player_prioritizeTimeOverSizeThresholds_title">优先考虑时间而非大小阈值</string>
+    <string name="settings_player_prioritizeTimeOverSizeThresholds_subtitle">设置负载控制是否优先考虑缓冲区时间约束而非缓冲区大小约束。关闭时，将遵循最先达到的阈值（时间或空间）</string>
+    <string name="playlist_dialog_add_large">您正在向此歌单添加大量歌曲。服务器处理此操作可能需要一些时间。</string>
+
+    <!-- %s represents the title of the song -->
+    <string name="warning_song_remove_subtitle">"从下载的歌曲中删除%s？"</string>
+
+    <string name="error_user_notEnabled">用户未启用，请检查您的电子邮件中的帐户确认链接或从服务器启用该用户</string>
+    <string name="error_cannotConnect">连接到服务器或数据源时出现问题。\n请播放其他曲目或检查您的连接</string>
+
+    <string name="nextcloud_not_implemented">在 Nextcloud Music 中尚未实现</string>
+    <string name="share_export_song">导出歌曲</string>
+    <string name="share_open_link_browser">在浏览器中打开链接</string>
+    <string name="share_link_pa2">分享到 Power Ampache 2</string>
+    <string name="share_link_web">分享链接</string>
+    <string name="about_support_title">支持</string>
+    <string name="about_links_title">链接</string>
+
+    <!-- do not translate, this is a reference -->
+    <string name="bmac_contentDescription" translatable="false">@string/bmac_btn_text</string>
+    <string name="patreon_contentDescription" translatable="false">Patreon</string>
+    <string name="about_matrix" translatable="false">Matrix Space</string>
+    <string name="about_telegram" translatable="false">Telegram</string>
+    <string name="about_telegram_chat" translatable="false">Telegram Chatroom</string>
+    <string name="about_mastodon" translatable="false">Mastodon</string>
+    <string name="about_github" translatable="false">Github</string>
+    <string name="telegram_contentDescription" translatable="false">@string/about_telegram</string>
+    <string name="mastodon_contentDescription" translatable="false">@string/about_mastodon</string>
+
+    <!-- "Donate" will be followed by Paypal or Bitcoin. ie "Donate Bitcoin" -->
+    <string name="donate_btn_text">捐赠</string>
+
+    <string name="bitcoin_btn_contentDescription">通过比特币捐赠</string>
+    <string name="paypal_btn_contentDescription">通过Paypal捐赠</string>
+    <string name="bmac_btn_text">请我喝咖啡</string>
+
+    <string name="ampachePreferences_screen_title">Ampache 设置</string>
+    <string name="ampachePreferences_screen_undo_btn_title">撤销</string>
+    <string name="ampachePreferences_systemPreferences_title">系统</string>
+    <string name="ampachePreferences_userPreferences_title">用户</string>
+    <string name="ampachePreferences_updated_toast">设置已更新</string>
+
+    <string name="albums_sortOrder_name">名称</string>
+    <string name="albums_sortOrder_year">年份</string>
+    <string name="albums_sortOrder_artist">歌手</string>
+    <string name="albums_sortOrder_rating">评分</string>
+    <string name="albums_sortOrder_averageRating">平均评分</string>
+
+    <string name="albums_emptyView_warning">没有要显示的专辑</string>
+
+    <!-- PLUGINS -->
+    <string name="plugin_cast_queueEmpty_warning">您的队列是空的</string>
+    <string name="plugin_cast_queueTooLarge_error">队列太大，无法发送到 Cast 插件</string>
+</resources>
