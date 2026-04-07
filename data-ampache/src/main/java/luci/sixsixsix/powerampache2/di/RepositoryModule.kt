@@ -48,6 +48,7 @@ import luci.sixsixsix.powerampache2.data.offlinemode.SongsOfflineDataSourceImpl
 import luci.sixsixsix.powerampache2.data.plugins.ChromecastPluginDataSourceImpl
 import luci.sixsixsix.powerampache2.data.plugins.InfoPluginDataSourceImpl
 import luci.sixsixsix.powerampache2.data.plugins.LyricsPluginDataSourceImpl
+import luci.sixsixsix.powerampache2.data.plugins.auto.AutoPluginDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.AmpacheInterceptor
 import luci.sixsixsix.powerampache2.data.remote.datasource.AlbumsRemoteDataSourceImpl
 import luci.sixsixsix.powerampache2.data.remote.datasource.ArtistsRemoteDataSourceImpl
@@ -75,6 +76,7 @@ import luci.sixsixsix.powerampache2.domain.datasource.SongsDbDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsOfflineDataSource
 import luci.sixsixsix.powerampache2.domain.datasource.SongsRemoteDataSource
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
+import luci.sixsixsix.powerampache2.domain.plugin.auto.AutoPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.chromecast.ChromecastPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.info.InfoPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.lyrics.LyricsPluginDataSource
@@ -273,6 +275,13 @@ abstract class RepositoryModule {
     abstract fun infoPluginDataSourceProvider(
         infoPluginDataSourceImpl: InfoPluginDataSourceImpl
     ): InfoPluginDataSource
+
+
+    @Binds
+    @PluginDataSource
+    abstract fun autoPluginDataSourceProvider(
+        autoPluginDataSourceImpl: AutoPluginDataSourceImpl
+    ): AutoPluginDataSource
 
     @Binds
     @PluginDataSource

@@ -32,7 +32,12 @@ const val KEY_REQUEST_SONG_TITLE = "songTitle"
 const val KEY_REQUEST_ALBUM_TITLE = "albumTitle"
 const val KEY_REQUEST_ARTIST_NAME = "artistName"
 const val KEY_RESPONSE_SUCCESS = "success"
+const val ACTION_GET_SONGS_ALBUM = "get_songs_album"
+const val ACTION_SONGS_ALBUM = "songs_album"
+const val ACTION_GET_SONGS_PLAYLIST = "get_songs_playlist"
+const val ACTION_SONGS_PLAYLIST = "songs_playlist"
 
 // Avoid android.os.TransactionTooLargeException: data parcel size xxx bytes by
 // reducing the size of the queue to MAX_CAST_QUEUE.
 const val MAX_CAST_QUEUE = 100
+const val MAX_AUTO_DATA_SIZE = 90

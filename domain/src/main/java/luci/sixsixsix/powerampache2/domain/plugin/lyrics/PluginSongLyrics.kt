@@ -26,4 +26,4 @@ data class PluginSongLyrics(
     val lyrics: String = ""
 )
 
-fun PluginSongLyrics.getAvailableLyrics() = if (lyrics.isNotBlank()) lyrics else lyricsUrl
+fun PluginSongLyrics.getAvailableLyrics() = lyrics.ifBlank { lyricsUrl }

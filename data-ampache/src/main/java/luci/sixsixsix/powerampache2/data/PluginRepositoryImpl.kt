@@ -25,6 +25,7 @@ import luci.sixsixsix.powerampache2.di.PluginDataSource
 import luci.sixsixsix.powerampache2.domain.PluginRepository
 import luci.sixsixsix.powerampache2.domain.errors.Pa2CastQueueException
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.plugin.auto.AutoPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.chromecast.ChromecastPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.info.InfoPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.lyrics.LyricsPluginDataSource
@@ -36,6 +37,7 @@ import kotlin.jvm.Throws
 class PluginRepositoryImpl @Inject constructor(
     @PluginDataSource private val lyricsPluginDataSource: LyricsPluginDataSource,
     @PluginDataSource private val chromecastPluginDataSource: ChromecastPluginDataSource,
+    @PluginDataSource private val autoPluginDataSource: AutoPluginDataSource,
     @PluginDataSource private val infoPluginDataSource: InfoPluginDataSource
 ): PluginRepository {
     override fun isLyricsPluginInstalled() =
@@ -46,6 +48,9 @@ class PluginRepositoryImpl @Inject constructor(
 
     override fun isChromecastPluginInstalled(): Boolean =
         chromecastPluginDataSource.isChromecastPluginInstalled()
+
+    override fun isAutoPluginInstalled(): Boolean =
+        autoPluginDataSource.isAutoPluginInstalled()
 
     @Throws(Pa2CastQueueException::class)
     override suspend fun sendQueueToChromecast(queue: List<Song>) {

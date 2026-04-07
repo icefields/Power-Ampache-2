@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -58,6 +59,7 @@ import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
+import luci.sixsixsix.powerampache2.domain.plugin.auto.AutoPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.info.InfoPluginDataSource
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
 import java.util.TreeSet
@@ -77,7 +79,8 @@ class AlbumsRepositoryImpl @Inject constructor(
     @LocalDataSource private val albumsDbDataSource: AlbumsDbDataSource,
     @OfflineModeDataSource private val albumsOfflineDataSource: AlbumsOfflineDataSource,
     @RemoteDataSource private val albumsRemoteDataSource: AlbumsRemoteDataSource,
-    @PluginDataSource private val pluginDataSource: InfoPluginDataSource,
+    @PluginDataSource private val infoPluginDataSource: InfoPluginDataSource,
+    @PluginDataSource private val autoPluginDataSource: AutoPluginDataSource,
     private val api: MainNetwork,
     db: MusicDatabase,
     private val errorHandler: ErrorHandler
@@ -482,6 +485,7 @@ class AlbumsRepositoryImpl @Inject constructor(
                 val data = albumsDto.map { it.toAlbum() }
                 dao.insertAlbums(data.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
                 emit(Resource.Success(data = data, networkData = data))
+                sendAlbumsToPlugins(data, statFilter)
             } ?: run {
                 // TODO throw exception, without updating the UI error message snackbar!
                 //  create a MusicException that ErrorHAndler will intercept?
@@ -502,6 +506,35 @@ class AlbumsRepositoryImpl @Inject constructor(
         getAlbumsStats(MainNetwork.StatFilter.frequent)
     override suspend fun getFlaggedAlbums() =
         getAlbumsStats(MainNetwork.StatFilter.flagged)
+
+    suspend fun sendAlbumsToPlugins(albums: List<Album>, statFilter: MainNetwork.StatFilter) {
+        when (statFilter) {
+            MainNetwork.StatFilter.random -> { }
+            MainNetwork.StatFilter.recent -> {
+                if (autoPluginDataSource.isAutoPluginInstalled()) {
+                    autoPluginDataSource.sendRecentAlbumsToAuto(albums)
+                }
+            }
+            MainNetwork.StatFilter.newest -> {
+                if (autoPluginDataSource.isAutoPluginInstalled()) {
+                    autoPluginDataSource.sendLatestAlbumsToAuto(albums)
+                }
+            }
+            MainNetwork.StatFilter.frequent -> { }
+            MainNetwork.StatFilter.flagged -> {
+                if (autoPluginDataSource.isAutoPluginInstalled()) {
+                    autoPluginDataSource.sendFavouriteAlbumsToAuto(albums)
+                }
+            }
+            MainNetwork.StatFilter.forgotten -> { }
+            MainNetwork.StatFilter.highest -> {
+                if (autoPluginDataSource.isAutoPluginInstalled()) {
+                    autoPluginDataSource.sendHighestAlbumsToAuto(albums)
+                }
+            }
+        }
+    }
+
     override suspend fun getRandomAlbums(fetchRemote: Boolean) =
         getAlbumsStats(MainNetwork.StatFilter.random, fetchRemote)
 
@@ -531,7 +564,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         albumTitle: String,
         artistName: String
     ): PluginAlbumData? =
-        pluginDataSource.getAlbumInfo(albumId = albumId,
+        infoPluginDataSource.getAlbumInfo(albumId = albumId,
             musicBrainzId = albumMbId, albumTitle = albumTitle, artistName = artistName)
 
 

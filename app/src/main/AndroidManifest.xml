@@ -14,6 +14,7 @@
 <!--    <uses-permission android:name="@string/permission_plugin_lyrics" />-->
 
     <queries>
+        <package android:name="luci.sixsixsix.powerampache2.plugin" />
         <package android:name="luci.sixsixsix.powerampache2.infoplugin" />
         <package android:name="luci.sixsixsix.powerampache2.lyricsplugin" />
         <package android:name="luci.sixsixsix.powerampache2.chromecastplugin" />
