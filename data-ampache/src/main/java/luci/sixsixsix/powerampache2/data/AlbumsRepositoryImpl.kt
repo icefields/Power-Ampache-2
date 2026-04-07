@@ -24,7 +24,10 @@ package luci.sixsixsix.powerampache2.data
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -35,6 +38,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbum
 import luci.sixsixsix.powerampache2.data.local.entities.toAlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toSong
@@ -80,11 +84,22 @@ class AlbumsRepositoryImpl @Inject constructor(
     @OfflineModeDataSource private val albumsOfflineDataSource: AlbumsOfflineDataSource,
     @RemoteDataSource private val albumsRemoteDataSource: AlbumsRemoteDataSource,
     @PluginDataSource private val infoPluginDataSource: InfoPluginDataSource,
-    @PluginDataSource private val autoPluginDataSource: AutoPluginDataSource,
     private val api: MainNetwork,
     db: MusicDatabase,
     private val errorHandler: ErrorHandler
 ): BaseAmpacheRepository(api, db, errorHandler), AlbumsRepository {
+
+//    val favouriteAlbumsFlow: Flow<List<Album>> = dao.getLikedAlbumsFlow()
+//        .map { dbList -> dbList.map { it.toAlbum() } }
+//        .distinctUntilChanged()
+//
+//    val highestAlbumsFlow: Flow<List<Album>> = dao.getHighestRatedAlbumsFlow()
+//        .map { dbList -> dbList.map { it.toAlbum() } }
+//        .distinctUntilChanged()
+//
+//    val latestAlbumsFlow: Flow<List<Album>> = dao.getRandomAlbumsFlow()
+//        .map { dbList -> dbList.map { it.toAlbum() } }
+//        .distinctUntilChanged()
 
     private fun removeDuplicates(albums: List<Album>) =
         if (Constants.config.removeDuplicateAlbums) albums.removeAlbumDuplicates() else albums
@@ -485,7 +500,6 @@ class AlbumsRepositoryImpl @Inject constructor(
                 val data = albumsDto.map { it.toAlbum() }
                 dao.insertAlbums(data.map { it.toAlbumEntity(username = cred.username, serverUrl = cred.serverUrl) })
                 emit(Resource.Success(data = data, networkData = data))
-                sendAlbumsToPlugins(data, statFilter)
             } ?: run {
                 // TODO throw exception, without updating the UI error message snackbar!
                 //  create a MusicException that ErrorHAndler will intercept?
@@ -506,34 +520,6 @@ class AlbumsRepositoryImpl @Inject constructor(
         getAlbumsStats(MainNetwork.StatFilter.frequent)
     override suspend fun getFlaggedAlbums() =
         getAlbumsStats(MainNetwork.StatFilter.flagged)
-
-    suspend fun sendAlbumsToPlugins(albums: List<Album>, statFilter: MainNetwork.StatFilter) {
-        when (statFilter) {
-            MainNetwork.StatFilter.random -> { }
-            MainNetwork.StatFilter.recent -> {
-                if (autoPluginDataSource.isAutoPluginInstalled()) {
-                    autoPluginDataSource.sendRecentAlbumsToAuto(albums)
-                }
-            }
-            MainNetwork.StatFilter.newest -> {
-                if (autoPluginDataSource.isAutoPluginInstalled()) {
-                    autoPluginDataSource.sendLatestAlbumsToAuto(albums)
-                }
-            }
-            MainNetwork.StatFilter.frequent -> { }
-            MainNetwork.StatFilter.flagged -> {
-                if (autoPluginDataSource.isAutoPluginInstalled()) {
-                    autoPluginDataSource.sendFavouriteAlbumsToAuto(albums)
-                }
-            }
-            MainNetwork.StatFilter.forgotten -> { }
-            MainNetwork.StatFilter.highest -> {
-                if (autoPluginDataSource.isAutoPluginInstalled()) {
-                    autoPluginDataSource.sendHighestAlbumsToAuto(albums)
-                }
-            }
-        }
-    }
 
     override suspend fun getRandomAlbums(fetchRemote: Boolean) =
         getAlbumsStats(MainNetwork.StatFilter.random, fetchRemote)

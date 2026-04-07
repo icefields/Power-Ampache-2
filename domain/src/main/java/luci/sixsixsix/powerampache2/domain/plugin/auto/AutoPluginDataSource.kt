@@ -21,17 +21,9 @@
  */
 package luci.sixsixsix.powerampache2.domain.plugin.auto
 
-import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Song
 
 interface AutoPluginDataSource {
     fun isAutoPluginInstalled(): Boolean
     suspend fun sendQueueToAuto(queue: List<Song>)
-    suspend fun sendAlbumsToAuto(albums: List<Album>)
-    suspend fun sendArtistsToAuto(artists: List<Artist>)
-    suspend fun sendFavouriteAlbumsToAuto(albums: List<Album>)
-    suspend fun sendLatestAlbumsToAuto(albums: List<Album>)
-    suspend fun sendRecentAlbumsToAuto(albums: List<Album>)
-    suspend fun sendHighestAlbumsToAuto(albums: List<Album>)
 }
