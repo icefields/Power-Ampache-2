@@ -26,4 +26,8 @@ class AutoPluginDataSourceImpl @Inject constructor(
             throw Pa2CastQueueException(e)
         }
     }
+
+    override fun initAutoPluginClient() {
+        autoPluginClient.initialize()
+    }
 }

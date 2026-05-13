@@ -74,6 +74,10 @@ class AutoPluginClient @Inject constructor(
     private val sendMutex = Mutex()
 
     init {
+        initialize()
+    }
+
+    fun initialize() {
         bindIfInstalled()
 
         if (isAutoPluginInstalled()) {

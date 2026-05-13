@@ -52,6 +52,10 @@ class PluginRepositoryImpl @Inject constructor(
     override fun isAutoPluginInstalled(): Boolean =
         autoPluginDataSource.isAutoPluginInstalled()
 
+    override fun initializeAuto() {
+        autoPluginDataSource.initAutoPluginClient()
+    }
+
     @Throws(Pa2CastQueueException::class)
     override suspend fun sendQueueToChromecast(queue: List<Song>) {
         chromecastPluginDataSource.sendQueueToChromecast(queue)

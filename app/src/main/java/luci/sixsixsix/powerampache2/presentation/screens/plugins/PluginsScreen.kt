@@ -52,6 +52,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.startCastPluginActivity
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_AUTO_ACTIVITY_ID
+import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_AUTO_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ACTIVITY_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_LYRICS_ACTIVITY_ID
@@ -75,7 +77,8 @@ fun PluginsScreen(
         isAndroidAutoPluginInstalled = state.isAndroidAutoPluginInstalled,
         isChromecastPluginInstalled = state.isChromecastPluginInstalled,
         isMetadataPluginInstalled = state.isMetadataPluginInstalled,
-        isExternalDataSourcePluginInstalled = state.isExternalDataSourcePluginInstalled
+        isExternalDataSourcePluginInstalled = state.isExternalDataSourcePluginInstalled,
+        onAutoPluginPress = { pluginsViewModel.autoPluginClientInit() }
     )
 }
 
@@ -87,7 +90,8 @@ fun PluginsScreenContent(
     isAndroidAutoPluginInstalled: Boolean = false,
     isMetadataPluginInstalled: Boolean = false,
     isExternalDataSourcePluginInstalled: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAutoPluginPress: () -> Unit = {}
 ) {
     val spacerH = 4.dp
     Column(
@@ -149,7 +153,9 @@ fun PluginsScreenContent(
         PluginListItem (isInstalled = isAndroidAutoPluginInstalled,
             title = "Android Auto",
             description = "Plugin to connect to Android Auto"
-        ) { }
+        ) {
+            onAutoPluginPress()
+            context.startActivity(Intent().setClassName(PLUGIN_AUTO_ID, PLUGIN_AUTO_ACTIVITY_ID)) }
     }
 }
 

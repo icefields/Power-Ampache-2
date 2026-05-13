@@ -9,14 +9,14 @@
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/CrashReportHandling" />
-            <option value="$PROJECT_DIR$/MrLog" />
-            <option value="$PROJECT_DIR$/PowerAmpache2Theme" />
-            <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/data-ampache" />
-            <option value="$PROJECT_DIR$/domain" />
-            <option value="$PROJECT_DIR$/errorlogger" />
+            <option value="$USER_HOME$/Code/Android/PowerAmpache2" />
+            <option value="$USER_HOME$/Code/Android/PowerAmpache2/CrashReportHandling" />
+            <option value="$USER_HOME$/Code/Android/PowerAmpache2/MrLog" />
+            <option value="$USER_HOME$/Code/Android/PowerAmpache2/PowerAmpache2Theme" />
+            <option value="$USER_HOME$/Code/Android/PowerAmpache2/app" />
+            <option value="$USER_HOME$/Code/Android/PowerAmpache2/data-ampache" />
+            <option value="$USER_HOME$/Code/Android/PowerAmpache2/domain" />
+            <option value="$USER_HOME$/Code/Android/PowerAmpache2/errorlogger" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -26,4 +26,5 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 interface AutoPluginDataSource {
     fun isAutoPluginInstalled(): Boolean
     suspend fun sendQueueToAuto(queue: List<Song>)
+    fun initAutoPluginClient()
 }

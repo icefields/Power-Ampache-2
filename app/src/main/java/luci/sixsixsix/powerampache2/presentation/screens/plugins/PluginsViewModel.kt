@@ -27,6 +27,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.parcelize.Parcelize
+import luci.sixsixsix.powerampache2.data.plugins.auto.AutoPluginClient
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.InitializeAutoUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsAutoPluginInstalled
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsChromecastPluginInstalled
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsInfoPluginInstalled
@@ -39,7 +41,8 @@ class PluginsViewModel @Inject constructor(
     lyricsPluginInstalledUseCase: IsLyricsPluginInstalledUseCase,
     infoPluginInstalled: IsInfoPluginInstalled,
     chromecastPluginInstalled: IsChromecastPluginInstalled,
-    autoPluginInstalled: IsAutoPluginInstalled
+    autoPluginInstalled: IsAutoPluginInstalled,
+    private val initializeAutoUseCase: InitializeAutoUseCase,
 ) : ViewModel() {
 
     var state =
@@ -49,6 +52,8 @@ class PluginsViewModel @Inject constructor(
             isChromecastPluginInstalled = chromecastPluginInstalled(),
             isAndroidAutoPluginInstalled = autoPluginInstalled()
         ))
+
+    fun autoPluginClientInit() { initializeAutoUseCase() }
 }
 
 
