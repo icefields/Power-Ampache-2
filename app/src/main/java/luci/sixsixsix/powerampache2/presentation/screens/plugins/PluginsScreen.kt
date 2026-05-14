@@ -21,7 +21,14 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.plugins
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -58,6 +65,7 @@ import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ACTIVITY
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_INFO_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_LYRICS_ACTIVITY_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_LYRICS_ID
+import luci.sixsixsix.powerampache2.presentation.notification.PluginSyncService
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 
 @Composable
@@ -84,15 +92,26 @@ fun PluginsScreen(
 
 @Composable
 fun PluginsScreenContent(
+    modifier: Modifier = Modifier,
     isLoading: Boolean = false,
     isLyricsPluginInstalled: Boolean = false,
     isChromecastPluginInstalled: Boolean = false,
     isAndroidAutoPluginInstalled: Boolean = false,
     isMetadataPluginInstalled: Boolean = false,
     isExternalDataSourcePluginInstalled: Boolean = false,
-    modifier: Modifier = Modifier,
     onAutoPluginPress: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val notificationPermissionLauncher = getNotificationPermissionLauncher(context)
+//    = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
+//        if (granted) {
+//            PluginSyncService.startService(context)
+//        } else {
+//            // Permission denied. Explain to the user or skip the service
+//            // Consider showing a dialog explaining why it's needed
+//        }
+//    }
+
     val spacerH = 4.dp
     Column(
         modifier = modifier
@@ -106,7 +125,9 @@ fun PluginsScreenContent(
             fontSize = 15.sp,
             lineHeight = 15.sp,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.fillMaxWidth().padding(8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
         )
 
         Text(
@@ -115,7 +136,9 @@ fun PluginsScreenContent(
             color = MaterialTheme.colorScheme.tertiary,
             lineHeight = 11.sp,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.fillMaxWidth().padding(8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
         )
 
         PluginListItem (
@@ -124,38 +147,49 @@ fun PluginsScreenContent(
             description = "Fetch Lyrics for songs when missing."
         ) { context.startActivity(Intent().setClassName(PLUGIN_LYRICS_ID, PLUGIN_LYRICS_ACTIVITY_ID)) }
 
-        Spacer(modifier = Modifier.fillMaxWidth().height(spacerH))
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .height(spacerH))
         PluginListItem (isInstalled = isExternalDataSourcePluginInstalled,
             title = "External Music Source",
             description = "Feed Power Ampache 2 with a custom media source—such as local music files, scraped content from video platforms, or your own personal media sources."
         ) { }
 
-        Spacer(modifier = Modifier.fillMaxWidth().height(spacerH))
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .height(spacerH))
         PluginListItem (isInstalled = isMetadataPluginInstalled,
             title = "Metadata",
             description = "Add artist, album, and song metadata on top of what’s provided by the backend."
         ) { context.startActivity(Intent().setClassName(PLUGIN_INFO_ID, PLUGIN_INFO_ACTIVITY_ID)) }
 
-        Spacer(modifier = Modifier.fillMaxWidth().height(spacerH))
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .height(spacerH))
         PluginListItem (
             isInstalled = false,
             title = "Live Shows",
             description = "Shows touring/shows info and dates in the Artist screen"
         ) {  }
 
-        Spacer(modifier = Modifier.fillMaxWidth().height(spacerH))
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .height(spacerH))
         PluginListItem (isInstalled = isChromecastPluginInstalled,
             title = "Chromecast",
             description = "Plugin to connect to Chromecast"
         ) { context.startCastPluginActivity() }
 
-        Spacer(modifier = Modifier.fillMaxWidth().height(spacerH))
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .height(spacerH))
         PluginListItem (isInstalled = isAndroidAutoPluginInstalled,
             title = "Android Auto",
             description = "Plugin to connect to Android Auto"
         ) {
             onAutoPluginPress()
-            context.startActivity(Intent().setClassName(PLUGIN_AUTO_ID, PLUGIN_AUTO_ACTIVITY_ID)) }
+            startAuto(context, notificationPermissionLauncher)
+        }
     }
 }
 
@@ -168,7 +202,9 @@ fun PluginListItem(
     onClick: () -> Unit
 ) {
     Button(
-        modifier = modifier.fillMaxWidth().padding(8.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp),
         onClick = onClick,
         enabled = isInstalled,
         colors = ButtonDefaults.buttonColors(
@@ -181,7 +217,8 @@ fun PluginListItem(
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = 1.dp)
             ) {
                 Text(title,
@@ -189,7 +226,9 @@ fun PluginListItem(
                     fontWeight = FontWeight.Bold
                 )
                 Text(description)
-                HorizontalDivider(modifier = Modifier.fillMaxWidth(0.5f).padding(top = 4.dp, bottom = 1.dp), color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .padding(top = 4.dp, bottom = 1.dp), color = MaterialTheme.colorScheme.surfaceVariant)
                 Text("Installed: ${if (isInstalled) "yes" else "no" }",
                     color = MaterialTheme.colorScheme.surfaceVariant
                 )
@@ -199,6 +238,41 @@ fun PluginListItem(
     }
 }
 
+@Composable
+private fun getNotificationPermissionLauncher(context: Context) =
+    rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            startAutoActivityAndService(context)
+            //PluginSyncService.startService(context)
+        } else {
+            // Permission denied. Explain to the user or skip the service
+            // show a dialog explaining why it's needed
+        }
+    }
+
+private fun startAuto(
+    context: Context,
+    notificationPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>
+) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            startAutoActivityAndService(context)
+        } else {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    } else { startAutoActivityAndService(context) }
+
+
+}
+
+private fun startAutoActivityAndService(context: Context) {
+    PluginSyncService.startService(context)
+    context.startActivity(Intent().apply {
+        setClassName(PLUGIN_AUTO_ID, PLUGIN_AUTO_ACTIVITY_ID)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Force the activity into its own task.
+        addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK) // Prevent reusing an existing task.
+    })
+}
 
 @Preview
 @Composable

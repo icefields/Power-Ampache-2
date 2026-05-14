@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="17">
-      <module name="Power_Ampache_2.CrashReportHandling" target="21" />
-      <module name="Power_Ampache_2.data-ampache" target="21" />
-      <module name="Power_Ampache_2.domain" target="21" />
-      <module name="Power_Ampache_2.errorlogger" target="21" />
-      <module name="Power_Ampache_2.MrLog" target="21" />
-      <module name="Power_Ampache_2.PowerAmpache2Theme" target="21" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="17" />
   </component>
 </project>

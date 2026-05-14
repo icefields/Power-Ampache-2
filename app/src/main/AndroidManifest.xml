@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- read external storage for older devices -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 <!--    <uses-permission android:name="@string/permission_plugin_info" />-->
@@ -73,6 +75,11 @@
                 <action android:name="android.support.v4.media.MediaBrowserCompat" />
             </intent-filter>
         </service>
+
+        <service
+            android:name=".presentation.notification.PluginSyncService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false" />
         
         <receiver android:name=".alarm.AlarmReceiver"/>
 
