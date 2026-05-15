@@ -1,0 +1,4 @@
+— [NEW] Created transfer data protocol for Auto.
+— Bug fixes and improvements.
+— Improved init config.
+— (contd) Code refactoring and cleanup.
