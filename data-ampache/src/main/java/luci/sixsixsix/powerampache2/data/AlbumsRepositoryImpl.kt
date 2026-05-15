@@ -89,18 +89,6 @@ class AlbumsRepositoryImpl @Inject constructor(
     private val errorHandler: ErrorHandler
 ): BaseAmpacheRepository(api, db, errorHandler), AlbumsRepository {
 
-//    val favouriteAlbumsFlow: Flow<List<Album>> = dao.getLikedAlbumsFlow()
-//        .map { dbList -> dbList.map { it.toAlbum() } }
-//        .distinctUntilChanged()
-//
-//    val highestAlbumsFlow: Flow<List<Album>> = dao.getHighestRatedAlbumsFlow()
-//        .map { dbList -> dbList.map { it.toAlbum() } }
-//        .distinctUntilChanged()
-//
-//    val latestAlbumsFlow: Flow<List<Album>> = dao.getRandomAlbumsFlow()
-//        .map { dbList -> dbList.map { it.toAlbum() } }
-//        .distinctUntilChanged()
-
     private fun removeDuplicates(albums: List<Album>) =
         if (Constants.config.removeDuplicateAlbums) albums.removeAlbumDuplicates() else albums
 

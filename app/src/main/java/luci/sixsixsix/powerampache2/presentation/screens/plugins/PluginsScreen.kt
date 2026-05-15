@@ -103,15 +103,6 @@ fun PluginsScreenContent(
 ) {
     val context = LocalContext.current
     val notificationPermissionLauncher = getNotificationPermissionLauncher(context)
-//    = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
-//        if (granted) {
-//            PluginSyncService.startService(context)
-//        } else {
-//            // Permission denied. Explain to the user or skip the service
-//            // Consider showing a dialog explaining why it's needed
-//        }
-//    }
-
     val spacerH = 4.dp
     Column(
         modifier = modifier
@@ -261,8 +252,6 @@ private fun startAuto(
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     } else { startAutoActivityAndService(context) }
-
-
 }
 
 private fun startAutoActivityAndService(context: Context) {
