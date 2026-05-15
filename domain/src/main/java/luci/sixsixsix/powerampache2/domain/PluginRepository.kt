@@ -27,5 +27,7 @@ interface PluginRepository {
     fun isLyricsPluginInstalled(): Boolean
     fun isInfoPluginInstalled(): Boolean
     fun isChromecastPluginInstalled(): Boolean
+    fun isAutoPluginInstalled(): Boolean
+    fun initializeAuto()
     suspend fun sendQueueToChromecast(queue: List<Song>)
 }

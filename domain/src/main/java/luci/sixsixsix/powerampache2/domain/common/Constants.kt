@@ -92,6 +92,11 @@ object Constants {
     const val PLUGIN_CHROMECAST_SERVICE_ID = "${PLUGIN_CHROMECAST_ID}.QueueFetchService"
     const val PLUGIN_CHROMECAST_ACTIVITY_ID = "${PLUGIN_CHROMECAST_ID}.MainActivity"
 
+    // PLUGINS - AUTO
+    const val PLUGIN_AUTO_ID = "luci.sixsixsix.powerampache2.plugin"
+    const val PLUGIN_AUTO_SERVICE_ID = "${PLUGIN_AUTO_ID}.PA2DataFetchService"
+    const val PLUGIN_AUTO_ACTIVITY_ID = "${PLUGIN_AUTO_ID}.MainActivity"
+
     @Deprecated("use getConfig()") lateinit var config: Pa2Config
 
     // TODO: use this from now

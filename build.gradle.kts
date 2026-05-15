@@ -12,7 +12,11 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.kotlin.compose) apply false
 }
-
+allprojects {
+    // This moves the "build" directory for all modules to /tmp
+    // It prevents "Path too long" errors on Ext4 partitions
+    layout.buildDirectory.set(file("/tmp/powerampache-build/${project.name}"))
+}
 tasks.register("clean", Delete::class){
     delete(rootProject.buildDir)
 }

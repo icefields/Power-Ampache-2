@@ -56,8 +56,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35 // 36 will enforce edge-to-edge
-        versionCode = 93
-        versionName = "1.01-87"
+        versionCode = 94
+        versionName = "1.01-88"
         val versionQuote = "This version is powered by the elliptical galaxy in the Virgo Cluster"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

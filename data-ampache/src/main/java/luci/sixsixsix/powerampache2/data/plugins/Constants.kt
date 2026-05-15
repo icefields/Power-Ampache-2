@@ -21,6 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.data.plugins
 
+const val THROTTLE_TIMEOUT_MS = 66L
+
 const val KEY_REQUEST_JSON = "json"
 const val KEY_ACTION = "action"
 const val ACTION_SONG = "song"
@@ -28,11 +30,22 @@ const val ACTION_ALBUM = "album"
 const val ACTION_ARTIST = "artist"
 const val KEY_MBID = "mbid"
 const val KEY_ID = "id"
+const val KEY_QUERY = "query"
 const val KEY_REQUEST_SONG_TITLE = "songTitle"
 const val KEY_REQUEST_ALBUM_TITLE = "albumTitle"
 const val KEY_REQUEST_ARTIST_NAME = "artistName"
 const val KEY_RESPONSE_SUCCESS = "success"
+const val ACTION_GET_SONGS_ALBUM = "get_songs_album"
+const val ACTION_SONGS_ALBUM = "songs_album"
+const val ACTION_GET_SONGS_PLAYLIST = "get_songs_playlist"
+const val ACTION_GET_ARTISTS = "get_artists"
+const val ACTION_GET_ALBUMS_ARTIST = "get_albums_artist"
+const val ACTION_GET_ALBUMS = "get_albums"
+const val ACTION_ALBUMS = "albums"
+const val ACTION_ARTISTS = "artists"
+const val ACTION_SONGS_PLAYLIST = "songs_playlist"
 
 // Avoid android.os.TransactionTooLargeException: data parcel size xxx bytes by
 // reducing the size of the queue to MAX_CAST_QUEUE.
 const val MAX_CAST_QUEUE = 100
+const val MAX_AUTO_DATA_SIZE = 90

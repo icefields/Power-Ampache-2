@@ -25,8 +25,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -77,7 +75,7 @@ class AlbumsRepositoryImpl @Inject constructor(
     @LocalDataSource private val albumsDbDataSource: AlbumsDbDataSource,
     @OfflineModeDataSource private val albumsOfflineDataSource: AlbumsOfflineDataSource,
     @RemoteDataSource private val albumsRemoteDataSource: AlbumsRemoteDataSource,
-    @PluginDataSource private val pluginDataSource: InfoPluginDataSource,
+    @PluginDataSource private val infoPluginDataSource: InfoPluginDataSource,
     private val api: MainNetwork,
     db: MusicDatabase,
     private val errorHandler: ErrorHandler
@@ -502,6 +500,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         getAlbumsStats(MainNetwork.StatFilter.frequent)
     override suspend fun getFlaggedAlbums() =
         getAlbumsStats(MainNetwork.StatFilter.flagged)
+
     override suspend fun getRandomAlbums(fetchRemote: Boolean) =
         getAlbumsStats(MainNetwork.StatFilter.random, fetchRemote)
 
@@ -531,7 +530,7 @@ class AlbumsRepositoryImpl @Inject constructor(
         albumTitle: String,
         artistName: String
     ): PluginAlbumData? =
-        pluginDataSource.getAlbumInfo(albumId = albumId,
+        infoPluginDataSource.getAlbumInfo(albumId = albumId,
             musicBrainzId = albumMbId, albumTitle = albumTitle, artistName = artistName)
 
 

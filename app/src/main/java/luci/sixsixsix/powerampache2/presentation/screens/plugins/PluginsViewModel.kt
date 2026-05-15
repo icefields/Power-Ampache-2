@@ -25,29 +25,43 @@ import android.os.Parcelable
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
+import androidx.media3.common.util.UnstableApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.parcelize.Parcelize
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.InitializeAutoUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsAutoPluginInstalled
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsChromecastPluginInstalled
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsInfoPluginInstalled
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsLyricsPluginInstalledUseCase
+import luci.sixsixsix.powerampache2.player.MusicController
 import javax.inject.Inject
 
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
+@UnstableApi
 class PluginsViewModel @Inject constructor(
     lyricsPluginInstalledUseCase: IsLyricsPluginInstalledUseCase,
     infoPluginInstalled: IsInfoPluginInstalled,
-    chromecastPluginInstalled: IsChromecastPluginInstalled
+    chromecastPluginInstalled: IsChromecastPluginInstalled,
+    autoPluginInstalled: IsAutoPluginInstalled,
+    private val initializeAutoUseCase: InitializeAutoUseCase,
+    private val musicController: MusicController
 ) : ViewModel() {
 
     var state =
         mutableStateOf(PluginsState(
             isLyricsPluginInstalled = lyricsPluginInstalledUseCase(),
             isMetadataPluginInstalled = infoPluginInstalled(),
-            isChromecastPluginInstalled = chromecastPluginInstalled()
+            isChromecastPluginInstalled = chromecastPluginInstalled(),
+            isAndroidAutoPluginInstalled = autoPluginInstalled()
         ))
-}
 
+    @UnstableApi
+    fun autoPluginClientInit() {
+        musicController.stopMusicService()
+        initializeAutoUseCase()
+    }
+}
 
 @Parcelize
 data class PluginsState(
