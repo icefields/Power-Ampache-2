@@ -97,7 +97,15 @@ Github, PlayStore and Telegram releases are signed by me.
 <br>
 <h2> Plugins </h2>
 <p><b>Enhance Power Ampache 2 with custom plugins.</b><br>Available for download via your favorite app store, GitHub Releases, and Telegram.</p>
-<p>Plugin rollout will begin in the coming days/weeks; check your favorite store regularly or follow the Telegram group for updates. If you're interested in beta versions of the plugins, they will be released exclusively in the Telegram group.</p>
+
+| Plugin | Description | Link |
+|---|---|---|
+| **Auto Plugin** | Android Auto integration for PowerAmpache 2, enables media playback control via vehicle head units | [Play Store](https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.plugin) |
+| **Lyrics Plugin** | Fetches and displays lyrics in PowerAmpache 2 | [Play Store](https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.lyricsplugin) |
+| **Chromecast Plugin** | Casts audio from PowerAmpache 2 to Chromecast-compatible devices | [Play Store](https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.chromecastplugin) |
+| **Data/Info Plugin** | Fetches song/album/artist metadata from **Last.fm** and adds it on top of existing Ampache tags | Available in the **Telegram group** or the **Matrix space** plugin room |
+
+<p>If you're interested in testing the beta versions of the plugins, they will be released exclusively in the Matrix Space and the Telegram group.</p>
 
 <br>
 
