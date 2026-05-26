@@ -228,9 +228,9 @@ Before starting any contribution, read the above document and if necessary conta
 - [x] playlist edit drag and drop
 - [ ] Android TV version
 - [x] Android widget
-- [ ] implement share with app scheme
-- [ ] Android Auto
-- [ ] Chromecast
+- [x] implement share with app scheme
+- [x] Android Auto
+- [x] Chromecast
 - [x] Improve Notifications Screen
 <br>
 
@@ -278,8 +278,9 @@ The app is currently translated in the following languages:
 <br>Italian
 <br>Japanese
 <br>Russian
+<br>Chinese
 <br><br>
-Non-English translations are usually not complete, since I keep adding new features all the time.
+Non-English translations might be incomplete, since I keep adding new features all the time.
 <br>
 In the future I will automate translation contributions, right now you have the following options.<br>
 - If you're an Android developer just create the resource directories and files and open a PR (`strings.xml` is where translatable strings are located).
