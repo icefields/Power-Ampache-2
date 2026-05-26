@@ -100,10 +100,10 @@ Github, PlayStore and Telegram releases are signed by me.
 
 | Plugin | Description | Link |
 |---|---|---|
-| **Auto Plugin** | Android Auto integration for PowerAmpache 2, enables media playback control via vehicle head units | [Play Store](https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.plugin) |
-| **Lyrics Plugin** | Fetches and displays lyrics in PowerAmpache 2 | [Play Store](https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.lyricsplugin) |
-| **Chromecast Plugin** | Casts audio from PowerAmpache 2 to Chromecast-compatible devices | [Play Store](https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.chromecastplugin) |
-| **Data/Info Plugin** | Fetches song/album/artist metadata from **Last.fm** and adds it on top of existing Ampache tags | Available in the **Telegram group** or the **Matrix space** plugin room |
+| **Android Auto** | Android Auto integration for PowerAmpache 2, enables media playback control via vehicle head units | [Play Store](https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.plugin) |
+| **Lyrics** | Fetches and displays lyrics in PowerAmpache 2 | [Play Store](https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.lyricsplugin) |
+| **Chromecast** | Casts audio from PowerAmpache 2 to Chromecast-compatible devices | [Play Store](https://play.google.com/store/apps/details?id=luci.sixsixsix.powerampache2.chromecastplugin) |
+| **Data/Info** | Fetches song/album/artist metadata from **Last.fm** and adds it on top of existing Ampache tags | Available in the **Telegram group** or the **Matrix space** plugin room |
 
 <p>If you're interested in testing the beta versions of the plugins, they will be released exclusively in the Matrix Space and the Telegram group.</p>
 
