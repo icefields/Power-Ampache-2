@@ -63,7 +63,8 @@ class StorageManagerImpl @Inject constructor(
                     fullPath = getDirPathFromSong(song),
                     fileName = getFileNameFromSong(song),
                     mimeType = song.mime,
-                    bytes = inputStream.readBytes()
+                    inputStream = inputStream,
+                    bufferSize = BUFFER_SIZE
                 ).toString()
             } else {
                 val absoluteDirPath = getAbsolutePathDir(song)

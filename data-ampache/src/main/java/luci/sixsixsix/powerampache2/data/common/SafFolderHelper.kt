@@ -3,6 +3,7 @@ package luci.sixsixsix.powerampache2.data.common
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+import java.io.InputStream
 
 class SafFolderHelper(private val context: Context) {
     fun getOrCreatePath(rootUri: Uri, fullPath: String): DocumentFile {
@@ -31,7 +32,8 @@ class SafFolderHelper(private val context: Context) {
         folder: DocumentFile,
         fileName: String,
         mimeType: String?,
-        bytes: ByteArray
+        inputStream: InputStream,
+        bufferSize: Int
     ): Uri {
         val existing = folder.findFile(fileName)
         existing?.delete() // optional: replace existing file
@@ -41,8 +43,20 @@ class SafFolderHelper(private val context: Context) {
             fileName)
             ?: error("Cannot create file: $fileName")
 
-        context.contentResolver.openOutputStream(file.uri)?.use {
-            it.write(bytes)
+        try {
+            context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
+                val buffer = ByteArray(bufferSize)
+                var read: Int
+                while (inputStream.read(buffer).also { read = it } != -1) {
+                    outputStream.write(buffer, 0, read)
+                }
+
+                outputStream.flush()
+            }
+        } catch (e: Exception) {
+            throw e
+        } finally {
+            inputStream.close()
         }
 
         return file.uri
@@ -54,8 +68,8 @@ class SafFolderHelper(private val context: Context) {
         return existing?.delete() ?: false
     }
 
-    suspend fun writeFile(rootUri: Uri, fullPath: String, fileName: String, mimeType: String?, bytes: ByteArray): Uri {
+    suspend fun writeFile(rootUri: Uri, fullPath: String, fileName: String, mimeType: String?, inputStream: InputStream, bufferSize: Int): Uri {
         val folder = getOrCreatePath(rootUri, fullPath)
-        return writeFile(folder, fileName, mimeType, bytes)
+        return writeFile(folder, fileName, mimeType, inputStream, bufferSize)
     }
 }
