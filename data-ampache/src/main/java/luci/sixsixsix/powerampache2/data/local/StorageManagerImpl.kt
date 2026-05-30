@@ -68,7 +68,7 @@ class StorageManagerImpl @Inject constructor(
                 ).toString()
             } else {
                 val absoluteDirPath = getAbsolutePathDir(song)
-                val directory = File(absoluteDirPath)
+                val directory = File(absoluteDirPath!!) // TODO fix double-bang
                 if (!directory.exists()) {
                     directory.mkdirs()
                 }
@@ -96,7 +96,7 @@ class StorageManagerImpl @Inject constructor(
     override suspend fun saveImage(song: Song, inputStream: InputStream) =
         withContext(Dispatchers.IO) {
             val absoluteDirPath = getAbsolutePathDir(song)
-            val directory = File(absoluteDirPath)
+            val directory = File(absoluteDirPath!!)
             if (!directory.exists()) {
                 directory.mkdirs()
             }
