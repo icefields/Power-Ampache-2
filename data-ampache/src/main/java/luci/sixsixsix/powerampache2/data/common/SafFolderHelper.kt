@@ -3,6 +3,7 @@ package luci.sixsixsix.powerampache2.data.common
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+import luci.sixsixsix.powerampache2.domain.errors.FileWriteException
 import java.io.InputStream
 
 class SafFolderHelper(private val context: Context) {
@@ -28,6 +29,7 @@ class SafFolderHelper(private val context: Context) {
         return getOrCreatePath(rootUri, fullPath).uri
     }
 
+    @Throws(Exception::class)
     fun writeFile(
         folder: DocumentFile,
         fileName: String,
@@ -54,7 +56,7 @@ class SafFolderHelper(private val context: Context) {
                 outputStream.flush()
             }
         } catch (e: Exception) {
-            throw e
+            throw FileWriteException("error writing file: ${e.localizedMessage}")
         } finally {
             inputStream.close()
         }
