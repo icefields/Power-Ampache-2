@@ -53,6 +53,9 @@ import luci.sixsixsix.powerampache2.domain.usecase.songs.SongsByGenreUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
+// minimum allowed size for a search query to trigger a search
+private const val MIN_QUERY_SIZE = 3
+
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
@@ -96,7 +99,7 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             playlistManager.currentSearchQuery.collect { query ->
                 L("SearchViewModel search query changed" , query)
-                if (query.length >=3) {
+                if (query.length >= MIN_QUERY_SIZE) {
                     onSearchQueryChange(query)
                 } else if (query.isBlank()) {
                     clearData() // return to genre screen
@@ -106,8 +109,8 @@ class SearchViewModel @Inject constructor(
 
         viewModelScope.launch {
             offlineSongsFlow()
+                .filter { playlistManager.currentSearchQuery.value.length >= MIN_QUERY_SIZE }
                 .map { offlineSongs ->
-                    if (playlistManager.currentSearchQuery.value.length < 3) return@map emptyList()
                     val visibleIds = state.songs.map { it.id }.toSet()
                     offlineSongs.filter { it.id in visibleIds }
                 }
@@ -246,8 +249,12 @@ class SearchViewModel @Inject constructor(
         getSongsUseCase(fetchRemote = fetchRemote, query = state.searchQuery).collect { result ->
             when (result) {
                 is Resource.Success ->
-                    result.data?.let { songs ->
-                        state = state.copy(songs = songs)
+                    if (state.searchQuery.isNotBlank()) {
+                        // only display the list if there is a search term present.
+                        // Avoids race conditions when quickly deleting and re-typing search terms.
+                        result.data?.let { songs ->
+                            state = state.copy(songs = songs)
+                        }
                     }
                 is Resource.Error ->
                     state = state.copy(isLoading = false)
@@ -321,6 +328,11 @@ class SearchViewModel @Inject constructor(
             is SearchViewEvent.OnSearchQueryChange -> onSearchQueryChange(event.query)
             SearchViewEvent.Refresh -> fetchGenres()
             is SearchViewEvent.OnBottomListReached -> {}
+            SearchViewEvent.Clear -> clearData()
+            SearchViewEvent.FetchGenres -> fetchGenres()
+            is SearchViewEvent.OnSongSelected -> {
+                //playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.songs)
+            }
             is SearchViewEvent.OnGenreSelected -> {
                 fetchByGenreJob?.cancel()
                 fetchByGenreJob = viewModelScope.launch {
@@ -330,14 +342,6 @@ class SearchViewModel @Inject constructor(
                     }
                 }
             }
-            SearchViewEvent.Clear ->
-                clearData()
-            is SearchViewEvent.OnSongSelected -> {
-                //playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.songs)
-            }
-
-            SearchViewEvent.FetchGenres ->
-                fetchGenres()
         }
     }
 
