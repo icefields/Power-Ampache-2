@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -106,6 +107,12 @@ fun SongDropDownMenu(
             iconImageVector = Icons.Default.Share
         ) {
             songItemEventListener(SongItemEvent.SHARE_SONG)
+        }
+        SongDropDownMenuItem(
+            text = R.string.dropdownMenu_item_song_info,
+            iconImageVector = Icons.Outlined.Info
+        ) {
+            songItemEventListener(SongItemEvent.SHOW_SONG_INFO)
         }
         if (isSongDownloaded) {
             SongDropDownMenuItem(

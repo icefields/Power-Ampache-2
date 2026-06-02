@@ -47,6 +47,8 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShowEraseConfirmDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.ShowSongInfoDialogOpen
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -90,7 +92,7 @@ fun SearchResultsScreen(
             )
         }
     }
-    
+
     var showDeleteFromDownloadsDialog by remember { mutableStateOf(ShowEraseConfirmDialog(false)) }
     if (showDeleteFromDownloadsDialog.isOpen) {
         showDeleteFromDownloadsDialog.song?.let { songToRemove ->
@@ -105,6 +107,15 @@ fun SearchResultsScreen(
                 dialogTitle = stringResource(id = R.string.warning_song_delete_downloaded_title),
                 dialogText = "Delete ${songToRemove.name} from downloads?"
             )
+        }
+    }
+
+    var showSongInfoDialog by remember { mutableStateOf(ShowSongInfoDialogOpen(false)) }
+    if (showSongInfoDialog.isOpen) {
+        showSongInfoDialog.song?.let { songToShow ->
+            InfoDialogSong(songToShow, showSongInfoDialog.songPlugin) {
+                showSongInfoDialog = ShowSongInfoDialogOpen(false, null)
+            }
         }
     }
 
@@ -152,6 +163,9 @@ fun SearchResultsScreen(
             },
             onShowDeleteFromDownloadsDialog = {
                 showDeleteFromDownloadsDialog = ShowEraseConfirmDialog(true, it)
+            },
+            onShowSongInfoDialog = {
+                showSongInfoDialog = ShowSongInfoDialogOpen(true, it)
             }
         )
     }

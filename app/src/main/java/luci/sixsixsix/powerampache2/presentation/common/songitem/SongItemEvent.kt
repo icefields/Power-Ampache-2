@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.presentation.common.songitem
 enum class SongItemEvent {
     PLAY_NEXT,
     SHARE_SONG,
+    SHOW_SONG_INFO,
     DOWNLOAD_SONG,
     DELETE_DOWNLOADED_SONG,
     EXPORT_DOWNLOADED_SONG,

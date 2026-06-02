@@ -88,6 +88,8 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.ShowSongInfoDialogOpen
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigateToArtist
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
@@ -196,6 +198,15 @@ fun PlaylistDetailScreen(
             dialogTitle = stringResource(id = R.string.warning_song_delete_downloaded_title),
             dialogText = "Delete ${songToRemove.name} from downloads?"
         )
+    }
+
+    var showSongInfoDialog by remember { mutableStateOf(ShowSongInfoDialogOpen(false)) }
+    if (showSongInfoDialog.isOpen) {
+        showSongInfoDialog.song?.let { songToShow ->
+            InfoDialogSong(songToShow, showSongInfoDialog.songPlugin) {
+                showSongInfoDialog = ShowSongInfoDialogOpen(false, null)
+            }
+        }
     }
 
     var songToShare: Song? by remember { mutableStateOf(null) }
@@ -400,9 +411,11 @@ fun PlaylistDetailScreen(
                                         when(event) {
                                             SongItemEvent.PLAY_NEXT ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                                            SongItemEvent.SHARE_SONG -> {
+                                            SongItemEvent.SHARE_SONG ->
                                                 songToShare = song
-                                            }
+                                            SongItemEvent.SHOW_SONG_INFO ->
+                                                showSongInfoDialog = ShowSongInfoDialogOpen(
+                                                    isOpen = true, song = song)
                                             SongItemEvent.DOWNLOAD_SONG ->
                                                 mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
                                             SongItemEvent.DELETE_DOWNLOADED_SONG ->

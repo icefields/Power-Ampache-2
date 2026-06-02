@@ -52,6 +52,12 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDialogTextHorizontal
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDialogTitleText
 
+data class ShowSongInfoDialogOpen(
+    val isOpen: Boolean,
+    val song: Song? = null,
+    val songPlugin: PluginSongData? = null,
+)
+
 @Composable
 fun InfoDialogSong(song: Song, songPlugin: PluginSongData?, onDismissRequest: () -> Unit) {
     InfoDialogBase(onDismissRequest) {
