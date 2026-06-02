@@ -84,7 +84,6 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainView
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumDetailTopBar
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoSection
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AlbumInfoViewEvents
-import luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail.PlaylistDetailsEditEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,7 +109,7 @@ fun AlbumDetailScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(false) }
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
-    var showDeleteDownloadedSongsDialog by remember { mutableStateOf(false) }
+    var showDeleteAllDownloadedSongsDialog by remember { mutableStateOf(false) }
 
     var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
     val configuration = LocalConfiguration.current
@@ -119,27 +118,6 @@ fun AlbumDetailScreen(
         // Save any changes to the orientation value on the configuration object
         snapshotFlow { configuration.orientation }
             .collect { orientation = it }
-    }
-
-    var songToShare: Song? by remember { mutableStateOf(null) }
-
-    AnimatedVisibility(songToShare != null) {
-        songToShare?.let { songS ->
-            ShareDialog(
-                onShareWeb = {
-                    mainViewModel.onEvent(MainEvent.OnShareSongWebUrl(songS))
-                    songToShare = null
-                },
-                onSharePowerAmpache = {
-                    mainViewModel.onEvent(MainEvent.OnShareSong(songS))
-                    songToShare = null
-                },
-                onDismissRequest = {
-                    songToShare = null
-                }
-            )
-        }
-
     }
 
     val isLandscape = when (orientation) {
@@ -151,6 +129,11 @@ fun AlbumDetailScreen(
             //infoVisibility = true
             false
         }
+    }
+
+    // album info dialog
+    if (infoVisibility) {
+        InfoDialogAlbum(album, pluginAlbum) { infoVisibility = false }
     }
 
     if (playlistsDialogOpen.isOpen) {
@@ -169,22 +152,52 @@ fun AlbumDetailScreen(
         }
     }
 
-    // album info dialog
-    if (infoVisibility) {
-        InfoDialogAlbum(album, pluginAlbum) { infoVisibility = false }
-    }
-
     // Delete all downloaded songs dialog
-    if(showDeleteDownloadedSongsDialog) {
+    if(showDeleteAllDownloadedSongsDialog) {
         EraseConfirmDialog(
-            onDismissRequest = { showDeleteDownloadedSongsDialog = false },
+            onDismissRequest = { showDeleteAllDownloadedSongsDialog = false },
             onConfirmation = {
-                showDeleteDownloadedSongsDialog = false
+                showDeleteAllDownloadedSongsDialog = false
                 mainViewModel.onEvent(MainEvent.OnDownloadedSongListDelete(songs))
             },
             dialogTitle = stringResource(id = R.string.warning_album_songList_remove_title),
             dialogText = stringResource(id = R.string.warning_album_songList_remove_subtitle)
         )
+    }
+
+    var showDeleteFromDownloadsDialog by remember { mutableStateOf<Song?>(null) }
+    showDeleteFromDownloadsDialog?.let { songToRemove ->
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteFromDownloadsDialog = null
+            },
+            onConfirmation = {
+                showDeleteFromDownloadsDialog = null
+                mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(songToRemove))
+            },
+            dialogTitle = stringResource(id = R.string.warning_song_delete_downloaded_title),
+            dialogText = "Delete ${songToRemove.name} from downloads?"
+        )
+    }
+
+    var songToShare: Song? by remember { mutableStateOf(null) }
+    AnimatedVisibility(songToShare != null) {
+        songToShare?.let { songS ->
+            ShareDialog(
+                onShareWeb = {
+                    mainViewModel.onEvent(MainEvent.OnShareSongWebUrl(songS))
+                    songToShare = null
+                },
+                onSharePowerAmpache = {
+                    mainViewModel.onEvent(MainEvent.OnShareSong(songS))
+                    songToShare = null
+                },
+                onDismissRequest = {
+                    songToShare = null
+                }
+            )
+        }
+
     }
 
     var imageUrl: String? by remember { mutableStateOf(null) }
@@ -317,7 +330,7 @@ fun AlbumDetailScreen(
                                     mainViewModel.onEvent(MainEvent.OnDownloadSongs(songs))
                                 } else {
                                     // if entire album is downloaded, the button will delete instead.
-                                    showDeleteDownloadedSongsDialog = true
+                                    showDeleteAllDownloadedSongsDialog = true
                                 }
                                 AlbumInfoViewEvents.SHUFFLE_PLAY_ALBUM -> {
                                     viewModel.onEvent(AlbumDetailEvent.OnShufflePlaylistToggle)
@@ -353,18 +366,18 @@ fun AlbumDetailScreen(
                                         when(event) {
                                             SongItemEvent.PLAY_NEXT ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                                            SongItemEvent.SHARE_SONG -> {
+                                            SongItemEvent.SHARE_SONG ->
                                                 songToShare = song
-                                            }
                                             SongItemEvent.DOWNLOAD_SONG ->
                                                 mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                                            SongItemEvent.DELETE_DOWNLOADED_SONG ->
+                                                showDeleteFromDownloadsDialog = song
                                             SongItemEvent.EXPORT_DOWNLOADED_SONG ->
                                                 mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
                                             SongItemEvent.GO_TO_ALBUM -> { } // No ACTION, we're already in this album //navigator.navigate(AlbumDetailScreenDestination(viewModel.state.album.id, viewModel.state.album))
                                             SongItemEvent.GO_TO_ARTIST ->
                                                 Ampache2NavGraphs.navigateToArtist(navigator,
-                                                    artistId = album.artist.id
-                                                )
+                                                    artistId = album.artist.id)
                                             SongItemEvent.ADD_SONG_TO_QUEUE ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                                             SongItemEvent.ADD_SONG_TO_PLAYLIST ->
