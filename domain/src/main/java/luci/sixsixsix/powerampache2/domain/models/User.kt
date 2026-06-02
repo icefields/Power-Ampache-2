@@ -35,6 +35,8 @@ import luci.sixsixsix.powerampache2.domain.common.Constants.USER_ACCESS_DEFAULT
 import luci.sixsixsix.powerampache2.domain.common.Constants.USER_DEFAULT_MASTODON_URL
 import luci.sixsixsix.powerampache2.domain.common.Constants.USER_ID_ERROR
 
+const val USER_SYSTEM = "system"
+
 @Parcelize
 data class User(
     val id: String,
@@ -63,6 +65,10 @@ data class User(
                 email.isBlank() &&
                 createDate == Constants.ERROR_INT &&
                 lastSeen == Constants.ERROR_INT
+
+    fun isAdmin(): Boolean {
+        return (access >= 100)
+    }
 
     companion object {
         fun emptyUser(): User = User(
