@@ -117,7 +117,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
         val username = user.username.lowercase()
 
         return if (user.isAdmin()) {
-            playlists.sortedBy { playlist ->
+            playlists.sortedBy { it.name }.sortedBy { playlist ->
                 when (playlist.owner?.lowercase()) {
                     username -> 0
                     USER_SYSTEM -> 1
@@ -125,7 +125,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
                 }
             }
         } else {
-            playlists.filter { it.owner?.lowercase() == username }
+            playlists.filter { it.owner?.lowercase() == username }.sortedBy { it.name }
         }
     }
 
