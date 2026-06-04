@@ -70,16 +70,14 @@ data class User(
         this.access >= level
 
     fun isAdmin() =
-        this.isAccessAtLeast(Access.ADMIN)
+        this.isAccessAtLeast(ACCESS_ADMIN)
 
     companion object {
-        object Access {
-            const val GUEST = 5
-            const val USER = 25
-            const val CONTENT_MANAGER = 50
-            const val CATALOG_MANAGER = 75
-            const val ADMIN = 100
-        }
+        const val ACCESS_GUEST = 5
+        const val ACCESS_ACCESS = 25
+        const val ACCESS_CONTENT_MANAGER = 50
+        const val ACCESS_CATALOG_MANAGER = 75
+        const val ACCESS_ADMIN = 100
 
         fun emptyUser(): User = User(
             "", "", "",
