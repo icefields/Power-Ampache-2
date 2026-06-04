@@ -35,7 +35,7 @@ import luci.sixsixsix.powerampache2.domain.common.Constants.USER_ACCESS_DEFAULT
 import luci.sixsixsix.powerampache2.domain.common.Constants.USER_DEFAULT_MASTODON_URL
 import luci.sixsixsix.powerampache2.domain.common.Constants.USER_ID_ERROR
 
-const val USER_SYSTEM = "system"
+const val USER_SYSTEM = "system"  // Name of Ampache's system user. Can own playlists.
 
 @Parcelize
 data class User(
@@ -66,11 +66,21 @@ data class User(
                 createDate == Constants.ERROR_INT &&
                 lastSeen == Constants.ERROR_INT
 
-    fun isAdmin(): Boolean {
-        return (access >= 100)
-    }
+    fun isAccessAtLeast(level: Int) =
+        this.access >= level
+
+    fun isAdmin() =
+        this.isAccessAtLeast(Access.ADMIN)
 
     companion object {
+        object Access {
+            const val GUEST = 5
+            const val USER = 25
+            const val CONTENT_MANAGER = 50
+            const val CATALOG_MANAGER = 75
+            const val ADMIN = 100
+        }
+
         fun emptyUser(): User = User(
             "", "", "",
             Constants.ERROR_INT,
