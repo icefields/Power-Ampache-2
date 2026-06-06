@@ -28,12 +28,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.Audiotrack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -106,12 +108,24 @@ fun SongDropDownMenu(
         ) {
             songItemEventListener(SongItemEvent.SHARE_SONG)
         }
+        SongDropDownMenuItem(
+            text = R.string.dropdownMenu_item_song_info,
+            iconImageVector = Icons.Outlined.Info
+        ) {
+            songItemEventListener(SongItemEvent.SHOW_SONG_INFO)
+        }
         if (isSongDownloaded) {
             SongDropDownMenuItem(
                 text = R.string.dropdownMenu_item_export,
                 iconImageVector = Icons.Default.SaveAlt
             ) {
                 songItemEventListener(SongItemEvent.EXPORT_DOWNLOADED_SONG)
+            }
+            SongDropDownMenuItem(
+                text = R.string.dropdownMenu_item_deleteDownloaded,
+                iconImageVector = Icons.Default.Delete
+            ) {
+                songItemEventListener(SongItemEvent.DELETE_DOWNLOADED_SONG)
             }
         } else {
             SongDropDownMenuItem(

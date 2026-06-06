@@ -78,6 +78,8 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.ShowSongInfoDialogOpen
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -240,8 +242,31 @@ fun OfflineSongsMainContent(
         )
     }
 
-    var songToShare: Song? by remember { mutableStateOf(null) }
+    var showDeleteFromDownloadsDialog by remember { mutableStateOf<Song?>(null) }
+    showDeleteFromDownloadsDialog?.let { songToRemove ->
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteFromDownloadsDialog = null
+            },
+            onConfirmation = {
+                showDeleteFromDownloadsDialog = null
+                mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(songToRemove))
+            },
+            dialogTitle = stringResource(id = R.string.warning_song_delete_downloaded_title),
+            dialogText = "Delete ${songToRemove.name} from downloads?"
+        )
+    }
 
+    var showSongInfoDialog by remember { mutableStateOf(ShowSongInfoDialogOpen(false)) }
+    if (showSongInfoDialog.isOpen) {
+        showSongInfoDialog.song?.let { songToShow ->
+            InfoDialogSong(songToShow, showSongInfoDialog.songPlugin) {
+                showSongInfoDialog = ShowSongInfoDialogOpen(false, null)
+            }
+        }
+    }
+
+    var songToShare: Song? by remember { mutableStateOf(null) }
     AnimatedVisibility(songToShare != null) {
         songToShare?.let { songS ->
             ShareDialog(
@@ -278,18 +303,20 @@ fun OfflineSongsMainContent(
                         when(event) {
                             SongItemEvent.PLAY_NEXT ->
                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                            SongItemEvent.SHARE_SONG -> {
+                            SongItemEvent.SHARE_SONG ->
                                 songToShare = song
-                            }
+                            SongItemEvent.SHOW_SONG_INFO ->
+                                showSongInfoDialog = ShowSongInfoDialogOpen(
+                                    isOpen = true, song = song)
                             SongItemEvent.DOWNLOAD_SONG -> { } // DO NOTHING
+                            SongItemEvent.DELETE_DOWNLOADED_SONG ->
+                                showDeleteFromDownloadsDialog = song
                             SongItemEvent.EXPORT_DOWNLOADED_SONG ->
                                 mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
                             SongItemEvent.GO_TO_ALBUM -> navigator?.navigate(
-                                AlbumDetailScreenDestination(albumId = song.album.id, album = null)
-                            )
+                                AlbumDetailScreenDestination(albumId = song.album.id, album = null))
                             SongItemEvent.GO_TO_ARTIST ->
                                 Ampache2NavGraphs.navigateToArtist(navigator, artistId = song.artist.id, artist = null)
-
                             SongItemEvent.ADD_SONG_TO_QUEUE ->
                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueue(song))
                             SongItemEvent.ADD_SONG_TO_PLAYLIST ->
