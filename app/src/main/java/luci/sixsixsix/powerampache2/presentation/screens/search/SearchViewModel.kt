@@ -54,7 +54,7 @@ class SearchViewModel @Inject constructor(
     private val albumsUseCase: AlbumsUseCase,
     private val playlistsUseCase: PlaylistsUseCase,
     private val songsRepository: SongsRepository,
-    private val settingsFlow: LocalSettingsFlowUseCase,
+    settingsFlow: LocalSettingsFlowUseCase,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(SearchScreenState())
