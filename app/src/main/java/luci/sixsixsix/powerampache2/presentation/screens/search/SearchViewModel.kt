@@ -30,12 +30,16 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.usecase.GenresUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.albums.AlbumsUseCase
@@ -43,62 +47,86 @@ import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsByGenreUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.GetSongsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
+import luci.sixsixsix.powerampache2.domain.usecase.songs.SongsByGenreUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
+
+// minimum allowed size for a search query to trigger a search
+private const val MIN_QUERY_SIZE = 3
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val genresUseCase: GenresUseCase,
+    private val getSongsUseCase: GetSongsUseCase,
+    private val songsByGenreUseCase: SongsByGenreUseCase,
     private val artistsByGenreUseCase: ArtistsByGenreUseCase,
     private val artistsUseCase: ArtistsUseCase,
     private val albumsUseCase: AlbumsUseCase,
     private val playlistsUseCase: PlaylistsUseCase,
-    private val songsRepository: SongsRepository,
     settingsFlow: LocalSettingsFlowUseCase,
+    offlineSongsFlow: OfflineSongsFlow,
     private val playlistManager: MusicPlaylistManager
 ) : ViewModel() {
     var state by mutableStateOf(SearchScreenState())
-
-    private var offlineModeState by mutableStateOf(false)
     private var searchSongsDeferred: Deferred<Job>? = null
     private var searchAlbumsDeferred: Deferred<Job>? = null
     private var searchPlaylistsDeferred: Deferred<Job>? = null
     private var searchArtistsDeferred: Deferred<Job>? = null
     private var fetchByGenreJob: Job? = null
+    private var fetchGenresJob: Job? = null
 
-    private val offlineModeFlow = settingsFlow().map { it.isOfflineModeEnabled }
+    private val offlineModeState = settingsFlow()
+        .map { it.isOfflineModeEnabled }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = false
+        )
 
     init {
-        fetchGenres()
-        // TODO this code is a repetition of SettingsViewModel
         viewModelScope.launch {
-            offlineModeFlow.distinctUntilChanged().collect {
-                if (it != offlineModeState) {
-                    offlineModeState = it
+            offlineModeState
+                .filterNotNull() // skips the synthetic null, only passes real booleans
+                .collectLatest { isOffline ->
+                    L("SearchViewModel fetchGenres $isOffline")
+                    fetchGenres()
                 }
-                // re-fetch genres when changing offline mode
-                fetchGenres()
-            }
         }
 
         viewModelScope.launch {
             playlistManager.currentSearchQuery.collect { query ->
                 L("SearchViewModel search query changed" , query)
-                if (query.length >=3) {
-                    onEvent(SearchViewEvent.OnSearchQueryChange(query))
+                if (query.length >= MIN_QUERY_SIZE) {
+                    onSearchQueryChange(query)
                 } else if (query.isBlank()) {
                     clearData() // return to genre screen
                 }
             }
         }
-    }
 
-    private var fetchGenresJob: Job? = null
+        viewModelScope.launch {
+            offlineSongsFlow()
+                .filter { playlistManager.currentSearchQuery.value.length >= MIN_QUERY_SIZE }
+                .map { offlineSongs ->
+                    val visibleIds = state.songs.map { it.id }.toSet()
+                    offlineSongs.filter { it.id in visibleIds }
+                }
+                .distinctUntilChanged()
+                .filter { it.isNotEmpty() }
+                .collect {
+                    L("SearchViewModel offline song state update, something in this list was updated")
+                    searchSongs(fetchRemote = false)
+                }
+        }
+    }
 
     private fun fetchGenres() {
         fetchGenresJob?.cancel()
         fetchGenresJob = viewModelScope.launch {
-            if (!offlineModeState) {
+            if (!offlineModeState.value) {
                 fetchGenresNetwork()
             } else {
                 fetchGenresOffline()
@@ -116,7 +144,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchGenresOffline() = songsRepository.getSongs().collect { result ->
+    private suspend fun fetchGenresOffline() = getSongsUseCase().collect { result ->
         when (result) {
             is Resource.Success ->
                 result.data?.let { songs ->
@@ -153,7 +181,7 @@ class SearchViewModel @Inject constructor(
         }
 
     private suspend fun fetchSongsByGenre(genre: Genre) =
-        songsRepository.getSongsByGenre(genre).collect { result ->
+        songsByGenreUseCase(genre).collect { result ->
             when (result) {
                 is Resource.Success ->
                     result.data?.let { songs ->
@@ -167,7 +195,7 @@ class SearchViewModel @Inject constructor(
         }
 
     private suspend fun searchOfflineSongsByGenre(genre: Genre) =
-        songsRepository.getSongs().collect { result ->
+        getSongsUseCase().collect { result ->
             when (result) {
                 is Resource.Success ->
                     result.data?.let { songs ->
@@ -184,7 +212,7 @@ class SearchViewModel @Inject constructor(
         }
 
     private suspend fun fetchByGenre(genre: Genre) {
-        if (!offlineModeState) {
+        if (!offlineModeState.value) {
             fetchSongsByGenre(genre)
             fetchArtistsByGenre(genre)
         } else {
@@ -206,7 +234,7 @@ class SearchViewModel @Inject constructor(
         cancelJobs()
 
         searchSongsDeferred = async { searchSongs() }
-        if (!offlineModeState) {
+        if (!offlineModeState.value) {
             searchPlaylistsDeferred = async { searchPlaylists() }
             searchArtistsDeferred = async { searchArtists() }
             searchAlbumsDeferred = async { searchAlbums() }
@@ -217,12 +245,16 @@ class SearchViewModel @Inject constructor(
         searchSongsDeferred?.await()
     }
 
-    private fun searchSongs() = viewModelScope.launch {
-        songsRepository.getSongs(true, state.searchQuery).collect { result ->
+    private fun searchSongs(fetchRemote: Boolean = true) = viewModelScope.launch {
+        getSongsUseCase(fetchRemote = fetchRemote, query = state.searchQuery).collect { result ->
             when (result) {
                 is Resource.Success ->
-                    result.data?.let { songs ->
-                        state = state.copy(songs = songs)
+                    if (state.searchQuery.isNotBlank()) {
+                        // only display the list if there is a search term present.
+                        // Avoids race conditions when quickly deleting and re-typing search terms.
+                        result.data?.let { songs ->
+                            state = state.copy(songs = songs)
+                        }
                     }
                 is Resource.Error ->
                     state = state.copy(isLoading = false)
@@ -282,18 +314,25 @@ class SearchViewModel @Inject constructor(
         state = it
     }
 
+    private fun onSearchQueryChange(query: String) {
+        if (query.isBlank() && state.searchQuery.isBlank()) {
+            // TODO: remove if empty branch?
+        } else {
+            state = state.copy(searchQuery = query)
+            search()
+        }
+    }
+
     fun onEvent(event: SearchViewEvent) {
         when (event) {
-            is SearchViewEvent.OnSearchQueryChange ->
-                if (event.query.isBlank() && state.searchQuery.isBlank()) {
-                    // TODO
-                } else {
-                    state = state.copy(searchQuery = event.query)
-                    search()
-                }
-            SearchViewEvent.Refresh ->
-                fetchGenres()
+            is SearchViewEvent.OnSearchQueryChange -> onSearchQueryChange(event.query)
+            SearchViewEvent.Refresh -> fetchGenres()
             is SearchViewEvent.OnBottomListReached -> {}
+            SearchViewEvent.Clear -> clearData()
+            SearchViewEvent.FetchGenres -> fetchGenres()
+            is SearchViewEvent.OnSongSelected -> {
+                //playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.songs)
+            }
             is SearchViewEvent.OnGenreSelected -> {
                 fetchByGenreJob?.cancel()
                 fetchByGenreJob = viewModelScope.launch {
@@ -303,14 +342,6 @@ class SearchViewModel @Inject constructor(
                     }
                 }
             }
-            SearchViewEvent.Clear ->
-                clearData()
-            is SearchViewEvent.OnSongSelected -> {
-                //playlistManager.addToCurrentQueueUpdateTopSong(event.song, state.songs)
-            }
-
-            SearchViewEvent.FetchGenres ->
-                fetchGenres()
         }
     }
 
