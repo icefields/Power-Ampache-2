@@ -35,9 +35,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.models.Genre
+import luci.sixsixsix.powerampache2.domain.usecase.GenresUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.albums.AlbumsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsByGenreUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsUseCase
@@ -48,7 +48,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val musicRepository: MusicRepository,
+    private val genresUseCase: GenresUseCase,
     private val artistsByGenreUseCase: ArtistsByGenreUseCase,
     private val artistsUseCase: ArtistsUseCase,
     private val albumsUseCase: AlbumsUseCase,
@@ -106,7 +106,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchGenresNetwork() = musicRepository.getGenres(fetchRemote = true).collect { result ->
+    private suspend fun fetchGenresNetwork() = genresUseCase(fetchRemote = true).collect { result ->
         when (result) {
             is Resource.Success -> result.data?.let { genres -> state = state.copy(genres = genres.sortedByDescending { genre ->
                 genre.songs
