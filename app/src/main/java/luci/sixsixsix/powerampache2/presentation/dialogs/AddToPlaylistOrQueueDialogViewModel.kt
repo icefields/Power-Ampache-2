@@ -41,6 +41,8 @@ import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.USER_SYSTEM
+import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
@@ -63,7 +65,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     val playlistsStateFlow: StateFlow<List<Playlist>> =
         playlistsFlow().filterNotNull().distinctUntilChanged()
             .combine(userFlowUseCase().filterNotNull().distinctUntilChanged()) { playlists, user ->
-                playlists.filter { it.owner?.lowercase() == user.username.lowercase() }
+                filterPlaylists(playlists, user)
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     fun onEvent(event: AddToPlaylistOrQueueDialogEvent) {
@@ -108,6 +110,22 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
                         }
                     }
                 }
+        }
+    }
+
+    private fun filterPlaylists(playlists: List<Playlist>, user: User): List<Playlist> {
+        val username = user.username.lowercase()
+
+        return if (user.isAdmin()) {
+            playlists.sortedBy { it.name }.sortedBy { playlist ->
+                when (playlist.owner?.lowercase()) {
+                    username -> 0
+                    USER_SYSTEM -> 1
+                    else -> 2
+                }
+            }
+        } else {
+            playlists.filter { it.owner?.lowercase() == username }.sortedBy { it.name }
         }
     }
 

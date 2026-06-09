@@ -31,6 +31,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.data.common.SafFolderHelper
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.domain.errors.FileWriteException
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
@@ -54,25 +55,27 @@ class StorageManagerImpl @Inject constructor(
     @Throws(Exception::class)
     override suspend fun saveSong(song: Song, inputStream: InputStream) =
         withContext(Dispatchers.IO) {
-            val safFolderHelper = SafFolderHelper(context)
-            val rootUri = sharedPreferencesManager.customDownloadRootUri
-            return@withContext if (Constants.config.enableExternalDirDownloads
-                && isStorageCustom(rootUri)) {
-                safFolderHelper.writeFile(
-                    rootUri = rootUri!!,
-                    fullPath = getDirPathFromSong(song),
-                    fileName = getFileNameFromSong(song),
-                    mimeType = song.mime,
-                    bytes = inputStream.readBytes()
-                ).toString()
-            } else {
-                val absoluteDirPath = getAbsolutePathDir(song)
-                val directory = File(absoluteDirPath)
-                if (!directory.exists()) {
-                    directory.mkdirs()
-                }
-                val absolutePath = getAbsolutePathFile(song)!! // TODO fix double-bang!!
-                try {
+            try {
+                val safFolderHelper = SafFolderHelper(context)
+                val rootUri = sharedPreferencesManager.customDownloadRootUri
+                return@withContext if (Constants.config.enableExternalDirDownloads
+                    && isStorageCustom(rootUri)) {
+                    safFolderHelper.writeFile(
+                        rootUri = rootUri!!,
+                        fullPath = getDirPathFromSong(song),
+                        fileName = getFileNameFromSong(song),
+                        mimeType = song.mime,
+                        inputStream = inputStream,
+                        bufferSize = BUFFER_SIZE
+                    ).toString()
+                } else {
+                    val absoluteDirPath = getAbsolutePathDir(song)
+                    val directory = File(absoluteDirPath!!) // TODO fix double-bang
+                    if (!directory.exists()) {
+                        directory.mkdirs()
+                    }
+
+                    val absolutePath = getAbsolutePathFile(song)!! // TODO fix double-bang!!
                     val fos = FileOutputStream(absolutePath)
                     fos.use { output ->
                         val buffer = ByteArray(BUFFER_SIZE)
@@ -82,12 +85,13 @@ class StorageManagerImpl @Inject constructor(
                         }
                         output.flush()
                     }
+
                     absolutePath
-                } catch (e: Exception) {
-                    throw e
-                } finally {
-                    inputStream.close()
                 }
+            } catch (e: Exception) {
+                throw FileWriteException("error writing file: ${e.localizedMessage}")
+            } finally {
+                inputStream.close()
             }
         }
 
@@ -95,7 +99,7 @@ class StorageManagerImpl @Inject constructor(
     override suspend fun saveImage(song: Song, inputStream: InputStream) =
         withContext(Dispatchers.IO) {
             val absoluteDirPath = getAbsolutePathDir(song)
-            val directory = File(absoluteDirPath)
+            val directory = File(absoluteDirPath!!)
             if (!directory.exists()) {
                 directory.mkdirs()
             }

@@ -224,7 +224,7 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity WHERE LOWER(:songId) == LOWER(mediaId)""")
     suspend fun getSongById(songId: String): SongEntity?
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by trackNumber, flag DESC, rating DESC, playCount DESC""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by disk, trackNumber, flag DESC, rating DESC, playCount DESC""")
     suspend fun getSongFromAlbum(albumId: String): List<SongEntity>
 
     @Query("""SELECT * FROM songentity WHERE LOWER(artistId) == LOWER(:artistId) order by year, albumName, trackNumber, title""")
@@ -450,7 +450,7 @@ interface MusicDao {
     @Query("""SELECT * FROM downloadedsongentity WHERE $multiUserCondition""")
     suspend fun getOfflineSongs(): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE :albumId == albumId AND $multiUserCondition ORDER BY trackNumber""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE :albumId == albumId AND $multiUserCondition ORDER BY disk, trackNumber""")
     suspend fun getOfflineSongsFromAlbum(albumId: String): List<DownloadedSongEntity>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:artistId) == LOWER(artistId) AND $multiUserCondition""")

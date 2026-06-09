@@ -186,18 +186,21 @@
     <string name="warning_playlist_adding_stay">Stay</string>
     <string name="warning_playlist_adding_leave">Leave Anyway</string>
     <string name="warning_song_remove_title">REMOVE SONG</string>
-    <string name="warning_album_songList_remove_title">REMOVE DOWNLOADED SONGS</string>
-    <string name="warning_album_songList_remove_subtitle">This will remove all downloaded songs from the album. Are you sure you want to proceed?</string>
+    <string name="warning_song_delete_downloaded_title">DELETE DOWNLOADED SONG</string>
+    <string name="warning_album_songList_remove_title">DELETE DOWNLOADED SONGS</string>
+    <string name="warning_album_songList_remove_subtitle">This will delete all downloaded songs from the album. Are you sure you want to proceed?</string>
 
     <!-- Song Dropdown Menu -->
     <string name="dropdownMenu_item_download">Download</string>
-    <string name="dropdownMenu_item_export">Export Downloaded Song</string>
+    <string name="dropdownMenu_item_deleteDownloaded">Delete Song</string>
+    <string name="dropdownMenu_item_export">Export Song</string>
     <string name="dropdownMenu_item_playNext">Play Next</string>
     <string name="dropdownMenu_item_addToQueue">Add to Queue</string>
     <string name="dropdownMenu_item_addToPlaylist">Add to Playlist</string>
     <string name="dropdownMenu_item_goToAlbum">Go to Album</string>
     <string name="dropdownMenu_item_goToArtist">Go to Artist</string>
     <string name="dropdownMenu_item_share">Share</string>
+    <string name="dropdownMenu_item_song_info">Show Info</string>
 
     <!---...-->
     <string name="about_flavour">Flavor</string>
