@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2026  Antonio Tari
+ *
+ * This file is a part of Power Ampache 2
+ * Ampache Android client application
+ * @author Antonio Tari
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package luci.sixsixsix.powerampache2.data.common
 
 import android.content.Context
@@ -9,10 +30,12 @@ class SafFolderHelper(private val context: Context) {
         var current = DocumentFile.fromTreeUri(context, rootUri)
             ?: error("Cannot access root URI")
 
-        val parts = fullPath.split("/").map { it.trim() }.filter { it.isNotEmpty() }
+        val parts = fullPath.split("/")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
 
         for (folderName in parts) {
-            val existing = current.findFile(folderName)
+            val existing = current.findFileIgnoreCase(folderName)
             current = if (existing != null && existing.isDirectory) {
                 existing
             } else {
@@ -21,6 +44,15 @@ class SafFolderHelper(private val context: Context) {
             }
         }
         return current
+    }
+
+    private fun DocumentFile.findFileIgnoreCase(name: String): DocumentFile? {
+        for (doc in listFiles()) {
+            if (doc.name?.equals(name, ignoreCase = true) == true) {
+                return doc
+            }
+        }
+        return null
     }
 
     suspend fun getOrCreateFolder(rootUri: Uri, fullPath: String): Uri {
