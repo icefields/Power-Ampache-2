@@ -150,7 +150,9 @@ class SearchViewModel @Inject constructor(
     private suspend fun fetchGenresOffline() = getSongsUseCase().collect { result ->
         when (result) {
             is Resource.Success ->
-                result.data?.let { songs ->
+                result.data?.toSongUI {
+                    isSongAvailableOfflineUseCase(it)
+                }?.let { songs ->
                     val genres: List<Genre> = HashSet<Genre>().apply {
                         songs.map { it.genre }.forEach { attributes ->
                             addAll(attributes.map { Genre(
@@ -187,10 +189,10 @@ class SearchViewModel @Inject constructor(
         songsByGenreUseCase(genre).collect { result ->
             when (result) {
                 is Resource.Success ->
-                    result.data?.let { songs ->
-                        state = state.copy(songs = songs.toSongUI {
-                            isSongAvailableOfflineUseCase(it)
-                        })
+                    result.data?.toSongUI {
+                        isSongAvailableOfflineUseCase(it)
+                    }?.let { songs ->
+                        state = state.copy(songs = songs)
                     }
                 is Resource.Error ->
                     state = state.copy(isLoading = false)
@@ -203,11 +205,11 @@ class SearchViewModel @Inject constructor(
         getSongsUseCase().collect { result ->
             when (result) {
                 is Resource.Success ->
-                    result.data?.let { songs ->
+                    result.data?.toSongUI {
+                        isSongAvailableOfflineUseCase(it)
+                    }?.let { songs ->
                         state = state.copy(songs = songs.filter {
                             it.genre.joinToString(", ").contains(genre.name)
-                        }.toSongUI {
-                            isSongAvailableOfflineUseCase(it)
                         })
                     }
                 is Resource.Error ->
@@ -258,10 +260,10 @@ class SearchViewModel @Inject constructor(
                     if (state.searchQuery.isNotBlank()) {
                         // only display the list if there is a search term present.
                         // Avoids race conditions when quickly deleting and re-typing search terms.
-                        result.data?.let { songs ->
-                            state = state.copy(songs = songs.toSongUI {
-                                isSongAvailableOfflineUseCase(it)
-                            })
+                        result.data?.toSongUI {
+                            isSongAvailableOfflineUseCase(it)
+                        }?.let { songs ->
+                            state = state.copy(songs = songs)
                         }
                     }
                 is Resource.Error ->
