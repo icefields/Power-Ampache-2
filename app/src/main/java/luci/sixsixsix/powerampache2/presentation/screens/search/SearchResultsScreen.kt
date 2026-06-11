@@ -132,7 +132,7 @@ fun SearchResultsScreen(
         }
     } else if (searchState.isNoResults) {
         // show no results screen (search query present but no results)
-        showHideEmptyResultsView(searchState.isLoading, searchState.isFetchingMore, searchState.isNoResults)
+        ShowHideEmptyResultsView(searchState.isLoading, searchState.isFetchingMore, searchState.isNoResults)
     } else {
         // show search results
         ResultsListView(
@@ -172,7 +172,7 @@ fun SearchResultsScreen(
 }
 
 @Composable
-private fun showHideEmptyResultsView(isLoading: Boolean, isRefreshing: Boolean, isNoResults: Boolean) {
+private fun ShowHideEmptyResultsView(isLoading: Boolean, isRefreshing: Boolean, isNoResults: Boolean) {
     if (!isLoading && !isRefreshing && isNoResults){
         Card(modifier = Modifier.fillMaxSize()) {
             Column(

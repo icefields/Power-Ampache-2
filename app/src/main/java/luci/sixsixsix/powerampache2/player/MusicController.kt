@@ -78,7 +78,7 @@ class MusicController @Inject constructor(
             initController(context)
         }
 
-        // There are 2 ways to stop the music using the timer, if the setting"sleepTimerWaitSongEnd"
+        // There are 2 ways to stop the music using the timer, if the setting "sleepTimerWaitSongEnd"
         // is not enabled, stop the music right away, to do so, listen to the alarm event sent
         // through sleepTimerEventBus.sleepTimerEvents.
         // If the setting"sleepTimerWaitSongEnd" is enabled, ignore the callback from the alarm
@@ -100,6 +100,7 @@ class MusicController @Inject constructor(
 
         // Callback triggered every time a new song is being played
         applicationCoroutineScope.launch {
+            // TODO: unused named lambda parameter, check if needed
             playlistManager.currentSongState.filterNotNull().collectLatest { newSong ->
                 val sleepTimerEndTimestamp = sleepTimerEndTimestampFlow().value
                 if (

@@ -43,11 +43,14 @@ import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsByGenreUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
     private val genresUseCase: GenresUseCase,
     private val artistsByGenreUseCase: ArtistsByGenreUseCase,
     private val artistsUseCase: ArtistsUseCase,
@@ -157,7 +160,9 @@ class SearchViewModel @Inject constructor(
             when (result) {
                 is Resource.Success ->
                     result.data?.let { songs ->
-                        state = state.copy(songs = songs)
+                        state = state.copy(songs = songs.toSongUI {
+                            isSongAvailableOfflineUseCase(it)
+                        })
                     }
                 is Resource.Error ->
                     state = state.copy(isLoading = false)
@@ -171,10 +176,11 @@ class SearchViewModel @Inject constructor(
             when (result) {
                 is Resource.Success ->
                     result.data?.let { songs ->
-                        val mapped = songs.filter {
+                        state = state.copy(songs = songs.filter {
                             it.genre.joinToString(", ").contains(genre.name)
-                        }
-                        state = state.copy(songs = mapped)
+                        }.toSongUI {
+                            isSongAvailableOfflineUseCase(it)
+                        })
                     }
                 is Resource.Error ->
                     state = state.copy(isLoading = false)
@@ -222,7 +228,9 @@ class SearchViewModel @Inject constructor(
             when (result) {
                 is Resource.Success ->
                     result.data?.let { songs ->
-                        state = state.copy(songs = songs)
+                        state = state.copy(songs = songs.toSongUI {
+                            isSongAvailableOfflineUseCase(it)
+                        })
                     }
                 is Resource.Error ->
                     state = state.copy(isLoading = false)

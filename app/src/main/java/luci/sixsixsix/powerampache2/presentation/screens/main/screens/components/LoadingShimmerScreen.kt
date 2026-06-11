@@ -77,7 +77,7 @@ fun LoadingShimmerScreen() {
 
 @Composable
 fun LoadingShimmerScreenSection() {
-    Column() {
+    Column {
         Text(
             modifier = Modifier
                 .width(200.dp)

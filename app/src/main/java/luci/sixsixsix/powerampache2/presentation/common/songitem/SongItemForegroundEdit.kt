@@ -43,19 +43,18 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 @Composable
 fun SongItemForegroundEdit(
-    song: Song,
+    song: SongUI,
     modifier: Modifier = Modifier,
-    isSongDownloaded: Boolean,
     isEditEnabled: Boolean,
-    showDownloadedSongMarker: Boolean,
+    //showDownloadedSongMarker: Boolean,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
     checked: Boolean,
-    onCheckedChange: (Boolean, Song) -> Unit,
+    onCheckedChange: (Boolean, SongUI) -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
 ) {
@@ -148,9 +147,8 @@ fun SongItemForegroundEdit(
 @Preview
 fun SongItemForegroundEditPreview() {
     SongItemForegroundEdit(
-        song = Song.mockSong,
-        isSongDownloaded = true,
-        showDownloadedSongMarker = true,
+        song = SongUI.mockSongUI,
+        //showDownloadedSongMarker = true,
         checked = true,
         onMoveDown = {},
         isEditEnabled = true,

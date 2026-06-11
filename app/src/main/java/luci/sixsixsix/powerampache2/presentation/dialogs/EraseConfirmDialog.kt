@@ -44,10 +44,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.RoundedCornerButton
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 data class ShowEraseConfirmDialog(
     val isOpen: Boolean,
-    val song: Song? = null,
+    val song: SongUI? = null,
 )
 
 @Composable

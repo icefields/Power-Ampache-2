@@ -69,9 +69,9 @@ import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.common.WeakContext
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.presentation.common.PlayButton
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
@@ -103,10 +103,11 @@ fun MiniPlayer(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MiniPlayerContent(
-    song: Song,
+    song: SongUI,
     isPlaying: Boolean,
     isPlayLoading: Boolean,
     isBuffering: Boolean,
+    // TODO: unused parameters
     shuffleOn: Boolean,
     repeatMode: RepeatMode,
     modifier: Modifier = Modifier,
@@ -257,9 +258,9 @@ fun MiniPlayerContent(
 
 @Composable
 @Preview
-fun previewMiniPlayer() {
+fun PreviewMiniPlayer() {
     MiniPlayerContent(
-        song = Song.mockSong,
+        song = SongUI.mockSongUI,
         modifier = Modifier
             .width(400.dp)
             .height(50.dp),

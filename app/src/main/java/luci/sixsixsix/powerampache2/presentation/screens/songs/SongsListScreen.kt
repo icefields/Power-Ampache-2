@@ -29,15 +29,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
+//import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+//import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+//import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
@@ -46,7 +46,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItemEvent
@@ -92,7 +92,7 @@ fun SongsListScreen(
         }
     }
 
-    var showDeleteFromDownloadsDialog by remember { mutableStateOf<Song?>(null) }
+    var showDeleteFromDownloadsDialog by remember { mutableStateOf<SongUI?>(null) }
     showDeleteFromDownloadsDialog?.let { songToRemove ->
         EraseConfirmDialog(
             onDismissRequest = {
@@ -116,7 +116,7 @@ fun SongsListScreen(
         }
     }
 
-    var songToShare: Song? by remember { mutableStateOf(null) }
+    var songToShare: SongUI? by remember { mutableStateOf(null) }
     AnimatedVisibility(songToShare != null) {
         songToShare?.let { songS ->
             ShareDialog(
@@ -149,8 +149,7 @@ fun SongsListScreen(
                         state.songs.size,
                         //key = { i -> state.songs[i].mediaId }
                     ) { i ->
-                        val song = state.songs[i].song
-                        val isOffline = state.songs[i].isOffline
+                        val song = state.songs[i]
                         SongItem(
                             song = song,
                             songItemEventListener = { event ->
@@ -179,7 +178,6 @@ fun SongsListScreen(
                                 }
                             },
                             subtitleString = SubtitleString.ARTIST,
-                            isSongDownloaded = isOffline,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
@@ -192,7 +190,7 @@ fun SongsListScreen(
                                 }
                         )
                         // TODO decide to include or not this
-                        // footer(i = i, state = state)
+                        // Footer(i = i, state = state)
                     }
                 }
             }
@@ -200,25 +198,25 @@ fun SongsListScreen(
     }
 }
 
-@Composable
-fun footer(i: Int, state: SongsState) {
-    if (i < state.songs.size - 1) {
-        // if not last item add a divider
-        // TODO: do I want a divider? Divider(modifier = Modifier.padding(horizontal = 16.dp))
-    } else if (i == state.songs.size - 1) {
-        // TODO should this screen be allowed to load more ?
-        Column(modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .alpha(
-                        if (state.isFetchingMore) {
-                            1.0f
-                        } else {
-                            0.0f
-                        }
-                    )
-            )
-        }
-    }
-}
+//@Composable
+//fun Footer(i: Int, state: SongsState) {
+//    if (i < state.songs.size - 1) {
+//        // if not last item add a divider
+//        // TODO: do I want a divider? Divider(modifier = Modifier.padding(horizontal = 16.dp))
+//    } else if (i == state.songs.size - 1) {
+//        // TODO should this screen be allowed to load more ?
+//        Column(modifier = Modifier.fillMaxWidth()) {
+//            CircularProgressIndicator(
+//                modifier = Modifier
+//                    .align(Alignment.CenterHorizontally)
+//                    .alpha(
+//                        if (state.isFetchingMore) {
+//                            1.0f
+//                        } else {
+//                            0.0f
+//                        }
+//                    )
+//            )
+//        }
+//    }
+//}

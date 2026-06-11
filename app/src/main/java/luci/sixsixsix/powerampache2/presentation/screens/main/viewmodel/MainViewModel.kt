@@ -58,8 +58,7 @@ import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
-import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.isFavourite
+import luci.sixsixsix.powerampache2.presentation.models.isFavourite
 import luci.sixsixsix.powerampache2.domain.usecase.DownloadSongUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.SessionFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsChromecastPluginInstalled
@@ -75,6 +74,9 @@ import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.toDomainSong
+import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -130,8 +132,8 @@ class MainViewModel @Inject constructor(
     var emittedDownloads by savedStateHandle.saveable { mutableStateOf(listOf<String>()) }
 
     // TODO: there is no queue to restore! because the queue is in MusicPlaylistManager
-    var restoredSong: Song? = null
-    var restoredQueue = listOf<Song>()
+    var restoredSong: SongUI? = null
+    var restoredQueue = listOf<SongUI>()
 
     val mainLock = Any()
 
@@ -147,6 +149,7 @@ class MainViewModel @Inject constructor(
             delay(6000)
             if (Constants.config.featureString.isNotBlank() &&
                 application.isFeatureAvailable(Constants.config.featureString)) {
+                // TODO: investigate if we should use a kotlin function here instead
                 System.exit(0)
             }
         }
@@ -160,10 +163,6 @@ class MainViewModel @Inject constructor(
 
     fun onEvent(event: MainEvent) =
         weakContext.get()?.applicationContext?.let { handleEvent(event, it) }
-
-    fun isOfflineSong(song: Song, callback: (Boolean) -> Unit) = viewModelScope.launch {
-        callback(isSongAvailableOfflineUseCase(song))
-    }
 
     /**
      * set isPlayLoading to true, the play button is listening to this variable
@@ -194,7 +193,9 @@ class MainViewModel @Inject constructor(
         songsRepository.getSongsForQuickPlay().collect { result ->
             when (result) {
                 is Resource.Success -> {
-                    result.data?.let { songs ->
+                    result.data?.toSongUI {
+                        isSongAvailableOfflineUseCase(it)
+                    }?.let { songs ->
                         if (songs.isNotEmpty()) {
                             addSongsToQueueAndPlay(songs[0], songs)
                         }
@@ -207,7 +208,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun favouriteSong(song: Song) = viewModelScope.launch {
+    fun favouriteSong(song: SongUI) = viewModelScope.launch {
         songsRepository.likeSong(song.mediaId, (song.flag != 1)).collect { result ->
             when (result) {
                 is Resource.Success -> result.data?.let {
@@ -221,7 +222,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun rateSong(song: Song, rate: Int) = viewModelScope.launch {
+    fun rateSong(song: SongUI, rate: Int) = viewModelScope.launch {
         songsRepository.rateSong(song.mediaId, rate).collect { result ->
             when (result) {
                 is Resource.Success -> result.data?.let {
@@ -265,11 +266,18 @@ class MainViewModel @Inject constructor(
     private suspend fun playDeepLinkedSong(id: String, title: String, artist: String, webLink: String) {
         shareManager.fetchDeepLinkedSong(id, title, artist,
             songCallback = {
-                onEvent(MainEvent.PlaySongAddToQueueTop(it, currentQueue().value))
-            },
+                onEvent(MainEvent.PlaySongAddToQueueTop(
+                    song = it.toSongUI(
+                        isSongAvailableOfflineUseCase(it)
+                    ),
+                    songList = currentQueue().value)
+                )},
             songsCallback = {
-                onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(it))
-            },
+                onEvent(MainEvent.AddSongsToQueueAndPlayShuffled(
+                    songList = it.toSongUI { song ->
+                        isSongAvailableOfflineUseCase(song)
+                    }
+                ))},
             errorCallback = {
                 weakContext.get()?.let { context ->
                     if (webLink.isNotBlank()) {
@@ -282,8 +290,8 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    fun downloadSong(song: Song) = viewModelScope.launch {
-        songsRepository.downloadSong(song).collect { result ->
+    fun downloadSong(song: SongUI) = viewModelScope.launch {
+        songsRepository.downloadSong(song.toDomainSong()).collect { result ->
             when (result) {
                 is Resource.Success -> {
                     result.data?.let {
@@ -297,12 +305,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun downloadSongs(songs: List<Song>) {
-        viewModelScope.launch { songsRepository.downloadSongs(songs) }
+    fun downloadSongs(songs: List<SongUI>) {
+        viewModelScope.launch { songsRepository.downloadSongs(songs.toDomainSong()) }
     }
 
-    fun deleteDownloadedSong(song: Song) = viewModelScope.launch {
-        songsRepository.deleteDownloadedSong(song).collect { result ->
+    fun deleteDownloadedSong(song: SongUI) = viewModelScope.launch {
+        songsRepository.deleteDownloadedSong(song.toDomainSong()).collect { result ->
             when (result) {
                 is Resource.Success -> {
                     result.data?.let {
@@ -317,10 +325,10 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun deleteDownloadedSongs(songs: List<Song>) = viewModelScope.launch {
+    fun deleteDownloadedSongs(songs: List<SongUI>) = viewModelScope.launch {
         var count = 0
         songs.forEach { song ->
-            songsRepository.deleteDownloadedSong(song).collect { result ->
+            songsRepository.deleteDownloadedSong(song.toDomainSong()).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let { ++count }
@@ -373,9 +381,9 @@ class MainViewModel @Inject constructor(
             logToErrorLogs("Load song data START")
 
             val mediaItemList = mutableListOf<MediaItem>()
-            for (song: Song? in playlistManager.currentQueueState.value) {
+            for (song: SongUI? in playlistManager.currentQueueState.value) {
                 song?.let {
-                    mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it)))
+                    mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it.toDomainSong())))
                 }
             }
 
@@ -409,14 +417,14 @@ class MainViewModel @Inject constructor(
             RepeatMode.ALL -> RepeatMode.OFF
         }
 
-    fun scrobble(song: Song) {
+    fun scrobble(song: SongUI) {
         scrobbleJob?.cancel()
         scrobbleJob = viewModelScope.launch {
             delay(LOCAL_SCROBBLE_TIMEOUT_MS) // add song to history after 30s
-            songsRepository.addToHistory(song)
+            songsRepository.addToHistory(song.toDomainSong())
 
             // send scrobble to backend
-            songsRepository.scrobble(song).collect { response ->
+            songsRepository.scrobble(song.toDomainSong()).collect { response ->
                 when (response) {
                     is Resource.Error -> { }
                     is Resource.Loading -> { }
@@ -426,7 +434,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun downloadAfterPlayback(song: Song) {
+    fun downloadAfterPlayback(song: SongUI) {
         // do not cancel, let the previous finish download // downloadAfterPlaybackJob?.cancel()
         downloadAfterPlaybackJob = viewModelScope.launch {
             // start downloading half way

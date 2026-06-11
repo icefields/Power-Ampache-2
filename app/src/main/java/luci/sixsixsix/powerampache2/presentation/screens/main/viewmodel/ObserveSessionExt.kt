@@ -32,7 +32,7 @@ fun MainViewModel.observeSession() {
             synchronized(mainLock) {
                 val oldToken = authToken
                 authToken = it?.auth ?: ""
-                logToErrorLogs(" old toke $oldToken, new one: $authToken")
+                logToErrorLogs(" old token $oldToken, new one: $authToken")
                 if (authToken.isNotBlank()) {
                     // refresh the playlist with new urls with the new token
                     // only if a queue exists

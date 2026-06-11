@@ -85,6 +85,8 @@ import luci.sixsixsix.powerampache2.domain.models.isOwnerAdmin
 import luci.sixsixsix.powerampache2.domain.models.isOwnerSystem
 import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.isAvailableOffline
 
 data class InfoViewItemText(
     val firstRowText: String,
@@ -97,7 +99,6 @@ fun <T: AmpacheModel> AmpacheListItem(
     item: T,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
-    isSongDownloaded: Boolean = false,
     showDownloadedSongMarker: Boolean = false,
     enableSwipeToRemove: Boolean = false,
     onRemove: (AmpacheModel) -> Unit = {},
@@ -111,7 +112,7 @@ fun <T: AmpacheModel> AmpacheListItem(
     var showPublicBadge = false
 
     when(item) {
-        is Song -> {
+        is SongUI -> {
             imageUrl = item.imageUrl
             infoViewItemText = InfoViewItemText(
                 item.title,
@@ -141,9 +142,9 @@ fun <T: AmpacheModel> AmpacheListItem(
                 } else stringResource(R.string.item_title_playlist)
             } ?: stringResource(R.string.item_title_playlist)
 
-            val items = item.items?.let {
+            val items = item.items.let {
                 if (it > 0) stringResource(id = R.string.playlistItem_songCount, it) else " "
-            } ?: run { " " }
+            }
             infoViewItemText = InfoViewItemText(item.name, items, ownerText)
             isFavourite = item.flag == 1
             rating = item.rating
@@ -162,9 +163,9 @@ fun <T: AmpacheModel> AmpacheListItem(
                 imageUrl = imageUrl,
                 textInfo = infoViewItemText,
                 songItemEventListener = songItemEventListener,
-                isSongDownloaded = isSongDownloaded,
+                isSongDownloaded = if (item is SongUI) { item.isAvailableOffline() } else false,
                 showDownloadedSongMarker = showDownloadedSongMarker,
-                hideSongMenu = item !is Song,
+                hideSongMenu = item !is SongUI,
                 isFavourite = isFavourite,
                 rating = rating,
                 showAmpacheBadge = showAmpacheBadge,
@@ -292,7 +293,7 @@ fun <T: AmpacheModel> AmpacheListItemMain(
     SongDropDownMenu(
         isContextMenuVisible = isContextMenuVisible,
         pressOffset = pressOffset,
-        isSongDownloaded = isSongDownloaded,
+        isSongAvailableOffline = isSongDownloaded,
         songItemEventListener = {
             isContextMenuVisible = false
             songItemEventListener(it)

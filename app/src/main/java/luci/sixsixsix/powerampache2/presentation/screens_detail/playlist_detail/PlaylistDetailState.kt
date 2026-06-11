@@ -29,18 +29,17 @@ import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
 import luci.sixsixsix.powerampache2.domain.models.settings.defaultPlaylistSort
 import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
-import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 @Parcelize
 data class PlaylistDetailState (
     //val playlist: Playlist = Playlist("", ""),
     val isNotStatPlaylist: Boolean = false,
     val isGeneratedOrSmartPlaylist: Boolean = false,
-    val songs: List<SongWrapper> = emptyList(),
+    val songs: List<SongUI> = emptyList(),
     val isLoading: Boolean = false,
     val isLikeLoading: Boolean = false,
     val isRefreshing: Boolean = false,
@@ -51,7 +50,7 @@ data class PlaylistDetailState (
     val isUserOwner: Boolean = false,
     val isGlobalShuffleOn: Boolean = LocalSettings.SETTINGS_DEFAULTS_GLOBAL_SHUFFLE
 ): Parcelable {
-    fun getSongList(): List<Song> = songs.map { it.song }
+    fun getSongList(): List<SongUI> = songs
 
     companion object {
         fun isGeneratedOrSmartPlaylist(playlist: Playlist) = when (playlist) {

@@ -53,9 +53,9 @@ import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
 import luci.sixsixsix.powerampache2.presentation.dialogs.IntroDialog
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.CheckCustomStoragePermissionDialog
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.SheetDragHandle
@@ -166,5 +166,5 @@ fun LoggedInScreen(
 }
 
 @Composable
-fun getPeakHeight(song: Song?): Dp = //TODO find a way to animate this (low-priority)
+fun getPeakHeight(song: SongUI?): Dp = //TODO find a way to animate this (low-priority)
     if (song == null) { 0.dp } else { dimensionResource(id = R.dimen.miniPlayer_height) }

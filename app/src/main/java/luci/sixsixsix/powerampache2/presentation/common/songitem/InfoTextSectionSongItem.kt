@@ -33,14 +33,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
-import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.totalTime
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.totalTime
 
 
 @Composable
 fun InfoTextSectionSongItem(
     modifier: Modifier,
-    song: Song,
+    song: SongUI,
     subtitleString: SubtitleString,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
 ) {

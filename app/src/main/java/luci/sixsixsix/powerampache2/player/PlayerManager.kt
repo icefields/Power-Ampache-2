@@ -1,11 +1,8 @@
 package luci.sixsixsix.powerampache2.player
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.cache.CacheDataSource
@@ -16,13 +13,8 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import luci.sixsixsix.powerampache2.BuildConfig
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -112,5 +104,6 @@ class PlayerManager @OptIn(UnstableApi::class)
         _playerState.value = null
     }
 
+    // TODO: unused?
     fun isPlayerInitialized(): Boolean = _player != null
 }

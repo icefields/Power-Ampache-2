@@ -64,11 +64,10 @@ fun MainViewModel.observePlaylistManager() {
 
     // listen to queue changes
     viewModelScope.launch {
-        playlistManager.currentQueueState.collectLatest { q ->
-            val queue = q.filterNotNull()
-            if (!queue.isNullOrEmpty()) {
+        playlistManager.currentQueueState.collectLatest { queue ->
+            if (queue.isNotEmpty()) {
                 startMusicServiceIfNecessary()
-            } else if (queue.isNullOrEmpty() && currentSong() == null) {
+            } else if (currentSong() == null) {
                 stopMusicService()
             }
             L("**** observing playlist change queue (before Load song data) :", queue.size)

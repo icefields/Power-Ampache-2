@@ -42,7 +42,6 @@ import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -69,8 +68,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
-import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.totalTime
+import luci.sixsixsix.powerampache2.presentation.models.totalTime
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
@@ -78,6 +76,8 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.isAvailableOffline
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -121,7 +121,7 @@ fun SongDetailContent(
 
     var isOffline by remember { mutableStateOf(false) }
 
-    var songToShare: Song? by remember { mutableStateOf(null) }
+    var songToShare: SongUI? by remember { mutableStateOf(null) }
     AnimatedVisibility(songToShare != null) {
         songToShare?.let { songS ->
             ShareDialog(
@@ -227,9 +227,7 @@ fun SongDetailContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         currentSongState?.let { song ->
-            mainViewModel.isOfflineSong(song) {
-                isOffline = it
-            }
+            isOffline = song.isAvailableOffline()
             SongDetailButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()

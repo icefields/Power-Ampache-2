@@ -22,10 +22,8 @@
 package luci.sixsixsix.powerampache2.player
 
 import android.content.Context
-import android.content.Intent
 import android.media.session.PlaybackState
 import androidx.annotation.OptIn
-import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
@@ -57,6 +55,8 @@ import luci.sixsixsix.powerampache2.domain.errors.PlaybackError
 import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
 import javax.inject.Inject
 import javax.inject.Singleton
+
+// TODO: there's a bunch of unused stuff in here, worth investigation and cleaning
 
 @Singleton
 class SimpleMediaServiceHandler @Inject constructor(
@@ -106,7 +106,7 @@ class SimpleMediaServiceHandler @Inject constructor(
     fun getMediaItemCount() = player().mediaItemCount
 
     fun addMediaItemList(mediaItems: List<MediaItem>) {
-        if(mediaItems.isNullOrEmpty() && player().mediaItemCount == 0) return
+        if(mediaItems.isEmpty() && player().mediaItemCount == 0) return
         if (player().mediaItemCount > 0 &&
             playlistManager.currentSongState.value?.mediaId == player().currentMediaItem?.mediaId) {
             // if the current song of the playlist (if playlist is not empty) corresponds to the current

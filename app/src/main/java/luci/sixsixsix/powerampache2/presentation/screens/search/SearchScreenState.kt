@@ -28,13 +28,13 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Genre
 import luci.sixsixsix.powerampache2.domain.models.Playlist
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 @Parcelize
 data class SearchScreenState (
     val selectedGenre: Genre? = null,
     val genres: List<Genre> = emptyList(),
-    val songs: List<Song> = emptyList(),
+    val songs: List<SongUI> = emptyList(),
     val albums: List<Album> = emptyList(),
     val artists: List<Artist> = emptyList(),
     val playlists: List<Playlist> = emptyList(),

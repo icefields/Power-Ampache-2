@@ -22,12 +22,12 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
 import luci.sixsixsix.powerampache2.domain.models.Playlist
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 sealed class PlaylistDetailEvent {
     data object Refresh: PlaylistDetailEvent()
     data class Fetch(val playlist: Playlist): PlaylistDetailEvent()
-    data class OnSongSelected(val song: Song): PlaylistDetailEvent()
+    data class OnSongSelected(val song: SongUI): PlaylistDetailEvent()
     data object OnLikePlaylist: PlaylistDetailEvent()
     data object OnPlayPlaylist: PlaylistDetailEvent()
     data object OnSharePlaylist: PlaylistDetailEvent()

@@ -24,7 +24,6 @@ package luci.sixsixsix.powerampache2.presentation.screens.queue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.onEach
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import javax.inject.Inject

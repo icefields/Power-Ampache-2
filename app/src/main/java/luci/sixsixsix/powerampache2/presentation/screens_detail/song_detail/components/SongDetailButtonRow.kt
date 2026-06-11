@@ -93,17 +93,18 @@ fun SongDetailButtonRow(
         }
         PlayerButton(
             text = R.string.player_buttonText_download,
-            icon = if (!isOffline)
-                Icons.Outlined.DownloadForOffline
-            else
-                Icons.Outlined.OfflinePin,
+            icon =
+                if (isOffline)
+                    Icons.Outlined.OfflinePin
+                else
+                    Icons.Outlined.DownloadForOffline,
             tint = tint,
             modifier = btnModifier
         ) {
-            if (!isOffline) {
-                eventListener(SongDetailButtonEvents.DOWNLOAD_SONG)
-            } else {
+            if (isOffline) {
                 eventListener(SongDetailButtonEvents.DELETE_DOWNLOADED_SONG)
+            } else {
+                eventListener(SongDetailButtonEvents.DOWNLOAD_SONG)
             }
         }
         PlayerButton(

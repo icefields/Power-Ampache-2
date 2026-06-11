@@ -40,13 +40,14 @@ import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.USER_SYSTEM
 import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.models.toDomainSong
 import java.util.UUID
 import javax.inject.Inject
 
@@ -151,10 +152,14 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private fun createPlaylistAndAddSongs(
         playlistName: String,
         playlistType: PlaylistType,
-        songsToAdd: List<Song>
+        songsToAdd: List<SongUI>
     ) = viewModelScope.launch {
         playlistsRepository
-            .createNewPlaylistAddSongs(playlistName, playlistType, songsToAdd).collect { result ->
+            .createNewPlaylistAddSongs(
+                name = playlistName,
+                playlistType = playlistType,
+                songsToAdd = songsToAdd.map { it.toDomainSong() },
+            ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {
@@ -188,10 +193,10 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
             }
     }
 
-    private fun addSongsToPlaylist(playlist: Playlist, songs: List<Song>) = viewModelScope.launch {
+    private fun addSongsToPlaylist(playlist: Playlist, songs: List<SongUI>) = viewModelScope.launch {
         playlistsRepository.addSongsToPlaylist(
             playlist = playlist,
-            songsToAdd = songs
+            songsToAdd = songs.map { it.toDomainSong() },
         ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -215,9 +220,17 @@ data class AddToPlaylistOrQueueDialogState (
 )
 
 sealed class AddToPlaylistOrQueueDialogEvent {
-    data class OnAddAlbumToQueue(val songs: List<Song>): AddToPlaylistOrQueueDialogEvent()
-    data class AddSongsToPlaylist(val songs: List<Song>, val playlist: Playlist): AddToPlaylistOrQueueDialogEvent()
-    data class CreatePlaylistAndAddSongs(val songs: List<Song>, val playlistName: String, val playlistType: PlaylistType): AddToPlaylistOrQueueDialogEvent()
-    data class AddSongToPlaylist(val song: Song, val playlistId: String): AddToPlaylistOrQueueDialogEvent()
-    data class CreatePlaylistAndAddSong(val song: Song, val playlistName: String, val playlistType: PlaylistType): AddToPlaylistOrQueueDialogEvent()
+    data class OnAddAlbumToQueue(val songs: List<SongUI>): AddToPlaylistOrQueueDialogEvent()
+    data class AddSongsToPlaylist(
+        val songs: List<SongUI>, val playlist: Playlist
+    ): AddToPlaylistOrQueueDialogEvent()
+    data class CreatePlaylistAndAddSongs(
+        val songs: List<SongUI>, val playlistName: String, val playlistType: PlaylistType
+    ): AddToPlaylistOrQueueDialogEvent()
+    data class AddSongToPlaylist(
+        val song: SongUI, val playlistId: String
+    ): AddToPlaylistOrQueueDialogEvent()
+    data class CreatePlaylistAndAddSong(
+        val song: SongUI, val playlistName: String, val playlistType: PlaylistType
+    ): AddToPlaylistOrQueueDialogEvent()
 }

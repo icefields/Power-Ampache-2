@@ -40,6 +40,7 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.domain.models.Playlist
+import luci.sixsixsix.powerampache2.domain.models.isOwnerAdmin
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
@@ -75,6 +76,7 @@ class PlaylistsViewModel @Inject constructor(
         when (event) {
             is PlaylistEvent.Refresh ->
                 getPlaylists(fetchRemote = true)
+            // TODO: inverse the check to get rid of if empty body
             is PlaylistEvent.OnSearchQueryChange -> if (event.query.isBlank() && state.searchQuery.isBlank()) {
                 } else {
                     state = state.copy(searchQuery = event.query)
@@ -109,10 +111,11 @@ class PlaylistsViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
+                            // TODO: why is it commented out only partially? Check if needed at all
                             result.data?.let { playlists ->
-                                // playlist updated automatically through live data from database
-//                                state = state.copy(playlists = playlists)
-//                                L("viewmodel.getPlaylists size", state.playlists.size)
+                            //    // playlist updated automatically through live data from database
+                            //    state = state.copy(playlists = playlists)
+                            //    L("viewmodel.getPlaylists size", state.playlists.size)
                             }
                             isEndOfDataReached =
                                 (result.networkData?.isEmpty() == true && offset > 0)
