@@ -282,6 +282,8 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.runtime.livedata)
 
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
     // --- Compose --- //
     implementation(libs.compose.ui)
     implementation(libs.compose.material.icons.extended)

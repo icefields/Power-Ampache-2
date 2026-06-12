@@ -40,7 +40,7 @@
             android:launchMode="singleTop"
             android:name=".presentation.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.PowerAmpache2">
+            android:theme="@style/Theme.App.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
