@@ -37,7 +37,7 @@ import luci.sixsixsix.powerampache2.common.toMediaItem
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.player.PlayerEvent.*
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
-import luci.sixsixsix.powerampache2.presentation.models.toDomainSong
+import luci.sixsixsix.powerampache2.presentation.models.toSong
 
 /**
  * UI ACTIONS AND EVENTS (play, stop, skip, like, download, etc ...)
@@ -93,10 +93,10 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         is MainEvent.OnDownloadSong ->
             downloadSong(event.song)
         is MainEvent.OnShareSong -> viewModelScope.launch {
-            shareManager.shareSongDeepLink(context, event.song.toDomainSong())
+            shareManager.shareSongDeepLink(context, event.song.toSong())
         }
         is MainEvent.OnShareSongWebUrl -> viewModelScope.launch {
-            shareManager.shareSongWeb(context, event.song.toDomainSong())
+            shareManager.shareSongWeb(context, event.song.toSong())
         }
         is MainEvent.Repeat -> viewModelScope.launch {
             val nextRepeatMode = nextRepeatMode()
@@ -146,7 +146,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
             try {
                 context.exportSong(
                     mimeType = event.song.mime,
-                    offlineUri = songsRepository.getSongUri(event.song.toDomainSong()),
+                    offlineUri = songsRepository.getSongUri(event.song.toSong()),
                 )
             } catch (e: Exception) {
                 errorHandler.updateErrorLogMessage(e.stackTraceToString())
@@ -172,7 +172,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
             // send queue to cast plugin
             if (isChromecastPluginInstalled()) {
                 viewModelScope.launch {
-                    sendQueueToChromecastUseCase(currentQueue().value.toDomainSong())
+                    sendQueueToChromecastUseCase(currentQueue().value.toSong())
                         .also { isSuccess ->
                             if (!isSuccess) {
                                 // this is just a safety net, the error should never happen because
@@ -272,7 +272,7 @@ private fun MainViewModel.playSongForce(song: SongUI) = viewModelScope.launch {
     try {
         simpleMediaServiceHandler.onPlayerEvent(
             ForcePlay(
-                song.toMediaItem(songsRepository.getSongUri(song.toDomainSong()))
+                song.toMediaItem(songsRepository.getSongUri(song.toSong()))
             )
         )
     } catch (e: Exception) {

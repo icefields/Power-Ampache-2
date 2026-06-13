@@ -99,6 +99,7 @@ fun SongUI.totalTime(): String {
 fun List<SongUI>.reduceList() = if (size > Constants.config.queueSizeLimit) {
     subList(0, Constants.config.queueSizeLimit) } else this
 
+/** Returns a "presentation" level SongUI model of the Song**/
 fun Song.toSongUI(isDownloaded: Boolean = false) = SongUI(
     mediaId = mediaId,
     title = title,
@@ -147,7 +148,8 @@ fun Song.toSongUI(isDownloaded: Boolean = false) = SongUI(
     isDownloaded = isDownloaded,
 )
 
-fun SongUI.toDomainSong() = Song(
+/** Returns a domain level Song model version of the SongUI **/
+fun SongUI.toSong() = Song(
     mediaId = mediaId,
     title = title,
     artist = artist,
@@ -194,23 +196,25 @@ fun SongUI.toDomainSong() = Song(
     averageRating = averageRating,
 )
 
+/** Returns a list of "presentation" level Song models, mapped from the list of Song **/
 suspend fun List<Song>.toSongUI(isAvailableOfflineCallback: suspend (Song) -> Boolean): List<SongUI> {
-    val songUIList = mutableListOf<SongUI>()
+    val songUiList = mutableListOf<SongUI>()
     this.forEach {
-        songUIList.add(
+        songUiList.add(
             it.toSongUI(
                 isAvailableOfflineCallback(it)
             )
         )
     }
-    return songUIList
+    return songUiList
 }
 
-fun List<SongUI>.toDomainSong(): List<Song> {
+/** Returns a list of domain level Song models, mapped from the list of SongUI **/
+fun List<SongUI>.toSong(): List<Song> {
     val songList = mutableListOf<Song>()
     this.forEach {
         songList.add(
-            it.toDomainSong()
+            it.toSong()
         )
     }
     return songList

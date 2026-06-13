@@ -69,7 +69,7 @@ import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleU
 import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
-import luci.sixsixsix.powerampache2.presentation.models.toDomainSong
+import luci.sixsixsix.powerampache2.presentation.models.toSong
 import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 
@@ -320,7 +320,7 @@ class PlaylistDetailViewModel @Inject constructor(
             .editPlaylist(
                 playlistId = playlist.id,
                 playlistName = playlist.name,
-                items = newList.toDomainSong(),
+                items = newList.toSong(),
                 owner = playlist.owner,
                 playlistType = playlist.type ?: PlaylistType.private
             ).collect { result ->

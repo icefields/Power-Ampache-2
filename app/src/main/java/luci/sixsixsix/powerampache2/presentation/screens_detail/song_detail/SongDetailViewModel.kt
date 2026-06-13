@@ -43,7 +43,7 @@ import luci.sixsixsix.powerampache2.domain.usecase.plugin.LyricsFromPluginUseCas
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.SongDataFromPluginUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.SongFromIdUseCase
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
-import luci.sixsixsix.powerampache2.presentation.models.toDomainSong
+import luci.sixsixsix.powerampache2.presentation.models.toSong
 import javax.inject.Inject
 
 @HiltViewModel
@@ -141,7 +141,7 @@ class SongDetailViewModel @Inject constructor(
     private suspend fun getSongInfoFromPlugin(song: SongUI) {
         // only fetch if no lyrics already present
         if (isInfoPluginInstalled()) {
-            _pluginInfo.value = getSongInfoPluginUseCase(song.toDomainSong())
+            _pluginInfo.value = getSongInfoPluginUseCase(song.toSong())
         }
     }
 }

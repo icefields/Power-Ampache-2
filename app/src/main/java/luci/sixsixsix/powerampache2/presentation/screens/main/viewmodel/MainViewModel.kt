@@ -75,7 +75,7 @@ import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
-import luci.sixsixsix.powerampache2.presentation.models.toDomainSong
+import luci.sixsixsix.powerampache2.presentation.models.toSong
 import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 import kotlin.math.abs
@@ -291,7 +291,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun downloadSong(song: SongUI) = viewModelScope.launch {
-        songsRepository.downloadSong(song.toDomainSong()).collect { result ->
+        songsRepository.downloadSong(song.toSong()).collect { result ->
             when (result) {
                 is Resource.Success -> {
                     result.data?.let {
@@ -306,11 +306,11 @@ class MainViewModel @Inject constructor(
     }
 
     fun downloadSongs(songs: List<SongUI>) {
-        viewModelScope.launch { songsRepository.downloadSongs(songs.toDomainSong()) }
+        viewModelScope.launch { songsRepository.downloadSongs(songs.toSong()) }
     }
 
     fun deleteDownloadedSong(song: SongUI) = viewModelScope.launch {
-        songsRepository.deleteDownloadedSong(song.toDomainSong()).collect { result ->
+        songsRepository.deleteDownloadedSong(song.toSong()).collect { result ->
             when (result) {
                 is Resource.Success -> {
                     result.data?.let {
@@ -328,7 +328,7 @@ class MainViewModel @Inject constructor(
     fun deleteDownloadedSongs(songs: List<SongUI>) = viewModelScope.launch {
         var count = 0
         songs.forEach { song ->
-            songsRepository.deleteDownloadedSong(song.toDomainSong()).collect { result ->
+            songsRepository.deleteDownloadedSong(song.toSong()).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let { ++count }
@@ -383,7 +383,7 @@ class MainViewModel @Inject constructor(
             val mediaItemList = mutableListOf<MediaItem>()
             for (song: SongUI? in playlistManager.currentQueueState.value) {
                 song?.let {
-                    mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it.toDomainSong())))
+                    mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it.toSong())))
                 }
             }
 
@@ -421,10 +421,10 @@ class MainViewModel @Inject constructor(
         scrobbleJob?.cancel()
         scrobbleJob = viewModelScope.launch {
             delay(LOCAL_SCROBBLE_TIMEOUT_MS) // add song to history after 30s
-            songsRepository.addToHistory(song.toDomainSong())
+            songsRepository.addToHistory(song.toSong())
 
             // send scrobble to backend
-            songsRepository.scrobble(song.toDomainSong()).collect { response ->
+            songsRepository.scrobble(song.toSong()).collect { response ->
                 when (response) {
                     is Resource.Error -> { }
                     is Resource.Loading -> { }

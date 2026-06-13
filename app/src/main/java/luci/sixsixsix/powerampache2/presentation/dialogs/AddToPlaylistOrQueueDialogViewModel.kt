@@ -47,7 +47,7 @@ import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
-import luci.sixsixsix.powerampache2.presentation.models.toDomainSong
+import luci.sixsixsix.powerampache2.presentation.models.toSong
 import java.util.UUID
 import javax.inject.Inject
 
@@ -158,7 +158,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
             .createNewPlaylistAddSongs(
                 name = playlistName,
                 playlistType = playlistType,
-                songsToAdd = songsToAdd.map { it.toDomainSong() },
+                songsToAdd = songsToAdd.map { it.toSong() },
             ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -196,7 +196,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private fun addSongsToPlaylist(playlist: Playlist, songs: List<SongUI>) = viewModelScope.launch {
         playlistsRepository.addSongsToPlaylist(
             playlist = playlist,
-            songsToAdd = songs.map { it.toDomainSong() },
+            songsToAdd = songs.map { it.toSong() },
         ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
