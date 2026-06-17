@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.isUserOwner
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.models.Playlist
@@ -117,7 +118,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
         val filteredList = mutableListOf<Playlist>()
 
         playlists.filterNot { it.isSmartPlaylist() }.forEach { playlist ->
-            if (user.isAdmin() || user.username.equals(other = playlist.owner, ignoreCase = true)) {
+            if (playlist.isUserOwner(user)) {
                 filteredList.add(playlist)
             }
         }

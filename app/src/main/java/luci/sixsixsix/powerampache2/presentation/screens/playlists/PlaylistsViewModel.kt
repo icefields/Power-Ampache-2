@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.isUserOwner
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.domain.models.Playlist
@@ -70,7 +71,7 @@ class PlaylistsViewModel @Inject constructor(
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     fun isCurrentUserOwner(playlist: Playlist) =
-        currentUser.username.lowercase() == playlist.owner?.lowercase() || currentUser.isAdmin()
+        playlist.isUserOwner(currentUser)
 
     fun onEvent(event: PlaylistEvent) {
         when (event) {
