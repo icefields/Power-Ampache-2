@@ -182,7 +182,7 @@ fun LoginScreenContent(
             contentDescription = "Power Ampache Title"
         )
 
-        if (!error.isNullOrBlank()) {
+        if (error.isNotBlank()) {
             ErrorView(
                 errorString = error,
                 modifier = Modifier

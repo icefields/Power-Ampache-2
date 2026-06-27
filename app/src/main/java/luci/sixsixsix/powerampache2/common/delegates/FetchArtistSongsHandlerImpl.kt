@@ -1,17 +1,20 @@
 package luci.sixsixsix.powerampache2.common.delegates
 
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.usecase.artists.SongsFromArtistUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 
 class FetchArtistSongsHandlerImpl(
     private val songsFromArtistUseCase: SongsFromArtistUseCase,
+    private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
 ): FetchArtistSongsHandler {
     override suspend fun getSongsFromArtist(
         artistId: String,
         isOfflineMode: Boolean,
         fetchRemote: Boolean,
-        songsCallback: (List<Song>) -> Unit,
+        songsCallback: (List<SongUI>) -> Unit,
         loadingCallback: (Boolean) -> Unit,
         errorCallback: (Throwable?) -> Unit
     ) {
@@ -24,7 +27,9 @@ class FetchArtistSongsHandlerImpl(
                             // check against network data but use db data.
                             // OR if in offline mode
                             result.data?.let { songs ->
-                                songsCallback(songs)
+                                songsCallback(songs.toSongUI {
+                                    isSongAvailableOfflineUseCase(it)
+                                })
                             }
                         }
                     }

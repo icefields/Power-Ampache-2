@@ -96,13 +96,13 @@ val drawerItems = listOf(
 
 @Composable
 fun MainDrawer(
+    modifier: Modifier = Modifier,
     user: User,
     versionInfo: String,
     hideDonationButtons: Boolean,
     currentItem: MainContentMenuItem,
     items: List<MainContentMenuItem> = drawerItems,
     onItemClick: (MainContentMenuItem) -> Unit,
-    modifier: Modifier = Modifier,
     donateButton: @Composable () -> Unit = { DonateButton(
         isTransparent = true,
         modifier = Modifier.padding(horizontal = 16.dp)

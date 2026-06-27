@@ -24,7 +24,6 @@ package luci.sixsixsix.powerampache2.presentation.screens.notifications
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
-import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import javax.inject.Inject
 
 @HiltViewModel

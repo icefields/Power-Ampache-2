@@ -40,7 +40,6 @@ import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandler
 import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandlerImpl
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.settings.LocalSettings
 import luci.sixsixsix.powerampache2.domain.usecase.albums.AlbumsFromArtistUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistUseCase
@@ -51,6 +50,8 @@ import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsInfoPluginInstalled
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -66,8 +67,12 @@ class ArtistDetailViewModel @Inject constructor(
     private val toggleGlobalShuffle: ToggleGlobalShuffleUseCase,
     private val isInfoPluginInstalled: IsInfoPluginInstalled,
     private val artistDataFromPluginUseCase: ArtistDataFromPluginUseCase,
-    private val errorHandler: ErrorHandler
-) : ViewModel(), FetchArtistSongsHandler by FetchArtistSongsHandlerImpl(songsFromArtistUseCase) {
+    private val errorHandler: ErrorHandler,
+    private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
+) : ViewModel(), FetchArtistSongsHandler by FetchArtistSongsHandlerImpl(
+    songsFromArtistUseCase,
+    isSongAvailableOfflineUseCase,
+) {
 
     var state by mutableStateOf(ArtistDetailState())
 //    private val isOfflineModeState = offlineModeFlowUseCase()
@@ -83,7 +88,7 @@ class ArtistDetailViewModel @Inject constructor(
 
             savedStateHandle.get<Artist>("artist")?.let { artist ->
                 // if artist provided, first check if there's an entry in the db, if not use the provided
-                // as fallback. This is important, because there is not certainty that the album is
+                // as fallback. This is important, because there is no certainty that the album is
                 // in the internal db
                 state = state.copy(artist = artist)
                 getArtist(id, fetchRemote = false)
@@ -147,14 +152,14 @@ class ArtistDetailViewModel @Inject constructor(
     fun fetchSongsFromArtist(
         artistId: String = state.artist.id,
         fetchRemote: Boolean = true,
-        songsCallback: (List<Song>) -> Unit
+        songsCallback: (List<SongUI>) -> Unit
     ) = viewModelScope.launch {
         getSongsFromArtist(
             artistId = artistId, fetchRemote = fetchRemote,
             isOfflineMode = offlineModeFlowUseCase().first(),
             songsCallback = songsCallback,
             loadingCallback = { state = state.copy(isLoading = it) },
-            errorCallback = { state.copy(isLoading = false) }
+            errorCallback = { state = state.copy(isLoading = false) }
         )
     }
 

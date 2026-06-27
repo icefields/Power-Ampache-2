@@ -59,7 +59,7 @@ fun SongDropDownMenu(
     modifier: Modifier = Modifier,
     isContextMenuVisible: Boolean,
     pressOffset: DpOffset,
-    isSongDownloaded: Boolean,
+    isSongAvailableOffline: Boolean,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     onDismissRequest:() -> Unit
 ) {
@@ -114,7 +114,7 @@ fun SongDropDownMenu(
         ) {
             songItemEventListener(SongItemEvent.SHOW_SONG_INFO)
         }
-        if (isSongDownloaded) {
+        if (isSongAvailableOffline) {
             SongDropDownMenuItem(
                 text = R.string.dropdownMenu_item_export,
                 iconImageVector = Icons.Default.SaveAlt

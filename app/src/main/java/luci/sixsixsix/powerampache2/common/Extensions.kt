@@ -104,7 +104,7 @@ fun Context.openLinkInBrowser(link: String) =
         }
     )
 
-fun Context.exportSong(song: Song, offlineUri: String) {
+fun Context.exportSong(mimeType: String?, offlineUri: String) {
     val fileWithinAppDir = File(offlineUri)
     val fileUri = FileProvider.getUriForFile(this,
         getString(R.string.sharing_provider_authority),
@@ -115,7 +115,7 @@ fun Context.exportSong(song: Song, offlineUri: String) {
         startActivity(
             Intent.createChooser(
                 Intent(Intent.ACTION_SEND).apply {
-                    type = song.mime
+                    type = mimeType
                     setDataAndType(fileUri, contentResolver.getType(fileUri))
                     putExtra(Intent.EXTRA_STREAM, fileUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

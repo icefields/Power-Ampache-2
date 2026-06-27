@@ -66,7 +66,6 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.models.Album
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItem
@@ -80,6 +79,7 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogAlbum
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.ShowSongInfoDialogOpen
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -91,10 +91,10 @@ import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.com
 @Composable
 @Destination
 fun AlbumDetailScreen(
+    modifier: Modifier = Modifier,
     navigator: DestinationsNavigator,
     albumId: String,
     album: Album? = null,
-    modifier: Modifier = Modifier,
     viewModel: AlbumDetailViewModel = hiltViewModel(),
     mainViewModel: MainViewModel,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
@@ -167,7 +167,7 @@ fun AlbumDetailScreen(
         )
     }
 
-    var showDeleteFromDownloadsDialog by remember { mutableStateOf<Song?>(null) }
+    var showDeleteFromDownloadsDialog by remember { mutableStateOf<SongUI?>(null) }
     showDeleteFromDownloadsDialog?.let { songToRemove ->
         EraseConfirmDialog(
             onDismissRequest = {
@@ -191,7 +191,7 @@ fun AlbumDetailScreen(
         }
     }
 
-    var songToShare: Song? by remember { mutableStateOf(null) }
+    var songToShare: SongUI? by remember { mutableStateOf(null) }
     AnimatedVisibility(songToShare != null) {
         songToShare?.let { songS ->
             ShareDialog(
@@ -214,6 +214,7 @@ fun AlbumDetailScreen(
     var imageUrl: String? by remember { mutableStateOf(null) }
     var imageError by remember { mutableStateOf(false) }
 
+    // TODO: investigate the warning about suspicious cascading if expression (also isNotBlank warning)
     val artUrl = if (isOffline != null && isOffline == true && songs.isNotEmpty()) {
         // in offline mode, grab url from a song
         songs[0].imageUrl
@@ -321,7 +322,7 @@ fun AlbumDetailScreen(
                             when(event) {
                                 AlbumInfoViewEvents.PLAY_ALBUM -> {
 
-                                    if (state.isLoading || viewModel.state.songs.isNullOrEmpty()) return@AlbumInfoSection
+                                    if (state.isLoading || viewModel.state.songs.isEmpty()) return@AlbumInfoSection
 
                                     if (isPlayingAlbum) {
                                         // will pause if playing
@@ -368,8 +369,7 @@ fun AlbumDetailScreen(
                                 .fillMaxSize()
                         ) {
                             items(state.songs.size) { i ->
-                                val song = state.songs[i].song
-                                val isOffline = state.songs[i].isOffline
+                                val song = state.songs[i]
                                 SongItem(
                                     song = song,
                                     isLandscape = isLandscape,
@@ -412,7 +412,6 @@ fun AlbumDetailScreen(
                                         },
                                     subtitleString = SubtitleString.NOTHING,
                                     songInfoThirdRow = SongInfoThirdRow.Time,
-                                    isSongDownloaded = isOffline
                                 )
                             }
                         }

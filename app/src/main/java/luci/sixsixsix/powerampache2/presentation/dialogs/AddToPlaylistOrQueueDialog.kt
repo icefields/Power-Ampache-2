@@ -64,6 +64,7 @@ import luci.sixsixsix.powerampache2.common.RandomThemeBackgroundColour
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -74,7 +75,7 @@ val textPaddingVertical = 10.dp
 
 data class AddToPlaylistOrQueueDialogOpen(
     val isOpen: Boolean,
-    val songs: List<Song> = listOf()
+    val songs: List<SongUI> = listOf()
 )
 
 /**
@@ -82,7 +83,7 @@ data class AddToPlaylistOrQueueDialogOpen(
  */
 @Composable
 fun AddToPlaylistOrQueueDialog(
-    songs: List<Song>,
+    songs: List<SongUI>,
     onDismissRequest: () -> Unit,
     onCreatePlaylistRequest: (success: Boolean) -> Unit = {},
     mainViewModel: MainViewModel,
@@ -194,7 +195,7 @@ fun AddToPlaylistOrQueueDialog(
 private fun addToPlaylist(
     context: Context,
     viewModel: AddToPlaylistOrQueueDialogViewModel,
-    songs: List<Song>,
+    songs: List<SongUI>,
     playlist: Playlist
 ) {
     when (songs.size) {
@@ -222,7 +223,7 @@ private fun addToPlaylist(
 private fun addToQueue(
     mainViewModel: MainViewModel,
     viewModel: AddToPlaylistOrQueueDialogViewModel,
-    songs: List<Song>
+    songs: List<SongUI>
 ) {
     when (songs.size) {
         1 -> mainViewModel.onEvent(MainEvent.OnAddSongToQueue(songs[0]))
@@ -236,7 +237,7 @@ private fun addToQueue(
 private fun CreateAddToPlaylist(
     context: Context,
     viewModel: AddToPlaylistOrQueueDialogViewModel,
-    songs: List<Song>,
+    songs: List<SongUI>,
     onConfirm: (playlistName: String, playlistType: PlaylistType) -> Unit,
     onCancel: () -> Unit
 ) {

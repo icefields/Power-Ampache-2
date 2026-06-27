@@ -47,10 +47,12 @@ import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsByGenreUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.ArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.GetSongsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.songs.SongsByGenreUseCase
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 
 // minimum allowed size for a search query to trigger a search
@@ -58,6 +60,7 @@ private const val MIN_QUERY_SIZE = 3
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    private val isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
     private val genresUseCase: GenresUseCase,
     private val getSongsUseCase: GetSongsUseCase,
     private val songsByGenreUseCase: SongsByGenreUseCase,
@@ -147,7 +150,9 @@ class SearchViewModel @Inject constructor(
     private suspend fun fetchGenresOffline() = getSongsUseCase().collect { result ->
         when (result) {
             is Resource.Success ->
-                result.data?.let { songs ->
+                result.data?.toSongUI {
+                    isSongAvailableOfflineUseCase(it)
+                }?.let { songs ->
                     val genres: List<Genre> = HashSet<Genre>().apply {
                         songs.map { it.genre }.forEach { attributes ->
                             addAll(attributes.map { Genre(
@@ -184,7 +189,9 @@ class SearchViewModel @Inject constructor(
         songsByGenreUseCase(genre).collect { result ->
             when (result) {
                 is Resource.Success ->
-                    result.data?.let { songs ->
+                    result.data?.toSongUI {
+                        isSongAvailableOfflineUseCase(it)
+                    }?.let { songs ->
                         state = state.copy(songs = songs)
                     }
                 is Resource.Error ->
@@ -198,11 +205,12 @@ class SearchViewModel @Inject constructor(
         getSongsUseCase().collect { result ->
             when (result) {
                 is Resource.Success ->
-                    result.data?.let { songs ->
-                        val mapped = songs.filter {
+                    result.data?.toSongUI {
+                        isSongAvailableOfflineUseCase(it)
+                    }?.let { songs ->
+                        state = state.copy(songs = songs.filter {
                             it.genre.joinToString(", ").contains(genre.name)
-                        }
-                        state = state.copy(songs = mapped)
+                        })
                     }
                 is Resource.Error ->
                     state = state.copy(isLoading = false)
@@ -252,7 +260,9 @@ class SearchViewModel @Inject constructor(
                     if (state.searchQuery.isNotBlank()) {
                         // only display the list if there is a search term present.
                         // Avoids race conditions when quickly deleting and re-typing search terms.
-                        result.data?.let { songs ->
+                        result.data?.toSongUI {
+                            isSongAvailableOfflineUseCase(it)
+                        }?.let { songs ->
                             state = state.copy(songs = songs)
                         }
                     }

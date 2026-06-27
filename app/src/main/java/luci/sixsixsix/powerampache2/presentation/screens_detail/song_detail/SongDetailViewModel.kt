@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
 import luci.sixsixsix.powerampache2.domain.plugin.lyrics.getAvailableLyrics
 import luci.sixsixsix.powerampache2.domain.usecase.ServerInfoStateFlowUseCase
@@ -43,6 +42,8 @@ import luci.sixsixsix.powerampache2.domain.usecase.plugin.IsLyricsPluginInstalle
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.LyricsFromPluginUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.plugin.SongDataFromPluginUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.SongFromIdUseCase
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.toSong
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,6 +58,7 @@ class SongDetailViewModel @Inject constructor(
     private val isChromecastPluginInstalled: IsChromecastPluginInstalled,
     ) : ViewModel() {
     private val _recommendedArtistsStateFlow = MutableStateFlow<List<Artist>>(listOf())
+    // TODO: is this needed?
     val recommendedArtistsStateFlow = _recommendedArtistsStateFlow.asStateFlow()
 
     private val _pluginInfo = MutableStateFlow<PluginSongData?>(null)
@@ -75,7 +77,7 @@ class SongDetailViewModel @Inject constructor(
     private var lyricsJob: Job? = null
     private var songInfoJob: Job? = null
 
-    private suspend fun getRecommendedArtists(song: Song) {
+    private suspend fun getRecommendedArtists(song: SongUI) {
             recommendedArtistsUseCase(song.artist.id).collectLatest { result ->
                 when(result) {
                     is Resource.Error -> {}
@@ -90,7 +92,7 @@ class SongDetailViewModel @Inject constructor(
             }
     }
 
-    fun onNewSong(song: Song) {
+    fun onNewSong(song: SongUI) {
         lyricsJob?.cancel()
         lyricsJob = viewModelScope.launch {
             getSongLyrics(song)
@@ -108,7 +110,7 @@ class SongDetailViewModel @Inject constructor(
         _isChromecastPluginInstalled.value = isChromecastPluginInstalled()
     }
 
-    private suspend fun getSongLyricsFromPlugin(song: Song) {
+    private suspend fun getSongLyricsFromPlugin(song: SongUI) {
         _pluginLyrics.value = ""
         // only fetch if no lyrics already present
         if (lyrics.value.isBlank() && isLyricsPluginInstalledUseCase()) {
@@ -121,7 +123,7 @@ class SongDetailViewModel @Inject constructor(
     }
 
 
-    private suspend fun getSongLyrics(song: Song) {
+    private suspend fun getSongLyrics(song: SongUI) {
         // if we already have lyrics, for a song with the same id there is no need to fetch again
         if (lyrics.value.isNotBlank() && song.id == songId) return
         songId = song.id
@@ -136,10 +138,10 @@ class SongDetailViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getSongInfoFromPlugin(song: Song) {
+    private suspend fun getSongInfoFromPlugin(song: SongUI) {
         // only fetch if no lyrics already present
         if (isInfoPluginInstalled()) {
-            _pluginInfo.value = getSongInfoPluginUseCase(song)
+            _pluginInfo.value = getSongInfoPluginUseCase(song.toSong())
         }
     }
 }

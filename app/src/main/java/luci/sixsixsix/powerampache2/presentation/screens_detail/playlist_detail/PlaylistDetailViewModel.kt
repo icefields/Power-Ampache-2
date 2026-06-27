@@ -59,7 +59,6 @@ import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
 import luci.sixsixsix.powerampache2.domain.models.settings.SortMode
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
@@ -70,13 +69,15 @@ import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUse
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
-import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.toSong
+import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistDetailViewModel @Inject constructor(
     @ApplicationContext private val application: Context,
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val toggleGlobalShuffle: ToggleGlobalShuffleUseCase,
     localSettingsFlowUseCase: LocalSettingsFlowUseCase,
     playlistFlow: PlaylistFlow,
@@ -242,7 +243,7 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
-    fun isEditSongSelected(song: Song): Boolean = editState.selectedSongs.contains(song)
+    fun isEditSongSelected(song: SongUI): Boolean = editState.selectedSongs.contains(song)
 
     private fun ratePlaylist(playlist: Playlist, rate: Int) = viewModelScope.launch {
         playlistsRepository.ratePlaylist(playlist.id, rate).collect { result ->
@@ -293,19 +294,13 @@ class PlaylistDetailViewModel @Inject constructor(
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            result.data?.let { songs ->
-                                val songWrapperList = mutableListOf<SongWrapper>()
-                                songs.forEach { song ->
-                                    songWrapperList.add(
-                                        SongWrapper(
-                                        song = song,
-                                        isOffline = isSongAvailableOfflineUseCase(song)
-                                    )
-                                    )
-                                }
+                            result.data?.toSongUI {
+                                isSongAvailableOfflineUseCase(it)
+                            }?.toMutableList()?.let { songs ->
                                 state = state.copy(
-                                    songs = songWrapperList.apply {
-                                        if (state.sortMode == SortMode.DESC) { reverse() } }
+                                    songs = songs.apply {
+                                        if (state.sortMode == SortMode.DESC) { reverse() }
+                                    }
                                 )
                             }
                         }
@@ -320,13 +315,13 @@ class PlaylistDetailViewModel @Inject constructor(
 
     private fun editPlaylist(
         playlist: Playlist = playlistStateFlow.value,
-        newList: List<Song> = state.getSongList()
+        newList: List<SongUI> = state.getSongList()
     ) = viewModelScope.launch {
         playlistsRepository
             .editPlaylist(
                 playlistId = playlist.id,
                 playlistName = playlist.name,
-                items = newList,
+                items = newList.toSong(),
                 owner = playlist.owner,
                 playlistType = playlist.type ?: PlaylistType.private
             ).collect { result ->
@@ -362,19 +357,15 @@ class PlaylistDetailViewModel @Inject constructor(
             }
     }
 
+    // TODO: fetchRemote isn't used?
     private fun getRecentSongs(fetchRemote: Boolean = true) = viewModelScope.launch {
         songsRepository.getRecentSongs().collect { result ->
             when(result) {
                 is Resource.Success -> {
-                    result.data?.let { songs ->
-                        val songWrapperList = mutableListOf<SongWrapper>()
-                        songs.forEach { song ->
-                            songWrapperList.add(
-                                SongWrapper(song = song,
-                                isOffline = isSongAvailableOfflineUseCase(song))
-                            )
-                        }
-                        state = state.copy(songs = songWrapperList)
+                    result.data?.toSongUI {
+                        isSongAvailableOfflineUseCase(it)
+                    }?.let { songs ->
+                        state = state.copy(songs = songs)
                         L("PlaylistDetailViewModel.getRecentSongs size ${state.songs.size}")
                     }
                 }
@@ -390,6 +381,7 @@ class PlaylistDetailViewModel @Inject constructor(
     }
 
 
+    // TODO: fetchRemote isn't used?
     private fun getFlaggedSongs(fetchRemote: Boolean = true) {
         viewModelScope.launch {
             songsRepository
@@ -397,17 +389,10 @@ class PlaylistDetailViewModel @Inject constructor(
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            result.data?.let { songs ->
-                                val songWrapperList = mutableListOf<SongWrapper>()
-                                songs.forEach { song ->
-                                    songWrapperList.add(
-                                        SongWrapper(
-                                            song = song,
-                                            isOffline = isSongAvailableOfflineUseCase(song)
-                                        )
-                                    )
-                                }
-                                state = state.copy(songs = songWrapperList)
+                            result.data?.toSongUI {
+                                isSongAvailableOfflineUseCase(it)
+                            }?.let { songs ->
+                                state = state.copy(songs = songs)
                                 L("PlaylistDetailViewModel.getFlaggedSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getFlaggedSongs size of network array ${result.networkData?.size}")
@@ -424,24 +409,18 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
-    private fun getFrequentSongs(fetchRemote: Boolean = true, ) {
+    // TODO: fetchRemote isn't used?
+    private fun getFrequentSongs(fetchRemote: Boolean = true) {
         viewModelScope.launch {
             songsRepository
                 .getFrequentSongs()
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            result.data?.let { songs ->
-                                val songWrapperList = mutableListOf<SongWrapper>()
-                                songs.forEach { song ->
-                                    songWrapperList.add(
-                                        SongWrapper(
-                                            song = song,
-                                            isOffline = isSongAvailableOfflineUseCase(song = song)
-                                        )
-                                    )
-                                }
-                                state = state.copy(songs = songWrapperList)
+                            result.data?.toSongUI {
+                                isSongAvailableOfflineUseCase(it)
+                            }?.let { songs ->
+                                state = state.copy(songs = songs)
                                 L("PlaylistDetailViewModel.getFrequentSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getFrequentSongs size of network array ${result.networkData?.size}")
@@ -458,24 +437,18 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
-    private fun getHighestSongs(fetchRemote: Boolean = true, ) {
+    // TODO: fetchRemote isn't used?
+    private fun getHighestSongs(fetchRemote: Boolean = true) {
         viewModelScope.launch {
             songsRepository
                 .getHighestSongs()
                 .collect { result ->
                     when(result) {
                         is Resource.Success -> {
-                            result.data?.let { songs ->
-                                val songWrapperList = mutableListOf<SongWrapper>()
-                                songs.forEach { song ->
-                                    songWrapperList.add(
-                                        SongWrapper(
-                                            song = song,
-                                            isOffline = isSongAvailableOfflineUseCase(song)
-                                        )
-                                    )
-                                }
-                                state = state.copy(songs = songWrapperList)
+                            result.data?.toSongUI {
+                                isSongAvailableOfflineUseCase(it)
+                            }?.let { songs ->
+                                state = state.copy(songs = songs)
                                 L("PlaylistDetailViewModel.getHighestSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getHighestSongs size of network array ${result.networkData?.size}")

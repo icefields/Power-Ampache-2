@@ -21,8 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 data class PlaylistEditState(
-    val selectedSongs: List<Song>
+    val selectedSongs: List<SongUI>
 )

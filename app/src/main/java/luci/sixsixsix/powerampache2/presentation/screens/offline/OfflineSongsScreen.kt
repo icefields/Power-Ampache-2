@@ -80,6 +80,7 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.ShowSongInfoDialogOpen
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -98,7 +99,7 @@ fun OfflineSongsScreen(
 
     // This variable can be passed into subscreen which will handle the creation of the playlist.
     // For example the offline screen will add offline songs to a playlist, the queue screen will
-    // add the queue, etc..
+    // add the queue, etc.
     // The button that sets this variable is the add-to-playlist button on the top bar
     val isPlaylistAddDialogOpen = remember { mutableStateOf(false) }
     val titleOfflineSongs = stringResource(R.string.menu_drawer_offline)
@@ -168,10 +169,10 @@ fun OfflineSongsScreen(
                 .padding(top = dimensionResource(id = R.dimen.albumDetailScreen_top_padding)),
         ) {
             OfflineSongsMainContent(
+                modifier = modifier,
                 navigator = navigator,
                 mainViewModel = mainViewModel,
                 viewModel = viewModel,
-                modifier = modifier,
                 playlistOrQueueDialogOpen = isPlaylistAddDialogOpen,
                 offlineScreenBarTitle = { title ->
                     barTitle = title
@@ -184,9 +185,9 @@ fun OfflineSongsScreen(
 @Composable
 @Destination(start = false)
 fun OfflineSongsMainContent(
+    modifier: Modifier = Modifier,
     navigator: DestinationsNavigator? = Ampache2NavGraphs.navigator,
     mainViewModel: MainViewModel,
-    modifier: Modifier = Modifier,
     playlistOrQueueDialogOpen: MutableState<Boolean>,
     viewModel: OfflineSongsViewModel = hiltViewModel(),
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel(),
@@ -226,7 +227,7 @@ fun OfflineSongsMainContent(
         }
     }
 
-    var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
+    var showDeleteSongDialog by remember { mutableStateOf<SongUI?>(null) }
     showDeleteSongDialog?.let { songToRemove ->
         EraseConfirmDialog(
             onDismissRequest = {
@@ -242,7 +243,7 @@ fun OfflineSongsMainContent(
         )
     }
 
-    var showDeleteFromDownloadsDialog by remember { mutableStateOf<Song?>(null) }
+    var showDeleteFromDownloadsDialog by remember { mutableStateOf<SongUI?>(null) }
     showDeleteFromDownloadsDialog?.let { songToRemove ->
         EraseConfirmDialog(
             onDismissRequest = {
@@ -266,7 +267,7 @@ fun OfflineSongsMainContent(
         }
     }
 
-    var songToShare: Song? by remember { mutableStateOf(null) }
+    var songToShare: SongUI? by remember { mutableStateOf(null) }
     AnimatedVisibility(songToShare != null) {
         songToShare?.let { songS ->
             ShareDialog(
@@ -297,7 +298,6 @@ fun OfflineSongsMainContent(
             items(state.songs) { song ->
                 SongItem(
                     song = song,
-                    isSongDownloaded = true,
                     showDownloadedSongMarker = false,
                     songItemEventListener = { event ->
                         when(event) {

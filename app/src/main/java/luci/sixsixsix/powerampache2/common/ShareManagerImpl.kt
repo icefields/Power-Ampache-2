@@ -46,6 +46,7 @@ class ShareManagerImpl @Inject constructor(
             .append("/share")
             .append("/song")
             .append("/${song.id}")
+            // TODO: possibly blocking call in non-blocking context warnings
             .append("/${URLEncoder.encode(song.title, "UTF-8")}")
             .append("/${URLEncoder.encode(song.album.name,"UTF-8")}")
             .append("/${URLEncoder.encode(song.artist.name,"UTF-8")}")
@@ -77,8 +78,8 @@ class ShareManagerImpl @Inject constructor(
         id: String,
         title: String,
         artist: String,
-        songCallback: (song: Song) -> Unit,
-        songsCallback: (songs: List<Song>) -> Unit,
+        songCallback: suspend (song: Song) -> Unit,
+        songsCallback: suspend (songs: List<Song>) -> Unit,
         errorCallback: () -> Unit
     ) {
         val song = getSongFromIdUseCase(id)

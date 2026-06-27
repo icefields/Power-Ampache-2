@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.presentation.screens_detail.artist_detail
 
 import android.content.res.Configuration
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -58,9 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
@@ -77,7 +74,6 @@ import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenD
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
-import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogAlbum
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogArtist
 import luci.sixsixsix.powerampache2.presentation.screens.albums.components.AlbumItem
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
@@ -94,10 +90,10 @@ private const val GRID_ITEMS_ROW_LAND = 5
 @Composable
 @Destination
 fun ArtistDetailScreen(
+    modifier: Modifier = Modifier,
     navigator: DestinationsNavigator,
     artistId: String,
     artist: Artist? = null,
-    modifier: Modifier = Modifier,
     viewModel: ArtistDetailViewModel = hiltViewModel(),
     mainViewModel: MainViewModel,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel = hiltViewModel()
@@ -121,6 +117,7 @@ fun ArtistDetailScreen(
         snapshotFlow { configuration.orientation }
             .collect { orientation = it }
     }
+    // TODO: unused?
     val isLandscape = when (orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> {
             cardsPerRow = GRID_ITEMS_ROW_LAND
@@ -155,6 +152,8 @@ fun ArtistDetailScreen(
     var artUrlTop = generateArtistArtUrl(state.artist, state.albums).ifBlank {
         infoPluginArtistState?.imageUrl
     }
+
+    // TODO: should be val?
     var artUrlBottom = generateArtistArtUrl(state.artist, state.albums).ifBlank {
         infoPluginArtistState?.imageUrl
     }
@@ -331,7 +330,7 @@ fun ArtistDetailScreen(
     }
 }
 
-fun generateArtistArtUrl(artist: Artist, albums: List<Album>) = if(artist.artUrl.isNullOrBlank()) {
+fun generateArtistArtUrl(artist: Artist, albums: List<Album>) = if(artist.artUrl.isBlank()) {
     if (albums.isNotEmpty()) {
         albums[albums.indices.random()].artUrl
     } else ""
@@ -374,10 +373,10 @@ private val screenBackgroundGradient
 @Destination
 @Composable
 fun ArtistDetailScreen2(
+    modifier: Modifier = Modifier,
     navigator: DestinationsNavigator,
     artistId: String,
     viewModel: ArtistDetailViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val state = viewModel.state

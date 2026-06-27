@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.di
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.annotation.OptIn
@@ -38,12 +37,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.ConfigProviderImpl
 import luci.sixsixsix.powerampache2.common.DataStringsProviderImpl
-import luci.sixsixsix.powerampache2.alarm.PingScheduler
-import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.domain.utils.ConfigProvider
 import luci.sixsixsix.powerampache2.domain.utils.DataStringsProvider
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager

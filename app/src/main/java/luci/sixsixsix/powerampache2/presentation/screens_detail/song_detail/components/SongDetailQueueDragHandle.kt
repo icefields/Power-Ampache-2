@@ -72,7 +72,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.ui.theme.additionalColours
 import java.net.MalformedURLException
@@ -81,7 +81,7 @@ import java.net.URL
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SongDetailQueueDragHandle(
-    song: Song?,
+    song: SongUI?,
     lyrics: String,
     scaffoldState: BottomSheetScaffoldState,
     selectedTabIndex: MutableIntState,
@@ -136,7 +136,7 @@ fun SongDetailQueueDragHandle(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDetailQueueTopBar(
-    song: Song?,
+    song: SongUI?,
     lyrics: String,
     modifier: Modifier = Modifier,
     pagerState: PagerState,
@@ -259,7 +259,7 @@ fun WebPageView(url: String, modifier: Modifier = Modifier) {
             }
         },
         update = {
-            if (currentUrl.isNotBlank() && it.url?.toString() != currentUrl) {
+            if (currentUrl.isNotBlank() && it.url != currentUrl) {
                 it.loadUrl(currentUrl)
             }
         }
@@ -270,19 +270,20 @@ fun WebPageView(url: String, modifier: Modifier = Modifier) {
 @Composable
 fun SongHandleTabRow(
     modifier: Modifier = Modifier,
-    song: Song?,
+    // TODO: isn't used?
+    song: SongUI?,
     lyrics: String,
     scaffoldState: BottomSheetScaffoldState,
     pagerState: PagerState,
     upNextText: String = stringResource(id = R.string.player_queue_upNext),
     selectedTabIndex: MutableIntState
 ) {
-    LaunchedEffect(selectedTabIndex.value) {
-        pagerState.animateScrollToPage(selectedTabIndex.value)
+    LaunchedEffect(selectedTabIndex.intValue) {
+        pagerState.animateScrollToPage(selectedTabIndex.intValue)
     }
     LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
         if (!pagerState.isScrollInProgress) {
-            selectedTabIndex.value = pagerState.currentPage
+            selectedTabIndex.intValue = pagerState.currentPage
         }
     }
 
@@ -293,23 +294,23 @@ fun SongHandleTabRow(
 
         },
         modifier = modifier,
-        selectedTabIndex = selectedTabIndex.value,
+        selectedTabIndex = selectedTabIndex.intValue,
         contentColor = textColour,
         containerColor = Color.Transparent
     ) {
         Tab(
             unselectedContentColor = textColour.copy(alpha = 0.66f),
-            selected = selectedTabIndex.value == 0,
+            selected = selectedTabIndex.intValue == 0,
             onClick = {
                 scope.launch {
                     // if we're in the tab that is selected just close the drawer
                     if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded &&
-                        selectedTabIndex.value == 0) {
+                        selectedTabIndex.intValue == 0) {
                         scaffoldState.bottomSheetState.partialExpand()
                     } else {
                         scaffoldState.bottomSheetState.expand()
                     }
-                    selectedTabIndex.value = 0
+                    selectedTabIndex.intValue = 0
                 }
             },
             text = {
@@ -326,18 +327,18 @@ fun SongHandleTabRow(
         if (lyrics != "") {
             Tab(
                 unselectedContentColor = textColour.copy(alpha = 0.66f),
-                selected = selectedTabIndex.value == 1,
+                selected = selectedTabIndex.intValue == 1,
                 onClick = {
                     scope.launch {
                         // if we're in the tab that is selected just close the drawer
                         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded &&
-                            selectedTabIndex.value == 1
+                            selectedTabIndex.intValue == 1
                         ) {
                             scaffoldState.bottomSheetState.partialExpand()
                         } else {
                             scaffoldState.bottomSheetState.expand()
                         }
-                        selectedTabIndex.value = 1
+                        selectedTabIndex.intValue = 1
                     }
                 },
                 text = {
