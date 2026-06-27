@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.isUserOwner
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
@@ -106,7 +107,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 state = state.copy(
                     isNotStatPlaylist = PlaylistDetailState.isNotStatPlaylist(playlist),
                     isGeneratedOrSmartPlaylist = PlaylistDetailState.isGeneratedOrSmartPlaylist(playlist),
-                    isUserOwner = user.username.lowercase() == playlist.owner?.lowercase() || user.isAdmin()
+                    isUserOwner = playlist.isUserOwner(user)
                 )
                 playlist
             }.flatMapConcat { playlist ->

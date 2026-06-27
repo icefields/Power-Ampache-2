@@ -37,10 +37,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.isUserOwner
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants.ALWAYS_FETCH_ALL_PLAYLISTS
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.isOwnerAdmin
+import luci.sixsixsix.powerampache2.domain.models.User
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
@@ -57,7 +59,7 @@ class PlaylistsViewModel @Inject constructor(
 ) : ViewModel() {
     var state by mutableStateOf(PlaylistsState())
     private var isEndOfDataReached: Boolean = false
-    private lateinit var currentUsername: String
+    private lateinit var currentUser: User
 
     val playlistsStateFlow: StateFlow<List<Playlist>> =
         offlineModeFlow()
@@ -65,20 +67,18 @@ class PlaylistsViewModel @Inject constructor(
             .filterNotNull()
             .distinctUntilChanged()
             .combine(userFlowUseCase().filterNotNull().distinctUntilChanged()) { playlists, user ->
-                currentUsername = user.username
+                currentUser = user
                 playlists
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     fun isCurrentUserOwner(playlist: Playlist) =
-        currentUsername.lowercase() == playlist.owner?.lowercase()
+        playlist.isUserOwner(currentUser)
 
     fun onEvent(event: PlaylistEvent) {
         when (event) {
             is PlaylistEvent.Refresh ->
                 getPlaylists(fetchRemote = true)
-            // TODO: inverse the check to get rid of if empty body
-            is PlaylistEvent.OnSearchQueryChange -> if (event.query.isBlank() && state.searchQuery.isBlank()) {
-                } else {
+            is PlaylistEvent.OnSearchQueryChange -> if (event.query.isNotBlank() || state.searchQuery.isNotBlank()) {
                     state = state.copy(searchQuery = event.query)
                     getPlaylists()
                 }
