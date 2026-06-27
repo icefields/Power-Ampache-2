@@ -21,12 +21,14 @@
  */
 package luci.sixsixsix.powerampache2.domain.utils
 
-import android.content.Context
 import android.net.Uri
-import androidx.core.net.toUri
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import luci.sixsixsix.powerampache2.domain.models.settings.GlobalSettings
 
 interface SharedPreferencesManager {
+    val globalSettingsFlow: Flow<GlobalSettings>
+
     var backBuffer: Int
     var minBufferMs: Int
     var maxBufferMs: Int

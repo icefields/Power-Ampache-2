@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data
 import android.content.Context
 import android.net.Uri
 import androidx.core.net.toUri
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.powerampache2.data.local.delegates.SharedPreferenceDelegateImpl
@@ -39,6 +40,7 @@ import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_PRIORITIZE_TI
 import luci.sixsixsix.powerampache2.domain.common.Constants.BUFFER_TARGET_BYTES
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLAYER_CACHE_SIZE_MB
 import luci.sixsixsix.powerampache2.domain.delegates.SharedPreferenceDelegate
+import luci.sixsixsix.powerampache2.domain.models.settings.GlobalSettings
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -72,15 +74,37 @@ class SharedPreferencesManagerImpl @Inject constructor(
     private val _sleepTimerEndTimestampFlow = MutableStateFlow(sleepTimerEndTimestamp)
     override val sleepTimerEndTimestampFlow: StateFlow<Long> = _sleepTimerEndTimestampFlow
 
+    private val _globalSettingsFlow = MutableStateFlow(GlobalSettings(
+        backBuffer = backBuffer,
+        minBufferMs = minBufferMs,
+        maxBufferMs = maxBufferMs,
+        bufferForPlaybackMs = bufferForPlaybackMs,
+        bufferForPlaybackAfterRebufferMs = bufferForPlaybackAfterRebufferMs,
+        cacheSizeMb = cacheSizeMb,
+        prioritizeTimeOverSizeThresholds = prioritizeTimeOverSizeThresholds,
+        targetBufferBytes = targetBufferBytes,
+        isAllowAllCertificates = isAllowAllCertificates,
+        useOkHttpForExoPlayer = useOkHttpForExoPlayer,
+        //isAllowAllCertificatesFlow,
+        //introDialogContent = introDialogContent,
+        //sleepTimerEndTimestampFlow,
+        sleepTimerEndTimestamp = sleepTimerEndTimestamp,
+        sleepTimerWaitSongEnd = sleepTimerWaitSongEnd,
+        customDownloadRootUri = customDownloadRootUri
+    ))
+    override val globalSettingsFlow: Flow<GlobalSettings> = _globalSettingsFlow
 
     override var backBuffer: Int
         get() = getInt(KEY_BACK_BUFFER, BACK_BUFFER_MS)
-        set(value) = setInt(KEY_BACK_BUFFER, value)
+        set(value) = setInt(KEY_BACK_BUFFER, value).also {
+            _globalSettingsFlow.value = _globalSettingsFlow.value.copy(backBuffer = value)
+        }
 
     override var minBufferMs: Int
         get() = getInt(KEY_MIN_BUFFER, BUFFER_MIN_MS)
-        set(value) = setInt(KEY_MIN_BUFFER, value)
-
+        set(value) = setInt(KEY_MIN_BUFFER, value).also {
+            _globalSettingsFlow.value = _globalSettingsFlow.value.copy(minBufferMs = value)
+        }
 
     override var maxBufferMs: Int
         get() = getInt(KEY_MAX_BUFFER, BUFFER_MAX_MS)
@@ -132,7 +156,7 @@ class SharedPreferencesManagerImpl @Inject constructor(
 
     override var customDownloadRootUri: Uri?
         get() = getString(KEY_CUSTOM_DOWNLOAD_LOCATION, "").takeIf { it.isNotBlank() }?.toUri()
-        set(value)  = setString(KEY_CUSTOM_DOWNLOAD_LOCATION, value?.toString() ?: "")
+        set(value) = setString(KEY_CUSTOM_DOWNLOAD_LOCATION, value?.toString() ?: "")
 
     override fun resetCustomDownloadRootUri() {
         customDownloadRootUri = null

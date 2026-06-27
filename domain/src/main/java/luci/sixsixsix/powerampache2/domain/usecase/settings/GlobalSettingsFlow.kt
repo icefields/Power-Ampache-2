@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024  Antonio Tari
+ * Copyright (C) 2026  Antonio Tari
  *
  * This file is a part of Power Ampache 2
  * Ampache Android client application
@@ -19,25 +19,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.screens.settings
+package luci.sixsixsix.powerampache2.domain.usecase.settings
 
-import android.net.Uri
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import luci.sixsixsix.powerampache2.domain.models.settings.GlobalSettings
+import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
+import javax.inject.Inject
+import javax.inject.Singleton
 
-//@Parcelize
-//data class PlayerSettingsState (
-//    val backBuffer: Int,
-//    val minBuffer: Int,
-//    val maxBuffer: Int,
-//    val bufferForPlayback: Int,
-//    val bufferForPlaybackAfterRebuffer: Int,
-//    val cacheSizeMb: Int,
-//    val useOkHttpExoplayer: Boolean,
-//    val prioritizeTimeOverSizeThresholds: Boolean,
-//    val targetBufferBytes: Int,
-//    val sleepTimerMins: Int,
-//    val sleepTimerEndTime: String?,
-//    val sleepTimerWaitSongEnd: Boolean,
-//    val customDownloadLocation: Uri?
-//): Parcelable
+@Singleton
+class GlobalSettingsFlow @Inject constructor(
+    private val sharedPreferencesManager: SharedPreferencesManager
+) {
+    operator fun invoke(): Flow<GlobalSettings> =
+        sharedPreferencesManager.globalSettingsFlow
+            .filterNotNull()
+            .distinctUntilChanged()
+}

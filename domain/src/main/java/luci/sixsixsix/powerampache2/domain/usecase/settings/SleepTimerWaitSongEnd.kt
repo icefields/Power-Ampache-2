@@ -19,13 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.domain.usecase.settings
-
-import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
-import javax.inject.Inject
-
-class SleepTimerWaitSongEnd @Inject constructor(
-    private val sharedPreferencesManager: SharedPreferencesManager,
-) {
-    operator fun invoke() = sharedPreferencesManager.sleepTimerWaitSongEnd
-}
+//package luci.sixsixsix.powerampache2.domain.usecase.settings
+//
+//import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
+//import javax.inject.Inject
+//
+//class SleepTimerWaitSongEnd @Inject constructor(
+//    private val sharedPreferencesManager: SharedPreferencesManager,
+//) {
+//    operator fun invoke() = sharedPreferencesManager.sleepTimerWaitSongEnd
+//}

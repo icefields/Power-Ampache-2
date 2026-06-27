@@ -37,6 +37,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -57,18 +58,19 @@ import luci.sixsixsix.powerampache2.domain.usecase.ServerInfoStateFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ClearCustomDownloadLocationUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.DeleteAllDownloadedSongsUseCase
-import luci.sixsixsix.powerampache2.domain.usecase.settings.GetCustomDownloadLocationUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.GetLocalSettingsUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.settings.GlobalSettingsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.settings.LocalSettingsFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.SaveLocalSettingsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.SetCustomDownloadLocationUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.SleepTimerEndTimestampFlow
 import luci.sixsixsix.powerampache2.domain.usecase.settings.SleepTimerSetWaitSongEndUseCase
-import luci.sixsixsix.powerampache2.domain.usecase.settings.SleepTimerWaitSongEnd
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleOfflineModeUseCase
 import luci.sixsixsix.powerampache2.domain.utils.AlarmScheduler
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
+import luci.sixsixsix.powerampache2.presentation.models.GlobalSettingsUI
+import luci.sixsixsix.powerampache2.presentation.models.toGlobalSettingsUI
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -86,11 +88,10 @@ class SettingsViewModel @Inject constructor(
     private val getLocalSettingsUseCase: GetLocalSettingsUseCase,
     private val toggleOfflineMode: ToggleOfflineModeUseCase,
     private val deleteAllDownloadedSongs: DeleteAllDownloadedSongsUseCase,
-    private val sleepTimerWaitSongEnd: SleepTimerWaitSongEnd,
+    globalSettingsFlow: GlobalSettingsFlow,
     private val sleepTimerEndTimestampFlow: SleepTimerEndTimestampFlow,
     private val sleepTimerSetWaitSongEndUseCase: SleepTimerSetWaitSongEndUseCase,
     private val clearCustomDownloadLocationUseCase: ClearCustomDownloadLocationUseCase,
-    private val getCustomDownloadLocationUseCase: GetCustomDownloadLocationUseCase,
     private val setCustomDownloadLocationUseCase: SetCustomDownloadLocationUseCase,
     localSettingsFlow: LocalSettingsFlowUseCase,
     offlineModeFlowUseCase: OfflineModeFlowUseCase,
@@ -105,24 +106,29 @@ class SettingsViewModel @Inject constructor(
         mutableStateOf(SettingsState(appVersionInfoStr = getVersionInfoString(application)))
     }
 
-    private fun playerSettingsInitialState() = PlayerSettingsState(
-        backBuffer = sharedPreferencesManager.backBuffer / 1000,
-        minBuffer = sharedPreferencesManager.minBufferMs / 1000,
-        maxBuffer = sharedPreferencesManager.maxBufferMs / 1000,
-        bufferForPlayback = sharedPreferencesManager.bufferForPlaybackMs / 1000,
-        bufferForPlaybackAfterRebuffer = sharedPreferencesManager.bufferForPlaybackAfterRebufferMs / 1000,
-        useOkHttpExoplayer = sharedPreferencesManager.useOkHttpForExoPlayer,
-        cacheSizeMb = sharedPreferencesManager.cacheSizeMb,
-        prioritizeTimeOverSizeThresholds = sharedPreferencesManager.prioritizeTimeOverSizeThresholds,
-        targetBufferBytes = sharedPreferencesManager.targetBufferBytes,
-        sleepTimerEndTime = getSleepTimerDescription(),
-        sleepTimerMins = 0,
-        sleepTimerWaitSongEnd = sleepTimerWaitSongEnd(),
-        customDownloadLocation = getCustomDownloadLocationUseCase()
-    )
+//    private fun playerSettingsInitialState() = PlayerSettingsState(
+//        backBuffer = sharedPreferencesManager.backBuffer / 1000,
+//        minBuffer = sharedPreferencesManager.minBufferMs / 1000,
+//        maxBuffer = sharedPreferencesManager.maxBufferMs / 1000,
+//        bufferForPlayback = sharedPreferencesManager.bufferForPlaybackMs / 1000,
+//        bufferForPlaybackAfterRebuffer = sharedPreferencesManager.bufferForPlaybackAfterRebufferMs / 1000,
+//        useOkHttpExoplayer = sharedPreferencesManager.useOkHttpForExoPlayer,
+//        cacheSizeMb = sharedPreferencesManager.cacheSizeMb,
+//        prioritizeTimeOverSizeThresholds = sharedPreferencesManager.prioritizeTimeOverSizeThresholds,
+//        targetBufferBytes = sharedPreferencesManager.targetBufferBytes,
+//        sleepTimerEndTime = getSleepTimerDescription(),
+//        sleepTimerMins = 0,
+//        sleepTimerWaitSongEnd = sleepTimerWaitSongEnd(),
+//        customDownloadLocation = getCustomDownloadLocationUseCase()
+//    )
 
-    var playerSettingsStateFlow = MutableStateFlow(playerSettingsInitialState())
-        private set
+//    var playerSettingsStateFlow = MutableStateFlow(playerSettingsInitialState())
+//        private set
+
+    val playerSettingsStateFlow: StateFlow<GlobalSettingsUI> = globalSettingsFlow()
+        .map { it.toGlobalSettingsUI(sleepTimerEndTime = getSleepTimerDescription()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), GlobalSettingsUI())
+
     val logs by mutableStateOf(mutableListOf<String>())
 
     val offlineModeStateFlow = offlineModeFlowUseCase().map {
@@ -164,7 +170,9 @@ class SettingsViewModel @Inject constructor(
 
         viewModelScope.launch {
             // listen for resets of the sleep timer
-            sleepTimerEndTimestampFlow().filter { it == 0L }.collect { value ->
+            // sleepTimerEndTimestampFlow()
+            globalSettingsFlow().map { it.sleepTimerEndTimestamp }
+            .filter { it == 0L }.collect { value ->
                 if (value == 0L) {
                     resetSleepTimerValue()
 //                    playerSettingsStateFlow.value = playerSettingsStateFlow.value.copy(
@@ -256,7 +264,7 @@ class SettingsViewModel @Inject constructor(
 
             PlayerSettingsEvent.OnResetDefaults -> {
                 sharedPreferencesManager.resetBufferDefaults()
-                playerSettingsStateFlow.value = playerSettingsInitialState()
+                playerSettingsStateFlow.value = playerSettingsInitialState() // TODO BUG!!! this will reset everything not just the player!!
             }
 
             PlayerSettingsEvent.OnKillApp -> {

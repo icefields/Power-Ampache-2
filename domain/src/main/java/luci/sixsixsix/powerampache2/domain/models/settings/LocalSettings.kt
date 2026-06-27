@@ -21,7 +21,6 @@
  */
 package luci.sixsixsix.powerampache2.domain.models.settings
 
-import android.net.Uri
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
