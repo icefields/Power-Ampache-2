@@ -324,6 +324,7 @@ fun PlaylistDetailScreen(
                         isPlayLoading = mainViewModel.isPlayLoading(),
                         enabled = !state.songs.isNullOrEmpty(),
                         songs = viewModel.state.getSongList(),
+                        totalTime = viewModel.state.totalTime,
                         artistClickListener = {
                             artistId -> Ampache2NavGraphs.navigateToArtist(navigator, artistId)
                         },

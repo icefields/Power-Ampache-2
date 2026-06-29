@@ -71,6 +71,7 @@ import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleU
 import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -303,9 +304,11 @@ class PlaylistDetailViewModel @Inject constructor(
                                     )
                                     )
                                 }
+                                val songs = songWrapperList.apply {
+                                    if (state.sortMode == SortMode.DESC) { reverse() } }
                                 state = state.copy(
-                                    songs = songWrapperList.apply {
-                                        if (state.sortMode == SortMode.DESC) { reverse() } }
+                                    songs = songs,
+                                    totalTime = songs.toDurationString()
                                 )
                             }
                         }
@@ -374,7 +377,7 @@ class PlaylistDetailViewModel @Inject constructor(
                                 isOffline = isSongAvailableOfflineUseCase(song))
                             )
                         }
-                        state = state.copy(songs = songWrapperList)
+                        state = state.copy(songs = songWrapperList, totalTime = songWrapperList.toDurationString())
                         L("PlaylistDetailViewModel.getRecentSongs size ${state.songs.size}")
                     }
                 }
@@ -407,7 +410,7 @@ class PlaylistDetailViewModel @Inject constructor(
                                         )
                                     )
                                 }
-                                state = state.copy(songs = songWrapperList)
+                                state = state.copy(songs = songWrapperList, totalTime = songWrapperList.toDurationString())
                                 L("PlaylistDetailViewModel.getFlaggedSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getFlaggedSongs size of network array ${result.networkData?.size}")
@@ -441,7 +444,7 @@ class PlaylistDetailViewModel @Inject constructor(
                                         )
                                     )
                                 }
-                                state = state.copy(songs = songWrapperList)
+                                state = state.copy(songs = songWrapperList, totalTime = songWrapperList.toDurationString())
                                 L("PlaylistDetailViewModel.getFrequentSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getFrequentSongs size of network array ${result.networkData?.size}")
@@ -475,7 +478,7 @@ class PlaylistDetailViewModel @Inject constructor(
                                         )
                                     )
                                 }
-                                state = state.copy(songs = songWrapperList)
+                                state = state.copy(songs = songWrapperList, totalTime = songWrapperList.toDurationString())
                                 L("PlaylistDetailViewModel.getHighestSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getHighestSongs size of network array ${result.networkData?.size}")
@@ -490,5 +493,26 @@ class PlaylistDetailViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    private fun List<SongWrapper>.toDurationString(): String {
+        val totalTime = this.sumOf { it.song.time }.toLong()
+        val hours = TimeUnit.SECONDS.toHours(totalTime)
+        val minutes = TimeUnit.SECONDS.toMinutes(totalTime) % 60
+        val seconds = TimeUnit.SECONDS.toSeconds(totalTime) % 60
+
+        val builder = StringBuilder()
+        if (hours > 0) {
+            builder.append("${hours}h")
+            builder.append(" ")
+        }
+        if (minutes > 0) {
+            builder.append("${minutes}m")
+            builder.append(" ")
+        }
+        if (seconds > 0) {
+            builder.append("${seconds}s")
+        }
+        return builder.toString()
     }
 }

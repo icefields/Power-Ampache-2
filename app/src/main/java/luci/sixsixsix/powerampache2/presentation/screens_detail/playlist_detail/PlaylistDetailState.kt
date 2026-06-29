@@ -41,6 +41,7 @@ data class PlaylistDetailState (
     val isNotStatPlaylist: Boolean = false,
     val isGeneratedOrSmartPlaylist: Boolean = false,
     val songs: List<SongWrapper> = emptyList(),
+    val totalTime: String = "",
     val isLoading: Boolean = false,
     val isLikeLoading: Boolean = false,
     val isRefreshing: Boolean = false,
