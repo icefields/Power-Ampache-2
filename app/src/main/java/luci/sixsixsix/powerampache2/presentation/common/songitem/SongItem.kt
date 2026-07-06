@@ -61,7 +61,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.isAvailableOffline
 import luci.sixsixsix.powerampache2.presentation.common.SongDropDownMenu
 import luci.sixsixsix.powerampache2.presentation.common.SwipeToDismissItem
 
@@ -71,23 +72,22 @@ enum class SubtitleString { NOTHING, ARTIST, ALBUM }
 
 @Composable
 fun SongItem(
-    song: Song,
+    song: SongUI,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
     isEditMode: Boolean = false,
     isEditEnabled: Boolean = true,
     isLandscape: Boolean = false,
-    isSongDownloaded: Boolean = false,
     showDownloadedSongMarker: Boolean = true,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle,
     enableSwipeToRemove: Boolean = false,
     isEditSongSelected: Boolean = false,
-    onRemove: (Song) -> Unit = {},
-    onRightToLeftSwipe: (Song) -> Unit = {},
-    onEditMoveUp: (Song) -> Unit = { _ -> },
-    onEditMoveDown: (Song) -> Unit = { _ -> },
-    onEditSelected: (Boolean, Song) -> Unit = { _, _ -> }
+    onRemove: (SongUI) -> Unit = {},
+    onRightToLeftSwipe: (SongUI) -> Unit = {},
+    onEditMoveUp: (SongUI) -> Unit = { _ -> },
+    onEditMoveDown: (SongUI) -> Unit = { _ -> },
+    onEditSelected: (Boolean, SongUI) -> Unit = { _, _ -> }
 ) {
     SwipeToDismissItem(
         item = song,
@@ -98,7 +98,6 @@ fun SongItem(
                     songItemEventListener = songItemEventListener,
                     modifier = modifier,
                     isLandscape  = isLandscape,
-                    isSongDownloaded  = isSongDownloaded,
                     showDownloadedSongMarker = showDownloadedSongMarker,
                     subtitleString  = subtitleString,
                     songInfoThirdRow = songInfoThirdRow
@@ -107,9 +106,8 @@ fun SongItem(
                 SongItemForegroundEdit(
                     song = song,
                     modifier = modifier,
-                    isSongDownloaded  = isSongDownloaded,
                     isEditEnabled = isEditEnabled,
-                    showDownloadedSongMarker = showDownloadedSongMarker,
+                    //showDownloadedSongMarker = showDownloadedSongMarker,
                     subtitleString  = subtitleString,
                     songInfoThirdRow = songInfoThirdRow,
                     checked = isEditSongSelected,
@@ -128,11 +126,10 @@ fun SongItem(
 
 @Composable
 fun SongItemMain(
-    song: Song,
+    song: SongUI,
     songItemEventListener: (songItemEvent: SongItemEvent) -> Unit,
     modifier: Modifier = Modifier,
     isLandscape: Boolean,
-    isSongDownloaded: Boolean,
     showDownloadedSongMarker: Boolean,
     subtitleString: SubtitleString = SubtitleString.ARTIST,
     songInfoThirdRow: SongInfoThirdRow = SongInfoThirdRow.AlbumTitle
@@ -157,7 +154,6 @@ fun SongItemMain(
                     .background(Color.Transparent)
                     .align(Alignment.CenterVertically),
                 song = song,
-                isSongDownloaded = isSongDownloaded,
                 showDownloadedSongMarker = showDownloadedSongMarker
             )
         }
@@ -204,7 +200,7 @@ fun SongItemMain(
     SongDropDownMenu(
         isContextMenuVisible = isContextMenuVisible,
         pressOffset = pressOffset,
-        isSongDownloaded = isSongDownloaded,
+        isSongAvailableOffline = song.isAvailableOffline(),
         songItemEventListener = {
             isContextMenuVisible = false
             songItemEventListener(it)
@@ -218,8 +214,7 @@ fun SongItemMain(
 @Composable
 private fun SongAlbumCover(
     modifier: Modifier,
-    song: Song,
-    isSongDownloaded: Boolean,
+    song: SongUI,
     showDownloadedSongMarker: Boolean
 ) {
     Card(
@@ -242,7 +237,7 @@ private fun SongAlbumCover(
                 error = painterResource(id = R.drawable.placeholder_album),
                 contentDescription = song.title,
             )
-            if(isSongDownloaded && showDownloadedSongMarker) {
+            if(song.isAvailableOffline() && showDownloadedSongMarker) {
                 Card(modifier = Modifier.size(20.dp)) {
                     Box(
                         modifier = Modifier
@@ -264,9 +259,8 @@ private fun SongAlbumCover(
 @Composable
 fun SongItemPreview() {
     SongItem(
-        song = Song.mockSong,
+        song = SongUI.mockSongUI,
         songItemEventListener = {},
         subtitleString = SubtitleString.NOTHING,
-        isSongDownloaded = true
     )
 }

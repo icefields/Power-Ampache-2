@@ -33,7 +33,8 @@ import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewMo
         true -> {
             val rootUri = settingsViewModel.playerSettingsStateFlow
                 .collectAsStateWithLifecycle().value.customDownloadLocation
-            checkCustomStoragePermission(rootUri) {
+
+            CheckCustomStoragePermission(rootUri) {
                 settingsViewModel.onEvent(SettingsEvent.OnChooseCustomDirDownloads(it))
             }
         }
@@ -44,7 +45,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewMo
 }
 
 @Composable
-private fun checkCustomStoragePermission(rootUri: Uri?, onSelectCustomDir: (Uri) -> Unit) {
+private fun CheckCustomStoragePermission(rootUri: Uri?, onSelectCustomDir: (Uri) -> Unit) {
     rootUri?.let { uri ->
         val context = LocalContext.current
         if(!context.hasPersistedWritePermission(uri)) {

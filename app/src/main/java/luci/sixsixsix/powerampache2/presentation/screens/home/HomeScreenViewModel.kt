@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -47,7 +46,6 @@ import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandler
 import luci.sixsixsix.powerampache2.common.delegates.FetchArtistSongsHandlerImpl
 import luci.sixsixsix.powerampache2.domain.AlbumsRepository
-import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Artist
@@ -56,7 +54,6 @@ import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.usecase.albums.RecommendedAlbumsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.artists.MostPlayedArtistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.artists.RecommendedArtistsFlow
@@ -64,6 +61,8 @@ import luci.sixsixsix.powerampache2.domain.usecase.artists.SongsFromArtistUseCas
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import javax.inject.Inject
 
 @HiltViewModel
@@ -75,8 +74,12 @@ class HomeScreenViewModel @Inject constructor(
     recommendedArtistsFlow: RecommendedArtistsFlow,
     recommendedAlbumsFlow: RecommendedAlbumsFlow,
     offlineModeFlowUseCase: OfflineModeFlowUseCase,
-    songsFromArtistUseCase: SongsFromArtistUseCase
-) : ViewModel(), FetchArtistSongsHandler by FetchArtistSongsHandlerImpl(songsFromArtistUseCase) {
+    songsFromArtistUseCase: SongsFromArtistUseCase,
+    isSongAvailableOfflineUseCase: IsSongAvailableOfflineUseCase,
+) : ViewModel(), FetchArtistSongsHandler by FetchArtistSongsHandlerImpl(
+        songsFromArtistUseCase,
+        isSongAvailableOfflineUseCase,
+    ) {
 
     var state by mutableStateOf(HomeScreenState())
     private var _recentNetwork: MutableStateFlow<List<AmpacheModel>> = MutableStateFlow(listOf())
@@ -186,7 +189,7 @@ class HomeScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             // playlists can change or be edited, make sure to always listen to the latest version
-            offlineModeStateFlow.collectLatest { isOfflineMode ->
+            offlineModeStateFlow.collectLatest {
                 fetchAllAsync()
             }
         }
@@ -314,6 +317,7 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 // ---- NEWEST
+    // TODO: fetchRemote isn't used?
     private suspend fun getNewest(fetchRemote: Boolean = true) {
         albumsRepository
             .getNewestAlbums()
@@ -398,6 +402,7 @@ class HomeScreenViewModel @Inject constructor(
 
 // ---- RANDOM
     private suspend fun getRandom(fetchRemote: Boolean = true) {
+        // TODO: empty callback?
         getRandom(fetchRemote = fetchRemote, injectArtists = true) { albums ->
             //state = state.copy(randomAlbums = albums)
         }
@@ -436,7 +441,7 @@ class HomeScreenViewModel @Inject constructor(
         fetchRemote: Boolean = false,
         callback: (albums: List<AmpacheModel>) -> Unit
     ) {
-        if (albums.isNullOrEmpty()) {
+        if (albums.isEmpty()) {
             getRandom(fetchRemote = fetchRemote, injectArtists = true) { albums ->
                 callback(albums)
             }
@@ -505,7 +510,7 @@ class HomeScreenViewModel @Inject constructor(
     fun fetchSongsFromArtist(
         artist: Artist,
         fetchRemote: Boolean = true,
-        songsCallback: (List<Song>) -> Unit
+        songsCallback: (List<SongUI>) -> Unit
     ) {
         fetchSongsArtistJob?.cancel()
         fetchSongsArtistJob = viewModelScope.launch {
@@ -515,7 +520,7 @@ class HomeScreenViewModel @Inject constructor(
                 isOfflineMode = offlineModeStateFlow.value,
                 songsCallback = songsCallback,
                 loadingCallback = { state = state.copy(currentArtistPlayLoading = if (it) artist else null) },
-                errorCallback = { state.copy(currentArtistPlayLoading = null) }
+                errorCallback = { state = state.copy(currentArtistPlayLoading = null) }
             )
         }
     }

@@ -24,11 +24,11 @@ package luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.domain.models.Artist
-import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 @Parcelize
 data class AlbumDetailState (
-    val songs: List<SongWrapper> = emptyList(),
+    val songs: List<SongUI> = emptyList(),
     val recommendedArtists: List<Artist> = emptyList(),
     val isLoading: Boolean = false,
     val isAlbumDownloaded: Boolean = false,
@@ -37,5 +37,5 @@ data class AlbumDetailState (
     val searchQuery: String = "",
     val isFetchingMore: Boolean = false,
 ): Parcelable {
-    fun getSongList() = songs.map { it.song }
+    fun getSongList() = songs
 }

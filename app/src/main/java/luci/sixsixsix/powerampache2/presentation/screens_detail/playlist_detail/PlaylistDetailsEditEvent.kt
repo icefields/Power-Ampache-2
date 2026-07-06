@@ -21,13 +21,13 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens_detail.playlist_detail
 
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 sealed class PlaylistDetailsEditEvent {
-    data class OnSongSelected(val isSelected: Boolean, val song: Song): PlaylistDetailsEditEvent()
-    data class OnRemoveSong(val song: Song): PlaylistDetailsEditEvent()
-    data class OnMoveUpSong(val song: Song): PlaylistDetailsEditEvent()
-    data class OnMoveDownSong(val song: Song): PlaylistDetailsEditEvent()
+    data class OnSongSelected(val isSelected: Boolean, val song: SongUI): PlaylistDetailsEditEvent()
+    data class OnRemoveSong(val song: SongUI): PlaylistDetailsEditEvent()
+    data class OnMoveUpSong(val song: SongUI): PlaylistDetailsEditEvent()
+    data class OnMoveDownSong(val song: SongUI): PlaylistDetailsEditEvent()
     data object OnRemoveSongDismiss: PlaylistDetailsEditEvent()
     data object OnDeleteSelectedSongs: PlaylistDetailsEditEvent()
     data object OnConfirmEdit: PlaylistDetailsEditEvent()

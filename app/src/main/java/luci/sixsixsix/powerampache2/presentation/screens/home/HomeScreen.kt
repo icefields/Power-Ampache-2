@@ -67,7 +67,7 @@ sealed class HomeScreenRowItems(@StringRes val title: Int, val items: List<Ampac
     // used to indicate loading
     data class Nothing(val isLoading: Boolean): HomeScreenRowItems(title = R.string.home_section_title_loading)
 
-    fun isNotEmpty() = !items.isNullOrEmpty()
+    fun isNotEmpty() = items.isNotEmpty()
 }
 
 
@@ -157,11 +157,11 @@ fun isLoadingData(
             state.isNewestAlbumsLoading||
             state.isFrequentAlbumsLoading
         ) ||
-        (   frequentAlbums.isNullOrEmpty() &&
-            recentAlbums.isNullOrEmpty() &&
-            randomAlbums.isNullOrEmpty() &&
-            state.newestAlbums.isNullOrEmpty() &&
-            playlists.isNullOrEmpty()
+        (   frequentAlbums.isEmpty() &&
+            recentAlbums.isEmpty() &&
+            randomAlbums.isEmpty() &&
+            state.newestAlbums.isEmpty() &&
+            playlists.isEmpty()
         )
 )
 
@@ -172,8 +172,8 @@ fun isNoData(
     recentAlbums: List<AmpacheModel>,
     randomAlbums: List<AmpacheModel>
 ) =
-    frequentAlbums.isNullOrEmpty() &&
-    recentAlbums.isNullOrEmpty() &&
-    randomAlbums.isNullOrEmpty() &&
-    state.newestAlbums.isNullOrEmpty() &&
-    playlists.isNullOrEmpty()
+    frequentAlbums.isEmpty() &&
+    recentAlbums.isEmpty() &&
+    randomAlbums.isEmpty() &&
+    state.newestAlbums.isEmpty() &&
+    playlists.isEmpty()

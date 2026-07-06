@@ -35,9 +35,9 @@ import luci.sixsixsix.powerampache2.common.exportSong
 import luci.sixsixsix.powerampache2.common.startCastPluginActivity
 import luci.sixsixsix.powerampache2.common.toMediaItem
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
-import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.PlayerEvent.*
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.toSong
 
 /**
  * UI ACTIONS AND EVENTS (play, stop, skip, like, download, etc ...)
@@ -93,10 +93,10 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         is MainEvent.OnDownloadSong ->
             downloadSong(event.song)
         is MainEvent.OnShareSong -> viewModelScope.launch {
-            shareManager.shareSongDeepLink(context, event.song)
+            shareManager.shareSongDeepLink(context, event.song.toSong())
         }
         is MainEvent.OnShareSongWebUrl -> viewModelScope.launch {
-            shareManager.shareSongWeb(context, event.song)
+            shareManager.shareSongWeb(context, event.song.toSong())
         }
         is MainEvent.Repeat -> viewModelScope.launch {
             val nextRepeatMode = nextRepeatMode()
@@ -108,20 +108,20 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
             shuffleOn = event.shuffleOn
         }
         is MainEvent.SkipNext -> viewModelScope.launch {
-            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.SkipForward)
+            simpleMediaServiceHandler.onPlayerEvent(SkipForward)
         }
         is MainEvent.SkipPrevious -> viewModelScope.launch {
-            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.SkipBack)
+            simpleMediaServiceHandler.onPlayerEvent(SkipBack)
         }
         is MainEvent.UpdateProgress -> viewModelScope.launch {
             progress = event.newProgress
             simpleMediaServiceHandler.onPlayerEvent(Progress(event.newProgress))
         }
         MainEvent.Backwards -> viewModelScope.launch {
-            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Backward)
+            simpleMediaServiceHandler.onPlayerEvent(Backward)
         }
         MainEvent.Forward -> viewModelScope.launch {
-            simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.Forward)
+            simpleMediaServiceHandler.onPlayerEvent(Forward)
         }
         MainEvent.FavouriteSong -> currentSong()?.let {
             favouriteSong(it)
@@ -144,7 +144,10 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         }
         is MainEvent.OnExportDownloadedSong -> viewModelScope.launch {
             try {
-                context.exportSong(event.song, songsRepository.getSongUri(event.song))
+                context.exportSong(
+                    mimeType = event.song.mime,
+                    offlineUri = songsRepository.getSongUri(event.song.toSong()),
+                )
             } catch (e: Exception) {
                 errorHandler.updateErrorLogMessage(e.stackTraceToString())
             }
@@ -169,17 +172,18 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
             // send queue to cast plugin
             if (isChromecastPluginInstalled()) {
                 viewModelScope.launch {
-                    sendQueueToChromecastUseCase(currentQueue().value).also { isSuccess ->
-                        if (!isSuccess) {
-                            // this is just a safety net, the error should never happen because
-                            //  the queue has been reduced before sending it to the Cast plugin.
-                            Toast.makeText(context,
-                                context.getString(R.string.plugin_cast_queueTooLarge_error),
-                                Toast.LENGTH_LONG
-                            ).show()
-                            // TODO: showing toast from view model, violating Clean Architecture?
+                    sendQueueToChromecastUseCase(currentQueue().value.toSong())
+                        .also { isSuccess ->
+                            if (!isSuccess) {
+                                // this is just a safety net, the error should never happen because
+                                //  the queue has been reduced before sending it to the Cast plugin.
+                                Toast.makeText(context,
+                                    context.getString(R.string.plugin_cast_queueTooLarge_error),
+                                 Toast.LENGTH_LONG
+                                ).show()
+                                // TODO: showing toast from view model, violating Clean Architecture?
+                            }
                         }
-                    }
                 }
             }
             context.startCastPluginActivity()
@@ -192,7 +196,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
  * to play albums and playlists
  */
 @UnstableApi
-fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
+fun MainViewModel.addSongsToQueueAndPlay(song: SongUI, songList: List<SongUI>) {
     startPlayLoading()
     playlistManager.updateCurrentSong(song)
     playlistManager.addToCurrentQueueTop(songList)
@@ -203,7 +207,7 @@ fun MainViewModel.addSongsToQueueAndPlay(song: Song, songList: List<Song>) {
  * select a single song, play, and put it on the top of the queue
  * the song list is just for verification (TODO: should that be optional?)
  */
-private fun MainViewModel.playSongAddToQueueTop(song: Song, songList: List<Song>) {
+private fun MainViewModel.playSongAddToQueueTop(song: SongUI, songList: List<SongUI>) {
     startPlayLoading()
     playlistManager.addToCurrentQueueUpdateTopSong(song, songList)
     play(song)
@@ -214,7 +218,7 @@ private fun MainViewModel.playSongAddToQueueTop(song: Song, songList: List<Song>
  * the song list is just for verification (TODO: should that be optional?)
  */
 @OptIn(UnstableApi::class)
-private fun MainViewModel.playSongReplacePlaylist(song: Song, songList: List<Song>) {
+private fun MainViewModel.playSongReplacePlaylist(song: SongUI, songList: List<SongUI>) {
     startPlayLoading()
     playlistManager.replaceQueuePlaySong(songList, song)
     play(song)
@@ -223,13 +227,13 @@ private fun MainViewModel.playSongReplacePlaylist(song: Song, songList: List<Son
 /**
  * select song from current queue and play
  */
-private fun MainViewModel.playSong(song: Song) {
+private fun MainViewModel.playSong(song: SongUI) {
     startPlayLoading()
     playlistManager.updateCurrentSong(song)
     play(song)
 }
 
-private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<Song>) {
+private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<SongUI>) {
     startPlayLoading()
     val shuffled = songList.shuffled()
     playlistManager.replaceCurrentQueue(shuffled)
@@ -246,7 +250,7 @@ private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<Song>) 
  *
  * call stopPlayLoading() in case of errors
  */
-private fun MainViewModel.play(song: Song) {
+private fun MainViewModel.play(song: SongUI) {
     startPlayLoading()
     if (loadSongDataJob?.isActive == true) {
         loadSongDataJob?.invokeOnCompletion {
@@ -263,17 +267,19 @@ private fun MainViewModel.play(song: Song) {
     }
 }
 
-private fun MainViewModel.playSongForce(song: Song) = viewModelScope.launch {
+private fun MainViewModel.playSongForce(song: SongUI) = viewModelScope.launch {
     L( "MainEvent.Play", "playing song")
     try {
         simpleMediaServiceHandler.onPlayerEvent(
-            PlayerEvent.ForcePlay(
-                song.toMediaItem(songsRepository.getSongUri(song)))
+            ForcePlay(
+                song.toMediaItem(songsRepository.getSongUri(song.toSong()))
+            )
         )
     } catch (e: Exception) {
         logToErrorLogs("fun MainViewModel.playSongForce EXCEPTION, loading song data now")
         logToErrorLogs(e.stackTraceToString())
     }
+
     stopPlayLoading()
     L( "MainEvent.Play", "aaaa play song launched. After")
 }
@@ -283,7 +289,7 @@ private fun MainViewModel.playPauseSong() = viewModelScope.launch {
     startMusicServiceIfNecessary()
     L( "MainEvent.Play", "playing song")
     try {
-        simpleMediaServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
+        simpleMediaServiceHandler.onPlayerEvent(PlayPause)
     } catch (e: Exception) {
         stopPlayLoading()
         logToErrorLogs(e.stackTraceToString())

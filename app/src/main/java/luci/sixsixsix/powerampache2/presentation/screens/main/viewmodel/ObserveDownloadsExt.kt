@@ -22,7 +22,6 @@
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
 import android.content.Context
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -30,6 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 
 internal fun MainViewModel.observeDownloads(application: Context) {
@@ -71,12 +71,12 @@ internal fun MainViewModel.observeDownloads(application: Context) {
                     }
 
                     if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                        workInfo?.outputData?.getString(SongDownloadWorker.KEY_RESULT_SONG)?.let { songId ->
+                        workInfo.outputData.getString(SongDownloadWorker.KEY_RESULT_SONG)?.let { songId ->
                             viewModelScope.launch {
                                 if (!emittedDownloads.contains(songId)) {
                                     emittedDownloads = emittedDownloads.toMutableList().apply { add(songId) }
                                     songsRepository.getDownloadedSongById(songId)?.let { finishedSong ->
-                                        playlistManager.updateDownloadedSong(finishedSong)
+                                        playlistManager.updateDownloadedSong(finishedSong.toSongUI())
                                         errorHandler.updateUserMessage(
                                             application.getString(R.string.downloaded_snackbar_title, finishedSong.name)
                                         ) //"${finishedSong.name} downloaded")

@@ -59,10 +59,10 @@ const val GRID_ITEMS_ROW_LAND = 6
 @Destination
 @Composable
 fun ArtistsScreen(
+    modifier: Modifier = Modifier,
     navigator: DestinationsNavigator,
     gridPerRow: Int = GRID_ITEMS_ROW,
     viewModel: ArtistsViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
 ) {
     ArtistsScreenContent(
         artists = viewModel.state.artists,
@@ -78,14 +78,14 @@ fun ArtistsScreen(
 @Destination
 @Composable
 fun ArtistsScreenContent(
+    modifier: Modifier = Modifier,
     artists: List<Artist>,
     isLoading: Boolean,
     isRefreshing: Boolean,
     gridPerRow: Int = GRID_ITEMS_ROW,
-    modifier: Modifier = Modifier,
     swipeToRefreshEnabled: Boolean = true,
     onEvent: (ArtistEvent) -> Unit,
-    navigateToArtist: (artistId: String, artist: Artist) -> Unit
+    navigateToArtist: (artistId: String, artist: Artist) -> Unit,
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
     var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }

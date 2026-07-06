@@ -43,23 +43,23 @@ import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.capitalizeWords
 import luci.sixsixsix.powerampache2.domain.common.toDebugMap
-import luci.sixsixsix.powerampache2.domain.models.Song
-import luci.sixsixsix.powerampache2.domain.models.totalTime
+import luci.sixsixsix.powerampache2.presentation.models.totalTime
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
 import luci.sixsixsix.powerampache2.domain.plugin.info.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.MusicChips
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDialogText
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDialogTextHorizontal
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.components.InfoDialogTitleText
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 data class ShowSongInfoDialogOpen(
     val isOpen: Boolean,
-    val song: Song? = null,
+    val song: SongUI? = null,
     val songPlugin: PluginSongData? = null,
 )
 
 @Composable
-fun InfoDialogSong(song: Song, songPlugin: PluginSongData?, onDismissRequest: () -> Unit) {
+fun InfoDialogSong(song: SongUI, songPlugin: PluginSongData?, onDismissRequest: () -> Unit) {
     InfoDialogBase(onDismissRequest) {
         Card(
             //border = BorderStroke((0.5).dp, MaterialTheme.colorScheme.background),
@@ -103,7 +103,6 @@ fun InfoDialogSong(song: Song, songPlugin: PluginSongData?, onDismissRequest: ()
             if (dur > 0) songPlugin.totalTime() else song.totalTime()
         } ?: song.totalTime()
 
-
         val year = try { (songPlugin?.year ?: "0").toInt() } catch (e: Exception) { 0 }
 
         InfoDialogTextHorizontal(name, "")
@@ -112,7 +111,7 @@ fun InfoDialogSong(song: Song, songPlugin: PluginSongData?, onDismissRequest: ()
         if (artistName.isNotBlank()) InfoDialogTextHorizontal("Artist", artistName)
         if (playCount > 0) InfoDialogTextHorizontal("Play Count", playCount.toString())
         if (listeners > 0) InfoDialogTextHorizontal("Listeners", listeners.toString())
-        InfoDialogTextHorizontal("Duration", duration.toString())
+        InfoDialogTextHorizontal("Duration", duration)
         if (year > 0) InfoDialogTextHorizontal("Year", year.toString())
         if (songPlugin?.language?.isNotBlank() == true) InfoDialogText("Language", songPlugin.language)
         if (artistAlbum.isNotBlank()) InfoDialogTextHorizontal("Album Artist", artistAlbum)
