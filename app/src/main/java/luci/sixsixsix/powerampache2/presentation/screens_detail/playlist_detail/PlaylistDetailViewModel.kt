@@ -50,6 +50,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.isUserOwner
 import luci.sixsixsix.powerampache2.common.shareLink
+import luci.sixsixsix.powerampache2.common.toDurationString
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
@@ -72,7 +73,6 @@ import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.models.toSong
 import luci.sixsixsix.powerampache2.presentation.models.toSongUI
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -300,8 +300,8 @@ class PlaylistDetailViewModel @Inject constructor(
                             }?.toMutableList()?.let { songs ->
                                 state = state.copy(
                                     songs = songs.apply {
-                                        if (state.sortMode == SortMode.DESC) { reverse() }
-                                    }
+                                        if (state.sortMode == SortMode.DESC) { reverse() }},
+                                    totalTime = songs.toDurationString()
                                 )
                             }
                         }
@@ -366,7 +366,7 @@ class PlaylistDetailViewModel @Inject constructor(
                     result.data?.toSongUI {
                         isSongAvailableOfflineUseCase(it)
                     }?.let { songs ->
-                        state = state.copy(songs = songs)
+                        state = state.copy(songs = songs, totalTime = songs.toDurationString())
                         L("PlaylistDetailViewModel.getRecentSongs size ${state.songs.size}")
                     }
                 }
@@ -393,7 +393,7 @@ class PlaylistDetailViewModel @Inject constructor(
                             result.data?.toSongUI {
                                 isSongAvailableOfflineUseCase(it)
                             }?.let { songs ->
-                                state = state.copy(songs = songs)
+                                state = state.copy(songs = songs, totalTime = songs.toDurationString())
                                 L("PlaylistDetailViewModel.getFlaggedSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getFlaggedSongs size of network array ${result.networkData?.size}")
@@ -421,7 +421,7 @@ class PlaylistDetailViewModel @Inject constructor(
                             result.data?.toSongUI {
                                 isSongAvailableOfflineUseCase(it)
                             }?.let { songs ->
-                                state = state.copy(songs = songs)
+                                state = state.copy(songs = songs, totalTime = songs.toDurationString())
                                 L("PlaylistDetailViewModel.getFrequentSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getFrequentSongs size of network array ${result.networkData?.size}")
@@ -449,7 +449,7 @@ class PlaylistDetailViewModel @Inject constructor(
                             result.data?.toSongUI {
                                 isSongAvailableOfflineUseCase(it)
                             }?.let { songs ->
-                                state = state.copy(songs = songs)
+                                state = state.copy(songs = songs, totalTime = songs.toDurationString())
                                 L("PlaylistDetailViewModel.getHighestSongs size ${state.songs.size}")
                             }
                             L( "PlaylistDetailViewModel.getHighestSongs size of network array ${result.networkData?.size}")
@@ -466,24 +466,6 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
-    private fun List<SongWrapper>.toDurationString(): String {
-        val totalTime = this.sumOf { it.song.time }.toLong()
-        val hours = TimeUnit.SECONDS.toHours(totalTime)
-        val minutes = TimeUnit.SECONDS.toMinutes(totalTime) % 60
-        val seconds = TimeUnit.SECONDS.toSeconds(totalTime) % 60
-
-        val builder = StringBuilder()
-        if (hours > 0) {
-            builder.append("${hours}h")
-            builder.append(" ")
-        }
-        if (minutes > 0) {
-            builder.append("${minutes}m")
-            builder.append(" ")
-        }
-        if (seconds > 0) {
-            builder.append("${seconds}s")
-        }
-        return builder.toString()
-    }
+    private fun List<SongUI>.toDurationString() =
+        this.sumOf { it.time }.toLong().toDurationString()
 }
