@@ -56,8 +56,8 @@ android {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
         targetSdk = 35 // 36 will enforce edge-to-edge
-        versionCode = 94
-        versionName = "1.01-88"
+        versionCode = 95
+        versionName = "1.01-89"
         val versionQuote = "This version is powered by the elliptical galaxy in the Virgo Cluster"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -281,6 +281,8 @@ dependencies {
     implementation(libs.androidx.media)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.runtime.livedata)
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
     // --- Compose --- //
     implementation(libs.compose.ui)

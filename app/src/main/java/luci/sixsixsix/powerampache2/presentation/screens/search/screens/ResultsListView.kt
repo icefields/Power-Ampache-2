@@ -38,16 +38,16 @@ import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
 import luci.sixsixsix.powerampache2.domain.models.Artist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.AmpacheListItem
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItemEvent
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.search.SearchViewEvent
 
 @Composable
 @Destination
 fun ResultsListView(
-    songs: List<Song>,
+    songs: List<SongUI>,
     albums: List<Album>,
     artists: List<Artist>,
     playlists: List<Playlist>,
@@ -56,12 +56,14 @@ fun ResultsListView(
     isRefreshing: Boolean,
     modifier: Modifier = Modifier,
     onEvent: (SearchViewEvent) -> Unit,
-    onSongSelected: (Song) -> Unit,
+    onSongSelected: (SongUI) -> Unit,
     onAlbumSelected: (albumId: String, album: Album?) -> Unit,
     onArtistSelected: (artistId: String, artist: Artist?) -> Unit,
     onPlaylistSelected: (Playlist) -> Unit,
     onSongEvent: (MainEvent) -> Unit,
-    onOpenPlaylistDialog: (List<Song>) -> Unit
+    onOpenPlaylistDialog: (List<SongUI>) -> Unit,
+    onShowDeleteFromDownloadsDialog: (SongUI) -> Unit,
+    onShowSongInfoDialog: (SongUI) -> Unit
 ) {
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
 
@@ -86,22 +88,23 @@ fun ResultsListView(
                 items(megaList) { item ->
                     AmpacheListItem(
                         item = item,
-                        isSongDownloaded = false,
                         songItemEventListener = {
                             onSongItemEvent(
-                                song = (item as Song),
+                                song = (item as SongUI),
                                 event = it,
                                 onSongEvent,
                                 onAlbumSelected,
                                 onArtistSelected,
-                                onOpenPlaylistDialog
+                                onOpenPlaylistDialog,
+                                onShowDeleteFromDownloadsDialog,
+                                onShowSongInfoDialog
                             )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 when (item) {
-                                    is Song -> onSongSelected(item)
+                                    is SongUI -> onSongSelected(item)
                                     is Album -> onAlbumSelected(item.id, item)
                                     is Artist -> onArtistSelected(item.id, item)
                                     is Playlist -> onPlaylistSelected(item)
@@ -117,20 +120,26 @@ fun ResultsListView(
 }
 
 private fun onSongItemEvent(
-    song: Song,
+    song: SongUI,
     event: SongItemEvent,
     onSongEvent: (MainEvent) -> Unit,
     onAlbumSelected: (albumId: String, album: Album?) -> Unit,
     onArtistSelected: (artistId: String, artist: Artist?) -> Unit,
-    onOpenPlaylistDialog: (List<Song>) -> Unit
+    onOpenPlaylistDialog: (List<SongUI>) -> Unit,
+    onShowDeleteFromDownloadsDialog: (SongUI) -> Unit,
+    onShowSongInfoDialog: (SongUI) -> Unit
 ) {
     when(event) {
         SongItemEvent.PLAY_NEXT ->
             onSongEvent(MainEvent.OnAddSongToQueueNext(song))
         SongItemEvent.SHARE_SONG ->
             onSongEvent(MainEvent.OnShareSong(song))
+        SongItemEvent.SHOW_SONG_INFO ->
+            onShowSongInfoDialog(song)
         SongItemEvent.DOWNLOAD_SONG ->
             onSongEvent(MainEvent.OnDownloadSong(song))
+        SongItemEvent.DELETE_DOWNLOADED_SONG ->
+            onShowDeleteFromDownloadsDialog(song)
         SongItemEvent.EXPORT_DOWNLOADED_SONG ->
             onSongEvent(MainEvent.OnExportDownloadedSong(song))
         SongItemEvent.GO_TO_ALBUM ->

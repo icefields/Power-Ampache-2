@@ -29,7 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,12 +42,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailContent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailQueueDragHandle
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.TabbedSongDetailView
+import androidx.compose.runtime.collectAsState
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,7 +86,8 @@ fun SongDetailScreen(
     val selectedTabIndex = remember { mutableIntStateOf(0) }
 
     val queuePosStr = getQueuePositionStr(
-        currentQueue = viewModel.currentQueue().value,
+        // TODO: the line below was missing collectAsState(), which was an error. Change needs testing/confirmation
+        currentQueue = viewModel.currentQueue().collectAsState().value,
         // currentQueuePosition is USER FACING: start from 1, not zero
         currentQueuePosition = viewModel.currentQueuePosition() + 1,
         isScreenOpen = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
@@ -128,7 +129,7 @@ fun SongDetailScreen(
     }
 }
 
-private fun getQueuePositionStr(currentQueue: List<Song>, currentQueuePosition: Int, isScreenOpen: Boolean) =
+private fun getQueuePositionStr(currentQueue: List<SongUI>, currentQueuePosition: Int, isScreenOpen: Boolean) =
     if (
         currentQueuePosition > 0
         && currentQueue.isNotEmpty()

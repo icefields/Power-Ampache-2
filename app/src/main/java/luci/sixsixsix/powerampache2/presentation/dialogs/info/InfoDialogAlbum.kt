@@ -44,6 +44,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.capitalizeWords
 import luci.sixsixsix.powerampache2.domain.models.Album
 import luci.sixsixsix.powerampache2.domain.models.totalTime
+import luci.sixsixsix.powerampache2.presentation.models.totalTime
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginAlbumData
 import luci.sixsixsix.powerampache2.domain.plugin.info.totalTime
 import luci.sixsixsix.powerampache2.presentation.common.MusicChips

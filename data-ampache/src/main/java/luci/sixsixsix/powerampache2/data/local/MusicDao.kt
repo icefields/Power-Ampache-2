@@ -224,7 +224,7 @@ interface MusicDao {
     @Query("""SELECT * FROM songentity WHERE LOWER(:songId) == LOWER(mediaId)""")
     suspend fun getSongById(songId: String): SongEntity?
 
-    @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by trackNumber, flag DESC, rating DESC, playCount DESC""")
+    @Query("""SELECT * FROM songentity WHERE LOWER(albumId) == LOWER(:albumId) order by disk, trackNumber, flag DESC, rating DESC, playCount DESC""")
     suspend fun getSongFromAlbum(albumId: String): List<SongEntity>
 
     @Query("""SELECT * FROM songentity WHERE LOWER(artistId) == LOWER(:artistId) order by year, albumName, trackNumber, title""")
@@ -367,7 +367,7 @@ interface MusicDao {
     @Query("""SELECT * FROM playlistentity WHERE (LOWER(name) LIKE '%' || LOWER(:query) || '%' OR LOWER(:query) == name)
         AND $multiUserCondition
         GROUP BY id
-        ORDER BY flag DESC, rating DESC, (LOWER(owner) == LOWER( (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
+        ORDER BY flag DESC, rating DESC, (LOWER(owner) == LOWER( (SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, name""")
     suspend fun searchPlaylists(query: String): List<PlaylistEntity>
 
     @Query("""
@@ -382,7 +382,7 @@ interface MusicDao {
     ORDER BY 
         flag DESC, rating DESC,
         (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))) DESC,
-        id DESC
+        name
     """)
     suspend fun searchOfflinePlaylists(query: String): List<PlaylistEntity>
 
@@ -397,25 +397,25 @@ interface MusicDao {
     ORDER BY 
         flag DESC, rating DESC,
         (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY'))) DESC,
-        id DESC
+        name
     """)
     fun playlistsOfflineFlow(): Flow<List<PlaylistEntity>>
 
 
-    @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, (LOWER(owner) == LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) ) DESC, name""")
     fun playlistsFlow(): Flow<List<PlaylistEntity>>
 
-    @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE $multiUserCondition order by flag DESC, rating DESC, name""")
     suspend fun getAllPlaylists(): List<PlaylistEntity>
 
     @Query("""SELECT * FROM playlistentity WHERE id == :playlistId AND $multiUserCondition""")
     fun playlistFlow(playlistId: String): Flow<PlaylistEntity?>
 
     // get only playlists user owns
-    @Query("""SELECT * FROM playlistentity WHERE LOWER(owner) = LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) order by rating DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE LOWER(owner) = LOWER((SELECT username FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) order by rating DESC, name""")
     suspend fun getMyPlaylists(): List<PlaylistEntity>
 
-    @Query("""SELECT * FROM playlistentity WHERE LOWER(owner) = LOWER('admin') order by rating DESC, id DESC""")
+    @Query("""SELECT * FROM playlistentity WHERE LOWER(owner) = LOWER('admin') order by rating DESC, name""")
     suspend fun getAdminPlaylists(): List<PlaylistEntity>
 
 // --- OFFLINE SONGS ---
@@ -450,7 +450,7 @@ interface MusicDao {
     @Query("""SELECT * FROM downloadedsongentity WHERE $multiUserCondition""")
     suspend fun getOfflineSongs(): List<DownloadedSongEntity>
 
-    @Query("""SELECT * FROM downloadedsongentity WHERE :albumId == albumId AND $multiUserCondition ORDER BY trackNumber""")
+    @Query("""SELECT * FROM downloadedsongentity WHERE :albumId == albumId AND $multiUserCondition ORDER BY disk, trackNumber""")
     suspend fun getOfflineSongsFromAlbum(albumId: String): List<DownloadedSongEntity>
 
     @Query("""SELECT * FROM downloadedsongentity WHERE LOWER(:artistId) == LOWER(artistId) AND $multiUserCondition""")

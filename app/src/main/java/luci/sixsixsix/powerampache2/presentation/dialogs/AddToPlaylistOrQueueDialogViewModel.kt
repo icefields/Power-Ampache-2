@@ -36,15 +36,21 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
+import luci.sixsixsix.powerampache2.common.isUserOwner
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
+import luci.sixsixsix.powerampache2.domain.models.USER_SYSTEM
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.User
+import luci.sixsixsix.powerampache2.domain.models.isSmartPlaylist
 import luci.sixsixsix.powerampache2.domain.usecase.UserFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsFlow
 import luci.sixsixsix.powerampache2.domain.usecase.playlists.PlaylistsUseCase
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.presentation.models.toSong
 import java.util.UUID
 import javax.inject.Inject
 
@@ -63,7 +69,7 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     val playlistsStateFlow: StateFlow<List<Playlist>> =
         playlistsFlow().filterNotNull().distinctUntilChanged()
             .combine(userFlowUseCase().filterNotNull().distinctUntilChanged()) { playlists, user ->
-                playlists.filter { it.owner?.lowercase() == user.username.lowercase() }
+                filterPlaylists(playlists, user)
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     fun onEvent(event: AddToPlaylistOrQueueDialogEvent) {
@@ -111,6 +117,18 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
         }
     }
 
+    private fun filterPlaylists(playlists: List<Playlist>, user: User): List<Playlist> {
+        val filteredList = mutableListOf<Playlist>()
+
+        playlists.filterNot { it.isSmartPlaylist() }.forEach { playlist ->
+            if (playlist.isUserOwner(user)) {
+                filteredList.add(playlist)
+            }
+        }
+
+        return filteredList
+    }
+
     private fun createPlaylistAddSong(
         playlistName: String,
         playlistType: PlaylistType = PlaylistType.private,
@@ -133,10 +151,14 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
     private fun createPlaylistAndAddSongs(
         playlistName: String,
         playlistType: PlaylistType,
-        songsToAdd: List<Song>
+        songsToAdd: List<SongUI>
     ) = viewModelScope.launch {
         playlistsRepository
-            .createNewPlaylistAddSongs(playlistName, playlistType, songsToAdd).collect { result ->
+            .createNewPlaylistAddSongs(
+                name = playlistName,
+                playlistType = playlistType,
+                songsToAdd = songsToAdd.map { it.toSong() },
+            ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.let {
@@ -170,10 +192,10 @@ class AddToPlaylistOrQueueDialogViewModel @Inject constructor(
             }
     }
 
-    private fun addSongsToPlaylist(playlist: Playlist, songs: List<Song>) = viewModelScope.launch {
+    private fun addSongsToPlaylist(playlist: Playlist, songs: List<SongUI>) = viewModelScope.launch {
         playlistsRepository.addSongsToPlaylist(
             playlist = playlist,
-            songsToAdd = songs
+            songsToAdd = songs.map { it.toSong() },
         ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -197,9 +219,17 @@ data class AddToPlaylistOrQueueDialogState (
 )
 
 sealed class AddToPlaylistOrQueueDialogEvent {
-    data class OnAddAlbumToQueue(val songs: List<Song>): AddToPlaylistOrQueueDialogEvent()
-    data class AddSongsToPlaylist(val songs: List<Song>, val playlist: Playlist): AddToPlaylistOrQueueDialogEvent()
-    data class CreatePlaylistAndAddSongs(val songs: List<Song>, val playlistName: String, val playlistType: PlaylistType): AddToPlaylistOrQueueDialogEvent()
-    data class AddSongToPlaylist(val song: Song, val playlistId: String): AddToPlaylistOrQueueDialogEvent()
-    data class CreatePlaylistAndAddSong(val song: Song, val playlistName: String, val playlistType: PlaylistType): AddToPlaylistOrQueueDialogEvent()
+    data class OnAddAlbumToQueue(val songs: List<SongUI>): AddToPlaylistOrQueueDialogEvent()
+    data class AddSongsToPlaylist(
+        val songs: List<SongUI>, val playlist: Playlist
+    ): AddToPlaylistOrQueueDialogEvent()
+    data class CreatePlaylistAndAddSongs(
+        val songs: List<SongUI>, val playlistName: String, val playlistType: PlaylistType
+    ): AddToPlaylistOrQueueDialogEvent()
+    data class AddSongToPlaylist(
+        val song: SongUI, val playlistId: String
+    ): AddToPlaylistOrQueueDialogEvent()
+    data class CreatePlaylistAndAddSong(
+        val song: SongUI, val playlistName: String, val playlistType: PlaylistType
+    ): AddToPlaylistOrQueueDialogEvent()
 }

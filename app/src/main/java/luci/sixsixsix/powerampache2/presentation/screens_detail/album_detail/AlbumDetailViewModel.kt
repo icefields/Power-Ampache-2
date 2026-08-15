@@ -60,14 +60,16 @@ import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCa
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleGlobalShuffleUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
-import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.isAvailableOffline
+import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     @ApplicationContext private val application: Context,
-    private val savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
-    // in the view model directly without passing them from the UI or the previos view model, we
+    savedStateHandle: SavedStateHandle, // a way to get access to navigation arguments
+    // in the view model directly without passing them from the UI or the previous view model, we
     // need this because we're passing the symbol around
     offlineModeFlowUseCase: OfflineModeFlowUseCase,
     localSettingsFlowUseCase: LocalSettingsFlowUseCase,
@@ -165,7 +167,7 @@ class AlbumDetailViewModel @Inject constructor(
     }
 
     private fun refreshFromCache() {
-        if (!albumStateFlow.value.id.isNullOrBlank()) {
+        if (albumStateFlow.value.id.isNotBlank()) {
             L("AlbumDetailEvent.RefreshFromCache", albumStateFlow.value.id)
             getSongsFromAlbum(albumId = albumStateFlow.value.id, fetchRemote = false)
         }
@@ -204,9 +206,9 @@ class AlbumDetailViewModel @Inject constructor(
             }
     }
 
-    private fun isAlbumDownloaded(songs: List<SongWrapper>): Boolean {
+    private fun isAlbumDownloaded(songs: List<SongUI>): Boolean {
         songs.forEach {
-            if (!it.isOffline) return false
+            if (!it.isAvailableOffline()) return false
         }
         return true
     }
@@ -219,16 +221,13 @@ class AlbumDetailViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                val songWrapperList = mutableListOf<SongWrapper>()
-                                songs.forEach { song ->
-                                    songWrapperList.add(
-                                        SongWrapper(
-                                        song = song,
-                                        isOffline = isSongAvailableOfflineUseCase(song)
-                                    )
-                                    )
+                                val songUIList = songs.toSongUI {
+                                    isSongAvailableOfflineUseCase(it)
                                 }
-                                state = state.copy(songs = songWrapperList, isAlbumDownloaded = isAlbumDownloaded(songWrapperList))
+                                state = state.copy(
+                                    songs = songUIList,
+                                    isAlbumDownloaded = isAlbumDownloaded(songUIList)
+                                )
                                 L("AlbumDetailViewModel.getSongsFromAlbum size", result.data?.size, "network", result.networkData?.size)
                             }
                         }
@@ -240,6 +239,7 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 
+    // TODO: this is never used
     private fun getRecommendedArtists(artistId: String, fetchRemote: Boolean = true) {
         viewModelScope.launch {
             recommendedArtistsUseCase(baseArtistId =  artistId, fetchRemote = fetchRemote)

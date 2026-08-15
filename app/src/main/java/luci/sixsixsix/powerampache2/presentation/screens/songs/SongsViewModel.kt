@@ -12,12 +12,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
-import luci.sixsixsix.powerampache2.domain.SettingsRepository
-import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.GetSongsUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
-import luci.sixsixsix.powerampache2.presentation.common.songitem.SongWrapper
+import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,11 +49,11 @@ class SongsViewModel @Inject constructor(
                 L("SongsEvent.OnSearchQueryChange")
                 // force refresh when deleting the search query
                 // start a search only if the new query is different from the previous
+                // TODO: invert the check to avoid empty if body
                 if (event.query.isBlank() && state.searchQuery.isBlank()) {
-
                 } else {
                     state = state.copy(searchQuery = event.query)
-                    getSongs(refresh = event.query.isNullOrEmpty())
+                    getSongs(refresh = event.query.isEmpty())
                 }
             }
 
@@ -78,17 +76,11 @@ class SongsViewModel @Inject constructor(
                     when(result) {
                         is Resource.Success -> {
                             result.data?.let { songs ->
-                                val songWrapperList = mutableListOf<SongWrapper>()
-                                songs.forEach { song ->
-                                    songWrapperList.add(
-                                        SongWrapper(
-                                        song = song,
-                                        isOffline = isSongAvailableOfflineUseCase(song)
-                                    )
-                                    )
-                                }
-                                state = state.copy(songs = songWrapperList)
-                                L("viewmodel.getSongs SONGS size at the end", state.songs.size)
+                                state = state.copy(songs = songs.toSongUI {
+                                    isSongAvailableOfflineUseCase(it)
+                                })
+                                L("viewmodel.getSongs SONGS size at the end",
+                                    state.songs.size)
                             }
                         }
 

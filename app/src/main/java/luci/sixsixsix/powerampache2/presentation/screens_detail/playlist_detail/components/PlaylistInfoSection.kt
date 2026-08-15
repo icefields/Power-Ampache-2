@@ -44,9 +44,9 @@ import luci.sixsixsix.powerampache2.domain.models.ArtistId
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.PlaylistType
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.screens_detail.album_detail.components.AttributeText
 import luci.sixsixsix.powerampache2.presentation.common.MusicAttributeChips
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 enum class PlaylistInfoViewEvents {
     PLAY_PLAYLIST,
@@ -72,7 +72,7 @@ fun PlaylistInfoSection(
     isLikeLoading: Boolean,
     isPlayLoading: Boolean,
     enabled: Boolean,
-    songs: List<Song>,
+    songs: List<SongUI>,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit,
     artistClickListener: (ArtistId) -> Unit
 ) {
@@ -172,7 +172,10 @@ fun PlaylistInfoSectionPreview() {
         isPlayingPlaylist = true,
         isDownloading = false,
         isGlobalShuffleOn = true,
-        songs = listOf(Song.mockSong, Song.mockSong, Song.mockSong, Song.mockSong, Song.mockSong),
+        songs = listOf(
+            SongUI.mockSongUI, SongUI.mockSongUI, SongUI.mockSongUI,
+            SongUI.mockSongUI, SongUI.mockSongUI
+        ),
         isPlaylistEditLoading = true,
         isLikeLoading = false,
         isLikeAvailable = true,

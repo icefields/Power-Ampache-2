@@ -1,0 +1,4 @@
+— [NEW] Download indicator for every screen.
+— [NEW] Info dialog available on song dropdown menu.
+— (contd) Code refactoring and cleanup.
+— various bug fixes and improvements.

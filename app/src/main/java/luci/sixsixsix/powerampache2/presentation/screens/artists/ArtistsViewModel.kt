@@ -62,6 +62,7 @@ class ArtistsViewModel @Inject constructor(
                 getArtists(fetchRemote = true)
             }
             is ArtistEvent.OnSearchQueryChange -> {
+                // TODO: invert check to remove if empty body
                 if (event.query.isBlank() && state.searchQuery.isBlank()) {
 
                 } else {

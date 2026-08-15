@@ -62,7 +62,9 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.PLAY_STORE_URL
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ACTIVITY_ID
 import luci.sixsixsix.powerampache2.domain.common.Constants.PLUGIN_CHROMECAST_ID
+import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.models.User
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -102,7 +104,7 @@ fun Context.openLinkInBrowser(link: String) =
         }
     )
 
-fun Context.exportSong(song: Song, offlineUri: String) {
+fun Context.exportSong(mimeType: String?, offlineUri: String) {
     val fileWithinAppDir = File(offlineUri)
     val fileUri = FileProvider.getUriForFile(this,
         getString(R.string.sharing_provider_authority),
@@ -113,7 +115,7 @@ fun Context.exportSong(song: Song, offlineUri: String) {
         startActivity(
             Intent.createChooser(
                 Intent(Intent.ACTION_SEND).apply {
-                    type = song.mime
+                    type = mimeType
                     setDataAndType(fileUri, contentResolver.getType(fileUri))
                     putExtra(Intent.EXTRA_STREAM, fileUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -266,4 +268,8 @@ fun Modifier.shimmer(): Modifier = composed {
     ).onGloballyPositioned {
         size = it.size
     }
+}
+
+fun Playlist.isUserOwner(user: User): Boolean {
+    return user.isAdmin() || user.username.equals(other = this.owner, ignoreCase = true)
 }

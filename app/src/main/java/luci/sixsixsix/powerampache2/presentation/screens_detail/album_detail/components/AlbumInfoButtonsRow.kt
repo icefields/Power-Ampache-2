@@ -45,6 +45,7 @@ import luci.sixsixsix.powerampache2.presentation.common.ShuffleToggleButton
 
 @Composable
 fun AlbumInfoButtonsRow(
+    // TODO: this is never used?
     album: Album,
     isPlayingAlbum: Boolean,
     isAlbumDownloaded: Boolean,

@@ -31,8 +31,8 @@ interface ShareManager {
     suspend fun shareSongWeb(context: Context, song: Song)
 
      suspend fun fetchDeepLinkedSong(id: String, title: String, artist: String,
-                                     songCallback: (song: Song) -> Unit,
-                                     songsCallback: (songs: List<Song>) -> Unit,
+                                     songCallback: suspend (song: Song) -> Unit,
+                                     songsCallback: suspend (songs: List<Song>) -> Unit,
                                      errorCallback: () -> Unit)
 
      companion object {

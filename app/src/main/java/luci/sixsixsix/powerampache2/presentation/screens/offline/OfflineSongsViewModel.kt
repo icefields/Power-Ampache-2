@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
+import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,7 +41,9 @@ class OfflineSongsViewModel @Inject constructor(
                 // TODO check consistency of downloaded songs and database entries every time,
                 //  delete data accordingly. Do this in data layer
                 OfflineSongsState(
-                    songs = songs,
+                    songs = songs.map {
+                        it.toSongUI(true)
+                    },
                     isLoading = false
                 )
             }

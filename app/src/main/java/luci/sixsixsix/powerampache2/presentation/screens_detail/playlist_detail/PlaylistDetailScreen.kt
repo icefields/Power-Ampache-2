@@ -33,7 +33,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -76,7 +76,6 @@ import luci.sixsixsix.powerampache2.domain.models.FrequentPlaylist
 import luci.sixsixsix.powerampache2.domain.models.HighestPlaylist
 import luci.sixsixsix.powerampache2.domain.models.Playlist
 import luci.sixsixsix.powerampache2.domain.models.RecentPlaylist
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.common.LoadingScreen
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongInfoThirdRow
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItem
@@ -88,7 +87,9 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
-import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.ShowSongInfoDialogOpen
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs.navigateToArtist
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -116,7 +117,6 @@ fun PlaylistDetailScreen(
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isRefreshing)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var infoVisibility by remember { mutableStateOf(true) }
-    var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
     var isEditMode by remember { mutableStateOf(false) }
 
     var randomBackgroundTop by remember { mutableStateOf("") }
@@ -151,14 +151,15 @@ fun PlaylistDetailScreen(
         }
     }
 
-    showDeleteSongDialog?.let { songToRemove ->
+    var showDeleteFromPlaylistDialog by remember { mutableStateOf<SongUI?>(null) }
+    showDeleteFromPlaylistDialog?.let { songToRemove ->
         EraseConfirmDialog(
             onDismissRequest = {
-                showDeleteSongDialog = null
+                showDeleteFromPlaylistDialog = null
                 viewModel.onEditEvent(PlaylistDetailsEditEvent.OnRemoveSongDismiss)
             },
             onConfirmation = {
-                showDeleteSongDialog = null
+                showDeleteFromPlaylistDialog = null
                 viewModel.onEditEvent(PlaylistDetailsEditEvent.OnRemoveSong(songToRemove))
             },
             dialogTitle = stringResource(id = R.string.warning_song_remove_title),
@@ -183,7 +184,31 @@ fun PlaylistDetailScreen(
         }
     }
 
-    var songToShare: Song? by remember { mutableStateOf(null) }
+    var showDeleteFromDownloadsDialog by remember { mutableStateOf<SongUI?>(null) }
+    showDeleteFromDownloadsDialog?.let { songToRemove ->
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteFromDownloadsDialog = null
+            },
+            onConfirmation = {
+                showDeleteFromDownloadsDialog = null
+                mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(songToRemove))
+            },
+            dialogTitle = stringResource(id = R.string.warning_song_delete_downloaded_title),
+            dialogText = "Delete ${songToRemove.name} from downloads?"
+        )
+    }
+
+    var showSongInfoDialog by remember { mutableStateOf(ShowSongInfoDialogOpen(false)) }
+    if (showSongInfoDialog.isOpen) {
+        showSongInfoDialog.song?.let { songToShow ->
+            InfoDialogSong(songToShow, showSongInfoDialog.songPlugin) {
+                showSongInfoDialog = ShowSongInfoDialogOpen(false, null)
+            }
+        }
+    }
+
+    var songToShare: SongUI? by remember { mutableStateOf(null) }
     AnimatedVisibility(songToShare != null) {
         songToShare?.let { songS ->
             ShareDialog(
@@ -296,17 +321,17 @@ fun PlaylistDetailScreen(
                         isDownloading = mainViewModel.state.isDownloading,
                         isGlobalShuffleOn = state.isGlobalShuffleOn,
                         isPlayLoading = mainViewModel.isPlayLoading(),
-                        enabled = !state.songs.isNullOrEmpty(),
+                        enabled = state.songs.isNotEmpty(),
                         songs = viewModel.state.getSongList(),
                         artistClickListener = {
-                            artistId -> Ampache2NavGraphs.navigateToArtist(navigator, artistId)
+                            artistId -> navigateToArtist(navigator, artistId)
                         },
                         isPlaylistEditLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading,
                         eventListener = { event ->
                             when(event) {
 
                                 PlaylistInfoViewEvents.PLAY_PLAYLIST -> {
-                                    if (viewModel.state.songs.isNullOrEmpty()) return@PlaylistInfoSection
+                                    if (viewModel.state.songs.isEmpty()) return@PlaylistInfoSection
 
                                     if (isPlayingPlaylist){
                                         // will pause if playing
@@ -314,7 +339,7 @@ fun PlaylistDetailScreen(
                                     } else if (state.songs.isNotEmpty()) {
                                         if (!state.isGlobalShuffleOn) {
                                             mainViewModel.onEvent(
-                                                MainEvent.AddSongsToQueueAndPlay(state.songs[0].song, state.getSongList())
+                                                MainEvent.AddSongsToQueueAndPlay(state.songs[0], state.getSongList())
                                             )
                                         } else {
                                             mainViewModel.onEvent(
@@ -360,7 +385,7 @@ fun PlaylistDetailScreen(
                         }
                     )
 
-                    showHideEmptyPlaylistView(playlist = currentPlaylistState, state = state)
+                    ShowHideEmptyPlaylistView(playlist = currentPlaylistState, state = state)
 
                     SwipeRefresh(
                         state = swipeRefreshState,
@@ -370,26 +395,26 @@ fun PlaylistDetailScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                         ) {
-                            itemsIndexed(
+                            items(
                                 items = state.songs,
-                                //key = { _, item -> item }
-                            ) { _, songWrapped ->
-                                val song = songWrapped.song
-                                val isOffline = songWrapped.isOffline
+                            ) { song ->
                                 SongItem(
                                     song = song,
                                     isLandscape = isLandscape,
                                     isEditMode = isEditMode,
-                                    isSongDownloaded = isOffline,
                                     songItemEventListener = { event ->
                                         when(event) {
                                             SongItemEvent.PLAY_NEXT ->
                                                 mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                                            SongItemEvent.SHARE_SONG -> {
+                                            SongItemEvent.SHARE_SONG ->
                                                 songToShare = song
-                                            }
+                                            SongItemEvent.SHOW_SONG_INFO ->
+                                                showSongInfoDialog = ShowSongInfoDialogOpen(
+                                                    isOpen = true, song = song)
                                             SongItemEvent.DOWNLOAD_SONG ->
                                                 mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                                            SongItemEvent.DELETE_DOWNLOADED_SONG ->
+                                                showDeleteFromDownloadsDialog = song
                                             SongItemEvent.EXPORT_DOWNLOADED_SONG ->
                                                 mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
                                             SongItemEvent.GO_TO_ALBUM ->
@@ -420,7 +445,7 @@ fun PlaylistDetailScreen(
                                     isEditSongSelected = viewModel.isEditSongSelected(song),
                                     isEditEnabled = viewModel.state.isLoading.not() && viewModel.state.isPlaylistRemoveLoading.not(),
                                     onRemove = { songToRemove ->
-                                        showDeleteSongDialog = songToRemove
+                                        showDeleteFromPlaylistDialog = songToRemove
                                     },
                                     onRightToLeftSwipe = {
                                         playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
@@ -447,13 +472,14 @@ fun PlaylistDetailScreen(
 }
 
 @Composable
-private fun showHideEmptyPlaylistView(playlist: Playlist, state: PlaylistDetailState) {
+private fun ShowHideEmptyPlaylistView(playlist: Playlist, state: PlaylistDetailState) {
     if (
+        // TODO: check if the commented out stuff is still relevant in any way or should be removed
         /*(playlist is RecentPlaylist ||
                 playlist is FrequentPlaylist ||
                 playlist is HighestPlaylist ||
                 playlist is FlaggedPlaylist) &&*/
-        !state.isLoading && !state.isRefreshing && state.songs.isNullOrEmpty()
+        !state.isLoading && !state.isRefreshing && state.songs.isEmpty()
     ){
         Card(modifier = Modifier.fillMaxSize()) {
             Column(

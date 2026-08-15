@@ -19,14 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package luci.sixsixsix.powerampache2.presentation.common.songitem
+package luci.sixsixsix.powerampache2.domain.usecase
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-import luci.sixsixsix.powerampache2.domain.models.Song
+import luci.sixsixsix.powerampache2.domain.MusicRepository
+import javax.inject.Inject
 
-@Parcelize
-data class SongWrapper(
-    val song: Song,
-    val isOffline: Boolean
-): Parcelable
+class GenresUseCase @Inject constructor(
+    private val musicRepository: MusicRepository
+) {
+    suspend operator fun invoke(fetchRemote: Boolean = true) = musicRepository.getGenres(fetchRemote)
+}

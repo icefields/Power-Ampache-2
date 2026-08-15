@@ -2,4 +2,13 @@
 <resources>
 
     <style name="Theme.PowerAmpache2" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- background color (no more white flash) -->
+        <item name="windowSplashScreenBackground">@color/surfaceDark</item>
+        <!-- app icon -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
+        <!-- The theme Activity transitions to -->
+        <item name="postSplashScreenTheme">@style/Theme.PowerAmpache2</item>
+    </style>
 </resources>

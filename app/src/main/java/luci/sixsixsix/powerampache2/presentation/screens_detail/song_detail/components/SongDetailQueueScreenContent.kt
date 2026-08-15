@@ -44,7 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
-import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.queue.QueueEvent
 import luci.sixsixsix.powerampache2.presentation.screens.queue.QueueViewModel
@@ -56,6 +55,9 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDia
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
 import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
+import luci.sixsixsix.powerampache2.presentation.dialogs.info.ShowSongInfoDialogOpen
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
@@ -89,22 +91,46 @@ fun SongDetailQueueScreenContent(
         }
     }
 
-    var showDeleteSongDialog by remember { mutableStateOf<Song?>(null) }
-    showDeleteSongDialog?.let { songToRemove ->
+    var showRemoveFromQueueDialog by remember { mutableStateOf<SongUI?>(null) }
+    showRemoveFromQueueDialog?.let { songToRemove ->
         EraseConfirmDialog(
             onDismissRequest = {
-                showDeleteSongDialog = null
+                showRemoveFromQueueDialog = null
             },
             onConfirmation = {
-                showDeleteSongDialog = null
+                showRemoveFromQueueDialog = null
                 viewModel.onEvent(QueueEvent.OnSongRemove(songToRemove))
             },
             dialogTitle = stringResource(id = R.string.warning_song_remove_title),
-            dialogText = "Delete ${songToRemove.name} from your queue?"
+            dialogText = "Remove ${songToRemove.name} from your queue?"
         )
     }
 
-    var songToShare: Song? by remember { mutableStateOf(null) }
+    var showDeleteFromDownloadsDialog by remember { mutableStateOf<SongUI?>(null) }
+    showDeleteFromDownloadsDialog?.let { songToRemove ->
+        EraseConfirmDialog(
+            onDismissRequest = {
+                showDeleteFromDownloadsDialog = null
+            },
+            onConfirmation = {
+                showDeleteFromDownloadsDialog = null
+                mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(songToRemove))
+            },
+            dialogTitle = stringResource(id = R.string.warning_song_delete_downloaded_title),
+            dialogText = "Delete ${songToRemove.name} from downloads?"
+        )
+    }
+
+    var showSongInfoDialog by remember { mutableStateOf(ShowSongInfoDialogOpen(false)) }
+    if (showSongInfoDialog.isOpen) {
+        showSongInfoDialog.song?.let { songToShow ->
+            InfoDialogSong(songToShow, showSongInfoDialog.songPlugin) {
+                showSongInfoDialog = ShowSongInfoDialogOpen(false, null)
+            }
+        }
+    }
+
+    var songToShare: SongUI? by remember { mutableStateOf(null) }
     AnimatedVisibility(songToShare != null) {
         songToShare?.let { songS ->
             ShareDialog(
@@ -133,10 +159,14 @@ fun SongDetailQueueScreenContent(
                 songItemEventListener = { event ->
                     when(event) {
                         SongItemEvent.PLAY_NEXT -> mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                        SongItemEvent.SHARE_SONG -> {
+                        SongItemEvent.SHARE_SONG ->
                             songToShare = song
-                        }
+                        SongItemEvent.SHOW_SONG_INFO ->
+                            showSongInfoDialog = ShowSongInfoDialogOpen(
+                                isOpen = true, song = song)
                         SongItemEvent.DOWNLOAD_SONG -> mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                        SongItemEvent.DELETE_DOWNLOADED_SONG ->
+                            showDeleteFromDownloadsDialog = song
                         SongItemEvent.GO_TO_ALBUM -> {
                             Ampache2NavGraphs.navigateToAlbum(albumId = song.album.id)
                             scope.launch {
@@ -165,7 +195,7 @@ fun SongDetailQueueScreenContent(
                     },
                 enableSwipeToRemove = true,
                 onRemove = { songToRemove ->
-                    showDeleteSongDialog = songToRemove
+                    showRemoveFromQueueDialog = songToRemove
                 },
                 onRightToLeftSwipe = {
                     playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
