@@ -42,7 +42,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.capitalizeWords
-import luci.sixsixsix.powerampache2.domain.common.toDebugMap
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_FLOAT
+import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_INT
 import luci.sixsixsix.powerampache2.presentation.models.totalTime
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
 import luci.sixsixsix.powerampache2.domain.plugin.info.totalTime
@@ -60,6 +61,39 @@ data class ShowSongInfoDialogOpen(
 
 @Composable
 fun InfoDialogSong(song: SongUI, songPlugin: PluginSongData?, onDismissRequest: () -> Unit) {
+
+    val songKeys = mapOf<String, Any?>(
+        "bitrate" to song.bitrate,
+        "streamBitrate" to song.streamBitrate,
+        "format" to song.format,
+        "streamFormat" to song.streamFormat,
+        "mime" to song.mime,
+        "streamMime" to song.streamMime,
+        "rateHz" to song.rateHz,
+        "mode" to song.mode,
+        "size" to song.size,
+        "channels" to song.channels,
+        "catalog" to song.catalog,
+        "composer" to song.composer,
+        "time" to song.time,
+        "publisher" to song.publisher,
+        "disk" to song.disk,
+        "diskSubtitle" to song.diskSubtitle,
+        "comment" to song.comment,
+        "language" to song.language,
+        "mbId" to song.mbId,
+        "albumMbId" to song.albumMbId,
+        "artistMbId" to song.artistMbId,
+        "albumArtistMbId" to song.albumArtistMbId,
+        "averageRating" to song.averageRating,
+        "preciseRating" to song.preciseRating,
+        "rating" to song.rating,
+        "replayGainTrackGain" to song.replayGainTrackGain,
+        "replayGainTrackPeak" to song.replayGainTrackPeak,
+        "filename" to song.filename,
+        "songUrl" to song.songUrl
+    )
+
     InfoDialogBase(onDismissRequest) {
         Card(
             //border = BorderStroke((0.5).dp, MaterialTheme.colorScheme.background),
@@ -131,12 +165,12 @@ fun InfoDialogSong(song: SongUI, songPlugin: PluginSongData?, onDismissRequest: 
 
         HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(vertical = dimensionResource(R.dimen.dialogInfo_padding_divider_vertical)))
 
-        for (entry in song.toDebugMap()) {
-            if (entry.key != "album") { // album already included earlier
-                if (entry.key != "filename")
-                    InfoDialogTextHorizontal(entry.key, entry.value)
+        for (entry in songKeys) {
+            if (entry.value != null && entry.value != "" && entry.value != ERROR_FLOAT && entry.value != ERROR_INT) { // album already included earlier
+                if (entry.key != "filename" && entry.key != "songUrl")
+                    InfoDialogTextHorizontal(entry.key, entry.value.toString())
                 else
-                    InfoDialogText(entry.key, entry.value)
+                    InfoDialogText(entry.key, entry.value.toString())
             }
         }
         //InfoContent(song.toDebugMap(), onDismissRequest)
