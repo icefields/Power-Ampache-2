@@ -323,6 +323,7 @@ fun PlaylistDetailScreen(
                         isPlayLoading = mainViewModel.isPlayLoading(),
                         enabled = state.songs.isNotEmpty(),
                         songs = viewModel.state.getSongList(),
+                        totalTime = viewModel.state.totalTime,
                         artistClickListener = {
                             artistId -> navigateToArtist(navigator, artistId)
                         },
