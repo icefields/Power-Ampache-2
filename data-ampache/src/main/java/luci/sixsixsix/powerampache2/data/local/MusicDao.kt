@@ -54,7 +54,7 @@ import luci.sixsixsix.powerampache2.data.local.models.SongUrl
 import luci.sixsixsix.powerampache2.domain.models.AlbumSortOrder
 import luci.sixsixsix.powerampache2.domain.models.SortOrder
 
-private const val multiUserCondition = " LOWER(multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) "
+internal const val multiUserCondition = " LOWER(multiUserId) == LOWER((SELECT multiUserId FROM credentialsentity WHERE primaryKey == '$CREDENTIALS_PRIMARY_KEY')) "
 
 @Dao
 interface MusicDao {
