@@ -180,6 +180,9 @@ abstract class BaseAmpacheRepository(
                 .firstOrNull { it.id == id}?.copy(flag = flag)?.let { dbPlaylist ->
                     dao.insertPlaylists(listOf(dbPlaylist))
                 }
+            MainNetwork.Type.podcast, MainNetwork.Type.podcast_episode -> {
+                // podcasts are not stored in the local db yet
+            }
         }
         if (!isOfflineModeEnabled()) {
             likeApiCall(
@@ -238,6 +241,9 @@ abstract class BaseAmpacheRepository(
                 .firstOrNull { it.id == itemId}?.copy(rating = rating)?.let { dbPlaylist ->
                     dao.insertPlaylists(listOf(dbPlaylist))
                 }
+            MainNetwork.Type.podcast, MainNetwork.Type.podcast_episode -> {
+                // podcasts are not stored in the local db yet
+            }
         }
 
         if (!isOfflineModeEnabled()) {
