@@ -73,6 +73,7 @@ import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCa
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleOfflineModeUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
+import luci.sixsixsix.powerampache2.player.EpisodeResumeTracker
 import luci.sixsixsix.powerampache2.player.MusicController
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.PlayableUriResolver
@@ -106,6 +107,7 @@ class MainViewModel @Inject constructor(
     val songsRepository: SongsRepository,
     val podcastRepository: PodcastRepository,
     val playableUriResolver: PlayableUriResolver,
+    val episodeResumeTracker: EpisodeResumeTracker,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
     val shareManager: ShareManager,
     val errorHandler: ErrorHandler,

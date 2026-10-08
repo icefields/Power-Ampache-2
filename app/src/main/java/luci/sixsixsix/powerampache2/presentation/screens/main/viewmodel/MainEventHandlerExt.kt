@@ -37,6 +37,7 @@ import luci.sixsixsix.powerampache2.common.toPlayerMediaItem
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.player.PlayerEvent.*
 import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
+import luci.sixsixsix.powerampache2.presentation.models.PodcastEpisodeUI
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.models.toSong
 
@@ -278,8 +279,10 @@ private fun MainViewModel.play(song: PlayableUI) {
 private fun MainViewModel.playSongForce(song: PlayableUI) = viewModelScope.launch {
     L( "MainEvent.Play", "playing song")
     try {
+        val startPositionMs =
+            if (song is PodcastEpisodeUI) episodeResumeTracker.startPositionMs(song.episode.id) else 0L
         simpleMediaServiceHandler.onPlayerEvent(
-            ForcePlay(song.toPlayerMediaItem(playableUriResolver(song)))
+            ForcePlay(song.toPlayerMediaItem(playableUriResolver(song)), startPositionMs)
         )
     } catch (e: Exception) {
         logToErrorLogs("fun MainViewModel.playSongForce EXCEPTION, loading song data now")

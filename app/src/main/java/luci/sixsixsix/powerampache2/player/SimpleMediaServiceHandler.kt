@@ -48,13 +48,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.common.Constants
+import luci.sixsixsix.powerampache2.domain.common.ResumePolicy
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackError
 import luci.sixsixsix.powerampache2.domain.errors.AmpPlaybackException
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
 import luci.sixsixsix.powerampache2.domain.errors.PlaybackError
 import luci.sixsixsix.powerampache2.domain.errors.UserNotEnabledException
+import luci.sixsixsix.powerampache2.domain.models.MediaKey
+import luci.sixsixsix.powerampache2.domain.models.MediaType
+import luci.sixsixsix.powerampache2.presentation.models.PodcastEpisodeUI
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.abs
 
 // TODO: there's a bunch of unused stuff in here, worth investigation and cleaning
 
@@ -62,6 +67,7 @@ import javax.inject.Singleton
 class SimpleMediaServiceHandler @Inject constructor(
     private val playerManager: PlayerManager,
     private val playlistManager: MusicPlaylistManager,
+    private val episodeResumeTracker: EpisodeResumeTracker,
     private val errorHandler: ErrorHandler,
     @ApplicationContext private val context: Context
 ): Player.Listener {
@@ -190,10 +196,10 @@ class SimpleMediaServiceHandler @Inject constructor(
                         player().replaceMediaItem(indexToSeekTo, media)
                     }
 
-                    player().seekTo(indexToSeekTo, 0)
+                    player().seekTo(indexToSeekTo, playerEvent.startPositionMs)
                 } else {
                     addMediaItem(0, playerEvent.mediaItem)
-                    player().seekTo(0, 0)
+                    player().seekTo(0, playerEvent.startPositionMs)
                 }
 
                 play()
@@ -210,6 +216,9 @@ class SimpleMediaServiceHandler @Inject constructor(
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         super.onMediaItemTransition(mediaItem, reason)
+        // the tracker still holds the previous item, save it before the new item starts
+        episodeResumeTracker.flush()
+        seekToSavedEpisodePosition(mediaItem)
         // if the media player is handling a playlist, when changing song update UI accordingly
         try {
             val qq = playlistManager.currentQueueState.value.filter { it.key.playerId == mediaItem?.mediaId }
@@ -275,11 +284,31 @@ class SimpleMediaServiceHandler @Inject constructor(
         _simpleMediaState.value = SimpleMediaState.Loading(isLoading)
     }
 
+    /**
+     * A queue transition (auto, skip, repeat) starts the next item at 0. Episodes resume instead.
+     * ForcePlay already seeks to the saved position, the tolerance avoids a second seek.
+     */
+    private fun seekToSavedEpisodePosition(mediaItem: MediaItem?) {
+        val playerId = mediaItem?.mediaId ?: return
+        val key = MediaKey.fromPlayerId(playerId)
+        if (key.type != MediaType.PODCAST_EPISODE) return
+        applicationPermanentCoroutineScope.launch {
+            val startPositionMs = episodeResumeTracker.startPositionMs(key.id)
+            withContext(Dispatchers.Main) {
+                if (player().currentMediaItem?.mediaId == playerId &&
+                    abs(player().currentPosition - startPositionMs) > ResumePolicy.SEEK_TOLERANCE_MS) {
+                    player().seekTo(startPositionMs)
+                }
+            }
+        }
+    }
+
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         _simpleMediaState.value = SimpleMediaState.Playing(isPlaying = isPlaying)
         if (isPlaying) {
             startProgressUpdate()
         } else {
+            episodeResumeTracker.flush()
             stopProgressUpdate()
         }
     }
@@ -291,10 +320,27 @@ class SimpleMediaServiceHandler @Inject constructor(
         }).launch{
             while (true) {
                 delay(500)
+                episodeResumeTracker.onProgress(
+                    playerId = player().currentMediaItem?.mediaId,
+                    positionMs = player().currentPosition,
+                    durationMs = progressDurationMs()
+                )
                 _simpleMediaState.value =
                     SimpleMediaState.Progress(player().currentPosition, player().isPlaying)
             }
         }
+    }
+
+    /**
+     * the player duration can be unknown (C.TIME_UNSET) for some streams: for an episode use the
+     * duration from the server, so a finished episode does not resume at its end
+     */
+    private fun progressDurationMs(): Long {
+        val playerDuration = player().duration
+        if (playerDuration > 0) return playerDuration
+        val episode = (playlistManager.currentItemState.value as? PodcastEpisodeUI)
+            ?.takeIf { it.key.playerId == player().currentMediaItem?.mediaId }
+        return if (episode != null && episode.durationSec > 0) episode.durationSec * 1000L else playerDuration
     }
 
     private fun stopProgressUpdate() {
@@ -419,7 +465,7 @@ sealed class PlayerEvent {
     data object SkipBack: PlayerEvent()
     data object SkipForward: PlayerEvent()
     data object PlayPause: PlayerEvent()
-    data class ForcePlay(val mediaItem: MediaItem): PlayerEvent()
+    data class ForcePlay(val mediaItem: MediaItem, val startPositionMs: Long = 0L): PlayerEvent()
     data object Stop: PlayerEvent()
     data class Progress(val newProgress: Float): PlayerEvent()
     data class ShuffleToggle(val shuffleOn: Boolean): PlayerEvent()
