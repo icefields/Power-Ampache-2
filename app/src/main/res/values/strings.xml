@@ -318,4 +318,8 @@
     <string name="podcast_episode_downloaded">Downloaded</string>
     <string name="podcast_episode_unavailable">Not available on the server yet</string>
     <string name="podcast_episode_more_actions">More actions</string>
+    <string name="menu_drawer_podcasts">Podcasts</string>
+    <string name="podcasts_empty">No podcasts on this server</string>
+    <string name="podcasts_disabled_on_server">Podcasts are disabled on this server</string>
+    <string name="podcast_episodes_empty">No episodes</string>
 </resources>
