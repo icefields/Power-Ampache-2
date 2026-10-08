@@ -5,4 +5,5 @@ import java.util.UUID
 
 interface WorkerHelper {
     suspend fun startSongDownloadWorker(authToken: String, username: String, song: Song): UUID
+    suspend fun startEpisodeDownloadWorker(authToken: String, username: String, episodeId: String): UUID
 }

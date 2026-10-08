@@ -24,6 +24,7 @@ package luci.sixsixsix.powerampache2.data.local
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import androidx.documentfile.provider.DocumentFile
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -32,6 +33,7 @@ import luci.sixsixsix.powerampache2.data.common.SafFolderHelper
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.errors.FileWriteException
+import luci.sixsixsix.powerampache2.domain.models.PodcastEpisode
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
@@ -123,6 +125,69 @@ class StorageManagerImpl @Inject constructor(
             }
         }
 
+    @Throws(Exception::class)
+    override suspend fun saveEpisode(episode: PodcastEpisode, inputStream: InputStream): String =
+        withContext(Dispatchers.IO) {
+            try {
+                val relativeDir = episodeRelativeDir(episode)
+                val fileName = episodeFileName(episode)
+                val rootUri = sharedPreferencesManager.customDownloadRootUri
+                if (Constants.config.enableExternalDirDownloads && isStorageCustom(rootUri)) {
+                    SafFolderHelper(context).writeFile(
+                        rootUri = rootUri!!,
+                        fullPath = relativeDir,
+                        fileName = fileName,
+                        mimeType = episode.mime.ifBlank { null },
+                        inputStream = inputStream,
+                        bufferSize = BUFFER_SIZE
+                    ).toString()
+                } else {
+                    val directory = File(getEpisodeAbsoluteDir(relativeDir))
+                    if (!directory.exists()) {
+                        directory.mkdirs()
+                    }
+                    val file = File(directory, fileName)
+                    FileOutputStream(file).use { output -> inputStream.copyTo(output, BUFFER_SIZE) }
+                    file.absolutePath
+                }
+            } catch (e: Exception) {
+                throw FileWriteException("error writing episode file: ${e.localizedMessage}")
+            } finally {
+                inputStream.close()
+            }
+        }
+
+    @Throws(Exception::class)
+    override suspend fun saveEpisodeImage(episode: PodcastEpisode, inputStream: InputStream): String =
+        withContext(Dispatchers.IO) {
+            try {
+                val directory = File(getEpisodeAbsoluteDir(episodeRelativeDir(episode)))
+                if (!directory.exists()) {
+                    directory.mkdirs()
+                }
+                val file = File(directory, "${episode.podcast.id}.png")
+                FileOutputStream(file).use { output -> inputStream.copyTo(output, BUFFER_SIZE) }
+                file.absolutePath
+            } finally {
+                inputStream.close()
+            }
+        }
+
+    @Throws(Exception::class)
+    override suspend fun deleteEpisodeFile(path: String): Boolean = withContext(Dispatchers.IO) {
+        if (path.startsWith("content://")) {
+            DocumentFile.fromSingleUri(context, Uri.parse(path))?.delete() == true
+        } else {
+            File(path).let { file -> file.exists() && file.delete() }
+        }
+    }
+
+    @Throws(Exception::class)
+    private suspend fun getEpisodeAbsoluteDir(relativeDir: String): String {
+        val owner = musicRepository.getUsername() ?: throw FileWriteException("username is null")
+        return "${getStorage()}/$SUB_DIR/$owner/$relativeDir"
+    }
+
     private fun getDirPathFromSong(song: Song): String {
         val fullPath = song.filename
         val lastSlashIndex = fullPath.lastIndexOf('/')
@@ -212,6 +277,8 @@ class StorageManagerImpl @Inject constructor(
 
         val mp3Files: List<File> =
             dir.walkTopDown()
+                // skip the downloaded podcast episodes in offline_music/{user}/podcasts/
+                .onEnter { !(it.name == PODCASTS_DIR && it.parentFile?.parentFile == dir) }
                 .filter { it.isFile
                         && !it.extension.equals("png", ignoreCase = true)
                         && !it.extension.equals("jpg", ignoreCase = true)

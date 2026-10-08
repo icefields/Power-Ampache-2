@@ -27,6 +27,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
@@ -39,19 +40,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.common.Constants.ERROR_STRING
+import luci.sixsixsix.powerampache2.domain.models.MediaType
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.usecase.DownloadSongUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.podcasts.DownloadEpisodeUseCase
 import java.time.Duration
 import java.util.UUID
 
 @HiltWorker
 class SongDownloadWorker @AssistedInject constructor(
     private val downloadSongUseCase: DownloadSongUseCase,
+    private val downloadEpisodeUseCase: DownloadEpisodeUseCase,
     @Assisted val context: Context,
     @Assisted private val params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        if (params.inputData.getString(KEY_MEDIA_TYPE) == MediaType.PODCAST_EPISODE.name) {
+            return@withContext downloadEpisode()
+        }
         val authKey = params.inputData.getString(KEY_AUTH_TOKEN)
         //val username = params.inputData.getString(KEY_USERNAME)
         val songId = params.inputData.getString(KEY_SONG) ?: ERROR_STRING // this will make the following query return null
@@ -102,6 +109,20 @@ class SongDownloadWorker @AssistedInject constructor(
 //        }
     }
 
+    private suspend fun downloadEpisode(): Result {
+        val episodeId = params.inputData.getString(KEY_SONG) ?: ERROR_STRING
+        return try {
+            downloadEpisodeUseCase(episodeId)?.let { episode ->
+                setProgress(workDataOf(KEY_PROGRESS to 100, KEY_SONG to episode.title))
+                Result.success(workDataOf(KEY_RESULT_EPISODE to episodeId))
+            } ?: Result.failure(
+                workDataOf(KEY_RESULT_ERROR to "PodcastEpisode is null or not playable, episodeId:$episodeId"))
+        } catch (e: Exception) {
+            Result.failure(
+                workDataOf(KEY_RESULT_ERROR to "cannot download/save episode: ${e.localizedMessage}"))
+        }
+    }
+
     companion object {
         private const val prefix = "luci.sixsixsix.powerampache2.worker."
 
@@ -109,6 +130,8 @@ class SongDownloadWorker @AssistedInject constructor(
         const val KEY_AUTH_TOKEN = "${prefix}KEY_AUTH_TOKEN"
         const val KEY_SONG = "${prefix}KEY_SONG"
         const val KEY_RESULT_SONG = "${prefix}KEY_RESULT_SONG"
+        const val KEY_MEDIA_TYPE = "${prefix}KEY_MEDIA_TYPE"
+        const val KEY_RESULT_EPISODE = "${prefix}KEY_RESULT_EPISODE"
         const val KEY_RESULT_ERROR = "${prefix}KEY_RESULT_ERROR"
         const val KEY_PROGRESS = "${prefix}KEY_PROGRESS"
 
@@ -142,14 +165,26 @@ class SongDownloadWorker @AssistedInject constructor(
             authToken: String,
             username: String,
             song: Song
-        ): UUID {
+        ): UUID = enqueueDownload(context, workDataOf(
+            KEY_SONG to song.mediaId,
+            KEY_AUTH_TOKEN to authToken,
+            KEY_USERNAME to username))
+
+        suspend fun startEpisodeDownloadWorker(
+            context: Context,
+            authToken: String,
+            username: String,
+            episodeId: String
+        ): UUID = enqueueDownload(context, workDataOf(
+            KEY_SONG to episodeId,
+            KEY_MEDIA_TYPE to MediaType.PODCAST_EPISODE.name,
+            KEY_AUTH_TOKEN to authToken,
+            KEY_USERNAME to username))
+
+        private suspend fun enqueueDownload(context: Context, inputData: Data): UUID {
             val request = OneTimeWorkRequestBuilder<SongDownloadWorker>()
-                .setInputData(
-                    workDataOf(
-                        KEY_SONG to song.mediaId,
-                        KEY_AUTH_TOKEN to authToken,
-                        KEY_USERNAME to username)
-                ).setConstraints(
+                .setInputData(inputData)
+                .setConstraints(
                     Constraints(
                         requiresStorageNotLow = true,
                         requiredNetworkType = NetworkType.CONNECTED)
