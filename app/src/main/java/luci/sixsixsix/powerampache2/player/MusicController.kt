@@ -101,7 +101,7 @@ class MusicController @Inject constructor(
         // Callback triggered every time a new song is being played
         applicationCoroutineScope.launch {
             // TODO: unused named lambda parameter, check if needed
-            playlistManager.currentSongState.filterNotNull().collectLatest { newSong ->
+            playlistManager.currentItemState.filterNotNull().collectLatest { newSong ->
                 val sleepTimerEndTimestamp = sleepTimerEndTimestampFlow().value
                 if (
                     sleepTimerWaitSongEnd()

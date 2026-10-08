@@ -43,7 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
-import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailContent
 import luci.sixsixsix.powerampache2.presentation.screens_detail.song_detail.components.SongDetailQueueDragHandle
@@ -76,8 +76,9 @@ fun SongDetailScreen(
         }
     }
 
-    // if tagged lyrics are present they take priority over plugin lyrics
-    val lyrics = if (lyricsTag.isNotBlank()) lyricsTag else pluginLyrics
+    // if tagged lyrics are present they take priority over plugin lyrics.
+    // song is null while a podcast episode plays: do not show the lyrics of the previous song
+    val lyrics = if (song == null) "" else if (lyricsTag.isNotBlank()) lyricsTag else pluginLyrics
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val pagerState = rememberPagerState(initialPage = 0) {
@@ -129,7 +130,7 @@ fun SongDetailScreen(
     }
 }
 
-private fun getQueuePositionStr(currentQueue: List<SongUI>, currentQueuePosition: Int, isScreenOpen: Boolean) =
+private fun getQueuePositionStr(currentQueue: List<PlayableUI>, currentQueuePosition: Int, isScreenOpen: Boolean) =
     if (
         currentQueuePosition > 0
         && currentQueue.isNotEmpty()

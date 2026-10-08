@@ -40,6 +40,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.common.episodeitem.EpisodeItem
+import luci.sixsixsix.powerampache2.presentation.common.episodeitem.onEpisodeItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SubtitleString
@@ -51,6 +53,8 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.EraseConfirmDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.ShareDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.ShowSongInfoDialogOpen
+import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
+import luci.sixsixsix.powerampache2.presentation.models.PodcastEpisodeUI
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
@@ -67,7 +71,7 @@ fun QueueScreenContent(
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
     val queue by queueViewModel.queueFlow.collectAsState()
-    val songState by mainViewModel.currentSongStateFlow().collectAsState()
+    val currentItem by mainViewModel.currentItemStateFlow().collectAsState()
 
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
     if (playlistsDialogOpen.isOpen) {
@@ -86,7 +90,7 @@ fun QueueScreenContent(
         }
     }
 
-    var showRemoveFromQueueDialog by remember { mutableStateOf<SongUI?>(null) }
+    var showRemoveFromQueueDialog by remember { mutableStateOf<PlayableUI?>(null) }
     showRemoveFromQueueDialog?.let { songToRemove ->
         EraseConfirmDialog(
             onDismissRequest = {
@@ -97,7 +101,7 @@ fun QueueScreenContent(
                 queueViewModel.onEvent(QueueEvent.OnSongRemove(songToRemove))
             },
             dialogTitle = stringResource(id = R.string.warning_song_remove_title),
-            dialogText = "Remove ${songToRemove.name} from your queue?"
+            dialogText = "Remove ${songToRemove.title} from your queue?"
         )
     }
 
@@ -149,53 +153,71 @@ fun QueueScreenContent(
         itemsIndexed(
             items = queue,
             //key = { _, item -> item }
-        ) { _, song ->
-            SongItem(
-                song = song,
-                songItemEventListener = { event ->
-                    when(event) {
-                        SongItemEvent.PLAY_NEXT ->
-                            mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
-                        SongItemEvent.SHARE_SONG ->
-                            songToShare = song
-                        SongItemEvent.SHOW_SONG_INFO ->
-                            showSongInfoDialog = ShowSongInfoDialogOpen(
-                                isOpen = true, song = song)
-                        SongItemEvent.DOWNLOAD_SONG ->
-                            mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
-                       SongItemEvent.DELETE_DOWNLOADED_SONG ->
-                            showDeleteFromDownloadsDialog = song
-                        SongItemEvent.EXPORT_DOWNLOADED_SONG ->
-                            mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
-                        SongItemEvent.GO_TO_ALBUM ->
-                            navigator.navigate(AlbumDetailScreenDestination(
-                                albumId = song.album.id,
-                                album = null))
-                        SongItemEvent.GO_TO_ARTIST ->
-                            Ampache2NavGraphs.navigateToArtist(navigator, artistId = song.artist.id)
-                        SongItemEvent.ADD_SONG_TO_QUEUE -> { } // already in queue
-                        SongItemEvent.ADD_SONG_TO_PLAYLIST ->
-                            playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
+        ) { _, item ->
+            when (item) {
+                is PodcastEpisodeUI -> EpisodeItem(
+                    episode = item,
+                    isCurrent = item.key == currentItem?.key,
+                    isInQueue = true,
+                    onClick = { mainViewModel.onEvent(MainEvent.PlaySong(item)) },
+                    onEvent = { event ->
+                        mainViewModel.onEpisodeItemEvent(
+                            episode = item,
+                            event = event,
+                            onRemoveFromQueue = { showRemoveFromQueueDialog = item }
+                        )
                     }
-                },
-                subtitleString = SubtitleString.ARTIST,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        if (song.mediaId == songState?.mediaId)
-                            MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+                )
+                is SongUI -> {
+                    val song = item
+                    SongItem(
+                        song = song,
+                        songItemEventListener = { event ->
+                            when(event) {
+                                SongItemEvent.PLAY_NEXT ->
+                                    mainViewModel.onEvent(MainEvent.OnAddSongToQueueNext(song))
+                                SongItemEvent.SHARE_SONG ->
+                                    songToShare = song
+                                SongItemEvent.SHOW_SONG_INFO ->
+                                    showSongInfoDialog = ShowSongInfoDialogOpen(
+                                        isOpen = true, song = song)
+                                SongItemEvent.DOWNLOAD_SONG ->
+                                    mainViewModel.onEvent(MainEvent.OnDownloadSong(song))
+                               SongItemEvent.DELETE_DOWNLOADED_SONG ->
+                                    showDeleteFromDownloadsDialog = song
+                                SongItemEvent.EXPORT_DOWNLOADED_SONG ->
+                                    mainViewModel.onEvent(MainEvent.OnExportDownloadedSong(song))
+                                SongItemEvent.GO_TO_ALBUM ->
+                                    navigator.navigate(AlbumDetailScreenDestination(
+                                        albumId = song.album.id,
+                                        album = null))
+                                SongItemEvent.GO_TO_ARTIST ->
+                                    Ampache2NavGraphs.navigateToArtist(navigator, artistId = song.artist.id)
+                                SongItemEvent.ADD_SONG_TO_QUEUE -> { } // already in queue
+                                SongItemEvent.ADD_SONG_TO_PLAYLIST ->
+                                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
+                            }
+                        },
+                        subtitleString = SubtitleString.ARTIST,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                if (song.key == currentItem?.key)
+                                    MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+                            )
+                            .clickable {
+                                mainViewModel.onEvent(MainEvent.PlaySong(song))
+                            },
+                        enableSwipeToRemove = true,
+                        onRemove = { songToRemove ->
+                            showRemoveFromQueueDialog = songToRemove
+                        },
+                        onRightToLeftSwipe = {
+                            playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
+                        }
                     )
-                    .clickable {
-                        mainViewModel.onEvent(MainEvent.PlaySong(song))
-                    },
-                enableSwipeToRemove = true,
-                onRemove = { songToRemove ->
-                    showRemoveFromQueueDialog = songToRemove
-                },
-                onRightToLeftSwipe = {
-                    playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, listOf(song))
                 }
-            )
+            }
         }
     }
 }
