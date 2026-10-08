@@ -29,15 +29,19 @@ import luci.sixsixsix.powerampache2.data.common.Constants
 import luci.sixsixsix.powerampache2.data.local.entities.AlbumEntity
 import luci.sixsixsix.powerampache2.data.local.entities.ArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.CredentialsEntity
+import luci.sixsixsix.powerampache2.data.local.entities.DownloadedPodcastEpisodeEntity
 import luci.sixsixsix.powerampache2.data.local.entities.DownloadedSongEntity
 import luci.sixsixsix.powerampache2.data.local.entities.GenreEntity
 import luci.sixsixsix.powerampache2.data.local.entities.HistoryEntity
 import luci.sixsixsix.powerampache2.data.local.entities.LocalSettingsEntity
 import luci.sixsixsix.powerampache2.data.local.entities.MultiUserCredentialEntity
 import luci.sixsixsix.powerampache2.data.local.entities.MultiUserEntity
+import luci.sixsixsix.powerampache2.data.local.entities.EpisodePositionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.MultiUserSessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.PlaylistSongEntity
+import luci.sixsixsix.powerampache2.data.local.entities.PodcastEntity
+import luci.sixsixsix.powerampache2.data.local.entities.PodcastEpisodeEntity
 import luci.sixsixsix.powerampache2.data.local.entities.RecommendedArtistEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SessionEntity
 import luci.sixsixsix.powerampache2.data.local.entities.SongEntity
@@ -60,7 +64,11 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         MultiUserEntity::class,
         MultiUserCredentialEntity::class,
         HistoryEntity::class,
-        RecommendedArtistEntity::class
+        RecommendedArtistEntity::class,
+        PodcastEntity::class,
+        PodcastEpisodeEntity::class,
+        DownloadedPodcastEpisodeEntity::class,
+        EpisodePositionEntity::class
     ], version = Constants.DATABASE_VERSION, // first prod version: 73
     autoMigrations = [
         AutoMigration(from = 73, to = 74),
@@ -81,13 +89,15 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         AutoMigration(from = 83, to = 84),
         AutoMigration(from = 84, to = 85),
         AutoMigration(from = 85, to = 86),
-        AutoMigration(from = 86, to = Constants.DATABASE_VERSION),
+        AutoMigration(from = 86, to = 87),
+        AutoMigration(from = 87, to = Constants.DATABASE_VERSION),
     ],
     exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class MusicDatabase: RoomDatabase() {
     abstract val dao: MusicDao
+    abstract val podcastDao: PodcastDao
 }
 
 //fun MIGRATION_73_74() =
