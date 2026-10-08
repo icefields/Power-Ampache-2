@@ -108,7 +108,7 @@ class SimpleMediaServiceHandler @Inject constructor(
     fun addMediaItemList(mediaItems: List<MediaItem>) {
         if(mediaItems.isEmpty() && player().mediaItemCount == 0) return
         if (player().mediaItemCount > 0 &&
-            playlistManager.currentSongState.value?.mediaId == player().currentMediaItem?.mediaId) {
+            playlistManager.currentItemState.value?.key?.playerId == player().currentMediaItem?.mediaId) {
             // if the current song of the playlist (if playlist is not empty) corresponds to the current
             // player song, ie. there is a song playing or paused and that song is inside both lists:
             // find current item in the list
@@ -212,7 +212,7 @@ class SimpleMediaServiceHandler @Inject constructor(
         super.onMediaItemTransition(mediaItem, reason)
         // if the media player is handling a playlist, when changing song update UI accordingly
         try {
-            val qq = playlistManager.currentQueueState.value.filter { it.mediaId == mediaItem?.mediaId }
+            val qq = playlistManager.currentQueueState.value.filter { it.key.playerId == mediaItem?.mediaId }
             if (qq.isNotEmpty()) {
                 val song = qq[0]
                 L("onMediaItemTransition - updateCurrentSong(it)")

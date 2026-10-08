@@ -21,6 +21,8 @@
  */
 package luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel
 
+import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
+import luci.sixsixsix.powerampache2.presentation.models.PodcastEpisodeUI
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 sealed class MainEvent {
@@ -28,11 +30,11 @@ sealed class MainEvent {
     data object OnDismissUserMessage: MainEvent()
     data object OnEnableOfflineMode: MainEvent()
     data object OnLogout: MainEvent() // TODO move this to AuthViewModel
-    data class AddSongsToQueueAndPlay(val song: SongUI, val songList: List<SongUI>): MainEvent()
-    data class AddSongsToQueueAndPlayShuffled(val songList: List<SongUI>): MainEvent()
-    data class PlaySongAddToQueueTop(val song: SongUI, val songList: List<SongUI>): MainEvent()
-    data class PlaySongReplacePlaylist(val song: SongUI, val songList: List<SongUI>): MainEvent()
-    data class PlaySong(val song: SongUI): MainEvent()
+    data class AddSongsToQueueAndPlay(val song: PlayableUI, val songList: List<PlayableUI>): MainEvent()
+    data class AddSongsToQueueAndPlayShuffled(val songList: List<PlayableUI>): MainEvent()
+    data class PlaySongAddToQueueTop(val song: PlayableUI, val songList: List<PlayableUI>): MainEvent()
+    data class PlaySongReplacePlaylist(val song: PlayableUI, val songList: List<PlayableUI>): MainEvent()
+    data class PlaySong(val song: PlayableUI): MainEvent()
     data object PlayPauseCurrent: MainEvent()
     data object SkipNext: MainEvent()
     data object SkipPrevious: MainEvent()
@@ -43,9 +45,11 @@ sealed class MainEvent {
     data object Reset: MainEvent()
     data object FavouriteSong: MainEvent()
     data class UpdateProgress(val newProgress: Float): MainEvent()
-    data class OnAddSongToQueue(val song: SongUI): MainEvent()
+    data class OnAddSongToQueue(val song: PlayableUI): MainEvent()
     data class OnAddSongToPlaylist(val song: SongUI): MainEvent()
-    data class OnAddSongToQueueNext(val song: SongUI): MainEvent()
+    data class OnAddSongToQueueNext(val song: PlayableUI): MainEvent()
+    data class OnDownloadEpisode(val episode: PodcastEpisodeUI): MainEvent()
+    data class OnDeleteDownloadedEpisode(val episode: PodcastEpisodeUI): MainEvent()
     data class OnShareSong(val song: SongUI): MainEvent()
     data class OnShareSongWebUrl(val song: SongUI): MainEvent()
     data class OnRateSong(val song: SongUI, val rate: Int): MainEvent()
