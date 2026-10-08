@@ -32,6 +32,7 @@ import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import luci.sixsixsix.powerampache2.domain.errors.ErrorHandler
+import luci.sixsixsix.powerampache2.player.EpisodeResumeTracker
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
 import luci.sixsixsix.powerampache2.player.PlayerManager
 import luci.sixsixsix.powerampache2.player.SimpleMediaNotificationManager
@@ -69,11 +70,13 @@ object ServiceModule {
     fun provideServiceHandler(
         playerManager: PlayerManager,
         playlistManager: MusicPlaylistManager,
+        episodeResumeTracker: EpisodeResumeTracker,
         errorHandler: ErrorHandler,
         @ApplicationContext context: Context
     ) =
         SimpleMediaServiceHandler(
             playlistManager = playlistManager,
+            episodeResumeTracker = episodeResumeTracker,
             playerManager = playerManager,
             errorHandler = errorHandler,
             context = context
