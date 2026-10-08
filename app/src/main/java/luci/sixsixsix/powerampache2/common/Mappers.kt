@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.StarRating
+import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
+import luci.sixsixsix.powerampache2.presentation.models.PodcastEpisodeUI
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 fun SongUI.toMediaItem(songUri: String) = MediaItem.Builder()
@@ -34,3 +36,21 @@ fun SongUI.toMediaItem(songUri: String) = MediaItem.Builder()
                 if (rating in 0f..5f) rating else 0f)
             ).build()
     ).build()
+
+fun PlayableUI.toPlayerMediaItem(uri: String): MediaItem = when (this) {
+    is SongUI -> toMediaItem(uri)
+    is PodcastEpisodeUI -> MediaItem.Builder()
+        .setMediaId(key.playerId)
+        .setUri(uri)
+        .setMimeType(episode.mime.takeIf { it.isNotBlank() })
+        .setMediaMetadata(
+            MediaMetadata.Builder()
+                .setMediaType(MediaMetadata.MEDIA_TYPE_PODCAST_EPISODE)
+                .setArtworkUri(Uri.parse(imageUrl))
+                .setArtist(subtitle)
+                .setAlbumTitle(subtitle)
+                .setDisplayTitle(title)
+                .setTitle(title)
+                .build()
+        ).build()
+}
