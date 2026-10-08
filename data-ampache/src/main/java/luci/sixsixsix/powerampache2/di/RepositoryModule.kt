@@ -31,6 +31,7 @@ import luci.sixsixsix.powerampache2.data.ArtistsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.error.ErrorHandlerImpl
 import luci.sixsixsix.powerampache2.data.MusicRepositoryImpl
 import luci.sixsixsix.powerampache2.data.PlaylistsRepositoryImpl
+import luci.sixsixsix.powerampache2.data.PodcastRepositoryImpl
 import luci.sixsixsix.powerampache2.data.PluginRepositoryImpl
 import luci.sixsixsix.powerampache2.data.SettingsRepositoryImpl
 import luci.sixsixsix.powerampache2.data.SharedPreferencesManagerImpl
@@ -60,6 +61,7 @@ import luci.sixsixsix.powerampache2.domain.ArtistsRepository
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.PlaylistsRepository
 import luci.sixsixsix.powerampache2.domain.PluginRepository
+import luci.sixsixsix.powerampache2.domain.PodcastRepository
 import luci.sixsixsix.powerampache2.domain.SettingsRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.datasource.AlbumsDbDataSource
@@ -107,6 +109,12 @@ abstract class RepositoryModule {
     abstract fun bindAlbumsRepository(
         albumsRepositoryImpl: AlbumsRepositoryImpl
     ): AlbumsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPodcastRepository(
+        podcastRepositoryImpl: PodcastRepositoryImpl
+    ): PodcastRepository
 
     @Binds
     @Singleton

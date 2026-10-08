@@ -230,6 +230,7 @@
     <string name="addToPlaylistOrQueueDialog_createNew">Create New</string>
     <string name="addToPlaylistOrQueueDialog_addQueue">Add to Current Queue</string>
     <string name="downloaded_snackbar_title">%s downloaded</string>
+    <string name="podcast_episode_downloaded_snackbar">%1$s downloaded</string>
 
     <string name="downloaded_delete_snackbar_songs">Deleted %d songs.</string>
     <string name="downloaded_delete_snackbar_song">%s deleted from downloads</string>
