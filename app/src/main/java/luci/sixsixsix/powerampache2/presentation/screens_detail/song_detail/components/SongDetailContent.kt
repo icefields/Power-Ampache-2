@@ -93,7 +93,9 @@ fun SongDetailContent(
     isChromecastPluginInstalled: Boolean,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
-    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+    val currentItem by mainViewModel.currentItemStateFlow().collectAsState()
+    // song-only controls use this, it is null while an episode is playing
+    val currentSongState = currentItem as? SongUI
     val scope = rememberCoroutineScope()
     val buttonsTint = MaterialTheme.colorScheme.onSurfaceVariant
 
@@ -142,7 +144,7 @@ fun SongDetailContent(
 
     var isImageScaleFit by remember { mutableStateOf(false) }
 
-    val coverImage = currentSongState?.imageUrl ?: pluginSong?.imageUrl?.let { imageUrl ->
+    val coverImage = currentItem?.imageUrl ?: pluginSong?.imageUrl?.let { imageUrl ->
         imageUrl.ifBlank { pluginSong.imageAlbum.ifBlank { pluginSong.imageArtist } }
     }
 
@@ -160,7 +162,7 @@ fun SongDetailContent(
                     .fillMaxWidth()
                     .clickable { isImageScaleFit = !isImageScaleFit },
                 artUrl = coverImage,
-                contentDescription = currentSongState?.title,
+                contentDescription = currentItem?.title,
                 isImageScaleFit = isImageScaleFit,
                 onSwipeLeft = { mainViewModel.onEvent(MainEvent.SkipNext) },
                 onSwipeRight = { mainViewModel.onEvent(MainEvent.SkipPrevious) }
@@ -187,7 +189,7 @@ fun SongDetailContent(
                 val artistName = if (currentSongState?.artists?.isNotEmpty() == true) {
                     currentSongState?.artists?.joinToString { it.name } ?: currentSongState?.artist?.name
                 } else {
-                    currentSongState?.artist?.name
+                    currentItem?.subtitle
                 }
                 Text(
                     text = artistName ?: "",
@@ -203,7 +205,7 @@ fun SongDetailContent(
                 Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
-                    text = currentSongState?.title ?: "",
+                    text = currentItem?.title ?: "",
                     fontWeight = FontWeight.Normal,
                     fontSize = fontDimensionResource(id = R.dimen.player_songTitle_size),
                     color = MaterialTheme.colorScheme.onSurface,
@@ -213,14 +215,16 @@ fun SongDetailContent(
                 )
             }
 
-            LikeButton(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(36.dp),
-                isLikeLoading = mainViewModel.state.isLikeLoading,
-                isFavourite = currentSongState?.flag == 1
-            ) {
-                mainViewModel.onEvent(MainEvent.FavouriteSong)
+            if (currentSongState != null) {
+                LikeButton(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(36.dp),
+                    isLikeLoading = mainViewModel.state.isLikeLoading,
+                    isFavourite = currentSongState?.flag == 1
+                ) {
+                    mainViewModel.onEvent(MainEvent.FavouriteSong)
+                }
             }
         }
 
@@ -272,7 +276,7 @@ fun SongDetailContent(
 
         SongDetailPlayerBar(
             progress = mainViewModel.progress,
-            durationStr = currentSongState?.totalTime() ?: "",
+            durationStr = currentItem?.totalTime() ?: "",
             progressStr = mainViewModel.progressStr,
             isPlaying = mainViewModel.isPlaying,
             isPlayLoading = mainViewModel.isPlayLoading(),
