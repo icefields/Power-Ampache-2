@@ -94,6 +94,13 @@ val drawerItems = listOf(
     //MainContentMenuItem.Logout
 )
 
+/** the podcasts entry shows only if the server reports at least one podcast */
+fun drawerItemsFor(podcastCount: Int): List<MainContentMenuItem> =
+    if (podcastCount <= 0) drawerItems
+    else drawerItems.toMutableList().apply {
+        add(indexOf(MainContentMenuItem.Offline) + 1, MainContentMenuItem.Podcasts)
+    }
+
 @Composable
 fun MainDrawer(
     modifier: Modifier = Modifier,
