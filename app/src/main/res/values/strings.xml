@@ -309,4 +309,13 @@
     <!-- PLUGINS -->
     <string name="plugin_cast_queueEmpty_warning">Your Queue is Empty</string>
     <string name="plugin_cast_queueTooLarge_error">Queue too large, cannot send to the Cast plugin</string>
+    <string name="podcast_episode_play_next">Play next</string>
+    <string name="podcast_episode_add_to_queue">Add to queue</string>
+    <string name="podcast_episode_download">Download</string>
+    <string name="podcast_episode_delete_download">Delete download</string>
+    <string name="podcast_episode_remove_from_queue">Remove from queue</string>
+    <string name="podcast_episode_go_to_podcast">Go to podcast</string>
+    <string name="podcast_episode_downloaded">Downloaded</string>
+    <string name="podcast_episode_unavailable">Not available on the server yet</string>
+    <string name="podcast_episode_more_actions">More actions</string>
 </resources>

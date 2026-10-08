@@ -4,6 +4,8 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.models.AmpacheModel
+import luci.sixsixsix.powerampache2.domain.models.MediaKey
+import luci.sixsixsix.powerampache2.domain.models.MediaType
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.Song
 
@@ -11,12 +13,12 @@ import luci.sixsixsix.powerampache2.domain.models.Song
 data class SongUI(
     val mediaId: String,
     override val id: String = mediaId,
-    val title: String,
+    override val title: String,
     val album: MusicAttribute,
     val artist: MusicAttribute,
     val albumArtist: MusicAttribute,
     val songUrl: String,
-    val imageUrl: String,
+    override val imageUrl: String,
     val bitrate: Int,
     val streamBitrate: Int,
     val catalog: Int,
@@ -54,8 +56,12 @@ data class SongUI(
     val averageRating: Float,
     val preciseRating: Float,
     val rating: Float,
-    val isDownloaded: Boolean,
-): Comparable<SongUI>, Parcelable, AmpacheModel {
+    override val isDownloaded: Boolean,
+): Comparable<SongUI>, Parcelable, AmpacheModel, PlayableUI {
+    override val key: MediaKey get() = MediaKey(MediaType.SONG, mediaId)
+    override val subtitle: String get() = artist.name
+    override val durationSec: Int get() = time
+
     override fun compareTo(other: SongUI): Int = mediaId.compareTo(other.mediaId)
 
     companion object {
@@ -89,15 +95,6 @@ fun SongUI.isAvailableOffline() = isDownloaded
 fun SongUI.hasLyrics() = lyrics.isNotBlank()
 
 fun SongUI.isFavourite() = flag != 0
-
-fun SongUI.totalTime(): String {
-    val minutes = time / 60
-    val seconds = time % 60
-    return "$minutes:${if (seconds < 10) { "0" } else { "" } }${seconds}"
-}
-
-fun List<SongUI>.reduceList() = if (size > Constants.config.queueSizeLimit) {
-    subList(0, Constants.config.queueSizeLimit) } else this
 
 /** Returns a "presentation" level SongUI model of the Song**/
 fun Song.toSongUI(isDownloaded: Boolean = false) = SongUI(
