@@ -54,6 +54,7 @@ import luci.sixsixsix.powerampache2.common.isFeatureAvailable
 import luci.sixsixsix.powerampache2.common.shareLink
 import luci.sixsixsix.powerampache2.common.toMediaItem
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.PodcastRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.WeakContext
@@ -98,6 +99,7 @@ class MainViewModel @Inject constructor(
     val sendQueueToChromecastUseCase: SendQueueToChromecastUseCase,
     val musicRepository: MusicRepository,
     val songsRepository: SongsRepository,
+    val podcastRepository: PodcastRepository,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
     val shareManager: ShareManager,
     val errorHandler: ErrorHandler,

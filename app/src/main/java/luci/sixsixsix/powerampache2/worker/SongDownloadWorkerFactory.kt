@@ -26,10 +26,12 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import luci.sixsixsix.powerampache2.domain.usecase.DownloadSongUseCase
+import luci.sixsixsix.powerampache2.domain.usecase.podcasts.DownloadEpisodeUseCase
 import javax.inject.Inject
 
 class SongDownloadWorkerFactory @Inject constructor(
-    private val downloadSongUseCase: DownloadSongUseCase
+    private val downloadSongUseCase: DownloadSongUseCase,
+    private val downloadEpisodeUseCase: DownloadEpisodeUseCase
 ): WorkerFactory() {
     override fun createWorker(
         appContext: Context,
@@ -37,6 +39,7 @@ class SongDownloadWorkerFactory @Inject constructor(
         workerParameters: WorkerParameters
     ): ListenableWorker = SongDownloadWorker(
         downloadSongUseCase,
+        downloadEpisodeUseCase,
         appContext,
         workerParameters
     )
