@@ -26,7 +26,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,6 +47,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -68,6 +72,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
+import luci.sixsixsix.powerampache2.presentation.models.PodcastEpisodeUI
 import luci.sixsixsix.powerampache2.presentation.models.totalTime
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
@@ -267,6 +272,30 @@ fun SongDetailContent(
                         mainViewModel.onEvent(MainEvent.OnDownloadedSongDelete(song = song))
                         // TODO BREAKING_RULE anti-pattern. verify the song is actually deleted
                         isOffline = false
+                    }
+                }
+            }
+        }
+        (currentItem as? PodcastEpisodeUI)?.let { episode ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = dimensionResource(id = R.dimen.player_screen_padding)),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TextButton(onClick = {
+                    Ampache2NavGraphs.navigateToPodcast(podcastId = episode.episode.podcast.id)
+                    scope.launch { mainScaffoldState.bottomSheetState.partialExpand() }
+                }) {
+                    Text(text = stringResource(id = R.string.podcast_episode_go_to_podcast))
+                }
+                if (episode.isDownloaded) {
+                    TextButton(onClick = { mainViewModel.onEvent(MainEvent.OnDeleteDownloadedEpisode(episode)) }) {
+                        Text(text = stringResource(id = R.string.podcast_episode_delete_download))
+                    }
+                } else {
+                    TextButton(onClick = { mainViewModel.onEvent(MainEvent.OnDownloadEpisode(episode)) }) {
+                        Text(text = stringResource(id = R.string.podcast_episode_download))
                     }
                 }
             }

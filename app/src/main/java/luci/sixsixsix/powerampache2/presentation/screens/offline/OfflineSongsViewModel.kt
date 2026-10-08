@@ -28,13 +28,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import luci.sixsixsix.powerampache2.domain.PodcastRepository
 import luci.sixsixsix.powerampache2.domain.usecase.songs.OfflineSongsFlow
 import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import javax.inject.Inject
 
 @HiltViewModel
 class OfflineSongsViewModel @Inject constructor(
-    offlineSongsFlow: OfflineSongsFlow
+    offlineSongsFlow: OfflineSongsFlow,
+    podcastRepository: PodcastRepository
 ) : ViewModel() {
     val state: StateFlow<OfflineSongsState> = offlineSongsFlow()
             .map { songs ->
@@ -52,6 +54,10 @@ class OfflineSongsViewModel @Inject constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = OfflineSongsState(isLoading = true)
             )
+
+    val downloadedEpisodesCount: StateFlow<Int> = podcastRepository.downloadedEpisodesFlow
+        .map { it.size }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     // empty, remove!
     fun onEvent(event: OfflineSongsEvent) { when(event) {is OfflineSongsEvent.OnSongSelected -> {} } }
