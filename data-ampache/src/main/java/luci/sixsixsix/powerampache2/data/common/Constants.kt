@@ -38,6 +38,7 @@ object Constants {
     const val NETWORK_REQUEST_LIMIT_SIMILAR = 30
     const val NETWORK_REQUEST_LIMIT_SONGS = 40
     const val NETWORK_REQUEST_LIMIT_SONGS_SEARCH = 100
+    const val NETWORK_REQUEST_LIMIT_EPISODES = 50
 
     const val ADMIN_USERNAME = "PowerAmpache"
 

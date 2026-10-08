@@ -22,6 +22,7 @@
 package luci.sixsixsix.powerampache2.data.remote
 
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_ARTISTS
+import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_EPISODES
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_HOME
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SIMILAR
 import luci.sixsixsix.powerampache2.data.common.Constants.NETWORK_REQUEST_LIMIT_SONGS
@@ -39,6 +40,9 @@ import luci.sixsixsix.powerampache2.data.remote.dto.GoodbyeDto
 import luci.sixsixsix.powerampache2.data.remote.dto.Pa2ConfigDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistDto
 import luci.sixsixsix.powerampache2.data.remote.dto.PlaylistsResponse
+import luci.sixsixsix.powerampache2.data.remote.dto.PodcastEpisodeDto
+import luci.sixsixsix.powerampache2.data.remote.dto.PodcastEpisodesResponse
+import luci.sixsixsix.powerampache2.data.remote.dto.PodcastsResponse
 import luci.sixsixsix.powerampache2.data.remote.dto.ShareDto
 import luci.sixsixsix.powerampache2.data.remote.dto.SongDto
 import luci.sixsixsix.powerampache2.data.remote.dto.SongsResponse
@@ -128,6 +132,32 @@ interface MainNetwork {
         @Query("offset") offset: Int = 0,
         @Query("include") include: String? = null, // albums, songs (includes track list)
     ): AlbumsResponse // TODO remove default values
+
+    @GET("json.server.php?action=podcasts")
+    suspend fun getPodcasts(
+        @Query("auth") authKey: String,
+    ): PodcastsResponse
+
+    /**
+     * episodes of one podcast, newest first (server default sort is pubdate DESC)
+     */
+    @GET("json.server.php?action=podcast_episodes")
+    suspend fun getPodcastEpisodes(
+        @Query("auth") authKey: String,
+        @Query("filter") podcastId: String,
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = NETWORK_REQUEST_LIMIT_EPISODES,
+    ): PodcastEpisodesResponse
+
+    /**
+     * one episode. API6 returns the flat episode object, not a wrapper.
+     * On an error response the id of the parsed dto is blank.
+     */
+    @GET("json.server.php?action=podcast_episode")
+    suspend fun getPodcastEpisode(
+        @Query("auth") authKey: String,
+        @Query("filter") episodeId: String,
+    ): PodcastEpisodeDto
 
     /**
      * fetch all the artists in the library
@@ -542,7 +572,9 @@ interface MainNetwork {
         song("song"),
         album("album"),
         artist("artist"),
-        playlist("playlist")
+        playlist("playlist"),
+        podcast("podcast"),
+        podcast_episode("podcast_episode")
     }
 
     enum class StatFilter(value: String) {
