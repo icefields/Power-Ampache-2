@@ -28,17 +28,21 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 
 @OptIn(UnstableApi::class)
 fun MainViewModel.observePlaylistManager() {
 
     // listen to current-song changes
     viewModelScope.launch {
-        playlistManager.currentSongState.collectLatest {
-            it?.let { songState ->
+        playlistManager.currentItemState.collectLatest {
+            it?.let { item ->
                 startMusicServiceIfNecessary()
-                scrobble(songState)
-                downloadAfterPlayback(songState)
+                // scrobble and save-after-playback are song features
+                if (item is SongUI) {
+                    scrobble(item)
+                    downloadAfterPlayback(item)
+                }
             } ?: stopMusicService()
         }
     }
@@ -67,7 +71,7 @@ fun MainViewModel.observePlaylistManager() {
         playlistManager.currentQueueState.collectLatest { queue ->
             if (queue.isNotEmpty()) {
                 startMusicServiceIfNecessary()
-            } else if (currentSong() == null) {
+            } else if (currentItem() == null) {
                 stopMusicService()
             }
             L("**** observing playlist change queue (before Load song data) :", queue.size)

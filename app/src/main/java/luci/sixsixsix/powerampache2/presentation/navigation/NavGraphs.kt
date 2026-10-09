@@ -3,8 +3,10 @@ package luci.sixsixsix.powerampache2.presentation.navigation
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.domain.models.Artist
+import luci.sixsixsix.powerampache2.domain.models.Podcast
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
 import luci.sixsixsix.powerampache2.presentation.destinations.ArtistDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.PodcastDetailScreenDestination
 
 //import luci.sixsixsix.powerampache2.presentation.NavGraph
 //import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
@@ -32,6 +34,13 @@ object Ampache2NavGraphs {
         false
     }
 
+    fun navigateToPodcast(podcastId: String, podcast: Podcast? = null) = try {
+        navigator?.navigate(PodcastDetailScreenDestination(podcastId = podcastId, podcast = podcast))
+        true
+    } catch (e: Exception) {
+        L.e(e)
+        false
+    }
 
     fun navigateToArtist(artistId: String, artist: Artist? = null) = try {
         navigator?.navigate(ArtistDetailScreenDestination(artistId = artistId, artist = artist))

@@ -26,7 +26,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,6 +47,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -68,6 +72,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.fontDimensionResource
+import luci.sixsixsix.powerampache2.presentation.models.PodcastEpisodeUI
 import luci.sixsixsix.powerampache2.presentation.models.totalTime
 import luci.sixsixsix.powerampache2.domain.plugin.info.PluginSongData
 import luci.sixsixsix.powerampache2.presentation.common.LikeButton
@@ -93,7 +98,9 @@ fun SongDetailContent(
     isChromecastPluginInstalled: Boolean,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
-    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+    val currentItem by mainViewModel.currentItemStateFlow().collectAsState()
+    // song-only controls use this, it is null while an episode is playing
+    val currentSongState = currentItem as? SongUI
     val scope = rememberCoroutineScope()
     val buttonsTint = MaterialTheme.colorScheme.onSurfaceVariant
 
@@ -142,7 +149,7 @@ fun SongDetailContent(
 
     var isImageScaleFit by remember { mutableStateOf(false) }
 
-    val coverImage = currentSongState?.imageUrl ?: pluginSong?.imageUrl?.let { imageUrl ->
+    val coverImage = currentItem?.imageUrl ?: pluginSong?.imageUrl?.let { imageUrl ->
         imageUrl.ifBlank { pluginSong.imageAlbum.ifBlank { pluginSong.imageArtist } }
     }
 
@@ -160,7 +167,7 @@ fun SongDetailContent(
                     .fillMaxWidth()
                     .clickable { isImageScaleFit = !isImageScaleFit },
                 artUrl = coverImage,
-                contentDescription = currentSongState?.title,
+                contentDescription = currentItem?.title,
                 isImageScaleFit = isImageScaleFit,
                 onSwipeLeft = { mainViewModel.onEvent(MainEvent.SkipNext) },
                 onSwipeRight = { mainViewModel.onEvent(MainEvent.SkipPrevious) }
@@ -187,7 +194,7 @@ fun SongDetailContent(
                 val artistName = if (currentSongState?.artists?.isNotEmpty() == true) {
                     currentSongState?.artists?.joinToString { it.name } ?: currentSongState?.artist?.name
                 } else {
-                    currentSongState?.artist?.name
+                    currentItem?.subtitle
                 }
                 Text(
                     text = artistName ?: "",
@@ -203,7 +210,7 @@ fun SongDetailContent(
                 Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
-                    text = currentSongState?.title ?: "",
+                    text = currentItem?.title ?: "",
                     fontWeight = FontWeight.Normal,
                     fontSize = fontDimensionResource(id = R.dimen.player_songTitle_size),
                     color = MaterialTheme.colorScheme.onSurface,
@@ -213,14 +220,16 @@ fun SongDetailContent(
                 )
             }
 
-            LikeButton(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(36.dp),
-                isLikeLoading = mainViewModel.state.isLikeLoading,
-                isFavourite = currentSongState?.flag == 1
-            ) {
-                mainViewModel.onEvent(MainEvent.FavouriteSong)
+            if (currentSongState != null) {
+                LikeButton(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(36.dp),
+                    isLikeLoading = mainViewModel.state.isLikeLoading,
+                    isFavourite = currentSongState?.flag == 1
+                ) {
+                    mainViewModel.onEvent(MainEvent.FavouriteSong)
+                }
             }
         }
 
@@ -267,12 +276,36 @@ fun SongDetailContent(
                 }
             }
         }
+        (currentItem as? PodcastEpisodeUI)?.let { episode ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = dimensionResource(id = R.dimen.player_screen_padding)),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TextButton(onClick = {
+                    Ampache2NavGraphs.navigateToPodcast(podcastId = episode.episode.podcast.id)
+                    scope.launch { mainScaffoldState.bottomSheetState.partialExpand() }
+                }) {
+                    Text(text = stringResource(id = R.string.podcast_episode_go_to_podcast))
+                }
+                if (episode.isDownloaded) {
+                    TextButton(onClick = { mainViewModel.onEvent(MainEvent.OnDeleteDownloadedEpisode(episode)) }) {
+                        Text(text = stringResource(id = R.string.podcast_episode_delete_download))
+                    }
+                } else {
+                    TextButton(onClick = { mainViewModel.onEvent(MainEvent.OnDownloadEpisode(episode)) }) {
+                        Text(text = stringResource(id = R.string.podcast_episode_download))
+                    }
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         SongDetailPlayerBar(
             progress = mainViewModel.progress,
-            durationStr = currentSongState?.totalTime() ?: "",
+            durationStr = currentItem?.totalTime() ?: "",
             progressStr = mainViewModel.progressStr,
             isPlaying = mainViewModel.isPlaying,
             isPlayLoading = mainViewModel.isPlayLoading(),

@@ -40,8 +40,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
@@ -52,8 +55,9 @@ import luci.sixsixsix.powerampache2.common.Constants.PLAY_LOAD_TIMEOUT
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.common.isFeatureAvailable
 import luci.sixsixsix.powerampache2.common.shareLink
-import luci.sixsixsix.powerampache2.common.toMediaItem
+import luci.sixsixsix.powerampache2.common.toPlayerMediaItem
 import luci.sixsixsix.powerampache2.domain.MusicRepository
+import luci.sixsixsix.powerampache2.domain.PodcastRepository
 import luci.sixsixsix.powerampache2.domain.SongsRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.common.WeakContext
@@ -69,11 +73,14 @@ import luci.sixsixsix.powerampache2.domain.usecase.settings.OfflineModeFlowUseCa
 import luci.sixsixsix.powerampache2.domain.usecase.settings.ToggleOfflineModeUseCase
 import luci.sixsixsix.powerampache2.domain.usecase.songs.IsSongAvailableOfflineUseCase
 import luci.sixsixsix.powerampache2.domain.utils.ShareManager
+import luci.sixsixsix.powerampache2.player.EpisodeResumeTracker
 import luci.sixsixsix.powerampache2.player.MusicController
 import luci.sixsixsix.powerampache2.player.MusicPlaylistManager
+import luci.sixsixsix.powerampache2.player.PlayableUriResolver
 import luci.sixsixsix.powerampache2.player.PlayerEvent
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.player.SimpleMediaServiceHandler
+import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.models.toSong
 import luci.sixsixsix.powerampache2.presentation.models.toSongUI
@@ -98,6 +105,9 @@ class MainViewModel @Inject constructor(
     val sendQueueToChromecastUseCase: SendQueueToChromecastUseCase,
     val musicRepository: MusicRepository,
     val songsRepository: SongsRepository,
+    val podcastRepository: PodcastRepository,
+    val playableUriResolver: PlayableUriResolver,
+    val episodeResumeTracker: EpisodeResumeTracker,
     val simpleMediaServiceHandler: SimpleMediaServiceHandler,
     val shareManager: ShareManager,
     val errorHandler: ErrorHandler,
@@ -132,8 +142,8 @@ class MainViewModel @Inject constructor(
     var emittedDownloads by savedStateHandle.saveable { mutableStateOf(listOf<String>()) }
 
     // TODO: there is no queue to restore! because the queue is in MusicPlaylistManager
-    var restoredSong: SongUI? = null
-    var restoredQueue = listOf<SongUI>()
+    var restoredSong: PlayableUI? = null
+    var restoredQueue = listOf<PlayableUI>()
 
     val mainLock = Any()
 
@@ -155,10 +165,19 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private val currentSongState: StateFlow<SongUI?> = playlistManager.currentItemState
+        .map { it as? SongUI }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     fun currentQueue() = playlistManager.currentQueueState
-    fun currentSongStateFlow() = playlistManager.currentSongState
-    fun currentSong() = playlistManager.currentSongState.value
-    fun currentQueuePosition() = currentSong()?.let { currentQueue().value.indexOf(it) } ?: -1
+    fun currentItemStateFlow() = playlistManager.currentItemState
+    fun currentItem() = playlistManager.currentItemState.value
+    /** song-only screens (lyrics, rating, like): null while an episode is playing */
+    fun currentSongStateFlow() = currentSongState
+    fun currentSong() = currentItem() as? SongUI
+    fun currentQueuePosition() = currentItem()?.let { item ->
+        currentQueue().value.indexOfFirst { it.key == item.key }
+    } ?: -1
 
 
     fun onEvent(event: MainEvent) =
@@ -381,10 +400,8 @@ class MainViewModel @Inject constructor(
             logToErrorLogs("Load song data START")
 
             val mediaItemList = mutableListOf<MediaItem>()
-            for (song: SongUI? in playlistManager.currentQueueState.value) {
-                song?.let {
-                    mediaItemList.add(it.toMediaItem(songsRepository.getSongUri(it.toSong())))
-                }
+            for (item in playlistManager.currentQueueState.value) {
+                mediaItemList.add(item.toPlayerMediaItem(playableUriResolver(item)))
             }
 
             logToErrorLogs("Load song data before addMediaItemList")

@@ -40,7 +40,7 @@ import javax.inject.Singleton
 @Singleton
 class SettingsRepositoryImpl @Inject constructor(
     api: MainNetwork,
-    db: MusicDatabase,
+    private val db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager
 ): BaseAmpacheRepository(api, db, errorHandler), SettingsRepository {
@@ -78,6 +78,7 @@ class SettingsRepositoryImpl @Inject constructor(
         L("deleteAllDownloadedSongs")
         emit(Resource.Loading(true))
         dao.deleteAllDownloadedSong()
+        db.podcastDao.deleteAllDownloadedEpisodes()
         L("after deleteAllDownloadedSongs db")
 
         storageManager.deleteAll()

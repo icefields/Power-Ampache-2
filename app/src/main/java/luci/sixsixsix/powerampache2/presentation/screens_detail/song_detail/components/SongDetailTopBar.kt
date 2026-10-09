@@ -52,6 +52,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.ERROR_TITLE
 import luci.sixsixsix.powerampache2.presentation.common.StarRatingButton
 import luci.sixsixsix.powerampache2.presentation.common.TopBarCircularProgress
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
@@ -60,7 +61,8 @@ fun SongDetailTopBar(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel
 ) {
-    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+    val currentItem by mainViewModel.currentItemStateFlow().collectAsState()
+    val currentSongState = currentItem as? SongUI
 
     Box(
         contentAlignment = Alignment.CenterStart,
@@ -88,14 +90,16 @@ fun SongDetailTopBar(
         ) {
             Text(
                 modifier = Modifier.basicMarquee(),
-                text = currentSongState?.title ?: ERROR_TITLE,
+                text = currentItem?.title ?: ERROR_TITLE,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 maxLines = 1,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.width(dimensionResource(R.dimen.songItem_infoTextSection_spacer)))
-            val albumYear = "${currentSongState?.album?.name ?: ERROR_TITLE} (${currentSongState?.year ?: ""})"
+            val albumYear = currentSongState?.let { "${it.album.name} (${it.year})" }
+                ?: currentItem?.subtitle
+                ?: ERROR_TITLE
             Text(
                 modifier = Modifier.basicMarquee(),
                 text = albumYear,

@@ -60,6 +60,7 @@ import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
+import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.queue.components.QueueScreenContent
@@ -117,7 +118,7 @@ fun QueueScreen(
                         imageVector = Icons.Default.PlaylistAdd,
                         imageContentDescription = "add all songs in queue to playlist",
                         isLoading = addToPlaylistOrQueueDialogViewModel.state.isPlaylistEditLoading
-                    ) { playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, queueState) }
+                    ) { playlistsDialogOpen = AddToPlaylistOrQueueDialogOpen(true, queueState.filterIsInstance<SongUI>()) }
                     IconButton(onClick = { queueViewModel.onEvent(QueueEvent.OnClearQueue) }) {
                         Icon(imageVector = Icons.Default.PlaylistRemove, contentDescription = "clear playlist")
                     }
