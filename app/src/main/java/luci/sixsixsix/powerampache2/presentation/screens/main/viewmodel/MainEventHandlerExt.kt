@@ -33,9 +33,11 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.common.Constants.SEARCH_TIMEOUT
 import luci.sixsixsix.powerampache2.common.exportSong
 import luci.sixsixsix.powerampache2.common.startCastPluginActivity
-import luci.sixsixsix.powerampache2.common.toMediaItem
+import luci.sixsixsix.powerampache2.common.toPlayerMediaItem
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 import luci.sixsixsix.powerampache2.player.PlayerEvent.*
+import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
+import luci.sixsixsix.powerampache2.presentation.models.PodcastEpisodeUI
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.models.toSong
 
@@ -53,7 +55,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
                 playlistManager.updateSearchQuery(event.query)
             }
         }
-        MainEvent.PlayPauseCurrent -> currentSong()?.let { song ->
+        MainEvent.PlayPauseCurrent -> currentItem()?.let { song ->
             if (loadSongDataJob?.isActive == true) {
                 L( "MainEvent.PlayPauseCurrent", "loadSongDataJob?.isActive")
                 loadSongDataJob?.invokeOnCompletion { thr ->
@@ -92,6 +94,12 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         is MainEvent.OnAddSongToPlaylist -> {}
         is MainEvent.OnDownloadSong ->
             downloadSong(event.song)
+        is MainEvent.OnDownloadEpisode -> viewModelScope.launch {
+            podcastRepository.downloadEpisode(event.episode.episode)
+        }
+        is MainEvent.OnDeleteDownloadedEpisode -> viewModelScope.launch {
+            podcastRepository.deleteDownloadedEpisode(event.episode.episode)
+        }
         is MainEvent.OnShareSong -> viewModelScope.launch {
             shareManager.shareSongDeepLink(context, event.song.toSong())
         }
@@ -162,8 +170,9 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
         }
 
         MainEvent.OnCastPress -> {
-            // check if queue is empty before going to chromecast
-            if (currentQueue().value.isEmpty()) {
+            // only songs can be cast: check if there are songs in the queue before going to chromecast
+            val songsToCast = currentQueue().value.filterIsInstance<SongUI>()
+            if (songsToCast.isEmpty()) {
                 // TODO: showing toast from view model, violating Clean Architecture?
                 Toast.makeText(context, context.getString(R.string.plugin_cast_queueEmpty_warning), Toast.LENGTH_LONG).show()
                 return
@@ -172,7 +181,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
             // send queue to cast plugin
             if (isChromecastPluginInstalled()) {
                 viewModelScope.launch {
-                    sendQueueToChromecastUseCase(currentQueue().value.toSong())
+                    sendQueueToChromecastUseCase(songsToCast.toSong())
                         .also { isSuccess ->
                             if (!isSuccess) {
                                 // this is just a safety net, the error should never happen because
@@ -196,7 +205,7 @@ fun MainViewModel.handleEvent(event: MainEvent, context: Context) {
  * to play albums and playlists
  */
 @UnstableApi
-fun MainViewModel.addSongsToQueueAndPlay(song: SongUI, songList: List<SongUI>) {
+fun MainViewModel.addSongsToQueueAndPlay(song: PlayableUI, songList: List<PlayableUI>) {
     startPlayLoading()
     playlistManager.updateCurrentSong(song)
     playlistManager.addToCurrentQueueTop(songList)
@@ -207,7 +216,7 @@ fun MainViewModel.addSongsToQueueAndPlay(song: SongUI, songList: List<SongUI>) {
  * select a single song, play, and put it on the top of the queue
  * the song list is just for verification (TODO: should that be optional?)
  */
-private fun MainViewModel.playSongAddToQueueTop(song: SongUI, songList: List<SongUI>) {
+private fun MainViewModel.playSongAddToQueueTop(song: PlayableUI, songList: List<PlayableUI>) {
     startPlayLoading()
     playlistManager.addToCurrentQueueUpdateTopSong(song, songList)
     play(song)
@@ -218,7 +227,7 @@ private fun MainViewModel.playSongAddToQueueTop(song: SongUI, songList: List<Son
  * the song list is just for verification (TODO: should that be optional?)
  */
 @OptIn(UnstableApi::class)
-private fun MainViewModel.playSongReplacePlaylist(song: SongUI, songList: List<SongUI>) {
+private fun MainViewModel.playSongReplacePlaylist(song: PlayableUI, songList: List<PlayableUI>) {
     startPlayLoading()
     playlistManager.replaceQueuePlaySong(songList, song)
     play(song)
@@ -227,13 +236,13 @@ private fun MainViewModel.playSongReplacePlaylist(song: SongUI, songList: List<S
 /**
  * select song from current queue and play
  */
-private fun MainViewModel.playSong(song: SongUI) {
+private fun MainViewModel.playSong(song: PlayableUI) {
     startPlayLoading()
     playlistManager.updateCurrentSong(song)
     play(song)
 }
 
-private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<SongUI>) {
+private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<PlayableUI>) {
     startPlayLoading()
     val shuffled = songList.shuffled()
     playlistManager.replaceCurrentQueue(shuffled)
@@ -250,7 +259,7 @@ private fun  MainViewModel.addSongsToQueueAndPlayShuffled(songList: List<SongUI>
  *
  * call stopPlayLoading() in case of errors
  */
-private fun MainViewModel.play(song: SongUI) {
+private fun MainViewModel.play(song: PlayableUI) {
     startPlayLoading()
     if (loadSongDataJob?.isActive == true) {
         loadSongDataJob?.invokeOnCompletion {
@@ -267,13 +276,13 @@ private fun MainViewModel.play(song: SongUI) {
     }
 }
 
-private fun MainViewModel.playSongForce(song: SongUI) = viewModelScope.launch {
+private fun MainViewModel.playSongForce(song: PlayableUI) = viewModelScope.launch {
     L( "MainEvent.Play", "playing song")
     try {
+        val startPositionMs =
+            if (song is PodcastEpisodeUI) episodeResumeTracker.startPositionMs(song.episode.id) else 0L
         simpleMediaServiceHandler.onPlayerEvent(
-            ForcePlay(
-                song.toMediaItem(songsRepository.getSongUri(song.toSong()))
-            )
+            ForcePlay(song.toPlayerMediaItem(playableUriResolver(song)), startPositionMs)
         )
     } catch (e: Exception) {
         logToErrorLogs("fun MainViewModel.playSongForce EXCEPTION, loading song data now")
