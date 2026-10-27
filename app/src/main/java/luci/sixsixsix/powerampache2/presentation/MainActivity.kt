@@ -24,16 +24,23 @@ package luci.sixsixsix.powerampache2.presentation
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
@@ -52,6 +59,7 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainView
 import luci.sixsixsix.powerampache2.presentation.screens.settings.SettingsViewModel
 import luci.sixsixsix.powerampache2.presentation.widget.SpinItWidgetProvider
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
+import luci.sixsixsix.powerampache2.ui.theme.surfaceDark
 
 @AndroidEntryPoint
 @OptIn(UnstableApi::class)
@@ -66,6 +74,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             authViewModel = hiltViewModel<AuthViewModel>(this)
             mainViewModel = hiltViewModel<MainViewModel>(this)
@@ -103,6 +112,17 @@ class MainActivity : ComponentActivity() {
             }
             RandomThemeBackgroundColour.reset()
             RandomThemeBackgroundColour.isDarkTheme = isDarkTheme
+            val view = LocalView.current
+            val currentActivity = LocalActivity.current
+
+            LaunchedEffect(Unit) {
+                currentActivity?.let { activity ->
+                    WindowCompat.getInsetsController(activity.window, view).apply {
+                        isAppearanceLightStatusBars = !isDarkTheme
+                        isAppearanceLightNavigationBars = !isDarkTheme
+                    }
+                }
+            }
 
             PowerAmpache2Theme(
                 darkTheme = isDarkTheme,
@@ -110,7 +130,9 @@ class MainActivity : ComponentActivity() {
             ) {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
+                        .background(surfaceDark)
+                        .systemBarsPadding(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreen(
