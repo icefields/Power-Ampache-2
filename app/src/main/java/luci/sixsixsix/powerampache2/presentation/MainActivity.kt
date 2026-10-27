@@ -21,11 +21,10 @@
  */
 package luci.sixsixsix.powerampache2.presentation
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
@@ -39,7 +38,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -115,12 +113,14 @@ class MainActivity : ComponentActivity() {
             RandomThemeBackgroundColour.reset()
             RandomThemeBackgroundColour.isDarkTheme = isDarkTheme
             val view = LocalView.current
-            val activity = view.context as Activity
+            val currentActivity = LocalActivity.current
 
             LaunchedEffect(Unit) {
-                WindowCompat.getInsetsController(activity.window, view).apply {
-                    isAppearanceLightStatusBars = !isDarkTheme
-                    isAppearanceLightNavigationBars = !isDarkTheme
+                currentActivity?.let { activity ->
+                    WindowCompat.getInsetsController(activity.window, view).apply {
+                        isAppearanceLightStatusBars = !isDarkTheme
+                        isAppearanceLightNavigationBars = !isDarkTheme
+                    }
                 }
             }
 

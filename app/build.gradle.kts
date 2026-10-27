@@ -18,7 +18,7 @@ localProperties.load(project.rootProject.file("local.properties").inputStream())
 
 android {
     namespace = "luci.sixsixsix.powerampache2"
-    compileSdk = 36
+    compileSdk = 37
 
     val properties = Properties()
     val propertiesFile = project.rootProject.file("secrets.properties")
@@ -55,7 +55,7 @@ android {
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 95
         versionName = "1.01-89"
         val versionQuote = "This version is powered by the elliptical galaxy in the Virgo Cluster"
