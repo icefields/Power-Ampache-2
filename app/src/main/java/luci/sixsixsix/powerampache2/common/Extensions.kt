@@ -68,6 +68,8 @@ import luci.sixsixsix.powerampache2.domain.models.User
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.concurrent.TimeUnit
+import kotlin.collections.sumOf
 import kotlin.math.absoluteValue
 
 val Int.dpTextUnit: TextUnit
@@ -272,4 +274,25 @@ fun Modifier.shimmer(): Modifier = composed {
 
 fun Playlist.isUserOwner(user: User): Boolean {
     return user.isAdmin() || user.username.equals(other = this.owner, ignoreCase = true)
+}
+
+fun Long.toDurationString(): String {
+    val hours = TimeUnit.SECONDS.toHours(this)
+    val minutes = TimeUnit.SECONDS.toMinutes(this) % 60
+    val seconds = TimeUnit.SECONDS.toSeconds(this) % 60
+
+    val builder = StringBuilder()
+    if (hours > 0) {
+        builder.append("${hours}h")
+        builder.append(" ")
+    }
+    if (minutes > 0) {
+        builder.append("${minutes}m")
+        builder.append(" ")
+    }
+    if (seconds > 0) {
+        builder.append("${seconds}s")
+    }
+
+    return builder.toString()
 }

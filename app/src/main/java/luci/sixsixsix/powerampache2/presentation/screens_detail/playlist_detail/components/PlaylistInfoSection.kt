@@ -73,6 +73,7 @@ fun PlaylistInfoSection(
     isPlayLoading: Boolean,
     enabled: Boolean,
     songs: List<SongUI>,
+    totalTime: String,
     eventListener: (playlistInfoViewEvents: PlaylistInfoViewEvents) -> Unit,
     artistClickListener: (ArtistId) -> Unit
 ) {
@@ -131,7 +132,13 @@ fun PlaylistInfoSection(
                     name = "${songs.size}"
                 )
             }
-
+        }
+        if (songs.isNotEmpty()) {
+            AttributeText(
+                modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.albumDetailScreen_infoSection_attribute_paddingHorizontal)),
+                title = stringResource(id = R.string.albumDetailScreen_infoSection_time),
+                name = totalTime
+            )
         }
         if (playlist.averageRating > 0) {
             AttributeText(
@@ -176,6 +183,7 @@ fun PlaylistInfoSectionPreview() {
             SongUI.mockSongUI, SongUI.mockSongUI, SongUI.mockSongUI,
             SongUI.mockSongUI, SongUI.mockSongUI
         ),
+        totalTime = "1h 20m",
         isPlaylistEditLoading = true,
         isLikeLoading = false,
         isLikeAvailable = true,
