@@ -24,20 +24,27 @@ package luci.sixsixsix.powerampache2.data.local
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import androidx.documentfile.provider.DocumentFile
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.data.common.SafFolderHelper
 import luci.sixsixsix.powerampache2.domain.MusicRepository
 import luci.sixsixsix.powerampache2.domain.common.Constants
 import luci.sixsixsix.powerampache2.domain.errors.FileWriteException
+import luci.sixsixsix.powerampache2.domain.models.PodcastEpisode
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.domain.utils.SharedPreferencesManager
 import luci.sixsixsix.powerampache2.domain.utils.StorageManager
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.io.OutputStream
 import javax.inject.Inject
 
 private const val BUFFER_SIZE = 4 * 1024
@@ -122,6 +129,113 @@ class StorageManagerImpl @Inject constructor(
                 inputStream.close()
             }
         }
+
+    @Throws(Exception::class)
+    override suspend fun saveEpisode(episode: PodcastEpisode, inputStream: InputStream): String =
+        withContext(Dispatchers.IO) {
+            try {
+                val relativeDir = episodeRelativeDir(episode)
+                val fileName = episodeFileName(episode)
+                val rootUri = sharedPreferencesManager.customDownloadRootUri
+                if (Constants.config.enableExternalDirDownloads && isStorageCustom(rootUri)) {
+                    val folder = SafFolderHelper(context).getOrCreatePath(rootUri!!, relativeDir)
+                    folder.findFile(fileName)?.delete()
+                    val document = folder.createFile(episode.mime.ifBlank { "application/octet-stream" }, fileName)
+                        ?: throw FileWriteException("cannot create file: $fileName")
+                    writeOrDelete(inputStream, onFailure = { document.delete() }) {
+                        context.contentResolver.openOutputStream(document.uri)
+                            ?: throw FileWriteException("cannot open file: $fileName")
+                    }
+                    document.uri.toString()
+                } else {
+                    val directory = File(getEpisodeAbsoluteDir(relativeDir))
+                    if (!directory.exists()) {
+                        directory.mkdirs()
+                    }
+                    val file = File(directory, fileName)
+                    writeOrDelete(inputStream, onFailure = { file.delete() }) { FileOutputStream(file) }
+                    file.absolutePath
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: FileWriteException) {
+                throw e
+            } catch (e: Exception) {
+                throw FileWriteException("error writing episode file: ${e.localizedMessage}")
+            } finally {
+                inputStream.close()
+            }
+        }
+
+    @Throws(Exception::class)
+    override suspend fun saveEpisodeImage(episode: PodcastEpisode, inputStream: InputStream): String =
+        withContext(Dispatchers.IO) {
+            try {
+                val directory = File(getEpisodeAbsoluteDir(episodeRelativeDir(episode)))
+                if (!directory.exists()) {
+                    directory.mkdirs()
+                }
+                val file = File(directory, "${episode.podcast.id}.png")
+                writeOrDelete(inputStream, onFailure = { file.delete() }) { FileOutputStream(file) }
+                file.absolutePath
+            } finally {
+                inputStream.close()
+            }
+        }
+
+    /**
+     * Copies [inputStream] to the output from [openOutput]. If the copy fails or the coroutine is
+     * cancelled, closes the input to stop a blocked read, calls [onFailure] to remove the
+     * unfinished output, and rethrows.
+     */
+    private suspend fun writeOrDelete(
+        inputStream: InputStream,
+        onFailure: () -> Unit,
+        openOutput: () -> OutputStream
+    ) {
+        val closeOnCancel = currentCoroutineContext().job.invokeOnCompletion { cause ->
+            if (cause is CancellationException) {
+                try { inputStream.close() } catch (_: Exception) { }
+            }
+        }
+        try {
+            openOutput().use { output ->
+                val buffer = ByteArray(BUFFER_SIZE)
+                while (true) {
+                    currentCoroutineContext().ensureActive()
+                    val read = inputStream.read(buffer)
+                    if (read == -1) break
+                    output.write(buffer, 0, read)
+                }
+                output.flush()
+            }
+        } catch (e: Throwable) {
+            try { onFailure() } catch (_: Exception) { }
+            // a read that fails because the input was closed on cancel reports the cancellation
+            currentCoroutineContext().ensureActive()
+            throw e
+        } finally {
+            closeOnCancel.dispose()
+        }
+    }
+
+    /** true when the file is gone after the call, also when it was already missing */
+    @Throws(Exception::class)
+    override suspend fun deleteEpisodeFile(path: String): Boolean = withContext(Dispatchers.IO) {
+        if (path.startsWith("content://")) {
+            val document = DocumentFile.fromSingleUri(context, Uri.parse(path))
+                ?: return@withContext false
+            !document.exists() || document.delete()
+        } else {
+            File(path).let { file -> !file.exists() || file.delete() }
+        }
+    }
+
+    @Throws(Exception::class)
+    private suspend fun getEpisodeAbsoluteDir(relativeDir: String): String {
+        val owner = musicRepository.getUsername() ?: throw FileWriteException("username is null")
+        return "${getStorage()}/$SUB_DIR/$owner/$relativeDir"
+    }
 
     private fun getDirPathFromSong(song: Song): String {
         val fullPath = song.filename
@@ -212,6 +326,8 @@ class StorageManagerImpl @Inject constructor(
 
         val mp3Files: List<File> =
             dir.walkTopDown()
+                // skip the downloaded podcast episodes in offline_music/{user}/podcasts/
+                .onEnter { !(it.name == PODCASTS_DIR && it.parentFile?.parentFile == dir) }
                 .filter { it.isFile
                         && !it.extension.equals("png", ignoreCase = true)
                         && !it.extension.equals("jpg", ignoreCase = true)

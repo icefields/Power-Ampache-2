@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.data
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import luci.sixsixsix.mrlog.L
@@ -40,7 +41,7 @@ import javax.inject.Singleton
 @Singleton
 class SettingsRepositoryImpl @Inject constructor(
     api: MainNetwork,
-    db: MusicDatabase,
+    private val db: MusicDatabase,
     private val errorHandler: ErrorHandler,
     private val storageManager: StorageManager
 ): BaseAmpacheRepository(api, db, errorHandler), SettingsRepository {
@@ -78,6 +79,20 @@ class SettingsRepositoryImpl @Inject constructor(
         L("deleteAllDownloadedSongs")
         emit(Resource.Loading(true))
         dao.deleteAllDownloadedSong()
+        // deleteAll() only removes the app folders, episodes saved in a custom folder (SAF) are deleted one by one
+        val failedEpisodePaths = db.podcastDao.getAllDownloadedEpisodePaths()
+            .filter { it.startsWith("content://") }
+            .filterNot { path ->
+                try {
+                    storageManager.deleteEpisodeFile(path)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    errorHandler.logError(e)
+                    false
+                }
+            }
+        db.podcastDao.deleteAllDownloadedEpisodes(keepPaths = failedEpisodePaths)
         L("after deleteAllDownloadedSongs db")
 
         storageManager.deleteAll()

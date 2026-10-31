@@ -24,6 +24,8 @@ package luci.sixsixsix.powerampache2.player
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.mrlog.L
+import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
+import luci.sixsixsix.powerampache2.presentation.models.distinctByKey
 import luci.sixsixsix.powerampache2.presentation.models.reduceList
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import javax.inject.Inject
@@ -31,14 +33,14 @@ import javax.inject.Singleton
 
 @Singleton
 class MusicPlaylistManager @Inject constructor() {
-    private val _currentSongState = MutableStateFlow<SongUI?>(null)
-    val currentSongState: StateFlow<SongUI?> = _currentSongState //val currentSong = _currentSong.asStateFlow()
+    private val _currentItemState = MutableStateFlow<PlayableUI?>(null)
+    val currentItemState: StateFlow<PlayableUI?> = _currentItemState
 
     private val _currentSearchQuery = MutableStateFlow("")
     val currentSearchQuery: StateFlow<String> = _currentSearchQuery
 
-    private val _currentQueueState = MutableStateFlow(listOf<SongUI>())
-    val currentQueueState: StateFlow<List<SongUI>> = _currentQueueState
+    private val _currentQueueState = MutableStateFlow(listOf<PlayableUI>())
+    val currentQueueState: StateFlow<List<PlayableUI>> = _currentQueueState
 
     private val _downloadedSongFlow = MutableStateFlow<SongUI?>(null)
     // TODO: is this needed?
@@ -53,24 +55,21 @@ class MusicPlaylistManager @Inject constructor() {
         _currentSearchQuery.value = searchQuery
     }
 
+    private fun List<PlayableUI>.indexOfKey(item: PlayableUI?): Int =
+        item?.let { indexOfFirst { queueItem -> queueItem.key == it.key } } ?: -1
+
     /**
      * assign the new song state, remove the song from the queue if exists and re-add it after the
      * one that is currently playing. Add a list of song to the queue state,if no song is currently
      * set as state, automatically set the first song of the queue
      */
-    fun addToCurrentQueueUpdateTopSong(newSong: SongUI, newQueue: List<SongUI>) {
+    fun addToCurrentQueueUpdateTopSong(newSong: PlayableUI, newQueue: List<PlayableUI>) {
         // add the current song on top of the queue
-        val updatedQueue = ArrayList(_currentQueueState.value).apply {
-            remove(newSong)
-            // add song next to the one that is currently playing
-            try {
-                add(indexOf(_currentSongState.value) + 1, newSong)
-            } catch (e: Exception) {
-                add(0, newSong)
-            }
-        }
-        _currentQueueState.value = LinkedHashSet(updatedQueue).apply { addAll(newQueue.reduceList()) }.toList()
-        _currentSongState.value = newSong
+        val updatedQueue = _currentQueueState.value.filterNot { it.key == newSong.key }.toMutableList()
+        // add song next to the one that is currently playing, at the top if nothing is playing
+        updatedQueue.add(updatedQueue.indexOfKey(_currentItemState.value) + 1, newSong)
+        _currentQueueState.value = (updatedQueue + newQueue.reduceList()).distinctByKey()
+        _currentItemState.value = newSong
 
         checkCurrentSong()
     }
@@ -78,40 +77,30 @@ class MusicPlaylistManager @Inject constructor() {
     /**
      * used in the callback when music player goes to the next song in the playlist
      */
-    fun updateCurrentSong(newSong: SongUI?) {
+    fun updateCurrentSong(newSong: PlayableUI?) {
         L( "MusicPlaylistManager updateCurrentSong", newSong)
-        _currentSongState.value = newSong
+        _currentItemState.value = newSong
     }
 
-    /**
-     * same as updateCurrentSong but also provides current queue
-     * TODO unused function
-     */
-    //fun moveToSongInQueue(newSong: SongUI?, queue: List<SongUI>) = newSong?.let {
-    //    L( "MusicPlaylistManager moveToSongInQueue", newSong)
-    //    _currentSongState.value = newSong
-    //}
-
-    fun replaceCurrentQueue(newQueue: List<SongUI>) {
+    fun replaceCurrentQueue(newQueue: List<PlayableUI>) {
         L( "MusicPlaylistManager replaceCurrentQueue", newQueue.size)
         _currentQueueState.value = newQueue.reduceList()
         checkCurrentSong()
     }
 
-    fun replaceQueuePlaySong(newQueue: List<SongUI>, songToPlay: SongUI) {
+    fun replaceQueuePlaySong(newQueue: List<PlayableUI>, songToPlay: PlayableUI) {
         _currentQueueState.value = newQueue.reduceList()
-        _currentSongState.value = songToPlay
+        _currentItemState.value = songToPlay
     }
 
     /**
      * add a list of song to the queue state
      * if no song is currently set as state, automatically set the first song of the queue
      */
-    fun addToCurrentQueue(newQueue: List<SongUI>) {
+    fun addToCurrentQueue(newQueue: List<PlayableUI>) {
         L( "MusicPlaylistManager addToCurrentQueue", newQueue.size)
-        _currentQueueState.value = LinkedHashSet(_currentQueueState.value)
-            .apply { addAll(newQueue) }
-            .toList()
+        _currentQueueState.value = (_currentQueueState.value + newQueue)
+            .distinctByKey()
             .reduceList()
         checkCurrentSong()
     }
@@ -119,7 +108,7 @@ class MusicPlaylistManager @Inject constructor() {
     /**
      * adds the song to the current queue if the song is not null
      */
-    fun addToCurrentQueue(newSong: SongUI?) = newSong?.let {
+    fun addToCurrentQueue(newSong: PlayableUI?) = newSong?.let {
         L( "MusicPlaylistManager addToCurrentQueue", newSong)
         addToCurrentQueue(listOf(newSong))
     }
@@ -127,13 +116,14 @@ class MusicPlaylistManager @Inject constructor() {
     /**
      * removes a list of songs from the current queue
      */
-    fun removeFromCurrentQueue(songsToRemove: List<SongUI>) {
-        _currentQueueState.value = LinkedHashSet(_currentQueueState.value)
-            .apply { removeAll(songsToRemove.toSet()) }
-            .toList()
+    fun removeFromCurrentQueue(songsToRemove: List<PlayableUI>) {
+        val keysToRemove = songsToRemove.map { it.key }.toSet()
+        _currentQueueState.value = _currentQueueState.value
+            .distinctByKey()
+            .filterNot { it.key in keysToRemove }
         // if the queue is empty after this operation also remove the current song
         if (_currentQueueState.value.isEmpty()) {
-            _currentSongState.value = null
+            _currentItemState.value = null
         }
         checkCurrentSong()
     }
@@ -141,46 +131,35 @@ class MusicPlaylistManager @Inject constructor() {
     /**
      * remove a single song from queue
      */
-    fun removeFromCurrentQueue(songToRemove: SongUI) =
+    fun removeFromCurrentQueue(songToRemove: PlayableUI) =
         removeFromCurrentQueue(listOf(songToRemove))
 
     /**
      * add items to the current queue as next in queue
      */
-    fun addToCurrentQueueNext(list: List<SongUI>) {
+    fun addToCurrentQueueNext(list: List<PlayableUI>) {
         L( "MusicPlaylistManager addToCurrentQueueNext", list.size)
-        val queue = ArrayList(_currentQueueState.value)
-            .apply {
-                // remove all songs except the current
-                val listWithoutCurrentSong = ArrayList(list)
-                    .apply { remove(currentSongState.value) }
-                removeAll(listWithoutCurrentSong.toSet())
-                // find current index, new songs will be added after that
-                val currentSongIndex = indexOf(currentSongState.value)
-                addAll( if (size > currentSongIndex+1) { currentSongIndex+1 } else { size } , listWithoutCurrentSong)
-            }
-
-//        val queue = ArrayList<Song>(currentQueueState.value)
-//            .apply {
-//                val currentSongIndex = indexOf(currentSongState.value.song)
-//                addAll( if (size > currentSongIndex+1) { currentSongIndex+1 } else { size } , list)
-//            }
+        // remove all songs except the current
+        val currentKey = _currentItemState.value?.key
+        val listWithoutCurrentSong = list.filterNot { it.key == currentKey }
+        val keysToMove = listWithoutCurrentSong.map { it.key }.toSet()
+        val queue = _currentQueueState.value.filterNot { it.key in keysToMove }.toMutableList()
+        // find current index, new songs will be added after that
+        val currentSongIndex = queue.indexOfKey(_currentItemState.value)
+        queue.addAll(if (queue.size > currentSongIndex + 1) { currentSongIndex + 1 } else { queue.size }, listWithoutCurrentSong)
         replaceCurrentQueue(queue)
     }
 
-    fun addToCurrentQueueTop(list: List<SongUI>) {
+    fun addToCurrentQueueTop(list: List<PlayableUI>) {
         L( "MusicPlaylistManager addToCurrentQueueTop", list.size)
-        val queue = ArrayList<SongUI>(currentQueueState.value).apply {
-            addAll(0, list)
-        }
-        replaceCurrentQueue(queue)
+        replaceCurrentQueue(list + currentQueueState.value)
     }
 
     /**
      * if no song is currently set as state, automatically set the first song of the queue
      */
     private fun checkCurrentSong() {
-        if (currentQueueState.value.isNotEmpty() && currentSongState.value == null) {
+        if (currentQueueState.value.isNotEmpty() && currentItemState.value == null) {
             updateTopSong(currentQueueState.value[0])
         }
     }
@@ -188,23 +167,20 @@ class MusicPlaylistManager @Inject constructor() {
     /**
      * assign the new song state, remove the song from the queue if exists and re-add it on top
      */
-    fun updateTopSong(newSong: SongUI) {
+    fun updateTopSong(newSong: PlayableUI) {
         L("MusicPlaylistManager updateTopSong", newSong)
-        _currentSongState.value = newSong
+        _currentItemState.value = newSong
         // add the current song on top of the queue
-        _currentQueueState.value = ArrayList(_currentQueueState.value).apply {
-            remove(newSong)
-            add(0, newSong)
-        }
+        _currentQueueState.value = listOf(newSong) + _currentQueueState.value.filterNot { it.key == newSong.key }
     }
 
-    fun addToCurrentQueueNext(song: SongUI?) = song?.let {
+    fun addToCurrentQueueNext(song: PlayableUI?) = song?.let {
         L( "MusicPlaylistManager addToCurrentQueueNext", song)
         addToCurrentQueueNext(listOf(song))
     }
 
     fun startRestartQueue() {
-        _currentSongState.value = currentQueueState.value[0]
+        _currentItemState.value = currentQueueState.value[0]
     }
 
     /**
@@ -212,13 +188,13 @@ class MusicPlaylistManager @Inject constructor() {
      */
     fun clearQueue(isPlaying: Boolean) = if (!isPlaying) {
         replaceCurrentQueue(listOf())
-        _currentSongState.value = null
+        _currentItemState.value = null
     } else {
-        replaceCurrentQueue(listOfNotNull(currentSongState.value))
+        replaceCurrentQueue(listOfNotNull(currentItemState.value))
     }
 
     fun reset() {
-        _currentSongState.value = null
+        _currentItemState.value = null
         updateSearchQuery(searchQuery= "")
         replaceCurrentQueue(listOf())
     }
