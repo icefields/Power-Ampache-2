@@ -212,6 +212,9 @@ Power Ampache app is completely free of ads and does not request unnecessary per
 * * *
 
 ## Contributing
+This project does not accept contributions or bug reports produced, in part or in full, with assistance of large language models (LLMs)/generative AI. Maintainers might close issues or delete comments without further explanation if they suspect that any part of the issue is generated. Incomplete or automatically translated issue reports are still welcomed and encouraged over LLM-assisted ones.
+<br>
+
 Power Ampache 2 is developed using Clean Architecture on top of MVVM, following SOLID principles.<br>
 Contribution guidelines here: 
 https://power.ampache.dev/contributing.html
