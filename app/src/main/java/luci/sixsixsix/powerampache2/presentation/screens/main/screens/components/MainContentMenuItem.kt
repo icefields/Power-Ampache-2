@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.OfflineBolt
+import androidx.compose.material.icons.outlined.Podcasts
 import androidx.compose.material.icons.outlined.Power
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -53,6 +54,7 @@ sealed class MainContentMenuItem(
                 "logout" -> Logout
                 "about" -> About
                 "offline" -> Offline
+                "podcasts" -> Podcasts
                 "plugins" -> Plugins
                 else -> throw IllegalArgumentException("$id is not a valid id")
             }
@@ -64,6 +66,7 @@ sealed class MainContentMenuItem(
     data object Library: MainContentMenuItem(id = "library", title = R.string.menu_drawer_library, icon = Icons.Outlined.LibraryMusic, contentDescription = "Library")
     data object Genres: MainContentMenuItem(id = "genres", title = R.string.menu_drawer_genres, icon = Icons.Outlined.MusicNote, contentDescription = "Genres")
     data object Offline: MainContentMenuItem(id = "offline", title = R.string.menu_drawer_offline, icon = Icons.Outlined.OfflineBolt, contentDescription = "Offline Songs")
+    data object Podcasts: MainContentMenuItem(id = "podcasts", title = R.string.menu_drawer_podcasts, icon = Icons.Outlined.Podcasts, contentDescription = "Podcasts")
     data object About: MainContentMenuItem(id = "about", title = R.string.menu_drawer_about, icon = Icons.Outlined.Info, contentDescription = "About")
     data object Plugins: MainContentMenuItem(id = "plugins", title = R.string.menu_drawer_plugins, icon = Icons.Outlined.Power, contentDescription = "Plugins")
     data object Logout: MainContentMenuItem(id = "logout", title = R.string.menu_drawer_logout, icon = Icons.Outlined.Logout, contentDescription = "Logout")

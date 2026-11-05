@@ -43,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -73,6 +74,7 @@ import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItem
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SongItemEvent
 import luci.sixsixsix.powerampache2.presentation.common.songitem.SubtitleString
 import luci.sixsixsix.powerampache2.presentation.destinations.AlbumDetailScreenDestination
+import luci.sixsixsix.powerampache2.presentation.destinations.DownloadedEpisodesScreenDestination
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialog
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogOpen
 import luci.sixsixsix.powerampache2.presentation.dialogs.AddToPlaylistOrQueueDialogViewModel
@@ -194,6 +196,7 @@ fun OfflineSongsMainContent(
     offlineScreenBarTitle: (String) -> Unit = { }
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val downloadedEpisodesCount by viewModel.downloadedEpisodesCount.collectAsStateWithLifecycle()
 
     val titleOfflineSongs = stringResource(R.string.menu_drawer_offline)
     offlineScreenBarTitle(if (state.songs.isNotEmpty()) "$titleOfflineSongs (${state.songs.size})" else titleOfflineSongs)
@@ -290,11 +293,21 @@ fun OfflineSongsMainContent(
     Box(modifier = modifier) {
         if (state.isLoading && state.songs.isEmpty()) {
             LoadingScreen()
-        } else if(state.songs.isEmpty()) {
+        } else if(state.songs.isEmpty() && downloadedEpisodesCount == 0) {
             EmptyListView(title = stringResource(id = R.string.offline_noData_warning))
         }
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
+            if (downloadedEpisodesCount > 0) {
+                item {
+                    TextButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { navigator?.navigate(DownloadedEpisodesScreenDestination()) }
+                    ) {
+                        Text(text = stringResource(id = R.string.offline_downloaded_episodes, downloadedEpisodesCount))
+                    }
+                }
+            }
             items(state.songs) { song ->
                 SongItem(
                     song = song,

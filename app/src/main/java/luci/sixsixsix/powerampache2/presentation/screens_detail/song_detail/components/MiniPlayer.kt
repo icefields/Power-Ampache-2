@@ -71,6 +71,7 @@ import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.domain.common.WeakContext
 import luci.sixsixsix.powerampache2.player.RepeatMode
 import luci.sixsixsix.powerampache2.presentation.common.PlayButton
+import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
@@ -80,7 +81,7 @@ fun MiniPlayer(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel
 ) {
-    val currentSongState by mainViewModel.currentSongStateFlow().collectAsState()
+    val currentSongState by mainViewModel.currentItemStateFlow().collectAsState()
 
     AnimatedVisibility(currentSongState != null) {
         currentSongState?.let {song ->
@@ -103,7 +104,7 @@ fun MiniPlayer(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MiniPlayerContent(
-    song: SongUI,
+    song: PlayableUI,
     isPlaying: Boolean,
     isPlayLoading: Boolean,
     isBuffering: Boolean,
@@ -168,7 +169,7 @@ fun MiniPlayerContent(
             ) {
                 Text(
                     modifier = Modifier.basicMarquee(),
-                    text = song.artist.name,
+                    text = song.subtitle,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,
                     maxLines = 1,
