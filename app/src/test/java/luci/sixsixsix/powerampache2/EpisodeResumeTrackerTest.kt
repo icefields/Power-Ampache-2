@@ -59,7 +59,7 @@ private class FakePodcastRepository : PodcastRepository {
     override suspend fun getEpisodeUri(episode: PodcastEpisode): String = ""
     override suspend fun isEpisodeDownloaded(episodeId: String): Boolean = false
     override suspend fun downloadEpisode(episode: PodcastEpisode) {}
-    override suspend fun downloadEpisodeAndAddToDb(episodeId: String, multiUserId: String?): PodcastEpisode? = null
+    override suspend fun downloadEpisodeAndAddToDb(episodeId: String, multiUserId: String?, podcastId: String?, podcastName: String?): PodcastEpisode? = null
     override suspend fun deleteDownloadedEpisode(episode: PodcastEpisode) {}
     override suspend fun getEpisodePosition(episodeId: String) = positions[episodeId]
     override suspend fun saveEpisodePosition(position: EpisodePosition) {

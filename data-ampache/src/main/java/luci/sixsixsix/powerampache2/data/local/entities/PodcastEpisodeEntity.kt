@@ -23,10 +23,15 @@ package luci.sixsixsix.powerampache2.data.local.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.PodcastEpisode
 
-@Entity(primaryKeys = ["id", "multiUserId"])
+@Entity(
+    primaryKeys = ["id", "multiUserId"],
+    // every hot query filters by podcastId + multiUserId, the composite pk does not cover it
+    indices = [Index("podcastId", "multiUserId")]
+)
 data class PodcastEpisodeEntity(
     val id: String,
     val title: String,

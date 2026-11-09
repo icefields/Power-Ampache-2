@@ -29,9 +29,15 @@ object ResumePolicy {
     const val SAVE_INTERVAL_MS = 5_000L
     const val SEEK_TOLERANCE_MS = 2_000L
 
-    /** an unknown duration (0 or negative, ie. C.TIME_UNSET) never counts as finished */
+    /** an unknown duration (0 or negative, ie. C.TIME_UNSET) never counts as finished. A clip
+     *  shorter than the threshold is only finished at its very end, so short episodes can resume */
     fun isFinished(positionMs: Long, durationMs: Long): Boolean =
-        durationMs > 0 && durationMs - positionMs <= FINISHED_THRESHOLD_MS
+        durationMs > 0 && positionMs > 0 &&
+            (if (durationMs > FINISHED_THRESHOLD_MS) {
+                durationMs - positionMs <= FINISHED_THRESHOLD_MS
+            } else {
+                positionMs >= durationMs
+            })
 
     fun shouldSave(lastSavedAtMs: Long, nowMs: Long): Boolean =
         nowMs - lastSavedAtMs >= SAVE_INTERVAL_MS

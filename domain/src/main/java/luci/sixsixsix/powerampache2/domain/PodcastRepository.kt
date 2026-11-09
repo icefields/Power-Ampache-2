@@ -49,9 +49,16 @@ interface PodcastRepository {
     suspend fun downloadEpisode(episode: PodcastEpisode)
     /**
      * called by the download worker. [multiUserId] is the account that queued the download:
-     * throws AccountChangedException if the current account is another one
+     * throws AccountChangedException if the current account is another one.
+     * [podcastId]/[podcastName] backfill the podcast on servers that omit the field
+     * (Nextcloud Music) when the worker has to refetch the episode on a cache miss.
      */
-    suspend fun downloadEpisodeAndAddToDb(episodeId: String, multiUserId: String?): PodcastEpisode?
+    suspend fun downloadEpisodeAndAddToDb(
+        episodeId: String,
+        multiUserId: String?,
+        podcastId: String? = null,
+        podcastName: String? = null
+    ): PodcastEpisode?
     suspend fun deleteDownloadedEpisode(episode: PodcastEpisode)
 
     suspend fun getEpisodePosition(episodeId: String): EpisodePosition?

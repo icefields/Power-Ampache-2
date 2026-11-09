@@ -29,6 +29,11 @@ import javax.inject.Inject
 class DownloadEpisodeUseCase @Inject constructor(
     private val podcastRepository: PodcastRepository
 ) {
-    suspend operator fun invoke(episodeId: String, multiUserId: String?): PodcastEpisode? =
-        podcastRepository.downloadEpisodeAndAddToDb(episodeId, multiUserId)
+    suspend operator fun invoke(
+        episodeId: String,
+        multiUserId: String?,
+        podcastId: String? = null,
+        podcastName: String? = null
+    ): PodcastEpisode? =
+        podcastRepository.downloadEpisodeAndAddToDb(episodeId, multiUserId, podcastId, podcastName)
 }

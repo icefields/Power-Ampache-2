@@ -23,10 +23,14 @@ package luci.sixsixsix.powerampache2.data.local.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import luci.sixsixsix.powerampache2.domain.models.MusicAttribute
 import luci.sixsixsix.powerampache2.domain.models.PodcastEpisode
 
-@Entity(primaryKeys = ["id", "multiUserId"])
+@Entity(
+    primaryKeys = ["id", "multiUserId"],
+    indices = [Index("podcastId", "multiUserId")]
+)
 data class DownloadedPodcastEpisodeEntity(
     val id: String,
     val title: String,

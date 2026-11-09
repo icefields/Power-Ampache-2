@@ -29,6 +29,18 @@ class ResumePolicyTest {
     }
 
     @Test
+    fun episodeShorterThanTheThresholdIsNotFinishedBeforeItsEnd() {
+        // with a flat threshold a 20s episode would be 'finished' at every position, disabling resume
+        assertFalse(ResumePolicy.isFinished(positionMs = 5_000L, durationMs = 20_000L))
+        assertFalse(ResumePolicy.isFinished(positionMs = 0L, durationMs = 20_000L))
+    }
+
+    @Test
+    fun episodeShorterThanTheThresholdIsFinishedAtItsEnd() {
+        assertTrue(ResumePolicy.isFinished(positionMs = 20_000L, durationMs = 20_000L))
+    }
+
+    @Test
     fun savesOnlyAfterTheInterval() {
         assertFalse(ResumePolicy.shouldSave(lastSavedAtMs = 10_000L, nowMs = 14_999L))
         assertTrue(ResumePolicy.shouldSave(lastSavedAtMs = 10_000L, nowMs = 15_000L))
@@ -52,5 +64,10 @@ class ResumePolicyTest {
     @Test
     fun savedPositionWithUnknownDurationIsUsed() {
         assertEquals(600_000L, ResumePolicy.startPositionMs(EpisodePosition("1", 600_000L, 0L)))
+    }
+
+    @Test
+    fun shortEpisodeStartsAtTheSavedPosition() {
+        assertEquals(5_000L, ResumePolicy.startPositionMs(EpisodePosition("1", 5_000L, 20_000L)))
     }
 }

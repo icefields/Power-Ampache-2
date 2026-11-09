@@ -7,7 +7,6 @@ import luci.sixsixsix.powerampache2.domain.models.PodcastEpisode
 import luci.sixsixsix.powerampache2.domain.models.Song
 import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
 import luci.sixsixsix.powerampache2.presentation.models.distinctByKey
-import luci.sixsixsix.powerampache2.presentation.models.queueEntryKeys
 import luci.sixsixsix.powerampache2.presentation.models.toPodcastEpisodeUI
 import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import luci.sixsixsix.powerampache2.presentation.models.totalTime
@@ -56,12 +55,6 @@ class PlayableUITest {
     fun distinctByKeyKeepsSongAndEpisodeWithTheSameId() {
         val list: List<PlayableUI> = listOf(testSong("123"), testEpisode("123"), testSong("123"))
         assertEquals(listOf(testSong("123").key, testEpisode("123").key), list.distinctByKey().map { it.key })
-    }
-
-    @Test
-    fun queueEntryKeysAreUniqueForRepeatedItems() {
-        val queue: List<PlayableUI> = listOf(testSong("123"), testEpisode("123"), testSong("123"), testSong("7"))
-        assertEquals(listOf("123", "pe-123", "123#2", "7"), queue.queueEntryKeys())
     }
 
     @Test

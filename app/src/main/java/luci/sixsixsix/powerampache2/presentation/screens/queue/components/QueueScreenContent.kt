@@ -55,7 +55,6 @@ import luci.sixsixsix.powerampache2.presentation.dialogs.info.InfoDialogSong
 import luci.sixsixsix.powerampache2.presentation.dialogs.info.ShowSongInfoDialogOpen
 import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
 import luci.sixsixsix.powerampache2.presentation.models.PodcastEpisodeUI
-import luci.sixsixsix.powerampache2.presentation.models.queueEntryKeys
 import luci.sixsixsix.powerampache2.presentation.models.withDownloadState
 import luci.sixsixsix.powerampache2.presentation.models.SongUI
 import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
@@ -72,11 +71,11 @@ fun QueueScreenContent(
     modifier: Modifier = Modifier,
     addToPlaylistOrQueueDialogViewModel: AddToPlaylistOrQueueDialogViewModel
 ) {
-    // not a delegate: LazyColumn can run its content before recomposition, and must not see a new queue with old keys
+    // keys are derived from the items themselves (item.key.playerId), so they can never desync
+    // from the queue state the LazyColumn renders
     val queue = queueViewModel.queueFlow.collectAsState().value
     val currentItem by mainViewModel.currentItemStateFlow().collectAsState()
     val downloadedEpisodeIds by mainViewModel.downloadedEpisodeIds.collectAsState()
-    val queueKeys = remember(queue) { queue.queueEntryKeys() }
 
     var playlistsDialogOpen by remember { mutableStateOf(AddToPlaylistOrQueueDialogOpen(false)) }
     if (playlistsDialogOpen.isOpen) {
@@ -157,7 +156,7 @@ fun QueueScreenContent(
     LazyColumn(modifier = modifier.fillMaxSize()) {
         itemsIndexed(
             items = queue,
-            key = { index, _ -> queueKeys[index] }
+            key = { _, item -> item.key.playerId }
         ) { _, queueItem ->
             when (val item = if (queueItem is PodcastEpisodeUI) queueItem.withDownloadState(downloadedEpisodeIds) else queueItem) {
                 is PodcastEpisodeUI -> EpisodeItem(

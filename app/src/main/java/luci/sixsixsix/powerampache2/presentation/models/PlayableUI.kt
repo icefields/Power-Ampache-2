@@ -51,17 +51,3 @@ fun <T : PlayableUI> List<T>.reduceList(): List<T> = if (size > Constants.config
 
 /** keeps the first occurrence of each key, like the LinkedHashSet the queue used before */
 fun List<PlayableUI>.distinctByKey(): List<PlayableUI> = distinctBy { it.key }
-
-/**
- * Stable LazyColumn keys for a queue: the player id, with the occurrence number appended when
- * the queue holds the same item more than once.
- */
-fun List<PlayableUI>.queueEntryKeys(): List<String> {
-    val occurrences = HashMap<String, Int>()
-    return map { item ->
-        val playerId = item.key.playerId
-        val occurrence = (occurrences[playerId] ?: 0) + 1
-        occurrences[playerId] = occurrence
-        if (occurrence == 1) playerId else "$playerId#$occurrence"
-    }
-}
