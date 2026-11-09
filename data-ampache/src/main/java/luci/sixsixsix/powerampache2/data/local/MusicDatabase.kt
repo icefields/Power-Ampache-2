@@ -90,7 +90,8 @@ import luci.sixsixsix.powerampache2.data.local.entities.UserEntity
         AutoMigration(from = 84, to = 85),
         AutoMigration(from = 85, to = 86),
         AutoMigration(from = 86, to = 87),
-        AutoMigration(from = 87, to = Constants.DATABASE_VERSION),
+        AutoMigration(from = 87, to = 88),
+        AutoMigration(from = 88, to = Constants.DATABASE_VERSION),
     ],
     exportSchema = true
 )

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 88,
-    "identityHash": "82e4c52c786cb50333695ca01942d953",
+    "identityHash": "b67f6f140b5b564882494c13532575e6",
     "entities": [
       {
         "tableName": "AlbumEntity",
@@ -1895,19 +1895,7 @@
             "id",
             "multiUserId"
           ]
-        },
-        "indices": [
-          {
-            "name": "index_PodcastEpisodeEntity_podcastId_multiUserId",
-            "unique": false,
-            "columnNames": [
-              "podcastId",
-              "multiUserId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PodcastEpisodeEntity_podcastId_multiUserId` ON `${TABLE_NAME}` (`podcastId`, `multiUserId`)"
-          }
-        ]
+        }
       },
       {
         "tableName": "DownloadedPodcastEpisodeEntity",
@@ -2017,19 +2005,7 @@
             "id",
             "multiUserId"
           ]
-        },
-        "indices": [
-          {
-            "name": "index_DownloadedPodcastEpisodeEntity_podcastId_multiUserId",
-            "unique": false,
-            "columnNames": [
-              "podcastId",
-              "multiUserId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_DownloadedPodcastEpisodeEntity_podcastId_multiUserId` ON `${TABLE_NAME}` (`podcastId`, `multiUserId`)"
-          }
-        ]
+        }
       },
       {
         "tableName": "EpisodePositionEntity",
@@ -2072,7 +2048,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '82e4c52c786cb50333695ca01942d953')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b67f6f140b5b564882494c13532575e6')"
     ]
   }
 }
