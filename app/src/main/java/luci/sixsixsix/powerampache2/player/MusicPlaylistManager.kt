@@ -84,12 +84,13 @@ class MusicPlaylistManager @Inject constructor() {
 
     fun replaceCurrentQueue(newQueue: List<PlayableUI>) {
         L( "MusicPlaylistManager replaceCurrentQueue", newQueue.size)
-        _currentQueueState.value = newQueue.reduceList()
+        // dedup on every write path: LazyColumn keys are the item playerId, duplicates would crash it
+        _currentQueueState.value = newQueue.distinctByKey().reduceList()
         checkCurrentSong()
     }
 
     fun replaceQueuePlaySong(newQueue: List<PlayableUI>, songToPlay: PlayableUI) {
-        _currentQueueState.value = newQueue.reduceList()
+        _currentQueueState.value = newQueue.distinctByKey().reduceList()
         _currentItemState.value = songToPlay
     }
 

@@ -219,6 +219,16 @@ class StorageManagerImpl @Inject constructor(
         }
     }
 
+    /** true when the file at [path] is still on storage: an absolute path or a SAF content uri */
+    @Throws(Exception::class)
+    override suspend fun isFilePresent(path: String): Boolean = withContext(Dispatchers.IO) {
+        if (path.startsWith("content://")) {
+            DocumentFile.fromSingleUri(context, Uri.parse(path))?.exists() ?: false
+        } else {
+            File(path).exists()
+        }
+    }
+
     /** true when the file is gone after the call, also when it was already missing */
     @Throws(Exception::class)
     override suspend fun deleteEpisodeFile(path: String): Boolean = withContext(Dispatchers.IO) {

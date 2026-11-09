@@ -160,11 +160,16 @@ class PodcastRepositoryImpl @Inject constructor(
         emit(Resource.Loading(false))
     }.catch { e -> errorHandler("getPodcastEpisodes()", e, this) }
 
-    override suspend fun getEpisodeUri(episode: PodcastEpisode): String =
-        podcastDao.getDownloadedEpisode(episode.id)?.localPath
-            ?: dao.getSongUrlData().first()?.getEpisodeUrl(episode.id)
+    override suspend fun getEpisodeUri(episode: PodcastEpisode): String {
+        // a record can outlive its file (deleted from a file manager): fall back to the stream url
+        val downloaded = podcastDao.getDownloadedEpisode(episode.id)
+        if (downloaded != null && storageManager.isFilePresent(downloaded.localPath)) {
+            return downloaded.localPath
+        }
+        return dao.getSongUrlData().first()?.getEpisodeUrl(episode.id)
             ?: SongUrl(authToken = authToken(), serverUrl = getCredentials()!!.serverUrl)
                 .getEpisodeUrl(episode.id)
+    }
 
     override suspend fun isEpisodeDownloaded(episodeId: String): Boolean =
         podcastDao.getDownloadedEpisode(episodeId) != null
@@ -174,20 +179,36 @@ class PodcastRepositoryImpl @Inject constructor(
         // the worker reads the episode from the cache, which a page 0 refresh can clear
         podcastDao.insertEpisodes(listOf(episode.toPodcastEpisodeEntity(getCurrentCredentials().multiUserId)))
         workerHelper.startEpisodeDownloadWorker(
-            authToken = authToken(),
-            username = getCurrentCredentials().username,
             multiUserId = getCurrentCredentials().multiUserId,
-            episodeId = episode.id
+            episodeId = episode.id,
+            // Nextcloud Music omits the podcast field of an episode: carry the identity in the
+            // work request, the single-episode endpoint cannot recover it on a cache miss
+            podcastId = episode.podcast.id,
+            podcastName = episode.podcast.name
         ).also { requestId -> L("Episode download worker requestId: $requestId") }
     }
 
     @Throws(Exception::class)
-    override suspend fun downloadEpisodeAndAddToDb(episodeId: String, multiUserId: String?): PodcastEpisode? {
+    override suspend fun downloadEpisodeAndAddToDb(
+        episodeId: String,
+        multiUserId: String?,
+        podcastId: String?,
+        podcastName: String?
+    ): PodcastEpisode? {
         // work queued before the account was stored in the request belongs to the current account
         val owner = multiUserId ?: getCurrentCredentials().multiUserId
         checkAccount(owner)
-        val episode = podcastDao.getEpisode(episodeId)?.toPodcastEpisode()
-            ?: fetchEpisodeAndCache(episodeId)
+        val episode = (podcastDao.getEpisode(episodeId)?.toPodcastEpisode()
+            ?: fetchEpisodeAndCache(episodeId))
+            // Nextcloud Music does not send the podcast of an episode: use the podcast from
+            // the work request, the same fallback as the episode list (withPodcastIfMissing)
+            ?.let { fetched ->
+                if (fetched.podcast.id.isBlank() && !podcastId.isNullOrBlank()) {
+                    fetched.copy(podcast = MusicAttribute(podcastId, podcastName ?: ""))
+                } else {
+                    fetched
+                }
+            }
             ?: return null
         if (!episode.isPlayable) return null
         if (isEpisodeDownloaded(episodeId)) return episode

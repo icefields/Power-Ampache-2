@@ -12,6 +12,8 @@ interface StorageManager {
     @Throws(Exception::class) suspend fun saveEpisodeImage(episode: PodcastEpisode, inputStream: InputStream): String
     /** path is the value returned by saveEpisode: an absolute path or a SAF content uri */
     @Throws(Exception::class) suspend fun deleteEpisodeFile(path: String): Boolean
+    /** true when the file at [path] (an absolute path or a SAF content uri) is still on storage */
+    @Throws(Exception::class) suspend fun isFilePresent(path: String): Boolean
     @Throws(Exception::class) suspend fun deleteSong(song: Song): Boolean
     @Throws(Exception::class) suspend fun deleteAll(): Boolean
     @Throws(Exception::class) suspend fun getAllSongsFromInternalStorages(): List<File>

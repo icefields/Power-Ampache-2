@@ -82,9 +82,22 @@ class MusicPlaylistManagerTest {
     }
 
     @Test
-    fun songAddToQueueTopKeepsDuplicates() {
+    fun songAddToQueueTopKeepsOneCopyOfADuplicate() {
         manager.addToCurrentQueue(listOf(testSong("1"), testSong("2")))
         manager.addToCurrentQueueTop(listOf(testSong("1")))
-        assertEquals(listOf(testSong("1").key, testSong("1").key, testSong("2").key), queueKeys())
+        assertEquals(listOf(testSong("1").key, testSong("2").key), queueKeys())
+    }
+
+    @Test
+    fun replacingTheQueueWithDuplicatesKeepsOneCopy() {
+        manager.replaceCurrentQueue(listOf(testSong("1"), testSong("1"), testEpisode("1")))
+        assertEquals(listOf(testSong("1").key, testEpisode("1").key), queueKeys())
+    }
+
+    @Test
+    fun replaceQueuePlaySongKeepsOneCopyOfADuplicate() {
+        manager.replaceQueuePlaySong(listOf(testSong("1"), testSong("1")), testSong("1"))
+        assertEquals(listOf(testSong("1").key), queueKeys())
+        assertEquals(testSong("1").key, manager.currentItemState.value?.key)
     }
 }

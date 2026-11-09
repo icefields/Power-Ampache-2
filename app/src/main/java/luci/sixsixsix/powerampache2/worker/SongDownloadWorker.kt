@@ -75,6 +75,8 @@ class SongDownloadWorker @AssistedInject constructor(
                     workDataOf(
                         KEY_RESULT_ERROR to "Song.mediaId, or Song, is null!, songId:$songId"))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(
                 workDataOf(
@@ -113,8 +115,11 @@ class SongDownloadWorker @AssistedInject constructor(
     private suspend fun downloadEpisode(): Result {
         val episodeId = params.inputData.getString(KEY_SONG) ?: ERROR_STRING
         val multiUserId = params.inputData.getString(KEY_MULTI_USER_ID)
+        // Nextcloud Music omits the podcast field of an episode: the enqueue site carried it here
+        val podcastId = params.inputData.getString(KEY_PODCAST_ID)
+        val podcastName = params.inputData.getString(KEY_PODCAST_NAME)
         return try {
-            downloadEpisodeUseCase(episodeId, multiUserId)?.let { episode ->
+            downloadEpisodeUseCase(episodeId, multiUserId, podcastId, podcastName)?.let { episode ->
                 setProgress(workDataOf(KEY_PROGRESS to 100, KEY_SONG to episode.title))
                 Result.success(workDataOf(KEY_RESULT_EPISODE to episodeId))
             } ?: Result.failure(
@@ -136,6 +141,8 @@ class SongDownloadWorker @AssistedInject constructor(
         const val KEY_RESULT_SONG = "${prefix}KEY_RESULT_SONG"
         const val KEY_MEDIA_TYPE = "${prefix}KEY_MEDIA_TYPE"
         const val KEY_MULTI_USER_ID = "${prefix}KEY_MULTI_USER_ID"
+        const val KEY_PODCAST_ID = "${prefix}KEY_PODCAST_ID"
+        const val KEY_PODCAST_NAME = "${prefix}KEY_PODCAST_NAME"
         const val KEY_RESULT_EPISODE = "${prefix}KEY_RESULT_EPISODE"
         const val KEY_RESULT_ERROR = "${prefix}KEY_RESULT_ERROR"
         const val KEY_PROGRESS = "${prefix}KEY_PROGRESS"
@@ -177,16 +184,16 @@ class SongDownloadWorker @AssistedInject constructor(
 
         suspend fun startEpisodeDownloadWorker(
             context: Context,
-            authToken: String,
-            username: String,
             multiUserId: String,
-            episodeId: String
+            episodeId: String,
+            podcastId: String,
+            podcastName: String
         ): UUID = enqueueDownload(context, workDataOf(
             KEY_SONG to episodeId,
             KEY_MEDIA_TYPE to MediaType.PODCAST_EPISODE.name,
-            KEY_AUTH_TOKEN to authToken,
-            KEY_USERNAME to username,
-            KEY_MULTI_USER_ID to multiUserId))
+            KEY_MULTI_USER_ID to multiUserId,
+            KEY_PODCAST_ID to podcastId,
+            KEY_PODCAST_NAME to podcastName))
 
         private suspend fun enqueueDownload(context: Context, inputData: Data): UUID {
             val request = OneTimeWorkRequestBuilder<SongDownloadWorker>()
