@@ -322,5 +322,6 @@
     <string name="podcasts_empty">No podcasts on this server</string>
     <string name="podcasts_disabled_on_server">Podcasts are disabled on this server</string>
     <string name="offline_downloaded_episodes">Downloaded episodes (%1$d)</string>
+    <string name="downloaded_episodes_title">Downloaded episodes</string>
     <string name="podcast_episodes_empty">No episodes</string>
 </resources>
