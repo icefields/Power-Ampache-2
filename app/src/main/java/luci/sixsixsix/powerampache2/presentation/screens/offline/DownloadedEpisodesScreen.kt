@@ -23,17 +23,26 @@ package luci.sixsixsix.powerampache2.presentation.screens.offline
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.presentation.common.CircleBackButton
 import luci.sixsixsix.powerampache2.presentation.common.EmptyListView
 import luci.sixsixsix.powerampache2.presentation.common.episodeitem.EpisodeItem
 import luci.sixsixsix.powerampache2.presentation.common.episodeitem.onEpisodeItemEvent
@@ -42,6 +51,7 @@ import luci.sixsixsix.powerampache2.presentation.navigation.Ampache2NavGraphs
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Destination
 fun DownloadedEpisodesScreen(
@@ -53,27 +63,49 @@ fun DownloadedEpisodesScreen(
     val currentItem by mainViewModel.currentItemStateFlow().collectAsStateWithLifecycle()
     val episodes = remember(downloaded) { downloaded.map { it.toPodcastEpisodeUI(isDownloaded = true) } }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        if (episodes.isEmpty()) {
-            EmptyListView(title = stringResource(id = R.string.offline_noData_warning))
+    // every other detail screen shows a transparent top bar with a back button
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = Color.Transparent,
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.downloaded_episodes_title),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                navigationIcon = { CircleBackButton { navigator.navigateUp() } }
+            )
         }
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(episodes, key = { it.key.playerId }) { episode ->
-                EpisodeItem(
-                    episode = episode,
-                    isCurrent = episode.key == currentItem?.key,
-                    showGoToPodcast = true,
-                    onClick = { mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(episode, listOf())) },
-                    onEvent = { event ->
-                        mainViewModel.onEpisodeItemEvent(
-                            episode = episode,
-                            event = event,
-                            onGoToPodcast = {
-                                Ampache2NavGraphs.navigateToPodcast(podcastId = episode.episode.podcast.id)
-                            }
-                        )
-                    }
-                )
+    ) { paddingValues ->
+        Box(modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()
+        ) {
+            if (episodes.isEmpty()) {
+                EmptyListView(title = stringResource(id = R.string.offline_noData_warning))
+            }
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(episodes, key = { it.key.playerId }) { episode ->
+                    EpisodeItem(
+                        episode = episode,
+                        isCurrent = episode.key == currentItem?.key,
+                        showGoToPodcast = true,
+                        onClick = { mainViewModel.onEvent(MainEvent.PlaySongAddToQueueTop(episode, listOf())) },
+                        onEvent = { event ->
+                            mainViewModel.onEpisodeItemEvent(
+                                episode = episode,
+                                event = event,
+                                onGoToPodcast = {
+                                    Ampache2NavGraphs.navigateToPodcast(podcastId = episode.episode.podcast.id)
+                                }
+                            )
+                        }
+                    )
+                }
             }
         }
     }
