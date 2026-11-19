@@ -32,6 +32,7 @@ import kotlinx.coroutines.withContext
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.common.Resource
 import luci.sixsixsix.powerampache2.data.local.MusicDatabase
+import luci.sixsixsix.powerampache2.data.local.entities.DownloadedPodcastEpisodeEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toDownloadedPodcastEpisodeEntity
 import luci.sixsixsix.powerampache2.data.local.entities.toEpisodePosition
 import luci.sixsixsix.powerampache2.data.local.entities.toEpisodePositionEntity
@@ -161,18 +162,36 @@ class PodcastRepositoryImpl @Inject constructor(
     }.catch { e -> errorHandler("getPodcastEpisodes()", e, this) }
 
     override suspend fun getEpisodeUri(episode: PodcastEpisode): String {
-        // a record can outlive its file (deleted from a file manager): fall back to the stream url
-        val downloaded = podcastDao.getDownloadedEpisode(episode.id)
-        if (downloaded != null && storageManager.isFilePresent(downloaded.localPath)) {
-            return downloaded.localPath
-        }
+        downloadedEpisodeWithFile(episode.id)?.let { return it.localPath }
         return dao.getSongUrlData().first()?.getEpisodeUrl(episode.id)
             ?: SongUrl(authToken = authToken(), serverUrl = getCredentials()!!.serverUrl)
                 .getEpisodeUrl(episode.id)
     }
 
     override suspend fun isEpisodeDownloaded(episodeId: String): Boolean =
-        podcastDao.getDownloadedEpisode(episodeId) != null
+        downloadedEpisodeWithFile(episodeId) != null
+
+    /**
+     * The download record of [episodeId], or null if there is none. A record can outlive its file
+     * (deleted from a file manager): that record is removed, so the lists stop showing the episode
+     * as downloaded and the user can download it again. If the check fails, the record stays.
+     */
+    private suspend fun downloadedEpisodeWithFile(episodeId: String): DownloadedPodcastEpisodeEntity? {
+        val downloaded = podcastDao.getDownloadedEpisode(episodeId) ?: return null
+        val isFilePresent = try {
+            storageManager.isFilePresent(downloaded.localPath)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorHandler.logError(e)
+            true
+        }
+        if (isFilePresent) return downloaded
+        L("downloaded episode file is missing, removing the record: ${downloaded.localPath}")
+        podcastDao.deleteDownloadedEpisode(episodeId)
+        deleteUnusedPodcastArt(downloaded.podcastId, downloaded.localImagePath)
+        return null
+    }
 
     override suspend fun downloadEpisode(episode: PodcastEpisode) {
         if (!episode.isPlayable || isEpisodeDownloaded(episode.id)) return

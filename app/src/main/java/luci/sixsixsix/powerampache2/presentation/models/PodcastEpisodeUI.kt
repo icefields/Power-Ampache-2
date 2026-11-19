@@ -36,7 +36,11 @@ data class PodcastEpisodeUI(
     override val subtitle: String get() = episode.podcast.name
     override val imageUrl: String get() = episode.artUrl
     override val durationSec: Int get() = episode.time
-    val isPlayable: Boolean get() = episode.isPlayable
+    /**
+     * A downloaded episode plays from its file. A later refresh can change its server state (the
+     * server deleted its file), and the user must still play it and delete the download.
+     */
+    val isPlayable: Boolean get() = episode.isPlayable || isDownloaded
 }
 
 fun PodcastEpisode.toPodcastEpisodeUI(isDownloaded: Boolean = false) =

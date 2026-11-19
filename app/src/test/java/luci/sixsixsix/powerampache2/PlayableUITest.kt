@@ -65,4 +65,11 @@ class PlayableUITest {
         assertFalse(downloaded.withDownloadState(setOf()).isDownloaded)
         assertSame(downloaded, downloaded.withDownloadState(setOf("123")))
     }
+
+    @Test
+    fun aDownloadedEpisodeStaysPlayableWhenTheServerStateChanges() {
+        assertFalse(testEpisode("123", state = "pending").isPlayable)
+        assertTrue(testEpisode("123", state = "pending").copy(isDownloaded = true).isPlayable)
+        assertTrue(testEpisode("123").isPlayable)
+    }
 }

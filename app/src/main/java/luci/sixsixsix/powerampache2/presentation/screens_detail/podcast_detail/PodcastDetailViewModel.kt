@@ -28,6 +28,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +51,8 @@ class PodcastDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private val podcastId: String = savedStateHandle.get<String>("podcastId") ?: ""
     private val episodes = MutableStateFlow<List<PodcastEpisode>>(listOf())
-    private var isEndOfDataReached = false
+    private val paging = EpisodePaging()
+    private var loadJob: Job? = null
 
     var state by mutableStateOf(PodcastDetailState(podcast = savedStateHandle.get<Podcast>("podcast")))
         private set
@@ -76,22 +78,28 @@ class PodcastDetailViewModel @Inject constructor(
     }
 
     fun refresh() {
-        isEndOfDataReached = false
+        paging.reset()
         load(offset = 0)
     }
 
     fun onBottomReached() {
-        if (state.isFetchingMore || state.isLoading || isEndOfDataReached) return
+        if (state.isFetchingMore || state.isLoading || paging.isEndReached) return
         state = state.copy(isFetchingMore = true)
-        load(offset = episodes.value.size)
+        load(offset = paging.nextOffset)
     }
 
-    private fun load(offset: Int) = viewModelScope.launch {
+    /** a new load replaces the running one, so an older page cannot overwrite the paging state */
+    private fun load(offset: Int) {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch { collectEpisodes(offset) }
+    }
+
+    private suspend fun collectEpisodes(offset: Int) {
         podcastRepository.getPodcastEpisodes(podcastId, offset = offset, fetchRemote = true).collect { result ->
             when (result) {
                 is Resource.Success -> {
                     result.data?.let { episodes.value = it }
-                    if (result.networkData?.isEmpty() == true && offset > 0) isEndOfDataReached = true
+                    paging.onResult(offset, result.networkData, cachedCount = result.data?.size ?: 0)
                 }
                 is Resource.Error -> state = state.copy(isLoading = false, isFetchingMore = false)
                 is Resource.Loading -> {
