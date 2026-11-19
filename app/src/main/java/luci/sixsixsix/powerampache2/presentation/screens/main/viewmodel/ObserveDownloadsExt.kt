@@ -26,9 +26,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
+import luci.sixsixsix.powerampache2.domain.models.MediaKey
+import luci.sixsixsix.powerampache2.domain.models.MediaType
 import luci.sixsixsix.powerampache2.presentation.models.toSongUI
 import luci.sixsixsix.powerampache2.worker.SongDownloadWorker
 
@@ -84,6 +87,22 @@ internal fun MainViewModel.observeDownloads(application: Context) {
                                         //WorkManager.getInstance(application).pruneWork()
                                         L("emitting", finishedSong.name)
                                     }
+                                }
+                            }
+                        }
+                        workInfo.outputData.getString(SongDownloadWorker.KEY_RESULT_EPISODE)?.let { episodeId ->
+                            viewModelScope.launch {
+                                // the prefixed key keeps episode 42 apart from song 42
+                                val emittedKey = MediaKey(MediaType.PODCAST_EPISODE, episodeId).playerId
+                                if (!emittedDownloads.contains(emittedKey)) {
+                                    emittedDownloads = emittedDownloads.toMutableList().apply { add(emittedKey) }
+                                    podcastRepository.downloadedEpisodesFlow.first()
+                                        .firstOrNull { it.id == episodeId }
+                                        ?.let { episode ->
+                                            errorHandler.updateUserMessage(
+                                                application.getString(R.string.podcast_episode_downloaded_snackbar, episode.title)
+                                            )
+                                        }
                                 }
                             }
                         }

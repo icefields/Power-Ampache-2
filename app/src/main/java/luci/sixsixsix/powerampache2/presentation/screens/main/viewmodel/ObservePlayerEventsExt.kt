@@ -104,7 +104,7 @@ private var playbackErrorCount = 0
 
 @OptIn(UnstableApi::class)
 private fun MainViewModel.calculateProgressValue(currentProgress: Long) {
-    if (duration <= 0L) duration = (currentSong()?.time?.toLong() ?: 1) * 1000
+    if (duration <= 0L) duration = (currentItem()?.durationSec?.toLong() ?: 1) * 1000
     progress = if (currentProgress > 0) (currentProgress.toFloat() / duration) else 0f
     progressStr = formatDuration(currentProgress)
 }

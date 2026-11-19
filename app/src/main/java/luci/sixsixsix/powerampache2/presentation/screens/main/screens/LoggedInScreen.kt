@@ -55,7 +55,7 @@ import luci.sixsixsix.mrlog.L
 import luci.sixsixsix.powerampache2.R
 import luci.sixsixsix.powerampache2.presentation.NavGraphs
 import luci.sixsixsix.powerampache2.presentation.dialogs.IntroDialog
-import luci.sixsixsix.powerampache2.presentation.models.SongUI
+import luci.sixsixsix.powerampache2.presentation.models.PlayableUI
 import luci.sixsixsix.powerampache2.presentation.screens.main.AuthViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.CheckCustomStoragePermissionDialog
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.SheetDragHandle
@@ -75,7 +75,7 @@ fun LoggedInScreen(
     val state = mainViewModel.state
     val offlineModeState by settingsViewModel.offlineModeStateFlow.collectAsState()
 
-    val songState by mainViewModel.currentSongStateFlow().collectAsState()
+    val songState by mainViewModel.currentItemStateFlow().collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState()
     val errorMessageOffline = stringResource(id = R.string.error_offline)
 
@@ -166,5 +166,5 @@ fun LoggedInScreen(
 }
 
 @Composable
-fun getPeakHeight(song: SongUI?): Dp = //TODO find a way to animate this (low-priority)
+fun getPeakHeight(song: PlayableUI?): Dp = //TODO find a way to animate this (low-priority)
     if (song == null) { 0.dp } else { dimensionResource(id = R.dimen.miniPlayer_height) }

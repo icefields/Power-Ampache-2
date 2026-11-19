@@ -105,10 +105,11 @@ import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.MainTabRow
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.MainTabRow.tabItems
 import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.TabItem
-import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.drawerItems
+import luci.sixsixsix.powerampache2.presentation.screens.main.screens.components.drawerItemsFor
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainEvent
 import luci.sixsixsix.powerampache2.presentation.screens.main.viewmodel.MainViewModel
 import luci.sixsixsix.powerampache2.presentation.screens.offline.OfflineSongsMainContent
+import luci.sixsixsix.powerampache2.presentation.screens.podcasts.PodcastsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.playlists.PlaylistsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.plugins.PluginsScreen
 import luci.sixsixsix.powerampache2.presentation.screens.search.SearchResultsScreen
@@ -141,6 +142,7 @@ fun MainContentScreen(
     val localSettingsState by settingsViewModel.localSettingsStateFlow.collectAsState()
     val notificationQueueEmpty by mainViewModel.notificationQueueEmptyState.collectAsState(true)
     val user by authViewModel.userStateFlow.collectAsState()
+    val session by authViewModel.sessionStateFlow.collectAsState()
     val tabsCount = tabItems.size
     val pagerState = rememberPagerState { tabsCount }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -185,7 +187,7 @@ fun MainContentScreen(
         //scrimColor = MaterialTheme.colorScheme.scrim,
         drawerContent = {
             MainDrawer(
-                items = drawerItems,
+                items = drawerItemsFor(session?.podcasts ?: 0),
                 currentItem = MainContentMenuItem.toMainContentMenuItem(currentScreen),
                 user = user ?: User.emptyUser(),
                 versionInfo = settingsViewModel.state.appVersionInfoStr,
@@ -323,6 +325,9 @@ fun MainContentScreen(
                                barTitle = offlineScreenStr
                            }
                        )
+                       is MainContentMenuItem.Podcasts -> PodcastsScreen(
+                           navigator = navigator,
+                       ).also { barTitle = stringResource(id = menuItem.title) }
                        is MainContentMenuItem.Settings -> SettingsScreen(
                            navigator = navigator,
                            settingsViewModel = settingsViewModel

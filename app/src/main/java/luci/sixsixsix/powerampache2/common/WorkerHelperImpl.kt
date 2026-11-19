@@ -16,4 +16,17 @@ class WorkerHelperImpl @Inject constructor(
         username: String,
         song: Song
     ): UUID = SongDownloadWorker.startSongDownloadWorker(context, authToken, username, song)
+
+    override suspend fun startEpisodeDownloadWorker(
+        multiUserId: String,
+        episodeId: String,
+        podcastId: String,
+        podcastName: String
+    ): UUID = SongDownloadWorker.startEpisodeDownloadWorker(
+        context = context,
+        multiUserId = multiUserId,
+        episodeId = episodeId,
+        podcastId = podcastId,
+        podcastName = podcastName
+    )
 }
