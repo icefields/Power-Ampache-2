@@ -55,7 +55,7 @@ android {
     defaultConfig {
         applicationId = "luci.sixsixsix.powerampache2"
         minSdk = 28
-        targetSdk = 35 // 36 will enforce edge-to-edge
+        targetSdk = 36
         versionCode = 95
         versionName = "1.01-89"
         val versionQuote = "This version is powered by the elliptical galaxy in the Virgo Cluster"
