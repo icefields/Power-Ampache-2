@@ -112,7 +112,7 @@
     <string name="player_buttonText_download">@string/download</string>
     <string name="player_buttonText_share">Condividi</string>
     <string name="player_buttonText_info">Info</string>
-    <string name="player_queue_upNext">Coda di riproduzione</string>
+    <string name="player_queue_upNext">Coda</string>
     <string name="player_queue_lyrics">Testo</string>
     <string name="logout_offline_warning">Disabilita la Modalità Offline prima di disconnetterti</string>
     <string name="offline_noData_warning">Non hai ancora scaricato alcun brano</string>
