@@ -1,0 +1,311 @@
+<resources>
+    <string name="notification_channel_description">Показва текущо възпроизвежданата музика</string>
+    <string name="coming_soon">Очаквайте скоро</string>
+
+    <string name="albumDetailScreen_infoSection_year">Година</string>
+    <string name="albumDetailScreen_infoSection_songs">Песни</string>
+    <string name="albumDetailScreen_infoSection_time">Обща продължителност</string>
+    <string name="playlistDetailScreen_infoSection_avgRating">Среден рейтинг</string>
+    <string name="playlistItem_songCount">%s песни</string>
+    <string name="topBar_search_hint">Търсене на песни, албуми, изпълнители, плейлисти</string>
+    <string name="main_tab_title_albums">Албуми</string>
+    <string name="main_tab_title_home">Начало</string>
+    <string name="main_tab_title_songs">Песни</string>
+    <string name="main_tab_title_artists">Изпълнители</string>
+    <string name="main_tab_title_playlists">Плейлисти</string>
+    <string name="loginScreen_username">Потребителско име</string>
+    <string name="loginScreen_signUp_email">Имейл</string>
+    <string name="loginScreen_fullname">Пълно име (по избор)</string>
+    <string name="loginScreen_password">Парола</string>
+    <string name="loginScreen_password_repeat">Потвърдете паролата</string>
+    <string name="loginScreen_register_success">Потребителят е регистриран успешно\nВече можете да влезете с вашите данни\nПотвърдете имейла си, ако сървърът го изисква</string>
+    <string name="loginScreen_server_url">URL адрес на сървъра</string>
+    <string name="loginScreen_signUp_requiredField">Това поле е задължително</string>
+    <string name="loginScreen_auth_token">Токен за удостоверяване</string>
+    <string name="loginScreen_auth_token_warning">Влизането с токен за удостоверяване работи със сървъри версия 6.4 и по-нови</string>
+    <string name="loginScreen_login">Вход</string>
+    <string name="loginScreen_signup">Регистрация</string>
+    <string name="loginScreen_demo_server">Демо</string>
+    <string name="loginScreen_loading_authenticating">Свързване …</string>
+    <string name="loginScreen_dogmazic_server">Dogmazic Music Server ДЕМО</string>
+    <string name="loginScreen_textFields_warning">Съвместимо със сървъри версия 4 и по-нови.\nТествано със сървър версия 6</string>
+    <string name="loginScreen_warning">За да се свържете със собствен сървър, изтеглете пълната версия на Power Ampache 2</string>
+
+    <string name="home_section_title_recent">Наскоро слушани</string>
+    <string name="home_section_title_recommended">Препоръчани</string>
+    <string name="home_section_title_flagged">Любими</string>
+    <string name="home_section_title_frequent">Често слушани</string>
+    <string name="home_section_title_highest">С най-висок рейтинг</string>
+    <string name="home_section_title_newest">Наскоро добавени</string>
+    <string name="home_section_title_playlists">Плейлисти</string>
+    <string name="home_section_title_moreAlbums">Още албуми</string>
+    <string name="home_section_title_loading">Зареждане</string>
+    <string name="home_artist_subtitle_item">Изпълнител</string>
+
+    <!-- content description strings-->
+    <string name="back_content_description">Назад</string>
+    <string name="search_content_description">Търсене</string>
+    <string name="menu_content_description">Падащо меню</string>
+
+    <!-- ERROR messages-->
+    <string name="error_io_exception">Данните не могат да бъдат заредени. Свързани ли сте с интернет?\nАко проблемът продължава, затворете приложението и го отворете отново</string>
+    <string name="error_cannotEditPreference">Настройката не може да бъде редактирана</string>
+    <string name="error_http_exception">Данните не могат да бъдат заредени. Свързани ли сте с интернет?\nАко проблемът продължава, затворете приложението и го отворете отново</string>
+    <string name="error_empty_result">Няма резултати за показване или се опитвате да добавите или премахнете нещо, което не е намерено на сървъра</string>
+    <string name="error_duplicate">Дублиран запис</string>
+    <string name="error_user_fetch">Възникна проблем при извличането на потребителя ви от сървъра</string>
+
+    <string name="error_playback_exception">Проблем при възпроизвеждането на тази песен.</string>
+    <string name="share_song_cannot_find">Споделената песен не може да бъде намерена</string>
+
+
+    <string name="crash_mail_subject">Доклад за срив</string>
+    <string name="crash_mail_body">Данни от доклада за срив. Благодаря</string>
+
+    <string name="error_offline">Не може да се осъществи връзка с вашия сървър</string>
+
+
+    <string name="offlineMode">Офлайн режим</string>
+    <string name="offlineMode_switch_title">Офлайн режим</string>
+
+    <!-- SETTINGS -->
+    <string name="quality_veryHigh_title">Много високо качество</string>
+    <string name="quality_veryHigh_subtitle">320kbps или flac (без транскодиране)</string>
+    <string name="quality_high_title">Високо качество</string>
+    <string name="quality_high_subtitle">256kbps</string>
+    <string name="quality_medium_title">Средно качество</string>
+    <string name="quality_medium_subtitle">192kbps</string>
+    <string name="quality_mediumLow_title">Средно-ниско качество</string>
+    <string name="quality_mediumLow_subtitle">128kbps</string>
+    <string name="quality_low_title">Ниско качество</string>
+    <string name="quality_low_subtitle">96kbps</string>
+    <string name="theme_system_title">Системна тема</string>
+    <string name="theme_dark_title">Тъмна</string>
+    <string name="theme_light_title">Светла</string>
+    <string name="theme_system_materialYou_title">MaterialYou системна</string>
+    <string name="theme_dark_materialYou_title">MaterialYou тъмна</string>
+    <string name="theme_light_materialYou_title">MaterialYou светла</string>
+    <string name="settings_equalizer">Еквалайзер</string>
+    <string name="settings_normalizeVolume_title">Нормализиране на силата на звука</string>
+    <string name="settings_offlineMode_title">Офлайн режим</string>
+    <string name="settings_downloadAfterPlay_title">Изтегляне на песента след възпроизвеждане</string>
+    <string name="settings_downloadAfterPlay_onlyFavourites_title">Изтегляне след възпроизвеждане само на любимите песни</string>
+    <string name="settings_offlineMode_subtitle">Включване на офлайн режим</string>
+    <string name="settings_downloadAfterPlay_subtitle">Песните ще се запазват в хранилището след възпроизвеждане.</string>
+    <string name="settings_downloadsSdCard_title">Използване на SD карта за изтеглянията</string>
+    <string name="settings_downloadsSdCard_subtitle">Работи, когато SD картата е монтирана като системно хранилище</string>
+    <string name="settings_normalizeVolume_subtitle">Еднакво ниво на силата на звука за всички песни</string>
+    <string name="settings_monoAudio_title">Моно звук</string>
+    <string name="settings_monoAudio_subtitle">Левият и десният високоговорител ще възпроизвеждат един и същ звук</string>
+    <string name="settings_smartDownloads_title">Интелигентно изтегляне</string>
+    <string name="settings_smartDownloads_subtitle">Автоматично изтегляне на най-слушаните песни, докато телефонът не се използва</string>
+    <string name="settings_checkUpdatesNow_title">Проверка за актуализации сега</string>
+    <string name="settings_autoCheckUpdates_title">Автоматична проверка за актуализации</string>
+    <string name="settings_debugLogs_title">Журнали за отстраняване на грешки</string>
+    <string name="settings_enableDebugLogging_title">Включване на анонимен журнал за отстраняване на грешки</string>
+    <string name="settings_enableDebugLogging_subtitle">Ще изпраща данни за сривове и грешки (stack trace) на разработчика, за да бъдат отстранени проблеми в приложението</string>
+    <string name="settings_deleteDownloads_title">Изтриване на всички изтегляния</string>
+    <string name="settings_deleteDownloads_subtitle">Това ще изтрие всички песни, които сте изтеглили</string>
+    <string name="settings_deleteDownloads_success">Цялата ви офлайн музика беше изтрита</string>
+    <string name="settings_deleteDownloads_fail">Възникна проблем при изтриването на офлайн музиката ви. Ако проблемът продължава, моля, свържете се с разработчика, за да бъде отстранена грешката</string>
+    <string name="settings_hideDonationButtonsMenu_title">Скриване на бутоните за дарение в менюто</string>
+    <string name="settings_ampachePreferences_title">Настройки на Ampache</string>
+    <string name="settings_ampachePreferences_subtitle">Настройки за вашия Ampache сървър</string>
+
+    <string name="settings_serverInfo_title">Сървър</string>
+    <string name="settings_serverInfo_version">Версия</string>
+    <string name="settings_serverInfo_compatible">Съвместим</string>
+    <string name="settings_userInfo_username">Потребителско име</string>
+    <string name="settings_userInfo_fullName">Пълно име</string>
+    <string name="settings_userInfo_email">Имейл</string>
+    <string name="settings_userInfo_website">Уебсайт</string>
+    <string name="settings_userInfo_state">Област</string>
+    <string name="settings_userInfo_city">Град</string>
+    <string name="settings_userInfo_id">ID</string>
+    <string name="player_buttonText_artist">Изпълнител</string>
+    <string name="player_buttonText_album">Албум</string>
+    <string name="player_buttonText_add">Добави</string>
+    <string name="download">Изтегли</string>
+    <string name="player_buttonText_download">@string/download</string>
+    <string name="player_buttonText_share">Сподели</string>
+    <string name="player_buttonText_info">Инфо</string>
+    <string name="player_queue_upNext">Следващи</string>
+    <string name="player_queue_lyrics">Текст</string>
+    <string name="logout_offline_warning">Моля, изключете офлайн режима, преди да излезете от профила</string>
+    <string name="offline_noData_warning">Все още не сте изтеглили нито една песен</string>
+    <string name="sleepTimer_title">Часовник за заспиване</string>
+    <string name="sleepTimer_subtitle">Задава време, след което спира музиката.</string>
+    <string name="sleepTimer_time_set">Музиката ще спре в %s (приблизително)</string>
+    <string name="sleepTimer_time_unset">Няма зададен часовник</string>
+    <string name="sleepTimer_waitEnd">Изчакване на края на песента преди спиране на възпроизвеждането.</string>
+    <string name="settings_player_unit_seconds">Секунди</string>
+    <string name="settings_player_unit_minutes">Минути</string>
+    <string name="settings_storagePermission_dialog_title">Изберете папка за изтегляния</string>
+    <string name="settings_storagePermission_dialog_text">Приложението вече няма достъп до папката, която избрахте преди.\nТова може да се случи, ако системните разрешения са били нулирани или променени от настройките на устройството.\n\nМоля, изберете папката отново, за да може приложението да продължи да запазва музика.</string>
+    <string name="settings_storagePermission_dialog_confirm">Избери папка</string>
+    <string name="settings_customFolder_title">Избор на персонализирана папка за офлайн музика</string>
+    <string name="settings_customFolder_subtitle">Текуща избрана папка: %s</string>
+    <string name="settings_customFolder_warning_title">ВНИМАНИЕ – Моля, прочетете</string>
+    <string name="settings_customFolder_warning_descr">Изборът на персонализирана папка прави файловете на приложението достъпни за вас и за приложенията ви за управление на файлове. Вие носите отговорност за тези файлове, ако ги премествате, променяте или преименувате или извършвате каквото и да е действие, което може да наруши работата на приложението (включително демонтиране на SD карта).\n\nМожете да промените мястото за съхранение по всяко време и приложението ще продължи да работи безпроблемно с файловете в предишно избраните места; изтриването на файлове от приложението обаче може да не засегне данните на диска. Винаги проверявайте с файловия мениджър дали изтриването е успешно.</string>
+    <string name="settings_customFolder_reset">Нулиране</string>
+
+
+    <!-- SETTINGS PLAYER -->
+    <string name="settings_playerAdvancedSettings_title">Разширени настройки на плейъра (изисква рестартиране на приложението)</string>
+    <string name="settings_playerAdvancedSettings_subtitle">Променете тези настройки, ако имате проблеми с възпроизвеждането, като накъсване, прекъсване на песни, забавяне при стартиране на песни и т.н.</string>
+    <string name="settings_playerAdvancedSettings_warning">За да приложите настройките на буфера, затворете напълно и стартирайте отново приложението.</string>
+    <string name="settings_backBuffer_title">Обратен буфер</string>
+    <string name="settings_backBuffer_subtitle">Регулира количеството съдържание, буферирано предварително преди възпроизвеждането, за да се избегнат прекъсвания, особено при забавяния в мрежата, в секунди.</string>
+    <string name="settings_minBuffer_title">Минимален буфер</string>
+    <string name="settings_minBuffer_subtitle">Минималната продължителност на медията, която плейърът се опитва да поддържа буферирана по всяко време, в секунди.</string>
+    <string name="settings_bufferForPlayback_title">Буфер за възпроизвеждане</string>
+    <string name="settings_bufferForPlayback_subtitle">Продължителността на медията, която трябва да е буферирана, за да започне или да се възобнови възпроизвеждането след действие на потребителя, например превъртане, в секунди.</string>
+    <string name="settings_maxBuffer_title">Максимален буфер</string>
+    <string name="settings_maxBuffer_subtitle">Максималната продължителност на медията, която плейърът се опитва да буферира, в секунди.</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_title">Буфер за възпроизвеждане след повторно буфериране</string>
+    <string name="settings_bufferForPlaybackAfterRebuffer_subtitle">Продължителността по подразбиране на медията, която трябва да е буферирана, за да се възобнови възпроизвеждането след повторно буфериране, в секунди. Повторно буфериране възниква при изчерпване на буфера, а не в резултат на действие на потребителя</string>
+    <string name="settings_playerCache_title">Кеш на плейъра (в MB)</string>
+    <string name="settings_playerCache_subtitle">Размер на дисковия кеш на плейъра, в MB</string>
+    <string name="settings_player_unit_mb">MB</string>
+    <string name="settings_player_unit_bytes">Байта</string>
+    <string name="settings_playerBufferSizeBytes_title">Целеви размер на буфера</string>
+    <string name="settings_playerBufferSizeBytes_subtitle">Задава целевия размер на буфера (ако имате проблеми с недостиг на памет, намалете тази стойност)</string>
+
+    <string name="settings_player_button_resetDefaults">Възстанови стойностите по подразбиране</string>
+    <string name="settings_player_button_killApp">НАТИСНЕТЕ, ЗА ДА ЗАТВОРИТЕ ПРИЛОЖЕНИЕТО\n(Прилагане на настройките на плейъра)</string>
+    <string name="settings_player_killDialog_title">Да се затвори ли приложението сега, за да се приложат настройките?</string>
+
+    <!--- DIALOGS -->
+    <string name="miniPlayer_reset_alert_message">ЗАДРЪЖТЕ, за да спрете възпроизвеждането и да изчистите опашката</string>
+    <string name="miniPlayer_reset_alert_title">СТОП/НУЛИРАНЕ</string>
+    <string name="dialog_create">СЪЗДАЙ</string>
+    <string name="warning_playlist_download">Моля, изчакайте плейлистът да се зареди напълно, преди да го изтеглите</string>
+    <string name="warning_playlist_server">Добавяне на песни. Ако версията на сървъра ви е по-стара от 6.3, тази операция може да отнеме около минута</string>
+    <string name="warning_playlist_adding">Песните се добавят към плейлиста ви.\nАко напуснете този екран сега, операцията ще бъде прекъсната</string>
+    <string name="warning_playlist_adding_title">Напускане на екрана?</string>
+    <string name="warning_playlist_adding_stay">Остани</string>
+    <string name="warning_playlist_adding_leave">Напусни въпреки това</string>
+    <string name="warning_song_remove_title">ПРЕМАХВАНЕ НА ПЕСЕН</string>
+    <string name="warning_song_delete_downloaded_title">ИЗТРИВАНЕ НА ИЗТЕГЛЕНА ПЕСЕН</string>
+    <string name="warning_album_songList_remove_title">ИЗТРИВАНЕ НА ИЗТЕГЛЕНИ ПЕСНИ</string>
+    <string name="warning_album_songList_remove_subtitle">Това ще изтрие всички изтеглени песни от албума. Сигурни ли сте, че искате да продължите?</string>
+
+    <!-- Song Dropdown Menu -->
+    <string name="dropdownMenu_item_download">Изтегли</string>
+    <string name="dropdownMenu_item_deleteDownloaded">Изтрий песента</string>
+    <string name="dropdownMenu_item_export">Експорт на песента</string>
+    <string name="dropdownMenu_item_playNext">Пусни следваща</string>
+    <string name="dropdownMenu_item_addToQueue">Добави към опашката</string>
+    <string name="dropdownMenu_item_addToPlaylist">Добави към плейлист</string>
+    <string name="dropdownMenu_item_goToAlbum">Към албума</string>
+    <string name="dropdownMenu_item_goToArtist">Към изпълнителя</string>
+    <string name="dropdownMenu_item_share">Сподели</string>
+    <string name="dropdownMenu_item_song_info">Покажи информация</string>
+
+    <!---...-->
+    <string name="about_flavour">Вариант</string>
+    <string name="version_quote_title">Цитат на версията</string>
+    <string name="about_appVersion_title">Версия на приложението</string>
+    <string name="about_license_title">Лиценз</string>
+    <string name="about_contact_title">Свържете се с мен в Telegram и Mastodon</string>
+    <string name="about_sourceCode_title">Изходен код</string>
+    <string name="about_considerDonating">Подкрепете проекта с дарение!\nВръзки в уебсайта:</string>
+
+    <!---Main Menu Items-->
+    <string name="menu_drawer_settings">Настройки</string>
+    <string name="menu_drawer_library">Библиотека</string>
+    <string name="menu_drawer_genres">Жанрове</string>
+    <string name="menu_drawer_home">Начало</string>
+    <string name="menu_drawer_about">Относно</string>
+    <string name="menu_drawer_plugins">Разширения</string>
+    <string name="menu_drawer_logout">Изход</string>
+    <string name="menu_drawer_offline">Офлайн песни</string>
+
+    <string name="settings_theme_title">Изберете тема</string>
+    <string name="settings_quality_title">Качество на стрийминга</string>
+    <string name="loginScreen_useAuthToken">Използване на токен за удостоверяване</string>
+    <string name="queue">Опашка</string>
+    <!-- the following Playlist title has to be all caps -->
+    <string name="addToPlaylistOrQueueDialog_playlists">ПЛЕЙЛИСТИ</string>
+    <string name="addToPlaylistOrQueueDialog_createNew">Създай нов</string>
+    <string name="addToPlaylistOrQueueDialog_addQueue">Добави към текущата опашка</string>
+    <string name="downloaded_snackbar_title">Изтеглено: %s</string>
+
+    <string name="downloaded_delete_snackbar_songs">Изтрити песни: %d.</string>
+    <string name="downloaded_delete_snackbar_song">Изтрито от изтеглянията: %s</string>
+    <string name="downloaded_delete_snackbar_song_error">ГРЕШКА при изтриване на %s</string>
+
+    <string name="home_playlist_highest_title">Песни с най-висок рейтинг</string>
+    <string name="home_playlist_frequent_title">Често слушани песни</string>
+    <string name="home_playlist_recent_title">Наскоро слушани песни</string>
+    <string name="home_playlist_favourites_title">Любими песни</string>
+
+    <string name="dialog_deletePlaylist_title">ИЗТРИВАНЕ НА ПЛЕЙЛИСТ</string>
+    <string name="dialog_deletePlaylist_text">Да се изтрие ли %s?</string>
+
+    <!-- NEW STRINGS -->
+    <string name="item_title_album">Албум</string>
+    <string name="item_title_playlist">Плейлист</string>
+    <string name="item_title_artist">Изпълнител</string>
+
+    <string name="loginScreen_acceptAllCertificates">Приемане на всички сертификати (включително самоподписани)</string>
+    <string name="loginScreen_killDialog_title">За да приложите тази опция, рестартирайте приложението</string>
+    <string name="loginScreen_killDialog_subtitle">Да се затвори ли приложението сега, за да се приложи?</string>
+
+    <string name="settings_player_useOkHttp_title">Използване на разширения плейър за стрийминг на музика (използва OkHttp)</string>
+    <string name="settings_player_useOkHttp_subtitle">Използвайте го при грешки във връзката по време на възпроизвеждане или при мрежови отговори 302. Тази опция изисква рестартиране на приложението.</string>
+
+    <string name="settings_player_prioritizeTimeOverSizeThresholds_title">Приоритет на праговете за време пред тези за размер</string>
+    <string name="settings_player_prioritizeTimeOverSizeThresholds_subtitle">Задава дали управлението на зареждането дава приоритет на ограниченията за време на буфера пред ограниченията за размер на буфера. Когато е изключено, се спазва прагът (време или размер), който бъде достигнат първи</string>
+    <string name="playlist_dialog_add_large">Добавяте голям брой песни към този плейлист. Обработката им на сървъра може да отнеме известно време.</string>
+
+    <!-- %s represents the title of the song -->
+    <string name="warning_song_remove_subtitle">"Да се изтрие ли %s от изтеглените песни?"</string>
+
+    <string name="error_user_notEnabled">Потребителят не е активиран. Проверете имейла си за връзката за потвърждение на акаунта или активирайте потребителя от сървъра</string>
+    <string name="error_cannotConnect">Проблем при свързването със сървъра или източника на данни. \nПуснете друга песен или проверете връзката си</string>
+
+    <string name="nextcloud_not_implemented">Все още не е реализирано в Nextcloud Music</string>
+    <string name="share_export_song">Експортирай песента</string>
+    <string name="share_open_link_browser">Отвори връзката в браузъра</string>
+    <string name="share_link_pa2">Сподели в Power Ampache 2</string>
+    <string name="share_link_web">Сподели URL адрес</string>
+    <string name="about_support_title">Подкрепа</string>
+    <string name="about_links_title">Връзки</string>
+
+    <!-- do not translate, this is a reference -->
+    <string name="bmac_contentDescription" translatable="false">@string/bmac_btn_text</string>
+    <string name="patreon_contentDescription" translatable="false">Patreon</string>
+    <string name="about_matrix" translatable="false">Matrix Space</string>
+    <string name="about_telegram" translatable="false">Telegram</string>
+    <string name="about_telegram_chat" translatable="false">Telegram Chatroom</string>
+    <string name="about_mastodon" translatable="false">Mastodon</string>
+    <string name="about_github" translatable="false">Github</string>
+    <string name="telegram_contentDescription" translatable="false">@string/about_telegram</string>
+    <string name="mastodon_contentDescription" translatable="false">@string/about_mastodon</string>
+
+    <!-- "Donate" will be followed by Paypal or Bitcoin. ie "Donate Bitcoin" -->
+    <string name="donate_btn_text">Дари</string>
+
+    <string name="bitcoin_btn_contentDescription">Дари Bitcoin</string>
+    <string name="paypal_btn_contentDescription">Дари чрез Paypal</string>
+    <string name="bmac_btn_text">Buy Me A Coffee</string>
+
+    <string name="ampachePreferences_screen_title">Настройки на Ampache</string>
+    <string name="ampachePreferences_screen_undo_btn_title">Отмени</string>
+    <string name="ampachePreferences_systemPreferences_title">Система</string>
+    <string name="ampachePreferences_userPreferences_title">Потребител</string>
+    <string name="ampachePreferences_updated_toast">Настройката е обновена</string>
+
+    <string name="albums_sortOrder_name">Име</string>
+    <string name="albums_sortOrder_year">Година</string>
+    <string name="albums_sortOrder_artist">Изпълнител</string>
+    <string name="albums_sortOrder_rating">Рейтинг</string>
+    <string name="albums_sortOrder_averageRating">Среден рейтинг</string>
+
+    <string name="albums_emptyView_warning">Няма албуми за показване</string>
+
+    <!-- PLUGINS -->
+    <string name="plugin_cast_queueEmpty_warning">Опашката ви е празна</string>
+    <string name="plugin_cast_queueTooLarge_error">Опашката е твърде голяма и не може да бъде изпратена към плъгина Cast</string>
+</resources>
